@@ -1,0 +1,10 @@
+### Test files ###
+test.cfm
+
+### Userdata folder ###
+userdata/**
+
+### Config files ###
+.cfconfig.json
+.env
+server.json

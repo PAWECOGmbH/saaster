@@ -1,0 +1,19 @@
+{
+    "debug": "${DEBUG}",
+    "trace": "${TRACE}",
+    "profile": "${APP_ENV}",
+    "app": {
+        "cfengine": "${CFENGINE}"
+    },
+    "web": {
+        "directoryBrowsing": false,
+        "blockCFAdmin": "${CFADMIN_BLOCK}",
+        "rewrites": {
+            "enable": true,
+            "logEnable": true,
+            "config": "./rewrite.xml",
+            "statusPath": "/rewriteStatus",
+            "configReloadSeconds": 5
+        }
+    }
+}

@@ -1,0 +1,35 @@
+.dropify-message > .file-icon > p {
+    font-size: 20px;
+}
+.fa_icon {
+    border: 0;
+    background: none;
+}
+.bottom_line {
+    border-bottom: 1px solid black;
+}
+.loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url('../img/loader.gif') 50% 50% no-repeat rgb(249,249,249);
+    opacity: .8;
+}
+#checkall tr:hover {
+    background: #eee;
+    cursor: pointer;
+}
+.plan-cards > ul {
+    list-style-type: none;
+    padding: 0;
+}
+.plan-cards > ul li::before {
+    font-family: "FontAwesome";
+    content: "\f00c";
+    padding: 0 10px 0 0;
+    color: green;
+    font-size: large;
+}

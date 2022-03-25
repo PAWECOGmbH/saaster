@@ -1,0 +1,78 @@
+version: "3"
+services:
+  cfml:
+    container_name: cfml-saaster
+    image: ortussolutions/commandbox
+    restart: always
+    environment:
+      PORT: ${CFML_PORT}
+      SSL_PORT: ${CFML_SSL_PORT}
+    volumes:
+      - "./:/app"
+    ports:
+      - 127.0.0.1:${CFML_PORT}:80
+      - 127.0.0.1:${CFML_SSL_PORT}:443
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 1m30s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+
+  mysql:
+    container_name: mysql-saaster
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - "./db/init:/docker-entrypoint-initdb.d"
+    ports:
+      - 127.0.0.1:${MYSQL_PORT}:3306
+    networks:
+      - backend
+    command:
+      [
+        "--sql_mode=",
+        "--innodb_strict_mode=OFF",
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_unicode_ci",
+        "--default-authentication-plugin=mysql_native_password"
+      ]
+    healthcheck:
+      test: mysqladmin ping -h mysql -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+
+  mailslurper:
+    container_name: mail-saaster
+    image: marcopas/docker-mailslurper
+    ports:
+      - "127.0.0.1:2500:2500"
+      - "127.0.0.1:9000:8080"
+      - "127.0.0.1:8085:8085"
+    networks:
+      - backend
+
+  db_seeder:
+    container_name: seeder-saaster
+    image: mysql:5.7
+    volumes:
+      - ./db/dev/${MYSQL_SEED_FILE}:/db.sql
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --host=${MYSQL_HOST} --port=3306 ${MYSQL_DATABASE} < db.sql && exit"
+      ]
+    depends_on:
+      - mysql
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
