@@ -11,7 +11,7 @@
             LEFT JOIN plans_modules
             ON modules.intModuleID = plans_modules.intModuleID
             AND plans_modules.intPlanID = :thisPlanID
-            WHERE modules.blnBookable = 1
+            WHERE modules.blnActive = 1
             ORDER BY modules.intPrio
         "
     )

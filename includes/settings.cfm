@@ -12,14 +12,14 @@ application.toEmail = "info@saaster.io"; <!--- Operator email address --->
 <!--- System settings --->
 
 <!--- the local or live url (domain) including http --->
-application.mainURL = "http://localhost"; 
+application.mainURL = "http://localhost";
 <!--- db datasource --->
 application.datasource = "database";
 
 <!--- Set local --->
 SetLocale("german (switzerland)");
 
-<!--- Default image for users (path or url) --->
+<!--- Default image for users (must be online) --->
 application.userTempImg = "http://www.clker.com/cliparts/A/Y/O/m/o/N/placeholder-md.png";
 
 </cfscript>

@@ -41,33 +41,33 @@
                                     #i.description#
                                 </div>
                             </div>
+                            <div class="row pt-2 small">
+                                <cfif i.isNet eq 1>
+                                    <cfswitch expression="#i.vatType#">
+                                        <cfcase value="1">
+                                            <p class="text-muted">#getTrans('txtPlusVat')# #numberFormat(i.vat, '__.__')#%</p>
+                                        </cfcase>
+                                        <cfcase value="2">
+                                            <p class="text-muted">#getTrans('txtTotalExcl')#</p>
+                                        </cfcase>
+                                        <cfdefaultcase>
+                                        </cfdefaultcase>
+                                    </cfswitch>
+                                <cfelse>
+                                    <cfswitch expression="#i.vatType#">
+                                        <cfcase value="1">
+                                            <p class="text-muted">#getTrans('txtVatIncluded')# #numberFormat(i.vat, '__.__')#%</p>
+                                        </cfcase>
+                                        <cfcase value="2">
+                                            <p class="text-muted">#getTrans('txtTotalExcl')#</p>
+                                        </cfcase>
+                                        <cfdefaultcase>
+                                        </cfdefaultcase>
+                                    </cfswitch>
+                                </cfif>
+                            </div>
                         </div>
                     </cfloop>
-                </div>
-                <div class="row pt-2 small">
-                    <cfif planObj[1].isNet eq 1>
-                        <cfswitch expression="#planObj[1].vatType#">
-                            <cfcase value="1">
-                                <p class="text-muted">#getTrans('txtPlusVat')# #numberFormat(planObj[1].vat, '__.__')#%</p>
-                            </cfcase>
-                            <cfcase value="2">
-                                <p class="text-muted">#getTrans('txtTotalExcl')#</p>
-                            </cfcase>
-                            <cfdefaultcase>
-                            </cfdefaultcase>
-                        </cfswitch>
-                    <cfelse>
-                        <cfswitch expression="#planObj[1].vatType#">
-                            <cfcase value="1">
-                                <p class="text-muted">#getTrans('txtVatIncluded')# #numberFormat(planObj[1].vat, '__.__')#%</p>
-                            </cfcase>
-                            <cfcase value="2">
-                                <p class="text-muted">#getTrans('txtTotalExcl')#</p>
-                            </cfcase>
-                            <cfdefaultcase>
-                            </cfdefaultcase>
-                        </cfswitch>
-                    </cfif>
                 </div>
             </div>
             <div class="modal-footer">

@@ -23,9 +23,9 @@
     }else if (structKeyExists(form, 'delete') or structKeyExists(url, 'delete')) {
         session.c_search = '';
     }
-    
+
     // Sorting
-    if(structKeyExists(form, 'sort')){  
+    if(structKeyExists(form, 'sort')){
         session.c_sort = form.sort;
     }
 
@@ -60,7 +60,7 @@
                 LIMIT #session.sql_start#, #getEntries#
             "
         );
-    } 
+    }
     else {
         qCountries = queryExecute(
             options = {datasource = application.datasource},
@@ -129,7 +129,7 @@
                 <div class="col-md-12 col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <p>You have <b>#qTotalCountries.totalCountries#</b> countries activated. In this list you will only find activated countries. If you want to activate more countries, click to the "Import" or "Add" button.</p>
+                            <p>You have <b>#qTotalCountries.totalCountries#</b> countries activated. If you want to activate more countries, click to the "Import" or "New country" button.</p>
                             <form action="#application.mainURL#/sysadmin/countries?start=1" method="post">
                                 <div class="row">
                                     <div class="col-lg-4">
@@ -175,26 +175,31 @@
                                             <th width="5%"></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="dragndrop_body">
-                                    <cfloop query="qCountries">
-                                        <tr>
-                                            <td class="text-center">#qCountries.intPrio#</td>
-                                            <td class="text-center">#yesNoFormat(qCountries.blnDefault)#</td>
-                                            <td>#qCountries.strCountryName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
-                                            <td class="text-center">#qCountries.strISO1#</td>
-                                            <td>#qCountries.strRegion#</td>
-                                            <td>#qCountries.strLanguageEN#</td>
-                                            <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
-                                            <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
-                                        </tr>
-                                        #getModal.init('countries', 'strCountryName', qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#
-                                    </cfloop>
-                                    </tbody>
-
+                                    <cfif qCountries.recordCount>
+                                        <tbody id="dragndrop_body">
+                                            <cfloop query="qCountries">
+                                                <tr>
+                                                    <td class="text-center">#qCountries.intPrio#</td>
+                                                    <td class="text-center">#yesNoFormat(qCountries.blnDefault)#</td>
+                                                    <td>#qCountries.strCountryName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
+                                                    <td class="text-center">#qCountries.strISO1#</td>
+                                                    <td>#qCountries.strRegion#</td>
+                                                    <td>#qCountries.strLanguageEN#</td>
+                                                    <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
+                                                    <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
+                                                </tr>
+                                                #getModal.init('countries', 'strCountryName', qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#
+                                            </cfloop>
+                                        </tbody>
+                                    <cfelse>
+                                        <tbody>
+                                            <tr><td colspan="100%" class="text-center text-red">If you want to offer your software only in certain countries, you have to add the desired countries here.</td></tr>
+                                        </tbody>
+                                    </cfif>
                                     <div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                             <div class="modal-content" id="dyn_modal-content">
-                                                <!--- dynamic content from ajax request (ajax_sort.cfm) --->
+                                                <!--- dynamic content from ajax request (ajax_country.cfm) --->
                                             </div>
                                         </div>
                                     </div>

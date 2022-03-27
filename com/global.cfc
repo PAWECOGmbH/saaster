@@ -168,7 +168,7 @@ component displayname="globalFunctions" {
                         FROM languages
                         WHERE intLanguageID = :lngID
                     "
-                )  
+                )
             }else {
                 qGetLanguage = queryExecute(
                     options = {datasource = application.datasource},
@@ -182,7 +182,7 @@ component displayname="globalFunctions" {
                     "
                 )
             }
-    
+
             if (qGetLanguage.recordCount) {
                 local.Language['lngID'] = qGetLanguage.intLanguageID;
                 local.Language['iso'] = qGetLanguage.strLanguageISO;
@@ -195,8 +195,8 @@ component displayname="globalFunctions" {
             local.Language['Error'] = "Couldn't find any matching language!";
             return local.Language;
         }
-    
-        
+
+
 
     }
 
@@ -822,8 +822,6 @@ component displayname="globalFunctions" {
 
     }
 
-
-
     // Get all languages
     public query function getAllLanguages(string whereFilter) {
 
@@ -840,6 +838,44 @@ component displayname="globalFunctions" {
         )
 
         return local.qAllLanguages;
+
+    }
+
+
+    // Get the default currency
+    public struct function getDefaultCurrency() {
+
+        local.currStruct = {};
+
+        local.qDefCurrency = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM currencies
+                WHERE blnDefault = 1
+            "
+        )
+        if (local.qDefCurrency.recordCount) {
+
+            local.currStruct['currencyID'] = local.qDefCurrency.intCurrencyID;
+            local.currStruct['iso'] = local.qDefCurrency.strCurrencyISO;
+            local.currStruct['currency_en'] = local.qDefCurrency.strCurrencyEN;
+            local.currStruct['currency'] = local.qDefCurrency.strCurrency;
+            local.currStruct['prio'] = local.qDefCurrency.intPrio;
+
+        } else {
+
+            local.currStruct['currencyID'] = 0;
+            local.currStruct['iso'] = '';
+            local.currStruct['currency_en'] = '';
+            local.currStruct['currency'] = '';
+            local.currStruct['prio'] = 0;
+
+        }
+
+
+        return local.currStruct;
+
 
     }
 
