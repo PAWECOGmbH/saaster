@@ -11,7 +11,7 @@ if (structKeyExists(form, "new_group")) {
     )
 
     param name="form.group_name" default="";
-    param name="form.countryID" default=NULL;
+    param name="form.countryID" default="";
 
     try {
 
@@ -46,7 +46,7 @@ if (structKeyExists(form, "edit_plangroup")) {
     if (isNumeric(form.edit_plangroup)) {
 
         param name="form.group_name" default="";
-        param name="form.countryID" default=NULL;
+        param name="form.countryID" default="";
 
         queryExecute(
             options = {datasource = application.datasource},

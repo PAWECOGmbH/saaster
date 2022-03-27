@@ -107,15 +107,17 @@
                                                                         <label class="form-label">Group name</label>
                                                                         <input type="text" name="group_name" class="form-control" autocomplete="off" value="#HTMLEditFormat(qPlanGroups.strGroupName)#" maxlength="100" required>
                                                                     </div>
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Country</label>
-                                                                        <select name="countryID" class="form-select">
-                                                                            <option value=""></option>
-                                                                            <cfloop query="qCountries">
-                                                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#qCountries.strCountryName#</option>
-                                                                            </cfloop>
-                                                                        </select>
-                                                                    </div>
+                                                                    <cfif qCountries.recordCount>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Country</label>
+                                                                            <select name="countryID" class="form-select">
+                                                                                <option value=""></option>
+                                                                                <cfloop query="qCountries">
+                                                                                    <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                                                </cfloop>
+                                                                            </select>
+                                                                        </div>
+                                                                    </cfif>
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -182,15 +184,17 @@
                                                     <label class="form-label">Group name</label>
                                                     <input type="text" name="group_name" class="form-control" autocomplete="off" maxlength="100" required>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Country</label>
-                                                    <select name="countryID" class="form-select">
-                                                        <option value=""></option>
-                                                        <cfloop query="qCountries">
-                                                            <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
-                                                        </cfloop>
-                                                    </select>
-                                                </div>
+                                                <cfif qCountries.recordCount>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Country</label>
+                                                        <select name="countryID" class="form-select">
+                                                            <option value=""></option>
+                                                            <cfloop query="qCountries">
+                                                                <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                                            </cfloop>
+                                                        </select>
+                                                    </div>
+                                                </cfif>
                                             </div>
                                             <div class="modal-footer">
                                                 <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>

@@ -50,9 +50,11 @@
                 </div>
                 <div class="col-lg-6 mb-3 page-header text-end align-text-top">
                     <div class="button-group">
-                        <button href="##" data-bs-toggle="modal" data-bs-target="##plan_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add plan
-                        </button>
+                        <cfif qPlanGroups.recordCount>
+                            <button href="##" data-bs-toggle="modal" data-bs-target="##plan_new" class="btn btn-primary">
+                                <i class="fas fa-plus pe-3"></i> Add plan
+                            </button>
+                        </cfif>
                         <button class="btn dropdown-toggle btn-primary" data-bs-toggle="dropdown">
                             Settings
                         </button>

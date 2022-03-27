@@ -1,13 +1,29 @@
-<cfset qUser = application.objUser.getAllUsers(session.customer_id)>
+
+<cfscript>
+    qUser = application.objUser.getAllUsers(session.customer_id);
+</cfscript>
 
 <cfinclude template="/includes/header.cfm">
 <cfinclude template="/includes/navigation.cfm">
 
-<div class="page-wrapper"> 
+<div class="page-wrapper">
     <div class="container-xl">
-        <cfoutput>               
-        <div class="row mb-3">           
+        <cfoutput>
+        <div class="row mb-3">
             <div class="col-md-12 col-lg-12">
+                <!--- <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <h4 class="page-title">#getTrans('titUserOverview')#</h4>
+                    <ol class="breadcrumb breadcrumb-dots">
+                        <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
+                        <li class="breadcrumb-item active">#getTrans('titUserOverview')#</li>
+                    </ol>
+                </div>
+                <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary" style="white-space: normal; width: 205px;">
+                        <i class="fa fa-address-book pe-3"></i>#getTrans('btnNewUser')#
+                    </a>
+                </div>  --->
                 <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                     <h4 class="page-title">#getTrans('titUserOverview')#</h4>
                     <ol class="breadcrumb breadcrumb-dots">
@@ -15,26 +31,26 @@
                         <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
                         <li class="breadcrumb-item active">#getTrans('titUserOverview')#</li>
                     </ol>
-                </div>                  
-                <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">                          
-                    <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary" style="white-space: normal; width: 205px;">
+                </div>
+                <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary">
                         <i class="fa fa-address-book pe-3"></i>#getTrans('btnNewUser')#
-                    </a>                                                 
-                </div> 
-            </div>                        
-        </div>   
-        <cfif structKeyExists(session, "alert")>
-            #session.alert#
-        </cfif>                   
+                    </a>
+                </div>
+            </div>
+            <cfif structKeyExists(session, "alert")>
+                #session.alert#
+            </cfif>
+        </div>
         <div class="row">
             <div class="col-md-12 col-lg-12">
                 <div class="card">
-                        
+
                     <div class="table-responsive">
                         <table class="table card-table table-vcenter text-nowrap">
                             <thead >
-                                <tr>       
-                                    <th>#getTrans('titPhoto')#</th>                                       
+                                <tr>
+                                    <th>#getTrans('titPhoto')#</th>
                                     <th>#getTrans('formFirstName')#</th>
                                     <th>#getTrans('formName')#</th>
                                     <th>#getTrans('formEmailAddress')#</th>
@@ -45,16 +61,12 @@
                             </thead>
                             <tbody>
                             <cfloop query="qUser">
-                                <tr>                                    
+                                <tr>
                                     <cfif not len(trim(qUser.strPhoto))>
-                                        <td>
-                                            <span class="avatar avatar-md brround">#ucase(left(qUser.strFirstName,1))##ucase(left(qUser.strLastName,1))#</span>
-                                        </td>
+                                        <td><span class="avatar avatar-md brround">#ucase(left(qUser.strFirstName,1))##ucase(left(qUser.strLastName,1))#</span></td>
                                     <cfelse>
-                                        <td>
-                                            <img src="#application.mainURL#/userdata/images/users/#qUser.strPhoto#" title="#qUser.strFirstName#" class="avatar avatar-md brround">
-                                        </td>     
-                                    </cfif>                                                
+                                        <td><img src="#application.mainURL#/userdata/images/users/#qUser.strPhoto#" title="#qUser.strFirstName#" class="avatar avatar-md brround"></td>
+                                    </cfif>
                                     <td>#qUser.strFirstName#</td>
                                     <td>#qUser.strLastName#</td>
                                     <td>#qUser.strEmail#</td>
@@ -70,7 +82,7 @@
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         <cfif qUser.intUserID eq session.user_id>
                                                             <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">#getTrans('btnEdit')#</a>
-                                                        <cfelse>                                                                
+                                                        <cfelse>
                                                             <a class="dropdown-item" href="#application.mainURL#/account-settings/user/edit/#qUser.intUserID#">#getTrans('btnEdit')#</a>
                                                             <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                             <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
@@ -78,8 +90,8 @@
                                                     </div>
                                                 </div>
                                             </cfif>
-                                        </span>    
-                                    </td>                                                
+                                        </span>
+                                    </td>
                                 </tr>
                             </cfloop>
                             <cfif qUser.recordCount lte 1>
@@ -88,16 +100,16 @@
                             </cfif>
                             </tbody>
                         </table>
-                    </div>     
+                    </div>
                 </div>
             </div>
-        </div> 
-        </cfoutput>               
+        </div>
+        </cfoutput>
     </div>
-    <cfinclude template="/includes/footer.cfm"> 
+    <cfinclude template="/includes/footer.cfm">
 </div>
-      
- 
+
+
 
 
 
