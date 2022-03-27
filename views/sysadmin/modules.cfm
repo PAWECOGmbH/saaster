@@ -53,9 +53,10 @@
                                             <th width="5%"></th>
                                             <th width="5%" class="text-center">Prio</th>
                                             <th width="20%">Module name</th>
-                                            <th width="40%">Short description</th>
+                                            <th width="35%">Short description</th>
                                             <th width="10%" class="text-center">Active</th>
                                             <th width="10%" class="text-center">Bookable</th>
+                                            <th width="5%"></th>
                                             <th width="5%"></th>
                                         </tr>
                                     </thead>
@@ -63,13 +64,14 @@
                                         <tbody <cfif qModules.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qModules">
                                                 <tr id="sort_#qModules.intModuleID#">
-                                                    <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                                    <td class="move text-center"><cfif qModules.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qModules.intPrio#</td>
                                                     <td>#qModules.strModuleName#</td>
                                                     <td>#qModules.strShortDescription#</td>
                                                     <td class="text-center">#yesNoFormat(qModules.blnActive)#</td>
                                                     <td class="text-center">#yesNoFormat(qModules.blnBookable)#</td>
                                                     <td><a href="#application.mainURL#/sysadmin/modules/edit/#qModules.intModuleID#" class="btn">Edit</a></td>
+                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_module=#qModules.intModuleID#', 'Delete module', 'Are you sure you want to delete this module?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
                                                 <cfif qModules.recordCount gt 1>
                                                     <script>
