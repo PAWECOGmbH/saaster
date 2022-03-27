@@ -1,5 +1,5 @@
 
-SET NAMES utf8mb4;
+/* SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
@@ -25,3 +25,8 @@ INSERT INTO `users` VALUES  (1, 1, now(), now(), 'Mister', 'Peter', 'Pan', 'admi
 TRUNCATE TABLE `customer_user`;
 INSERT INTO `customer_user` VALUES (1, 1, 1, 1, now());
 
+-- ----------------------------
+-- UPDATE some tables
+-- ----------------------------
+UPDATE currencies SET blnDefault = 0;
+UPDATE currencies SET blnActive = 1, blnDefault = 1 WHERE intCurrencyID = 1; */

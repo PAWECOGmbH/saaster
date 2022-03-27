@@ -237,5 +237,148 @@ if (structKeyExists(url, "delete_module")) {
 }
 
 
+if (structKeyExists(form, "edit_prices")) {
+
+    if (isNumeric(form.edit_prices)) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: form.edit_prices}
+            },
+            sql = "
+                UPDATE modules_prices
+                SET blnIsNet = 0
+                WHERE intModuleID = :moduleID
+            "
+        )
+
+        cfloop( list = form.fieldnames, index = "f" ) {
+
+            thisCurrencyID = listLast(f, "_");
+            thisField = listFirst(f, "_");
+
+            if (thisField eq "pricemonthly" or thisField eq "priceyearly") {
+
+                // Look if we find an entry in the table
+                qCheckPrice = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        moduleID: {type: "numeric", value: form.edit_prices},
+                        thisCurrencyID: {type: "numeric", value: thisCurrencyID}
+                    },
+                    sql = "
+                        SELECT intCurrencyID
+                        FROM modules_prices
+                        WHERE intModuleID = :moduleID
+                        AND intCurrencyID = :thisCurrencyID
+                    "
+                )
+
+                if (!qCheckPrice.recordCount) {
+
+                    queryExecute(
+                        options = {datasource = application.datasource},
+                        params = {
+                            moduleID: {type: "numeric", value: form.edit_prices},
+                            thisCurrencyID: {type: "numeric", value: thisCurrencyID}
+                        },
+                        sql = "
+                            INSERT INTO modules_prices (intModuleID, intCurrencyID)
+                            VALUES (:moduleID, :thisCurrencyID)
+                        "
+                    )
+
+                }
+
+                pricemonthly = 0;
+                priceyearly = 0;
+
+                if (thisField eq "pricemonthly") {
+                    pricemonthly = evaluate("pricemonthly_#thisCurrencyID#");
+                    if (isNumeric(pricemonthly)) {
+                        queryExecute(
+                            options = {datasource = application.datasource},
+                            params = {
+                                moduleID: {type: "numeric", value: form.edit_prices},
+                                thisCurrencyID: {type: "numeric", value: thisCurrencyID},
+                                pricemonthly: {type: "decimal", value: pricemonthly, scale: 2}
+
+                            },
+                            sql = "
+                                UPDATE modules_prices
+                                SET decPriceMonthly = :pricemonthly
+                                WHERE intModuleID = :moduleID
+                                AND intCurrencyID = :thisCurrencyID
+                            "
+                        )
+                    }
+                }
+
+                if (thisField eq "priceyearly") {
+                    priceyearly = evaluate("priceyearly_#thisCurrencyID#");
+                    if (isNumeric(priceyearly)) {
+                        queryExecute(
+                            options = {datasource = application.datasource},
+                            params = {
+                                moduleID: {type: "numeric", value: form.edit_prices},
+                                thisCurrencyID: {type: "numeric", value: thisCurrencyID},
+                                priceyearly: {type: "decimal", value: priceyearly, scale: 2}
+                            },
+                            sql = "
+                                UPDATE modules_prices
+                                SET decPriceYearly = :priceyearly
+                                WHERE intModuleID = :moduleID
+                                AND intCurrencyID = :thisCurrencyID
+                            "
+                        )
+                    }
+                }
+            }
+        }
+
+        vat = 0;
+        type = 1;
+        isNetto = 0;
+        onRequest = 0;
+        if (isNumeric(form.vat)) {
+            vat = form.vat;
+        }
+        if (isNumeric(form.type)) {
+            type = form.type;
+        }
+        if (structKeyExists(form, "netto")) {
+            isNetto = 1;
+        }
+        if (structKeyExists(form, "request")) {
+            onRequest = 1;
+        }
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: form.edit_prices},
+                vat: {type: "decimal", value: vat, scale: 2},
+                type: {type: "numeric", value: type},
+                isNetto: {type: "boolean", value: isNetto}
+
+            },
+            sql = "
+                UPDATE modules_prices
+                SET decVat = :vat,
+                    intVatType = :type,
+                    blnIsNet = :isNetto
+                WHERE intModuleID = :moduleID
+            "
+        )
+
+        getAlert('Prices saved.');
+        location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_prices#?tab=prices" addtoken="false";
+
+    }
+
+}
+
+
 
 </cfscript>
