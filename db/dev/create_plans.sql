@@ -185,13 +185,6 @@ CREATE TABLE `plans_modules`  (
   PRIMARY KEY (`intPlanModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of plans_modules
--- ----------------------------
-INSERT INTO `plans_modules` VALUES (1, 2, 1, now());
-INSERT INTO `plans_modules` VALUES (2, 3, 1, now());
-INSERT INTO `plans_modules` VALUES (3, 4, 1, now());
-INSERT INTO `plans_modules` VALUES (4, 5, 1, now());
 
 -- ----------------------------
 -- Table structure for plans_plan_features
