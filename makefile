@@ -37,8 +37,23 @@ reinit:
 	@echo ------------------------------------------------------
 
 seed:
-	@echo Seeding testdata..
-	@docker-compose up -d db_seeder
+	@n=0; \
+	for file in $(notdir $(wildcard db/dev/*.sql)); do \
+		let "n+=1" ; \
+		echo "[$$n]" $$file; \
+	done
+	@echo "Choose a number: "; \
+    read number; \
+	k=0; \
+	for file in $(notdir $(wildcard db/dev/*.sql)); do \
+		let "k+=1"; \
+		if [ "$$k" = "$$number" ]; then \
+		sqlfile="$$file"; \
+		echo "[+]" $$sqlfile;\
+		fi \
+	done; \
+	MYSQL_SEED_FILE="$$sqlfile" \
+	docker-compose up -d db_seeder
 	@echo Done!
 
 clean:
