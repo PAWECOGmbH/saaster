@@ -36,6 +36,8 @@
         "
     )
 
+
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -75,32 +77,36 @@
                             <h3 class="card-title">Invoices overview</h3>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-vcenter table-mobile-md card-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Number</th>
-                                            <th>Status</th>
-                                            <th>Due date</th>
-                                            <th>Customer</th>
-                                            <th>Currency</th>
-                                            <th>Total</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <cfloop query="qInvoices">
+                            <cfif qInvoices.recordCount>
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter table-mobile-md card-table">
+                                        <thead>
                                             <tr>
-                                                <td></td>
+                                                <th>Date</th>
+                                                <th>Number</th>
+                                                <th>Status</th>
+                                                <th>Due date</th>
+                                                <th>Customer</th>
+                                                <th>Currency</th>
+                                                <th>Total</th>
+                                                <th></th>
                                             </tr>
-                                        </cfloop>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            <cfloop query="qInvoices">
+                                                <tr>
+                                                    <td></td>
+                                                </tr>
+                                            </cfloop>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <cfelse>
+                                <div class="col-lg-12 text-center text-red">There are no invoices yet.</div>
+                            </cfif>
                         </div>
                         <div class="card-footer">
-                            footer
+
                         </div>
                     </div>
                 </div>
@@ -112,16 +118,20 @@
 
 <cfoutput>
 <form action="#application.mainURL#/sysadm/invoices" method="post">
-<input type="hidden" name="new_invoice">
-    <div id="invoice_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+<input type="hidden" name="new_invoice" id="customer_id">
+    <div id="invoice_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">New invoice</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
+                    <div class="mb-3">
+                        <label class="form-label">Search for customer</label>
+                        <input type="text" onkeyup="showResult(this.value)" class="form-control" id="searchfield" autocomplete="off" maxlength="20" required>
+                        <div id="livesearch"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -134,3 +144,30 @@
     </div>
 </form>
 </cfoutput>
+
+<script>
+    function showResult(str) {
+        if (str.length==0) {
+            document.getElementById("livesearch").innerHTML="";
+            return;
+        }
+        var xmlhttp=new XMLHttpRequest();
+        xmlhttp.onreadystatechange=function() {
+            if (this.readyState==4 && this.status==200) {
+                document.getElementById("livesearch").innerHTML=this.responseText;
+            }
+        }
+        xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
+        xmlhttp.send();
+    }
+    function intoTf(c, i) {
+        var customer_name = document.getElementById("searchfield");
+        customer_name.value = c;
+        var customer_id = document.getElementById("customer_id");
+        customer_id.value = i;
+    }
+    function hideResult() {
+        document.getElementById("livesearch").innerHTML="";
+        return;
+    }
+</script>
