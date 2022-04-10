@@ -15,6 +15,51 @@ component displayname="sysadmin" output="false" {
     }
 
 
+    public query function getSysAdminInvoices() {
+
+        local.qInvoices = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT  invoices.intInvoiceID as invoiceID,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle as invoiceTitle,
+                        DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
+                        DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
+                        invoices.strCurrency as invoiceCurrency,
+                        invoices.decTotalPrice as invoiceTotal,
+                        invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
+                        invoice_status.strColor as invoiceStatusColor,
+                        IF(
+                            LENGTH(customers.strCompanyName),
+                            customers.strCompanyName,
+                            IF(
+                                LENGTH(invoices.intUserID),
+                                (
+                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                                    FROM users
+                                    WHERE intUserID = invoices.intUserID
+                                ),
+                                customers.strContactPerson
+                            )
+                        ) as customerName
+
+                FROM invoices
+
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+
+                INNER JOIN customers ON 1=1
+                AND invoices.intCustomerID = customers.intCustomerID
+
+                ORDER BY invoiceDate DESC
+            "
+        )
+
+        return local.qInvoices;
+
+    }
+
+
 
 
 

@@ -14,6 +14,7 @@ qCustomer = queryExecute (
                 strCity LIKE '%#url.search#%'
             )
             ORDER BY strCompanyName
+            LIMIT 10
         "
     )
 </cfscript>

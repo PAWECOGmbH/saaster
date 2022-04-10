@@ -17,10 +17,10 @@
                         <li class="breadcrumb-item active">#getTrans('titInvoices')#</li>
                     </ol>
                 </div>
+                <cfif structKeyExists(session, "alert")>
+                    #session.alert#
+                </cfif>
             </div>
-            <cfif structKeyExists(session, "alert")>
-                #session.alert#
-            </cfif>
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="card">
@@ -53,9 +53,6 @@
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
                                                         <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
-                                                        <cfif session.admin>
-                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/invoices?delete=#qInvoices.invoiceID#', '#getTrans("btnDeleteInvoice")#', '#getTrans("txtDeleteInvoiceConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDeleteInvoice')#</a>
-                                                        </cfif>
                                                     </div>
                                                 </span>
                                             </div>

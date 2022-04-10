@@ -1,42 +1,7 @@
 
 <cfscript>
 
-    qInvoices = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT  invoices.intInvoiceID as invoiceID,
-                    CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                    invoices.strInvoiceTitle as invoiceTitle,
-                    DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
-                    DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
-                    invoices.strCurrency as invoiceCurrency,
-                    invoices.decTotalPrice as invoiceTotal,
-                    invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
-                    invoice_status.strColor as invoiceStatusColor,
-                    IF(LENGTH(customers.strCompanyName), customers.strCompanyName, CONCAT(users.strFirstName, ' ', users.strLastName)) as customerName
-
-            FROM invoices
-
-            INNER JOIN invoice_status ON 1=1
-            AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-
-            INNER JOIN customers ON 1=1
-            AND invoices.intCustomerID = customers.intCustomerID
-
-            INNER JOIN users ON 1=1
-            AND customers.intCustomerID =
-            (
-                SELECT usr.intCustomerID
-                FROM users usr
-                WHERE usr.intCustomerID = customers.intCustomerID
-                LIMIT 1
-            )
-
-            ORDER BY invoiceDate DESC
-        "
-    )
-
-
+    qInvoices = new com.sysadmin().getSysAdminInvoices();
 
 </cfscript>
 
@@ -88,17 +53,41 @@
                                                 <th>Due date</th>
                                                 <th>Customer</th>
                                                 <th>Currency</th>
-                                                <th>Total</th>
-                                                <th></th>
+                                                <th class="text-end">Total</th>
+                                                <th class="text-end"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <cfloop query="qInvoices">
-                                                <tr>
-                                                    <td></td>
-                                                </tr>
-                                            </cfloop>
+                                        <cfloop query="qInvoices">
+                                            <tr>
+                                                <td>#LSDateFormat(qInvoices.invoiceDate)#</td>
+                                                <td>#qInvoices.invoiceNumber#</td>
+                                                <td><span class="badge bg-#qInvoices.invoiceStatusColor#">#getTrans(qInvoices.invoiceStatusVariable, 'en')#</span></td>
+                                                <td>#LSDateFormat(qInvoices.invoiceDueDate)#</td>
+                                                <td>#qInvoices.customerName#</td>
+                                                <td>#qInvoices.invoiceCurrency#</td>
+                                                <td class="text-end">#lsNumberFormat(qInvoices.invoiceTotal, '_,___.__')#</td>
+                                                <td class="text-end float-end">
+                                                    <div class="btn-list flex-nowrap">
+                                                        <span class="dropdown">
+                                                            <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
+                                                                Action
+                                                            </button>
+                                                            <div class="dropdown-menu dropdown-menu-end">
+                                                                <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.invoiceID#">Edit invoice</a>
+                                                                <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?delete=#qInvoices.invoiceID#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </cfloop>
                                         </tbody>
+                                        <cfif qInvoices.recordCount lte 2>
+                                            <!--- Spacer in order to show the action button correctly --->
+                                            <tr><td colspan="100%"><br /><br /><br /></td></tr>
+
+                                        </cfif>
                                     </table>
                                 </div>
                             <cfelse>
@@ -131,6 +120,10 @@
                         <label class="form-label">Search for customer</label>
                         <input type="text" onkeyup="showResult(this.value)" class="form-control" id="searchfield" autocomplete="off" maxlength="20" required>
                         <div id="livesearch"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Invoice title</label>
+                        <input type="text" name="title" class="form-control" maxlength="50">
                     </div>
                 </div>
                 <div class="modal-footer">
