@@ -105,14 +105,14 @@ component displayname="plans" {
                                 (
                                     SELECT strPlanName
                                     FROM plans_trans
-                                    WHERE intPlanID = plans_trans.intPlanID
+                                    WHERE intPlanID = plans.intPlanID
                                     AND intLanguageID = :languageID
                                 )
                             ),
                             (
                                 SELECT strPlanName
                                 FROM plans_trans
-                                WHERE intPlanID = plans_trans.intPlanID
+                                WHERE intPlanID = plans.intPlanID
                                 AND intLanguageID = :languageID
                             ),
                             plans.strPlanName
@@ -125,14 +125,14 @@ component displayname="plans" {
                                 (
                                     SELECT strShortDescription
                                     FROM plans_trans
-                                    WHERE intPlanID = plans_trans.intPlanID
+                                    WHERE intPlanID = plans.intPlanID
                                     AND intLanguageID = :languageID
                                 )
                             ),
                             (
                                 SELECT strShortDescription
                                 FROM plans_trans
-                                WHERE intPlanID = plans_trans.intPlanID
+                                WHERE intPlanID = plans.intPlanID
                                 AND intLanguageID = :languageID
                             ),
                             plans.strShortDescription
@@ -145,14 +145,14 @@ component displayname="plans" {
                                 (
                                     SELECT strDescription
                                     FROM plans_trans
-                                    WHERE intPlanID = plans_trans.intPlanID
+                                    WHERE intPlanID = plans.intPlanID
                                     AND intLanguageID = :languageID
                                 )
                             ),
                             (
                                 SELECT strDescription
                                 FROM plans_trans
-                                WHERE intPlanID = plans_trans.intPlanID
+                                WHERE intPlanID = plans.intPlanID
                                 AND intLanguageID = :languageID
                             ),
                             plans.strDescription
@@ -165,14 +165,14 @@ component displayname="plans" {
                                 (
                                     SELECT strButtonName
                                     FROM plans_trans
-                                    WHERE intPlanID = plans_trans.intPlanID
+                                    WHERE intPlanID = plans.intPlanID
                                     AND intLanguageID = :languageID
                                 )
                             ),
                             (
                                 SELECT strButtonName
                                 FROM plans_trans
-                                WHERE intPlanID = plans_trans.intPlanID
+                                WHERE intPlanID = plans.intPlanID
                                 AND intLanguageID = :languageID
                             ),
                             plans.strButtonName
@@ -185,14 +185,14 @@ component displayname="plans" {
                                 (
                                     SELECT strBookingLink
                                     FROM plans_trans
-                                    WHERE intPlanID = plans_trans.intPlanID
+                                    WHERE intPlanID = plans.intPlanID
                                     AND intLanguageID = :languageID
                                 )
                             ),
                             (
                                 SELECT strBookingLink
                                 FROM plans_trans
-                                WHERE intPlanID = plans_trans.intPlanID
+                                WHERE intPlanID = plans.intPlanID
                                 AND intLanguageID = :languageID
                             ),
                             plans.strBookingLink
