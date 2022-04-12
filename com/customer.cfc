@@ -338,30 +338,4 @@ component displayname="customer" output="false" {
 
     }
 
-
-    <!--- Get all active users of a customer --->
-    public query function getUsersActive(required numeric customerID) {
-
-        if (arguments.customerID gt 0) {
-
-            local.qUsers = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-                    SELECT *
-                    FROM users
-                    WHERE intCustomerID = :customerID
-                    AND blnActive = 1
-                "
-            )
-
-            return local.qUsers;
-
-        }
-
-    }
-
-
 }

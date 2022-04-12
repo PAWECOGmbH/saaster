@@ -11,19 +11,6 @@
         <cfoutput>
         <div class="row mb-3">
             <div class="col-md-12 col-lg-12">
-                <!--- <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
-                    <h4 class="page-title">#getTrans('titUserOverview')#</h4>
-                    <ol class="breadcrumb breadcrumb-dots">
-                        <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
-                        <li class="breadcrumb-item active">#getTrans('titUserOverview')#</li>
-                    </ol>
-                </div>
-                <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                    <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary" style="white-space: normal; width: 205px;">
-                        <i class="fa fa-address-book pe-3"></i>#getTrans('btnNewUser')#
-                    </a>
-                </div>  --->
                 <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                     <h4 class="page-title">#getTrans('titUserOverview')#</h4>
                     <ol class="breadcrumb breadcrumb-dots">
@@ -94,10 +81,6 @@
                                     </td>
                                 </tr>
                             </cfloop>
-                            <cfif qUser.recordCount lte 1>
-                                <!--- Spacer in order to show the action button correctly --->
-                                <tr><td colspan="100%"><br></td></tr>
-                            </cfif>
                             </tbody>
                         </table>
                     </div>

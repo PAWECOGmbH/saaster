@@ -4,12 +4,16 @@ SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE `invoices`
 ADD COLUMN `intUserID` int(11) NULL DEFAULT NULL AFTER `intCustomerID`;
 
+ALTER TABLE `payments`
+ADD COLUMN `strPaymentType` varchar(50) NULL AFTER `dtmPayDate`,
+MODIFY COLUMN `dtmPayDate` datetime NOT NULL AFTER `strCurrency`;
+
 -- ----------------------------
 -- Records of system_settings
 -- ----------------------------
 INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '1', 'Which vat type should be set by default?', now());
 INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.', now());
-INSERT INTO `settingInvoiceNet` VALUES (5, 'settingInvoicePrefix', '1', 'Decide whether the invoices are issued "net" by default.', now());
+INSERT INTO `system_settings` VALUES (5, 'settingInvoicePrefix', '1', 'Decide whether the invoices are issued "net" by default.', now());
 
 -- ----------------------------
 -- Records of system_mappings
@@ -34,7 +38,6 @@ INSERT INTO `invoice_status` VALUES (3, 'statInvoicePaid', 'green');
 INSERT INTO `invoice_status` VALUES (4, 'statInvoicePartPaid', 'orange');
 INSERT INTO `invoice_status` VALUES (5, 'statInvoiceCanceled', 'purple');
 INSERT INTO `invoice_status` VALUES (6, 'statInvoiceOverDue', 'red');
-
 
 
 

@@ -1,8 +1,7 @@
 
 <cfscript>
-
     qInvoices = new com.sysadmin().getSysAdminInvoices();
-
+    objInvoice = new com.invoices();
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -62,7 +61,7 @@
                                             <tr>
                                                 <td>#LSDateFormat(qInvoices.invoiceDate)#</td>
                                                 <td>#qInvoices.invoiceNumber#</td>
-                                                <td><span class="badge bg-#qInvoices.invoiceStatusColor#">#getTrans(qInvoices.invoiceStatusVariable, 'en')#</span></td>
+                                                <td>#objInvoice.getInvoiceStatusBadge(qInvoices.invoiceID, 'en')#</span></td>
                                                 <td>#LSDateFormat(qInvoices.invoiceDueDate)#</td>
                                                 <td>#qInvoices.customerName#</td>
                                                 <td>#qInvoices.invoiceCurrency#</td>
@@ -83,20 +82,15 @@
                                             </tr>
                                         </cfloop>
                                         </tbody>
-                                        <cfif qInvoices.recordCount lte 2>
-                                            <!--- Spacer in order to show the action button correctly --->
-                                            <tr><td colspan="100%"><br /><br /><br /></td></tr>
 
-                                        </cfif>
                                     </table>
                                 </div>
                             <cfelse>
                                 <div class="col-lg-12 text-center text-red">There are no invoices yet.</div>
                             </cfif>
                         </div>
-                        <div class="card-footer">
-
-                        </div>
+                        <!--- <div class="card-footer">
+                        </div> --->
                     </div>
                 </div>
             </div>

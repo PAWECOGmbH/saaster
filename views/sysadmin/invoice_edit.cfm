@@ -7,9 +7,11 @@
         location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
 
-    qInvoice = new com.invoices().getInvoiceData(thisInvoiceID);
+    objInvoice = new com.invoices();
+    qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
+
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
-    qUsers = application.objCustomer.getUsersActive(qInvoice.customerID);
+    qUsers = application.objUser.getAllUsers(qInvoice.customerID);
 
     if (isNumeric(qInvoice.userID)) {
         qUser = application.objCustomer.getUserDataByID(qInvoice.userID);
@@ -21,8 +23,6 @@
     }
 
     activeCurrencies = application.objGlobal.getActiveCurrencies();
-
-    //dump(qInvoice);
 
 </cfscript>
 
@@ -102,7 +102,7 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                <span class="badge bg-#qInvoice.paymentstatusColor#">#getTrans(qInvoice.paymentstatusVar, 'en')#</span>
+                                                #objInvoice.getInvoiceStatusBadge(thisInvoiceID, 'en')#
                                                 <cfif qInvoice.paymentstatusID eq 1>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2>
@@ -413,6 +413,15 @@
     document.addEventListener("DOMContentLoaded", function () {
         window.Litepicker && (new Litepicker({
             element: document.getElementById('due_date'),
+            buttonText: {
+                previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
+                nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+            },
+        }));
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        window.Litepicker && (new Litepicker({
+            element: document.getElementById('payment_date'),
             buttonText: {
                 previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
                 nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,

@@ -19,7 +19,6 @@ component displayname="invoices" output="false" {
             sql = "
                 SELECT MAX(intInvoiceNumber) as nextInvoice
                 FROM invoices
-                WHERE intCustomerID = :customerID
             "
         )
 
@@ -824,7 +823,7 @@ component displayname="invoices" output="false" {
                             invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
                             invoice_status.strColor as invoiceStatusColor
                     FROM invoices INNER JOIN invoice_status ON invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                    WHERE invoices.intCustomerID = :customerID
+                    WHERE invoices.intCustomerID = :customerID AND invoices.intPaymentStatusID > 1
                     ORDER BY invoiceDate DESC
                 "
             )
@@ -988,7 +987,20 @@ component displayname="invoices" output="false" {
     }
 
 
+    <!--- Get the colored invoice status badge --->
+    public string function getInvoiceStatusBadge(required numeric invoiceID, required string language) {
 
+        local.lng = arguments.language;
+        local.color = getInvoiceData(arguments.invoiceID).paymentstatusColor;
+        local.var = getInvoiceData(arguments.invoiceID).paymentstatusVar;
+
+        cfsavecontent (variable="local.htmlForBadge") {
+            echo("<span class='badge bg-#local.color#'>#application.objGlobal.getTrans(local.var, local.lng)#</span>")
+        }
+
+        return local.htmlForBadge;
+
+    }
 
 
 

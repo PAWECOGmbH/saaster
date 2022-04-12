@@ -32,13 +32,18 @@ if (structKeyExists(form, "new_invoice")) {
         createInvoice = objInvoice.createInvoice(invoiceData);
 
         if (createInvoice.success) {
-            getAlert('msgInvoiceCreated');
+            getAlert('The invoice has been successfully created. Please enter any items now.');
             location url="#application.mainURL#/sysadmin/invoice/edit/#createInvoice.newInvoiceID#" addtoken="false";
         } else {
             getAlert(createInvoice.message, 'danger');
             location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
         }
 
+
+    } else {
+
+        getAlert('The chosen customer does not exist!', 'warning');
+        location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
 
     }
 
@@ -67,7 +72,7 @@ if (structKeyExists(url, "delete")) {
     )
 
     if (getAnswer.recordCount) {
-        getAlert('msgInvoiceDeleted', 'success');
+        getAlert('The invoice has been successfully deleted.', 'success');
     } else {
         getAlert('No invoice found!', 'danger');
     }
