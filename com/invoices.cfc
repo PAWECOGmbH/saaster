@@ -988,17 +988,49 @@ component displayname="invoices" output="false" {
 
 
     <!--- Get the colored invoice status badge --->
-    public string function getInvoiceStatusBadge(required numeric invoiceID, required string language) {
-
-        local.lng = arguments.language;
-        local.color = getInvoiceData(arguments.invoiceID).paymentstatusColor;
-        local.var = getInvoiceData(arguments.invoiceID).paymentstatusVar;
+    public string function getInvoiceStatusBadge(required string language, required string color, required string variable) {
 
         cfsavecontent (variable="local.htmlForBadge") {
-            echo("<span class='badge bg-#local.color#'>#application.objGlobal.getTrans(local.var, local.lng)#</span>")
+            echo("<span class='badge bg-#arguments.color#'>#application.objGlobal.getTrans(arguments.variable, arguments.language)#</span>")
         }
 
         return local.htmlForBadge;
+
+    }
+
+
+    <!--- Insert payment --->
+    public struct function insertPayment(required struct paymentStruct) {
+
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
+
+        if (!structKeyExists(arguments.paymentStruct, "invoiceID") or !isNumeric(paymentStruct.invoiceID)) {
+            local.argsReturnValue['message'] = "No valid invoiceID found!";
+            return local.argsReturnValue;
+        }
+        if (!structKeyExists(arguments.paymentStruct, "date") or !isDate(paymentStruct.date)) {
+            local.argsReturnValue['message'] = "No valid payment date found!";
+            return local.argsReturnValue;
+        }
+        if (!structKeyExists(arguments.paymentStruct, "amount") or !isNumeric(paymentStruct.amount)) {
+            local.argsReturnValue['message'] = "No valid payment date found!";
+            return local.argsReturnValue;
+        }
+        if (structKeyExists(arguments.paymentStruct, "type")) {
+            local.type = paymentStruct.type;
+        } else {
+            local.type = "";
+        }
+
+        local.invoiceID = paymentStruct.invoiceID;
+        local.date = paymentStruct.date;
+        local.amount = paymentStruct.amount;
+
+
+
+
 
     }
 

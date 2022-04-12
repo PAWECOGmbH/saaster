@@ -61,7 +61,7 @@
                                             <tr>
                                                 <td>#LSDateFormat(qInvoices.invoiceDate)#</td>
                                                 <td>#qInvoices.invoiceNumber#</td>
-                                                <td>#objInvoice.getInvoiceStatusBadge(qInvoices.invoiceID, 'en')#</span></td>
+                                                <td>#objInvoice.getInvoiceStatusBadge('en', qInvoices.invoiceStatusColor, qInvoices.invoiceStatusVariable)#</td>
                                                 <td>#LSDateFormat(qInvoices.invoiceDueDate)#</td>
                                                 <td>#qInvoices.customerName#</td>
                                                 <td>#qInvoices.invoiceCurrency#</td>

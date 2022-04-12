@@ -24,6 +24,15 @@
 
     activeCurrencies = application.objGlobal.getActiveCurrencies();
 
+    payment = structNew();
+    payment['invoiceID'] = 500;
+    payment['date'] = dateFormat(now(), 'yyyy-mm-dd');
+    payment['amount'] = 500;
+    payment['type'] = 'PayPal';
+
+    objInvoice.insertPayment(payment);
+
+
 </cfscript>
 
 
@@ -102,7 +111,7 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                #objInvoice.getInvoiceStatusBadge(thisInvoiceID, 'en')#
+                                                #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2>
