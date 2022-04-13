@@ -5,12 +5,16 @@ ALTER TABLE `invoices`
 ADD COLUMN `intUserID` int(11) NULL DEFAULT NULL AFTER `intCustomerID`;
 
 ALTER TABLE `payments`
-ADD COLUMN `strPaymentType` varchar(50) NULL AFTER `dtmPayDate`,
-MODIFY COLUMN `dtmPayDate` datetime NOT NULL AFTER `strCurrency`;
+DROP COLUMN `strCurrency`,
+DROP COLUMN `intCustomerID`,
+MODIFY COLUMN `dtmPayDate` datetime NOT NULL,
+ADD COLUMN `strPaymentType` varchar(50) NULL AFTER `dtmPayDate`;
+
 
 CREATE TRIGGER `updPaymStatInsert` AFTER INSERT ON `payments` FOR EACH ROW UPDATE invoices
 SET intPaymentStatusID = IF(NEW.decAmount >= decTotalPrice, 3, 4)
 WHERE intInvoiceID = NEW.intInvoiceID;
+
 
 
 -- ----------------------------

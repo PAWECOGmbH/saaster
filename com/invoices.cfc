@@ -880,7 +880,7 @@ component displayname="invoices" output="false" {
                 qPayments = getInvoicePayments(arguments.invoiceID);
                 local.paid = 0;
 
-                if (qPayments.recordCount) {
+                if (qPayments.recordCount and isNumeric(qPayments.totalPaid)) {
                     cfloop(query="qPayments") {
                         local.paid = local.paid + qPayments.decAmount;
                     }
@@ -973,7 +973,7 @@ component displayname="invoices" output="false" {
                     invoiceID: {type: "numeric", value: arguments.invoiceID}
                 },
                 sql = "
-                    SELECT decAmount, strCurrency, dtmPayDate, intInvoiceID, intCustomerID
+                    SELECT *, SUM(decAmount) as totalPaid
                     FROM payments
                     WHERE intInvoiceID = :invoiceID
                     ORDER BY dtmPayDate
@@ -1028,7 +1028,38 @@ component displayname="invoices" output="false" {
         local.date = paymentStruct.date;
         local.amount = paymentStruct.amount;
 
+        //Insert the payment
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                invoiceID: {type: "numeric", value: local.invoiceID},
+                paydate: {type: "date", value: local.date},
+                amount: {type: "decimal", value: local.amount, scale: 2},
+                type: {type: "varchar", value: local.type}
+            },
+            sql = "
+                INSERT INTO payments (intInvoiceID, decAmount, dtmPayDate, strPaymentType)
+                VALUES (:invoiceID, :amount, :paydate, :type)
+            "
+        )
 
+        // Check payments and update the invoice
+        local.qPayments = getInvoicePayments(local.invoiceID);
+        local.paid = 0;
+
+        if (qPayments.recordCount and isNumeric(qPayments.totalPaid)) {
+            cfloop(query="qPayments") {
+                local.paid = local.paid + qPayments.decAmount;
+            }
+        }
+
+
+
+
+
+
+        dump(local.amountPaid);
+        abort;
 
 
 

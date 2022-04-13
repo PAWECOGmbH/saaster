@@ -68,15 +68,13 @@
                                                 <td class="text-end">#lsNumberFormat(qInvoices.invoiceTotal, '_,___.__')#</td>
                                                 <td class="text-end float-end">
                                                     <div class="btn-list flex-nowrap">
-                                                        <span class="dropdown">
-                                                            <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                                                Action
-                                                            </button>
-                                                            <div class="dropdown-menu dropdown-menu-end">
-                                                                <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.invoiceID#">Edit invoice</a>
-                                                                <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?delete=#qInvoices.invoiceID#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
-                                                            </div>
-                                                        </span>
+                                                        <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
+                                                            Action
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.invoiceID#">Edit invoice</a>
+                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?delete=#qInvoices.invoiceID#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -89,8 +87,6 @@
                                 <div class="col-lg-12 text-center text-red">There are no invoices yet.</div>
                             </cfif>
                         </div>
-                        <!--- <div class="card-footer">
-                        </div> --->
                     </div>
                 </div>
             </div>

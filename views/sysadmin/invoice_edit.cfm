@@ -25,9 +25,9 @@
     activeCurrencies = application.objGlobal.getActiveCurrencies();
 
     payment = structNew();
-    payment['invoiceID'] = 500;
-    payment['date'] = dateFormat(now(), 'yyyy-mm-dd');
-    payment['amount'] = 500;
+    payment['invoiceID'] = thisInvoiceID;
+    payment['date'] = now();
+    payment['amount'] = 200;
     payment['type'] = 'PayPal';
 
     objInvoice.insertPayment(payment);

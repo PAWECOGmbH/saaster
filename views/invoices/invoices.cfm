@@ -49,17 +49,14 @@
                                         <td class="text-center">#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.invoiceStatusColor, qInvoices.invoiceStatusVariable)#</td>
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap">
-                                                <span class="dropdown">
-                                                    <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                                        #getTrans('blnAction')#
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
-                                                    </div>
-                                                </span>
+                                                <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
+                                                    #getTrans('blnAction')#
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
+                                                </div>
                                             </div>
-
                                         </td>
                                     </tr>
                                 </cfloop>
