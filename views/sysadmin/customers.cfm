@@ -8,8 +8,6 @@
             WHERE customers.blnActive = 1;
         "
     )
-
-    dump(qCustomers);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
