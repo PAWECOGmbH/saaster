@@ -17,8 +17,8 @@
             AND customers.intCustomerID = #thisCustomerID#;
         "
     )
-   
-    dump(qCustomer)
+
+    qUsers = application.objUser.getAllUsers(thisCustomerID);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -55,7 +55,7 @@
         <div class="container-xl">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card">
+                    <div class="card d-flex flex-row">
                         <div class="card-body">
                             <div class="d-flex">
                                 <cfif len(trim(qCustomer.strLogo))>
@@ -71,15 +71,62 @@
                                     <h2>#qCustomer.strCompanyName#</h2>
                                 </div>
                             </div>
-                            <div class="d-flex pt-3">
-                                <span class="muted">Address</span>
-                                #qCustomer.strContactPerson#
+                            <div class="d-flex pt-4">
+                                <div class="me-5 text-muted">
+                                    Address
+                                </div>
+                                <div class="d-flex flex-column ps-3 pe-5">
+                                    <div>
+                                        #qCustomer.strAddress#
+                                    </div>
+                                    <div>
+                                        #qCustomer.strZIP# #qCustomer.strCity#
+                                    </div>
+                                    <div>
+                                        #qCustomer.strCountryName#
+                                    </div>
+                                </div>
+                                <div class="me-5 flex-column text-muted ps-3">
+                                    <div>
+                                    Contact person
+                                    </div>
+                                    <div>
+                                    E-Mail
+                                    </div>
+                                    <div>
+                                    Phone
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column ps-3">
+                                    <div>
+                                        #qCustomer.strContactPerson#
+                                    </div>
+                                    <div>
+                                        #qCustomer.strEmail#
+                                    </div>
+                                    <div>
+                                        #qCustomer.strPhone#
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="card-footer">
-                            
+                        <div class="col-lg-4">
+                            <h2 class="pt-3 ps-3">Users</h2>
+                            <cfloop query="qUsers">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">
+                                        <div class="row align-items-center">
+                                            <div class="col text-truncate">
+                                                <a href="" class="text-reset d-block">#qUsers.strFirstName# #strLastName#</a>
+                                                #qUsers.strEmail#
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </cfloop>
                         </div>
+
                     </div>
                 </div>
             </div>

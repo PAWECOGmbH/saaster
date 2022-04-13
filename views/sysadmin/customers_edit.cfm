@@ -92,8 +92,6 @@
     if(structKeyExists(session, "billing_info") and len(trim(session.billing_info))){
         custBillingInfo = session.billing_info
     }
-
-    dump(qCustomers)
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -137,7 +135,7 @@
                         </div>
                         <div class="card-body">
                             <div class="col-lg-12">
-                                <form class="card" id="submit_form" method="post" action="#application.mainURL#/customer">
+                                <form class="card" id="submit_form" method="post" action="#application.mainURL#/sysadm/customers">
                                     <input type="hidden" name="edit_company_btn">
                                     <div class="card-header">
                                         <h3 class="card-title">Edit company</h3>
