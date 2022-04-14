@@ -326,6 +326,78 @@ if (structKeyExists(url, "draft")) {
 }
 
 
+<!--- Insert payment --->
+if (structKeyExists(form, "payments")) {
+
+    if (isNumeric(form.payments)) {
+
+        invoiceID = form.payments;
+
+        if (structKeyExists(form, "delete")) {
+
+            param name="form.delete" default="0";
+            objInvoice.deletePayment(form.delete);
+
+            if (!objInvoice.success) {
+                getAlert(objInvoice.message);
+                location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
+            }
+
+        } else {
+
+            param name="form.payment_date" default="#now()#";
+            param name="form.payment_type" default="";
+            param name="form.amount" default="0";
+
+            if (isDate(form.payment_date)) {
+                paymentDate = form.payment_date;
+            } else {
+                paymentDate = now();
+            }
+            if (isNumeric(amount)) {
+                paymentAmount = form.amount;
+            } else {
+                paymentAmount = 0;
+            }
+            paymentType = form.payment_type;
+
+            payment = structNew();
+            payment['invoiceID'] = invoiceID;
+            payment['date'] = paymentDate;
+            payment['amount'] = paymentAmount;
+            payment['type'] = paymentType;
+
+            objInvoice.insertPayment(payment);
+
+            if (!objInvoice.success) {
+                getAlert(objInvoice.message);
+                location url="#application.mainURL#/sysadmin/invoice/edit/#invoiceID#" addtoken="false";
+            }
+
+        }
+
+    }
+
+
+}
+
+
+
+<!--- Delete payment --->
+if (structKeyExists(form, "delete")) {
+
+    param name="form.delete" default="0";
+    objInvoice.deletePayment(form.delete);
+
+    if (!objInvoice.success) {
+        getAlert(objInvoice.message);
+        location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
+    }
+
+
+}
+
+
 
 
 </cfscript>

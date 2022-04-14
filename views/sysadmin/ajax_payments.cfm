@@ -4,15 +4,17 @@
     if(!isNumeric(url.invoiceID)){
          location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
-
     thisInvoiceID = url.invoiceID;
-    qPayments = new com.invoices().getInvoicePayments(thisInvoiceID);
+    objInvoice = new com.invoices();
+    qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
+    amountOpen = objInvoice.getInvoiceData(thisInvoiceID).amountOpen;
 
+    dump(amountOpen);
 </cfscript>
 
 <cfoutput>
 
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">
     <input type="hidden" name="payments" value="#thisInvoiceID#">
     <div class="modal-header">
         <h5 class="modal-title">Payments</h5>
@@ -25,8 +27,8 @@
                     <tr>
                         <th width="30%">Date</th>
                         <th width="30%">Payment type</th>
-                        <th width="20%" class="text-end">Amount</th>
-                        <th width="20%" class="text-end"></th>
+                        <th width="30%" class="text-end">Amount</th>
+                        <th width="10%" class="text-center"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,15 +40,15 @@
                         </div>
                     </td>
                     <td><input type="text" name="payment_type" class="form-control" maxlength="50" placeholder="Credit card"></td>
-                    <td><input type="text" name="amount" class="form-control text-end" maxlength="6" required></td>
-                    <td><i onclick="sendPayment();" class="far fa-check-circle h1 text-green mt-2" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Save payment"></i></td>
+                    <td><input type="text" name="amount" class="form-control text-end" maxlength="6" value="#lsnumberformat(trim(amountOpen), '_,___.__')#"></td>
+                    <td class="text-center"><i onclick="sendPayment();" class="far fa-check-circle h1 text-green mt-2" style="cursor: pointer;"></i></td>
                 </tr>
                 <cfloop query="qPayments">
                     <tr>
                         <td>#LSDateFormat(qPayments.dtmPayDate)#</td>
                         <td>#qPayments.strPaymentType#</td>
-                        <td class="text-end">#lsNumberFormat(qPayments.decAmount, '_,___.__')# #qPayments.strCurrency#</td>
-                        <td class="text-end"></td>
+                        <td class="text-end">#lsNumberFormat(qPayments.decAmount, '_,___.__')#</td>
+                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Save payment"></i></td>
                     </tr>
                 </cfloop>
                 </tbody>

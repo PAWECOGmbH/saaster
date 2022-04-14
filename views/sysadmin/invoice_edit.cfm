@@ -24,15 +24,6 @@
 
     activeCurrencies = application.objGlobal.getActiveCurrencies();
 
-    payment = structNew();
-    payment['invoiceID'] = thisInvoiceID;
-    payment['date'] = now();
-    payment['amount'] = 200;
-    payment['type'] = 'PayPal';
-
-    objInvoice.insertPayment(payment);
-
-
 </cfscript>
 
 
@@ -86,7 +77,7 @@
                                 </div>
                                 <div class="col-lg-6 text-end pe-3">
                                     <cfif qInvoice.paymentstatusID gt 1>
-                                        <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
+                                        <a href="##" data-bs-toggle="modal" class="openPopupPayments" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
                                     <cfelse>
                                         <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
                                     </cfif>
@@ -398,7 +389,7 @@
 </div>
 </form>
 
-<div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+<div id="dynModalPayments" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content" id="dyn_modal-content">
             <!--- dynamic content from ajax request (ajax_payments.cfm) --->
@@ -407,7 +398,6 @@
 </div>
 
 </cfoutput>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -422,15 +412,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         window.Litepicker && (new Litepicker({
             element: document.getElementById('due_date'),
-            buttonText: {
-                previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-                nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
-            },
-        }));
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-        window.Litepicker && (new Litepicker({
-            element: document.getElementById('payment_date'),
             buttonText: {
                 previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
                 nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,

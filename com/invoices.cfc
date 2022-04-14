@@ -880,7 +880,7 @@ component displayname="invoices" output="false" {
                 qPayments = getInvoicePayments(arguments.invoiceID);
                 local.paid = 0;
 
-                if (qPayments.recordCount and isNumeric(qPayments.totalPaid)) {
+                if (qPayments.recordCount) {
                     cfloop(query="qPayments") {
                         local.paid = local.paid + qPayments.decAmount;
                     }
@@ -973,7 +973,7 @@ component displayname="invoices" output="false" {
                     invoiceID: {type: "numeric", value: arguments.invoiceID}
                 },
                 sql = "
-                    SELECT *, SUM(decAmount) as totalPaid
+                    SELECT *
                     FROM payments
                     WHERE intInvoiceID = :invoiceID
                     ORDER BY dtmPayDate
@@ -1028,38 +1028,74 @@ component displayname="invoices" output="false" {
         local.date = paymentStruct.date;
         local.amount = paymentStruct.amount;
 
-        //Insert the payment
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                invoiceID: {type: "numeric", value: local.invoiceID},
-                paydate: {type: "date", value: local.date},
-                amount: {type: "decimal", value: local.amount, scale: 2},
-                type: {type: "varchar", value: local.type}
-            },
-            sql = "
-                INSERT INTO payments (intInvoiceID, decAmount, dtmPayDate, strPaymentType)
-                VALUES (:invoiceID, :amount, :paydate, :type)
-            "
-        )
+
+        try {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    invoiceID: {type: "numeric", value: local.invoiceID},
+                    paydate: {type: "date", value: local.date},
+                    amount: {type: "decimal", value: local.amount, scale: 2},
+                    type: {type: "varchar", value: local.type}
+                },
+                sql = "
+                    INSERT INTO payments (intInvoiceID, decAmount, dtmPayDate, strPaymentType)
+                    VALUES (:invoiceID, :amount, :paydate, :type)
+                "
+            )
+
+        } catch (any e) {
+
+            local.argsReturnValue['message'] = e.message;
+            return local.argsReturnValue;
+
+        }
 
         // Check payments and update the invoice
         local.qPayments = getInvoicePayments(local.invoiceID);
         local.paid = 0;
 
-        if (qPayments.recordCount and isNumeric(qPayments.totalPaid)) {
+        if (qPayments.recordCount) {
             cfloop(query="qPayments") {
                 local.paid = local.paid + qPayments.decAmount;
             }
         }
 
-
-
-
-
-
-        dump(local.amountPaid);
+        echo('#local.paid#');
         abort;
+
+
+
+    }
+
+
+    <!--- Delete payment --->
+    public struct function deletePayment(required numeric paymentID) {
+
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
+
+        try {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    paymentID: {type: "numeric", value: arguments.paymentID},
+                },
+                sql = "
+                    DELETE FROM payments WHERE intPaymentID = :paymentID
+                "
+            )
+
+        } catch (any e) {
+
+            local.argsReturnValue['message'] = e.message;
+            return local.argsReturnValue;
+
+        }
+
 
 
 
