@@ -46,30 +46,30 @@
                                         <td data-label="status" class="text-center" style="color: #qInvoices.invoiceStatusColor#"><b>#getTrans(qInvoices.invoiceStatusVariable)#</b></td>
                                         <td data-label="button" class="text-end">
                                             <div class="btn-list flex-nowrap">
-                                                <span class="dropdown">
-                                                    <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                                        #getTrans('blnAction')#
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
-                                                        <cfif session.admin>
-                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/invoices?delete=#qInvoices.invoiceID#', '#getTrans("btnDeleteInvoice")#', '#getTrans("txtDeleteInvoiceConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDeleteInvoice')#</a>
-                                                        </cfif>
-                                                    </div>
-                                                </span>
+                                                
+                                                <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
+                                                    #getTrans('blnAction')#
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
+                                                    <cfif session.admin>
+                                                        <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/invoices?delete=#qInvoices.invoiceID#', '#getTrans("btnDeleteInvoice")#', '#getTrans("txtDeleteInvoiceConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDeleteInvoice')#</a>
+                                                    </cfif>
+                                                </div>
+                                                
                                             </div>
 
                                         </td>
                                     </tr>
                                 </cfloop>
                                 </tbody>
-                                <cfif qInvoices.recordCount lte 2>
+                                <!--- <cfif qInvoices.recordCount lte 2>
                                     <!--- Spacer in order to show the action button correctly --->
                                     <tr><td colspan="100%"><br /><br /><br /></td></tr>
 
 
-                                </cfif>
+                                </cfif> --->
                             </table>
                         </div>
                     </div>

@@ -49,9 +49,10 @@
                                         <tr>
                                             <th width="5%"></th>
                                             <th width="5%" class="text-center w-10">Prio</th>
-                                            <th width="15%">Currency (english)</th>
-                                            <th width="15%">Currency (own language)</th>
+                                            <th width="10%">Currency (english)</th>
+                                            <th width="10%">Currency (own language)</th>
                                             <th width="10%" class="text-center">ISO code</th>
+                                            <th width="10%" class="text-center">Currency Sign</th>
                                             <th width="10%" class="text-center">Default</th>
                                             <th width="10%" class="text-center">Active</th>
                                             <th width="5%"></th>
@@ -59,6 +60,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="dragndrop_body">
+                                    
                                     <cfloop query="qCurrencies">
                                         <tr id="sort_#qCurrencies.intCurrencyID#">
                                             <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
@@ -66,15 +68,18 @@
                                             <td>#qCurrencies.strCurrencyEN#</td>
                                             <td>#qCurrencies.strCurrency#</td>
                                             <td class="text-center">#qCurrencies.strCurrencyISO#</td>
+                                            <td class="text-center">#qCurrencies.strCurrencySign#</td>
                                             <td class="text-center">#yesNoFormat(qCurrencies.blnDefault)#</td>
                                             <td class="text-center">#yesNoFormat(qCurrencies.blnActive)#</td>
                                             <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##cur_#qCurrencies.intCurrencyID#">Edit</a></td>
                                             <td><cfif !qCurrencies.blnDefault><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/currencies?delete_currency=#qCurrencies.intCurrencyID#', 'Delete currency', 'If you delete a currency, all variables, translations and contents in tables with this currency will also be deleted. Do you really want to delete this currency irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></cfif></td>
                                         </tr>
+                                        
                                         <div id="cur_#qCurrencies.intCurrencyID#" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                                                
                                                 <form action="#application.mainURL#/sysadm/currencies" method="post">
-                                                <input type="hidden" name="edit_currency" value="#qCurrencies.intCurrencyID#">
+                                                    <input type="hidden" name="edit_currency" value="#qCurrencies.intCurrencyID#">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Edit currency</h5>
@@ -117,6 +122,17 @@
                                                                         <span class="form-check-label">Default currency</span>
                                                                     </label>
                                                                 </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-lg-3">
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Sign</label>
+                                                                            <div class="input-group input-group-flat w-50">
+                                                                                <input type="text" class="form-control" name="sign" value="#HTMLEditFormat(qCurrencies.strCurrencySign)#" autocomplete="off">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -127,7 +143,7 @@
                                                 </form>
                                             </div>
                                         </div>
-
+                                      
                                         <script>
                                             // Save new prio
                                             function fnSaveSort(){
@@ -173,7 +189,7 @@
                                     <div id="cur_new" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                             <form action="#application.mainURL#/sysadm/currencies" method="post">
-                                            <input type="hidden" name="new_currency">
+                                                <input type="hidden" name="new_currency">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">New currency</h5>
@@ -205,6 +221,18 @@
                                                                 </label>
                                                             </div>
                                                         </div>
+
+                                                        <div class="row">
+                                                            <div class="col-lg-3">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Sign</label>
+                                                                    <div class="input-group input-group-flat w-50">
+                                                                        <input type="text" class="form-control" name="sign" autocomplete="off">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                     <div class="modal-footer">
                                                         <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>

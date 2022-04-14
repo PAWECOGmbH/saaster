@@ -11,6 +11,7 @@ CREATE TABLE `currencies`  (
   `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `intPrio` int(11) NOT NULL,
   `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
   `blnActive` tinyint(1) NOT NULL DEFAULT 0,
@@ -21,9 +22,9 @@ CREATE TABLE `currencies`  (
 -- ----------------------------
 -- Records of currencies
 -- ----------------------------
-INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', 1, 1, 1, now());
-INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', 2, 0, 1, now());
-INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 3, 0, 0, now());
-INSERT INTO `currencies` VALUES (4, 'GBP', 'Pound sterling', 'Pound sterling', 4, 0, 0, now());
+INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1, now());
+INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', 'EUR', 2, 0, 1, now());
+INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 'CHF', 3, 0, 0, now());
+INSERT INTO `currencies` VALUES (4, 'GBP', 'Pound sterling', 'Pound sterling', '£', 4, 0, 0, now());
 
 SET FOREIGN_KEY_CHECKS = 1;
