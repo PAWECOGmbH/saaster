@@ -45,11 +45,13 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add position
-                        </a>
-                    </div>
+                    <cfif qInvoice.paymentstatusID eq 1>
+                        <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                            <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
+                                <i class="fas fa-plus pe-3"></i> Add position
+                            </a>
+                        </div>
+                    </cfif>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -103,7 +105,7 @@
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
                                                 #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
-                                                <cfif qInvoice.paymentstatusID eq 1>
+                                                <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&draft" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
@@ -142,8 +144,10 @@
                                                 <td valign="top" class="text-end"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                                 <td valign="top" class="text-end">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
                                                 <td valign="top" class="text-end">
-                                                    <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
-                                                    <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                    <cfif qInvoice.paymentstatusID eq 1>
+                                                        <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
+                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                    </cfif>
                                                 </td>
                                             </tr>
                                         </cfloop>
@@ -208,15 +212,15 @@
                     <div class="row mb-3">
                         <div class="col-lg-4">
                             <label class="form-label">Quantity *</label>
-                            <input type="text" name="quantity" class="form-control" maxlength="10" required>
+                            <input type="text" name="quantity" class="form-control" maxlength="6" required>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">Singleprice *</label>
-                            <input type="text" name="price" class="form-control" maxlength="10" required>
+                            <input type="text" name="price" class="form-control" maxlength="6" required>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">VAT (%)</label>
-                            <input type="text" name="vat" class="form-control" maxlength="10">
+                            <input type="text" name="vat" class="form-control" maxlength="6">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -226,7 +230,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">Discount (%)</label>
-                            <input type="text" name="discount" class="form-control" maxlength="10">
+                            <input type="text" name="discount" class="form-control" maxlength="6">
                         </div>
                         <div class="col-lg-4"></div>
                     </div>

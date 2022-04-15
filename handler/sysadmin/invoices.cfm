@@ -32,7 +32,7 @@ if (structKeyExists(form, "new_invoice")) {
         createInvoice = objInvoice.createInvoice(invoiceData);
 
         if (createInvoice.success) {
-            getAlert('The invoice has been successfully created. Please enter any items now.');
+            getAlert('The invoice has been successfully created. Please add any positions now.');
             location url="#application.mainURL#/sysadmin/invoice/edit/#createInvoice.newInvoiceID#" addtoken="false";
         } else {
             getAlert(createInvoice.message, 'danger');
@@ -279,19 +279,8 @@ if (structKeyExists(url, "open")) {
 
     if (isNumeric(url.invoiceID)) {
 
-        <!--- Update position --->
-        qNextPosNumber = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                invoiceID: {type: "numeric", value: url.invoiceID},
-                statusID: {type: "numeric", value: 2}
-            },
-            sql = "
-                UPDATE invoices
-                SET intPaymentStatusID = :statusID
-                WHERE intInvoiceID = :invoiceID
-            "
-        )
+        // Update invoice status
+        objInvoice.setInvoiceStatus(url.invoiceID);
 
         location url="#application.mainURL#/sysadmin/invoice/edit/#url.invoiceID#" addtoken="false";
 
@@ -338,10 +327,6 @@ if (structKeyExists(form, "payments")) {
             param name="form.delete" default="0";
             objInvoice.deletePayment(form.delete);
 
-            if (!objInvoice.success) {
-                getAlert(objInvoice.message);
-                location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
-            }
 
         } else {
 
@@ -361,17 +346,16 @@ if (structKeyExists(form, "payments")) {
             }
             paymentType = form.payment_type;
 
-            payment = structNew();
-            payment['invoiceID'] = invoiceID;
-            payment['date'] = paymentDate;
-            payment['amount'] = paymentAmount;
-            payment['type'] = paymentType;
+            if (paymentAmount gt 0) {
 
-            objInvoice.insertPayment(payment);
+                payment = structNew();
+                payment['invoiceID'] = invoiceID;
+                payment['date'] = paymentDate;
+                payment['amount'] = paymentAmount;
+                payment['type'] = paymentType;
 
-            if (!objInvoice.success) {
-                getAlert(objInvoice.message);
-                location url="#application.mainURL#/sysadmin/invoice/edit/#invoiceID#" addtoken="false";
+                objInvoice.insertPayment(payment);
+
             }
 
         }
@@ -388,12 +372,6 @@ if (structKeyExists(form, "delete")) {
 
     param name="form.delete" default="0";
     objInvoice.deletePayment(form.delete);
-
-    if (!objInvoice.success) {
-        getAlert(objInvoice.message);
-        location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
-    }
-
 
 }
 

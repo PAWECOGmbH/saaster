@@ -1,4 +1,8 @@
 <cfscript>
+    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
+        getAlert('alertSessionExpired', 'warning');
+        location url="#application.mainURL#/login" addtoken="false";
+    }
     setting showdebugoutput = false;
     param name="url.invoiceID" default=0 type="numeric";
     if(!isNumeric(url.invoiceID)){
@@ -8,8 +12,7 @@
     objInvoice = new com.invoices();
     qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
     amountOpen = objInvoice.getInvoiceData(thisInvoiceID).amountOpen;
-
-    dump(amountOpen);
+    currency = objInvoice.getInvoiceData(thisInvoiceID).currency;
 </cfscript>
 
 <cfoutput>
@@ -27,7 +30,7 @@
                     <tr>
                         <th width="30%">Date</th>
                         <th width="30%">Payment type</th>
-                        <th width="30%" class="text-end">Amount</th>
+                        <th width="30%" class="text-end">Amount #currency#</th>
                         <th width="10%" class="text-center"></th>
                     </tr>
                 </thead>
@@ -40,7 +43,7 @@
                         </div>
                     </td>
                     <td><input type="text" name="payment_type" class="form-control" maxlength="50" placeholder="Credit card"></td>
-                    <td><input type="text" name="amount" class="form-control text-end" maxlength="6" value="#lsnumberformat(trim(amountOpen), '_,___.__')#"></td>
+                    <td><input type="text" name="amount" class="form-control text-end" maxlength="5" <cfif amountOpen gt 0>value="#lsnumberformat(amountOpen, '___.__')#"</cfif>></td>
                     <td class="text-center"><i onclick="sendPayment();" class="far fa-check-circle h1 text-green mt-2" style="cursor: pointer;"></i></td>
                 </tr>
                 <cfloop query="qPayments">
@@ -48,7 +51,7 @@
                         <td>#LSDateFormat(qPayments.dtmPayDate)#</td>
                         <td>#qPayments.strPaymentType#</td>
                         <td class="text-end">#lsNumberFormat(qPayments.decAmount, '_,___.__')#</td>
-                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Save payment"></i></td>
+                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2" style="cursor: pointer;"></i></td>
                     </tr>
                 </cfloop>
                 </tbody>
@@ -57,7 +60,7 @@
     </div>
     <div class="modal-footer">
         <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
-        <button type="submit" class="btn btn-primary ms-auto">Save changes</button>
+        <a href="#application.mainURL#/sysadmin/invoice/edit/#thisInvoiceID#" class="btn btn-primary ms-auto">Done!</a>
     </div>
 </form>
 </cfoutput>

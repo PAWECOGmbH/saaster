@@ -1,7 +1,11 @@
 <cfscript>
-setting showdebugoutput = false;
-param name="url.search" default="";
-qCustomer = queryExecute (
+    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
+        getAlert('alertSessionExpired', 'warning');
+        location url="#application.mainURL#/login" addtoken="false";
+    }
+    setting showdebugoutput = false;
+    param name="url.search" default="";
+    qCustomer = queryExecute (
         options = {datasource = application.datasource},
         sql = "
             SELECT intCustomerID, strCompanyName, strZIP, strCity

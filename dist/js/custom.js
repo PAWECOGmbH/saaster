@@ -150,3 +150,28 @@ $('.editor').each(function(index, element){
     });
 });
 
+// for invoices (sysadmin)
+function showResult(str) {
+	if (str.length==0) {
+		document.getElementById("livesearch").innerHTML="";
+		return;
+	}
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function() {
+		if (this.readyState==4 && this.status==200) {
+			document.getElementById("livesearch").innerHTML=this.responseText;
+		}
+	}
+	xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
+	xmlhttp.send();
+}
+function intoTf(c, i) {
+	var customer_name = document.getElementById("searchfield");
+	customer_name.value = c;
+	var customer_id = document.getElementById("customer_id");
+	customer_id.value = i;
+}
+function hideResult() {
+	document.getElementById("livesearch").innerHTML="";
+	return;
+}

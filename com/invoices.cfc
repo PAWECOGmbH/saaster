@@ -244,6 +244,8 @@ component displayname="invoices" output="false" {
         <!--- Recalculating --->
         local.recalc = recalculateInvoice(local.invoiceID);
 
+
+
         if (!local.recalc.success) {
             local.argsReturnValue['message'] = "Error in function recalculateInvoice()";
             return local.argsReturnValue;
@@ -659,16 +661,11 @@ component displayname="invoices" output="false" {
                 invoiceID: {type: "numeric", value: arguments.invoiceID}
             },
             sql = "
-                SELECT invoice_positions.*, invoices.intCustomerID, invoices.blnIsNet, invoices.intVatType
-                FROM invoice_positions INNER JOIN invoices ON invoice_positions.intInvoiceID = invoices.intInvoiceID
-                WHERE invoice_positions.intInvoiceID = :invoiceID
+                SELECT invoices.intCustomerID, invoices.blnIsNet, invoices.intVatType, invoice_positions.*
+                FROM invoices LEFT JOIN invoice_positions ON invoices.intInvoiceID = invoice_positions.intInvoiceID
+                WHERE invoices.intInvoiceID = :invoiceID
             "
         )
-
-        if (!qInvoicePositions.recordCount) {
-            local.argsReturnValue['message'] = "No positions found!";
-            return local.argsReturnValue;
-        }
 
         <!--- Customers language --->
         local.customerLng = application.objCustomer.getCustomerData(qInvoicePositions.intCustomerID).strLanguageISO;
@@ -691,36 +688,40 @@ component displayname="invoices" output="false" {
         local.subtotal_price = 0;
         local.vat_total = 0;
 
-        <!--- Loop over all positions --->
-        cfloop(query="qInvoicePositions") {
+        if (qInvoicePositions.recordcount and len(trim(qInvoicePositions.decTotalPrice))) {
 
-            <!--- Calc prices --->
-            local.vat_amount = calcVat(qInvoicePositions.decTotalPrice, qInvoicePositions.blnIsNet, qInvoicePositions.decVat);
-            local.vat_total = local.vat_total + local.vat_amount;
-            local.subtotal_price = local.subtotal_price + qInvoicePositions.decTotalPrice;
+            <!--- Loop over all positions --->
+            cfloop(query="qInvoicePositions") {
 
-            <!--- Define vat text and sum --->
-            if (qInvoicePositions.blnIsNet eq 1) {
-                local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
-            } else {
-                local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
-            }
+                <!--- Calc prices --->
+                local.vat_amount = calcVat(qInvoicePositions.decTotalPrice, qInvoicePositions.blnIsNet, qInvoicePositions.decVat);
+                local.vat_total = local.vat_total + local.vat_amount;
+                local.subtotal_price = local.subtotal_price + qInvoicePositions.decTotalPrice;
 
-            if (qInvoicePositions.intVatType eq 1) {
+                <!--- Define vat text and sum --->
+                if (qInvoicePositions.blnIsNet eq 1) {
+                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
+                } else {
+                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
+                }
 
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        invoiceID: {type: "numeric", value: arguments.invoiceID},
-                        decVat: {type: "decimal", value: qInvoicePositions.decVat, scale: 2},
-                        vat_text: {type: "nvarchar", value: left(local.vat_text, 50)},
-                        vat_amount: {type: "decimal", value: local.vat_amount, scale: 2}
-                    },
-                    sql = "
-                        INSERT INTO invoice_vat (intInvoiceID, decVat, strVatText, decVatAmount)
-                        VALUES (:invoiceID, :decVat, :vat_text, :vat_amount)
-                    "
-                )
+                if (qInvoicePositions.intVatType eq 1) {
+
+                    queryExecute(
+                        options = {datasource = application.datasource},
+                        params = {
+                            invoiceID: {type: "numeric", value: arguments.invoiceID},
+                            decVat: {type: "decimal", value: qInvoicePositions.decVat, scale: 2},
+                            vat_text: {type: "nvarchar", value: left(local.vat_text, 50)},
+                            vat_amount: {type: "decimal", value: local.vat_amount, scale: 2}
+                        },
+                        sql = "
+                            INSERT INTO invoice_vat (intInvoiceID, decVat, strVatText, decVatAmount)
+                            VALUES (:invoiceID, :decVat, :vat_text, :vat_amount)
+                        "
+                    )
+
+                }
 
             }
 
@@ -1052,54 +1053,118 @@ component displayname="invoices" output="false" {
 
         }
 
-        // Check payments and update the invoice
-        local.qPayments = getInvoicePayments(local.invoiceID);
-        local.paid = 0;
+        // Update invoice status
+        setInvoiceStatus(local.invoiceID);
 
-        if (qPayments.recordCount) {
-            cfloop(query="qPayments") {
-                local.paid = local.paid + qPayments.decAmount;
-            }
-        }
-
-        echo('#local.paid#');
-        abort;
-
+        local.argsReturnValue['message'] = "OK";
+        local.argsReturnValue['success'] = true;
+        return local.argsReturnValue;
 
 
     }
 
 
     <!--- Delete payment --->
-    public struct function deletePayment(required numeric paymentID) {
+    public any function deletePayment(required numeric paymentID) {
 
-        local.argsReturnValue = structNew();
-        local.argsReturnValue['message'] = "";
-        local.argsReturnValue['success'] = false;
+        local.qInvoice = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                paymentID: {type: "numeric", value: arguments.paymentID},
+            },
+            sql = "
+                SELECT intInvoiceID
+                FROM payments
+                WHERE intPaymentID = :paymentID
+            "
+        )
 
-        try {
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                paymentID: {type: "numeric", value: arguments.paymentID},
+            },
+            sql = "
+                DELETE FROM payments WHERE intPaymentID = :paymentID
+            "
+        )
 
+        if (local.qInvoice.recordCount) {
+            setInvoiceStatus(local.qInvoice.intInvoiceID);
+        }
+
+    }
+
+
+
+    public void function setInvoiceStatus(required numeric invoiceID, numeric status) {
+
+        if (structKeyExists(arguments, "status")) {
+
+            // Update invoice
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    paymentID: {type: "numeric", value: arguments.paymentID},
+                    invoiceID: {type: "numeric", value: local.invoiceID},
+                    status: {type: "numeric", value: arguments.status}
                 },
                 sql = "
-                    DELETE FROM payments WHERE intPaymentID = :paymentID
+                    UPDATE invoices
+                    SET intPaymentStatusID = :status
+                    WHERE intInvoiceID = :invoiceID
                 "
             )
 
-        } catch (any e) {
+        } else {
 
-            local.argsReturnValue['message'] = e.message;
-            return local.argsReturnValue;
+            // Check payments
+            local.qPayments = getInvoicePayments(arguments.invoiceID);
+            local.paid = 0;
+
+            if (qPayments.recordCount) {
+                cfloop(query="qPayments") {
+                    local.paid = local.paid + qPayments.decAmount;
+                }
+            }
+
+            // Payment status
+            objInvoice = getInvoiceData(arguments.invoiceID);
+            local.invoiceAmount = objInvoice.total;
+            local.dueDate = objInvoice.dueDate;
+            if (local.paid eq 0) {
+                local.status = 2; // open
+                if (local.dueDate < now()) {
+                    local.status = 6; // open
+                }
+            } else if (local.paid lt local.invoiceAmount) {
+                local.status = 4; // part paid
+            } else if (local.paid gte local.invoiceAmount) {
+                local.status = 3; // paid
+            }
+
+            // Update invoice
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    invoiceID: {type: "numeric", value: arguments.invoiceID},
+                    status: {type: "numeric", value: local.status}
+                },
+                sql = "
+                    UPDATE invoices
+                    SET intPaymentStatusID = :status
+                    WHERE intInvoiceID = :invoiceID
+                "
+            )
 
         }
 
-
-
+        return;
 
     }
+
+
+
+
 
 
 

@@ -35,6 +35,7 @@ INSERT INTO `system_mappings` VALUES (61, 'sysadmin/invoice/edit', 'views/sysadm
 -- Records of system_translations
 -- ----------------------------
 INSERT INTO `system_translations` VALUES (178, 'statInvoiceDraft', 'Entwurf', 'Draft', now());
+INSERT INTO `system_translations` VALUES (179, 'statInvoiceOverDue', 'Überfällig', 'Overdue', now());
 
 
 -- ----------------------------
