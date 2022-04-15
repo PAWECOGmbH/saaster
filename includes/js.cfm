@@ -5,7 +5,7 @@
 <script src="#application.mainURL#/dist/js/dropify.min.js"></script>
 
 <script src="#application.mainURL#/dist/js/tabler.min.js"></script>
-<!--- <script src="#application.mainURL#/dist/js/demo.min.js"></script> --->
+<script src="#application.mainURL#/dist/js/litepicker.js"></script>
 
 <!-- Sweet alert Plugin -->
 <script src="#application.mainURL#/dist/js/sweetalert.min.js"></script>

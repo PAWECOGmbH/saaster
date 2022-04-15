@@ -79,7 +79,7 @@ $(document).ready(function() {
 	});
 });
 
-// load modal with dynamic content
+// load modal with dynamic content (general)
 $(document).ready(function(){
     $('.openPopup').on('click',function(){
         var dataURL = $(this).attr('data-href');
@@ -88,6 +88,57 @@ $(document).ready(function(){
         });
     });
 });
+
+// load modal with dynamic content for payments
+$(document).ready(function(){
+    $('.openPopupPayments').on('click',function(){
+        var dataURL = $(this).attr('data-href');
+        $('#dyn_modal-content').load(dataURL,function(){
+            $('#dynModalPayments').modal('show');
+			window.Litepicker && (new Litepicker({
+				element: document.getElementById('payment_date'),
+				buttonText: {
+					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
+					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+				},
+			}));
+        });
+    });
+});
+
+// Save payment
+function sendPayment() {
+	var paymentModal = $('#dyn_modal-content');
+	var formData = $("#sendPayment").serialize();
+	var formAction = $("#sendPayment").attr("action");
+	var formReturn = $("#sendPayment").data("return");
+	$.ajax({
+		type: "POST",
+		url: formAction,
+		data: formData,
+		success: function (){
+			paymentModal.load(formReturn);
+		}
+	  });
+}
+
+// Delete payment
+function deletePayment(paymentID) {
+
+	var paymentModal = $('#dyn_modal-content');
+	var formData = 'delete=' + paymentID;
+	var formAction = $("#sendPayment").attr("action");
+	var formReturn = $("#sendPayment").data("return");
+	$.ajax({
+		type: "POST",
+		url: formAction,
+		data: formData,
+		success: function(){
+			paymentModal.load(formReturn);
+		}
+	});
+}
+
 
 // Load trumbowyg editor
 $('.editor').each(function(index, element){
@@ -99,3 +150,28 @@ $('.editor').each(function(index, element){
     });
 });
 
+// for invoices (sysadmin)
+function showResult(str) {
+	if (str.length==0) {
+		document.getElementById("livesearch").innerHTML="";
+		return;
+	}
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function() {
+		if (this.readyState==4 && this.status==200) {
+			document.getElementById("livesearch").innerHTML=this.responseText;
+		}
+	}
+	xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
+	xmlhttp.send();
+}
+function intoTf(c, i) {
+	var customer_name = document.getElementById("searchfield");
+	customer_name.value = c;
+	var customer_id = document.getElementById("customer_id");
+	customer_id.value = i;
+}
+function hideResult() {
+	document.getElementById("livesearch").innerHTML="";
+	return;
+}

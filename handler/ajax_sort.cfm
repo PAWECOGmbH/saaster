@@ -3,6 +3,11 @@
 
 <cfscript>
 
+if (!structKeyExists(session, "user_id")) {
+    getAlert('alertSessionExpired', 'warning');
+    location url="#application.mainURL#/login" addtoken="false";
+}
+
 if (structKeyExists(url, "extend")) {
     sqlExtend = url.extend;
 } else {

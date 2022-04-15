@@ -32,6 +32,7 @@
                                 <span class="dropdown-header">Sales</span>
                                 <a href="#application.mainURL#/sysadmin/customers" class="dropdown-item">Customers</a>
                                 <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans & Prices</a>
+                                <a href="#application.mainURL#/sysadmin/invoices" class="dropdown-item">Invoices</a>
                                 <div class="dropdown-divider"></div>
 
                                 <span class="dropdown-header">System</span>

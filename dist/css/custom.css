@@ -33,3 +33,7 @@
     color: green;
     font-size: large;
 }
+
+.trumbowyg-box, .trumbowyg-editor {
+    min-height: 150px;
+}

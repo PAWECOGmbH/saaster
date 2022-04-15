@@ -696,7 +696,7 @@ component displayname="globalFunctions" {
         if (qSetting.recordCount) {
             return qSetting.strSettingValue;
         } else {
-            return "no entries";
+            return "";
         }
 
     }
@@ -880,6 +880,39 @@ component displayname="globalFunctions" {
     }
 
 
+    // Get all active currencies
+    public array function getActiveCurrencies() {
 
+        local.qCurrencies = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM currencies
+                WHERE blnActive = 1
+                ORDER BY intPrio
+            "
+        )
+
+        local.currArray = arrayNew(1);
+        local.currStruct = structNew();
+
+        if (local.qCurrencies.recordCount) {
+
+            loop query= local.qCurrencies {
+
+                local.currStruct[local.qCurrencies.currentRow]['currencyID'] = local.qCurrencies.intCurrencyID;
+                local.currStruct[local.qCurrencies.currentRow]['iso'] = local.qCurrencies.strCurrencyISO;
+                local.currStruct[local.qCurrencies.currentRow]['currency_en'] = local.qCurrencies.strCurrencyEN;
+                local.currStruct[local.qCurrencies.currentRow]['currency'] = local.qCurrencies.strCurrency;
+                local.currStruct[local.qCurrencies.currentRow]['prio'] = local.qCurrencies.intPrio;
+                arrayAppend(local.currArray, local.currStruct[local.qCurrencies.currentRow]);
+
+            }
+
+        }
+
+        return local.currArray;
+
+    }
 
 }
