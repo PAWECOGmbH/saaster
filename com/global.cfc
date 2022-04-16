@@ -678,13 +678,11 @@ component displayname="globalFunctions" {
                 settingVariable: {type: "nvarchar", value: arguments.settingVariable}
             },
             sql = "
-                SELECT customer_system_settings.strSettingValue
+                SELECT strDefaultValue as thisValue
                 FROM system_settings
-                INNER JOIN customer_system_settings ON system_settings.intSystSettingID = customer_system_settings.intSystSettingID
-                WHERE customer_system_settings.intCustomerID = :customerID
-                AND system_settings.strSettingVariable = :settingVariable
+                WHERE strSettingVariable = :settingVariable
                 UNION
-                SELECT customer_custom_settings.strSettingValue
+                SELECT customer_custom_settings.strSettingValue as thisValue
                 FROM custom_settings
                 INNER JOIN customer_custom_settings ON custom_settings.intCustomSettingID = customer_custom_settings.intCustomSettingID
                 WHERE customer_custom_settings.intCustomerID = :customerID
@@ -694,7 +692,7 @@ component displayname="globalFunctions" {
         )
 
         if (qSetting.recordCount) {
-            return qSetting.strSettingValue;
+            return qSetting.thisValue;
         } else {
             return "";
         }

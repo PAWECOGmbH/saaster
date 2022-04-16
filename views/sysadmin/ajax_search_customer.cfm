@@ -8,7 +8,12 @@
     qCustomer = queryExecute (
         options = {datasource = application.datasource},
         sql = "
-            SELECT intCustomerID, strCompanyName, strZIP, strCity
+            SELECT intCustomerID, strZIP, strCity,
+                IF(
+                    LENGTH(customers.strCompanyName),
+                    customers.strCompanyName,
+                    customers.strContactPerson
+                ) as customerName
             FROM customers
             WHERE blnActive = 1
             AND (
@@ -25,7 +30,7 @@
 <div class="mt-2">
     <cfoutput query="qCustomer">
         <div class="bg-azure-lt py-2 ps-2 mb-1" style="cursor: pointer;">
-            <a onclick="intoTf('#qCustomer.strCompanyName#, #qCustomer.strZIP# #qCustomer.strCity#', #qCustomer.intCustomerID#), hideResult();">#qCustomer.strCompanyName#, #qCustomer.strZIP# #qCustomer.strCity#</a>
+            <a onclick="intoTf('#qCustomer.customerName#, #qCustomer.strZIP# #qCustomer.strCity#', #qCustomer.intCustomerID#), hideResult();">#qCustomer.customerName#, #qCustomer.strZIP# #qCustomer.strCity#</a>
         </div>
     </cfoutput>
 </div>

@@ -21,7 +21,7 @@
                 </div>
                 <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                     <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary">
-                        <i class="fa fa-address-book pe-3"></i>#getTrans('btnNewUser')#
+                        <i class="fas fa-plus pe-3"></i> #getTrans('btnNewUser')#
                     </a>
                 </div>
             </div>
@@ -41,9 +41,10 @@
                                     <th>#getTrans('formFirstName')#</th>
                                     <th>#getTrans('formName')#</th>
                                     <th>#getTrans('formEmailAddress')#</th>
+                                    <th class="text-center">#getTrans('titSuperAdmin')#</th>
                                     <th class="text-center">#getTrans('titAdmin')#</th>
                                     <th class="text-center">#getTrans('titActive')#</th>
-                                    <th></th>
+                                    <th class="w-1"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,27 +58,34 @@
                                     <td>#qUser.strFirstName#</td>
                                     <td>#qUser.strLastName#</td>
                                     <td>#qUser.strEmail#</td>
+                                    <td class="text-center"><cfif qUser.blnSuperAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
-                                    <td class="text-right" style="padding-left:40px; width: 100px">
-                                        <span class="dropdown">
-                                            <cfif (qUser.intCustomerID eq session.customer_id or session.superadmin eq 1) and session.user_id neq qUser.intUserID>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">
-                                                        #getTrans('blnAction')#
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <cfif qUser.intUserID eq session.user_id>
-                                                            <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">#getTrans('btnEdit')#</a>
-                                                        <cfelse>
-                                                            <a class="dropdown-item" href="#application.mainURL#/account-settings/user/edit/#qUser.intUserID#">#getTrans('btnEdit')#</a>
-                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
-                                                            <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
-                                                        </cfif>
-                                                    </div>
-                                                </div>
+                                    <td class="text-end">
+                                        <cfset canEdit = true>
+                                        <cfif session.superadmin>
+                                            <cfif qUser.blnSysAdmin>
+                                                <cfset canEdit = false>
                                             </cfif>
-                                        </span>
+                                        <cfelseif session.admin>
+                                            <cfif qUser.blnSuperAdmin>
+                                                <cfset canEdit = false>
+                                            </cfif>
+                                        </cfif>
+                                        <cfif canEdit or session.sysadmin>
+                                            <div class="btn-list flex-nowrap">
+                                                <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
+                                                    #getTrans('blnAction')#
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/user/edit/#qUser.intUserID#">#getTrans('btnEdit')#</a>
+                                                    <cfif qUser.intUserID neq session.user_id>
+                                                        <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                    </cfif>
+                                                    <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                </div>
+                                            </div>
+                                        </cfif>
                                     </td>
                                 </tr>
                             </cfloop>
