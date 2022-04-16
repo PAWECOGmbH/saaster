@@ -25,7 +25,7 @@
 
     if(structKeyExists(session, "phone") and len(trim(session.phone))){
         userPhone = session.phone
-    }   
+    }
 
     if(structKeyExists(session, "mobile") and len(trim(session.mobile))){
         userMobile = session.mobile
@@ -36,8 +36,8 @@
 <cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper" >
-    <div class="container-xl">   
-        <cfoutput> 
+    <div class="container-xl">
+        <cfoutput>
         <div class="page-header mb-3">
             <h4 class="page-title">#getTrans('btnNewUser')#</h4>
 
@@ -51,30 +51,39 @@
         <cfif structKeyExists(session, "alert")>
             #session.alert#
         </cfif>
-        <div class="row">                                    
+        <div class="row">
             <div class="col-lg-12">
-                
+
                 <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
                     <input type="hidden" name="user_new_btn">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titNewUser')#</h3>
                     </div>
                     <div class="card-body">
-                        <div class="row">  
-                            <div class="col-sm-6 col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-lg-4 mb-3">
                                 <div class="form-label">#getTrans('titActive')#</div>
                                 <label class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" name="active" checked>
                                     <span class="form-check-label">#getTrans('txtActivateThisUser')#</span>
                                 </label>
                             </div>
-                            <div class="col-sm-6 col-md-6 mb-3">
+                            <div class="col-lg-4 mb-3">
                                 <div class="form-label">#getTrans('titAdmin')#</div>
                                 <label class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" name="admin">
                                     <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
                                 </label>
                             </div>
+                            <cfif session.superadmin>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-label">#getTrans('titSuperAdmin')#</div>
+                                    <label class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="superadmin">
+                                        <span class="form-check-label">#getTrans('txtSetUserAsSuperAdmin')#</span>
+                                    </label>
+                                </div>
+                            </cfif>
                             <div class="col-sm-6 col-md-3 mb-3">
                                 <div class="form-group">
                                     <label class="form-label">#getTrans('formSalutation')#</label>
@@ -111,18 +120,18 @@
                                     <label class="form-label">#getTrans('formMobile')#</label>
                                     <input type="text" name="mobile" class="form-control" value="#HTMLEditFormat(userMobile)#" maxlength="100">
                                 </div>
-                            </div>  
+                            </div>
                         </div>
-                    </div>                                
+                    </div>
                     <div class="card-footer text-right">
                         <button id="submit_button" type="submit" class="btn btn-primary">#getTrans('btnSave')#</button>
                     </div>
                 </form>
-                
+
             </div>
-        </div>  
-        </cfoutput>                 
+        </div>
+        </cfoutput>
     </div>
-</div>  
-<cfinclude template="/includes/footer.cfm"> 
+</div>
+<cfinclude template="/includes/footer.cfm">
 

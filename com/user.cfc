@@ -1,37 +1,37 @@
 
 component displayname="user" output="false" {
-    
+
     <!--- Login --->
-    public struct function checkLogin() {        
+    public struct function checkLogin() {
 
         param name="form.email" default="" type="string";
         param name="form.password" default="" type="string";
 
         local.returnStruct = structNew();
         local.returnStruct['loginCorrect'] = false;
-        local.returnStruct['step'] = 1;   
+        local.returnStruct['step'] = 1;
 
         qCheckLogin = queryExecute(
 
             options = {datasource = application.datasource},
-            params = {                
+            params = {
                 thisEmail: {type: "nvarchar", value: arguments.email}
                 },
             sql = "
-                SELECT intUserID,strFirstName,strLastName,dtmLastLogin,blnAdmin,strEmail,blnActive,blnSuperAdmin,blnSysAdmin,strPasswordHash,strPasswordSalt,
-                    (   SELECT intCustomerID 
+                SELECT intUserID,strFirstName,strLastName,dtmLastLogin,blnAdmin,strEmail,blnActive,blnSuperAdmin,blnSysAdmin,strPasswordHash,strPasswordSalt,strLanguage,
+                    (   SELECT intCustomerID
                         FROM customer_user
                         WHERE intUserID = users.intUserID AND blnStandard = 1
                         LIMIT 1
                     ) AS intCustomerID,
-                    (   SELECT customers.blnActive 
+                    (   SELECT customers.blnActive
                         FROM customer_user INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                         WHERE blnStandard = 1 AND intUserID = users.intUserID
                         LIMIT 1
                     ) AS tenant_active
                 FROM users
                 WHERE strEmail = :thisEmail
-            "          
+            "
 
         )
 
@@ -48,9 +48,10 @@ component displayname="user" output="false" {
                     local.returnStruct['user_name'] = qCheckLogin.strFirstName & " " & qCheckLogin.strLastName;
                     local.returnStruct['user_email'] = qCheckLogin.strEmail;
                     local.returnStruct['last_login'] = qCheckLogin.dtmLastLogin;
+                    local.returnStruct['language'] = qCheckLogin.strLanguage;
                     local.returnStruct['admin'] = trueFalseFormat(qCheckLogin.blnAdmin);
                     local.returnStruct['superadmin'] = trueFalseFormat(qCheckLogin.blnSuperAdmin);
-                    local.returnStruct['sysadmin'] = trueFalseFormat(qCheckLogin.blnSysAdmin);                
+                    local.returnStruct['sysadmin'] = trueFalseFormat(qCheckLogin.blnSysAdmin);
 
                     queryExecute(
 
@@ -63,9 +64,9 @@ component displayname="user" output="false" {
                             SET dtmLastLogin = now(),
                                 strUUID = ''
                             WHERE intUserID = :thisUserID
-                        "               
+                        "
 
-                    )               
+                    )
 
                     local.returnStruct['loginCorrect'] = true;
 
@@ -81,15 +82,15 @@ component displayname="user" output="false" {
                     local.returnStruct['active'] = false;
                     local.returnStruct['loginCorrect'] = false;
 
-                }            
+                }
 
-            }       	            
+            }
 
-        }else {                     
-            
+        }else {
+
             local.returnStruct['redirect'] = "#application.mainURL#/login";
 
-        }   
+        }
 
         return local.returnStruct;
 
@@ -181,6 +182,11 @@ component displayname="user" output="false" {
         } else {
             local.language = '';
         }
+        if (structKeyExists(arguments.userStruct, "superadmin")) {
+            local.superadmin = arguments.userStruct.superadmin;
+        } else {
+            local.superadmin = 0;
+        }
         if (structKeyExists(arguments.userStruct, "admin")) {
             local.admin = arguments.userStruct.admin;
         } else {
@@ -213,6 +219,7 @@ component displayname="user" output="false" {
                     mobile: {type: "nvarchar", value: local.mobile},
                     language: {type: "nvarchar", value: local.language},
                     admin: {type: "numeric", value: local.admin},
+                    superadmin: {type: "numeric", value: local.superadmin},
                     active: {type: "numeric", value: local.active}
                 },
                 sql = "
@@ -226,41 +233,42 @@ component displayname="user" output="false" {
                         strMobile = :mobile,
                         strLanguage = :language,
                         blnAdmin = :admin,
+                        blnSuperAdmin = :superadmin,
                         blnActive = :active
                     WHERE intUserID = :intUserID
-                    
+
                 "
 
-            )           
+            )
 
-            
+
             if (listLen(local.tenantID)) {
 
                 <!--- Delete tenants to which the user has no access  --->
                 queryExecute(
 
                     options = {datasource = application.datasource, result="check"},
-                    params = { 
+                    params = {
                         userID: {type: "numeric", value: arguments.userID}
                     },
-                    sql = "                            
+                    sql = "
                         DELETE FROM customer_user
                         WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
                     "
 
-                )                   
+                )
 
                 <!--- Insert tenants to which the user has access  --->
                 cfloop( list = local.tenantID, index = "local.t" ) {
-                    
+
                     queryExecute(
 
                         options = {datasource = application.datasource},
-                        params = {                        
+                        params = {
                             tenantID: {type: "numeric", value: local.t},
                             userID: {type: "numeric", value: arguments.userID}
                         },
-                        sql = "                            
+                        sql = "
                             INSERT INTO customer_user (intCustomerID, intUserID)
                             SELECT * FROM
                             (
@@ -282,10 +290,10 @@ component displayname="user" output="false" {
                 qCheckStandard = queryExecute(
 
                     options = {datasource = application.datasource},
-                    params = { 
+                    params = {
                         userID: {type: "numeric", value: arguments.userID}
                     },
-                    sql = "                            
+                    sql = "
                         SELECT SUM(blnStandard) as hasStandard
                         FROM customer_user
                         WHERE intUserID = :userID
@@ -297,10 +305,10 @@ component displayname="user" output="false" {
                     queryExecute(
 
                         options = {datasource = application.datasource},
-                        params = { 
+                        params = {
                             userID: {type: "numeric", value: arguments.userID}
                         },
-                        sql = "                            
+                        sql = "
                             UPDATE customer_user
                             SET blnStandard = 1
                             WHERE intUserID = :userID
@@ -309,7 +317,7 @@ component displayname="user" output="false" {
                         "
                     )
 
-                }              
+                }
 
             }
 
@@ -372,12 +380,20 @@ component displayname="user" output="false" {
         } else {
             local.admin = 0;
         }
+        if (structKeyExists(arguments.userStruct, "superadmin")) {
+            local.superadmin = arguments.userStruct.superadmin;
+            if (local.superadmin eq 1) {
+                local.admin = 1;
+            }
+        } else {
+            local.superadmin = 0;
+        }
         if (structKeyExists(arguments.userStruct, "active")) {
             local.active = arguments.userStruct.active;
         } else {
             local.active = 0;
         }
-                
+
 
         try {
 
@@ -392,16 +408,17 @@ component displayname="user" output="false" {
                     email: {type: "nvarchar", value: local.email},
                     phone: {type: "nvarchar", value: local.phone},
                     mobile: {type: "nvarchar", value: local.mobile},
-                    admin: {type: "numeric", value: local.admin},
-                    active: {type: "numeric", value: local.active},
+                    admin: {type: "boolean", value: local.admin},
+                    superadmin: {type: "boolean", value: local.superadmin},
+                    active: {type: "boolean", value: local.active},
                     newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, blnActive, blnAdmin, strUUID)
-                    VALUES (:customerID, now(), now(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :active, :admin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, blnActive, blnAdmin, blnSuperAdmin, strUUID)
+                    VALUES (:customerID, now(), now(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :active, :admin, :superadmin, :newUUID)
                 "
 
-            )           
+            )
 
             local.argsReturnValue['newUserID'] = newUserID.generatedkey;
             local.argsReturnValue['message'] = "OK";
@@ -425,12 +442,12 @@ component displayname="user" output="false" {
 
             qUsers = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
                     SELECT users.*
-                    FROM customer_user 
+                    FROM customer_user
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intCustomerID = :customerID
                 "
@@ -438,7 +455,7 @@ component displayname="user" output="false" {
 
             return qUsers;
 
-        } 
+        }
 
     }
 
@@ -450,13 +467,13 @@ component displayname="user" output="false" {
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
-        
+
         if (arguments.toUserID gt 0 and arguments.fromUserID gt 0) {
-            
+
             <!--- Get user --->
             qUser = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     toUserID: {type: "numeric", value: arguments.toUserID},
                     fromUserID: {type: "numeric", value: arguments.fromUserID}
                 },
@@ -482,7 +499,7 @@ component displayname="user" output="false" {
 
                     queryExecute(
                         options = {datasource = application.datasource},
-                        params = {                    
+                        params = {
                             userID: {type: "numeric", value: arguments.toUserID},
                             newUUID: {type: "nvarchar", value: local.thisUUID}
                         },
@@ -491,7 +508,7 @@ component displayname="user" output="false" {
                             SET strUUID = :newUUID
                             WHERE intUserID = :userID
                         "
-                    )                    
+                    )
 
                 }
 
@@ -501,7 +518,7 @@ component displayname="user" output="false" {
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
-                <!--- Send activation link ---> 
+                <!--- Send activation link --->
                 mail from="#application.fromEmail#" to="#qUser.toEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
                     echo (
                         "
@@ -535,7 +552,7 @@ component displayname="user" output="false" {
 
         } else {
 
-            local.argsReturnValue['message'] = "Wrong id's";                   
+            local.argsReturnValue['message'] = "Wrong id's";
 
         }
 
@@ -559,7 +576,7 @@ component displayname="user" output="false" {
         } else {
 
             <!--- Look for a gravatar.com picture or use the default picture (application) --->
-            local.encodedPath = urlEncode(application.userTempImg);            
+            local.encodedPath = urlEncode(application.userTempImg);
             local.myImgStruct['userImage'] = "https://www.gravatar.com/avatar/#lcase(Hash(lcase(local.userData.strEmail)))#?d=#local.encodedPath#&s=300";
             local.myImgStruct['itsLocal'] = false;
 

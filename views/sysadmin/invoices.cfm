@@ -153,6 +153,7 @@
     }
 
     objInvoice = new com.invoices();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -212,31 +213,31 @@
                                         <div class="form-selectgroup">
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="0" class="form-selectgroup-input" <cfif session.status eq 0>checked</cfif>>
-                                                <span class="form-selectgroup-label">
+                                                <span class="form-selectgroup-label <cfif session.status neq 0>no-border</cfif>">
                                                     ALL
                                                 </span>
                                             </label>
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="1" class="form-selectgroup-input" <cfif session.status eq 1>checked</cfif>>
-                                                <span class="form-selectgroup-label">
+                                                <span class="form-selectgroup-label <cfif session.status neq 1>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'muted', 'statInvoiceDraft')#
                                                 </span>
                                             </label>
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="2" class="form-selectgroup-input" <cfif session.status eq 2>checked</cfif>>
-                                                <span class="form-selectgroup-label">
+                                                <span class="form-selectgroup-label <cfif session.status neq 2>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'blue', 'statInvoiceOpen')#
                                                 </span>
                                             </label>
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="3" class="form-selectgroup-input" <cfif session.status eq 3>checked</cfif>>
-                                                <span class="form-selectgroup-label">
+                                                <span class="form-selectgroup-label <cfif session.status neq 3>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'green', 'statInvoicePaid')#
                                                 </span>
                                             </label>
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="6" class="form-selectgroup-input" <cfif session.status eq 6>checked</cfif>>
-                                                <span class="form-selectgroup-label">
+                                                <span class="form-selectgroup-label <cfif session.status neq 6>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'red', 'statInvoiceOverDue')#
                                                 </span>
                                             </label>

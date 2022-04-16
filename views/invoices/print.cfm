@@ -87,10 +87,10 @@
                     <table width="100%" border="0" style="border-collapse: collapse;">
                         <tr>
                             <td width="5%" style="border-bottom: 1px solid gray;"><b>#getTrans('titPos')#</b></td>
-                            <td width="45%" style="border-bottom: 1px solid gray;"><b>#getTrans('titDescription')#</b></td>
+                            <td width="35%" style="border-bottom: 1px solid gray;"><b>#getTrans('titDescription')#</b></td>
                             <td width="15%" style="border-bottom: 1px solid gray;" align="right"><b>#getTrans('titQuantity')#</b></td>
                             <td width="15%" style="border-bottom: 1px solid gray;" align="right"><b>#getTrans('titSinglePrice')#</b></td>
-                            <td width="5%" style="border-bottom: 1px solid gray;" align="center"><b>#getTrans('titDiscount')#</b></td>
+                            <td width="15%" style="border-bottom: 1px solid gray;" align="center"><b>#getTrans('titDiscount')#</b></td>
                             <td width="15%" style="border-bottom: 1px solid gray;" align="right"><b>#getTrans('titTotal')# #getInvoiceData.currency#</b></td>
                         </tr>
                         <cfloop array="#getInvoiceData.positions#" index="pos">
@@ -100,10 +100,10 @@
                                     <b>#pos.title#</b><br />
                                     #pos.description#
                                 </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#numberFormat(pos.quantity, "__.__")# #pos.unit#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsnumberFormat(pos.quantity, "__.__")# #pos.unit#</td>
                                 <td valign="top" align="right" style="border-bottom: 1px solid gray;">
                                     #lsnumberFormat(pos.singlePrice, "_,___.__")#<br />
-                                    <span style="font-size: 9px; color: gray;">(#numberFormat(pos.vat, "__.__")#%)</span>
+                                    <span style="font-size: 9px; color: gray;">(#pos.vat#%)</span>
                                 </td>
                                 <td valign="top" align="center" style="border-bottom: 1px solid gray;">#pos.discountPercent#%</td>
                                 <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>

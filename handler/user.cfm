@@ -7,10 +7,12 @@ if (structKeyExists(form, "edit_profile_btn")) {
     param name="form.first_name" default="";
     param name="form.last_name" default="";
     param name="form.email" default="";
+    param name="form.language" default="";
     param name="form.phone" default="";
     param name="form.mobile" default="";
-    param name="form.language" default="";
+    param name="form.tenantID" default="";
     param name="form.admin" default="0";
+    param name="form.superadmin" default="0";
     param name="form.active" default="0";
     param name="form.tenantID" default="";
     param name="thisUserID" default="#session.user_id#";
@@ -24,11 +26,16 @@ if (structKeyExists(form, "edit_profile_btn")) {
     if (structKeyExists(form, "customerID")) {
         thisCustomerID = form.customerID;
     }
-
     if (form.admin eq 1 or form.admin eq "on") {
         form.admin = 1;
     } else {
         form.admin = 0;
+    }
+    if (form.superadmin eq 1 or form.superadmin eq "on") {
+        form.superadmin = 1;
+        form.admin = 1;
+    } else {
+        form.superadmin = 0;
     }
     if (form.active eq 1 or form.active eq "on") {
         form.active = 1;
@@ -72,14 +79,18 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
     if (objUserEdit.success) {
         getAlert('msgChangesSaved', 'success');
-        if (not structKeyExists(url, "notme")){
+        if (thisReferer eq "my-profile"){
             session.user_name = form.first_name & " " & form.last_name;
         }
     } else {
         getAlert(objUserEdit.message, 'danger');
     }
 
-    location url="#application.mainURL#/account-settings/#thisReferer#?l=#form.language#" addtoken="false";
+    if (thisReferer eq "my-profile") {
+        location url="#application.mainURL#/account-settings/#thisReferer#?l=#form.language#" addtoken="false";
+    } else {
+        location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
+    }
 
 }
 
@@ -95,12 +106,18 @@ if (structKeyExists(form, "user_new_btn")) {
     param name="form.phone" default="";
     param name="form.mobile" default="";
     param name="form.admin" default="0";
+    param name="form.superadmin" default="0";
     param name="form.active" default="0";
 
     if (form.admin eq 1 or form.admin eq "on") {
         form.admin = 1;
     } else {
         form.admin = 0;
+    }
+    if (form.superadmin eq 1 or form.superadmin eq "on") {
+        form.superadmin = 1;
+    } else {
+        form.superadmin = 0;
     }
     if (form.active eq 1 or form.active eq "on") {
         form.active = 1;

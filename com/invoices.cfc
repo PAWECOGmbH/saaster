@@ -50,7 +50,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
         } else {
-            local.prefix = "";
+            local.prefix = application.objGlobal.getSetting('settingInvoicePrefix');
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
@@ -823,9 +823,12 @@ component displayname="invoices" output="false" {
                             invoices.decTotalPrice as invoiceTotal,
                             invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
                             invoice_status.strColor as invoiceStatusColor
-                    FROM invoices INNER JOIN invoice_status ON invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                    WHERE invoices.intCustomerID = :customerID AND invoices.intPaymentStatusID > 1
-                    ORDER BY invoiceDate DESC
+                    FROM invoices
+                    INNER JOIN invoice_status ON 1=1
+                    AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                    AND invoices.intPaymentStatusID > 1
+                    AND invoices.intCustomerID = :customerID
+
                 "
             )
 

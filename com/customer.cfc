@@ -28,6 +28,7 @@ component displayname="customer" output="false" {
                     users.blnActive,
                     users.dtmLastLogin,
                     users.blnAdmin,
+                    users.blnSuperAdmin,
                     users.strUUID,
                     customers.intCustomerID,
                     customers.intCustParentID,
@@ -147,7 +148,7 @@ component displayname="customer" output="false" {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
                     company: {type: "nvarchar", value: local.company},
                     contact: {type: "nvarchar", value: local.contact},
@@ -246,7 +247,7 @@ component displayname="customer" output="false" {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
                     company_name: {type: "nvarchar", value: local.company_name},
                     contact_person: {type: "nvarchar", value: local.contact_person},

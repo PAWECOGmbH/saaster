@@ -47,7 +47,6 @@
                                         </div>
                                     </div>
 
-                                    <!--- if Local Picture show delete butten else not --->
                                     <cfif application.objUser.getUserImage(session.user_id).itsLocal>
                                         <div class="d-flex flex-row flex-start">
                                             <a href="#application.mainURL#/user?del_photo" class="btn btn-warning btn-block" >#getTrans('txtDeletePhoto')#</a>
@@ -67,6 +66,9 @@
                     <div class="col-lg-8">
                         <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
                             <input type="hidden" name="edit_profile_btn">
+                            <input type="hidden" name="admin" value="#qCustomer.blnAdmin#">
+                            <input type="hidden" name="superadmin" value="#qCustomer.blnSuperAdmin#">
+                            <input type="hidden" name="active" value="#qCustomer.blnActive#">
                             <div class="card-header">
                                 <h3 class="card-title">#getTrans('txtEditProfile')#</h3>
                             </div>
@@ -120,36 +122,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <cfset givTheHidden = 1>
-                                    <cfif session.admin>
-                                        <cfif session.user_id neq qCustomer.intUserID>
-                                            <cfset givTheHidden = 0>
-                                            <div class="col-sm-6 col-md-6 mt-4">
-                                                <div class="form-group">
-                                                    <div class="form-label">#getTrans('titAdmin')#</div>
-                                                    <label class="custom-switch">
-                                                        <input type="checkbox" name="admin" class="custom-switch-input" <cfif qCustomer.blnAdmin eq 1>checked</cfif>>
-                                                        <span class="custom-switch-indicator"></span>
-                                                        <span class="custom-switch-description">#getTrans('txtSetUserAsAdmin')#</span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6 col-md-6 mt-4">
-                                                <div class="form-group">
-                                                    <div class="form-label">#getTrans('titActive')#</div>
-                                                    <label class="custom-switch">
-                                                        <input type="checkbox" name="active" class="custom-switch-input" <cfif qCustomer.blnActive eq 1>checked</cfif>>
-                                                        <span class="custom-switch-indicator"></span>
-                                                        <span class="custom-switch-description">#getTrans('txtActivateThisUser')#</span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </cfif>
-                                    </cfif>
-                                    <cfif givTheHidden eq 1>
-                                        <input type="hidden" name="admin" value="#qCustomer.blnAdmin#">
-                                        <input type="hidden" name="active" value="#qCustomer.blnActive#">
-                                    </cfif>
                                 </div>
                             </div>
                             <div class="card-footer text-right">

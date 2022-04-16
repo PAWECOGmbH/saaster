@@ -37,3 +37,13 @@
 .trumbowyg-box, .trumbowyg-editor {
     min-height: 150px;
 }
+
+.badge {
+    font-size: 70%;
+    font-weight: normal;
+    padding: 4px 5px;
+}
+
+.no-border {
+    border: none;
+}
