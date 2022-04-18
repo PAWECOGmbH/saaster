@@ -10,7 +10,7 @@
     <div class="container-xl">
         <cfoutput>
         <div class="row mb-3">
-            <div class="col-md-12 col-lg-12">
+            <div class="col-md-12 col-lg-12 mb-3">
                 <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                     <h4 class="page-title">#getTrans('titUserOverview')#</h4>
                     <ol class="breadcrumb breadcrumb-dots">

@@ -196,6 +196,32 @@ if (structKeyExists(form, "edit_plan")) {
         } else {
             recommended = 0;
         }
+        if (structKeyExists(form, "free")) {
+
+            free = 1;
+            test_days = 0;
+
+            // Set all prices to 0
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    planID: {type: "numeric", value: form.edit_plan}
+                },
+                sql = "
+                    UPDATE plan_prices
+                    SET decPriceMonthly = 0,
+                        decPriceYearly = 0,
+                        decVat = 0,
+                        intVatType = 1,
+                        blnIsNet = 1,
+                        blnOnRequest = 0
+                    WHERE intPlanID = :planID
+                "
+            )
+
+        } else {
+            free = 0;
+        }
 
         queryExecute(
             options = {datasource = application.datasource, result="newID"},
@@ -207,6 +233,7 @@ if (structKeyExists(form, "edit_plan")) {
                 button_name: {type: "nvarchar", value: button_name},
                 booking_link: {type: "nvarchar", value: booking_link},
                 recommended: {type: "boolean", value: recommended},
+                free: {type: "boolean", value: free},
                 test_days: {type: "numeric", value: test_days},
                 max_users: {type: "numeric", value: max_users},
                 planID: {type: "numeric", value: form.edit_plan}
@@ -221,6 +248,7 @@ if (structKeyExists(form, "edit_plan")) {
                     strBookingLink = :booking_link,
                     intNumTestDays = :test_days,
                     blnRecommended = :recommended,
+                    blnFree = :free,
                     intMaxUsers = :max_users
                 WHERE intPlanID = :planID
             "

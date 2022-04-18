@@ -1,7 +1,7 @@
 
-component displayname="plans" {
+component displayname="plans" output="false" {
 
-    public array function getPlans(string language, numeric groupID, numeric countryID, numeric currencyID) {
+    public array function getPlans(string language, numeric groupID, numeric currencyID) {
 
         if (structKeyExists(arguments, "language")) {
             local.qLanguage = queryExecute (
@@ -18,12 +18,13 @@ component displayname="plans" {
             if (local.qLanguage.recordCount) {
                 local.lngID = local.qLanguage.intLanguageID;
             } else {
-                local.lngID = 0;
+                local.lngID = application.objGlobal.getDefaultLanguage().lngID;
             }
         } else {
             local.lngID = application.objGlobal.getDefaultLanguage().lngID;
         }
-        if (structKeyExists(arguments, "groupID")) {
+
+        if (structKeyExists(arguments, "groupID") and arguments.groupID gt 0) {
             local.groupID = arguments.groupID;
         } else {
             local.qDefPlanGroup = queryExecute (
@@ -41,7 +42,7 @@ component displayname="plans" {
                 local.groupID = 0;
             }
         }
-        if (structKeyExists(arguments, "currencyID")) {
+        if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             local.currencyID = arguments.currencyID;
         } else {
             local.qDefCurrency = queryExecute (
@@ -68,6 +69,8 @@ component displayname="plans" {
             },
             sql = "
                 SELECT
+                plans.intPlanID, plans.intPlanGroupID, plans.blnFree,
+                plan_prices.intCurrencyID,
                 COALESCE(blnRecommended,0) as blnRecommended,
                 COALESCE(intMaxUsers,0) as intMaxUsers,
                 COALESCE(intNumTestDays,0) as intNumTestDays,
@@ -77,7 +80,6 @@ component displayname="plans" {
                 COALESCE(decVat,0) as decVat,
                 COALESCE(blnIsNet,0) as blnIsNet,
                 COALESCE(intVatType,0) as intVatType,
-                COALESCE(intCountryID,0) as intCountryID,
                 (
                     IF
                         (
@@ -246,6 +248,10 @@ component displayname="plans" {
 
                 local.structPlan = structNew();
 
+                local.structPlan['planID'] = getPlan.intPlanID;
+                local.structPlan['planGroupID'] = getPlan.intPlanGroupID;
+                local.structPlan['currencyID'] = getPlan.intCurrencyID;
+                local.structPlan['itsFree'] = getPlan.blnFree;
                 local.structPlan['groupName'] = '';
                 local.structPlan['planName'] = '';
                 local.structPlan['shortDescription'] = '';
@@ -262,6 +268,7 @@ component displayname="plans" {
                 local.structPlan['isNet'] = 1;
                 local.structPlan['vatType'] = 1;
                 local.structPlan['currency'] = '';
+
 
                 if (len(trim(local.getPlan.strGroupName))) {
                     local.structPlan['groupName'] = local.getPlan.strGroupName;
@@ -312,6 +319,13 @@ component displayname="plans" {
                     local.structPlan['currency'] = local.getPlan.strCurrencyISO;
                 }
 
+                // Building the booking link
+                if (!len(trim(local.getPlan.strBookingLink))) {
+                    objBook = new com.book();
+                    bookingString = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID);
+                    local.structPlan['bookingLink'] = application.mainURL & "/book?plan=" & bookingString;
+                }
+
                 arrayAppend(local.arrPlan, local.structPlan);
 
             }
@@ -320,6 +334,10 @@ component displayname="plans" {
 
             local.structPlan = structNew();
 
+            local.structPlan['planID'] = 0;
+            local.structPlan['planGroupID'] = 0;
+            local.structPlan['currencyID'] = 0;
+            local.structPlan['itsFree'] = 0;
             local.structPlan['groupName'] = 'Group name';
             local.structPlan['planName'] = 'Plan name';
             local.structPlan['shortDescription'] = 'Short description';
@@ -335,7 +353,7 @@ component displayname="plans" {
             local.structPlan['vat'] = 0;
             local.structPlan['isNet'] = 1;
             local.structPlan['vatType'] = 1;
-            local.structPlan['currency'] = 'CHF';
+            local.structPlan['currency'] = 'USD';
 
             arrayAppend(local.arrPlan, local.structPlan);
 
@@ -344,5 +362,324 @@ component displayname="plans" {
         return local.arrPlan;
 
     }
+
+
+    public array function getPlanFeatures(string language) {
+
+        if (structKeyExists(arguments, "language")) {
+            local.qLanguage = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    language: {type: "varchar", value: arguments.language}
+                },
+                sql = "
+                    SELECT intLanguageID
+                    FROM languages
+                    WHERE strLanguageISO = :language
+                "
+            )
+            if (local.qLanguage.recordCount) {
+                local.lngID = local.qLanguage.intLanguageID;
+            } else {
+                local.lngID = 0;
+            }
+        } else {
+            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
+
+        local.arrFeatures = arrayNew(1);
+
+        local.qPlanFeatures = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                languageID: {type: "numeric", value: local.lngID}
+            },
+            sql = "
+                SELECT intPlanFeatureID, blnCategory,
+                (
+                    IF
+                        (
+                            LENGTH(
+                                (
+                                    SELECT strFeatureName
+                                    FROM plan_features_trans
+                                    WHERE intPlanFeatureID = plan_features.intPlanFeatureID
+                                    AND intLanguageID = :languageID
+                                )
+                            ),
+                            (
+                                SELECT strFeatureName
+                                FROM plan_features_trans
+                                WHERE intPlanFeatureID = plan_features.intPlanFeatureID
+                                AND intLanguageID = :languageID
+                            ),
+                            plan_features.strFeatureName
+                        )
+                ) as strFeatureName,
+                (
+                    IF
+                        (
+                            LENGTH(
+                                (
+                                    SELECT strDescription
+                                    FROM plan_features_trans
+                                    WHERE intPlanFeatureID = plan_features.intPlanFeatureID
+                                    AND intLanguageID = :languageID
+                                )
+                            ),
+                            (
+                                SELECT strDescription
+                                FROM plan_features_trans
+                                WHERE intPlanFeatureID = plan_features.intPlanFeatureID
+                                AND intLanguageID = :languageID
+                            ),
+                            plan_features.strDescription
+                        )
+                ) as strDescription
+                FROM plan_features
+                ORDER BY intPrio
+            "
+        )
+
+        if (local.qPlanFeatures.recordCount) {
+
+            cfloop( query = local.qPlanFeatures ) {
+
+                local.structFeat = structNew();
+
+                local.structFeat['id'] = local.qPlanFeatures.intPlanFeatureID;
+                local.structFeat['name'] = '';
+                local.structFeat['description'] = '';
+                local.structFeat['category'] = 0;
+
+                if (len(trim(local.qPlanFeatures.strFeatureName))) {
+                    local.structFeat['name'] = local.qPlanFeatures.strFeatureName;
+                }
+                if (len(trim(local.qPlanFeatures.strDescription))) {
+                    local.structFeat['description'] = local.qPlanFeatures.strDescription;
+                }
+                if (isBoolean(local.qPlanFeatures.blnCategory)) {
+                    local.structFeat['category'] = local.qPlanFeatures.blnCategory;
+                }
+
+                arrayAppend(local.arrFeatures, local.structFeat);
+
+
+            }
+
+        }
+
+        return local.arrFeatures;
+
+
+    }
+
+
+
+    public struct function getFeatureValue(required numeric planID, required numeric planFeatureID, string language) {
+
+        if (structKeyExists(arguments, "language")) {
+            local.qLanguage = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    language: {type: "varchar", value: arguments.language}
+                },
+                sql = "
+                    SELECT intLanguageID
+                    FROM languages
+                    WHERE strLanguageISO = :language
+                "
+            )
+            if (local.qLanguage.recordCount) {
+                local.lngID = local.qLanguage.intLanguageID;
+            } else {
+                local.lngID = 0;
+            }
+        } else {
+            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
+
+        local.qFeatValue = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                planID: {type: "numeric", value: arguments.planID},
+                planFeatureID: {type: "numeric", value: arguments.planFeatureID},
+                languageID: {type: "numeric", value: local.lngID}
+            },
+            sql = "
+                SELECT blnCheckmark,
+                (
+                    IF
+                        (
+                            LENGTH(
+                                (
+                                    SELECT strValue
+                                    FROM plans_plan_features_trans
+                                    WHERE intPlansPlanFeatID = plans_plan_features.intPlansPlanFeatID
+                                    AND intLanguageID = :languageID
+                                )
+                            ),
+                            (
+                                SELECT strValue
+                                FROM plans_plan_features_trans
+                                WHERE intPlansPlanFeatID = plans_plan_features.intPlansPlanFeatID
+                                AND intLanguageID = :languageID
+                            ),
+                            plans_plan_features.strValue
+                        )
+                ) as strValue
+                FROM plans_plan_features
+                WHERE intPlanID = :planID
+                AND intPlanFeatureID = :planFeatureID
+
+            "
+        )
+
+        local.structFeatVal = structNew();
+        local.structFeatVal['value'] = '';
+        local.structFeatVal['checkmark'] = 0;
+
+        if (local.qFeatValue.recordCount) {
+            local.structFeatVal['value'] = local.qFeatValue.strValue;
+            local.structFeatVal['checkmark'] = local.qFeatValue.blnCheckmark;
+
+        }
+
+        return local.structFeatVal;
+
+    }
+
+
+
+    public struct function getCurrentPlan(required numeric customerID) {
+
+        planStruct = structNew();
+        planStruct['planID'] = 0;
+        planStruct['planName'] = "";
+        planStruct['status'] = '';
+        planStruct['maxUsers'] = 1;
+        planStruct['startDate'] = "";
+        planStruct['endDate'] = "";
+        planStruct['endTestDate'] = "";
+
+        if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
+
+            local.qCurrentPlan = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT  customer_plans.intPlanID, customer_plans.dtmStartDate, customer_plans.dtmEndDate,
+                            customer_plans.blnPaused, customer_plans.dtmEndTestDate,
+                            plans.strPlanName, plans.intMaxUsers, plans.blnFree
+                    FROM customer_plans
+                    INNER JOIN plans ON customer_plans.intPlanID = plans.intPlanID
+                    WHERE customer_plans.intCustomerID = :customerID
+                    ORDER BY intCustomerPlanID DESC
+                    LIMIT 1
+                "
+            )
+
+            if (local.qCurrentPlan.recordCount) {
+
+                planStruct['planID'] = local.qCurrentPlan.intPlanID;
+                planStruct['planName'] = local.qCurrentPlan.strPlanName;
+                planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
+                planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
+
+                // Is the plan paused?
+                if (local.qCurrentPlan.blnPaused eq 1) {
+
+                    planStruct['status'] = 'paused';
+
+                } else {
+
+                    // Is there a test date defined?
+                    if (isDate(local.qCurrentPlan.dtmEndTestDate)) {
+
+                        planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+
+                        // Test still active?
+                        if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
+                            planStruct['status'] = 'test';
+                        } else {
+                            planStruct['status'] = 'expired';
+                        }
+
+                    } else {
+
+
+                    }
+
+
+
+                    // Is a plan defined?
+                    if (isDate(local.qCurrentPlan.dtmStartDate)) {
+
+                        // Is it a free plan?
+                        if (local.qCurrentPlan.blnFree) {
+
+
+                            planStruct['endDate'] = "";
+                            planStruct['status'] = 'free';
+
+                        } else {
+
+
+                            planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                            planStruct['status'] = 'active';
+
+                            // Is the plan still valid?
+                            if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
+                                planStruct['status'] = 'expired';
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+        }
+
+        return planStruct;
+
+
+
+
+    }
+
+
+
+    public any function getPlanDetail(required numeric planID, string language, numeric currencyID) {
+
+        planArray = getPlans(language=arguments.language, currencyID=arguments.currencyID);
+
+        planStruct = structNew();
+
+        if (isArray(planArray)) {
+            planID = arguments.planID;
+            planStruct = ArrayFilter(planArray, function(p) {
+                return p.planID eq planID;
+            })
+            return planStruct[1];
+        } else {
+            return planStruct;
+        }
+
+
+    }
+
+
+
+
+
+
+
+
 
 }
