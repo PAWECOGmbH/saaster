@@ -299,6 +299,13 @@ if (structKeyExists(form, 'login_btn')) {
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
 
+            <!--- Set customers locale -> Todo: get the users setting --->
+            session.user_locale = getLocale();
+
+            <!--- Save current plan into a session --->
+            checkPlan = new com.plans().getCurrentPlan(session.customer_id);
+            session.currentPlan = checkPlan;
+
             if (findNoCase("?", objUserLogin.redirect)) {
                 location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
             } else {

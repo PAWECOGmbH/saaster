@@ -7,7 +7,7 @@ if (structKeyExists(url, "logout")) {
     onSessionStart();
 
     location url="#application.mainURL#/login?logout" addtoken="no";
-}  
+}
 
 
 <!--- Switch the company/tenant --->
@@ -27,12 +27,16 @@ if (structKeyExists(url, "switch")) {
                 FROM customers INNER JOIN customer_user ON customers.intCustomerID = customer_user.intCustomerID
                 WHERE customers.intCustomerID = :intCustomerID AND customer_user.intUserID = :intUserID
             "
-        )     
+        )
 
         if (qTenant.recordCount) {
-            
+
             session.customer_id = qTenant.intCustomerID;
-            
+
+            <!--- Save current plan into a session --->
+            checkPlan = new com.plans().getCurrentPlan(session.customer_id);
+            session.currentPlan = checkPlan;
+
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {
@@ -43,8 +47,8 @@ if (structKeyExists(url, "switch")) {
 
     }
 
-    
-}  
+
+}
 
 
 </cfscript>

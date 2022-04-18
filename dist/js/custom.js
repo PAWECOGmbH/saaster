@@ -175,3 +175,15 @@ function hideResult() {
 	document.getElementById("livesearch").innerHTML="";
 	return;
 }
+
+// Change plan prices
+$('input[type=radio][name=payment_changer]').change(function() {
+    if (this.value == 'yearly') {
+        $(".yearly").show();
+		$(".monthly").hide();
+    }
+    else if (this.value == 'monthly') {
+        $(".yearly").hide();
+		$(".monthly").show();
+    }
+});
