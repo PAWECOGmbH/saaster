@@ -7,11 +7,13 @@
         location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
 
+
     objInvoice = new com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
 
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
     qUsers = application.objUser.getAllUsers(qInvoice.customerID);
+
 
     if (isNumeric(qInvoice.userID)) {
         qUser = application.objCustomer.getUserDataByID(qInvoice.userID);
@@ -392,6 +394,7 @@
     </div>
 </div>
 </form>
+
 
 <div id="dynModalPayments" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">

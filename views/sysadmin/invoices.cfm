@@ -297,7 +297,6 @@
                                             </tr>
                                         </cfloop>
                                         </tbody>
-
                                     </table>
                                 </div>
                             <cfelse>

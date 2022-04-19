@@ -39,6 +39,7 @@
             param name="form.lng_en" default="";
             param name="form.lng_own" default="";
             param name="form.iso" default="";
+            param name="form.sign" default="";
 
             queryExecute(
                 options = {datasource = application.datasource},
@@ -46,6 +47,7 @@
                     lng_en: {type: "nvarchar", value: lng_en},
                     lng_own: {type: "varchar", value: lng_own},
                     iso: {type: "varchar", value: iso},
+                    sign: {type: "varchar", value: sign},
                     thisID: {type: "numeric", value: form.edit_currency},
                     active: {type: "boolean", value: active},
                     default: {type: "boolean", value: itsDefault}
@@ -55,6 +57,7 @@
                     SET strCurrencyISO = :iso,
                         strCurrencyEN = :lng_en,
                         strCurrency = :lng_own,
+                        strCurrencySign = :sign,
                         blnActive = :active,
                         blnDefault = :default
                     WHERE intCurrencyID = :thisID
@@ -73,6 +76,7 @@
         param name="form.lng_en" default="";
         param name="form.lng_own" default="";
         param name="form.iso" default="";
+        param name="form.sign" default="";
 
         if (structKeyExists(form, "active")) {
             active = 1;
@@ -94,12 +98,13 @@
                 lng_en: {type: "varchar", value: left(form.lng_en, 20)},
                 lng_own: {type: "varchar", value: left(form.lng_own, 20)},
                 iso: {type: "varchar", value: left(form.iso, 2)},
+                sign: {type: "varchar", value: left(form.sign, 2)},
                 active: {type: "boolean", value: active},
                 newPrio: {type: "numeric", value: qNewPrio.newPrio}
             },
             sql = "
-                INSERT INTO currencies (strCurrencyISO, strCurrencyEN, strCurrency, intPrio, blnDefault, blnActive)
-                VALUES (:iso, :lng_en, :lng_own, :newPrio, 0, :active)
+                INSERT INTO currencies (strCurrencyISO, strCurrencyEN, strCurrency, strCurrencySign, intPrio, blnDefault, blnActive)
+                VALUES (:iso, :lng_en, :lng_own, :sign, :newPrio, 0, :active)
             "
         )
 
