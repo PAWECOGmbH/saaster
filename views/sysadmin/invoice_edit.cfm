@@ -7,9 +7,13 @@
         location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
 
-    qInvoice = new com.invoices().getInvoiceData(thisInvoiceID);
+
+    objInvoice = new com.invoices();
+    qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
+
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
-    qUsers = application.objCustomer.getUsersActive(qInvoice.customerID);
+    qUsers = application.objUser.getAllUsers(qInvoice.customerID);
+
 
     if (isNumeric(qInvoice.userID)) {
         qUser = application.objCustomer.getUserDataByID(qInvoice.userID);
@@ -21,8 +25,6 @@
     }
 
     activeCurrencies = application.objGlobal.getActiveCurrencies();
-
-    //dump(qInvoice);
 
 </cfscript>
 
@@ -45,11 +47,13 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add position
-                        </a>
-                    </div>
+                    <cfif qInvoice.paymentstatusID eq 1>
+                        <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                            <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
+                                <i class="fas fa-plus pe-3"></i> Add position
+                            </a>
+                        </div>
+                    </cfif>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -77,7 +81,7 @@
                                 </div>
                                 <div class="col-lg-6 text-end pe-3">
                                     <cfif qInvoice.paymentstatusID gt 1>
-                                        <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
+                                        <a href="##" data-bs-toggle="modal" class="openPopupPayments" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
                                     <cfelse>
                                         <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
                                     </cfif>
@@ -102,8 +106,8 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                <span class="badge bg-#qInvoice.paymentstatusColor#">#getTrans(qInvoice.paymentstatusVar, 'en')#</span>
-                                                <cfif qInvoice.paymentstatusID eq 1>
+                                                #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
+                                                <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2>
                                                     <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&draft" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
@@ -142,8 +146,10 @@
                                                 <td valign="top" class="text-end"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                                 <td valign="top" class="text-end">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
                                                 <td valign="top" class="text-end">
-                                                    <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
-                                                    <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                    <cfif qInvoice.paymentstatusID eq 1>
+                                                        <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
+                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                    </cfif>
                                                 </td>
                                             </tr>
                                         </cfloop>
@@ -208,15 +214,15 @@
                     <div class="row mb-3">
                         <div class="col-lg-4">
                             <label class="form-label">Quantity *</label>
-                            <input type="text" name="quantity" class="form-control" maxlength="10" required>
+                            <input type="text" name="quantity" class="form-control" maxlength="6" required>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">Singleprice *</label>
-                            <input type="text" name="price" class="form-control" maxlength="10" required>
+                            <input type="text" name="price" class="form-control" maxlength="6" required>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">VAT (%)</label>
-                            <input type="text" name="vat" class="form-control" maxlength="10">
+                            <input type="text" name="vat" class="form-control" maxlength="6">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -226,7 +232,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label">Discount (%)</label>
-                            <input type="text" name="discount" class="form-control" maxlength="10">
+                            <input type="text" name="discount" class="form-control" maxlength="6">
                         </div>
                         <div class="col-lg-4"></div>
                     </div>
@@ -389,7 +395,8 @@
 </div>
 </form>
 
-<div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+
+<div id="dynModalPayments" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content" id="dyn_modal-content">
             <!--- dynamic content from ajax request (ajax_payments.cfm) --->
@@ -398,7 +405,6 @@
 </div>
 
 </cfoutput>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

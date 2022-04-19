@@ -32,13 +32,15 @@
                                 <span class="dropdown-header">Sales</span>
                                 <a href="#application.mainURL#/sysadmin/customers" class="dropdown-item">Customers</a>
                                 <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans & Prices</a>
+                                <a href="#application.mainURL#/sysadmin/invoices" class="dropdown-item">Invoices</a>
                                 <div class="dropdown-divider"></div>
 
                                 <span class="dropdown-header">System</span>
+                                <a href="#application.mainURL#/sysadmin/system-settings" class="dropdown-item">System settings</a>
+                                <a href="#application.mainURL#/sysadmin/settings" class="dropdown-item">Custom settings</a>
                                 <a href="#application.mainURL#/sysadmin/languages" class="dropdown-item">Languages</a>
                                 <a href="#application.mainURL#/sysadmin/currencies" class="dropdown-item">Currencies</a>
                                 <a href="#application.mainURL#/sysadmin/countries" class="dropdown-item">Countries</a>
-                                <a href="#application.mainURL#/sysadmin/settings" class="dropdown-item">Settings</a>
                                 <a href="#application.mainURL#/sysadmin/mappings" class="dropdown-item">Mappings</a>
                                 <a href="#application.mainURL#/sysadmin/translations" class="dropdown-item">Translations</a>
                                 <a href="#application.mainURL#/sysadmin/modules" class="dropdown-item">Modules</a>

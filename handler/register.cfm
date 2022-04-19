@@ -9,7 +9,7 @@ if (structKeyExists(form, 'register_btn')) {
     param name="form.first_name" default="";
     param name="form.name" default="";
     param name="form.company" default="";
-    param name="form.email" default="";    
+    param name="form.email" default="";
 
     session.first_name = form.first_name;
     session.name = form.name;
@@ -31,9 +31,9 @@ if (structKeyExists(form, 'register_btn')) {
                 FROM users
                 WHERE strEmail = :strEmail
             "
-        );        
+        );
 
-        if (qCheckDouble.recordCount) {    
+        if (qCheckDouble.recordCount) {
             getAlert('alertHasAccountAlready', 'warning');
             location url="#application.mainURL#/login" addtoken="false";
         }
@@ -72,7 +72,7 @@ if (structKeyExists(form, 'register_btn')) {
                     </html>
                     "
                 )
-            }  
+            }
 
             structDelete(session, "first_name");
             structDelete(session, "name");
@@ -89,7 +89,7 @@ if (structKeyExists(form, 'register_btn')) {
 
         }
 
-    } else {       
+    } else {
 
         getAlert('alertEnterEmail', 'warning');
         location url="#application.mainURL#/register" addtoken="false";
@@ -135,7 +135,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
                 FROM users
                 WHERE strUUID = :strUUID
             "
-        )        
+        )
 
         if (qCheckUser.recordCount) {
 
@@ -148,7 +148,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
 
-        }        
+        }
 
     }
 
@@ -165,7 +165,7 @@ if (structKeyExists(form, 'create_account')) {
 
     <!--- Check passwords first --->
     if (len(trim(form.password)) and len(trim(form.password2))) {
-        if (not trim(form.password) eq trim(form.password2)) {            
+        if (not trim(form.password) eq trim(form.password2)) {
             session.step = 2;
             getAlert('alertPasswordsNotSame', 'warning');
             location url="#application.mainURL#/register" addtoken="false";
@@ -175,10 +175,10 @@ if (structKeyExists(form, 'create_account')) {
         getAlert('alertChoosePassword', 'warning');
         location url="#application.mainURL#/register" addtoken="false";
     }
-    
+
     <!--- Is there a valid uuid? --->
     if (structKeyExists(session, "uuid")) {
-        
+
         <!--- Is there a valid registration? --->
         qCheckOptin = queryExecute(
 
@@ -191,10 +191,10 @@ if (structKeyExists(form, 'create_account')) {
                 FROM optin
                 WHERE strUUID = :strUUID
             "
-        )        
+        )
 
         if (qCheckOptin.recordCount) {
-            
+
             customerStruct = QueryRowData(qCheckOptin, 1);
 
             <!--- Hash and salt the password --->
@@ -210,7 +210,7 @@ if (structKeyExists(form, 'create_account')) {
                 structDelete(session, "step");
                 structDelete(session, "first_name");
                 structDelete(session, "name");
-                structDelete(session, "company");                
+                structDelete(session, "company");
                 structDelete(session, "uuid");
 
                 getAlert('alertAccountCreatedLogin', 'success');
@@ -239,7 +239,7 @@ if (structKeyExists(form, 'create_account')) {
                     FROM users
                     WHERE strUUID = :strUUID
                 "
-            )              
+            )
 
             if (qCheckUser.recordCount) {
 
@@ -259,7 +259,7 @@ if (structKeyExists(form, 'create_account')) {
 
                 }
 
-                
+
             }
 
             session.step = 1;
@@ -275,7 +275,7 @@ if (structKeyExists(form, 'create_account')) {
         location url="#application.mainURL#/register" addtoken="false";
 
     }
-    
+
 }
 
 <!--- Check login --->
@@ -283,13 +283,13 @@ if (structKeyExists(form, 'login_btn')) {
 
     param name="form.email" default="";
     param name="form.password" default="";
-    
+
     objUserLogin = application.objUser.checkLogin(argumentCollection = form);
 
     if (isStruct(objUserLogin)) {
 
         if (objUserLogin.loginCorrect) {
-            
+
             session.user_id = objUserLogin.user_id;
             session.customer_id = objUserLogin.customer_id;
             session.user_name = objUserLogin.user_name;
@@ -299,7 +299,12 @@ if (structKeyExists(form, 'login_btn')) {
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
 
-            location url="#objUserLogin.redirect#" addtoken="false";
+            if (findNoCase("?", objUserLogin.redirect)) {
+                location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
+            } else {
+                location url="#objUserLogin.redirect#?l=#objUserLogin.language#" addtoken="false";
+            }
+
 
         } else {
 
@@ -310,7 +315,7 @@ if (structKeyExists(form, 'login_btn')) {
             } else {
                 getAlert('alertWrongLogin', 'warning');
                 location url="#application.mainURL#/login" addtoken="false";
-            }               
+            }
 
         }
 
@@ -325,11 +330,11 @@ if (structKeyExists(form, 'login_btn')) {
 
 
 
-    
+
 <!--- Reset the password step 1 --->
 if (structKeyExists(form, "reset_pw_btn_1")) {
 
-    param name="form.email" default="";   
+    param name="form.email" default="";
 
     qCheckUser = queryExecute(
         options = {datasource = application.datasource},
@@ -341,7 +346,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             FROM users
             WHERE strEmail = :email AND blnActive = 1
         "
-    );    
+    );
 
     if (qCheckUser.recordCount) {
 
@@ -352,14 +357,14 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             params = {
                 strUUID: {type: "nvarchar", value: newUUID},
                 intUserID: {type: "numeric", value: qCheckUser.intUserID}
-            },  
+            },
             sql="
                 UPDATE users
                 SET strUUID = :strUUID
                 WHERE intUserID = :intUserID
             "
         );
-        	
+
 
         <!--- Send email to reset the password --->
         mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
@@ -373,7 +378,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                         #getTrans('txtResetPassword')#<br>
                         <a href='#application.mainURL#/registration?p=#newUUID#'>#application.mainURL#/registration?p=#newUUID#</a><br>
                         (#getTrans('txtRegisterLinkNotWorking')#)
-                        <br><br>						
+                        <br><br>
                         #getTrans('txtRegards')#<br>
                         #getTrans('txtYourTeam')#<br>
                         #application.appOwner#
@@ -406,7 +411,7 @@ if (structKeyExists(url, "p")) {
             WHERE strUUID = :strUUID
         "
     );
-    
+
     if (qCheckUUID.recordCount) {
 
         getAlert('alertChoosePassword', 'info');
@@ -416,7 +421,7 @@ if (structKeyExists(url, "p")) {
 
     } else {
 
-        getAlert('alertNotValidAnymore', 'warning');        
+        getAlert('alertNotValidAnymore', 'warning');
         location url="#application.mainURL#/password" addtoken="false";
 
     }
@@ -436,7 +441,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
     if (structKeyExists(session, "uuid") and len(trim(session.uuid))) {
         thisResetUUID = session.uuid;
     } else {
-        getAlert('alertNotValidAnymore', 'warning');        
+        getAlert('alertNotValidAnymore', 'warning');
         location url="#application.mainURL#/password" addtoken="false";
     }
 
@@ -454,7 +459,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         location url="#application.mainURL#/password" addtoken="false";
 
     }
-    
+
 
     <!--- save password using a function --->
     changePassword = application.objUser.changePassword(form.password, thisResetUUID);
@@ -467,8 +472,8 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         queryExecute(
             options = {datasource = application.datasource},
             params = {
-                strUUID: {type: "nvarchar", value: thisResetUUID}                
-            },  
+                strUUID: {type: "nvarchar", value: thisResetUUID}
+            },
             sql="
                 UPDATE users
                 SET strUUID = ''

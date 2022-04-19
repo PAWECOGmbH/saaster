@@ -58,9 +58,6 @@ component displayname="Application" output="false" hint="Handle the application.
     <!--- onRequestStart fires at first part of page processing --->
     public boolean function onRequestStart(required string TargetPage) {
 
-        structClear(APPLICATION);
-            onApplicationStart();
-
         <!--- Reinit Application --->
         if (structKeyExists(url, "reinit") and url.reinit eq 1) {
             structClear(APPLICATION);

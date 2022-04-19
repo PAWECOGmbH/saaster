@@ -14,7 +14,7 @@ component displayname="customer" output="false" {
                 params = {
                     thisUserID: {type: "numeric", value = arguments.userID}
                 },
-                sql = "                
+                sql = "
                     SELECT DISTINCT
                     users.intUserID,
                     users.strSalutation,
@@ -28,6 +28,7 @@ component displayname="customer" output="false" {
                     users.blnActive,
                     users.dtmLastLogin,
                     users.blnAdmin,
+                    users.blnSuperAdmin,
                     users.strUUID,
                     customers.intCustomerID,
                     customers.intCustParentID,
@@ -47,13 +48,13 @@ component displayname="customer" output="false" {
                     customers.strBillingAddress,
                     customers.strBillingInfo,
                     customers.intCountryID
-                    FROM customer_user 
+                    FROM customer_user
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
                     WHERE customer_user.intUserID = :thisUserID
                 "
             )
-            
+
             local.userQuery = local.qCustomer;
 
         }
@@ -121,7 +122,7 @@ component displayname="customer" output="false" {
             local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100);
         } else {
             local.website = '';
-        }  
+        }
         if (structKeyExists(arguments.customerStruct, "billing_name")) {
             local.billing_name = application.objGlobal.cleanUpText(arguments.customerStruct.billing_name, 100);
         } else {
@@ -141,13 +142,13 @@ component displayname="customer" output="false" {
             local.billing_info = application.objGlobal.cleanUpText(arguments.customerStruct.billing_info);
         } else {
             local.billing_info = '';
-        }      
+        }
 
         try {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
                     company: {type: "nvarchar", value: local.company},
                     contact: {type: "nvarchar", value: local.contact},
@@ -185,7 +186,7 @@ component displayname="customer" output="false" {
                         strBillingAddress = :billing_address,
                         strBillingInfo = :billing_info
                     WHERE intCustomerID = :intCustomerID
-                    
+
                 "
 
             );
@@ -213,7 +214,7 @@ component displayname="customer" output="false" {
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
-            
+
         param name="local.company_name" default="";
         param name="local.contact_person" default="";
 
@@ -228,7 +229,7 @@ component displayname="customer" output="false" {
         }
 
         local.customerID = tenantStruct.customerID;
-        local.userID = tenantStruct.userID;       
+        local.userID = tenantStruct.userID;
 
         if (structKeyExists(arguments.tenantStruct, "company_name")) {
             local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100);
@@ -246,7 +247,7 @@ component displayname="customer" output="false" {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
                     company_name: {type: "nvarchar", value: local.company_name},
                     contact_person: {type: "nvarchar", value: local.contact_person},
@@ -262,25 +263,25 @@ component displayname="customer" output="false" {
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
                     INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
-                    VALUES (@last_inserted_customer_id, :intUserID, 0);               
-                    
+                    VALUES (@last_inserted_customer_id, :intUserID, 0);
+
                 "
 
             )
 
             local.argsReturnValue['message'] = "OK";
-            local.argsReturnValue['success'] = true;   
-            return local.argsReturnValue; 
+            local.argsReturnValue['success'] = true;
+            return local.argsReturnValue;
 
         } catch (any e) {
 
             local.argsReturnValue['message'] = e.message;
-            return local.argsReturnValue; 
+            return local.argsReturnValue;
 
-        }               
+        }
 
     }
-    
+
 
     <!--- Get all tenants --->
     public query function getAllTenants(required numeric userID) {
@@ -289,12 +290,12 @@ component displayname="customer" output="false" {
 
             local.qTenants = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     userID: {type: "numeric", value: arguments.userID}
                 },
                 sql = "
                     SELECT customer_user.blnStandard, customers.*, users.blnSuperAdmin, users.blnAdmin
-                    FROM customer_user 
+                    FROM customer_user
                     INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intUserID = :userID
@@ -305,7 +306,7 @@ component displayname="customer" output="false" {
 
             return local.qTenants;
 
-        } 
+        }
 
     }
 
@@ -317,7 +318,7 @@ component displayname="customer" output="false" {
 
             local.qCustomer = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
@@ -338,6 +339,4 @@ component displayname="customer" output="false" {
 
     }
 
-
 }
-  

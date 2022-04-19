@@ -6,7 +6,7 @@
     if(not isNumeric(thisUserID) or thisUserID lte 0) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
-    
+
     // Get the users data
     qCustomer = application.objCustomer.getUserDataByID(thisUserID)
     if(not qCustomer.recordCount){
@@ -49,12 +49,12 @@
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">            
+<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <div class="container-xl">
-        <div class="row">    
-            <cfoutput> 
+        <div class="row">
+            <cfoutput>
             <div class="page-header mb-3">
                 <h4 class="page-title">#getTrans('btnEditUser')#</h4>
 
@@ -68,32 +68,53 @@
         </div>
         <cfif structKeyExists(session, "alert")>
             #session.alert#
-        </cfif>                      
-        <div class="row">                                             
+        </cfif>
+        <div class="row">
             <div class="col-lg-12">
-                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user?notme">
+                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
                     <input type="hidden" name="edit_profile_btn">
                     <input type="hidden" name="customerID" value="#session.customer_id#">
                     <input type="hidden" name="userID" value="#thisUserID#">
+                    <input type="hidden" name="language" value="#qCustomer.strLanguage#">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titEditUser')#</h3>
                     </div>
                     <div class="card-body">
-                        <div class="row">  
-                            <div class="col-sm-6 col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-lg-4 mb-3">
                                 <div class="form-label">#getTrans('titActive')#</div>
                                 <label class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="active" <cfif qCustomer.blnActive eq 1>checked</cfif>>
+                                    <cfif thisUserID neq session.user_id>
+                                        <input class="form-check-input" type="checkbox" name="active" <cfif qCustomer.blnActive eq 1>checked</cfif>>
+                                    <cfelse>
+                                        <input class="form-check-input" type="checkbox" name="active" checked disabled>
+                                        <input type="hidden" name="active" value="1">
+                                    </cfif>
                                     <span class="form-check-label">#getTrans('txtActivateThisUser')#</span>
                                 </label>
                             </div>
-                            <div class="col-sm-6 col-md-6 mb-3">
-                                <div class="form-label">#getTrans('titAdmin')#</div>
-                                <label class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="admin" <cfif qCustomer.blnAdmin eq 1>checked</cfif>>
-                                    <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
-                                </label>
-                            </div> 
+                            <div class="col-lg-4 mb-3">
+                                <cfif session.admin>
+                                    <div class="form-label">#getTrans('titAdmin')#</div>
+                                    <label class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="admin" <cfif qCustomer.blnAdmin eq 1>checked</cfif>>
+                                        <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
+                                    </label>
+                                <cfelse>
+                                    <input type="hidden" name="admin" value="#qCustomer.blnAdmin#">
+                                </cfif>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <cfif session.superadmin>
+                                    <div class="form-label">#getTrans('titSuperAdmin')#</div>
+                                    <label class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="superadmin" <cfif qCustomer.blnSuperAdmin eq 1>checked</cfif>>
+                                        <span class="form-check-label">#getTrans('txtSetUserAsSuperAdmin')#</span>
+                                    </label>
+                                <cfelse>
+                                    <input type="hidden" name="superadmin" value="#qCustomer.blnSuperAdmin#">
+                                </cfif>
+                            </div>
                             <div class="col-sm-6 col-md-3 mb-3">
                                 <div class="form-group">
                                     <label class="form-label">#getTrans('formSalutation')#</label>
@@ -130,18 +151,18 @@
                                     <label class="form-label">#getTrans('formMobile')#</label>
                                     <input type="text" name="mobile" class="form-control" value="#HTMLEditFormat(userMobile)#" maxlength="100">
                                 </div>
-                            </div>                                        
+                            </div>
                         </div>
                     </div>
                     <cfif qTenants.recordCount gt 1>
                         <div class="card-header">
-                            <h3 class="card-title">#getTrans('titMandanten')#</h3>                            
-                        </div>                                                       
+                            <h3 class="card-title">#getTrans('titMandanten')#</h3>
+                        </div>
                         <div class="card-body">
-                            <div class="row"> 
+                            <div class="row">
                                 <div class="col-md-12">
                                     <p>#getTrans('txtWhichTenants')#</p>
-                                    <div class="">                                   
+                                    <div class="">
                                         <div class="form-selectgroup form-selectgroup-boxes d-flex flex-inline-row">
                                             <cfloop query="qTenants">
                                                 <cfquery datasource="#application.datasource#" name="qAccessToTenant">
@@ -149,7 +170,7 @@
                                                     FROM customer_user
                                                     WHERE intUserID = <cfqueryparam sqltype="numeric" value="#thisUserID#">
                                                     AND intCustomerID = <cfqueryparam sqltype="numeric" value="#qTenants.intCustomerID#">
-                                                </cfquery> 
+                                                </cfquery>
                                                 <label class="form-selectgroup-item flex-fill">
                                                     <input type="checkbox" name="tenantID" class="form-selectgroup-input" value="#qTenants.intCustomerID#" <cfif qAccessToTenant.recordCount>checked</cfif>>
                                                     <div class="form-selectgroup-label d-flex align-items-center p-3">
@@ -158,7 +179,7 @@
                                                         </div>
                                                         <div class="form-selectgroup-label-content d-flex align-items-center">
                                                             <cfif len(trim(qTenants.strLogo))>
-                                                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar me-3" alt="#qTenants.strCompanyName#">                
+                                                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar me-3" alt="#qTenants.strCompanyName#">
                                                             <cfelse>
                                                                 <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strCompanyName,2)#</div>
                                                             </cfif>
@@ -170,18 +191,18 @@
                                                 </label>
                                             </cfloop>
                                         </div>
-                                    </div>                                       
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </cfif>
-                    <div class="card-footer text-right">
+                    <div class="card-footer">
                         <button id="submit_button" type="submit" class="btn btn-primary">#getTrans('btnSave')#</button>
                     </div>
                 </form>
             </div>
-        </div>  
-        </cfoutput>                    
+        </div>
+        </cfoutput>
     </div>
 </div>
-<cfinclude template="/includes/footer.cfm"> 
+<cfinclude template="/includes/footer.cfm">

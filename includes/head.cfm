@@ -25,6 +25,6 @@
 
 <!--- Display only in backend --->
 <cfif structKeyExists(session, "sysadmin") and session.sysadmin and !findNoCase("frontend", thiscontent.thisPath)>
-    <div class="text-center col-lg-12 bg-red py-2">SysAdmin</div>
+    <div class="text-center col-lg-12 bg-red py-2"><b>SysAdmin</b> (the sysadmin part is only available in english)</div>
 </cfif>
 

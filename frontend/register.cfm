@@ -1,8 +1,10 @@
-<cfparam name="session.step" default="1">
-<cfparam name="session.first_name" default="">
-<cfparam name="session.name" default="">
-<cfparam name="session.company" default="">
-<cfparam name="session.email" default="">
+<cfscript>
+    param name="session.step" default="";
+    param name="session.first_name" default="";
+    param name="session.name" default="";
+    param name="session.company" default="";
+    param name="session.email" default="";
+</cfscript>
 
 <cfoutput>
 <body  class=" border-top-wide border-primary d-flex flex-column">
@@ -21,32 +23,32 @@
                         </cfif>
 
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formFirstName')#</label>
+                            <label class="form-label">#getTrans('formFirstName')# *</label>
                             <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formName')#</label>
+                            <label class="form-label">#getTrans('formName')# *</label>
                             <input type="text" name="name" class="form-control" value="#session.name#"  minlength="3" maxlenght="100" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formCompanyName')#</label>
-                            <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100" required>
+                            <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formEmailAddress')#</label>
+                            <label class="form-label">#getTrans('formEmailAddress')# *</label>
                             <input type="email" name="email" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
                         </div>
 
 
-                        <!--- <div class="mb-3">
+                        <div class="mb-3">
                             <label class="form-check">
-                                <input type="checkbox" class="form-check-input"/>
-                                <span class="form-check-label">Agree the <a href="./terms-of-service.html" tabindex="-1">terms and policy</a>.</span>
+                                <input type="checkbox" class="form-check-input" required>
+                                <span class="form-check-label">Agree the <a href="./" target="_blank">terms and policy</a></span>
                             </label>
-                        </div> --->
+                        </div>
                         <div class="form-footer">
                             <button id="submit_button" type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
                         </div>

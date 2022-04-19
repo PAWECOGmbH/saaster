@@ -678,13 +678,11 @@ component displayname="globalFunctions" {
                 settingVariable: {type: "nvarchar", value: arguments.settingVariable}
             },
             sql = "
-                SELECT customer_system_settings.strSettingValue
+                SELECT strDefaultValue as thisValue
                 FROM system_settings
-                INNER JOIN customer_system_settings ON system_settings.intSystSettingID = customer_system_settings.intSystSettingID
-                WHERE customer_system_settings.intCustomerID = :customerID
-                AND system_settings.strSettingVariable = :settingVariable
+                WHERE strSettingVariable = :settingVariable
                 UNION
-                SELECT customer_custom_settings.strSettingValue
+                SELECT customer_custom_settings.strSettingValue as thisValue
                 FROM custom_settings
                 INNER JOIN customer_custom_settings ON custom_settings.intCustomSettingID = customer_custom_settings.intCustomSettingID
                 WHERE customer_custom_settings.intCustomerID = :customerID
@@ -694,9 +692,9 @@ component displayname="globalFunctions" {
         )
 
         if (qSetting.recordCount) {
-            return qSetting.strSettingValue;
+            return qSetting.thisValue;
         } else {
-            return "no entries";
+            return "";
         }
 
     }
@@ -880,6 +878,39 @@ component displayname="globalFunctions" {
     }
 
 
+    // Get all active currencies
+    public array function getActiveCurrencies() {
 
+        local.qCurrencies = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM currencies
+                WHERE blnActive = 1
+                ORDER BY intPrio
+            "
+        )
+
+        local.currArray = arrayNew(1);
+        local.currStruct = structNew();
+
+        if (local.qCurrencies.recordCount) {
+
+            loop query= local.qCurrencies {
+
+                local.currStruct[local.qCurrencies.currentRow]['currencyID'] = local.qCurrencies.intCurrencyID;
+                local.currStruct[local.qCurrencies.currentRow]['iso'] = local.qCurrencies.strCurrencyISO;
+                local.currStruct[local.qCurrencies.currentRow]['currency_en'] = local.qCurrencies.strCurrencyEN;
+                local.currStruct[local.qCurrencies.currentRow]['currency'] = local.qCurrencies.strCurrency;
+                local.currStruct[local.qCurrencies.currentRow]['prio'] = local.qCurrencies.intPrio;
+                arrayAppend(local.currArray, local.currStruct[local.qCurrencies.currentRow]);
+
+            }
+
+        }
+
+        return local.currArray;
+
+    }
 
 }
