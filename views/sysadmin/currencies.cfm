@@ -227,7 +227,7 @@
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Sign</label>
                                                                     <div class="input-group input-group-flat w-50">
-                                                                        <input type="text" class="form-control" name="sign" autocomplete="off">
+                                                                        <input type="text" class="form-control" name="sign" maxlength="3" autocomplete="off">
                                                                     </div>
                                                                 </div>
                                                             </div>
