@@ -1,7 +1,7 @@
 <cfscript>
     param name="session.cust_search" default="" type="string";
     param name="session.cust_sort" default="intPrio" type="string";
-    param name="session.start" default=1 type="numeric";
+    param name="session.cust_start" default=1 type="numeric";
 
     // Check if url "start" exists
     if (structKeyExists(url, "start") and not isNumeric(url.start)) {
@@ -11,11 +11,11 @@
     // Pagination
     getEntries = 10;
     if( structKeyExists(url, 'start')){
-        session.start = url.start;
+        session.cust_start = url.start;
     }
-    next = session.start+getEntries;
-    prev = session.start-getEntries;
-    session.sql_start = session.start-1;
+    next = session.cust_start+getEntries;
+    prev = session.cust_start-getEntries;
+    session.cust_sql_start = session.cust_start-1;
 
     // Search
     if(structKeyExists(form, 'search') and len(trim(form.search))){
@@ -39,23 +39,34 @@
     )
 
     if (len(trim(session.cust_search))) {
+        
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-            SELECT customers.*, countries.strCountryName
-            FROM customers
-            LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-            WHERE customers.blnActive = 1
-            AND (
-                    strCompanyName LIKE '%#session.cust_search#%' OR
-                    strContactPerson LIKE '%#session.cust_search#%' OR
-                    strAddress LIKE '%#session.cust_search#%' OR
-                    strZIP LIKE '%#session.cust_search#%' OR
-                    strCity LIKE '%#session.cust_search#%' OR
-                    strEmail LIKE '%#session.cust_search#%'
-                )
-            ORDER BY #session.cust_sort#
-            LIMIT #session.sql_start#, #getEntries#
+                SELECT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson, 
+                customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
+                FROM customers
+
+                LEFT JOIN countries ON 1=1
+                AND countries.intCountryID = customers.intCountryID
+
+                INNER JOIN users ON 1=1
+                AND customers.intCustomerID = users.intCustomerID
+                OR customers.intCustParentID = users.intCustomerID
+
+                WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
+                OR users.strEmail LIKE '%#session.cust_search#%' 
+                OR users.strFirstName LIKE '%#session.cust_search#%' 
+                OR users.strLastName LIKE '%#session.cust_search#%'
+                OR customers.strContactPerson LIKE '%#session.cust_search#%'
+                OR customers.strAddress LIKE '%#session.cust_search#%'
+                OR customers.strZIP LIKE '%#session.cust_search#%'
+                OR customers.strCity LIKE '%#session.cust_search#%'
+                OR customers.strEmail LIKE '%#session.cust_search#%' 
+
+                GROUP BY customers.intCustomerID
+                ORDER BY #session.cust_sort#
+                LIMIT #session.cust_sql_start#, #getEntries#
             "
         );
     }
@@ -68,7 +79,7 @@
             LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
             WHERE customers.blnActive = 1
             ORDER BY #session.cust_sort#
-            LIMIT #session.sql_start#, #getEntries#
+            LIMIT #session.cust_sql_start#, #getEntries#
             "
         );
     }
@@ -107,7 +118,7 @@
                             <div class="col-lg-4">
                                 <label class="form-label">Search for customer:</label>
                                 <div class="input-group mb-2">
-                                    <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
+                                    <input type="text" name="search" class="form-control" minlength="1" placeholder="Search for…">
                                     <button class="btn bg-green-lt" type="submit">Go!</button>
                                     <cfif len(trim(session.cust_search))>
                                         <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
@@ -165,7 +176,7 @@
 
                                                     <td data-label="Contact">
                                                         <div>#strContactPerson#</div>
-                                                        <div class="text-muted"><a href="##" class="text-reset">#strEmail#</a></div>
+                                                        <div class="text-muted">#strEmail#</div>
                                                     </td>
 
                                                     <td data-label="City">
@@ -181,24 +192,6 @@
                                                             <a href="#application.mainURL#/sysadmin/customers/edit/#intCustomerID#" class="btn">
                                                                 Edit
                                                             </a>
-                                                            <!---   
-                                                            <a href="##" class="btn">
-                                                                Remove
-                                                            </a>
-                                                            <div class="dropdown">
-                                                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                                                    Actions
-                                                                </button>
-                                                                <div class="dropdown-menu dropdown-menu-end">
-                                                                    <a class="dropdown-item" href="##">
-                                                                        Action
-                                                                    </a>
-                                                                    <a class="dropdown-item" href="##">
-                                                                        Another action
-                                                                    </a>
-                                                                </div>
-                                                            </div> 
-                                                            --->
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -210,12 +203,12 @@
                         </div>
                         <div class="pt-4 card-footer d-flex align-items-center">
                             <ul class="pagination m-0 ms-auto">
-                                <li class="page-item <cfif session.start lt getEntries>disabled</cfif>">
+                                <li class="page-item <cfif session.cust_start lt getEntries>disabled</cfif>">
                                     <a class="page-link" href="#application.mainURL#/sysadmin/customers?start=#prev#" tabindex="-1" aria-disabled="true">
                                         <i class="fas fa-angle-left"></i> prev
                                     </a>
                                 </li>
-                                <li class="ms-3 page-item <cfif qTotalCustomers.totalCustomers lt next>disabled</cfif>">
+                                <li class="ms-3 page-item <cfif qTotalCustomers.totalCustomers lt next or qCustomers.RecordCount lt getEntries>disabled</cfif>">
                                     <a class="page-link" href="#application.mainURL#/sysadmin/customers?start=#next#">
                                         next <i class="fas fa-angle-right"></i>
                                     </a>
