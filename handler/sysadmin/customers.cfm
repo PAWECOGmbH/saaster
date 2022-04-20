@@ -16,22 +16,7 @@
         param name="form.billing_email" default="";
         param name="form.billing_address" default="";
         param name="form.billing_info" default="";
-    
-        session.company = form.company;
-        session.contact = form.contact;
-        session.address = form.address;
-        session.address2 = form.address2;
-        session.zip = form.zip;
-        session.city = form.city;
-        session.countryID = form.countryID;
-        session.email = form.email;
-        session.phone = form.phone;
-        session.website = form.website;
-        session.billing_name = form.billing_name;
-        session.billing_email = form.billing_email;
-        session.billing_address = form.billing_address;
-        session.billing_info = form.billing_info;  
-    
+
         <!--- Check whether the email is valid --->
         checkEmail = application.objGlobal.checkEmail(form.email);
         if (!checkEmail) {
@@ -55,23 +40,51 @@
         } else {
             getAlert(objCustomerEdit.message, 'danger');
         }
-    
-        <!--- Clear sessions --->
-        structDelete(session, "company");
-        structDelete(session, "contact");
-        structDelete(session, "address");
-        structDelete(session, "address2");
-        structDelete(session, "zip");
-        structDelete(session, "countryID");
-        structDelete(session, "email");
-        structDelete(session, "phone");
-        structDelete(session, "website");
-        structDelete(session, "billing_name");
-        structDelete(session, "billing_email");
-        structDelete(session, "billing_address");
-        structDelete(session, "billing_info");
-    
+
         location url="#application.mainURL#/sysadmin/customers/edit/#form.redirect#" addtoken="false";   
     
+    }
+
+    if (structKeyExists(form, "edit_user")) {
+
+        <!--- Check whether the email is valid --->
+        checkEmail = application.objGlobal.checkEmail(form.email);
+
+        if (!checkEmail) {
+            getAlert('alertEnterEmail', 'warning');
+            location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
+        }
+
+        <!--- Check for already registered email --->
+        qCheckDouble = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                strEmail: {type: "nvarchar", value: form.email},
+                intCustomerID: {type: "numeric", value: form.customer_id},
+                intUserID: {type: "numeric", value: form.user_id}
+            },
+            sql = "
+                SELECT intUserID
+                FROM users
+                WHERE strEmail = :strEmail
+                AND intCustomerID = :intCustomerID
+                AND intUserID <> :intUserID
+            "
+        )
+
+        if (qCheckDouble.recordCount) {
+            getAlert('alertEmailAlreadyUsed', 'warning');
+            location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
+        }
+
+        objupdateUser = application.objUser.updateUser(form, form.user_id);
+
+        if (objupdateUser.success) {
+            getAlert('msgChangesSaved', 'success');        
+        } else {
+            getAlert(objCustomerEdit.message, 'danger');
+        }
+        
+        location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";   
     }
 </cfscript>
