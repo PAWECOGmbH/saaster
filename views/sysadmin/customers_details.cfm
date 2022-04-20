@@ -63,7 +63,7 @@
                                         <img src="#application.mainURL#/userdata/images/logos/#qCustomer.strLogo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#qCustomer.strCompanyName#">
                                     </div>
                                 <cfelse>
-                                    <div style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center">
+                                    <div class="avatar avatar-xl me-3 align-self-center">
                                         #left(qCustomer.strCompanyName,2)#
                                     </div>
                                 </cfif>
@@ -109,24 +109,55 @@
                                     </div>
                                 </div>
                             </div>
+                            <h2 class="mt-4">Users</h2>
+                            <div class="table-responsive">
+                                <table
+                                      class="table table-vcenter">
+                                  <thead>
+                                    <tr>
+                                      <th>Salutation</th>
+                                      <th>Prename</th>
+                                      <th>Lastname</th>
+                                      <th>Mail</th>
+                                      <th class="w-1"></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <cfset counter = 1>
+                                    <cfloop query="qUsers">
+                                        <form id="user_form_#counter#" method="post" action="#application.mainURL#/sysadm/customers">
+                                            <input type="hidden" name="edit_user" value="">
+                                            <input type="hidden" name="user_id" value="#qUsers.intUserID#">
+                                            <input type="hidden" name="customer_id" value="#thisCustomerID#">
+                                            <input type="hidden" name="phone" value="#qUsers.strPhone#">
+                                            <input type="hidden" name="mobile" value="#qUsers.strMobile#">
+                                            <input type="hidden" name="language" value="#qUsers.strLanguage#">
+                                            <input type="hidden" name="admin" value="#qUsers.blnAdmin#">
+                                            <input type="hidden" name="active" value="#qUsers.blnActive#">
+                                            <tr>
+                                                <td>
+                                                    <input class="form-control" name="salutation" value="#qUsers.strSalutation#">
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" name="first_name" value="#qUsers.strFirstName#">
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" name="last_name" value="#qUsers.strLastName#">
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" name="email" value="#qUsers.strEmail#">
+                                                </td>
+                                                <td>
+                                                    <button type="submit" id="submit_button" class="btn btn-primary">Save</button>
+                                                </td>
+                                            </tr>
+                                        </form>
+                                        <cfset counter++>
+                                    </cfloop>
+                                  </tbody>
+                                </table>
+                              </div>
                         </div>
-
-                        <div class="col-lg-4">
-                            <h2 class="pt-3 ps-3">Users</h2>
-                            <cfloop query="qUsers">
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col text-truncate">
-                                                <a href="" class="text-reset d-block">#qUsers.strFirstName# #strLastName#</a>
-                                                #qUsers.strEmail#
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </cfloop>
-                        </div>
-
                     </div>
                 </div>
             </div>
