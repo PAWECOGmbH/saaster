@@ -50,6 +50,7 @@ services:
   mailslurper:
     container_name: mail-saaster
     image: marcopas/docker-mailslurper
+    restart: always
     ports:
       - "127.0.0.1:2500:2500"
       - "127.0.0.1:9000:8080"
