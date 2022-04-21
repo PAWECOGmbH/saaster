@@ -37,8 +37,8 @@
                 SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
                 FROM customers
 
-                INNER JOIN users ON 1=1
-                AND customers.intCustomerID = users.intCustomerID
+                INNER JOIN users 
+                ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
 
                 WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
@@ -57,15 +57,15 @@
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson, 
+                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson, 
                 customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
                 FROM customers
 
-                LEFT JOIN countries ON 1=1
-                AND countries.intCountryID = customers.intCountryID
+                LEFT JOIN countries 
+                ON countries.intCountryID = customers.intCountryID
 
-                INNER JOIN users ON 1=1
-                AND customers.intCustomerID = users.intCustomerID
+                INNER JOIN users 
+                ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
 
                 WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
@@ -79,7 +79,6 @@
                 OR customers.strEmail LIKE '%#session.cust_search#%'
                 AND customers.blnActive = 1 
 
-                GROUP BY customers.intCustomerID
                 ORDER BY #session.cust_sort#
                 LIMIT #session.cust_sql_start#, #getEntries#
             "
