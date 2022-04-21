@@ -34,23 +34,23 @@
         qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-            SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
-            FROM customers
+                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
+                FROM customers
 
-            INNER JOIN users ON 1=1
-            AND customers.intCustomerID = users.intCustomerID
-            OR customers.intCustParentID = users.intCustomerID
+                INNER JOIN users ON 1=1
+                AND customers.intCustomerID = users.intCustomerID
+                OR customers.intCustParentID = users.intCustomerID
 
-            WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
-            OR users.strEmail LIKE '%#session.cust_search#%' 
-            OR users.strFirstName LIKE '%#session.cust_search#%' 
-            OR users.strLastName LIKE '%#session.cust_search#%'
-            OR customers.strContactPerson LIKE '%#session.cust_search#%'
-            OR customers.strAddress LIKE '%#session.cust_search#%'
-            OR customers.strZIP LIKE '%#session.cust_search#%'
-            OR customers.strCity LIKE '%#session.cust_search#%'
-            OR customers.strEmail LIKE '%#session.cust_search#%'
-            AND customers.blnActive = 1
+                WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
+                OR users.strEmail LIKE '%#session.cust_search#%' 
+                OR users.strFirstName LIKE '%#session.cust_search#%' 
+                OR users.strLastName LIKE '%#session.cust_search#%'
+                OR customers.strContactPerson LIKE '%#session.cust_search#%'
+                OR customers.strAddress LIKE '%#session.cust_search#%'
+                OR customers.strZIP LIKE '%#session.cust_search#%'
+                OR customers.strCity LIKE '%#session.cust_search#%'
+                OR customers.strEmail LIKE '%#session.cust_search#%'
+                AND customers.blnActive = 1
             "
         )
 
@@ -98,12 +98,12 @@
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-            SELECT customers.*, countries.strCountryName
-            FROM customers
-            LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-            WHERE customers.blnActive = 1
-            ORDER BY #session.cust_sort#
-            LIMIT #session.cust_sql_start#, #getEntries#
+                SELECT customers.*, countries.strCountryName
+                FROM customers
+                LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
+                WHERE customers.blnActive = 1
+                ORDER BY #session.cust_sort#
+                LIMIT #session.cust_sql_start#, #getEntries#
             "
         );
     }
