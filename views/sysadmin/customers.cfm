@@ -29,17 +29,31 @@
         session.cust_sort = form.sort;
     }
 
-    qTotalCustomers = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT COUNT(intCustomerID) as totalCustomers
-            FROM customers
-            WHERE blnActive = 1
-        "
-    )
-
     if (len(trim(session.cust_search))) {
         
+        qTotalCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+            SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
+            FROM customers
+
+            INNER JOIN users ON 1=1
+            AND customers.intCustomerID = users.intCustomerID
+            OR customers.intCustParentID = users.intCustomerID
+
+            WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
+            OR users.strEmail LIKE '%#session.cust_search#%' 
+            OR users.strFirstName LIKE '%#session.cust_search#%' 
+            OR users.strLastName LIKE '%#session.cust_search#%'
+            OR customers.strContactPerson LIKE '%#session.cust_search#%'
+            OR customers.strAddress LIKE '%#session.cust_search#%'
+            OR customers.strZIP LIKE '%#session.cust_search#%'
+            OR customers.strCity LIKE '%#session.cust_search#%'
+            OR customers.strEmail LIKE '%#session.cust_search#%'
+            AND customers.blnActive = 1
+            "
+        )
+
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -62,7 +76,8 @@
                 OR customers.strAddress LIKE '%#session.cust_search#%'
                 OR customers.strZIP LIKE '%#session.cust_search#%'
                 OR customers.strCity LIKE '%#session.cust_search#%'
-                OR customers.strEmail LIKE '%#session.cust_search#%' 
+                OR customers.strEmail LIKE '%#session.cust_search#%'
+                AND customers.blnActive = 1 
 
                 GROUP BY customers.intCustomerID
                 ORDER BY #session.cust_sort#
@@ -71,6 +86,15 @@
         );
     }
     else {
+        qTotalCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intCustomerID) as totalCustomers
+                FROM customers
+                WHERE blnActive = 1
+            "
+        )
+        
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -208,7 +232,7 @@
                                         <i class="fas fa-angle-left"></i> prev
                                     </a>
                                 </li>
-                                <li class="ms-3 page-item <cfif qTotalCustomers.totalCustomers lt next or qCustomers.RecordCount lt getEntries>disabled</cfif>">
+                                <li class="ms-3 page-item <cfif qTotalCustomers.totalCustomers lt next>disabled</cfif>">
                                     <a class="page-link" href="#application.mainURL#/sysadmin/customers?start=#next#">
                                         next <i class="fas fa-angle-right"></i>
                                     </a>
