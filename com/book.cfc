@@ -39,7 +39,7 @@ component displayname="book" output="false" {
 
         if (isStruct(local.thisPlan)) {
 
-            if (structKeyExists(arguments, "itsTest")) {
+            if (structKeyExists(arguments, "itsTest") and arguments.itsTest) {
                 local.testTillDate = dateAdd("d", local.thisPlan.testDays, local.startDate);
                 local.tillDate = "";
             } else if (local.thisPlan.itsFree) {
@@ -47,7 +47,7 @@ component displayname="book" output="false" {
                 local.tillDate = "";
             } else {
                 local.testTillDate = "";
-                if (structKeyExists(arguments, "yearly")) {
+                if (structKeyExists(arguments, "yearly") and arguments.yearly) {
                     // Yearly subscription
                     local.tillDate = dateAdd("y", 1, local.startDate);
                 } else {

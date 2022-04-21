@@ -583,56 +583,94 @@ component displayname="plans" output="false" {
 
             if (local.qCurrentPlan.recordCount) {
 
+                // Get all the linked modules of the current plan
+                local.qLinkedModules = queryExecute (
+                    options = {datasource = application.datasource},
+                    params = {
+                        planID: {type: "numeric", value: local.qCurrentPlan.intPlanID}
+                    },
+                    sql = "
+                        SELECT intModuleID,
+                        (
+                            IF
+                                (
+                                    LENGTH(
+                                        (
+                                            SELECT strModuleName
+                                            FROM modules_trans
+                                            WHERE intModuleID = plan_modules.intModuleID
+                                            AND intLanguageID = :languageID
+                                        )
+                                    ),
+                                    (
+                                        SELECT strModuleName
+                                        FROM modules_trans
+                                        WHERE intModuleID = plan_modules.intModuleID
+                                        AND intLanguageID = :languageID
+                                    ),
+                                    plan_modules.strModuleName
+                                )
+                        ) as strModuleName
+                        FROM plan_modules
+                        WHERE plan_modules.intPlanID = :planID
+                        AND blnActive = 1
+                    "
+                )
+
+
+
+
+
+
+
                 planStruct['planID'] = local.qCurrentPlan.intPlanID;
                 planStruct['planName'] = local.qCurrentPlan.strPlanName;
                 planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
                 planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
 
-                // Is the plan paused?
-                if (local.qCurrentPlan.blnPaused eq 1) {
+                // Is already a plan defined?
+                if (local.qCurrentPlan.intPlanID gt 0) {
 
-                    planStruct['status'] = 'paused';
+                    // Is the plan paused?
+                    if (local.qCurrentPlan.blnPaused eq 1) {
 
-                } else {
-
-                    // Is there a test date defined?
-                    if (isDate(local.qCurrentPlan.dtmEndTestDate)) {
-
-                        planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-
-                        // Test still active?
-                        if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
-                            planStruct['status'] = 'test';
-                        } else {
-                            planStruct['status'] = 'expired';
-                        }
+                        planStruct['status'] = 'paused';
 
                     } else {
 
+                        // Is a test phase running?
+                        if (isDate(local.qCurrentPlan.dtmStartDate) and isDate(local.qCurrentPlan.dtmEndTestDate)) {
 
-                    }
+                            if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
 
+                                planStruct['status'] = 'test';
+                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
 
-
-                    // Is a plan defined?
-                    if (isDate(local.qCurrentPlan.dtmStartDate)) {
-
-                        // Is it a free plan?
-                        if (local.qCurrentPlan.blnFree) {
-
-
-                            planStruct['endDate'] = "";
-                            planStruct['status'] = 'free';
+                            }
 
                         } else {
 
+                            // See if there is a free plan running
+                            if (local.qCurrentPlan.blnFree) {
 
-                            planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                            planStruct['status'] = 'active';
+                                planStruct['status'] = 'free';
+                                planStruct['endDate'] = "";
 
-                            // Is the plan still valid?
-                            if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
-                                planStruct['status'] = 'expired';
+                            } else {
+
+                                // Is a plan running?
+                                if (isDate(local.qCurrentPlan.dtmEndDate)) {
+
+                                    planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                                    planStruct['status'] = 'active';
+
+                                    // Still valid?
+                                    if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
+                                        planStruct['status'] = 'expired';
+                                    }
+
+                                }
+
                             }
 
                         }
@@ -642,7 +680,6 @@ component displayname="plans" output="false" {
                 }
 
             }
-
 
         }
 

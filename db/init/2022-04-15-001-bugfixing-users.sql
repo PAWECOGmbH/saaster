@@ -8,6 +8,7 @@ INSERT INTO `system_translations` VALUES (182, 'msgMaxUsersReached', 'Sie haben 
 INSERT INTO `system_translations` VALUES (183, 'titPayment', 'Zahlung', 'Payment', now());
 INSERT INTO `system_translations` VALUES (184, 'txtMonthlyPayment', 'Bei monatlicher Zahlung', 'On monthly payment', now());
 INSERT INTO `system_translations` VALUES (185, 'txtYearlyPayment', 'Bei jährlicher Zahlung', 'On annual payment', now());
+INSERT INTO `system_translations` VALUES (186, 'statInvoiceOverDue', 'Überfällig', 'Overdue', now());
 
 
 INSERT INTO `system_mappings` VALUES (62, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1, now());

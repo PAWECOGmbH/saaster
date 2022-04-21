@@ -69,12 +69,14 @@
 
     } else {
 
+
+
         // Is it a free plan?
         if (planDetails.itsFree) {
 
             // Book the free plan
 
-            insertBooking = objBook.makeBooking(session.customer_id, planDetails, false);
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, planData=planDetails, itsTest=false, yearly=false);
 
             if (insertBooking.success) {
 

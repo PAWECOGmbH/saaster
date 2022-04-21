@@ -17,7 +17,7 @@
 <cfif session.currentPlan.planID gt 0>
     <p class="mb-1">
         Plan status:
-        <cfif session.currentPlan.status eq "active"><span class="text-green">ACTIVE</span></cfif>
+        <cfif session.currentPlan.status eq "active"><span class="text-green">ACTIVE</span> - <a href="#application.mainURL#/plans">Change plan now!</a></cfif>
         <cfif session.currentPlan.status eq "test"><span class="text-blue">TEST</span></cfif>
         <cfif session.currentPlan.status eq "expired"><span class="text-red">EXPIRED</span></cfif>
         <cfif session.currentPlan.status eq "free"><span class="text-green">FREE</span> - <a href="#application.mainURL#/plans">Upgrade plan now!</a></cfif>
