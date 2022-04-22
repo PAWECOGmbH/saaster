@@ -80,7 +80,31 @@
             location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
         }
 
-        objupdateUser = application.objUser.updateUser(form, form.user_id);
+        // Get data that is missing from form
+        qGetData = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                intUserID: {type: "numeric", value: form.user_id}
+            },
+            sql = "
+                SELECT strPhone, strMobile, strLanguage, blnAdmin, blnActive
+                FROM users
+                WHERE intUserID = :intUserID
+            "
+        )
+
+        allData = {}
+        allData.phone = qGetData.strPhone
+        allData.mobile = qGetData.strMobile
+        allData.language = qGetData.strLanguage
+        allData.admin = qGetData.blnAdmin
+        allData.active = qGetData.blnActive
+        allData.email = form.email
+        allData.first_name = form.first_name
+        allData.last_name = form.last_name
+        allData.salutation = form.salutation
+
+        objupdateUser = application.objUser.updateUser(allData, form.user_id);
 
         if (objupdateUser.success) {
             getAlert('msgChangesSaved', 'success');        

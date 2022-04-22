@@ -118,11 +118,6 @@
                                             <input type="hidden" name="edit_user" value="">
                                             <input type="hidden" name="user_id" value="#qUsers.intUserID#">
                                             <input type="hidden" name="customer_id" value="#thisCustomerID#">
-                                            <input type="hidden" name="phone" value="#qUsers.strPhone#">
-                                            <input type="hidden" name="mobile" value="#qUsers.strMobile#">
-                                            <input type="hidden" name="language" value="#qUsers.strLanguage#">
-                                            <input type="hidden" name="admin" value="#qUsers.blnAdmin#">
-                                            <input type="hidden" name="active" value="#qUsers.blnActive#">
                                             <tr>
                                                 <td>
                                                     <input class="form-control" name="salutation" value="#qUsers.strSalutation#">
