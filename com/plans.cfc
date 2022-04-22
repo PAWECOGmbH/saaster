@@ -240,6 +240,9 @@ component displayname="plans" output="false" {
             "
         )
 
+        dump(local.getPlan);
+        abort;
+
         local.arrPlan = arrayNew(1);
 
         if (local.getPlan.recordCount) {
@@ -286,7 +289,8 @@ component displayname="plans" output="false" {
                     local.structPlan['buttonName'] = local.getPlan.strButtonName;
                 }
                 if (len(trim(local.getPlan.strBookingLink))) {
-                    local.structPlan['bookingLink'] = local.getPlan.strBookingLink;
+                    local.structPlan['bookingLinkM'] = local.getPlan.strBookingLink;
+                    local.structPlan['bookingLinkY'] = local.getPlan.strBookingLink;
                 }
                 if (isBoolean(local.getPlan.blnRecommended)) {
                     local.structPlan['recommended'] = local.getPlan.blnRecommended;
@@ -322,8 +326,10 @@ component displayname="plans" output="false" {
                 // Building the booking link
                 if (!len(trim(local.getPlan.strBookingLink))) {
                     objBook = new com.book();
-                    bookingString = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID);
-                    local.structPlan['bookingLink'] = application.mainURL & "/book?plan=" & bookingString;
+                    bookingStringM = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "m");
+                    local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & bookingStringM;
+                    bookingStringY = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "y");
+                    local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & bookingStringY;
                 }
 
                 arrayAppend(local.arrPlan, local.structPlan);
@@ -343,7 +349,8 @@ component displayname="plans" output="false" {
             local.structPlan['shortDescription'] = 'Short description';
             local.structPlan['description'] = 'Description and feature list';
             local.structPlan['buttonName'] = 'Button name';
-            local.structPlan['bookingLink'] = '##?';
+            local.structPlan['bookingLinkM'] = '##?';
+            local.structPlan['bookingLinkY'] = '##?';
             local.structPlan['recommended'] = 0;
             local.structPlan['maxUsers'] = 0;
             local.structPlan['testDays'] = 0;
@@ -551,7 +558,28 @@ component displayname="plans" output="false" {
 
 
 
-    public struct function getCurrentPlan(required numeric customerID) {
+    public struct function getCurrentPlan(required numeric customerID, string language) {
+
+        if (structKeyExists(arguments, "language")) {
+            local.qLanguage = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    language: {type: "varchar", value: arguments.language}
+                },
+                sql = "
+                    SELECT intLanguageID
+                    FROM languages
+                    WHERE strLanguageISO = :language
+                "
+            )
+            if (local.qLanguage.recordCount) {
+                local.lngID = local.qLanguage.intLanguageID;
+            } else {
+                local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+            }
+        } else {
+            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
 
         planStruct = structNew();
         planStruct['planID'] = 0;
@@ -561,6 +589,7 @@ component displayname="plans" output="false" {
         planStruct['startDate'] = "";
         planStruct['endDate'] = "";
         planStruct['endTestDate'] = "";
+        planStruct['modulesIncluded'] = "";
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -587,10 +616,11 @@ component displayname="plans" output="false" {
                 local.qLinkedModules = queryExecute (
                     options = {datasource = application.datasource},
                     params = {
-                        planID: {type: "numeric", value: local.qCurrentPlan.intPlanID}
+                        planID: {type: "numeric", value: local.qCurrentPlan.intPlanID},
+                        languageID: {type: "numeric", value: local.lngID}
                     },
                     sql = "
-                        SELECT intModuleID,
+                        SELECT plans_modules.intModuleID,
                         (
                             IF
                                 (
@@ -598,30 +628,37 @@ component displayname="plans" output="false" {
                                         (
                                             SELECT strModuleName
                                             FROM modules_trans
-                                            WHERE intModuleID = plan_modules.intModuleID
+                                            WHERE intModuleID = plans_modules.intModuleID
                                             AND intLanguageID = :languageID
                                         )
                                     ),
                                     (
                                         SELECT strModuleName
                                         FROM modules_trans
-                                        WHERE intModuleID = plan_modules.intModuleID
+                                        WHERE intModuleID = plans_modules.intModuleID
                                         AND intLanguageID = :languageID
                                     ),
-                                    plan_modules.strModuleName
+                                    modules.strModuleName
                                 )
                         ) as strModuleName
-                        FROM plan_modules
-                        WHERE plan_modules.intPlanID = :planID
-                        AND blnActive = 1
+                        FROM plans_modules
+                        INNER JOIN modules ON plans_modules.intModuleID = modules.intModuleID
+                        WHERE plans_modules.intPlanID = :planID
+                        AND modules.blnActive = 1
                     "
                 )
 
+                if (local.qLinkedModules.recordCount) {
+                    modulesArray = arrayNew(1);
+                    cfloop( query="local.qLinkedModules" ) {
+                        linkedModules = structNew();
+                        linkedModules['moduleID'] = local.qLinkedModules.intModuleID;
+                        linkedModules['name'] = local.qLinkedModules.strModuleName;
+                        arrayAppend(modulesArray, linkedModules);
+                    }
+                    planStruct['modulesIncluded'] = modulesArray;
 
-
-
-
-
+                }
 
                 planStruct['planID'] = local.qCurrentPlan.intPlanID;
                 planStruct['planName'] = local.qCurrentPlan.strPlanName;
@@ -641,10 +678,17 @@ component displayname="plans" output="false" {
                         // Is a test phase running?
                         if (isDate(local.qCurrentPlan.dtmStartDate) and isDate(local.qCurrentPlan.dtmEndTestDate)) {
 
+                            // Is the test phase still valid? | YES
                             if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
 
-                                planStruct['status'] = 'test';
                                 planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+                                planStruct['status'] = 'test';
+
+                            // NO
+                            } else {
+
+                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+                                planStruct['status'] = 'expired';
 
                             }
 
@@ -666,7 +710,10 @@ component displayname="plans" output="false" {
 
                                     // Still valid?
                                     if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
+
+                                        planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
                                         planStruct['status'] = 'expired';
+
                                     }
 
                                 }

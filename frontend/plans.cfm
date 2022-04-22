@@ -5,6 +5,9 @@
     variables.planGroupID = 0;
 </cfscript>
 <cfoutput>
+<cfif structKeyExists(session, "alert")>
+    #session.alert#
+</cfif>
 <div class="border-top-wide border-primary d-flex flex-column">
     <div class="page page-center">
         <div class="container py-4">

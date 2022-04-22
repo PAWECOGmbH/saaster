@@ -20,8 +20,8 @@
     failed = false;
 
     // decoding base64 value
-    changeToString = toString(toBinary(url.plan));
-    planStruct = deserializeJSON(URLDecode(changeToString));
+    planStruct = objBook.decryptBookingLink(url.plan);
+
 
     // Check whether we have all the needed information
     if (!structKeyExists(planStruct, "planID")) {
@@ -33,18 +33,27 @@
     if (!structKeyExists(planStruct, "currencyID")) {
         failed = true;
     }
+    if (!structKeyExists(planStruct, "plan")) {
+        failed = true;
+    }
+
+    if (failed) {
+        getAlert('alertErrorOccured', 'danger');
+        location url="#application.mainURL#/plans" addtoken="false";
+    }
 
     // As we have all the infos, save it into variables
     variables.planID = planStruct.planID;
     variables.lngID = planStruct.lngID;
     variables.currencyID = planStruct.currencyID;
+    variables.plan = planStruct.plan;
 
     // and getting more plan infos
     lngIso = getAnyLanguage(variables.lngID).iso;
     planDetails = objPlans.getPlanDetail(variables.planID, lngIso, variables.currencyID);
 
     // Check customers current plan (if exists)
-    currentPlan = objPlans.getCurrentPlan(session.customer_id);
+    currentPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
 
     // Is there already a plan?
     if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
@@ -76,12 +85,12 @@
 
             // Book the free plan
 
-            insertBooking = objBook.makeBooking(customerID=session.customer_id, planData=planDetails, itsTest=false, yearly=false);
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, planData=planDetails, itsTest=false, plan=variables.plan);
 
             if (insertBooking.success) {
 
                 <!--- Save the new plan into a session --->
-                newPlan = objPlans.getCurrentPlan(session.customer_id);
+                newPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
                 session.currentPlan = newPlan;
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
@@ -92,17 +101,14 @@
     }
 
 
-    dump(planDetails);
-    dump(currentPlan);
-
-
 
     // Do we have to provide any test days?
     if (isNumeric(planDetails.testDays) and planDetails.testDays gt 0) {
 
         // The customer only gets test days if he has not already had any.
         getsTestDays = true;
-        if (!isDate(currentPlan.endTestDate) and currentPlan.planID gt 0) {
+
+        if (isDate(currentPlan.endTestDate) and currentPlan.planID gt 0) {
             getsTestDays = false;
         }
 
@@ -110,12 +116,12 @@
 
             // Book the plan and let the customer test
 
-            insertBooking = objBook.makeBooking(session.customer_id, planDetails, true);
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, planData=planDetails, itsTest=true, plan=variables.plan);
 
             if (insertBooking.success) {
 
                 <!--- Save the new plan into a session --->
-                newPlan = objPlans.getCurrentPlan(session.customer_id);
+                newPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
                 session.currentPlan = newPlan;
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
@@ -151,21 +157,20 @@
 
             case "success":
 
-
                 // Make a book for the plan
-                insertBooking = objBook.makeBooking(session.customer_id, planDetails);
+                insertBooking = objBook.makeBooking(customerID=session.customer_id, planData=planDetails, itsTest=false, plan=variables.plan);
 
                 if (insertBooking.success) {
 
                     <!--- Save the new plan into a session --->
-                    newPlan = objPlans.getCurrentPlan(session.customer_id);
+                    newPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
                     session.currentPlan = newPlan;
                     location url="#application.mainURL#/dashboard" addtoken=false;
 
                 } else {
 
                     getAlert(insertBooking.message, 'danger');
-                    location url="#application.mainURL#/dashboard" addtoken=false;
+                    location url="#application.mainURL#/plans" addtoken=false;
 
                 }
 

@@ -303,7 +303,7 @@ if (structKeyExists(form, 'login_btn')) {
             session.user_locale = getLocale();
 
             <!--- Save current plan into a session --->
-            checkPlan = new com.plans().getCurrentPlan(session.customer_id);
+            checkPlan = new com.plans().getCurrentPlan(session.customer_id, objUserLogin.language);
             session.currentPlan = checkPlan;
 
             if (findNoCase("?", objUserLogin.redirect)) {

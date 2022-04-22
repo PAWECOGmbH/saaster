@@ -34,7 +34,7 @@ if (structKeyExists(url, "switch")) {
             session.customer_id = qTenant.intCustomerID;
 
             <!--- Save current plan into a session --->
-            checkPlan = new com.plans().getCurrentPlan(session.customer_id);
+            checkPlan = new com.plans().getCurrentPlan(session.customer_id, session.lng);
             session.currentPlan = checkPlan;
 
             location url="#application.mainURL#/dashboard" addtoken="no";

@@ -15,8 +15,8 @@
         planCurrencyID = variables.planCurrencyID;
     }
     objPlans = new com.plans();
-    planObj = objPlans.getPlans(language='#planLanguage#', groupID=planGroupID, currencyID=planCurrencyID);
-    //dump(planObj);
+    planObj = objPlans.getPlans(language=planLanguage, groupID=planGroupID, currencyID=planCurrencyID);
+    dump(planObj);
 </cfscript>
 
 <cfoutput>
@@ -98,25 +98,31 @@
                     <cfif structKeyExists(session, "customer_id") and session.customer_id gt 0>
 
                         <!--- Check whether the user already have this plan --->
-                        <cfset checkPlan = objPlans.getCurrentPlan(session.customer_id)>
-                        <!--- <cfdump var="#checkPlan#"> --->
+                        <cfset checkPlan = objPlans.getCurrentPlan(session.customer_id, session.lng)>
 
                         <cfif checkPlan.planID eq i.planID>
 
+                            <!--- Button monthly --->
                             <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
                                 <a href="#application.mainURL#/dashboard" class="btn w-100">#getTrans('btnActivate')#</a>
                             </div>
+
+                            <!--- Button yearly --->
+                            <div class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>" style="display: none;">
+                                <a href="#application.mainURL#/dashboard" class="btn w-100">#getTrans('btnActivate')#</a>
+                            </div>
+
 
                         <cfelse>
 
                             <!--- Button monthly --->
                             <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
-                                <a href="#i.bookingLink#" class="btn w-100">#getTrans('btnActivate')#</a>
+                                <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                             </div>
 
                             <!--- Button yearly --->
                             <div class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>" style="display: none;">
-                                <a href="#i.bookingLink#" class="btn w-100">#getTrans('btnActivate')#</a>
+                                <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                             </div>
 
                         </cfif>

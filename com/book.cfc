@@ -2,12 +2,17 @@
 component displayname="book" output="false" {
 
     // Create and encrypt booking link
-    public string function createBookingLink(required numeric planID, required numeric lngID, required numeric currencyID) {
+    public string function createBookingLink(required numeric planID, required numeric lngID, required numeric currencyID, string plan) {
 
         local.argsJason = {};
         local.argsJason['planID'] = arguments.planID;
         local.argsJason['lngID'] = arguments.lngID;
         local.argsJason['currencyID'] = arguments.currencyID;
+        if (structKeyExists(arguments, "plan")) {
+            local.argsJason['plan'] = arguments.plan;
+        } else {
+            local.argsJason['plan'] = "m";
+        }
 
         local.urlEncoded = URLEncodedFormat(serializeJSON(local.argsJason));
         local.base64Link = toBase64(local.urlEncoded);
@@ -28,7 +33,7 @@ component displayname="book" output="false" {
 
 
     // Make a booking
-    public struct function makeBooking(required numeric customerID, required struct planData, boolean itsTest, boolean yearly) {
+    public struct function makeBooking(required numeric customerID, required struct planData, boolean itsTest, string plan) {
 
         variables.argsReturnValue = structNew();
         variables.argsReturnValue['message'] = "";
@@ -47,9 +52,9 @@ component displayname="book" output="false" {
                 local.tillDate = "";
             } else {
                 local.testTillDate = "";
-                if (structKeyExists(arguments, "yearly") and arguments.yearly) {
+                if (structKeyExists(arguments, "plan") and arguments.plan eq "y") {
                     // Yearly subscription
-                    local.tillDate = dateAdd("y", 1, local.startDate);
+                    local.tillDate = dateAdd("yyyy", 1, local.startDate);
                 } else {
                     // Monthly subscription
                     local.tillDate = dateAdd("m", 1, local.startDate);
