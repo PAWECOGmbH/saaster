@@ -118,7 +118,7 @@
                         <div class="card-body">
                             <div class="col-lg-12">
                                 <form class="card" id="submit_form" method="post" action="#application.mainURL#/sysadm/customers">
-                                    <input type="hidden" name="edit_company_btn">
+                                    <input type="hidden" name="edit_company_btn" value="#thisCustomerID#">
                                     <div class="card-header">
                                         <h3 class="card-title">Edit company</h3>
                                     </div>
@@ -187,8 +187,7 @@
                                                     <label class="form-label">Website</label>
                                                     <input type="text" class="form-control" name="website" value="#HTMLEditFormat(custWebsite)#" maxlength="100">
                                                 </div>
-                                            </div>
-                                            <input type="hidden" name="redirect" value="#thisCustomerID#">                                                         
+                                            </div>                                                       
                                         </div>
                                     </div>
                                     <div class="card-header">

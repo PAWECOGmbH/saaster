@@ -21,19 +21,19 @@
         checkEmail = application.objGlobal.checkEmail(form.email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
-            location url="#application.mainURL#/sysadmin/customers/edit/#form.redirect#" addtoken="false";
+            location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";
         }
     
         if (len(trim(form.billing_email))) {
             checkEmail = application.objGlobal.checkEmail(form.billing_email);
             if (!checkEmail) {
                 getAlert('alertEnterEmail', 'warning');
-                location url="#application.mainURL#/sysadmin/customers/edit/#form.redirect#" addtoken="false";
+                location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";
             }
         }
     
         <!--- Save the customer using a function --->
-        objCustomerEdit = application.objCustomer.updateCustomer(form, form.redirect);
+        objCustomerEdit = application.objCustomer.updateCustomer(form, form.edit_company_btn);
     
         if (objCustomerEdit.success) {
             getAlert('msgChangesSaved', 'success');        
@@ -41,11 +41,14 @@
             getAlert(objCustomerEdit.message, 'danger');
         }
 
-        location url="#application.mainURL#/sysadmin/customers/edit/#form.redirect#" addtoken="false";   
+        location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";   
     
     }
 
     if (structKeyExists(form, "edit_user")) {
+        param name="form.customer_id" default="";
+        param name="form.user_id " default="";
+        param name="form.email" default="";
 
         <!--- Check whether the email is valid --->
         checkEmail = application.objGlobal.checkEmail(form.email);
