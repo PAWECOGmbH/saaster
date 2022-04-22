@@ -7,17 +7,7 @@
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
 
-    qCustomer = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT customers.*, countries.strCountryName
-            FROM customers
-            LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-            WHERE customers.blnActive = 1
-            AND customers.intCustomerID = #thisCustomerID#;
-        "
-    )
-
+    qCustomer = application.objCustomer.getCustomerData(thisCustomerID);
     qUsers = application.objUser.getAllUsers(thisCustomerID);
 </cfscript>
 

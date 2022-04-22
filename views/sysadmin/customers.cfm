@@ -184,35 +184,35 @@
                                                 <tr>
                                                     <td data-label="Name">
                                                         <div class="d-flex py-1 align-items-center">
-                                                            <cfif len(trim(strLogo))>
-                                                                <img src="#application.mainURL#/userdata/images/logos/#strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#strCompanyName#">
+                                                            <cfif len(trim(qCustomers.strLogo))>
+                                                                <img src="#application.mainURL#/userdata/images/logos/#qCustomers.strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#qCustomers.strCompanyName#">
                                                             <cfelse>
-                                                                <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(strCompanyName,2)#</div>
+                                                                <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
                                                             </cfif>
-                                                            <a href="#application.mainURL#/sysadmin/customers/details/#intCustomerID#">
+                                                            <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
-                                                                    <div class="font-weight-medium">#strCompanyName#</div>
+                                                                    <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
                                                                 </div>
                                                             </a>
                                                         </div>
                                                     </td>
 
                                                     <td data-label="Contact">
-                                                        <div>#strContactPerson#</div>
-                                                        <div class="text-muted">#strEmail#</div>
+                                                        <div>#qCustomers.strContactPerson#</div>
+                                                        <div class="text-muted">#qCustomers.strEmail#</div>
                                                     </td>
 
                                                     <td data-label="City">
-                                                        #strCity#
+                                                        #qCustomers.strCity#
                                                     </td>
 
                                                     <td data-label="Country">
-                                                        #strCountryName#
+                                                        #qCustomers.strCountryName#
                                                     </td>
 
                                                     <td>
                                                         <div class="btn-list flex-nowrap">
-                                                            <a href="#application.mainURL#/sysadmin/customers/edit/#intCustomerID#" class="btn">
+                                                            <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomers.intCustomerID#" class="btn">
                                                                 Edit
                                                             </a>
                                                         </div>

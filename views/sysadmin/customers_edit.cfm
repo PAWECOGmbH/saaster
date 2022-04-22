@@ -7,18 +7,7 @@
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
 
-    qCustomers = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT customers.*, countries.strCountryName
-            FROM customers
-            LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-            WHERE customers.blnActive = 1
-            AND customers.intCustomerID = #thisCustomerID#;
-        "
-    )
-
-    // getCustomerData you'll find in index.cfm
+    qCustomers = application.objCustomer.getCustomerData(thisCustomerID);
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
     // Set default values
@@ -113,13 +102,6 @@
                             <li class="breadcrumb-item active">#qCustomers.strCompanyName#</li>
                         </ol>
                     </div>
-                    <!---                     
-                        <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                            <a href="##" class="btn btn-primary">
-                                <i class="fas fa-edit pe-3"></i> Edit
-                            </a>
-                        </div> 
-                    --->
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
