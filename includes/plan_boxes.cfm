@@ -1,9 +1,9 @@
 
 <cfscript>
-    param name="variables.planLanguage" default="de";
+    param name="variables.planLanguage" default="en";
     param name="variables.planCurrencyID" default="0";
+    param name="variables.planCountryID" default="0";
     param name="variables.planGroupID" default="0";
-    param name="disableButtonLink" default=false;
     planArgList = "";
     if (len(trim(variables.planLanguage))) {
         planLanguage = variables.planLanguage;
@@ -16,7 +16,7 @@
     }
     objPlans = new com.plans();
     planObj = objPlans.getPlans(language=planLanguage, groupID=planGroupID, currencyID=planCurrencyID);
-    dump(planObj);
+    //dump(planObj);
 </cfscript>
 
 <cfoutput>

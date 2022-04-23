@@ -7,7 +7,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="text-align: center; margin: 0 auto; width: 70%;">
-                <cfset disableButtonLink = true>
                 <cfinclude template="/includes/plan_boxes.cfm">
             </div>
             <div class="modal-footer">

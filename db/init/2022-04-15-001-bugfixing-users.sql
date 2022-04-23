@@ -8,7 +8,6 @@ INSERT INTO `system_translations` VALUES (182, 'msgMaxUsersReached', 'Sie haben 
 INSERT INTO `system_translations` VALUES (183, 'titPayment', 'Zahlung', 'Payment', now());
 INSERT INTO `system_translations` VALUES (184, 'txtMonthlyPayment', 'Bei monatlicher Zahlung', 'On monthly payment', now());
 INSERT INTO `system_translations` VALUES (185, 'txtYearlyPayment', 'Bei jährlicher Zahlung', 'On annual payment', now());
-INSERT INTO `system_translations` VALUES (186, 'statInvoiceOverDue', 'Überfällig', 'Overdue', now());
 
 
 INSERT INTO `system_mappings` VALUES (62, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1, now());
@@ -26,9 +25,9 @@ DROP TRIGGER `deleteSettings`;
 DROP TABLE `system_settings_trans`;
 DROP TABLE `customer_system_settings`;
 
-
 ALTER TABLE `invoices`
-DROP FOREIGN KEY `frn_inv_invstat`,
+DROP FOREIGN KEY `frn_inv_invstat`;
+ALTER TABLE `invoices`
 ADD CONSTRAINT `frn_inv_invstat` FOREIGN KEY (`intPaymentStatusID`) REFERENCES `invoice_status` (`intPaymentStatusID`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 ALTER TABLE `customer_plans`
@@ -39,6 +38,9 @@ MODIFY COLUMN `dtmStartDate` date NULL;
 
 ALTER TABLE `plans`
 ADD COLUMN `blnFree` tinyint(1) NULL DEFAULT 0 AFTER `intNumTestDays`;
+
+ALTER TABLE `currencies`
+ADD COLUMN `strCurrencySign` varchar(20) NULL AFTER `strCurrency`;
 
 
 SET FOREIGN_KEY_CHECKS = 1;

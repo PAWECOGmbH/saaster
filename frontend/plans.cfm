@@ -1,7 +1,7 @@
 <cfscript>
     variables.planLanguage = session.lng;
-    variables.planCurrencyID = 3;
-    variables.planCountryID = 164;
+    variables.planCurrencyID = 0;
+    variables.planCountryID = 0;
     variables.planGroupID = 0;
 </cfscript>
 <cfoutput>

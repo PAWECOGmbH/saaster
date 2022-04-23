@@ -240,9 +240,6 @@ component displayname="plans" output="false" {
             "
         )
 
-        dump(local.getPlan);
-        abort;
-
         local.arrPlan = arrayNew(1);
 
         if (local.getPlan.recordCount) {
