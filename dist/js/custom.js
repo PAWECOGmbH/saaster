@@ -1,35 +1,35 @@
 
+function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
+
+	if (type == 'warning') {
+
+		swal({
+			title: textOne,
+			text: textTwo,
+			icon: "warning",
+			buttons: [buttonOne, buttonTwo],
+			dangerMode: true,
+		})
+		.then((willDelete) => {
+			if (willDelete) {
+				window.location.href = thisURL;
+			}
+		});
+
+	} else {
+
+		swal({
+			title: textOne,
+			text: textTwo,
+			icon: "success"
+		})
+
+	}
+
+};
+
+
 $(document).ready(function(){
-
-	function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
-
-		if (type == 'warning') {
-
-			swal({
-				title: textOne,
-				text: textTwo,
-				icon: "warning",
-				buttons: [buttonOne, buttonTwo],
-				dangerMode: true,
-			})
-			.then((willDelete) => {
-				if (willDelete) {
-					window.location.href = thisURL;
-				}
-			});
-
-		} else {
-
-			swal({
-				title: textOne,
-				text: textTwo,
-				icon: "success"
-			})
-
-		}
-
-	};
-
 
 	$('#dragndrop_body').sortable({
 		handle: ".move",

@@ -15,10 +15,10 @@
     </cfif>
 </p>
 <p class="mb-1">
-Plan status:
-
 
 <cfif session.currentPlan.planID gt 0>
+
+Plan status:
 
     <!--- Test time --->
     <cfif isDate(session.currentPlan.endTestDate)>
@@ -34,7 +34,7 @@ Plan status:
     <cfelseif isDate(session.currentPlan.endDate)>
 
         <cfif session.currentPlan.status eq "active">
-            <span class="text-green">ACTIVE</span> - <a href="#application.mainURL#/plans">Change plan now!</a>
+            <span class="text-green">ACTIVE</span>
             <cfif isArray(session.currentPlan.modulesIncluded)>
                 <p class="mb-1">Included modules:</p>
                 <ul>
@@ -43,7 +43,7 @@ Plan status:
                     </cfloop>
                 </ul>
             </cfif>
-            <p class="mb-1">Your plan is valid until: #lsDateFormat(session.currentPlan.endDate, "Full")#</p>
+            <p class="mb-1">Your plan will be renewed on: #lsDateFormat(session.currentPlan.endDate, "Full")#</p>
         <cfelseif session.currentPlan.status eq "expired">
             <span class="text-red">EXPIRED</span> - <a href="#application.mainURL#/plans">Renew plan now!</a>
         </cfif>

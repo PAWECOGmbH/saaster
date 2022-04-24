@@ -587,6 +587,7 @@ component displayname="plans" output="false" {
         planStruct['endDate'] = "";
         planStruct['endTestDate'] = "";
         planStruct['modulesIncluded'] = "";
+        planStruct['recurring'] = "";
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -597,7 +598,7 @@ component displayname="plans" output="false" {
                 },
                 sql = "
                     SELECT  customer_plans.intPlanID, customer_plans.dtmStartDate, customer_plans.dtmEndDate,
-                            customer_plans.blnPaused, customer_plans.dtmEndTestDate,
+                            customer_plans.blnPaused, customer_plans.dtmEndTestDate, customer_plans.strRecurring,
                             plans.strPlanName, plans.intMaxUsers, plans.blnFree
                     FROM customer_plans
                     INNER JOIN plans ON customer_plans.intPlanID = plans.intPlanID
@@ -661,6 +662,7 @@ component displayname="plans" output="false" {
                 planStruct['planName'] = local.qCurrentPlan.strPlanName;
                 planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
                 planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
+                planStruct['recurring'] = local.qCurrentPlan.strRecurring;
 
                 // Is already a plan defined?
                 if (local.qCurrentPlan.intPlanID gt 0) {

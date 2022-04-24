@@ -44,20 +44,28 @@ component displayname="book" output="false" {
 
         if (isStruct(local.thisPlan)) {
 
+            local.tillDate = "";
+            local.testTillDate = "";
+            local.recurring = "";
+
             if (structKeyExists(arguments, "itsTest") and arguments.itsTest) {
+
                 local.testTillDate = dateAdd("d", local.thisPlan.testDays, local.startDate);
-                local.tillDate = "";
-            } else if (local.thisPlan.itsFree) {
-                local.testTillDate = "";
-                local.tillDate = "";
+
             } else {
-                local.testTillDate = "";
+
                 if (structKeyExists(arguments, "plan") and arguments.plan eq "y") {
+
                     // Yearly subscription
                     local.tillDate = dateAdd("yyyy", 1, local.startDate);
+                    local.recurring = "yearly";
+
                 } else {
+
                     // Monthly subscription
                     local.tillDate = dateAdd("m", 1, local.startDate);
+                    local.recurring = "monthly";
+
                 }
             }
 
@@ -71,11 +79,12 @@ component displayname="book" output="false" {
                         dateStart: {type: "date", value: local.startDate},
                         dateEnd: {type: "date", value: local.tillDate},
                         dateTestEnd: {type: "date", value: local.testTillDate},
-                        paused: {type: "boolean", value: 0}
+                        paused: {type: "boolean", value: 0},
+                        recurring: {type: "varchar", value: local.recurring}
                     },
                     sql = "
-                        INSERT INTO customer_plans (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused)
-                        VALUES (:customerID, :planID, :dateStart, :dateEnd, :dateTestEnd, :paused)
+                        INSERT INTO customer_plans (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                        VALUES (:customerID, :planID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
                     "
                 )
 

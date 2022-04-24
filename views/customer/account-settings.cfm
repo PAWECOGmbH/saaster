@@ -29,33 +29,42 @@
                         </div>
                         <div class="card-body">
                             <div class="list-group">
-                                <a href="./account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titMyCompany')#</b></h4>
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtMyCompanyDescription')#</p>
                                 </a>
-                                <a href="./account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titUser')#</b></h4>
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
                                 </a>
                                 <cfif getCustomerData.intCustParentID eq 0 and session.superadmin>
-                                    <a href="./account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex justify-content-between">
                                             <h4 class="mb-1"><b>#getTrans('titMandanten')#</b></h4>
                                         </div>
                                         <p class="mb-1 ">#getTrans('txtAddOrEditTenants')#</p>
                                     </a>
                                 </cfif>
-                                <a href="./account-settings/invoices" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <a href="#application.mainURL#/account-settings/invoices" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titInvoices')#</b></h4>
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtViewInvoices')#</p>
                                 </a>
-                                <a href="./account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">Pakete und Module</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
                                     </div>
@@ -74,13 +83,13 @@
                     </div>
                     <div class="card-body">
                         <div class="list-group">
-                            <a href="./account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
+                            <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
                                 <div class="d-flex justify-content-between">
                                     <h4 class="mb-1"><b>#getTrans('txtEditProfile')#</b></h4>
                                 </div>
                                 <p class="mb-1 ">#getTrans('txtEditYourProfile')#</p>
                             </a>
-                            <a href="./account-settings/reset-password" class="list-group-item list-group-item-action flex-column align-items-start">
+                            <a href="#application.mainURL#/account-settings/reset-password" class="list-group-item list-group-item-action flex-column align-items-start">
                                 <div class="d-flex justify-content-between">
                                     <h4 class="mb-1"><b>#getTrans('titResetPassword')#</b></h4>
                                 </div>
