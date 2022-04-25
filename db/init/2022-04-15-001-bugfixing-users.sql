@@ -12,13 +12,11 @@ INSERT INTO `system_translations` VALUES (186, 'TitYear', 'Jahr', 'Year', now())
 INSERT INTO `system_translations` VALUES (187, 'TitMonth', 'Monat', 'Month', now());
 
 
-INSERT INTO `system_mappings` VALUES (62, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1, now());
-INSERT INTO `system_mappings` VALUES (63, 'book', 'frontend/book.cfm', 0, 0, 0, now());
-
+INSERT INTO `system_mappings` VALUES (66, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1, now());
+INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/book.cfm', 0, 0, 0, now());
 
 
 UPDATE system_mappings SET blnOnlyAdmin = 0 WHERE intSystemMappingID = 33;
-
 
 
 DROP TRIGGER `insertSettings`;
@@ -44,10 +42,5 @@ ADD COLUMN `blnFree` tinyint(1) NULL DEFAULT 0 AFTER `intNumTestDays`;
 
 ALTER TABLE `currencies`
 ADD COLUMN `strCurrencySign` varchar(20) NULL AFTER `strCurrency`;
-
-
-ALTER TABLE `database`.`customer_plans`
-ADD COLUMN `strRecurring` varchar(10) NULL AFTER `blnPaused`;
-
 
 SET FOREIGN_KEY_CHECKS = 1;
