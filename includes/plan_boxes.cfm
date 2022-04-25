@@ -16,7 +16,7 @@
     }
     objPlans = new com.plans();
     planObj = objPlans.getPlans(language=planLanguage, groupID=planGroupID, currencyID=planCurrencyID);
-    dump(planObj);
+    //dump(planObj);
 </cfscript>
 
 <cfoutput>
