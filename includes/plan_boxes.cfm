@@ -16,7 +16,7 @@
     }
     objPlans = new com.plans();
     planObj = objPlans.getPlans(language=planLanguage, groupID=planGroupID, currencyID=planCurrencyID);
-    //dump(planObj);
+    dump(planObj);
 </cfscript>
 
 <cfoutput>
@@ -56,7 +56,7 @@
                                 <cfif i.priceMonthly eq 0>
                                     #getTrans('txtFree')#
                                 <cfelse>
-                                    <span class="currency">#i.currency#</span> #lsnumberFormat(i.priceMonthly, '__,___.__')#
+                                    <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceMonthly, '__,___.__')#
                                 </cfif>
                             </cfif>
                         </div>
@@ -77,7 +77,7 @@
                                 <cfif i.priceMonthly eq 0>
                                     #getTrans('txtFree')#
                                 <cfelse>
-                                    <span class="currency">#i.currency#</span> #lsnumberFormat(i.priceYearly, '__,___.__')#
+                                    <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceYearly, '__,___.__')#
                                 </cfif>
                             </cfif>
                         </div>
@@ -145,7 +145,22 @@
 
             </div>
 
+            <cfif !i.itsFree and !i.onRequest>
+
+                <!--- Price monthly --->
+                <div class="row pt-2 small monthly">
+                    <p class="text-muted">#i.vat_text_monthly#</p>
+                </div>
+
+                <!--- Price yearly --->
+                <div class="row pt-2 small yearly" style="display: none;">
+                    <p class="text-muted">#i.vat_text_yearly#</p>
+                </div>
+
+            </cfif>
+
         </div>
+
     </cfloop>
 </div>
 </cfoutput>

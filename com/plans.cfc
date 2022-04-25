@@ -70,16 +70,17 @@ component displayname="plans" output="false" {
             sql = "
                 SELECT
                 plans.intPlanID, plans.intPlanGroupID, plans.blnFree,
+                currencies.strCurrencyISO, currencies.strCurrencySign,
                 plan_prices.intCurrencyID,
-                COALESCE(blnRecommended,0) as blnRecommended,
-                COALESCE(intMaxUsers,0) as intMaxUsers,
-                COALESCE(intNumTestDays,0) as intNumTestDays,
-                COALESCE(decPriceMonthly,0) as decPriceMonthly,
-                COALESCE(decPriceYearly,0) as decPriceYearly,
-                COALESCE(blnOnRequest,0) as blnOnRequest,
-                COALESCE(decVat,0) as decVat,
-                COALESCE(blnIsNet,0) as blnIsNet,
-                COALESCE(intVatType,0) as intVatType,
+                COALESCE(plans.blnRecommended,0) as blnRecommended,
+                COALESCE(plans.intMaxUsers,0) as intMaxUsers,
+                COALESCE(plans.intNumTestDays,0) as intNumTestDays,
+                COALESCE(plan_prices.decPriceMonthly,0) as decPriceMonthly,
+                COALESCE(plan_prices.decPriceYearly,0) as decPriceYearly,
+                COALESCE(plan_prices.blnOnRequest,0) as blnOnRequest,
+                COALESCE(plan_prices.decVat,0) as decVat,
+                COALESCE(plan_prices.blnIsNet,0) as blnIsNet,
+                COALESCE(plan_prices.intVatType,0) as intVatType,
                 (
                     IF
                         (
@@ -199,30 +200,7 @@ component displayname="plans" output="false" {
                             ),
                             plans.strBookingLink
                         )
-                ) as strBookingLink,
-                (
-                    IF
-                        (
-                            LENGTH(
-                                (
-                                    SELECT strCurrencyISO
-                                    FROM currencies
-                                    WHERE intCurrencyID = plan_prices.intCurrencyID
-                                )
-                            ),
-                            (
-                                SELECT strCurrencyISO
-                                FROM currencies
-                                WHERE intCurrencyID = plan_prices.intCurrencyID
-                            ),
-                            (
-                                SELECT strCurrencyISO
-                                FROM currencies
-                                WHERE intCurrencyID = :currencyID
-                            )
-                        )
-                ) as strCurrencyISO
-
+                ) as strBookingLink
 
                 FROM plan_groups
 
@@ -232,6 +210,9 @@ component displayname="plans" output="false" {
                 LEFT JOIN plan_prices ON 1=1
                 AND plans.intPlanID = plan_prices.intPlanID
                 AND plan_prices.intCurrencyID = :currencyID
+
+                LEFT JOIN currencies ON 1=1
+                AND plan_prices.intCurrencyID = currencies.intCurrencyID
 
                 WHERE !ISNULL(plans.intPlanID)
 
@@ -268,7 +249,7 @@ component displayname="plans" output="false" {
                 local.structPlan['isNet'] = 1;
                 local.structPlan['vatType'] = 1;
                 local.structPlan['currency'] = '';
-
+                local.structPlan['currencySign'] = '';
 
                 if (len(trim(local.getPlan.strGroupName))) {
                     local.structPlan['groupName'] = local.getPlan.strGroupName;
@@ -319,6 +300,70 @@ component displayname="plans" output="false" {
                 if (isBoolean(local.getPlan.blnRecommended)) {
                     local.structPlan['currency'] = local.getPlan.strCurrencyISO;
                 }
+                if (len(trim(local.getPlan.strCurrencySign))) {
+                    local.structPlan['currencySign'] = local.getPlan.strCurrencySign;
+                } else {
+                    local.structPlan['currencySign'] = local.getPlan.strCurrencyISO;
+                }
+
+                <!--- Calc prices --->
+                objInvoice = new com.invoices();
+
+                local.vat_amount_monthly = objInvoice.calcVat(local.getPlan.decPriceMonthly, local.getPlan.blnIsNet, local.getPlan.decVat);
+                local.subtotal_price_monthly = local.getPlan.decPriceMonthly;
+
+                local.vat_amount_yearly = objInvoice.calcVat(local.getPlan.decPriceYearly, local.getPlan.blnIsNet, local.getPlan.decVat);
+                local.subtotal_price_yearly = local.getPlan.decPriceYearly;
+
+
+                <!--- Add up subtotal and vat --->
+                if (local.getPlan.blnIsNet eq 1) {
+                    local.total_price_monthly = local.subtotal_price_monthly + local.vat_amount_monthly;
+                    local.total_price_yearly = local.subtotal_price_yearly + local.vat_amount_yearly;
+                } else {
+                    local.total_price_monthly = local.subtotal_price_monthly;
+                    local.total_price_yearly = local.subtotal_price_yearly;
+                }
+
+                <!--- Define vat text and sum --->
+                if (local.getPlan.blnIsNet eq 1) {
+                    if (local.getPlan.intVatType eq 1) {
+                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtPlusVat', arguments.language) & ' ' & local.getPlan.decVat & '%: ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_monthly, '__,___.__');
+                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtPlusVat', arguments.language) & ' ' & local.getPlan.decVat & '%: ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_yearly, '__,___.__');
+                    } else if (local.getPlan.intVatType eq 3) {
+                        local.total_price_monthly = local.subtotal_price_monthly;
+                        local.total_price_yearly = local.subtotal_price_yearly;
+                        local.structPlan['vat_text_monthly']  = "";
+                        local.structPlan['vat_text_yearly']  = "";
+                    } else {
+                        local.total_price_monthly = local.subtotal_price_monthly;
+                        local.total_price_yearly = local.subtotal_price_yearly;
+                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
+                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
+                    }
+                } else {
+                    if (local.getPlan.intVatType eq 1) {
+                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtVatIncluded', arguments.language) & ' ' & local.getPlan.decVat & '%' & ': ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_monthly, '__,___.__');
+                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtVatIncluded', arguments.language) & ' ' & local.getPlan.decVat & '%' & ': ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_yearly, '__,___.__');
+                    } else if (local.getPlan.intVatType eq 3) {
+                        local.total_price_monthly = local.subtotal_price_monthly;
+                        local.total_price_yearly = local.subtotal_price_yearly;
+                        local.structPlan['vat_text_monthly']  = "";
+                        local.structPlan['vat_text_yearly']  = "";
+                    } else {
+                        local.total_price_monthly = local.subtotal_price_monthly;
+                        local.total_price_yearly = local.subtotal_price_yearly;
+                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
+                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
+                    }
+                }
+
+                <!--- Round total according customers setting --->
+                local.total_price_monthly = objInvoice.roundAmount(local.total_price_monthly, application.objGlobal.getSetting(0, 'settingRoundFactor'));
+                local.total_price_yearly = objInvoice.roundAmount(local.total_price_yearly, application.objGlobal.getSetting(0, 'settingRoundFactor'));
+
+                local.structPlan['priceMonthlyAfterVAT'] = local.total_price_monthly;
+                local.structPlan['priceYearlyAfterVAT'] = local.total_price_yearly;
 
                 // Building the booking link
                 if (!len(trim(local.getPlan.strBookingLink))) {
@@ -353,11 +398,15 @@ component displayname="plans" output="false" {
             local.structPlan['testDays'] = 0;
             local.structPlan['priceMonthly'] = 0;
             local.structPlan['priceYearly'] = 0;
+            local.structPlan['priceMonthlyAfterVAT'] = 0;
+            local.structPlan['priceYearlyAfterVAT'] = 0;
             local.structPlan['onRequest'] = 0;
             local.structPlan['vat'] = 0;
             local.structPlan['isNet'] = 1;
             local.structPlan['vatType'] = 1;
             local.structPlan['currency'] = 'USD';
+            local.structPlan['currencySign'] = "$";
+            local.structPlan['vat_text'] = "Total";
 
             arrayAppend(local.arrPlan, local.structPlan);
 

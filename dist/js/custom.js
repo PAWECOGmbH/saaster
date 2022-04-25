@@ -28,6 +28,65 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 
 };
 
+// Save payment
+function sendPayment() {
+	var paymentModal = $('#dyn_modal-content');
+	var formData = $("#sendPayment").serialize();
+	var formAction = $("#sendPayment").attr("action");
+	var formReturn = $("#sendPayment").data("return");
+	$.ajax({
+		type: "POST",
+		url: formAction,
+		data: formData,
+		success: function (){
+			paymentModal.load(formReturn);
+		}
+	});
+}
+
+// Delete payment
+function deletePayment(paymentID) {
+
+	var paymentModal = $('#dyn_modal-content');
+	var formData = 'delete=' + paymentID;
+	var formAction = $("#sendPayment").attr("action");
+	var formReturn = $("#sendPayment").data("return");
+	$.ajax({
+		type: "POST",
+		url: formAction,
+		data: formData,
+		success: function(){
+			paymentModal.load(formReturn);
+		}
+	});
+}
+
+// for invoices (sysadmin)
+function showResult(str) {
+	if (str.length==0) {
+		document.getElementById("livesearch").innerHTML="";
+		return;
+	}
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function() {
+		if (this.readyState==4 && this.status==200) {
+			document.getElementById("livesearch").innerHTML=this.responseText;
+		}
+	}
+	xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
+	xmlhttp.send();
+}
+function intoTf(c, i) {
+	var customer_name = document.getElementById("searchfield");
+	customer_name.value = c;
+	var customer_id = document.getElementById("customer_id");
+	customer_id.value = i;
+}
+function hideResult() {
+	document.getElementById("livesearch").innerHTML="";
+	return;
+}
+
 
 $(document).ready(function(){
 
@@ -102,41 +161,6 @@ $(document).ready(function(){
 		});
 	});
 
-
-	// Save payment
-	function sendPayment() {
-		var paymentModal = $('#dyn_modal-content');
-		var formData = $("#sendPayment").serialize();
-		var formAction = $("#sendPayment").attr("action");
-		var formReturn = $("#sendPayment").data("return");
-		$.ajax({
-			type: "POST",
-			url: formAction,
-			data: formData,
-			success: function (){
-				paymentModal.load(formReturn);
-			}
-		});
-	}
-
-	// Delete payment
-	function deletePayment(paymentID) {
-
-		var paymentModal = $('#dyn_modal-content');
-		var formData = 'delete=' + paymentID;
-		var formAction = $("#sendPayment").attr("action");
-		var formReturn = $("#sendPayment").data("return");
-		$.ajax({
-			type: "POST",
-			url: formAction,
-			data: formData,
-			success: function(){
-				paymentModal.load(formReturn);
-			}
-		});
-	}
-
-
 	// Load trumbowyg editor
 	$('.editor').each(function(index, element){
 		var $this = $(element);
@@ -146,32 +170,6 @@ $(document).ready(function(){
 			]
 		});
 	});
-
-	// for invoices (sysadmin)
-	function showResult(str) {
-		if (str.length==0) {
-			document.getElementById("livesearch").innerHTML="";
-			return;
-		}
-		var xmlhttp=new XMLHttpRequest();
-		xmlhttp.onreadystatechange=function() {
-			if (this.readyState==4 && this.status==200) {
-				document.getElementById("livesearch").innerHTML=this.responseText;
-			}
-		}
-		xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
-		xmlhttp.send();
-	}
-	function intoTf(c, i) {
-		var customer_name = document.getElementById("searchfield");
-		customer_name.value = c;
-		var customer_id = document.getElementById("customer_id");
-		customer_id.value = i;
-	}
-	function hideResult() {
-		document.getElementById("livesearch").innerHTML="";
-		return;
-	}
 
 	// Change plan prices
 	$('input[type=radio][name=payment_changer]').change(function() {

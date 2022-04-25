@@ -796,7 +796,7 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Calculating vat --->
-    private numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
+    public numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
 
         if (arguments.isNet eq 0) {
             local.cvat = 10 & arguments.rate;
@@ -810,7 +810,7 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Round prices depending on settings --->
-    private numeric function roundAmount(required numeric amount, required numeric factor) {
+    public numeric function roundAmount(required numeric amount, required numeric factor) {
 
         if (arguments.factor eq 5) {
             local.rounded_price = round(arguments.amount*20)/20;
