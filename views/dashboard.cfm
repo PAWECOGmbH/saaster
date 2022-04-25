@@ -41,8 +41,7 @@
                         <div class="col-lg-#qWidgets.intSizeRatio#">
                             <div class="card">
                                 <div class="card-body">
-                                    <div class="widget" data-href="#application.mainURL#/#qWidgets.strFilePath#">
-                                    </div>
+                                    <cfinclude template="/#qWidgets.strFilePath#">
                                 </div>
                             </div>
                         </div>

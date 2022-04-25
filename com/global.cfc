@@ -23,7 +23,7 @@ component displayname="globalFunctions" {
             }
 
             <!--- look for db entry --->
-            qCheckSEF = queryExecute(
+            local.qCheckSEF = queryExecute(
 
                 options = {datasource = application.datasource},
                 params = {
@@ -41,11 +41,11 @@ component displayname="globalFunctions" {
                 "
             )
 
-            if (qCheckSEF.recordCount) {
-                local.returnStruct['thisPath'] = qCheckSEF.strPath;
-                local.returnStruct['onlyAdmin'] = trueFalseFormat(qCheckSEF.blnOnlyAdmin);
-                local.returnStruct['onlySuperAdmin'] = trueFalseFormat(qCheckSEF.blnOnlySuperAdmin);
-                local.returnStruct['onlySysAdmin'] = trueFalseFormat(qCheckSEF.blnOnlySysAdmin);
+            if (local.qCheckSEF.recordCount) {
+                local.returnStruct['thisPath'] = local.qCheckSEF.strPath;
+                local.returnStruct['onlyAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlyAdmin);
+                local.returnStruct['onlySuperAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySuperAdmin);
+                local.returnStruct['onlySysAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySysAdmin);
             }
 
         } else {
@@ -54,7 +54,7 @@ component displayname="globalFunctions" {
             local.thisPath = replace(replace(cgi.request_url, application.mainURL, ""), "/", "", "one");
 
             <!--- look for db entry --->
-            qCheckSEF = queryExecute(
+            local.qCheckSEF = queryExecute(
 
                 options = {datasource = application.datasource},
                 params = {
@@ -72,7 +72,7 @@ component displayname="globalFunctions" {
                 "
             )
 
-            if (qCheckSEF.recordCount) {
+            if (local.qCheckSEF.recordCount) {
                 local.returnStruct['thisPath'] = local.thisPath;
                 local.returnStruct['noaccess'] = true;
             } else {

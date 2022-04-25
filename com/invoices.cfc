@@ -50,7 +50,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
         } else {
-            local.prefix = application.objGlobal.getSetting('settingInvoicePrefix');
+            local.prefix = application.objGlobal.getSetting(local.customerID, 'settingInvoicePrefix');
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
@@ -70,12 +70,12 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
         } else {
-            local.currency = IF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
+            local.currency = IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = 1;
+            local.isNet = application.objGlobal.getSetting(local.customerID, 'settingInvoiceNet');
         }
         if (structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0) {
             local.paymentStatusID = invoiceData.paymentStatusID;
@@ -85,7 +85,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = 1;
+            local.vatType = application.objGlobal.getSetting(local.customerID, 'settingStandardVatType');
         }
 
         <!--- Total text --->
@@ -179,17 +179,17 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
         } else {
-            local.currency = IF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
+            local.currency = IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = 1;
+            local.isNet = application.objGlobal.getSetting(local.customerID, 'settingStandardNet');
         }
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = 1;
+            local.vatType = application.objGlobal.getSetting(local.customerID, 'settingStandardVatType');
         }
 
         <!--- Total text --->
@@ -257,6 +257,25 @@ component displayname="invoices" output="false" {
 
 
     }
+
+
+    public void function deleteInvoice(required numeric invoiceID) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                invoiceID: {type: "numeric", value: arguments.invoiceID}
+            },
+            sql = "
+                DELETE FROM invoices WHERE intInvoiceID = :invoiceID
+            "
+        )
+
+        return;
+
+    }
+
+
 
     <!--- Insert invoice positions --->
     public struct function insertInvoicePositions(required struct invoicePosData) {
@@ -777,7 +796,7 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Calculating vat --->
-    private numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
+    public numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
 
         if (arguments.isNet eq 0) {
             local.cvat = 10 & arguments.rate;
@@ -791,7 +810,7 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Round prices depending on settings --->
-    private numeric function roundAmount(required numeric amount, required numeric factor) {
+    public numeric function roundAmount(required numeric amount, required numeric factor) {
 
         if (arguments.factor eq 5) {
             local.rounded_price = round(arguments.amount*20)/20;

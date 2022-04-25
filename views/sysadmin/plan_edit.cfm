@@ -118,10 +118,17 @@
                                                 </a>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
-                                                    <i class="fas fa-coins pe-3"></i>
-                                                    Prices
-                                                </a>
+                                                <cfif qPlan.blnFree>
+                                                    <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                <cfelse>
+                                                    <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                </cfif>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="##features" class="nav-link #features#" data-bs-toggle="tab">

@@ -16,9 +16,6 @@ application.mainURL = "http://localhost";
 <!--- db datasource --->
 application.datasource = "database";
 
-<!--- Set local --->
-SetLocale("german (switzerland)");
-
 <!--- Default image for users (must be online) --->
 application.userTempImg = "http://www.clker.com/cliparts/A/Y/O/m/o/N/placeholder-md.png";
 

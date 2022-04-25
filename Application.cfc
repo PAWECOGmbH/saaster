@@ -85,6 +85,13 @@ component displayname="Application" output="false" hint="Handle the application.
             session.langStruct = application.objGlobal.initLanguages(session.lng);
         }
 
+        <!--- Set local --->
+        if (structKeyExists(session, "user_locale")) {
+            setLocale(session.user_locale);
+        } else {
+            setLocale(getLocale());
+        }
+
         return true;
 
     }

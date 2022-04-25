@@ -1,5 +1,5 @@
 <cfscript>
-    param name="session.step" default="";
+    param name="session.step" default="1";
     param name="session.first_name" default="";
     param name="session.name" default="";
     param name="session.company" default="";
@@ -7,7 +7,7 @@
 </cfscript>
 
 <cfoutput>
-<body  class=" border-top-wide border-primary d-flex flex-column">
+<div class="border-top-wide border-primary d-flex flex-column">
     <div class="page page-center">
         <div class="container-tight py-4">
             <cfif session.step eq 1>
@@ -85,7 +85,7 @@
             </cfif>
         </div>
     </div>
-</body>
+</div>
 </cfoutput>
 
 

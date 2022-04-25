@@ -22,7 +22,7 @@ WHERE intInvoiceID = NEW.intInvoiceID;
 -- ----------------------------
 INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '1', 'Which vat type should be set by default?', now());
 INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.', now());
-INSERT INTO `system_settings` VALUES (5, 'settingInvoicePrefix', '1', 'Decide whether the invoices are issued "net" by default.', now());
+INSERT INTO `system_settings` VALUES (5, 'settingInvoiceNet', '1', 'Decide whether the invoices are issued "net" by default.', now());
 
 -- ----------------------------
 -- Records of system_mappings

@@ -61,22 +61,9 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
 
-    queryExecute(
-        options = {datasource = application.datasource, result="getAnswer"},
-        params = {
-            invoiceID: {type: "numeric", value: url.delete}
-        },
-        sql = "
-            DELETE FROM invoices WHERE intInvoiceID = :invoiceID
-        "
-    )
+    objInvoice.deleteInvoice(url.delete);
 
-    if (getAnswer.recordCount) {
-        getAlert('The invoice has been successfully deleted.', 'success');
-    } else {
-        getAlert('No invoice found!', 'danger');
-    }
-
+    getAlert('The invoice has been successfully deleted.', 'success');
     location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
 
 }
