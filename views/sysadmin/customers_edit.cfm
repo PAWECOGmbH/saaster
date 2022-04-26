@@ -10,6 +10,11 @@
     qCustomers = application.objCustomer.getCustomerData(thisCustomerID);
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
+    
+    if(not qCustomers.recordCount){
+        location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+    }
+
     // Set default values
     custCompany = qCustomers.strCompanyName;
     custContactPerson = qCustomers.strContactPerson;
