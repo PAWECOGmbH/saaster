@@ -70,12 +70,12 @@
                                     <h3 class="card-title">Title: #qInvoice.title#</h3>
                                     <p>
                                     <cfif len(trim(qCustomer.strCompanyName))>
-                                        Customer: <a href="##?">#qCustomer.strCompanyName#</a><cfif invoicePersonID gt 0> - </cfif>
+                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#qCustomer.strCompanyName#</a><cfif invoicePersonID gt 0> - </cfif>
                                     <cfelseif len(trim(qCustomer.strContactPerson)) and invoicePersonID eq 0>
-                                        <p>Customer: <a href="##?">#qCustomer.strContactPerson#</a></p>
+                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#qCustomer.strContactPerson#</a></p>
                                     </cfif>
                                     <cfif invoicePersonID gt 0>
-                                        <a href="##?">#invoicePerson#</a>
+                                        <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#invoicePerson#</a>
                                     </cfif>
                                     </p>
                                 </div>
