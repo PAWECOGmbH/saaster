@@ -205,9 +205,9 @@
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
 </div>
-<cfinclude template="plans_preview.cfm">
 
 <cfif qPlans.recordCount gt 1>
+    <cfinclude template="plans_preview.cfm">
     <cfoutput>
     <script>
         // Save new prio
