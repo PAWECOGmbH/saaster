@@ -9,6 +9,10 @@
 
     qCustomer = application.objCustomer.getCustomerData(thisCustomerID);
     qUsers = application.objUser.getAllUsers(thisCustomerID);
+
+    if(not qCustomer.recordCount){
+        location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+    }
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
