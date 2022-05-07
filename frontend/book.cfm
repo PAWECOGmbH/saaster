@@ -8,6 +8,7 @@
     objBook = new com.book();
     objInvoice = new com.invoices();
 
+    // This is the variable for the payment type and can be overwritten by the PSP.
     thisPaymentType = "Credit card";
 
     if (!structKeyExists(url, "plan")) {
@@ -19,11 +20,10 @@
         location url="#application.mainURL#/login" addtoken=false;
     }
 
-    failed = false;
-
     // decoding base64 value
     planStruct = objBook.decryptBookingLink(url.plan);
 
+    failed = false;
 
     // Check whether we have all the needed information
     if (!structKeyExists(planStruct, "planID")) {
@@ -50,7 +50,7 @@
     variables.currencyID = planStruct.currencyID;
     variables.plan = planStruct.plan;
 
-    // and getting more plan infos
+    // Get more plan infos
     lngIso = getAnyLanguage(variables.lngID).iso;
     planDetails = objPlans.getPlanDetail(variables.planID, lngIso, variables.currencyID);
 
@@ -76,16 +76,23 @@
 
     }
 
-
-
-
     // Is there already a plan?
     if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
 
-        // If its the same plan, send to the dashboard
+        // Is it the same plan?
         if (currentPlan.planID eq planDetails.planID) {
 
-            location url="#application.mainURL#/dashboard" addtoken=false;
+            // If the plan has been expired, renew
+            if (currentPlan.status eq "expired") {
+
+                // Do nothing and let the customer book... down to the next step
+
+            } else {
+
+                // Back to dashboard
+                location url="#application.mainURL#/dashboard" addtoken=false;
+            }
+
 
         } else {
 
@@ -182,10 +189,11 @@
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
+
                     if (newInvoice.success) {
                         invoiceID = newInvoice.newInvoiceID;
                     } else {
-                        getAlert(insertBooking.message, 'danger');
+                        getAlert(newInvoice.message, 'danger');
                         location url="#application.mainURL#/dashboard" addtoken=false;
                     }
 
@@ -233,7 +241,7 @@
 
                     if (!insPayment.success) {
                         objInvoice.deleteInvoice(invoiceID);
-                        getAlert(insPositions.message, 'danger');
+                        getAlert(insPayment.message, 'danger');
                     } else {
                         // If everything went well, save plan into the session
                         session.currentPlan = newPlan;

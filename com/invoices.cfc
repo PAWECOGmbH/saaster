@@ -1046,11 +1046,15 @@ component displayname="invoices" output="false" {
         } else {
             local.type = "";
         }
+        if (structKeyExists(arguments.paymentStruct, "customerID")) {
+            local.customerID = paymentStruct.customerID;
+        } else {
+            local.customerID = 0;
+        }
 
         local.invoiceID = paymentStruct.invoiceID;
         local.date = paymentStruct.date;
         local.amount = paymentStruct.amount;
-
 
         try {
 
@@ -1058,13 +1062,14 @@ component displayname="invoices" output="false" {
                 options = {datasource = application.datasource},
                 params = {
                     invoiceID: {type: "numeric", value: local.invoiceID},
+                    customerID: {type: "numeric", value: local.customerID},
                     paydate: {type: "date", value: local.date},
                     amount: {type: "decimal", value: local.amount, scale: 2},
                     type: {type: "varchar", value: local.type}
                 },
                 sql = "
-                    INSERT INTO payments (intInvoiceID, decAmount, dtmPayDate, strPaymentType)
-                    VALUES (:invoiceID, :amount, :paydate, :type)
+                    INSERT INTO payments (intInvoiceID, intCustomerID, decAmount, dtmPayDate, strPaymentType)
+                    VALUES (:invoiceID, :customerID, :amount, :paydate, :type)
                 "
             )
 
