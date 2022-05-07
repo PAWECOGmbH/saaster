@@ -336,6 +336,7 @@ CREATE TABLE `currencies`  (
   `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `intPrio` int(11) NOT NULL,
   `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
   `blnActive` tinyint(1) NOT NULL DEFAULT 0,
@@ -343,10 +344,10 @@ CREATE TABLE `currencies`  (
   PRIMARY KEY (`intCurrencyID`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', 1, 0, 0, now());
-INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', 2, 0, 0, now());
-INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 3, 0, 0, now());
-INSERT INTO `currencies` VALUES (4, 'GBP', 'Pound sterling', 'Pound sterling', 4, 0, 0, now());
+INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1, now());
+INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', 'EUR', 2, 0, 1, now());
+INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 'CHF', 3, 0, 0, now());
+INSERT INTO `currencies` VALUES (4, 'GBP', 'Pound sterling', 'Pound sterling', '£', 4, 0, 0, now());
 
 
 -- ----------------------------
@@ -457,12 +458,14 @@ CREATE TABLE `customer_modules`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `customer_plans`;
 CREATE TABLE `customer_plans`  (
-  `intCustomerPlanID` int(11) NOT NULL,
+  `intCustomerPlanID` int(11) NOT NULL AUTO_INCREMENT,
   `intCustomerID` int(11) NOT NULL,
   `intPlanID` int(11) NOT NULL,
-  `dtmStartDate` date NOT NULL,
-  `dtmEndDate` date NOT NULL,
+  `dtmStartDate` date NULL,
+  `dtmEndDate` date NULL,
+  `dtmEndTestDate` date NULL,
   `blnPaused` tinyint(1) NOT NULL DEFAULT 0,
+  `strRecurring` varchar(10) NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intCustomerPlanID`) USING BTREE,
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
@@ -471,22 +474,6 @@ CREATE TABLE `customer_plans`  (
   CONSTRAINT `frn_cp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Table structure for customer_system_settings
--- ----------------------------
-DROP TABLE IF EXISTS `customer_system_settings`;
-CREATE TABLE `customer_system_settings`  (
-  `intCustSystSettingID` int(11) NOT NULL AUTO_INCREMENT,
-  `intCustomerID` int(11) NOT NULL,
-  `intSystSettingID` int(11) NOT NULL,
-  `strSettingValue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`intCustSystSettingID`) USING BTREE,
-  INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
-  INDEX `_intSystSettingID`(`intSystSettingID`) USING BTREE,
-  CONSTRAINT `frn_css_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_css_system_settings` FOREIGN KEY (`intSystSettingID`) REFERENCES `system_settings` (`intSystSettingID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for customer_user
@@ -531,7 +518,6 @@ CREATE TABLE `customers`  (
   `strBillingEmail` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strBillingAddress` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `strBillingInfo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `blnOwnerAccount` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'The owner account is assigned to the owner of the present project.',
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intCustomerID`) USING BTREE,
   UNIQUE INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
@@ -574,15 +560,15 @@ CREATE TABLE `invoice_status`  (
   UNIQUE INDEX `_intPaymentStatusID`(`intPaymentStatusID`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
-
 -- ----------------------------
 -- Records of invoice_status
 -- ----------------------------
-INSERT INTO `invoice_status` VALUES (1, 'statInvoiceOpen', 'red');
-INSERT INTO `invoice_status` VALUES (2, 'statInvoicePaid', 'darkgreen');
-INSERT INTO `invoice_status` VALUES (3, 'statInvoicePartPaid', 'orange');
-INSERT INTO `invoice_status` VALUES (4, 'statInvoiceOverPay', 'darkblue');
-INSERT INTO `invoice_status` VALUES (5, 'statInvoiceCanceled', 'darkred');
+INSERT INTO `invoice_status` VALUES (1, 'statInvoiceDraft', 'muted');
+INSERT INTO `invoice_status` VALUES (2, 'statInvoiceOpen', 'blue');
+INSERT INTO `invoice_status` VALUES (3, 'statInvoicePaid', 'green');
+INSERT INTO `invoice_status` VALUES (4, 'statInvoicePartPaid', 'orange');
+INSERT INTO `invoice_status` VALUES (5, 'statInvoiceCanceled', 'purple');
+INSERT INTO `invoice_status` VALUES (6, 'statInvoiceOverDue', 'red');
 
 
 -- ----------------------------
@@ -608,6 +594,7 @@ DROP TABLE IF EXISTS `invoices`;
 CREATE TABLE `invoices`  (
   `intInvoiceID` int(11) NOT NULL AUTO_INCREMENT,
   `intCustomerID` int(11) NOT NULL,
+  `intUserID` int(11) NULL DEFAULT NULL,
   `intInvoiceNumber` int(11) NOT NULL,
   `strPrefix` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strInvoiceTitle` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
@@ -627,7 +614,7 @@ CREATE TABLE `invoices`  (
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
   INDEX `_intPaymentStatusID`(`intPaymentStatusID`) USING BTREE,
   CONSTRAINT `frn_inv_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_inv_invstat` FOREIGN KEY (`intPaymentStatusID`) REFERENCES `invoice_status` (`intPaymentStatusID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `frn_inv_invstat` FOREIGN KEY (`intPaymentStatusID`) REFERENCES `invoice_status` (`intPaymentStatusID`) ON DELETE RESTRICT ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 
@@ -656,19 +643,38 @@ CREATE TABLE `modules`  (
 DROP TABLE IF EXISTS `modules_trans`;
 CREATE TABLE `modules_trans`  (
   `intModulTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intModulID` int(11) NOT NULL,
+  `intModuleID` int(11) NOT NULL,
   `intLanguageID` int(11) NOT NULL,
-  `strModuleName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strModuleName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strShortDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `strPicture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intModulTransID`) USING BTREE,
-  INDEX `_intModulID`(`intModulID`) USING BTREE,
+  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
   INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
-  CONSTRAINT `frn_modules_trans` FOREIGN KEY (`intModulID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_mt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT `frn_mt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_modules_trans` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
+-- ----------------------------
+-- Table structure for modules_prices
+-- ----------------------------
+DROP TABLE IF EXISTS `modules_prices`;
+CREATE TABLE `modules_prices`  (
+  `intModulePriceID` int(11) NOT NULL AUTO_INCREMENT,
+  `intModuleID` int(11) NOT NULL,
+  `intCurrencyID` int(11) NOT NULL,
+  `decPriceMonthly` decimal(10, 2) NULL DEFAULT NULL,
+  `decPriceYearly` decimal(10, 2) NULL DEFAULT NULL,
+  `decVat` decimal(10, 2) NULL DEFAULT NULL,
+  `blnIsNet` tinyint(1) NOT NULL DEFAULT 1,
+  `intVatType` int(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`intModulePriceID`) USING BTREE,
+  INDEX `_intCurrencyID`(`intCurrencyID`) USING BTREE,
+  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
+  CONSTRAINT `frn_mp_currencies` FOREIGN KEY (`intCurrencyID`) REFERENCES `currencies` (`intCurrencyID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_mp_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for notifications
@@ -735,10 +741,10 @@ DROP TABLE IF EXISTS `payments`;
 CREATE TABLE `payments`  (
   `intPaymentID` int(11) NOT NULL AUTO_INCREMENT,
   `intInvoiceID` int(11) NOT NULL,
-  `intCustomerID` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `intCustomerID` int(11) NOT NULL,
   `decAmount` decimal(10, 2) NOT NULL,
-  `strCurrency` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dtmPayDate` date NOT NULL,
+  `dtmPayDate` datetime NOT NULL,
+  `strPaymentType` varchar(50) NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intPaymentID`) USING BTREE,
   INDEX `_intInvoiceID`(`intInvoiceID`) USING BTREE,
@@ -852,6 +858,7 @@ CREATE TABLE `plans`  (
   `blnRecommended` tinyint(1) NULL DEFAULT 0,
   `intMaxUsers` int(11) NULL DEFAULT NULL,
   `intNumTestDays` int(11) NULL DEFAULT 0,
+  `blnFree` tinyint(1) NULL DEFAULT 0,
   `intPrio` int(11) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intPlanID`) USING BTREE,
@@ -962,7 +969,6 @@ CREATE TABLE `system_mappings`  (
   UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
-
 -- ----------------------------
 -- Records of system_mappings
 -- ----------------------------
@@ -990,7 +996,7 @@ INSERT INTO `system_mappings` VALUES (27, 'invoices', 'handler/invoices.cfm', 1,
 INSERT INTO `system_mappings` VALUES (29, 'sysadmin/mappings', 'views/sysadmin/mappings.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (31, 'sysadmin/translations', 'views/sysadmin/translations.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (32, 'sysadmin/settings', 'views/sysadmin/settings.cfm', 0, 0, 1, now());
-INSERT INTO `system_mappings` VALUES (33, 'user', 'handler/user.cfm', 1, 0, 0, now());
+INSERT INTO `system_mappings` VALUES (33, 'user', 'handler/user.cfm', 0, 0, 0, now());
 INSERT INTO `system_mappings` VALUES (34, 'sysadmin/languages', 'views/sysadmin/languages.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (36, 'sysadmin/countries', 'views/sysadmin/countries.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (37, 'sysadmin/countries/import', 'views/sysadmin/country_import.cfm', 0, 0, 1, now());
@@ -1013,6 +1019,15 @@ INSERT INTO `system_mappings` VALUES (55, 'sysadmin/plan/edit', 'views/sysadmin/
 INSERT INTO `system_mappings` VALUES (56, 'sysadmin/plangroups', 'views/sysadmin/plan_groups.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (57, 'sysadmin/planfeatures', 'views/sysadmin/plan_features.cfm', 0, 0, 1, now());
 INSERT INTO `system_mappings` VALUES (58, 'plans', 'frontend/plans.cfm', 0, 0, 0, now());
+INSERT INTO `system_mappings` VALUES (59, 'sysadmin/invoices', 'views/sysadmin/invoices.cfm', 0, 0, 1, now());
+INSERT INTO `system_mappings` VALUES (60, 'sysadm/invoices', 'handler/sysadmin/invoices.cfm', 0, 0, 1, now());
+INSERT INTO `system_mappings` VALUES (61, 'sysadmin/invoice/edit', 'views/sysadmin/invoice_edit.cfm', 0, 0, 1, now());
+INSERT INTO `system_mappings` VALUES (62, 'sysadmin/customers','views/sysadmin/customers.cfm',0,0,1, now());
+INSERT INTO `system_mappings` VALUES (63, 'sysadm/customers','handler/sysadmin/customers.cfm',0,0,1, now());
+INSERT INTO `system_mappings` VALUES (64, 'sysadmin/customers/edit','views/sysadmin/customers_edit.cfm',0,0,1, now());
+INSERT INTO `system_mappings` VALUES (65, 'sysadmin/customers/details','views/sysadmin/customers_details.cfm',0,0,1, now());
+INSERT INTO `system_mappings` VALUES (66, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1, now());
+INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/book.cfm', 0, 0, 0, now());
 
 
 -- ----------------------------
@@ -1034,25 +1049,9 @@ CREATE TABLE `system_settings`  (
 -- ----------------------------
 INSERT INTO `system_settings` VALUES (1, 'settingInvoiceNumberStart', '1000', 'New invoice: At which invoice number should the system start?', now());
 INSERT INTO `system_settings` VALUES (2, 'settingRoundFactor', '5', 'The rounding factor for invoice amounts. Note: Currently only 5 (0.05 Switzerland) or 1 (0.01 rest of the world) are available.', now());
-
-
--- ----------------------------
--- Table structure for system_settings_trans
--- ----------------------------
-DROP TABLE IF EXISTS `system_settings_trans`;
-CREATE TABLE `system_settings_trans`  (
-  `intSystSetTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intSystSettingID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
-  `strDefaultValue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDescription` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`intSystSetTransID`) USING BTREE,
-  INDEX `_intSystSettingID`(`intSystSettingID`) USING BTREE,
-  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
-  CONSTRAINT `frn_sst_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_sst_system_setting` FOREIGN KEY (`intSystSettingID`) REFERENCES `system_settings` (`intSystSettingID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '1', 'Which vat type should be set by default?', now());
+INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.', now());
+INSERT INTO `system_settings` VALUES (5, 'settingInvoiceNet', '1', 'Decide whether the invoices are issued "net" by default.', now());
 
 
 -- ----------------------------
@@ -1247,6 +1246,17 @@ INSERT INTO `system_translations` VALUES (173, 'txtOnRequest', 'Auf Anfrage', 'O
 INSERT INTO `system_translations` VALUES (174, 'txtFree', 'Gratis', 'Free', now());
 INSERT INTO `system_translations` VALUES (175, 'txtMonthly', 'Monatlich', 'Monthly', now());
 INSERT INTO `system_translations` VALUES (176, 'txtYearly', 'Jährlich', 'Yearly', now());
+INSERT INTO `system_translations` VALUES (177, 'statInvoiceDraft', 'Entwurf', 'Draft', now());
+INSERT INTO `system_translations` VALUES (178, 'statInvoiceOverDue', 'Überfällig', 'Overdue', now());
+INSERT INTO `system_translations` VALUES (179, 'titSuperAdmin', 'Superadmin', 'Superadmin', now());
+INSERT INTO `system_translations` VALUES (180, 'txtSetUserAsSuperAdmin', 'Dieses Benutzer als Superadmin festlegen', 'Set this user as Superadmin', now());
+INSERT INTO `system_translations` VALUES (181, 'msgMaxUsersReached', 'Sie haben die maximal zulässige Anzahl Benutzer mit Ihrem gebuchten Plan erreicht. Bitte führen Sie ein Upgrade durch.', 'You have reached the maximum number of users allowed with your booked plan. Please upgrade.', now());
+INSERT INTO `system_translations` VALUES (182, 'titPayment', 'Zahlung', 'Payment', now());
+INSERT INTO `system_translations` VALUES (183, 'txtMonthlyPayment', 'Bei monatlicher Zahlung', 'On monthly payment', now());
+INSERT INTO `system_translations` VALUES (184, 'txtYearlyPayment', 'Bei jährlicher Zahlung', 'On annual payment', now());
+INSERT INTO `system_translations` VALUES (185, 'TitYear', 'Jahr', 'Year', now());
+INSERT INTO `system_translations` VALUES (186, 'TitMonth', 'Monat', 'Month', now());
+
 
 
 -- ----------------------------
@@ -1484,14 +1494,15 @@ LOWER(TRIM(s)),
 ;;
 delimiter ;
 
+
 -- ----------------------------
--- Triggers structure for table customers
+-- Triggers structure for table payments
 -- ----------------------------
-DROP TRIGGER IF EXISTS `insertSettings`;
+DROP TRIGGER IF EXISTS `updPaymStatInsert`;
 delimiter ;;
-CREATE TRIGGER `insertSettings` AFTER INSERT ON `customers` FOR EACH ROW INSERT INTO customer_system_settings (intCustomerID, intSystSettingID, strSettingValue)
-SELECT NEW.intCustomerID, intSystSettingID, strDefaultValue
-FROM system_settings
+CREATE TRIGGER `updPaymStatInsert` AFTER INSERT ON `payments` FOR EACH ROW UPDATE invoices
+SET intPaymentStatusID = IF(NEW.decAmount >= decTotalPrice, 3, 4)
+WHERE intInvoiceID = NEW.intInvoiceID
 ;;
 delimiter ;
 
@@ -1503,16 +1514,6 @@ delimiter ;;
 CREATE TRIGGER `insertCustomSettings` AFTER INSERT ON `customers` FOR EACH ROW INSERT INTO customer_custom_settings (intCustomerID, intCustomSettingID, strSettingValue)
 SELECT NEW.intCustomerID, intCustomSettingID, strDefaultValue
 FROM custom_settings
-;;
-delimiter ;
-
--- ----------------------------
--- Triggers structure for table customers
--- ----------------------------
-DROP TRIGGER IF EXISTS `deleteSettings`;
-delimiter ;;
-CREATE TRIGGER `deleteSettings` BEFORE DELETE ON `customers` FOR EACH ROW DELETE FROM customer_system_settings
-WHERE intCustomerID = OLD.intCustomerID
 ;;
 delimiter ;
 
