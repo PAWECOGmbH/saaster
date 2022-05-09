@@ -170,27 +170,28 @@ $(document).ready(function(){
 			]
 		});
 	});
-
+	$('.radio-toggle').toggleInput();
 	// Change plan prices
-	$('input[type=radio][name=payment_changer]').change(function() {
-		if (this.value == 'yearly') {
-			$(".yearly").show();
-			$(".monthly").hide();
+	$('.form-check-label').click(function() {
+		if ($(this).hasClass("yearly")) {
+			$(".price_box.yearly").show();
+			$(".price_box.monthly").hide();
 		}
-		else if (this.value == 'monthly') {
-			$(".yearly").hide();
-			$(".monthly").show();
+		else if ($(this).hasClass("monthly")){
+			$(".price_box.yearly").hide();
+			$(".price_box.monthly").show();
 		}
 	});
 
 
 	$('.dropify').dropify();
 
-
 	$("#submit_form").submit(function () {
 		$("#submit_button").attr("disabled", true).addClass("not-allowed");
 		return true;
 	});
+	
 
-
+	
+		
 });

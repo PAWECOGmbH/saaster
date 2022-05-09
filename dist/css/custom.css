@@ -80,3 +80,58 @@ td.category {
 td.feature {
     font-size: 14px;
 }
+.content-td-head{
+    border: 1px solid #cccccc; 
+    border-left: none;
+    padding: 25px 15px;
+}
+
+.content-td-body{
+    border: 1px solid #cccccc; border-right: none;
+}
+
+.planName, .categoryName{
+    border-bottom: 1px #000000 solid;
+}
+.categoryName{
+    padding-top: 50px;
+}
+.allPlans{
+    font-size: 0px
+}
+
+.categorie1 .allPlans{
+    font-size: 0.875rem;
+}
+
+.feat{
+    width: 30%;
+}
+.has-toggle-input label, .has-toggle-input.radio label {
+    display: block;
+    float: left;
+    padding: 5px 10px;
+    margin: auto auto auto -1px;
+    background: #f4f4f4;
+    color: #444;
+    /* border: 1px #d0d0d0 solid; */
+    line-height: normal;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .has-toggle-input label.active {
+    background: #1d60b0;
+    border-color: #1d60b0;
+    color: white;
+    font-weight: bolder;
+  }
+
+  .has-toggle-input label:first-of-type { margin-left: auto; }
+  
+  .has-toggle-input label:last-of-type { }
+
+  .toggleradio{
+      width: 15%;
+      margin: 0 auto;
+  }

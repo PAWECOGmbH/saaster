@@ -1,44 +1,45 @@
 
 <cfscript>
-planFeatures = objPlans.getPlanFeatures(session.lng);
+    planFeatures = objPlans.getPlanFeatures(session.lng);
 </cfscript>
 
 <cfoutput>
-<table class="planFeatures">
-    <thead>
-        <tr>
-            <th width="300">&nbsp;</th>
-            <cfloop array="#planObj#" index="p">
-                <th class="planName">#p.planName#</th>
-            </cfloop>
-        </tr>
-    </thead>
-    <tbody>
-        <cfloop array="#planFeatures#" index="f">
-            <cfset featureID = f.id>
-            <tr>
-                <cfif f.category>
-                    <td class="feat category"><b>#f.name#</b></td>
-                <cfelse>
-                    <td class="feat feature" data-bs-toggle="tooltip" data-bs-placement="left" title="#f.description#">#f.name#</td>
-                </cfif>
-                <cfloop array="#planObj#" index="p">
+    <div class="d-none d-sm-block">
+        <table class="planFeatures">
+            <cfloop array="#planFeatures#" index="f">
+                <cfset featureID = f.id>
+                <cfoutput group="f.category">
+
                     <cfif f.category>
-                        <td>&nbsp;</td>
+                        <tr class="categorie#featureID#">
+                            <td class="feat categoryName">
+                                <strong>#f.name#</strong>
+                            </td>
+                            <cfloop array="#planObj#" index="p">
+                                <td class="allPlans planName">#p.planName#</td>
+                            </cfloop>
+                        </tr>
                     <cfelse>
-                        <cfset thisPlanID = p.planID>
-                        <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID, session.lng)>
-                        <td>
-                            <cfif featureContent.checkmark>
-                                <i class="fas fa-check"></i>
-                            <cfelse>
-                                #replace(featureContent.value, chr(13), "<br />")#
-                            </cfif>
-                        </td>
+                        <tr>
+                            <td class="feat content-td-head">#f.name#</td>
+
+                            <cfloop array="#planObj#" index="p">
+                                <cfset thisPlanID = p.planID>
+                                <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID, session.lng)>
+                                
+                                <td class="content-td-body">
+                                    <cfif featureContent.checkmark>
+                                        <i class="fas fa-check"></i>
+                                    <cfelse>
+                                        #replace(featureContent.value, chr(13), "<br />")#
+                                    </cfif>
+                                </td>
+                            </cfloop>
+                        </tr>    
                     </cfif>
-                </cfloop>
-            </tr>
-        </cfloop>
-    </tbody>
-</table>
+
+                </cfoutput>
+            </cfloop>
+        </table>
+    </div>
 </cfoutput>
