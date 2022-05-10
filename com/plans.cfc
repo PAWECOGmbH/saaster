@@ -10,18 +10,21 @@ component displayname="plans" output="false" {
                     language: {type: "varchar", value: arguments.language}
                 },
                 sql = "
-                    SELECT intLanguageID
+                    SELECT intLanguageID, strLanguageISO
                     FROM languages
                     WHERE strLanguageISO = :language
                 "
             )
             if (local.qLanguage.recordCount) {
                 local.lngID = local.qLanguage.intLanguageID;
+                local.language = local.qLanguage.strLanguageISO;
             } else {
                 local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+                local.language = application.objGlobal.getDefaultLanguage().iso;
             }
         } else {
             local.lngID = application.objGlobal.getDefaultLanguage().lngID;
+            local.language = application.objGlobal.getDefaultLanguage().iso;
         }
 
         if (structKeyExists(arguments, "groupID") and arguments.groupID gt 0) {
@@ -306,64 +309,48 @@ component displayname="plans" output="false" {
                     local.structPlan['currencySign'] = local.getPlan.strCurrencyISO;
                 }
 
-                <!--- Calc prices --->
-                objInvoice = new com.invoices();
 
-                local.vat_amount_monthly = objInvoice.calcVat(local.getPlan.decPriceMonthly, local.getPlan.blnIsNet, local.getPlan.decVat);
-                local.subtotal_price_monthly = local.getPlan.decPriceMonthly;
+                local.objPrices = new com.prices();
 
-                local.vat_amount_yearly = objInvoice.calcVat(local.getPlan.decPriceYearly, local.getPlan.blnIsNet, local.getPlan.decVat);
-                local.subtotal_price_yearly = local.getPlan.decPriceYearly;
+                local.structPlan['vat_text_monthly'] = local.objPrices.getPriceData
+                    (
+                        price=local.getPlan.decPriceMonthly,
+                        vat=local.getPlan.decVat,
+                        vat_type=local.getPlan.intVatType,
+                        isnet=local.getPlan.blnIsNet,
+                        language=local.language,
+                        currency=local.getPlan.strCurrencyISO
+                    ).vat_text;
 
+                local.structPlan['vat_text_yearly'] = local.objPrices.getPriceData
+                    (
+                        price=local.getPlan.decPriceYearly,
+                        vat=local.getPlan.decVat,
+                        vat_type=local.getPlan.intVatType,
+                        isnet=local.getPlan.blnIsNet,
+                        language=local.language,
+                        currency=local.getPlan.strCurrencyISO
+                    ).vat_text;
 
-                <!--- Add up subtotal and vat --->
-                if (local.getPlan.blnIsNet eq 1) {
-                    local.total_price_monthly = local.subtotal_price_monthly + local.vat_amount_monthly;
-                    local.total_price_yearly = local.subtotal_price_yearly + local.vat_amount_yearly;
-                } else {
-                    local.total_price_monthly = local.subtotal_price_monthly;
-                    local.total_price_yearly = local.subtotal_price_yearly;
-                }
+                local.structPlan['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
+                    (
+                        price=local.getPlan.decPriceMonthly,
+                        vat=local.getPlan.decVat,
+                        vat_type=local.getPlan.intVatType,
+                        isnet=local.getPlan.blnIsNet,
+                        language=local.language,
+                        currency=local.getPlan.strCurrencyISO
+                    ).priceAfterVAT;
 
-                <!--- Define vat text and sum --->
-                if (local.getPlan.blnIsNet eq 1) {
-                    if (local.getPlan.intVatType eq 1) {
-                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtPlusVat', arguments.language) & ' ' & local.getPlan.decVat & '%: ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_monthly, '__,___.__');
-                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtPlusVat', arguments.language) & ' ' & local.getPlan.decVat & '%: ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_yearly, '__,___.__');
-                    } else if (local.getPlan.intVatType eq 3) {
-                        local.total_price_monthly = local.subtotal_price_monthly;
-                        local.total_price_yearly = local.subtotal_price_yearly;
-                        local.structPlan['vat_text_monthly']  = "";
-                        local.structPlan['vat_text_yearly']  = "";
-                    } else {
-                        local.total_price_monthly = local.subtotal_price_monthly;
-                        local.total_price_yearly = local.subtotal_price_yearly;
-                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
-                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
-                    }
-                } else {
-                    if (local.getPlan.intVatType eq 1) {
-                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtVatIncluded', arguments.language) & ' ' & local.getPlan.decVat & '%' & ': ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_monthly, '__,___.__');
-                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtVatIncluded', arguments.language) & ' ' & local.getPlan.decVat & '%' & ': ' & local.getPlan.strCurrencyISO & ' ' & lsNumberFormat(local.vat_amount_yearly, '__,___.__');
-                    } else if (local.getPlan.intVatType eq 3) {
-                        local.total_price_monthly = local.subtotal_price_monthly;
-                        local.total_price_yearly = local.subtotal_price_yearly;
-                        local.structPlan['vat_text_monthly']  = "";
-                        local.structPlan['vat_text_yearly']  = "";
-                    } else {
-                        local.total_price_monthly = local.subtotal_price_monthly;
-                        local.total_price_yearly = local.subtotal_price_yearly;
-                        local.structPlan['vat_text_monthly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
-                        local.structPlan['vat_text_yearly']  = application.objGlobal.getTrans('txtTotalExcl', arguments.language);
-                    }
-                }
-
-                <!--- Round total according customers setting --->
-                local.total_price_monthly = objInvoice.roundAmount(local.total_price_monthly, application.objGlobal.getSetting(0, 'settingRoundFactor'));
-                local.total_price_yearly = objInvoice.roundAmount(local.total_price_yearly, application.objGlobal.getSetting(0, 'settingRoundFactor'));
-
-                local.structPlan['priceMonthlyAfterVAT'] = local.total_price_monthly;
-                local.structPlan['priceYearlyAfterVAT'] = local.total_price_yearly;
+                local.structPlan['priceYearlyAfterVAT'] = local.objPrices.getPriceData
+                    (
+                        price=local.getPlan.decPriceYearly,
+                        vat=local.getPlan.decVat,
+                        vat_type=local.getPlan.intVatType,
+                        isnet=local.getPlan.blnIsNet,
+                        language=local.language,
+                        currency=local.getPlan.strCurrencyISO
+                    ).priceAfterVAT;
 
                 // Building the booking link
                 if (!len(trim(local.getPlan.strBookingLink))) {

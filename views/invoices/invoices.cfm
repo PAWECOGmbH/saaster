@@ -45,7 +45,7 @@
                                         <td>#lsDateFormat(qInvoices.invoiceDate)#</td>
                                         <td>#lsDateFormat(qInvoices.invoiceDueDate)#</td>
                                         <td>#qInvoices.invoiceTitle#</td>
-                                        <td class="text-end">#qInvoices.invoiceCurrency# #numberFormat(qInvoices.invoiceTotal, "__.__")#</td>
+                                        <td class="text-end">#qInvoices.invoiceCurrency# #lsNumberFormat(qInvoices.invoiceTotal, '__,___.__')#</td>
                                         <td class="text-center">#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.invoiceStatusColor, qInvoices.invoiceStatusVariable)#</td>
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap">

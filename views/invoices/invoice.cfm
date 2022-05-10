@@ -111,7 +111,7 @@
                                             <p class="m-0">#lsnumberFormat(pos.singlePrice, "_,___.__")#</p>
                                             <p class="text-muted small">(#numberFormat(pos.vat, "__.__")#%)</p>
                                         </td>
-                                        <td valign="top" class="text-center">#pos.discountPercent#%</td>
+                                        <td valign="top" class="text-center"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                         <td valign="top" class="text-end pr-0">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
                                     </tr>
                                 </cfloop>

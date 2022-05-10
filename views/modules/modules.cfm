@@ -2,7 +2,7 @@
 <cfscript>
     objModules = new com.modules();
     getModules = objModules.getAllModules(lngID=getAnyLanguage(session.lng).lngID);
-    //dump(getModules);
+    dump(getModules);
 </cfscript>
 
 
@@ -40,7 +40,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Modules</h3>
+                            <h3 class="card-title">#getTrans('titModules')#</h3>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -82,7 +82,7 @@
                                                             #module.description#
                                                         </div>
                                                         <div class="mb-3">
-                                                            <cfif module.price_monthly eq 0>
+                                                            <cfif module.price_monthly eq 0 >
                                                                 <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
                                                             <cfelse>
                                                                 <div class="display-6 fw-bold mb-1">#module.currency# #numberFormat(module.price_monthly, '__.__')#</div>
