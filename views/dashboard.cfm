@@ -35,9 +35,6 @@
         <div class="page-body">
             <div class="container-xl">
 
-
-                <cfdump var="#objPrices.getPriceData(price=100.50, vat=7.7, vat_type=1, isnet=1, language='de', currency='CHF')#">
-
                 <div class="row row-deck row-cards">
 
                     <cfloop query="qWidgets">

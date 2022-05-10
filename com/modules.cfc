@@ -2,46 +2,38 @@ component displayname="modules" output="false" {
 
 
     <!--- Get data of a module --->
-    public struct function getModuleData(required numeric moduleID, string language) {
+    public struct function getModuleData(required numeric moduleID, numeric lngID, numeric currencyID) {
 
         if (structKeyExists(arguments, "moduleID") and arguments.moduleID gt 0) {
 
-            if (structKeyExists(arguments, "language")) {
-                local.qLanguage = queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        language: {type: "varchar", value: arguments.language}
-                    },
-                    sql = "
-                        SELECT intLanguageID, strLanguageISO
-                        FROM languages
-                        WHERE strLanguageISO = :language
-                    "
-                )
-                if (local.qLanguage.recordCount) {
-                    local.lngID = local.qLanguage.intLanguageID;
-                    local.language = local.qLanguage.strLanguageISO;
-                } else {
-                    local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-                    local.language = application.objGlobal.getDefaultLanguage().iso;
-                }
+            if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
+                local.lngID = arguments.lngID;
+                local.language = application.objGlobal.getAnyLanguage(local.lngID).iso;
             } else {
                 local.lngID = application.objGlobal.getDefaultLanguage().lngID;
                 local.language = application.objGlobal.getDefaultLanguage().iso;
             }
+            if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
+                local.currencyID = arguments.currencyID;
+            } else {
+                local.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+            }
 
-            qModule = queryExecute(
+            local.qModule = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
                     moduleID: {type: "numeric", value: arguments.moduleID},
-                    lngID: {type: "numeric", value: local.lngID}
+                    lngID: {type: "numeric", value: local.lngID},
+                    currencyID: {type: "numeric", value: local.currencyID}
                 },
                 sql = "
-                    SELECT modules.strTabPrefix, modules.strPicture, modules.blnBookable, modules.intPrio, modules.blnActive,
+                    SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture,
+                    modules.blnBookable, modules.intPrio, modules.blnActive,
                     currencies.strCurrencyISO, currencies.strCurrencySign,
                     COALESCE(modules_prices.blnIsNet,0) as blnIsNet,
                     COALESCE(modules_prices.decPriceMonthly,0) as decPriceMonthly,
                     COALESCE(modules_prices.decPriceYearly,0) as decPriceYearly,
+                    COALESCE(modules_prices.decPriceOneTime,0) as decPriceOneTime,
                     COALESCE(modules_prices.decVat,0) as decVat,
                     COALESCE(modules_prices.intCurrencyID,0) as intCurrencyID,
                     COALESCE(modules_prices.intVatType,0) as intVatType,
@@ -104,34 +96,100 @@ component displayname="modules" output="false" {
 
                     LEFT JOIN currencies ON 1=1
 				    AND modules_prices.intCurrencyID = currencies.intCurrencyID
+                    AND currencies.intCurrencyID = :currencyID
 
-                    WHERE modules.intModuleID = :lngID
+                    WHERE modules.intModuleID = :moduleID
 
                 "
             )
 
             local.moduleStruct = structNew();
-            if (qModule.recordCount) {
+            if (local.qModule.recordCount) {
 
-                local.moduleStruct['name'] = qModule.strModuleName;
-                local.moduleStruct['short_description'] = qModule.strShortDescription;
-                local.moduleStruct['description'] = qModule.strDescription;
-                local.moduleStruct['table_prefix'] = qModule.strTabPrefix;
-                local.moduleStruct['picture'] = qModule.strPicture;
-                local.moduleStruct['bookable'] = qModule.blnBookable;
-                local.moduleStruct['active'] = qModule.blnActive;
-                local.moduleStruct['isNet'] = qModule.blnIsNet;
-                local.moduleStruct['price_monthly'] = qModule.decPriceMonthly;
-                local.moduleStruct['price_yearly'] = qModule.decPriceYearly;
-                local.moduleStruct['vat'] = qModule.decVat;
-                local.moduleStruct['vat_type'] = qModule.intVatType;
-                local.moduleStruct['currencyID'] = qModule.intCurrencyID;
-                if (len(trim(qModule.strCurrencySign))) {
-                    local.moduleStruct['currencySign'] = qModule.strCurrencySign;
+                local.moduleStruct['moduleID'] = local.qModule.intModuleID;
+                local.moduleStruct['name'] = local.qModule.strModuleName;
+                local.moduleStruct['short_description'] = local.qModule.strShortDescription;
+                local.moduleStruct['description'] = local.qModule.strDescription;
+                local.moduleStruct['table_prefix'] = local.qModule.strTabPrefix;
+                local.moduleStruct['picture'] = local.qModule.strPicture;
+                local.moduleStruct['bookable'] = local.qModule.blnBookable;
+                local.moduleStruct['active'] = local.qModule.blnActive;
+                local.moduleStruct['isNet'] = local.qModule.blnIsNet;
+                local.moduleStruct['price_monthly'] = local.qModule.decPriceMonthly;
+                local.moduleStruct['price_yearly'] = local.qModule.decPriceYearly;
+                local.moduleStruct['price_onetime'] = local.qModule.decPriceOneTime;
+                local.moduleStruct['vat'] = local.qModule.decVat;
+                local.moduleStruct['vat_type'] = local.qModule.intVatType;
+                local.moduleStruct['currencyID'] = local.qModule.intCurrencyID;
+                if (len(trim(local.qModule.strCurrencySign))) {
+                    local.moduleStruct['currencySign'] = local.qModule.strCurrencySign;
                 } else {
-                    local.moduleStruct['currencySign'] = qModule.strCurrencyISO;
+                    local.moduleStruct['currencySign'] = local.qModule.strCurrencyISO;
                 }
             }
+
+            local.objPrices = new com.prices();
+
+            local.moduleStruct['vat_text_monthly'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceMonthly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['vat_text_yearly'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceYearly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['vat_text_onetime'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceOneTime,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceMonthly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
+            local.moduleStruct['priceYearlyAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceYearly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
+            local.moduleStruct['priceOneTimeAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceOneTime,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=local.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
 
             return local.moduleStruct;
 
@@ -168,24 +226,23 @@ component displayname="modules" output="false" {
             "
         )
 
-        local.modalArray = arrayNew(1);
+        local.moduleArray = arrayNew(1);
+        local.moduleStruct = structNew();
 
-        loop query="qModule" {
+        if (local.qModule.recordCount) {
 
-            local.moduleStruct = structNew();
-            local.moduleStruct = getModuleData(local.qModule.intModuleID, local.lngID);
-            arrayAppend(local.modalArray, local.moduleStruct);
+            loop query= local.qModule {
+
+                local.moduleStruct[local.qModule.currentRow] = getModuleData(local.qModule.intModuleID, local.lngID);
+                arrayAppend(local.moduleArray, local.moduleStruct[local.qModule.currentRow]);
+
+            }
 
         }
 
-
-        return local.modalArray;
-
-
+        return local.moduleArray;
 
     }
-
-
 
 
 
