@@ -23,17 +23,6 @@
 
 <div class="mb-5">
     <div class="form-label">#getTrans('titPayment')#</div>
-    <!--- <div>
-        <label class="form-check form-check-inline">
-            <input class="form-check-input" name="payment_changer" type="radio" value="monthly" checked>
-            <span class="form-check-label">#getTrans('txtMonthly')#</span>
-        </label>
-        <label class="form-check form-check-inline">
-            <input class="form-check-input" name="payment_changer" type="radio" value="yearly">
-            <span class="form-check-label">#getTrans('txtYearly')#</span>
-        </label>
-    </div> --->
-
     <div class="form-group radio-toggle has-toggle-input toggleradio mt-3">
         <div class="form-check">
             <label class="form-check-label active form-check form-check-inline monthly">
@@ -47,7 +36,6 @@
         </div>
     </div>
 </div>
-
 <div class="row row-cards">
     <cfloop array="#planObj#" index="i">
         <div class="col-sm-6 col-lg-3">
