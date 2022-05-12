@@ -40,16 +40,26 @@
                     <label class="form-label">Table prefix *</label>
                     <input type="text" class="form-control" name="prefix" placeholder="e.g. mymod_" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Picture/Logo</label>
-                    <cfif len(trim(qModule.strPicture))>
-                        <div class="col-lg-3 mt-3 text-center">
-                            <p><img src="#application.mainURL#/userdata/images/modules/#qModule.strPicture#" class="avatar avatar-xl avatar-rounded"></p>
-                            <p><a href="#application.mainURL#/sysadm/modules?delete_pic=#qModule.intModuleID#">Delete picture</a></p>
-                        </div>
-                    <cfelse>
-                        <input name="pic" type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
-                    </cfif>
+                <div class="row mb-3">
+                    <div class="col-lg-4">
+                        <label class="form-label">Number of test days *</label>
+                        <input type="text" class="form-control text-end w-75" name="test_days" autocomplete="off" maxlength="10" value="#qModule.intNumTestDays#" placeholder="30" required>
+                        <small class="form-hint">
+                            Enter 0 if you don't want to provide any test days.
+                        </small>
+                    </div>
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <label class="form-label">Picture/Logo</label>
+                        <cfif len(trim(qModule.strPicture))>
+                            <div class="mt-3">
+                                <p><img src="#application.mainURL#/userdata/images/modules/#qModule.strPicture#" class="avatar avatar-xl"></p>
+                                <p><a href="#application.mainURL#/sysadm/modules?delete_pic=#qModule.intModuleID#">Delete picture</a></p>
+                            </div>
+                        <cfelse>
+                            <input name="pic" type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
+                        </cfif>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-6">

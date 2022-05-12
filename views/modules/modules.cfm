@@ -2,7 +2,7 @@
 <cfscript>
     objModules = new com.modules();
     getModules = objModules.getAllModules(lngID=getAnyLanguage(session.lng).lngID);
-    //dump(getModules);
+    dump(getModules);
 </cfscript>
 
 
@@ -58,12 +58,24 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex">
-                                                <a href="" class="card-btn">
-                                                    <i class="fa-solid fa-lock pe-2"></i> Freischalten
-                                                </a>
-                                                <a href="##?" class="card-btn" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
+                                                <a href="##?" class="card-btn w-50" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
                                                     <i class="fa-solid fa-circle-info pe-2"></i> Info
                                                 </a>
+                                                <cfif module.price_monthly gt 0>
+                                                    <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
+                                                        <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fa-solid fa-lock pe-2"></i> #getTrans('txtUnlock')#
+                                                        </a>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="##">#getTrans('txtMonthly')# (#module.currencySign# #lsnumberFormat(module.priceMonthlyAfterVAT, '_,___.__')#)</a>
+                                                            <a class="dropdown-item" href="##">#getTrans('txtYearly')# (#module.currencySign# #lsnumberFormat(module.priceYearlyAfterVAT, '_,___.__')#)</a>
+                                                        </div>
+                                                    </div>
+                                                <cfelse>
+                                                    <a href="##?" class="card-btn w-50">
+                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('txtUnlock')#
+                                                    </a>
+                                                </cfif>
                                             </div>
                                         </div>
                                     </div>
@@ -80,19 +92,30 @@
                                                         #module.description#
                                                     </div>
                                                     <div class="mb-3">
+
                                                         <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
                                                             <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
                                                         <cfelseif module.price_onetime gt 0>
-                                                            <div class="display-6 fw-bold mb-1">#module.currencySign# #lsnumberFormat(module.price_onetime, '_,___.__')#</div>
-                                                            <div class="small text-muted">#getTrans('txtOneTime')#</div>
+                                                            <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_onetime, '_,___.__')#</div>
+                                                            <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
+                                                            <div class="text-muted small">#module.vat_text_onetime#</div>
                                                         <cfelse>
-                                                            <div class="display-6 fw-bold mb-1">#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')#</div>
-                                                            <div class="small text-muted">#getTrans('txtMonthly')#</div>
-                                                            <div class="small text-muted">(#module.currencySign# #lsnumberFormat(module.price_yearly, '_,___.__')# #getTrans('txtYearly')#)</div>
+                                                            <div class="row my-3 col-md-12">
+                                                                <div class="col-md-6">
+                                                                    <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
+                                                                    <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_monthly, '_,___.__')#</div>
+                                                                    <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
+                                                                    <div class="text-muted small">#module.vat_text_monthly#</div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
+                                                                    <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_yearly, '_,___.__')#</div>
+                                                                    <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
+                                                                    <div class="text-muted small">#module.vat_text_yearly#</div>
+                                                                </div>
+                                                            </div>
                                                         </cfif>
-                                                        <div class="row pt-2 small">
-                                                            <p class="text-muted">#module.vat_text_monthly#</p>
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">

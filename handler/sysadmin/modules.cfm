@@ -21,11 +21,12 @@ if (structKeyExists(form, "new_module")) {
                 module_name: {type: "nvarchar", value: form.module_name},
                 active: {type: "boolean", value: 0},
                 bookable: {type: "boolean", value: 0},
+                test_days: {type: "numeric", value: 30},
                 nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
             },
             sql = "
-                INSERT INTO modules (strModuleName, blnActive, blnBookable, intPrio)
-                VALUES (:module_name, :active, :bookable, :nextPrio)
+                INSERT INTO modules (strModuleName, blnActive, blnBookable, intNumTestDays, intPrio)
+                VALUES (:module_name, :active, :bookable, :test_days, :nextPrio)
             "
         )
 
@@ -105,6 +106,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.prefix" default="";
         param name="form.pic" default="";
         param name="form.desc" default="";
+        param name="form.test_days" default="0";
 
         qNexPrio = queryExecute(
             options = {datasource = application.datasource},
@@ -122,6 +124,7 @@ if (structKeyExists(form, "edit_module")) {
                 prefix: {type: "varchar", value: form.prefix},
                 active: {type: "boolean", value: active},
                 bookable: {type: "boolean", value: bookable},
+                test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
                 thisID: {type: "numeric", value: form.edit_module}
             },
@@ -132,7 +135,8 @@ if (structKeyExists(form, "edit_module")) {
                     strDescription = :description,
                     blnActive = :active,
                     strTabPrefix = :prefix,
-                    blnBookable = :bookable
+                    blnBookable = :bookable,
+                    intNumTestDays = :test_days
                 WHERE intModuleID = :thisID
 
             "

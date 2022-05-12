@@ -2,19 +2,25 @@
 component displayname="book" output="false" {
 
     // Create and encrypt booking link
-    public string function createBookingLink(required numeric planID, required numeric lngID, required numeric currencyID, string plan) {
+    public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string plan, string type) {
 
-        local.argsJason = {};
-        local.argsJason['planID'] = arguments.planID;
-        local.argsJason['lngID'] = arguments.lngID;
-        local.argsJason['currencyID'] = arguments.currencyID;
-        if (structKeyExists(arguments, "plan")) {
-            local.argsJason['plan'] = arguments.plan;
+        param name="arguments.type" default="plan";
+
+        local.argsJSon = {};
+        if(arguments.type eq "module") {
+            local.argsJSon['moduleID'] = arguments.thisID;
         } else {
-            local.argsJason['plan'] = "m";
+            local.argsJSon['planID'] = arguments.thisID;
+        }
+        local.argsJSon['lngID'] = arguments.lngID;
+        local.argsJSon['currencyID'] = arguments.currencyID;
+        if (structKeyExists(arguments, "plan")) {
+            local.argsJSon['plan'] = arguments.plan;
+        } else {
+            local.argsJSon['plan'] = "m";
         }
 
-        local.urlEncoded = URLEncodedFormat(serializeJSON(local.argsJason));
+        local.urlEncoded = URLEncodedFormat(serializeJSON(local.argsJSon));
         local.base64Link = toBase64(local.urlEncoded);
 
         return local.base64Link;
@@ -60,11 +66,17 @@ component displayname="book" output="false" {
                     local.tillDate = dateAdd("yyyy", 1, local.startDate);
                     local.recurring = "yearly";
 
-                } else {
+                } else if (structKeyExists(arguments, "plan") and arguments.plan eq "m") {
 
                     // Monthly subscription
                     local.tillDate = dateAdd("m", 1, local.startDate);
                     local.recurring = "monthly";
+
+                } else {
+
+                    // Its a module with fix price
+                    local.tillDate = "";
+                    local.recurring = "";
 
                 }
             }
@@ -76,6 +88,7 @@ component displayname="book" output="false" {
                     params = {
                         customerID: {type: "numeric", value: arguments.customerID},
                         planID: {type: "numeric", value: local.thisPlan.planID},
+                        moduleID: {type: "numeric", value: local.thisPlan.moduleID},
                         dateStart: {type: "date", value: local.startDate},
                         dateEnd: {type: "date", value: local.tillDate},
                         dateTestEnd: {type: "date", value: local.testTillDate},
@@ -83,8 +96,8 @@ component displayname="book" output="false" {
                         recurring: {type: "varchar", value: local.recurring}
                     },
                     sql = "
-                        INSERT INTO customer_plans (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                        VALUES (:customerID, :planID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
+                        INSERT INTO customer_bookings (intCustomerID, intPlanID, intModuleID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                        VALUES (:customerID, :planID, :moduleID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
                     "
                 )
 

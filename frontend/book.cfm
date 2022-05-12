@@ -123,7 +123,7 @@
             },
             sql = "
                 SELECT intPlanID
-                FROM customer_plans
+                FROM customer_bookings
                 WHERE intCustomerID = :customerID
                 AND intPlanID = :planID
                 AND LENGTH(dtmEndTestDate) > 0
