@@ -633,13 +633,13 @@ component displayname="plans" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT  customer_booking.intPlanID, customer_booking.dtmStartDate, customer_booking.dtmEndDate,
-                            customer_booking.blnPaused, customer_booking.dtmEndTestDate, customer_booking.strRecurring,
+                    SELECT  customer_bookings.intPlanID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
+                            customer_bookings.blnPaused, customer_bookings.dtmEndTestDate, customer_bookings.strRecurring,
                             plans.strPlanName, plans.intMaxUsers, plans.blnFree
-                    FROM customer_booking
-                    INNER JOIN plans ON customer_booking.intPlanID = plans.intPlanID
-                    WHERE customer_booking.intCustomerID = :customerID
-                    ORDER BY intCustomerPlanID DESC
+                    FROM customer_bookings
+                    INNER JOIN plans ON customer_bookings.intPlanID = plans.intPlanID
+                    WHERE customer_bookings.intCustomerID = :customerID
+                    ORDER BY intCustomerBookingID DESC
                     LIMIT 1
                 "
             )

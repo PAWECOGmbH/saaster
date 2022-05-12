@@ -59,6 +59,23 @@ Plan status:
 
 </p>
 
+<br>
+
+<h2>Your modules</h2>
+
+<cfset objModules = new com.modules().getCurrentModules(session.customer_id, 'de')>
+<cfdump var="#objModules#">
+
+<cfif arrayLen(objModules)>
+
+
+
+<cfelse>
+
+    No modules activated - <a href="#application.mainURL#/account-settings/modules">Book now!</a>
+
+</cfif>
+
 
 
 </cfoutput>

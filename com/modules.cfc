@@ -191,8 +191,15 @@ component displayname="modules" output="false" {
                 ).priceAfterVAT;
 
 
+
             // Building the booking link
-            if (local.qModule.decPriceMonthly gt 0 or local.qModule.decPriceOneTime gt 0) {
+
+            local.moduleStruct['bookingLinkM'] = "";
+            local.moduleStruct['bookingLinkY'] = "";
+            local.moduleStruct['bookingLink'] = "";
+
+            if ((local.qModule.decPriceMonthly gt 0 or local.qModule.decPriceOneTime gt 0) and local.qModule.blnBookable eq 1) {
+
                 local.objBook = new com.book();
                 local.bookingStringM = local.objBook.createBookingLink(local.qModule.intModuleID, local.lngID, local.currencyID, "m", "module");
                 local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
@@ -200,6 +207,7 @@ component displayname="modules" output="false" {
                 local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
                 local.bookingString = local.objBook.createBookingLink(local.qModule.intModuleID, local.lngID, local.currencyID, "", "module");
                 local.moduleStruct['bookingLink'] = application.mainURL & "/book?module=" & local.bookingString;
+
             }
 
 
@@ -234,6 +242,7 @@ component displayname="modules" output="false" {
             sql = "
                 SELECT intModuleID
                 FROM modules
+                WHERE blnActive = 1
                 ORDER BY intPrio
             "
         )
@@ -258,7 +267,7 @@ component displayname="modules" output="false" {
 
 
 
-    public struct function getCurrentModules(required numeric customerID, string language) {
+    public array function getCurrentModules(required numeric customerID, string language) {
 
         if (arguments.customerID gt 0) {
 
@@ -283,130 +292,82 @@ component displayname="modules" output="false" {
                 local.lngID = application.objGlobal.getDefaultLanguage().lngID;
             }
 
-            local.moduleArray = arrayNew(1);
-            local.moduleStruct = structNew();
-
             local.qCurrentModules = queryExecute (
                 options = {datasource = application.datasource},
                 params = {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT  customer_booking.intModuleID, customer_booking.dtmStartDate, customer_booking.dtmEndDate,
-                            customer_booking.blnPaused, customer_booking.dtmEndTestDate, customer_booking.strRecurring,
-                            modules.strModuleName, modules.blnFree
-                    FROM customer_booking
-                    INNER JOIN modules ON customer_booking.intPlanID = modules.intPlanID
-                    WHERE customer_booking.intCustomerID = :customerID
-                    ORDER BY intCustomerPlanID DESC
-                    LIMIT 1
+                    SELECT  customer_bookings.intModuleID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
+                            customer_bookings.blnPaused, customer_bookings.dtmEndTestDate, customer_bookings.strRecurring,
+                            modules.strModuleName, modules.intNumTestDays
+                    FROM customer_bookings
+                    INNER JOIN modules ON customer_bookings.intModuleID = modules.intModuleID
+                    WHERE customer_bookings.intCustomerID = :customerID
+                    AND modules.blnBookable = 1
+                    AND modules.blnActive = 1
                 "
             )
 
-            if (local.qCurrentPlan.recordCount) {
+            local.moduleArray = arrayNew(1);
 
-                // Get all the linked modules of the current plan
-                local.qLinkedModules = queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        planID: {type: "numeric", value: local.qCurrentPlan.intPlanID},
-                        languageID: {type: "numeric", value: local.lngID}
-                    },
-                    sql = "
-                        SELECT plans_modules.intModuleID,
-                        (
-                            IF
-                                (
-                                    LENGTH(
-                                        (
-                                            SELECT strModuleName
-                                            FROM modules_trans
-                                            WHERE intModuleID = plans_modules.intModuleID
-                                            AND intLanguageID = :languageID
-                                        )
-                                    ),
-                                    (
-                                        SELECT strModuleName
-                                        FROM modules_trans
-                                        WHERE intModuleID = plans_modules.intModuleID
-                                        AND intLanguageID = :languageID
-                                    ),
-                                    modules.strModuleName
-                                )
-                        ) as strModuleName
-                        FROM plans_modules
-                        INNER JOIN modules ON plans_modules.intModuleID = modules.intModuleID
-                        WHERE plans_modules.intPlanID = :planID
-                        AND modules.blnActive = 1
-                    "
-                )
+            if (local.qCurrentModules.recordCount) {
 
-                if (local.qLinkedModules.recordCount) {
-                    modulesArray = arrayNew(1);
-                    cfloop( query="local.qLinkedModules" ) {
-                        linkedModules = structNew();
-                        linkedModules['moduleID'] = local.qLinkedModules.intModuleID;
-                        linkedModules['name'] = local.qLinkedModules.strModuleName;
-                        arrayAppend(modulesArray, linkedModules);
-                    }
-                    planStruct['modulesIncluded'] = modulesArray;
+                cfloop( query="local.qCurrentModules" ) {
 
-                }
-
-                planStruct['planID'] = local.qCurrentPlan.intPlanID;
-                planStruct['planName'] = local.qCurrentPlan.strPlanName;
-                planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
-                planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
-                planStruct['recurring'] = local.qCurrentPlan.strRecurring;
-
-                // Is already a plan defined?
-                if (local.qCurrentPlan.intPlanID gt 0) {
+                    local.moduleStruct = structNew();
+                    local.moduleStruct['moduleID'] = local.qCurrentModules.intModuleID;
+                    local.moduleStruct['moduleName'] = local.qCurrentModules.strModuleName;
+                    local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
+                    local.moduleStruct['endTestDate'] = "";
+                    local.moduleStruct['endTestDate'] = "";
+                    local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
 
                     // Is the plan paused?
-                    if (local.qCurrentPlan.blnPaused eq 1) {
+                    if (local.qCurrentModules.blnPaused eq 1) {
 
-                        planStruct['status'] = 'paused';
+                        local.moduleStruct['status'] = 'paused';
 
                     } else {
 
                         // Is a test phase running?
-                        if (isDate(local.qCurrentPlan.dtmStartDate) and isDate(local.qCurrentPlan.dtmEndTestDate)) {
+                        if (isDate(local.qCurrentModules.dtmStartDate) and isDate(local.qCurrentModules.dtmEndTestDate)) {
 
                             // Is the test phase still valid? | YES
-                            if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
+                            if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
 
-                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-                                planStruct['status'] = 'test';
+                                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                                local.moduleStruct['status'] = 'test';
 
                             // NO
                             } else {
 
-                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-                                planStruct['status'] = 'expired';
+                                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                                local.moduleStruct['status'] = 'expired';
 
                             }
 
                         } else {
 
-                            // See if there is a free plan running
-                            if (local.qCurrentPlan.blnFree) {
+                            // See if there is a free module running
+                            if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
 
-                                planStruct['status'] = 'free';
-                                planStruct['endDate'] = "";
+                                local.moduleStruct['status'] = 'free';
+                                local.moduleStruct['endDate'] = "";
 
                             } else {
 
-                                // Is a plan running?
-                                if (isDate(local.qCurrentPlan.dtmEndDate)) {
+                                // Is a module running?
+                                if (isDate(local.qCurrentModules.dtmEndDate)) {
 
-                                    planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                                    planStruct['status'] = 'active';
+                                    local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+                                    local.moduleStruct['status'] = 'active';
 
                                     // Still valid?
-                                    if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
+                                    if (dateDiff("d", local.qCurrentModules.dtmStartDate, local.qCurrentModules.dtmEndDate) lt 0) {
 
-                                        planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                                        planStruct['status'] = 'expired';
+                                        local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+                                        local.moduleStruct['status'] = 'expired';
 
                                     }
 
@@ -418,13 +379,15 @@ component displayname="modules" output="false" {
 
                     }
 
+                    arrayAppend(local.moduleArray, local.moduleStruct);
+
                 }
 
             }
 
         }
 
-        return planStruct;
+        return local.moduleArray;
 
     }
 

@@ -306,6 +306,10 @@ if (structKeyExists(form, 'login_btn')) {
             checkPlan = new com.plans().getCurrentPlan(session.customer_id, objUserLogin.language);
             session.currentPlan = checkPlan;
 
+            <!--- Save current modules into a session --->
+            checkModules = new com.modules().getCurrentModules(session.customer_id, session.lng);
+            session.currentModules = checkModules;
+
             if (findNoCase("?", objUserLogin.redirect)) {
                 location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
             } else {

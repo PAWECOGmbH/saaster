@@ -37,6 +37,10 @@ if (structKeyExists(url, "switch")) {
             checkPlan = new com.plans().getCurrentPlan(session.customer_id, session.lng);
             session.currentPlan = checkPlan;
 
+            <!--- Save current modules into a session --->
+            checkModules = new com.modules().getCurrentModules(session.customer_id, session.lng);
+            session.currentModules = checkModules;
+
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {

@@ -14,7 +14,7 @@ ADD COLUMN `intModuleID` int(11) NULL AFTER `intPlanID`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`intCustomerBookingID`) USING BTREE,
 ADD INDEX `_intModuleID`(`intModuleID`) USING BTREE,
-ADD CONSTRAINT `frn_cp_modules` FOREIGN KEY (`int`, `intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ADD CONSTRAINT `frn_cp_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 ALTER TABLE `modules`
 ADD COLUMN `intNumTestDays` int(11) NOT NULL AFTER `blnBookable`;

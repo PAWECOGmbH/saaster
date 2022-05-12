@@ -16,7 +16,7 @@ CREATE TABLE `modules`  (
   `strTabPrefix` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strPicture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `blnBookable` tinyint(1) NOT NULL,
-  `intNumTestDays` int(11) NOT NULL;
+  `intNumTestDays` int(11) NOT NULL,
   `intPrio` int(11) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`intModuleID`) USING BTREE

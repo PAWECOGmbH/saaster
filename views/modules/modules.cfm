@@ -1,8 +1,20 @@
 
 <cfscript>
+
     objModules = new com.modules();
     getModules = objModules.getAllModules(lngID=getAnyLanguage(session.lng).lngID);
-    dump(getModules);
+
+    moduleArray = "";
+
+    if (structKeyExists(session.currentPlan, "modulesIncluded")) {
+        if (isArray(session.currentPlan.modulesIncluded) and arrayLen(session.currentPlan.modulesIncluded)) {
+            moduleArray = session.currentPlan.modulesIncluded;
+        }
+    }
+
+
+    //dump(getModules);
+    dump(session.currentPlan);
 </cfscript>
 
 
@@ -64,7 +76,7 @@
                                                 <cfif module.price_monthly gt 0>
                                                     <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
                                                         <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                            <i class="fa-solid fa-lock pe-2"></i> #getTrans('txtUnlock')#
+                                                            <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                         </a>
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item" href="##">#getTrans('txtMonthly')# (#module.currencySign# #lsnumberFormat(module.priceMonthlyAfterVAT, '_,___.__')#)</a>
@@ -73,7 +85,7 @@
                                                     </div>
                                                 <cfelse>
                                                     <a href="##?" class="card-btn w-50">
-                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('txtUnlock')#
+                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                     </a>
                                                 </cfif>
                                             </div>
