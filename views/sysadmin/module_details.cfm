@@ -40,6 +40,13 @@
                     <label class="form-label">Table prefix *</label>
                     <input type="text" class="form-control" name="prefix" placeholder="e.g. mymod_" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Setting path (first file)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">root/</span>
+                        <input type="text" name="path" class="form-control" autocomplete="off" value="#HTMLEditFormat(qModule.strSettingPath)#" maxlength="255">
+                    </div>
+                </div>
                 <div class="row mb-3">
                     <div class="col-lg-4">
                         <label class="form-label">Number of test days *</label>

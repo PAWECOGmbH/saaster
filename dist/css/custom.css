@@ -1,3 +1,7 @@
+
+a {
+    outline: none;
+}
 .dropify-message > .file-icon > p {
     font-size: 20px;
 }

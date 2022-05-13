@@ -107,6 +107,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.pic" default="";
         param name="form.desc" default="";
         param name="form.test_days" default="0";
+        param name="form.path" default="";
 
         qNexPrio = queryExecute(
             options = {datasource = application.datasource},
@@ -126,6 +127,7 @@ if (structKeyExists(form, "edit_module")) {
                 bookable: {type: "boolean", value: bookable},
                 test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
+                modulePath: {type: "varchar", value: form.path},
                 thisID: {type: "numeric", value: form.edit_module}
             },
             sql = "
@@ -136,7 +138,8 @@ if (structKeyExists(form, "edit_module")) {
                     blnActive = :active,
                     strTabPrefix = :prefix,
                     blnBookable = :bookable,
-                    intNumTestDays = :test_days
+                    intNumTestDays = :test_days,
+                    strSettingPath = :modulePath
                 WHERE intModuleID = :thisID
 
             "
