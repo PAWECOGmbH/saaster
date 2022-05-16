@@ -1,13 +1,18 @@
 
 component displayname="book" output="false" {
 
-    // Create and encrypt booking link
-    public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string recurring, string type) {
+    public any function init(string type) {
 
         param name="arguments.type" default="plan";
+        variables.type = arguments.type;
+
+    }
+
+    // Create and encrypt booking link
+    public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string recurring) {
 
         local.argsJSon = {};
-        if(arguments.type eq "module") {
+        if(variables.type eq "module") {
             local.argsJSon['moduleID'] = arguments.thisID;
         } else {
             local.argsJSon['planID'] = arguments.thisID;
@@ -53,6 +58,14 @@ component displayname="book" output="false" {
             local.testTillDate = "";
             local.recurring = "";
 
+            if (structKeyExists(structure, "moduleID")) {
+                local.thisID = local.bookingData.moduleID;
+                local.column = "intModuleID";
+            } else {
+                local.thisID = local.bookingData.planID;
+                local.column = "intPlanID";
+            }
+
             if (structKeyExists(arguments, "itsTest") and arguments.itsTest) {
 
                 local.testTillDate = dateAdd("d", local.bookingData.testDays, local.startDate);
@@ -86,7 +99,7 @@ component displayname="book" output="false" {
                     options = {datasource = application.datasource, result = "newID"},
                     params = {
                         customerID: {type: "numeric", value: arguments.customerID},
-                        planID: {type: "numeric", value: local.bookingData.planID},
+                        thisID: {type: "numeric", value: local.thisID},
                         dateStart: {type: "date", value: local.startDate},
                         dateEnd: {type: "date", value: local.tillDate},
                         dateTestEnd: {type: "date", value: local.testTillDate},
@@ -94,7 +107,7 @@ component displayname="book" output="false" {
                         recurring: {type: "varchar", value: local.recurring}
                     },
                     sql = "
-                        INSERT INTO customer_bookings (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                        INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
                         VALUES (:customerID, :planID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
                     "
                 )

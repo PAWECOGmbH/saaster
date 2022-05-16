@@ -307,7 +307,7 @@ if (structKeyExists(form, 'login_btn')) {
             session.currentPlan = checkPlan;
 
             <!--- Save current modules into a session --->
-            checkModules = new com.modules().getCurrentModules(session.customer_id, session.lng);
+            checkModules = new com.modules().getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
             if (findNoCase("?", objUserLogin.redirect)) {

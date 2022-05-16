@@ -20,20 +20,11 @@ ALTER TABLE `modules`
 ADD COLUMN `intNumTestDays` int(11) NOT NULL AFTER `blnBookable`,
 ADD COLUMN `strSettingPath` varchar(255) NULL AFTER `intNumTestDays`;
 
-
-
-
-
-
-
-
+DROP TABLE customer_modules;
 
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtOneTime', 'Einmalig', 'One time');
-
-INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtUnlock', 'Freischalten', 'Unlock');
 
 
 SET FOREIGN_KEY_CHECKS = 1;

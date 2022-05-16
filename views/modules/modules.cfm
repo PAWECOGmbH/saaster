@@ -5,6 +5,8 @@
     getModules = objModules.getAllModules();
 
     moduleList = "";
+
+    // Get included modules in plan
     if (structKeyExists(session.currentPlan, "modulesIncluded")) {
         if (isArray(session.currentPlan.modulesIncluded) and arrayLen(session.currentPlan.modulesIncluded)) {
             cfloop(array=session.currentPlan.modulesIncluded, index="i") {
@@ -13,8 +15,17 @@
         }
     }
 
+    // Get separately booked modules
+    if (arrayLen(session.currentModules)) {
+        cfloop(array=session.currentModules, index="i") {
+            moduleList = listAppend(moduleList, i.moduleID);
+        }
+    }
 
-    dump(objModules.getBookedModules(session.customer_id));
+    listRemoveDuplicates(moduleList);
+
+
+    //dump(session.currentModules);
     //dump(session.currentPlan);
     //dump(moduleList);
 </cfscript>

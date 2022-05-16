@@ -40,11 +40,6 @@
     // Get more module infos of the module to be booked
     moduleDetails = objModules.getModuleData(variables.moduleID, variables.lngID, variables.currencyID);
 
-    bookedModule = objModules.getBookedModuleByID(variables.moduleID, variables.lngID, variables.currencyID);
-
-    dump(moduleDetails);
-    abort;
-
     // Is it a free module?
     if (moduleDetails.price_yearly eq 0 and moduleDetails.price_monthly eq 0 and moduleDetails.price_onetime eq 0) {
 
@@ -55,12 +50,17 @@
         if (insertBooking.success) {
 
             <!--- Save module array into a session --->
-            session.currentModules = objModules.getCurrentModules(session.customer_id, session.lng);
+            session.currentModules = objModules.getBookedModules(session.customer_id);
             location url="#application.mainURL#/dashboard" addtoken=false;
 
         }
 
     }
+
+    dump(moduleDetails);
+
+    // loop over booked modules
+
 
     // Did the customer already book this module?
     if (structKeyExists(moduleDetails, "moduleID") and moduleDetails.moduleID gt 0) {
@@ -114,7 +114,7 @@
             if (insertBooking.success) {
 
                 <!--- Save module array into a session --->
-                session.currentModules = objModules.getCurrentModules(session.customer_id, session.lng);
+                session.currentModules = objModules.getBookedModules(session.customer_id);
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
             }

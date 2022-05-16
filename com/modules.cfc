@@ -280,10 +280,9 @@ component displayname="modules" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT intModuleID, dtmStartDate
+                    SELECT intModuleID
                     FROM customer_bookings
                     WHERE intCustomerID = :customerID
-                    AND
                 "
             )
 
@@ -293,7 +292,8 @@ component displayname="modules" output="false" {
 
                     local.moduleStruct = structNew();
                     local.moduleStruct['moduleID'] = local.qCurrentModules.intModuleID;
-                    local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
+                    local.moduleStruct['moduleStatus'] = getModuleStatus(arguments.customerID, local.qCurrentModules.intModuleID);
+                    local.moduleStruct['moduleData'] = getModuleData(local.qCurrentModules.intModuleID);
                     arrayAppend(local.moduleArray, local.moduleStruct);
 
                 }
@@ -307,7 +307,7 @@ component displayname="modules" output="false" {
     }
 
 
-    public struct function getBookedModuleData(required numeric customerID, required numeric moduleID) {
+    public struct function getModuleStatus(required numeric customerID, required numeric moduleID) {
 
         local.moduleStruct = structNew();
 
@@ -316,23 +316,85 @@ component displayname="modules" output="false" {
             local.qCurrentModules = queryExecute (
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
+                    customerID: {type: "numeric", value: arguments.customerID},
+                    moduleID: {type: "numeric", value: arguments.moduleID}
                 },
                 sql = "
-                    SELECT  customer_bookings.intModuleID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
-                            customer_bookings.blnPaused, customer_bookings.dtmEndTestDate, customer_bookings.strRecurring,
-                            modules.strModuleName, modules.intNumTestDays
+                    SELECT  intModuleID, blnPaused, strRecurring,
+                            DATE_FORMAT(dtmStartDate, '%Y-%m-%d') as dtmStartDate,
+                            DATE_FORMAT(dtmEndDate, '%Y-%m-%d') as dtmEndDate,
+                            DATE_FORMAT(dtmEndTestDate, '%Y-%m-%d') as dtmEndTestDate
                     FROM customer_bookings
-                    INNER JOIN modules ON customer_bookings.intModuleID = modules.intModuleID
-                    WHERE customer_bookings.intCustomerID = :customerID
-                    AND modules.blnBookable = 1
-                    AND modules.blnActive = 1
+                    WHERE intModuleID = :moduleID
+                    AND intCustomerID = :customerID
                 "
             )
 
+            if (local.qCurrentModules.recordCount) {
+
+                local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
+                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
+
+                // Is the plan paused?
+                if (local.qCurrentModules.blnPaused eq 1) {
+
+                    local.moduleStruct['status'] = 'paused';
+
+                } else {
+
+                    // Is a test phase running?
+                    if (isDate(local.qCurrentModules.dtmStartDate) and isDate(local.qCurrentModules.dtmEndTestDate)) {
+
+                        // Is the test phase still valid? | YES
+                        if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
+
+                            local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                            local.moduleStruct['status'] = 'test';
+
+                        // NO
+                        } else {
+
+                            local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                            local.moduleStruct['status'] = 'expired';
+
+                        }
+
+                    } else {
+
+                        // See if there is a free module running
+                        if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
+
+                            local.moduleStruct['status'] = 'free';
+                            local.moduleStruct['endDate'] = "";
+
+                        } else {
+
+                            // Is a module running?
+                            if (isDate(local.qCurrentModules.dtmEndDate)) {
+
+                                local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+                                local.moduleStruct['status'] = 'active';
+
+                                // Still valid?
+                                if (dateDiff("d", local.qCurrentModules.dtmStartDate, local.qCurrentModules.dtmEndDate) lt 0) {
+
+                                    local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+                                    local.moduleStruct['status'] = 'expired';
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
         }
-
-
 
         return local.moduleStruct;
 
@@ -353,85 +415,7 @@ component displayname="modules" output="false" {
 
 
 
-/* local.moduleStruct['endTestDate'] = "";
-                    local.moduleStruct['endTestDate'] = "";
-                    local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
-
-                    // Is the plan paused?
-                    if (local.qCurrentModules.blnPaused eq 1) {
-
-                        local.moduleStruct['status'] = 'paused';
-
-                    } else {
-
-                        // Is a test phase running?
-                        if (isDate(local.qCurrentModules.dtmStartDate) and isDate(local.qCurrentModules.dtmEndTestDate)) {
-
-                            // Is the test phase still valid? | YES
-                            if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
-
-                                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
-                                local.moduleStruct['status'] = 'test';
-
-                            // NO
-                            } else {
-
-                                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
-                                local.moduleStruct['status'] = 'expired';
-
-                            }
-
-                        } else {
-
-                            // See if there is a free module running
-                            if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
-
-                                local.moduleStruct['status'] = 'free';
-                                local.moduleStruct['endDate'] = "";
-
-                            } else {
-
-                                // Is a module running?
-                                if (isDate(local.qCurrentModules.dtmEndDate)) {
-
-                                    local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
-                                    local.moduleStruct['status'] = 'active';
-
-                                    // Still valid?
-                                    if (dateDiff("d", local.qCurrentModules.dtmStartDate, local.qCurrentModules.dtmEndDate) lt 0) {
-
-                                        local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
-                                        local.moduleStruct['status'] = 'expired';
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    } */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*
 
 
     public struct function getBookedModuleByID(required numeric moduleID, numeric lngID, numeric currencyID) {
@@ -478,6 +462,6 @@ component displayname="modules" output="false" {
         return local.moduleStruct;
 
     }
-
+*/
 
 }

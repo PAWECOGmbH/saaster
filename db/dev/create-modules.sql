@@ -26,8 +26,8 @@ CREATE TABLE `modules`  (
 -- ----------------------------
 -- Records of modules
 -- ----------------------------
-INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo_', '', 0, 0, 1, '2022-03-28 14:54:17');
-INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easy-erp_', '', 1, 30, 2, '2022-03-28 15:19:23');
+INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo_', '', 0, 0, '', 1, '2022-03-28 14:54:17');
+INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easy-erp_', '', 1, 30, '', 2, '2022-03-28 15:19:23');
 
 -- ----------------------------
 -- Table structure for modules_prices
