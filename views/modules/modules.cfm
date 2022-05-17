@@ -27,7 +27,7 @@
 
     //dump(session.currentModules);
     //dump(session.currentPlan);
-    //dump(moduleList);
+    //dump(getModules);
 </cfscript>
 
 
@@ -103,11 +103,11 @@
                                                                 </div>
                                                             </div>
                                                         <cfelseif module.price_onetime gt 0>
-                                                            <a href="#module.bookingLink#" class="card-btn w-50">
+                                                            <a href="#module.bookingLinkO#" class="card-btn w-50">
                                                                 <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                             </a>
                                                         <cfelse>
-                                                            <a href="##?" class="card-btn w-50">
+                                                            <a href="#module.bookingLinkF#" class="card-btn w-50">
                                                                 <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                             </a>
                                                         </cfif>

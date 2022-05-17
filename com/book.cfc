@@ -6,6 +6,8 @@ component displayname="book" output="false" {
         param name="arguments.type" default="plan";
         variables.type = arguments.type;
 
+        return this;
+
     }
 
     // Create and encrypt booking link
@@ -58,7 +60,7 @@ component displayname="book" output="false" {
             local.testTillDate = "";
             local.recurring = "";
 
-            if (structKeyExists(structure, "moduleID")) {
+            if (variables.type eq "module") {
                 local.thisID = local.bookingData.moduleID;
                 local.column = "intModuleID";
             } else {
@@ -96,7 +98,7 @@ component displayname="book" output="false" {
             try {
 
                 queryExecute (
-                    options = {datasource = application.datasource, result = "newID"},
+                    options = {datasource = application.datasource},
                     params = {
                         customerID: {type: "numeric", value: arguments.customerID},
                         thisID: {type: "numeric", value: local.thisID},
@@ -108,11 +110,22 @@ component displayname="book" output="false" {
                     },
                     sql = "
                         INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                        VALUES (:customerID, :planID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
+                        SELECT * FROM
+                        (
+                            SELECT  :customerID as customerID, :thisID as thisID, :dateStart as dateStart,
+                                    :dateEnd as dateEnd, :dateTestEnd as dateTestEnd, :paused as paused, :recurring as recurring
+                        ) AS tmp
+                        WHERE NOT EXISTS
+                        (
+                            SELECT intCustomerID
+                            FROM customer_bookings
+                            WHERE intCustomerID = :customerID
+                            AND #local.column# = :thisID
+                            AND dtmStartDate = :dateStart
+                        )
+                        LIMIT 1
                     "
                 )
-
-                argsReturnValue['newID'] = newID.generatedKey;
 
             } catch (e any) {
 

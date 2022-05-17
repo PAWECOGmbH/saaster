@@ -355,9 +355,9 @@ component displayname="plans" output="false" {
                 // Building the booking link
                 if (!len(trim(local.getPlan.strBookingLink))) {
                     objBook = new com.book();
-                    bookingStringM = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "m");
+                    bookingStringM = objBook.init('plan').createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "m");
                     local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & bookingStringM;
-                    bookingStringY = objBook.createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "y");
+                    bookingStringY = objBook.init('plan').createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "y");
                     local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & bookingStringY;
                 }
 

@@ -75,9 +75,9 @@ Plan status:
             <cfif isDate(i.moduleStatus.endTestDate)>
 
                 <cfif i.moduleStatus.status eq "expired">
-                    <span class="text-red">Your test time has EXPIRED</span> - <a href="#application.mainURL#/account-settings/modules">Renew plan now!</a>
+                    <span class="text-red">Your test time has EXPIRED</span> - <a href="#application.mainURL#/account-settings/modules">Renew module now!</a>
                 <cfelseif i.moduleStatus.status eq "test">
-                    <span class="text-blue">TEST</span>  - <a href="#application.mainURL#/account-settings/modules">Change plan now!</a><br>
+                    <span class="text-blue">TEST</span> <br>
                     You can test until: #lsDateFormat(i.moduleStatus.endTestDate, "Full")#
                 </cfif>
 
@@ -105,7 +105,7 @@ Plan status:
 
 <cfelse>
 
-    No modules activated - <a href="#application.mainURL#/account-settings/modules">Book now!</a>
+    No modules activated - <a href="#application.mainURL#/account-settings/modules">book now!</a>
 
 </cfif>
 

@@ -7,9 +7,6 @@
     // decoding base64 value
     moduleStruct = objBook.decryptBookingLink(url.module);
 
-    dump(moduleStruct);
-
-
     failed = false;
 
     // Check whether we have all the needed information
@@ -45,7 +42,7 @@
 
         // Activate the free module
 
-        insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
+        insertBooking = objBook.init('module').makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
 
         if (insertBooking.success) {
 
@@ -57,40 +54,41 @@
 
     }
 
-    dump(moduleDetails);
+    /* // Get all modules already booked and loop over
+    modulesBooked = objModules.getBookedModules(session.customer_id);
+    if (isArray(modulesBooked) and arrayLen(modulesBooked)) {
+        loop array=modulesBooked index="i" {
 
-    // loop over booked modules
 
+
+        }
+    }
 
     // Did the customer already book this module?
     if (structKeyExists(moduleDetails, "moduleID") and moduleDetails.moduleID gt 0) {
 
-        // Is it the same module?
-        if (moduleDetails.moduleID eq moduleDetails.moduleID) {
 
+        // If the plan has been expired, renew
+        if (moduleDetails.status eq "expired") {
 
+            // Do nothing and let the customer book... down to the next step
 
-            // If the plan has been expired, renew
-            if (moduleDetails.status eq "expired") {
+        } else {
 
-                // Do nothing and let the customer book... down to the next step
-
-            } else {
-
-                // Back to dashboard
-                location url="#application.mainURL#/dashboard" addtoken=false;
-            }
-
-
+            // Back to dashboard
+            location url="#application.mainURL#/dashboard" addtoken=false;
         }
 
-    }
+
+
+
+    } */
 
 
     // Do we have to provide any test days?
     if (isNumeric(moduleDetails.testDays) and moduleDetails.testDays gt 0) {
 
-        // The customer can only test modules that he has not already tested.
+        // The customer can only test modules that he has not already tested
         qTestedModules = queryExecute (
             options = {datasource = application.datasource},
             params = {
@@ -109,7 +107,7 @@
         if (!qTestedModules.recordCount) {
 
             // Book the module and let the customer test
-            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=true, recurring=variables.recurring);
+            insertBooking = objBook.init('module').makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=true, recurring=variables.recurring);
 
             if (insertBooking.success) {
 
@@ -122,6 +120,9 @@
         }
 
     }
+
+
+    abort;
 
 
 

@@ -71,7 +71,7 @@ component displayname="modules" output="false" {
                 currencyID: {type: "numeric", value: variables.currencyID}
             },
             sql = "
-                SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture,
+                SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture, modules.intNumTestDays,
                 modules.blnBookable, modules.intPrio, modules.blnActive, modules.strSettingPath,
                 currencies.strCurrencyISO, currencies.strCurrencySign,
                 COALESCE(modules_prices.blnIsNet,0) as blnIsNet,
@@ -168,6 +168,7 @@ component displayname="modules" output="false" {
             local.moduleStruct['currencyID'] = local.qModule.intCurrencyID;
             local.moduleStruct['currency'] = local.qModule.strCurrencyISO;
             local.moduleStruct['settingPath'] = local.qModule.strSettingPath;
+            local.moduleStruct['testDays'] = local.qModule.intNumTestDays;
             if (len(trim(local.qModule.strCurrencySign))) {
                 local.moduleStruct['currencySign'] = local.qModule.strCurrencySign;
             } else {
@@ -239,29 +240,24 @@ component displayname="modules" output="false" {
 
 
 
-        // Building the booking link
+        // Build the booking link
 
-        local.moduleStruct['bookingLinkM'] = "";
-        local.moduleStruct['bookingLinkY'] = "";
-        local.moduleStruct['bookingLink'] = "";
+        // bookingLinkM: monthly
+        // bookingLinkY: yearly
+        // bookingLinkO: onetime
+        // bookingLinkF: free
 
-        if ((local.qModule.decPriceMonthly gt 0 or local.qModule.decPriceOneTime gt 0) and local.qModule.blnBookable eq 1) {
-
-            local.objBook = new com.book();
-            local.bookingStringM = local.objBook.createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "m", "module");
-            local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
-            local.bookingStringY = local.objBook.createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "y", "module");
-            local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
-            local.bookingString = local.objBook.createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "o", "module");
-            local.moduleStruct['bookingLink'] = application.mainURL & "/book?module=" & local.bookingString;
-
-        }
-
+        local.objBook = new com.book();
+        local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "m", "module");
+        local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
+        local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "y", "module");
+        local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
+        local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "o", "module");
+        local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
+        local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "f", "module");
+        local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
 
         return local.moduleStruct;
-
-
-
 
     }
 
@@ -399,69 +395,5 @@ component displayname="modules" output="false" {
         return local.moduleStruct;
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-    public struct function getBookedModuleByID(required numeric moduleID, numeric lngID, numeric currencyID) {
-
-        local.moduleStruct = structNew();
-
-        if (structKeyExists(arguments, "moduleID") and arguments.moduleID gt 0) {
-
-            if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
-                local.lngID = arguments.lngID;
-                local.language = application.objGlobal.getAnyLanguage(local.lngID).iso;
-            } else {
-                local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-                local.language = application.objGlobal.getDefaultLanguage().iso;
-            }
-            if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
-                local.currencyID = arguments.currencyID;
-            } else {
-                local.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
-            }
-
-            local.moduleData = structNew();
-            local.moduleData['status'] = '';
-            local.moduleData['startDate'] = "";
-            local.moduleData['endDate'] = "";
-            local.moduleData['endTestDate'] = "";
-            local.moduleData['recurring'] = "";
-
-            // Get module data using a function
-            local.moduleData = getModuleData(arguments.moduleID, local.lngID, local.currencyID);
-            local.moduleStruct['moduleID'] = local.moduleData.moduleID;
-            local.moduleStruct['moduleName'] = local.moduleData.name;
-
-
-
-
-
-
-            dump(local.moduleStruct);
-
-
-        }
-
-        return local.moduleStruct;
-
-    }
-*/
 
 }
