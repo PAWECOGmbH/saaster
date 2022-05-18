@@ -42,6 +42,17 @@
                             <input type="email" name="email" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('formLanguage')#</label>
+                            <select name="language" class="form-select">
+                                <cfloop list="#application.allLanguages#" index="i">
+                                    <cfset lngIso = listfirst(i,"|")>
+                                    <cfset lngName = listlast(i,"|")>
+                                    <option value="#lngIso#" >#lngName#</option>
+                                </cfloop>
+                            </select>
+                        </div>
+
 
                         <div class="mb-3">
                             <label class="form-check">
