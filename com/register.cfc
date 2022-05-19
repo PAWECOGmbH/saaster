@@ -29,9 +29,9 @@ component displayname="customer" output="false" {
             local.email = '';
         }
         if (structKeyExists(arguments.optinValues, "language")) {
-            local.language = application.objGlobal.cleanUpText(arguments.optinValues.language, 2);
+            local.language = arguments.optinValues.language;
         } else {
-            local.language = '';
+            local.language = application.objGlobal.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.optinValues, "newUUID")) {
             local.newUUID = arguments.optinValues.newUUID;
@@ -107,9 +107,9 @@ component displayname="customer" output="false" {
             local.email = '';
         }
         if (structKeyExists(arguments.customerStruct, "strLanguage")) {
-            local.language = application.objGlobal.cleanUpText(arguments.customerStruct.strLanguage, 2);
+            local.language = arguments.customerStruct.strLanguage;
         } else {
-            local.language = '';
+            local.language = application.objGlobal.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.customerStruct, "hash")) {
             local.hash = trim(arguments.customerStruct.hash);
@@ -139,7 +139,7 @@ component displayname="customer" output="false" {
                     first_name: {type: "nvarchar", value: local.first_name},
                     last_name: {type: "nvarchar", value: local.last_name},
                     email: {type: "nvarchar", value: local.email},
-                    language: {type: "nvarchar", value: local.language},
+                    language: {type: "varchar", value: local.language},
                     hash: {type: "nvarchar", value: local.hash},
                     salt: {type: "nvarchar", value: local.salt},
                     uuid: {type: "nvarchar", value: local.uuid}
