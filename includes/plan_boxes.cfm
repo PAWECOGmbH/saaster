@@ -4,7 +4,6 @@
     param name="variables.planCurrencyID" default="0";
     param name="variables.planCountryID" default="0";
     param name="variables.planGroupID" default="0";
-    planArgList = "";
     if (len(trim(variables.planLanguage))) {
         planLanguage = variables.planLanguage;
     }
@@ -14,8 +13,8 @@
     if (len(trim(variables.planCurrencyID)) and isNumeric(variables.planCurrencyID)) {
         planCurrencyID = variables.planCurrencyID;
     }
-    objPlans = new com.plans();
-    planObj = objPlans.getPlans(language=planLanguage, groupID=planGroupID, currencyID=planCurrencyID);
+    objPlans = new com.plans().init(language=planLanguage, currencyID=planCurrencyID);
+    planObj = objPlans.getPlans(planGroupID);
     //dump(planObj);
 </cfscript>
 
@@ -53,7 +52,7 @@
                             <cfif i.onRequest>
                                 #getTrans('txtOnRequest')#
                             <cfelse>
-                                <cfif i.priceMonthly eq 0>
+                                <cfif i.itsFree eq 1>
                                     #getTrans('txtFree')#
                                 <cfelse>
                                     <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceMonthly, '__,___.__')#
@@ -74,7 +73,7 @@
                             <cfif i.onRequest>
                                 #getTrans('txtOnRequest')#
                             <cfelse>
-                                <cfif i.priceMonthly eq 0>
+                                <cfif i.itsFree eq 1>
                                     #getTrans('txtFree')#
                                 <cfelse>
                                     <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceYearly, '__,___.__')#
@@ -83,7 +82,7 @@
                         </div>
                         <!--- Price addition --->
                         <div style="min-height: 50px;">
-                            <cfif !i.onRequest and i.priceMonthly gt 0>
+                            <cfif !i.onRequest and i.priceYearly gt 0>
                                 #getTrans('txtYearlyPayment')#
                             </cfif>
                         </div>
@@ -97,15 +96,26 @@
                     <!--- If there is a user session, send the user to the booking or to the dashboard --->
                     <cfif structKeyExists(session, "customer_id") and session.customer_id gt 0>
 
-                        <!--- Button monthly --->
-                        <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
-                            <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
-                        </div>
+                        <cfif i.itsFree eq 1>
 
-                        <!--- Button yearly --->
-                        <div class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>" style="display: none;">
-                            <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
-                        </div>
+                            <!--- Button free --->
+                            <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+                                <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                            </div>
+
+                        <cfelse>
+
+                            <!--- Button monthly --->
+                            <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
+                                <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                            </div>
+
+                            <!--- Button yearly --->
+                            <div class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>" style="display: none;">
+                                <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                            </div>
+
+                        </cfif>
 
                     <!--- otherwise send to registration form --->
                     <cfelse>

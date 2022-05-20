@@ -1,31 +1,31 @@
 
 component displayname="plans" output="false" {
 
-    public array function getPlans(string language, numeric groupID, numeric currencyID) {
+    public any function init(numeric lngID, string language, numeric currencyID) {
 
-        if (structKeyExists(arguments, "language")) {
-            local.qLanguage = queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    language: {type: "varchar", value: arguments.language}
-                },
-                sql = "
-                    SELECT intLanguageID, strLanguageISO
-                    FROM languages
-                    WHERE strLanguageISO = :language
-                "
-            )
-            if (local.qLanguage.recordCount) {
-                local.lngID = local.qLanguage.intLanguageID;
-                local.language = local.qLanguage.strLanguageISO;
-            } else {
-                local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-                local.language = application.objGlobal.getDefaultLanguage().iso;
-            }
-        } else {
-            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+        if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
+            variables.lngID = arguments.lngID;
+        } else if (structKeyExists(arguments, "language")) {
+            variables.language = arguments.language;
         }
+        if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
+            variables.currencyID = arguments.currencyID;
+        } else {
+            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+        }
+
+        if(!len(trim(arguments.language))) {
+            variables.language = application.objGlobal.getDefaultLanguage().iso;
+        }
+        if(!len(trim(arguments.lngID))) {
+            variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
+
+        return this;
+
+    }
+
+    public array function getPlans(numeric groupID) {
 
         if (structKeyExists(arguments, "groupID") and arguments.groupID gt 0) {
             local.groupID = arguments.groupID;
@@ -45,30 +45,13 @@ component displayname="plans" output="false" {
                 local.groupID = 0;
             }
         }
-        if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
-            local.currencyID = arguments.currencyID;
-        } else {
-            local.qDefCurrency = queryExecute (
-                options = {datasource = application.datasource},
-                sql = "
-                    SELECT intCurrencyID
-                    FROM currencies
-                    WHERE blnDefault = 1
-                "
-            )
-            if (local.qDefCurrency.recordCount) {
-                local.currencyID = local.qDefCurrency.intCurrencyID;
-            } else {
-                local.currencyID = 0;
-            }
-        }
 
         // Get plans
         local.getPlan = queryExecute (
             options = {datasource = application.datasource},
             params = {
-                languageID: {type: "numeric", value: local.lngID},
-                currencyID: {type: "numeric", value: local.currencyID}
+                languageID: {type: "numeric", value: variables.lngID},
+                currencyID: {type: "numeric", value: variables.currencyID}
             },
             sql = "
                 SELECT
@@ -232,16 +215,18 @@ component displayname="plans" output="false" {
 
                 local.structPlan = structNew();
 
-                local.structPlan['planID'] = getPlan.intPlanID;
-                local.structPlan['planGroupID'] = getPlan.intPlanGroupID;
-                local.structPlan['currencyID'] = getPlan.intCurrencyID;
-                local.structPlan['itsFree'] = getPlan.blnFree;
+                local.structPlan['planID'] = local.getPlan.intPlanID;
+                local.structPlan['planGroupID'] = local.getPlan.intPlanGroupID;
+                local.structPlan['currencyID'] = local.getPlan.intCurrencyID;
+                local.structPlan['itsFree'] = local.getPlan.blnFree;
                 local.structPlan['groupName'] = '';
                 local.structPlan['planName'] = '';
                 local.structPlan['shortDescription'] = '';
                 local.structPlan['description'] = '';
                 local.structPlan['buttonName'] = '';
-                local.structPlan['bookingLink'] = '';
+                local.structPlan['bookingLinkM'] = '';
+                local.structPlan['bookingLinkY'] = '';
+                local.structPlan['bookingLinkF'] = '';
                 local.structPlan['recommended'] = 0;
                 local.structPlan['maxUsers'] = 0;
                 local.structPlan['testDays'] = 0;
@@ -272,6 +257,7 @@ component displayname="plans" output="false" {
                 if (len(trim(local.getPlan.strBookingLink))) {
                     local.structPlan['bookingLinkM'] = local.getPlan.strBookingLink;
                     local.structPlan['bookingLinkY'] = local.getPlan.strBookingLink;
+                    local.structPlan['bookingLinkF'] = local.getPlan.strBookingLink;
                 }
                 if (isBoolean(local.getPlan.blnRecommended)) {
                     local.structPlan['recommended'] = local.getPlan.blnRecommended;
@@ -309,6 +295,9 @@ component displayname="plans" output="false" {
                     local.structPlan['currencySign'] = local.getPlan.strCurrencyISO;
                 }
 
+                // Get all the included modules of the current plan                ;
+                structAppend(local.structPlan, getModulesIncluded(local.getPlan.intPlanID));
+
 
                 local.objPrices = new com.prices();
 
@@ -318,7 +307,7 @@ component displayname="plans" output="false" {
                         vat=local.getPlan.decVat,
                         vat_type=local.getPlan.intVatType,
                         isnet=local.getPlan.blnIsNet,
-                        language=local.language,
+                        language=variables.language,
                         currency=local.getPlan.strCurrencyISO
                     ).vat_text;
 
@@ -328,7 +317,7 @@ component displayname="plans" output="false" {
                         vat=local.getPlan.decVat,
                         vat_type=local.getPlan.intVatType,
                         isnet=local.getPlan.blnIsNet,
-                        language=local.language,
+                        language=variables.language,
                         currency=local.getPlan.strCurrencyISO
                     ).vat_text;
 
@@ -338,7 +327,7 @@ component displayname="plans" output="false" {
                         vat=local.getPlan.decVat,
                         vat_type=local.getPlan.intVatType,
                         isnet=local.getPlan.blnIsNet,
-                        language=local.language,
+                        language=variables.language,
                         currency=local.getPlan.strCurrencyISO
                     ).priceAfterVAT;
 
@@ -348,17 +337,26 @@ component displayname="plans" output="false" {
                         vat=local.getPlan.decVat,
                         vat_type=local.getPlan.intVatType,
                         isnet=local.getPlan.blnIsNet,
-                        language=local.language,
+                        language=variables.language,
                         currency=local.getPlan.strCurrencyISO
                     ).priceAfterVAT;
 
-                // Building the booking link
+                // Build the booking link
+
+                // bookingLinkM: monthly
+                // bookingLinkY: yearly
+                // bookingLinkF: free
+
                 if (!len(trim(local.getPlan.strBookingLink))) {
-                    objBook = new com.book();
-                    bookingStringM = objBook.init('plan').createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "m");
-                    local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & bookingStringM;
-                    bookingStringY = objBook.init('plan').createBookingLink(getPlan.intPlanID, local.lngID, local.currencyID, "y");
-                    local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & bookingStringY;
+
+                    local.objBook = new com.book();
+                    local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "m", "plan");
+                    local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & local.bookingStringM;
+                    local.bookingStringY = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "y", "plan");
+                    local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & local.bookingStringY;
+                    local.bookingStringF = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "f", "plan");
+                    local.structPlan['bookingLinkF'] = application.mainURL & "/book?plan=" & local.bookingStringF;
+
                 }
 
                 arrayAppend(local.arrPlan, local.structPlan);
@@ -380,6 +378,7 @@ component displayname="plans" output="false" {
             local.structPlan['buttonName'] = 'Button name';
             local.structPlan['bookingLinkM'] = '##?';
             local.structPlan['bookingLinkY'] = '##?';
+            local.structPlan['bookingLinkF'] = '##?';
             local.structPlan['recommended'] = 0;
             local.structPlan['maxUsers'] = 0;
             local.structPlan['testDays'] = 0;
@@ -394,6 +393,8 @@ component displayname="plans" output="false" {
             local.structPlan['currency'] = 'USD';
             local.structPlan['currencySign'] = "$";
             local.structPlan['vat_text'] = "Total";
+            local.structPlan['modulesIncluded'] = "";
+            local.structPlan['modulesIncludedAsList'] = "";
 
             arrayAppend(local.arrPlan, local.structPlan);
 
@@ -404,35 +405,14 @@ component displayname="plans" output="false" {
     }
 
 
-    public array function getPlanFeatures(string language) {
-
-        if (structKeyExists(arguments, "language")) {
-            local.qLanguage = queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    language: {type: "varchar", value: arguments.language}
-                },
-                sql = "
-                    SELECT intLanguageID
-                    FROM languages
-                    WHERE strLanguageISO = :language
-                "
-            )
-            if (local.qLanguage.recordCount) {
-                local.lngID = local.qLanguage.intLanguageID;
-            } else {
-                local.lngID = 0;
-            }
-        } else {
-            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-        }
+    public array function getPlanFeatures() {
 
         local.arrFeatures = arrayNew(1);
 
         local.qPlanFeatures = queryExecute (
             options = {datasource = application.datasource},
             params = {
-                languageID: {type: "numeric", value: local.lngID}
+                languageID: {type: "numeric", value: variables.lngID}
             },
             sql = "
                 SELECT intPlanFeatureID, blnCategory,
@@ -516,35 +496,14 @@ component displayname="plans" output="false" {
 
 
 
-    public struct function getFeatureValue(required numeric planID, required numeric planFeatureID, string language) {
-
-        if (structKeyExists(arguments, "language")) {
-            local.qLanguage = queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    language: {type: "varchar", value: arguments.language}
-                },
-                sql = "
-                    SELECT intLanguageID
-                    FROM languages
-                    WHERE strLanguageISO = :language
-                "
-            )
-            if (local.qLanguage.recordCount) {
-                local.lngID = local.qLanguage.intLanguageID;
-            } else {
-                local.lngID = 0;
-            }
-        } else {
-            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-        }
+    public struct function getFeatureValue(required numeric planID, required numeric planFeatureID) {
 
         local.qFeatValue = queryExecute (
             options = {datasource = application.datasource},
             params = {
                 planID: {type: "numeric", value: arguments.planID},
                 planFeatureID: {type: "numeric", value: arguments.planFeatureID},
-                languageID: {type: "numeric", value: local.lngID}
+                languageID: {type: "numeric", value: variables.lngID}
             },
             sql = "
                 SELECT blnCheckmark,
@@ -591,114 +550,64 @@ component displayname="plans" output="false" {
 
 
 
-    public struct function getCurrentPlan(required numeric customerID, string language) {
+    public struct function getCurrentPlan(required numeric customerID) {
 
-        if (structKeyExists(arguments, "language")) {
-            local.qLanguage = queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    language: {type: "varchar", value: arguments.language}
-                },
-                sql = "
-                    SELECT intLanguageID
-                    FROM languages
-                    WHERE strLanguageISO = :language
-                "
-            )
-            if (local.qLanguage.recordCount) {
-                local.lngID = local.qLanguage.intLanguageID;
-            } else {
-                local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-            }
-        } else {
-            local.lngID = application.objGlobal.getDefaultLanguage().lngID;
-        }
-
-        planStruct = structNew();
-        planStruct['planID'] = 0;
-        planStruct['planName'] = "";
-        planStruct['status'] = '';
-        planStruct['maxUsers'] = 1;
-        planStruct['startDate'] = "";
-        planStruct['endDate'] = "";
-        planStruct['endTestDate'] = "";
-        planStruct['modulesIncluded'] = "";
-        planStruct['recurring'] = "";
+        local.planStruct = structNew();
+        local.planStruct['planID'] = 0;
+        local.planStruct['planName'] = "";
+        local.planStruct['status'] = '';
+        local.planStruct['maxUsers'] = 1;
+        local.planStruct['startDate'] = "";
+        local.planStruct['endDate'] = "";
+        local.planStruct['endTestDate'] = "";
+        local.planStruct['modulesIncluded'] = "";
+        local.planStruct['recurring'] = "";
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
             local.qCurrentPlan = queryExecute (
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
+                    customerID: {type: "numeric", value: arguments.customerID},
+                    languageID: {type: "numeric", value: variables.lngID}
                 },
                 sql = "
                     SELECT  customer_bookings.intPlanID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
                             customer_bookings.blnPaused, customer_bookings.dtmEndTestDate, customer_bookings.strRecurring,
-                            plans.strPlanName, plans.intMaxUsers, plans.blnFree
+                            plans.intMaxUsers, plans.blnFree,
+                            (
+                                IF
+                                    (
+                                        LENGTH(
+                                            (
+                                                SELECT strPlanName
+                                                FROM plans_trans
+                                                WHERE intPlanID = plans.intPlanID
+                                                AND intLanguageID = :languageID
+                                            )
+                                        ),
+                                        (
+                                            SELECT strPlanName
+                                            FROM plans_trans
+                                            WHERE intPlanID = plans.intPlanID
+                                            AND intLanguageID = :languageID
+                                        ),
+                                        plans.strPlanName
+                                    )
+                            ) as strPlanName
                     FROM customer_bookings
                     INNER JOIN plans ON customer_bookings.intPlanID = plans.intPlanID
                     WHERE customer_bookings.intCustomerID = :customerID
-                    ORDER BY intCustomerBookingID DESC
-                    LIMIT 1
                 "
             )
 
             if (local.qCurrentPlan.recordCount) {
 
-                // Get all the linked modules of the current plan
-                local.qLinkedModules = queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        planID: {type: "numeric", value: local.qCurrentPlan.intPlanID},
-                        languageID: {type: "numeric", value: local.lngID}
-                    },
-                    sql = "
-                        SELECT plans_modules.intModuleID,
-                        (
-                            IF
-                                (
-                                    LENGTH(
-                                        (
-                                            SELECT strModuleName
-                                            FROM modules_trans
-                                            WHERE intModuleID = plans_modules.intModuleID
-                                            AND intLanguageID = :languageID
-                                        )
-                                    ),
-                                    (
-                                        SELECT strModuleName
-                                        FROM modules_trans
-                                        WHERE intModuleID = plans_modules.intModuleID
-                                        AND intLanguageID = :languageID
-                                    ),
-                                    modules.strModuleName
-                                )
-                        ) as strModuleName
-                        FROM plans_modules
-                        INNER JOIN modules ON plans_modules.intModuleID = modules.intModuleID
-                        WHERE plans_modules.intPlanID = :planID
-                        AND modules.blnActive = 1
-                    "
-                )
-
-                if (local.qLinkedModules.recordCount) {
-                    modulesArray = arrayNew(1);
-                    cfloop( query="local.qLinkedModules" ) {
-                        linkedModules = structNew();
-                        linkedModules['moduleID'] = local.qLinkedModules.intModuleID;
-                        linkedModules['name'] = local.qLinkedModules.strModuleName;
-                        arrayAppend(modulesArray, linkedModules);
-                    }
-                    planStruct['modulesIncluded'] = modulesArray;
-
-                }
-
-                planStruct['planID'] = local.qCurrentPlan.intPlanID;
-                planStruct['planName'] = local.qCurrentPlan.strPlanName;
-                planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
-                planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
-                planStruct['recurring'] = local.qCurrentPlan.strRecurring;
+                local.planStruct['planID'] = local.qCurrentPlan.intPlanID;
+                local.planStruct['planName'] = local.qCurrentPlan.strPlanName;
+                local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
+                local.planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
+                local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
 
                 // Is already a plan defined?
                 if (local.qCurrentPlan.intPlanID gt 0) {
@@ -706,7 +615,13 @@ component displayname="plans" output="false" {
                     // Is the plan paused?
                     if (local.qCurrentPlan.blnPaused eq 1) {
 
-                        planStruct['status'] = 'paused';
+                        local.planStruct['status'] = 'paused';
+
+                    // Is the plan canceled?
+                    } else if (local.qCurrentPlan.strRecurring eq "canceled") {
+
+                        local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                        local.planStruct['status'] = 'canceled';
 
                     } else {
 
@@ -716,14 +631,14 @@ component displayname="plans" output="false" {
                             // Is the test phase still valid? | YES
                             if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
 
-                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-                                planStruct['status'] = 'test';
+                                local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+                                local.planStruct['status'] = 'test';
 
                             // NO
                             } else {
 
-                                planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-                                planStruct['status'] = 'expired';
+                                local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+                                local.planStruct['status'] = 'expired';
 
                             }
 
@@ -732,22 +647,22 @@ component displayname="plans" output="false" {
                             // See if there is a free plan running
                             if (local.qCurrentPlan.blnFree) {
 
-                                planStruct['status'] = 'free';
-                                planStruct['endDate'] = "";
+                                local.planStruct['status'] = 'free';
+                                local.planStruct['endDate'] = "";
 
                             } else {
 
                                 // Is a plan running?
                                 if (isDate(local.qCurrentPlan.dtmEndDate)) {
 
-                                    planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                                    planStruct['status'] = 'active';
+                                    local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                                    local.planStruct['status'] = 'active';
 
                                     // Still valid?
                                     if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
 
-                                        planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                                        planStruct['status'] = 'expired';
+                                        local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                                        local.planStruct['status'] = 'expired';
 
                                     }
 
@@ -761,23 +676,113 @@ component displayname="plans" output="false" {
 
                 }
 
+                // Get all the included modules of the current plan
+                structAppend(local.planStruct, getModulesIncluded(local.qCurrentPlan.intPlanID));
+
             }
 
         }
 
-        return planStruct;
-
-
-
+        return local.planStruct;
 
     }
 
 
 
-    public any function getPlanDetail(required numeric planID, string language, numeric currencyID) {
+    public struct function getModulesIncluded(required numeric planID) {
 
-        planArray = getPlans(language=arguments.language, currencyID=arguments.currencyID);
+        local.modulesStruct = structNew();
+        local.modulesArray = arrayNew(1);
+        local.moduleList = "";
 
+        local.modulesStruct['modulesIncluded'] = local.modulesArray;
+        local.modulesStruct['modulesIncludedAsList'] = local.moduleList;
+
+        if (isNumeric(arguments.planID) and arguments.planID gt 0) {
+
+            local.qLinkedModules = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    planID: {type: "numeric", value: arguments.planID},
+                    languageID: {type: "numeric", value: variables.lngID}
+                },
+                sql = "
+                    SELECT plans_modules.intModuleID,
+                    (
+                        IF
+                            (
+                                LENGTH(
+                                    (
+                                        SELECT strModuleName
+                                        FROM modules_trans
+                                        WHERE intModuleID = plans_modules.intModuleID
+                                        AND intLanguageID = :languageID
+                                    )
+                                ),
+                                (
+                                    SELECT strModuleName
+                                    FROM modules_trans
+                                    WHERE intModuleID = plans_modules.intModuleID
+                                    AND intLanguageID = :languageID
+                                ),
+                                modules.strModuleName
+                            )
+                    ) as strModuleName
+                    FROM plans_modules
+                    INNER JOIN modules ON plans_modules.intModuleID = modules.intModuleID
+                    WHERE plans_modules.intPlanID = :planID
+                    AND modules.blnActive = 1
+                "
+            )
+
+            if (local.qLinkedModules.recordCount) {
+
+                cfloop( query="local.qLinkedModules" ) {
+
+                    local.includedModules = structNew();
+                    local.includedModules['moduleID'] = local.qLinkedModules.intModuleID;
+                    local.includedModules['name'] = local.qLinkedModules.strModuleName;
+                    arrayAppend(local.modulesArray, local.includedModules);
+
+                    local.moduleList = listAppend(local.moduleList, local.qLinkedModules.intModuleID);
+
+                }
+
+                local.modulesStruct['modulesIncluded'] = local.modulesArray;
+                local.modulesStruct['modulesIncludedAsList'] = listRemoveDuplicates(local.moduleList);
+
+            }
+
+        }
+
+        return local.modulesStruct;
+
+    }
+
+
+
+    public any function getPlanDetail(required numeric planID) {
+
+        // Get groupID of the plan first
+        local.qGroup = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                planID: {type: "numeric", value: arguments.planID}
+            },
+            sql = "
+                SELECT intPlanGroupID
+                FROM plans
+                WHERE intPlanID = :planID
+            "
+        )
+
+        if (local.qGroup.recordCount) {
+            local.groupID = local.qGroup.intPlanGroupID;
+        } else {
+            local.groupID = 0;
+        }
+
+        planArray = getPlans(local.groupID);
         planStruct = structNew();
 
         if (isArray(planArray)) {
@@ -794,7 +799,70 @@ component displayname="plans" output="false" {
     }
 
 
+    public struct function getPlanStatusAsText(required struct thisPlan) {
 
+        local.planStatus = structNew();
+
+        if (isStruct(arguments.thisPlan)) {
+
+            if (structKeyExists(arguments.thisPlan, "status")) {
+
+                switch(arguments.thisPlan.status) {
+
+                    case "active":
+                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtRenewPlanOn');
+                        local.planStatus['fontColor'] = "green";
+                        break;
+
+                    case "free":
+                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
+                        local.planStatus['fontColor'] = "green";
+                        break;
+
+                    case "expired":
+                        local.planStatus['status'] = application.objGlobal.getTrans('txtExpired');
+                        if (isDate(arguments.thisPlan.endTestDate)) {
+                            local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestTimeExpired');
+                        } else {
+                            local.planStatus['statusText'] = application.objGlobal.getTrans('txtPlanExpired');
+                        }
+                        local.planStatus['fontColor'] = "red";
+                        break;
+
+                    case "test":
+                        local.planStatus['status'] = application.objGlobal.getTrans('txtTest');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestUntil');
+                        local.planStatus['fontColor'] = "blue";
+                        break;
+
+                    case "canceled":
+                        local.planStatus['status'] = application.objGlobal.getTrans('txtCanceled');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtSubscriptionCanceled');
+                        local.planStatus['fontColor'] = "orange";
+                        break;
+
+                    case "onetime":
+                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtOneTimePayment');
+                        local.planStatus['fontColor'] = "green";
+                        break;
+
+                    default:
+                        local.planStatus['status'] = "";
+                        local.planStatus['statusText'] = "";
+                        local.planStatus['fontColor'] = "";
+
+                }
+
+            }
+
+        }
+
+        return local.planStatus;
+
+    }
 
 
 

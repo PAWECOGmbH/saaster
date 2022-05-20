@@ -1,6 +1,6 @@
 
 <cfscript>
-planFeatures = objPlans.getPlanFeatures(session.lng);
+planFeatures = objPlans.getPlanFeatures();
 </cfscript>
 
 <cfoutput>
@@ -27,7 +27,7 @@ planFeatures = objPlans.getPlanFeatures(session.lng);
                         <td>&nbsp;</td>
                     <cfelse>
                         <cfset thisPlanID = p.planID>
-                        <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID, session.lng)>
+                        <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID)>
                         <td>
                             <cfif featureContent.checkmark>
                                 <i class="fas fa-check"></i>

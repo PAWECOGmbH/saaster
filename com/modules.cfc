@@ -1,23 +1,24 @@
 component displayname="modules" output="false" {
 
 
-    public any function init(numeric lngID, varchar language, numeric currencyID) {
+    public any function init(numeric lngID, string language, numeric currencyID) {
 
         if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
             variables.lngID = arguments.lngID;
-            variables.language = application.objGlobal.getAnyLanguage(arguments.lngID).iso;
         } else if (structKeyExists(arguments, "language")) {
-            variables.lngID = application.objGlobal.getAnyLanguage(arguments.language).lngID;
             variables.language = arguments.language;
-        } else {
-            variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
-            variables.language = application.objGlobal.getDefaultLanguage().iso;
         }
-
         if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             variables.currencyID = arguments.currencyID;
         } else {
             variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+        }
+
+        if(!len(trim(arguments.language))) {
+            variables.language = application.objGlobal.getDefaultLanguage().iso;
+        }
+        if(!len(trim(arguments.lngID))) {
+            variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
         }
 
         return this;
@@ -239,6 +240,22 @@ component displayname="modules" output="false" {
             ).priceAfterVAT;
 
 
+        // Is the module included in plans?
+        local.qCheckPlans = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: local.qModule.intModuleID}
+            },
+            sql = "
+                SELECT GROUP_CONCAT(DISTINCT intPlanID) as planList
+                FROM plans_modules
+                WHERE intModuleID = :moduleID
+            "
+        )
+
+        local.moduleStruct['includedPlans'] = local.qCheckPlans.planList;
+
+
 
         // Build the booking link
 
@@ -279,6 +296,7 @@ component displayname="modules" output="false" {
                     SELECT intModuleID
                     FROM customer_bookings
                     WHERE intCustomerID = :customerID
+                    AND intModuleID > 0
                 "
             )
 
@@ -331,11 +349,17 @@ component displayname="modules" output="false" {
                 local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
                 local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
                 local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
+                local.moduleStruct['endDate'] = "";
 
                 // Is the plan paused?
                 if (local.qCurrentModules.blnPaused eq 1) {
 
                     local.moduleStruct['status'] = 'paused';
+
+                // Is a plan (or better module) cancelled?
+                } else if (local.qCurrentModules.strRecurring eq "canceled") {
+
+                    local.moduleStruct['status'] = 'canceled';
 
                 } else {
 
@@ -361,8 +385,14 @@ component displayname="modules" output="false" {
                         // See if there is a free module running
                         if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
 
-                            local.moduleStruct['status'] = 'free';
-                            local.moduleStruct['endDate'] = "";
+                            // Get module data
+                            local.moduleData = getModuleData(arguments.moduleID);
+
+                            if (local.moduleData.price_onetime gt 0) {
+                                local.moduleStruct['status'] = 'onetime';
+                            } else {
+                                local.moduleStruct['status'] = 'free';
+                            }
 
                         } else {
 
@@ -387,6 +417,9 @@ component displayname="modules" output="false" {
                     }
 
                 }
+
+                local.objPlans = new com.plans().init(language=variables.language);
+                structAppend(local.moduleStruct, local.objPlans.getPlanStatusAsText(local.moduleStruct));
 
             }
 

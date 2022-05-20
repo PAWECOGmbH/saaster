@@ -1,8 +1,6 @@
 <cfscript>
 
-    objPlans = new com.plans();
-    objBook = new com.book();
-    objInvoice = new com.invoices();
+    objBook = new com.book().init('plan');
 
     // decoding base64 value
     planStruct = objBook.decryptBookingLink(url.plan);
@@ -28,6 +26,9 @@
         location url="#application.mainURL#/plans" addtoken="false";
     }
 
+    objPlans = new com.plans().init(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
+    objInvoice = new com.invoices();
+
     // As we have all the infos, save it into variables
     variables.planID = planStruct.planID;
     variables.lngID = planStruct.lngID;
@@ -35,12 +36,7 @@
     variables.recurring = planStruct.recurring;
 
     // Get more plan infos
-    lngIso = getAnyLanguage(variables.lngID).iso;
-    planDetails = objPlans.getPlanDetail(variables.planID, lngIso, variables.currencyID);
-
-
-    // Check customers current plan (if exists)
-    currentPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
+    planDetails = objPlans.getPlanDetail(variables.planID);
 
     // Is it a free plan?
     if (planDetails.itsFree) {
@@ -52,13 +48,16 @@
         if (insertBooking.success) {
 
             <!--- Save the new plan into a session --->
-            newPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
+            newPlan = objPlans.getCurrentPlan(session.customer_id);
             session.currentPlan = newPlan;
             location url="#application.mainURL#/dashboard" addtoken=false;
 
         }
 
     }
+
+    // Check customers current plan (if exists)
+    currentPlan = objPlans.getCurrentPlan(session.customer_id);
 
     // Is there already a plan?
     if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
@@ -107,7 +106,7 @@
             },
             sql = "
                 SELECT intPlanID
-                FROM customer_bookings
+                FROM customer_bookings_history
                 WHERE intCustomerID = :customerID
                 AND intPlanID = :planID
                 AND LENGTH(dtmEndTestDate) > 0
@@ -122,7 +121,7 @@
             if (insertBooking.success) {
 
                 <!--- Save the new plan into a session --->
-                session.currentPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
+                session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
             }
@@ -156,8 +155,8 @@
 
                 if (insertBooking.success) {
 
-                    <!--- Save the new plan into a session --->
-                    newPlan = objPlans.getCurrentPlan(session.customer_id, session.lng);
+                    <!--- Save the new plan into a variable --->
+                    newPlan = objPlans.getCurrentPlan(session.customer_id);
 
                     // Make invoice struct
                     invoiceStruct = structNew();

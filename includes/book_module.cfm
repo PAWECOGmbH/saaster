@@ -1,8 +1,6 @@
 <cfscript>
 
-    objModules = new com.modules();
-    objBook = new com.book();
-    objInvoice = new com.invoices();
+    objBook = new com.book().init('module');
 
     // decoding base64 value
     moduleStruct = objBook.decryptBookingLink(url.module);
@@ -28,6 +26,9 @@
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
     }
 
+    objModules = new com.modules().init(lngID=moduleStruct.lngID, currencyID=moduleStruct.currencyID);
+    objInvoice = new com.invoices();
+
     // As we have all the infos, save it into variables
     variables.moduleID = moduleStruct.moduleID;
     variables.lngID = moduleStruct.lngID;
@@ -35,14 +36,13 @@
     variables.recurring = moduleStruct.recurring;
 
     // Get more module infos of the module to be booked
-    moduleDetails = objModules.getModuleData(variables.moduleID, variables.lngID, variables.currencyID);
+    moduleDetails = objModules.getModuleData(variables.moduleID);
 
     // Is it a free module?
     if (moduleDetails.price_yearly eq 0 and moduleDetails.price_monthly eq 0 and moduleDetails.price_onetime eq 0) {
 
         // Activate the free module
-
-        insertBooking = objBook.init('module').makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
+        insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
 
         if (insertBooking.success) {
 
@@ -53,36 +53,6 @@
         }
 
     }
-
-    /* // Get all modules already booked and loop over
-    modulesBooked = objModules.getBookedModules(session.customer_id);
-    if (isArray(modulesBooked) and arrayLen(modulesBooked)) {
-        loop array=modulesBooked index="i" {
-
-
-
-        }
-    }
-
-    // Did the customer already book this module?
-    if (structKeyExists(moduleDetails, "moduleID") and moduleDetails.moduleID gt 0) {
-
-
-        // If the plan has been expired, renew
-        if (moduleDetails.status eq "expired") {
-
-            // Do nothing and let the customer book... down to the next step
-
-        } else {
-
-            // Back to dashboard
-            location url="#application.mainURL#/dashboard" addtoken=false;
-        }
-
-
-
-
-    } */
 
 
     // Do we have to provide any test days?
@@ -97,7 +67,7 @@
             },
             sql = "
                 SELECT intModuleID
-                FROM customer_bookings
+                FROM customer_bookings_history
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
                 AND LENGTH(dtmEndTestDate) > 0
@@ -107,7 +77,7 @@
         if (!qTestedModules.recordCount) {
 
             // Book the module and let the customer test
-            insertBooking = objBook.init('module').makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=true, recurring=variables.recurring);
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=true, recurring=variables.recurring);
 
             if (insertBooking.success) {
 
@@ -120,10 +90,6 @@
         }
 
     }
-
-
-    abort;
-
 
 
     // Is the call coming from payment service provider (PSP)?
@@ -144,25 +110,13 @@
 
             case "success":
 
-                // Make a book for the plan
+                // Make a book for the module
                 insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
 
-                // get current module from array
-                moduleArray = objModules.getCurrentModules(session.customer_id, session.lng);
-                if (isArray(moduleArray) and arrayLen(moduleArray)) {
-                    moduleID = variables.moduleID;
-                    moduleStruct = ArrayFilter(moduleArray, function(p) {
-                        moduleID = p.moduleID eq moduleID;
-                    })
-                    return moduleStruct[1];
-                } else {
-                    return moduleStruct;
-                }
-
-                dump(moduleStruct);
-                abort;
-
                 if (insertBooking.success) {
+
+                    <!--- Get module status --->
+                    moduleStatus = objModules.getModuleStatus(session.customer_id, moduleDetails.moduleID);
 
                     // Make invoice struct
                     invoiceStruct = structNew();
@@ -193,18 +147,18 @@
                     positionArray = arrayNew(1);
 
                     position = structNew();
-                    position[1]['title'] = moduleDetails.name & ' ' & lsDateFormat(newPlan.startDate) & ' - ' & lsDateFormat(newPlan.endDate);
-                    position[1]['description'] = moduleDetails.shortDescription;
+                    position[1]['title'] = moduleDetails.name & ' ' & lsDateFormat(moduleStatus.startDate) & ' - ' & lsDateFormat(moduleStatus.endDate);
+                    position[1]['description'] = moduleDetails.short_description;
                     position[1]['quantity'] = 1;
                     position[1]['discountPercent'] = 0;
                     position[1]['vat'] = moduleDetails.vat;
-                    if (newPlan.recurring eq 'monthly') {
+                    if (moduleStatus.recurring eq 'monthly') {
                         position[1]['unit'] = getTrans('TitMonth', session.lng);
-                        position[1]['price'] = moduleDetails.priceMonthly;
+                        position[1]['price'] = moduleDetails.price_monthly;
                         priceAfterVAT = moduleDetails.priceMonthlyAfterVAT;
                     } else {
                         position[1]['unit'] = getTrans('TitYear', session.lng);
-                        position[1]['price'] = moduleDetails.priceYearly;
+                        position[1]['price'] = moduleDetails.price_yearly;
                         priceAfterVAT = moduleDetails.priceYearlyAfterVAT;
                     }
                     arrayAppend(positionArray, position[1]);
@@ -234,8 +188,9 @@
                         objInvoice.deleteInvoice(invoiceID);
                         getAlert(insPayment.message, 'danger');
                     } else {
-                        // If everything went well, save plan into the session
-                        session.currentPlan = newPlan;
+                        // If everything went well, save current modules into a session
+                        session.currentModules = objModules.getBookedModules(session.customer_id);
+
                     }
 
                     location url="#application.mainURL#/dashboard" addtoken=false;
@@ -270,5 +225,5 @@
 </cfscript>
 
 <cfoutput>
-<a href="#application.mainURL#/book?plan=#url.plan#&psp_response=success">OK, done!</a>
+<a href="#application.mainURL#/book?module=#url.module#&psp_response=success">OK, done!</a>
 </cfoutput>

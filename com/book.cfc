@@ -60,14 +60,6 @@ component displayname="book" output="false" {
             local.testTillDate = "";
             local.recurring = "";
 
-            if (variables.type eq "module") {
-                local.thisID = local.bookingData.moduleID;
-                local.column = "intModuleID";
-            } else {
-                local.thisID = local.bookingData.planID;
-                local.column = "intPlanID";
-            }
-
             if (structKeyExists(arguments, "itsTest") and arguments.itsTest) {
 
                 local.testTillDate = dateAdd("d", local.bookingData.testDays, local.startDate);
@@ -88,49 +80,140 @@ component displayname="book" output="false" {
 
                 } else {
 
-                    // Its a module with fix price
+                    // Its a plan/module with fix price
                     local.tillDate = "";
                     local.recurring = "onetime";
 
                 }
             }
 
-            try {
+            if (variables.type eq "module") {
+                local.thisID = local.bookingData.moduleID;
+                local.column = "intModuleID";
+                local.queryStatement = "AND intModuleID = #local.thisID#";
+            } else {
+                local.thisID = local.bookingData.planID;
+                local.column = "intPlanID";
+                local.queryStatement = "AND intPlanID > 0";
+            }
 
-                queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: arguments.customerID},
-                        thisID: {type: "numeric", value: local.thisID},
-                        dateStart: {type: "date", value: local.startDate},
-                        dateEnd: {type: "date", value: local.tillDate},
-                        dateTestEnd: {type: "date", value: local.testTillDate},
-                        paused: {type: "boolean", value: 0},
-                        recurring: {type: "varchar", value: local.recurring}
-                    },
-                    sql = "
-                        INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                        SELECT * FROM
-                        (
-                            SELECT  :customerID as customerID, :thisID as thisID, :dateStart as dateStart,
-                                    :dateEnd as dateEnd, :dateTestEnd as dateTestEnd, :paused as paused, :recurring as recurring
-                        ) AS tmp
-                        WHERE NOT EXISTS
-                        (
-                            SELECT intCustomerID
-                            FROM customer_bookings
-                            WHERE intCustomerID = :customerID
-                            AND #local.column# = :thisID
-                            AND dtmStartDate = :dateStart
+            local.qCheckBookings = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT intCustomerBookingID, intPlanID
+                    FROM customer_bookings
+                    WHERE intCustomerID = :customerID
+                    #local.queryStatement#
+                "
+            )
+
+            if (local.qCheckBookings.recordCount) {
+
+                try {
+
+                    if (variables.type eq "module") {
+
+                        queryExecute (
+                            options = {datasource = application.datasource},
+                            params = {
+                                customerID: {type: "numeric", value: arguments.customerID},
+                                thisID: {type: "numeric", value: local.thisID},
+                                dateStart: {type: "date", value: local.startDate},
+                                dateEnd: {type: "date", value: local.tillDate},
+                                dateTestEnd: {type: "date", value: local.testTillDate},
+                                paused: {type: "boolean", value: 0},
+                                recurring: {type: "varchar", value: local.recurring}
+                            },
+                            sql = "
+
+                                UPDATE customer_bookings
+                                SET dtmStartDate = :dateStart,
+                                    dtmEndDate = :dateEnd,
+                                    dtmEndTestDate = :dateTestEnd,
+                                    strRecurring = :recurring
+                                WHERE intCustomerID = :customerID
+                                AND intModuleID = :thisID;
+
+                                INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                                VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
+
+                            "
                         )
-                        LIMIT 1
-                    "
-                )
 
-            } catch (e any) {
+                    } else {
 
-                argsReturnValue['message'] = e.messsage;
-                return argsReturnValue;
+                        queryExecute (
+                            options = {datasource = application.datasource},
+                            params = {
+                                customerID: {type: "numeric", value: arguments.customerID},
+                                thisID: {type: "numeric", value: local.thisID},
+                                dateStart: {type: "date", value: local.startDate},
+                                dateEnd: {type: "date", value: local.tillDate},
+                                dateTestEnd: {type: "date", value: local.testTillDate},
+                                paused: {type: "boolean", value: 0},
+                                recurring: {type: "varchar", value: local.recurring}
+                            },
+                            sql = "
+
+                                UPDATE customer_bookings
+                                SET intPlanID = :thisID,
+                                    dtmStartDate = :dateStart,
+                                    dtmEndDate = :dateEnd,
+                                    dtmEndTestDate = :dateTestEnd,
+                                    strRecurring = :recurring
+                                WHERE intCustomerID = :customerID
+                                AND intModuleID IS NULL;
+
+                                INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                                VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
+
+                            "
+                        )
+
+                    }
+
+                } catch (e any) {
+
+                    argsReturnValue['message'] = e.messsage;
+                    return argsReturnValue;
+
+                }
+
+            } else {
+
+                try {
+
+                    queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: arguments.customerID},
+                            thisID: {type: "numeric", value: local.thisID},
+                            dateStart: {type: "date", value: local.startDate},
+                            dateEnd: {type: "date", value: local.tillDate},
+                            dateTestEnd: {type: "date", value: local.testTillDate},
+                            paused: {type: "boolean", value: 0},
+                            recurring: {type: "varchar", value: local.recurring}
+                        },
+                        sql = "
+
+                            INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring);
+
+                            INSERT INTO customer_bookings_history (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
+
+                        "
+                    )
+
+                } catch (e any) {
+
+                    argsReturnValue['message'] = e.messsage;
+                    return argsReturnValue;
+
+                }
 
             }
 
