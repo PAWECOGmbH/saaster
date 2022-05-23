@@ -17,7 +17,7 @@ CREATE TABLE `widgets`  (
 -- ----------------------------
 -- Records of widgets
 -- ----------------------------
-INSERT INTO `widgets` VALUES (1, 'Plans', 'modules/plan_status.cfm', 1, 3);
+INSERT INTO `widgets` VALUES (1, 'Plans', 'modules/module_widget.cfm', 1, 3);
 INSERT INTO `widgets` VALUES (2, 'Sales', 'modules/sales.cfm', 1, 3);
 
 

@@ -114,11 +114,23 @@ INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtOneTimePayment', 'Einmalige Zahlung', 'One time payment');
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtIncludedInPlan', 'Im Plan enthalten', 'Included in plan');
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('msgThanksForPurchaseFindInvoice', 'Vielen Dank für Ihren Einkauf. Sie finden Ihre Rechnung/Quittung unter Kontoeinstellungen -> Rechnungen.', 'Thank you for your purchase. You can find your invoice/receipt under Account Settings -> Invoices.');
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('msgModuleActivated', 'Das gewünschte Modul wurde erfolgreich freigeschaltet.', 'The desired module has been successfully activated.');
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('msgPlanActivated', 'Der gewünschte Plan wurde erfolgreich freigeschaltet.', 'The desired plan has been successfully activated.');
+
+
 
 
 
 INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin)
 VALUES ('cancel', 'handler/cancel.cfm', 0, 1, 0);
+
+
+DELETE FROM system_mappings WHERE intSystemMappingID = 16;
+UPDATE system_mappings SET strPath = 'views/customer/modules.cfm' WHERE intSystemMappingID = 26;
 
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -94,8 +94,6 @@ objPlan = new com.plans().init(language=session.lng);
                         </div>
                         <div class="card-body">
 
-                            <cfdump  var="#session.currentPlan#">
-
                             <cfif session.currentPlan.planID gt 0>
 
                                 <cfset getStatus = objPlan.getPlanStatusAsText(session.currentPlan)>

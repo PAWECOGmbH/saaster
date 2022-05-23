@@ -356,7 +356,7 @@ component displayname="modules" output="false" {
 
                     local.moduleStruct['status'] = 'paused';
 
-                // Is a plan (or better module) cancelled?
+                // Is a module or plan canceled?
                 } else if (local.qCurrentModules.strRecurring eq "canceled") {
 
                     local.moduleStruct['status'] = 'canceled';

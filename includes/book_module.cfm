@@ -48,6 +48,7 @@
 
             <!--- Save module array into a session --->
             session.currentModules = objModules.getBookedModules(session.customer_id);
+            getAlert('msgModuleActivated');
             location url="#application.mainURL#/dashboard" addtoken=false;
 
         }
@@ -83,6 +84,7 @@
 
                 <!--- Save module array into a session --->
                 session.currentModules = objModules.getBookedModules(session.customer_id);
+                getAlert('msgModuleActivated');
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
             }
@@ -189,6 +191,7 @@
                         getAlert(insPayment.message, 'danger');
                     } else {
                         // If everything went well, save current modules into a session
+                        getAlert('msgThanksForPurchaseFindInvoice');
                         session.currentModules = objModules.getBookedModules(session.customer_id);
 
                     }

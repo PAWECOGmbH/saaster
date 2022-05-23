@@ -23,8 +23,19 @@
 
 </head>
 
-<!--- Display only in backend --->
+<!--- Display for sysAdmin --->
 <cfif structKeyExists(session, "sysadmin") and session.sysadmin and !findNoCase("frontend", thiscontent.thisPath)>
     <div class="text-center col-lg-12 bg-red py-2"><b>SysAdmin</b> (the sysadmin part is only available in english)</div>
+</cfif>
+
+<!--- Test plan running? --->
+<cfif structKeyExists(session, "currentPlan") and isDate(session.currentPlan.endTestDate) and !findNoCase("frontend", thiscontent.thisPath)>
+    <cfoutput>
+    <cfif dateformat(now(), 'yyyy-mm-dd') lte dateformat(session.currentPlan.endTestDate, 'yyyy-mm-dd')>
+        <div class="text-center col-lg-12 bg-blue py-2">#getTrans('txtTestUntil')#: #lsDateFormat(session.currentPlan.endTestDate, 'Full')#</div>
+    <cfelse>
+        <div class="text-center col-lg-12 bg-red py-2">#getTrans('txtTestTimeExpired')#</div>
+    </cfif>
+    </cfoutput>
 </cfif>
 

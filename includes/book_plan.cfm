@@ -50,6 +50,7 @@
             <!--- Save the new plan into a session --->
             newPlan = objPlans.getCurrentPlan(session.customer_id);
             session.currentPlan = newPlan;
+            getAlert('msgPlanActivated');
             location url="#application.mainURL#/dashboard" addtoken=false;
 
         }
@@ -122,6 +123,7 @@
 
                 <!--- Save the new plan into a session --->
                 session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+                getAlert('msgPlanActivated');
                 location url="#application.mainURL#/dashboard" addtoken=false;
 
             }
@@ -229,11 +231,11 @@
                         getAlert(insPayment.message, 'danger');
                     } else {
                         // If everything went well, save plan into the session
+                        getAlert('msgThanksForPurchaseFindInvoice');
                         session.currentPlan = newPlan;
                     }
 
                     location url="#application.mainURL#/dashboard" addtoken=false;
-
 
 
 

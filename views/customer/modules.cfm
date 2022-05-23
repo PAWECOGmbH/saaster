@@ -67,21 +67,27 @@
                                 <cfloop array="#getAllModules#" index="module">
                                     <cfif module.active>
                                         <cfset moduleStatus = objModules.getModuleStatus(session.customer_id, module.moduleID)>
-                                        <cfset fontColor = moduleStatus.fontColor>
+                                        <cfif listFind(includedModuleList, module.moduleID)>
+                                            <cfset bgColor = "bg-green">
+                                            <cfset fontColor = "text-green">
+                                        <cfelseif structKeyExists(moduleStatus, "fontColor")>
+                                            <cfset bgColor = "bg-" & moduleStatus.fontColor>
+                                            <cfset fontColor = "text-" & moduleStatus.fontColor>
+                                        <cfelse>
+                                            <cfset bgColor = "">
+                                            <cfset fontColor = "">
+                                        </cfif>
                                         <div class="col-lg-3">
                                             <div class="card" style="min-height: 450px;">
-                                                <cfif listFind(totalModuleList, module.moduleID)>
-                                                    <div class="card-status-top bg-#fontColor#"></div>
-                                                </cfif>
+                                                <div class="card-status-top #bgColor#"></div>
                                                 <div class="card-body p-4 text-center">
                                                     <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
                                                     <h3 class="m-0 mb-1">#module.name#</h3>
                                                     <cfif listFind(bookedModuleList, module.moduleID)>
-
                                                         <table class="table text-start mt-4" style="width: 90%;">
                                                             <tr>
                                                                 <td width="60%">#getTrans('txtPlanStatus')#:</td>
-                                                                <td width="40%" class="text-#fontColor#">#moduleStatus.status#</td>
+                                                                <td width="40%" class="#fontColor#">#moduleStatus.status#</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>#getTrans('txtBookedOn')#:</td>
