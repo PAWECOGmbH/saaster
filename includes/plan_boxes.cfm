@@ -15,7 +15,7 @@
     }
     objPlans = new com.plans().init(language=planLanguage, currencyID=planCurrencyID);
     planObj = objPlans.getPlans(planGroupID);
-    //dump(planObj);
+    dump(planObj);
 </cfscript>
 
 <cfoutput>
@@ -121,8 +121,14 @@
                         <!--- otherwise send to registration form --->
                         <cfelse>
 
+                            <cfif i.itsFree eq 1>
+                                <cfset redirectLink = replace(i.bookingLinkF, application.mainURL, "", "one")>
+                            <cfelse>
+                                <cfset redirectLink = replace(i.bookingLinkM, application.mainURL, "", "one")>
+                            </cfif>
+
                             <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                                <a href="#application.mainURL#/register?redirect=#URLEncodedFormat(redirectLink)#" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                         </cfif>

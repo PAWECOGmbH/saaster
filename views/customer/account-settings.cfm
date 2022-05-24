@@ -104,7 +104,7 @@ objPlan = new com.plans().init(language=session.lng);
                                     <dd class="col-7">#session.currentPlan.planName#</dd>
 
                                     <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
-                                    <dd class="col-7 text-#getStatus.fontColor#">#getStatus.status#</dd>
+                                    <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
 
                                     <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
                                     <dd class="col-7">#lsDateFormat(session.currentPlan.startDate, "Full")#</dd>

@@ -810,19 +810,19 @@ component displayname="plans" output="false" {
                 switch(arguments.thisPlan.status) {
 
                     case "active":
-                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtRenewPlanOn');
                         local.planStatus['fontColor'] = "green";
                         break;
 
                     case "free":
-                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
                         local.planStatus['fontColor'] = "green";
                         break;
 
                     case "expired":
-                        local.planStatus['status'] = application.objGlobal.getTrans('txtExpired');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtExpired');
                         if (isDate(arguments.thisPlan.endTestDate)) {
                             local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestTimeExpired');
                         } else {
@@ -832,25 +832,25 @@ component displayname="plans" output="false" {
                         break;
 
                     case "test":
-                        local.planStatus['status'] = application.objGlobal.getTrans('txtTest');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtTest');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestUntil');
                         local.planStatus['fontColor'] = "blue";
                         break;
 
                     case "canceled":
-                        local.planStatus['status'] = application.objGlobal.getTrans('txtCanceled');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtCanceled');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtSubscriptionCanceled');
                         local.planStatus['fontColor'] = "orange";
                         break;
 
                     case "onetime":
-                        local.planStatus['status'] = application.objGlobal.getTrans('titActive');
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtOneTimePayment');
                         local.planStatus['fontColor'] = "green";
                         break;
 
                     default:
-                        local.planStatus['status'] = "";
+                        local.planStatus['statusTitle'] = "";
                         local.planStatus['statusText'] = "";
                         local.planStatus['fontColor'] = "";
 

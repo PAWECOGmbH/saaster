@@ -299,6 +299,14 @@ if (structKeyExists(form, 'login_btn')) {
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
 
+            <!--- Inheritance --->
+            if (session.sysadmin) {
+                session.admin = true;
+                session.superadmin = true;
+            } else if (session.superadmin) {
+                session.admin = true;
+            }
+
             <!--- Set customers locale -> Todo: get the users setting --->
             session.user_locale = getLocale();
 

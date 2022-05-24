@@ -87,7 +87,7 @@
                                                         <table class="table text-start mt-4" style="width: 90%;">
                                                             <tr>
                                                                 <td width="60%">#getTrans('txtPlanStatus')#:</td>
-                                                                <td width="40%" class="#fontColor#">#moduleStatus.status#</td>
+                                                                <td width="40%" class="#fontColor#">#moduleStatus.statusTitle#</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>#getTrans('txtBookedOn')#:</td>
@@ -146,9 +146,15 @@
                                                     </cfif>
                                                 </div>
                                                 <div class="d-flex">
+                                                    <!--- <cfdump var="#moduleStatus.status#"> --->
                                                     <cfif listFind(totalModuleList, module.moduleID)>
+                                                        <cfif len(trim(module.settingPath))>
+                                                            <cfset settingLink = "#application.mainURL#/#module.settingPath#">
+                                                        <cfelse>
+                                                            <cfset settingLink = "##?">
+                                                        </cfif>
                                                         <cfif listFind(includedModuleList, module.moduleID)>
-                                                            <a href="#application.mainURL#/#module.settingPath#" class="card-btn">
+                                                            <a href="#settingLink#" class="card-btn">
                                                                 <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                             </a>
                                                         <cfelse>
@@ -158,7 +164,7 @@
                                                                         <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
                                                                     </a>
                                                                 <cfelse>
-                                                                    <a href="#application.mainURL#/#module.settingPath#" class="card-btn">
+                                                                    <a href="#settingLink#" class="card-btn">
                                                                         <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                     </a>
                                                                     <a href="##?" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
@@ -166,7 +172,7 @@
                                                                     </a>
                                                                 </cfif>
                                                             <cfelse>
-                                                                <a href="#application.mainURL#/#module.settingPath#" class="card-btn">
+                                                                <a href="#settingLink#" class="card-btn">
                                                                     <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                 </a>
                                                             </cfif>
