@@ -24,7 +24,7 @@ MacOS:
 
 ### 1. Clone the repository
 
-```
+```git
 git clone https://github.com/PAWECOGmbH/saaster
 ```
 
@@ -32,7 +32,7 @@ git clone https://github.com/PAWECOGmbH/saaster
 
 You can find some example config files in the "configs" folder of the repository. Copy them to the root directory of the application and rename them as followed:
 
-```
+```plain
 config/example.cfconfig.json   ->   /.cfconfig.json
 config/example.env             ->   /.env
 config/example.server.json     ->   /server.json
@@ -46,13 +46,13 @@ Now you can start the application. Open any console* in the root application dir
 
 > *On Windows you need to use the WSL distro to use make. The filesystem of Windows ist mounted unter /mnt on your WSL system.
 
-```
+```bash
 make
 ```
 
 This will output all possible commands:
 
-```
+```plain
 Makefile commands:
 dev                     -> creates the local development environment      
 reinit                  -> reinites the database
@@ -65,7 +65,7 @@ url                     -> outputs all importent URL's of the application
 Now enter `make dev` and let the application build.</br>
 If everything worked out, then it should display the URL's:
 
-```
+```bash
 ------------------------------------------------------
 Saaster: http://localhost/login
 Mailslurper: http://localhost:9000
@@ -81,13 +81,13 @@ In the directory db/dev/ you find some SQL files. This files provide you with te
 
 To execute this files, use following make command:
 
-```
+```bash
 make seed
 ```
 
 Then enter the number of the sql file you would like to seed.
 
-```
+```bash
 [1] create-plans.sql   
 [2] create-widgets.sql 
 [3] create-sysadmin.sql
