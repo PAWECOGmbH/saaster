@@ -46,8 +46,19 @@ component displayname="Application" output="false" hint="Handle the application.
 
     public void function onSessionStart() {
 
-        <!--- Init languages in the default language --->
-        param name="session.lng" default=application.objGlobal.getDefaultLanguage().iso;
+        <!--- Check browser language --->
+        local.firstString = listFirst(cgi.http_accept_language, ";");
+        local.checkLeft = listFirst(firstString, ",");
+        if (find("-", local.checkLeft)) {
+            local.client_lang = listFirst(local.firstString, ",");
+        } else {
+            local.client_lang = listLast(local.firstString, ",");
+        }
+        local.client_lang = replace(listfirst(client_lang), "-", "_", "ALL");
+
+        <!--- Save into the session --->
+        session.lng = left(local.client_lang, 2);
+        session.lngLocale = local.client_lang;
         session.langStruct = application.objGlobal.initLanguages(session.lng);
 
         return;
@@ -85,7 +96,7 @@ component displayname="Application" output="false" hint="Handle the application.
             session.langStruct = application.objGlobal.initLanguages(session.lng);
         }
 
-        <!--- Set local --->
+        <!--- Set locale --->
         if (structKeyExists(session, "user_locale")) {
             setLocale(session.user_locale);
         } else {

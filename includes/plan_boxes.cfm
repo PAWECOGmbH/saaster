@@ -1,21 +1,7 @@
 
 <cfscript>
-    param name="variables.planLanguage" default="en";
-    param name="variables.planCurrencyID" default="0";
-    param name="variables.planCountryID" default="0";
-    param name="variables.planGroupID" default="0";
-    if (len(trim(variables.planLanguage))) {
-        planLanguage = variables.planLanguage;
-    }
-    if (len(trim(variables.planGroupID)) and isNumeric(variables.planGroupID)) {
-        planGroupID = variables.planGroupID;
-    }
-    if (len(trim(variables.planCurrencyID)) and isNumeric(variables.planCurrencyID)) {
-        planCurrencyID = variables.planCurrencyID;
-    }
-    objPlans = new com.plans().init(language=planLanguage, currencyID=planCurrencyID);
-    planObj = objPlans.getPlans(planGroupID);
-    dump(planObj);
+    planArray = objPlans.getPlans(variables.planGroupID);
+    //dump(planArray);
 </cfscript>
 
 <cfoutput>
@@ -33,8 +19,8 @@
     </div>
 </div>
 <div class="row row-cards">
-    <cfif structKeyExists(planObj[1], "planGroupID") and planObj[1].planGroupID gt 0>
-        <cfloop array="#planObj#" index="i">
+    <cfif structKeyExists(planArray[1], "planGroupID") and planArray[1].planGroupID gt 0>
+        <cfloop array="#planArray#" index="i">
             <div class="col-sm-6 col-lg-3">
                 <div class="card card-md">
                     <cfif i.recommended>

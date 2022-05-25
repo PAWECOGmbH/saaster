@@ -8,7 +8,7 @@ planFeatures = objPlans.getPlanFeatures();
     <thead>
         <tr>
             <th width="300">&nbsp;</th>
-            <cfloop array="#planObj#" index="p">
+            <cfloop array="#planArray#" index="p">
                 <th class="planName">#p.planName#</th>
             </cfloop>
         </tr>
@@ -22,7 +22,7 @@ planFeatures = objPlans.getPlanFeatures();
                 <cfelse>
                     <td class="feat feature" data-bs-toggle="tooltip" data-bs-placement="left" title="#f.description#">#f.name#</td>
                 </cfif>
-                <cfloop array="#planObj#" index="p">
+                <cfloop array="#planArray#" index="p">
                     <cfif f.category>
                         <td>&nbsp;</td>
                     <cfelse>

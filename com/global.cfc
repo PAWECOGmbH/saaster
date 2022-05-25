@@ -96,22 +96,30 @@ component displayname="globalFunctions" {
             arguments.thisLng = "en";
         }
 
-        qTranslations = queryExecute(
-
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT strVariable, strString#arguments.thisLng#
-                FROM system_translations
-            "
-        )
-
         local.myVarStruct = structNew();
 
-        if (qTranslations.recordCount) {
+        try {
 
-            loop query = qTranslations {
-                myVarStruct[qTranslations.strVariable] = qTranslations['strString' & arguments.thisLng];
-            };
+            qTranslations = queryExecute(
+
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT strVariable, strString#arguments.thisLng#
+                    FROM system_translations
+                "
+            )
+
+            if (qTranslations.recordCount) {
+
+                loop query = qTranslations {
+                    myVarStruct[qTranslations.strVariable] = qTranslations['strString' & arguments.thisLng];
+                };
+
+            }
+
+        } catch (any) {
+
+            initLanguages('en');
 
         }
 

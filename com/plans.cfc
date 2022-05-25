@@ -3,27 +3,80 @@ component displayname="plans" output="false" {
 
     public any function init(numeric lngID, string language, numeric currencyID) {
 
+        param name="variables.lngID" default=0;
+        param name="variables.language" default="";
+        param name="variables.currencyID" default=0;
+
+        // Set variables by arguments
         if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
             variables.lngID = arguments.lngID;
+            variables.language = application.objGlobal.getAnyLanguage(variables.lngID).iso;
         } else if (structKeyExists(arguments, "language")) {
             variables.language = arguments.language;
+            variables.lngID = application.objGlobal.getAnyLanguage(variables.language).lngID;
         }
         if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             variables.currencyID = arguments.currencyID;
-        } else {
-            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
         }
 
-        if(!len(trim(arguments.language))) {
+        // Set variables by default settings
+        if (!len(variables.language)) {
             variables.language = application.objGlobal.getDefaultLanguage().iso;
         }
-        if(!len(trim(arguments.lngID))) {
+        if (variables.lngID eq 0) {
             variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
+        if (variables.currencyID eq 0) {
+            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
         }
 
         return this;
 
     }
+
+
+    public struct function getGroupData(required numeric groupID) {
+
+        local.groupData = structNew();
+        local.groupData['countryID'] = 0;
+        local.groupData['currency'] = "USD";
+        local.groupData['locale'] = "en_US";
+
+        local.qGroupData = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                groupID: {type: "numeric", value: arguments.groupID}
+            },
+            sql = "
+                SELECT countries.intCountryID, countries.strLocale, countries.strCurrency,
+                (
+                    SELECT intCurrencyID
+                    FROM currencies
+                    WHERE strCurrencyISO =
+                    IF(
+                        LENGTH(countries.strCurrency),
+                        countries.strCurrency,
+                        ''
+                    )
+                ) as currencyID
+                FROM plan_groups LEFT JOIN countries ON plan_groups.intCountryID = countries.intCountryID
+                WHERE plan_groups.intPlanGroupID = :groupID
+            "
+        )
+
+        if (local.qGroupData.recordCount and isNumeric(local.qGroupData.intCountryID)) {
+
+            local.groupData['countryID'] = local.qGroupData.intCountryID;
+            local.groupData['currency'] = local.qGroupData.strCurrency;
+            local.groupData['currencyID'] = local.qGroupData.currencyID;
+            local.groupData['locale'] = local.qGroupData.strLocale;
+
+        }
+
+        return local.groupData;
+
+    }
+
 
     public array function getPlans(numeric groupID) {
 
