@@ -324,9 +324,29 @@ if (structKeyExists(form, 'login_btn')) {
             session.currentModules = checkModules;
 
             if (findNoCase("?", objUserLogin.redirect)) {
-                location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
+                if(session.lastvisit EQ ""){
+                    if(session.admin){
+                        getAlert('txtUpdateInformation', 'warning');
+                        location url="#application.mainURL#/account-settings/company?l=#objUserLogin.language#" addtoken="false";
+                    }else {
+                        getAlert('txtUpdateInformation', 'warning');
+                        location url="#application.mainURL#/account-settings/my-profile?l=#objUserLogin.language#" addtoken="false";
+                    }
+                }else {
+                    location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
+                }
             } else {
-                location url="#objUserLogin.redirect#?l=#objUserLogin.language#" addtoken="false";
+                if(session.lastvisit EQ ""){
+                    if(session.admin){
+                        getAlert('txtUpdateInformation', 'warning');
+                        location url="#application.mainURL#/account-settings/company?l=#objUserLogin.language#" addtoken="false";
+                    }else {
+                        getAlert('txtUpdateInformation', 'warning');
+                        location url="#application.mainURL#/account-settings/my-profile?l=#objUserLogin.language#" addtoken="false";
+                    }
+                }else {
+                    location url="#objUserLogin.redirect#?l=#objUserLogin.language#" addtoken="false";
+                }
             }
 
 
