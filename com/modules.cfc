@@ -3,22 +3,31 @@ component displayname="modules" output="false" {
 
     public any function init(numeric lngID, string language, numeric currencyID) {
 
+        param name="variables.lngID" default=0;
+        param name="variables.language" default="";
+        param name="variables.currencyID" default=0;
+
+        // Set variables by arguments
         if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
             variables.lngID = arguments.lngID;
+            variables.language = application.objGlobal.getAnyLanguage(variables.lngID).iso;
         } else if (structKeyExists(arguments, "language")) {
             variables.language = arguments.language;
+            variables.lngID = application.objGlobal.getAnyLanguage(variables.language).lngID;
         }
         if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             variables.currencyID = arguments.currencyID;
-        } else {
-            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
         }
 
-        if(!len(trim(arguments.language))) {
+        // Set variables by default settings
+        if (!len(variables.language)) {
             variables.language = application.objGlobal.getDefaultLanguage().iso;
         }
-        if(!len(trim(arguments.lngID))) {
+        if (variables.lngID eq 0) {
             variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
+        }
+        if (variables.currencyID eq 0) {
+            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
         }
 
         return this;
@@ -31,10 +40,6 @@ component displayname="modules" output="false" {
 
         local.qModule = queryExecute(
             options = {datasource = application.datasource},
-            params = {
-                lngID: {type: "numeric", value: variables.lngID},
-                currID: {type: "numeric", value: variables.currencyID}
-            },
             sql = "
                 SELECT intModuleID
                 FROM modules
@@ -175,104 +180,111 @@ component displayname="modules" output="false" {
             } else {
                 local.moduleStruct['currencySign'] = local.qModule.strCurrencyISO;
             }
+
+            local.objPrices = new com.prices();
+
+            local.moduleStruct['vat_text_monthly'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceMonthly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['vat_text_yearly'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceYearly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['vat_text_onetime'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceOneTime,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).vat_text;
+
+            local.moduleStruct['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceMonthly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
+            local.moduleStruct['priceYearlyAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceYearly,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
+            local.moduleStruct['priceOneTimeAfterVAT'] = local.objPrices.getPriceData
+                (
+                    price=local.qModule.decPriceOneTime,
+                    vat=local.qModule.decVat,
+                    vat_type=local.qModule.intVatType,
+                    isnet=local.qModule.blnIsNet,
+                    language=variables.language,
+                    currency=local.qModule.strCurrencyISO
+                ).priceAfterVAT;
+
+
+            // Is the module included in plans?
+            local.qCheckPlans = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    moduleID: {type: "numeric", value: local.qModule.intModuleID}
+                },
+                sql = "
+                    SELECT GROUP_CONCAT(DISTINCT intPlanID) as planList
+                    FROM plans_modules
+                    WHERE intModuleID = :moduleID
+                "
+            )
+
+            local.moduleStruct['includedPlans'] = local.qCheckPlans.planList;
+
+
+
+            // Build the booking link
+
+            // bookingLinkM: monthly
+            // bookingLinkY: yearly
+            // bookingLinkO: onetime
+            // bookingLinkF: free
+
+            local.objBook = new com.book();
+            local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "m", "module");
+            local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
+            local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "y", "module");
+            local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
+            local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "o", "module");
+            local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
+            local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "f", "module");
+            local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
+
+        } else {
+
+            throw(message='No modules found!', detail='Did you add a new currency? If so, you need to re-save the prices of all your modules.');
+
         }
 
-        local.objPrices = new com.prices();
 
-        local.moduleStruct['vat_text_monthly'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceMonthly,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).vat_text;
-
-        local.moduleStruct['vat_text_yearly'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceYearly,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).vat_text;
-
-        local.moduleStruct['vat_text_onetime'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceOneTime,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).vat_text;
-
-        local.moduleStruct['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceMonthly,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).priceAfterVAT;
-
-        local.moduleStruct['priceYearlyAfterVAT'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceYearly,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).priceAfterVAT;
-
-        local.moduleStruct['priceOneTimeAfterVAT'] = local.objPrices.getPriceData
-            (
-                price=local.qModule.decPriceOneTime,
-                vat=local.qModule.decVat,
-                vat_type=local.qModule.intVatType,
-                isnet=local.qModule.blnIsNet,
-                language=variables.language,
-                currency=local.qModule.strCurrencyISO
-            ).priceAfterVAT;
-
-
-        // Is the module included in plans?
-        local.qCheckPlans = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                moduleID: {type: "numeric", value: local.qModule.intModuleID}
-            },
-            sql = "
-                SELECT GROUP_CONCAT(DISTINCT intPlanID) as planList
-                FROM plans_modules
-                WHERE intModuleID = :moduleID
-            "
-        )
-
-        local.moduleStruct['includedPlans'] = local.qCheckPlans.planList;
-
-
-
-        // Build the booking link
-
-        // bookingLinkM: monthly
-        // bookingLinkY: yearly
-        // bookingLinkO: onetime
-        // bookingLinkF: free
-
-        local.objBook = new com.book();
-        local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "m", "module");
-        local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
-        local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "y", "module");
-        local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
-        local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "o", "module");
-        local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
-        local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "f", "module");
-        local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
 
         return local.moduleStruct;
 
@@ -403,7 +415,7 @@ component displayname="modules" output="false" {
                                 local.moduleStruct['status'] = 'active';
 
                                 // Still valid?
-                                if (dateDiff("d", local.qCurrentModules.dtmStartDate, local.qCurrentModules.dtmEndDate) lt 0) {
+                                if (dateDiff("d", now(), local.qCurrentModules.dtmEndDate) lt 0) {
 
                                     local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
                                     local.moduleStruct['status'] = 'expired';
@@ -428,5 +440,17 @@ component displayname="modules" output="false" {
         return local.moduleStruct;
 
     }
+
+
+    // In this function we will delete all the users data out of a module (ex. after a cancellation)
+    public void function deleteModuleData(required numeric customerID, required numeric moduleID) {
+
+        // Make your queries!
+
+
+    }
+
+
+
 
 }

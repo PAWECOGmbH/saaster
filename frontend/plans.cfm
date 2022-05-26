@@ -1,42 +1,39 @@
+
 <cfscript>
 
-    // you can use this ID to enforce a specific plan. If 0, we will get the group id using the browser setting (locale)
+    objPlans = new com.plans();
 
-    variables.planGroupID = 1;
+    if (structKeyExists(session, "customer_id")) {
+        groupStruct = objPlans.prepareForGroupID(customerID=session.customer_id);
+    } else {
+        groupStruct = objPlans.prepareForGroupID(ipAddress=application.usersIP);
+    }
 
-    // the language coming from application but you can overwrite the language using the url variable l -> l=en or by hardcoding
-    variables.planLanguage = session.lng;
+    hasPlans = true;
 
-    // you can use this ID to enforce a specific country. Set 0 if you want to use the country of the plan group
-    variables.planCountryID = 0;
+    if (groupStruct.groupID gt 0) {
 
-    // you can use this ID to enforce a specific currency. Set 0 if you want to use the currency of the plan group (country)
-    variables.planCurrencyID = 0;
+        planArray = objPlans.init(language=session.lng, currencyID=groupStruct.defaultCurrencyID).getPlans(groupStruct.groupID);
 
-
-    // Get the data of the plan group if needed
-    if (variables.planCountryID eq 0 or variables.planCurrencyID eq 0) {
-
-        getPlanGroupData = objPlans.getGroupData(variables.planGroupID);
-
-
-
-    dump(getPlanGroupData);
-    abort;
-
-        if (getPlanGroupData.countryID gt 0) {
-            variables.planCountryID = getPlanGroupData.countryID;
+        if (!arrayLen(planArray)) {
+            hasPlans = false;
         }
-        if (getPlanGroupData.currencyID gt 0) {
-            variables.planCurrencyID = getPlanGroupData.currencyID;
-        }
+
+    } else {
+
+        hasPlans = false;
 
     }
 
-    // Get the plans object
-    objPlans = new com.plans(language=variables.planLanguage, currencyID=variables.planCurrencyID);
+    if (!hasPlans) {
+        getAlert('Sorry, no plans were found!', 'warning');
+    }
+
+    //dump(groupStruct);
 
 </cfscript>
+
+
 <cfoutput>
 <div class="border-top-wide border-primary d-flex flex-column">
     <div class="page page-center">
@@ -44,12 +41,14 @@
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
-            <div class="text-center mb-4">
-                <cfinclude template="/includes/plan_boxes.cfm">
-            </div>
-            <div class="text-center mb-4">
-                <cfinclude template="/includes/plan_features.cfm">
-            </div>
+            <cfif hasPlans>
+                <div class="text-center mb-4">
+                    <cfinclude template="/includes/plan_boxes.cfm">
+                </div>
+                <div class="text-center mb-4">
+                    <!--- <cfinclude template="/includes/plan_features.cfm"> --->
+                </div>
+            </cfif>
         </div>
     </div>
 </div>

@@ -1,6 +1,6 @@
 <cfscript>
 
-    objBook = new com.book().init('module');
+    objBook = new com.book('module');
 
     // decoding base64 value
     moduleStruct = objBook.decryptBookingLink(url.module);
@@ -26,7 +26,7 @@
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
     }
 
-    objModules = new com.modules().init(lngID=moduleStruct.lngID, currencyID=moduleStruct.currencyID);
+    objModules = new com.modules(lngID=moduleStruct.lngID, currencyID=moduleStruct.currencyID);
     objInvoice = new com.invoices();
 
     // As we have all the infos, save it into variables

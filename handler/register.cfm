@@ -310,12 +310,15 @@ if (structKeyExists(form, 'login_btn')) {
             <!--- Set customers locale -> Todo: get the users setting --->
             session.user_locale = getLocale();
 
+
+            objUserLogin.language = 'de';
+
             <!--- Save current plan into a session --->
-            checkPlan = new com.plans().init(language=objUserLogin.language).getCurrentPlan(session.customer_id);
+            checkPlan = new com.plans(language=objUserLogin.language).getCurrentPlan(session.customer_id);
             session.currentPlan = checkPlan;
 
             <!--- Save current modules into a session --->
-            checkModules = new com.modules().init(language=objUserLogin.language).getBookedModules(session.customer_id);
+            checkModules = new com.modules(language=objUserLogin.language).getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
             if (findNoCase("?", objUserLogin.redirect)) {

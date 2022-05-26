@@ -35,71 +35,104 @@ component displayname="plans" output="false" {
     }
 
 
-    public struct function getGroupData(required numeric groupID) {
+    // Prepare for group id according ip or customer account
+    public struct function prepareForGroupID(numeric customerID, string ipAddress) {
 
-        local.groupData = structNew();
-        local.groupData['countryID'] = 0;
-        local.groupData['currency'] = "USD";
-        local.groupData['locale'] = "en_US";
+        local.prepareStruct = structNew();
+        local.thisCountryID = 0;
+        local.thisGroupID = 0;
+        local.thisCurrencyID = 0;
 
-        local.qGroupData = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                groupID: {type: "numeric", value: arguments.groupID}
-            },
-            sql = "
-                SELECT countries.intCountryID, countries.strLocale, countries.strCurrency,
-                (
-                    SELECT intCurrencyID
-                    FROM currencies
-                    WHERE strCurrencyISO =
-                    IF(
-                        LENGTH(countries.strCurrency),
-                        countries.strCurrency,
-                        ''
-                    )
-                ) as currencyID
-                FROM plan_groups LEFT JOIN countries ON plan_groups.intCountryID = countries.intCountryID
-                WHERE plan_groups.intPlanGroupID = :groupID
-            "
-        )
+        // do we have a session?
+        if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
-        if (local.qGroupData.recordCount and isNumeric(local.qGroupData.intCountryID)) {
-
-            local.groupData['countryID'] = local.qGroupData.intCountryID;
-            local.groupData['currency'] = local.qGroupData.strCurrency;
-            local.groupData['currencyID'] = local.qGroupData.currencyID;
-            local.groupData['locale'] = local.qGroupData.strLocale;
+            // Get the country of the customer, if exists
+            local.getCustomerData = application.objCustomer.getCustomerData(arguments.customerID);
+            if (local.getCustomerData.recordCount and local.getCustomerData.intCountryID gt 0) {
+                local.thisCountryID = local.getCustomerData.intCountryID;
+            }
 
         }
 
-        return local.groupData;
-
-    }
 
 
-    public array function getPlans(numeric groupID) {
+        // If countryID is still 0, then get over ip
+        if (local.thisCountryID eq 0) {
 
-        if (structKeyExists(arguments, "groupID") and arguments.groupID gt 0) {
-            local.groupID = arguments.groupID;
-        } else {
+            if (structKeyExists(arguments, "ipAddress") and len(trim(arguments.ipAddress))) {
+
+                // What is the country according to the IP address? (Yes, the user may have a VPN, but we'll ignore that for now)
+                local.countryStruct = application.objGlobal.getCountryFromIP(arguments.ipAddress);
+
+                if (local.countryStruct.success) {
+                    if (local.countryStruct.countryID gt 0) {
+                        local.thisCountryID = local.countryStruct.countryID;
+                    }
+                }
+
+            }
+
+        }
+
+        local.qCheckGroup = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                countryID: {type: "numeric", value: local.thisCountryID}
+            },
+            sql = "
+                SELECT intPlanGroupID
+                FROM plan_groups
+                WHERE intCountryID = :countryID
+            "
+        )
+        if (local.qCheckGroup.recordCount) {
+            local.thisGroupID = local.qCheckGroup.intPlanGroupID;
+        }
+
+        // We didn't find a group corresponding to the country, so we need to get group without country
+        if (local.thisGroupID eq 0) {
+
             local.qDefPlanGroup = queryExecute (
                 options = {datasource = application.datasource},
                 sql = "
                     SELECT intPlanGroupID
                     FROM plan_groups
+                    WHERE intCountryID IS NULL
                     ORDER BY intPrio
                     LIMIT 1
                 "
             )
+
             if (local.qDefPlanGroup.recordCount) {
-                local.groupID = local.qDefPlanGroup.intPlanGroupID;
+                local.thisGroupID = local.qDefPlanGroup.intPlanGroupID;
             } else {
-                local.groupID = 0;
+                local.thisGroupID = 0;
+            }
+
+        }
+
+        // get the currency of the country
+        if (local.thisCountryID gt 0) {
+            local.currID = application.objGlobal.getCurrencyOfCountry(local.thisCountryID).currencyID;
+            if (local.currID gt 0) {
+                local.thisCurrencyID = local.currID;
+            } else {
+                local.thisCurrencyID = application.objGlobal.getDefaultCurrency().currencyID;
             }
         }
 
-        // Get plans
+        local.prepareStruct['countryID'] = local.thisCountryID;
+        local.prepareStruct['groupID'] = local.thisGroupID;
+        local.prepareStruct['defaultCurrencyID'] = local.thisCurrencyID;
+
+        return local.prepareStruct;
+
+    }
+
+
+    // Get plans using the groupID
+    public array function getPlans(required numeric planGroupID) {
+
         local.getPlan = queryExecute (
             options = {datasource = application.datasource},
             params = {
@@ -416,41 +449,6 @@ component displayname="plans" output="false" {
 
             }
 
-        } else {
-
-            local.structPlan = structNew();
-
-            local.structPlan['planID'] = 0;
-            local.structPlan['planGroupID'] = 0;
-            local.structPlan['currencyID'] = 0;
-            local.structPlan['itsFree'] = 0;
-            local.structPlan['groupName'] = 'Group name';
-            local.structPlan['planName'] = 'Plan name';
-            local.structPlan['shortDescription'] = 'Short description';
-            local.structPlan['description'] = 'Description and feature list';
-            local.structPlan['buttonName'] = 'Button name';
-            local.structPlan['bookingLinkM'] = '##?';
-            local.structPlan['bookingLinkY'] = '##?';
-            local.structPlan['bookingLinkF'] = '##?';
-            local.structPlan['recommended'] = 0;
-            local.structPlan['maxUsers'] = 0;
-            local.structPlan['testDays'] = 0;
-            local.structPlan['priceMonthly'] = 0;
-            local.structPlan['priceYearly'] = 0;
-            local.structPlan['priceMonthlyAfterVAT'] = 0;
-            local.structPlan['priceYearlyAfterVAT'] = 0;
-            local.structPlan['onRequest'] = 0;
-            local.structPlan['vat'] = 0;
-            local.structPlan['isNet'] = 1;
-            local.structPlan['vatType'] = 1;
-            local.structPlan['currency'] = 'USD';
-            local.structPlan['currencySign'] = "$";
-            local.structPlan['vat_text'] = "Total";
-            local.structPlan['modulesIncluded'] = "";
-            local.structPlan['modulesIncludedAsList'] = "";
-
-            arrayAppend(local.arrPlan, local.structPlan);
-
         }
 
         return local.arrPlan;
@@ -654,6 +652,7 @@ component displayname="plans" output="false" {
                 "
             )
 
+
             if (local.qCurrentPlan.recordCount) {
 
                 local.planStruct['planID'] = local.qCurrentPlan.intPlanID;
@@ -712,7 +711,7 @@ component displayname="plans" output="false" {
                                     local.planStruct['status'] = 'active';
 
                                     // Still valid?
-                                    if (dateDiff("d", local.qCurrentPlan.dtmStartDate, local.qCurrentPlan.dtmEndDate) lt 0) {
+                                    if (dateDiff("d", now(), local.qCurrentPlan.dtmEndDate) lt 0) {
 
                                         local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
                                         local.planStruct['status'] = 'expired';

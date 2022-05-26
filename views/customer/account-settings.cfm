@@ -1,6 +1,6 @@
 
 <cfscript>
-objPlan = new com.plans().init(language=session.lng);
+objPlan = new com.plans(language=session.lng);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -134,7 +134,7 @@ objPlan = new com.plans().init(language=session.lng);
 
                                 <cfif session.superAdmin>
 
-                                    <cfif session.currentPlan.status eq "active">
+                                    <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
                                         <div class="row mt-4">
                                             <div class="button-group">
                                                 <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
@@ -153,7 +153,7 @@ objPlan = new com.plans().init(language=session.lng);
                                                 <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
                                             </div>
                                         </div>
-                                    <cfelseif session.currentPlan.status eq "test">
+                                    <cfelseif session.currentPlan.status eq "expired">
                                         <div class="row mt-4">
                                             <div class="button-group">
                                                 <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>

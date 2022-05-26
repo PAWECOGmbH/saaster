@@ -1,10 +1,19 @@
 
 <cfscript>
 
-    objModules = new com.modules().init(language=session.lng);
-    objPlans = new com.plans().init(language=session.lng);
+    custCountryID = getCustomerData.intCountryID;
+    custCountry = application.objGlobal.getCurrencyOfCountry(custCountryID);
+    if (custCountry.currencyID gt 0) {
+        currencyID = custCountry.currencyID;
+    } else {
+        currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+    }
+
+    objModules = new com.modules(language=session.lng, currencyID=currencyID);
+    objPlans = new com.plans(language=session.lng, currencyID=currencyID);
 
     getAllModules = objModules.getAllModules();
+
     getBookedModules = objModules.getBookedModules(session.customer_id);
     getBookedPlans = objPlans.getCurrentPlan(session.customer_id);
 

@@ -921,4 +921,132 @@ component displayname="globalFunctions" {
 
     }
 
+
+    // Get currency of a given country
+    public struct function getCurrencyOfCountry(required any country) {
+
+        local.currencyStruct = structNew();
+
+        if (isNumeric(arguments.country)) {
+
+            local.qCurrOfCountry = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    countryID: {type: "numeric", value: arguments.country}
+                },
+                sql = "
+                    SELECT intCurrencyID, strCurrencyISO
+                    FROM currencies
+                    WHERE blnActive = 1
+                    AND strCurrencyISO =
+                    (
+                        SELECT strCurrency
+                        FROM countries
+                        WHERE intCountryID = :countryID
+                    )
+                "
+            )
+
+        } else {
+
+            local.qCurrOfCountry = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    country: {type: "varchar", value: arguments.country}
+                },
+                sql = "
+                    SELECT intCurrencyID, strCurrencyISO
+                    FROM currencies
+                    WHERE blnActive = 1
+                    AND strCurrencyISO =
+                    (
+                        SELECT strCurrency
+                        FROM countries
+                        WHERE strISO1 = :country
+                        OR strISO2 = :country
+                        OR strLocale = :country
+                        LIMIT 1
+                    )
+                "
+            )
+        }
+
+        if (local.qCurrOfCountry.recordCount) {
+
+            local.currencyStruct['currencyID'] = local.qCurrOfCountry.intCurrencyID;
+            local.currencyStruct['currency'] = local.qCurrOfCountry.strCurrencyISO;
+
+        } else {
+
+            local.currencyStruct['currencyID'] = 0;
+            local.currencyStruct['currency'] = "";
+
+        }
+
+        return local.currencyStruct;
+
+    }
+
+
+
+
+    // Get the country from IP address (Yes, the user may have a VPN, but we'll ignore that for now)
+    public struct function getCountryFromIP(required string ip) {
+
+        local.countryStruct = structNew();
+        local.countryStruct['country'] = "";
+        local.countryStruct['countryID'] = "0";
+        local.countryStruct['countryCode'] = "";
+        local.countryStruct['success'] = false;
+
+        local.jsonQuery = '[{"query": "#arguments.ip#", "fields": "country,countryCode"}]';
+
+        if (len(trim(arguments.ip))) {
+
+            // We are using the free api service from ip-api.com
+            http url="http://ip-api.com/batch" method="post" result="local.theCountry" {
+                httpparam type="body" value="#local.jsonQuery#";
+            }
+
+            if (local.theCountry.status_text eq "OK") {
+
+                local.fileContent = deserializeJSON(local.theCountry.fileContent);
+
+                if (isArray(local.fileContent)) {
+
+                    local.thisStruct = local.fileContent[1];
+                    local.countryStruct['country'] = local.thisStruct.country;
+                    local.countryStruct['countryCode'] = local.thisStruct.countryCode;
+                    local.countryStruct['success'] = true;
+
+                    // get the countryID, if exists
+                    local.qCountry = queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            iso: {type: "varchar", value: local.thisStruct.countryCode}
+                        },
+                        sql = "
+                            SELECT intCountryID
+                            FROM countries
+                            WHERE blnActive = 1
+                            AND strISO1 = :iso
+                        "
+                    )
+
+                    if (local.qCountry.recordCount) {
+                        local.countryStruct['countryID'] = local.qCountry.intCountryID;
+                    }
+
+
+                }
+
+            }
+
+        }
+
+        return local.countryStruct;
+
+
+    }
+
 }

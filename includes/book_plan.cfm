@@ -1,6 +1,6 @@
 <cfscript>
 
-    objBook = new com.book().init('plan');
+    objBook = new com.book('plan');
 
     // decoding base64 value
     planStruct = objBook.decryptBookingLink(url.plan);
@@ -26,7 +26,7 @@
         location url="#application.mainURL#/plans" addtoken="false";
     }
 
-    objPlans = new com.plans().init(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
+    objPlans = new com.plans(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
     objInvoice = new com.invoices();
 
     // As we have all the infos, save it into variables

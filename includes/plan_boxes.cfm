@@ -1,9 +1,3 @@
-
-<cfscript>
-    planArray = objPlans.getPlans(variables.planGroupID);
-    //dump(planArray);
-</cfscript>
-
 <cfoutput>
 <div class="mb-5">
     <div class="form-label">#getTrans('titPayment')#</div>
