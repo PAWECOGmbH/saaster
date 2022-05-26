@@ -105,7 +105,7 @@
                                     #lsnumberFormat(pos.singlePrice, "_,___.__")#<br />
                                     <span style="font-size: 9px; color: gray;">(#pos.vat#%)</span>
                                 </td>
-                                <td valign="top" align="center" style="border-bottom: 1px solid gray;">#pos.discountPercent#%</td>
+                                <td valign="top" align="center" style="border-bottom: 1px solid gray;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                 <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
                             </tr>
                         </cfloop>

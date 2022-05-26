@@ -301,12 +301,27 @@ if (structKeyExists(form, 'login_btn')) {
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
 
+            <!--- Inheritance --->
+            if (session.sysadmin) {
+                session.admin = true;
+                session.superadmin = true;
+            } else if (session.superadmin) {
+                session.admin = true;
+            }
+
             <!--- Set customers locale -> Todo: get the users setting --->
             session.user_locale = getLocale();
 
+
+            objUserLogin.language = 'de';
+
             <!--- Save current plan into a session --->
-            checkPlan = new com.plans().getCurrentPlan(session.customer_id, objUserLogin.language);
+            checkPlan = new com.plans(language=objUserLogin.language).getCurrentPlan(session.customer_id);
             session.currentPlan = checkPlan;
+
+            <!--- Save current modules into a session --->
+            checkModules = new com.modules(language=objUserLogin.language).getBookedModules(session.customer_id);
+            session.currentModules = checkModules;
 
             if (findNoCase("?", objUserLogin.redirect)) {
                 location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";

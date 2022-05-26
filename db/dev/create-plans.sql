@@ -67,7 +67,7 @@ INSERT INTO `plan_prices` VALUES (10, 5, 3, 0.00, 0.00, 7.70, 1, 1, 3);
 -- Records of plans
 -- ----------------------------
 DELETE FROM plans;
-INSERT INTO `plans` VALUES (2, 1, 'Free', '3 users + 0 guests\r\nBest for small, personal projects', '<ul><li>1 project</li><li>3 users</li><li>60 task limit</li></ul>', 'Try free', '', 0, 3, 30, 1, 1, now());
+INSERT INTO `plans` VALUES (2, 1, 'Free', '3 users + 0 guests\r\nBest for small, personal projects', '<ul><li>1 project</li><li>3 users</li><li>60 task limit</li></ul>', 'Try free', '', 0, 3, 0, 1, 1, now());
 INSERT INTO `plans` VALUES (3, 1, 'Standard', 'Up to 10 users\r\nFor teams that need planning and collaboration features.', '<p><strong>Try free for 30 days. Cancel anytime.</strong></p><ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed</li><li>Collaboration and planning features</li></ul>', 'Try standard', '', 1, 10, 30, 0, 2, now());
 INSERT INTO `plans` VALUES (4, 1, 'Advanced', 'Up to 30 users\r\nFor teams that need planning and collaboration, + tracking workloads by hours, and advanced project reporting. ', '<p><strong>Including all from Basic plan and:</strong></p><ul><li>Advanced reporting</li><li>Track workloads by hours</li></ul><ul></ul>', 'Try advanced', '', 0, 30, 30, 0, 3, now());
 INSERT INTO `plans` VALUES (5, 1, 'Enterprise', 'Bis business for large companies.\r\nUp to 500 users or more - pleas ask for offer', '<ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed no limits</li><li>and much more<br></li></ul>', 'Contact', 'contact/enterprise', 0, 0, 30, 0, 4, now());

@@ -6,7 +6,8 @@
             FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
             WHERE widgets.blnActive = 1
         "
-    );
+    )
+    objPrices = new com.prices();
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">

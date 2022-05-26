@@ -27,15 +27,19 @@
                 <table class="table card-table table-vcenter text-nowrap">
                     <thead>
                         <tr>
-                            <th width="15%">Currency</th>
-                            <th width="15%" class="text-end">Price monthly</th>
-                            <th width="15%" class="text-end">Price yearly</th>
+                            <th width="25%">Currency</th>
+                            <th width="25%" class="text-end">One time pricing</th>
+                            <th width="25%" class="text-end">Price monthly</th>
+                            <th width="25%" class="text-end">Price yearly</th>
                         </tr>
                         <cfloop query="qPrices">
                             <tr>
                                 <td>#qPrices.strCurrencyEN# (#qPrices.strCurrencyISO#)</td>
                                 <td align="right">
-                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceMonthly, '__.__'))#" maxlength="10" required>
+                                    <input type="text" name="onetime_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceOneTime, '__.__'))#" maxlength="10">
+                                </td>
+                                <td align="right">
+                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceMonthly, '__.__'))#" maxlength="10">
                                 </td>
                                 <td align="right">
                                     <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceYearly, '__.__'))#" maxlength="10">

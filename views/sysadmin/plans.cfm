@@ -78,11 +78,11 @@
                                 <div class="col-lg-6">
                                     <h3>Plans & Prices</h3>
                                 </div>
-                                <cfif qPlanGroups.recordCount>
+                                <!--- <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">
                                         <a href="##" data-bs-toggle="modal" data-bs-target="##plans_preview"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
                                     </div>
-                                </cfif>
+                                </cfif> --->
                             </div>
                         </div>
                         <div class="card-body">
@@ -118,43 +118,6 @@
                                                     <td><a href="#application.mainURL#/sysadmin/plan/edit/#qPlans.intPlanID#" class="btn">Edit</a></td>
                                                     <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_plan=#qPlans.intPlanID#', 'Delete plan', 'Do you really want to delete this plan irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
-                                                <!--- <cfif qPlans.recordCount gt 1>
-                                                    <script>
-                                                        // Save new prio
-                                                        function fnSaveSort(){
-
-                                                            var jsonTmp = "[";
-                                                                $('##dragndrop_body > tr').each(function (i, row) {
-                                                                    var divbox = $(this).attr('id');
-                                                                    var aTR = divbox.split('_');
-                                                                    var newslist = 0;
-                                                                    jsonTmp += "{\"prio\" :" + (i+1) + ',';
-                                                                    if(newslist != 0){
-                                                                        var setlist = JSON.stringify(newslist);
-                                                                        jsonTmp += "\"strBoxList\" :" + setlist + ',';
-                                                                    }
-                                                                    jsonTmp += "\"intPlanID\" :" + aTR[1] + '},';
-                                                                }
-                                                            );
-                                                            jsonTmp += jsonTmp.slice(0,-1);
-                                                            jsonTmp += "]]";
-                                                            var ajaxResponse = $.ajax({
-                                                                type: "post",
-                                                                url: "#application.mainURL#/handler/ajax_sort.cfm?plans&extend=#urlencodedformat('AND intPlanGroupID = #qPlans.intPlanGroupID#')#",
-                                                                contentType: "application/json",
-                                                                data: JSON.stringify( jsonTmp )
-                                                            })
-                                                            // Response
-                                                            ajaxResponse.then(
-                                                                function( apiResponse ){
-                                                                    if(apiResponse.trim() == 'ok'){
-                                                                        location.href = '#application.mainURL#/sysadmin/plans';
-                                                                    }
-                                                                }
-                                                            );
-                                                        }
-                                                    </script>
-                                                </cfif> --->
                                             </cfloop>
                                         </tbody>
                                     </table>
@@ -207,7 +170,6 @@
 </div>
 
 <cfif qPlans.recordCount gt 1>
-    <cfinclude template="plans_preview.cfm">
     <cfoutput>
     <script>
         // Save new prio

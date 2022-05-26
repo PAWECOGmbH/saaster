@@ -21,11 +21,12 @@ if (structKeyExists(form, "new_module")) {
                 module_name: {type: "nvarchar", value: form.module_name},
                 active: {type: "boolean", value: 0},
                 bookable: {type: "boolean", value: 0},
+                test_days: {type: "numeric", value: 30},
                 nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
             },
             sql = "
-                INSERT INTO modules (strModuleName, blnActive, blnBookable, intPrio)
-                VALUES (:module_name, :active, :bookable, :nextPrio)
+                INSERT INTO modules (strModuleName, blnActive, blnBookable, intNumTestDays, intPrio)
+                VALUES (:module_name, :active, :bookable, :test_days, :nextPrio)
             "
         )
 
@@ -105,6 +106,8 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.prefix" default="";
         param name="form.pic" default="";
         param name="form.desc" default="";
+        param name="form.test_days" default="0";
+        param name="form.path" default="";
 
         qNexPrio = queryExecute(
             options = {datasource = application.datasource},
@@ -122,7 +125,9 @@ if (structKeyExists(form, "edit_module")) {
                 prefix: {type: "varchar", value: form.prefix},
                 active: {type: "boolean", value: active},
                 bookable: {type: "boolean", value: bookable},
+                test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
+                modulePath: {type: "varchar", value: form.path},
                 thisID: {type: "numeric", value: form.edit_module}
             },
             sql = "
@@ -132,7 +137,9 @@ if (structKeyExists(form, "edit_module")) {
                     strDescription = :description,
                     blnActive = :active,
                     strTabPrefix = :prefix,
-                    blnBookable = :bookable
+                    blnBookable = :bookable,
+                    intNumTestDays = :test_days,
+                    strSettingPath = :modulePath
                 WHERE intModuleID = :thisID
 
             "
@@ -253,14 +260,16 @@ if (structKeyExists(form, "edit_prices")) {
             "
         )
 
+        itsOneTimePricing = false;
+
         cfloop( list = form.fieldnames, index = "f" ) {
 
             thisCurrencyID = listLast(f, "_");
             thisField = listFirst(f, "_");
 
-            if (thisField eq "pricemonthly" or thisField eq "priceyearly") {
+            if (thisField eq "pricemonthly" or thisField eq "priceyearly" or thisField eq "onetime") {
 
-                // Look if we find an entry in the table
+                // Look whether we find an entry in the table
                 qCheckPrice = queryExecute(
                     options = {datasource = application.datasource},
                     params = {
@@ -293,17 +302,40 @@ if (structKeyExists(form, "edit_prices")) {
 
                 pricemonthly = 0;
                 priceyearly = 0;
+                onetime = 0;
+
+                if (thisField eq "onetime") {
+                    onetime = evaluate("onetime_#thisCurrencyID#");
+                    if (isNumeric(onetime)) {
+                        if (onetime gt 0) {
+                            itsOneTimePricing = true;
+                        }
+                        queryExecute(
+                            options = {datasource = application.datasource},
+                            params = {
+                                moduleID: {type: "numeric", value: form.edit_prices},
+                                thisCurrencyID: {type: "numeric", value: thisCurrencyID},
+                                onetime: {type: "decimal", value: onetime, scale: 2}
+                            },
+                            sql = "
+                                UPDATE modules_prices
+                                SET decPriceOneTime = :onetime
+                                WHERE intModuleID = :moduleID
+                                AND intCurrencyID = :thisCurrencyID
+                            "
+                        )
+                    }
+                }
 
                 if (thisField eq "pricemonthly") {
                     pricemonthly = evaluate("pricemonthly_#thisCurrencyID#");
-                    if (isNumeric(pricemonthly)) {
+                    if (isNumeric(pricemonthly) and onetime eq 0) {
                         queryExecute(
                             options = {datasource = application.datasource},
                             params = {
                                 moduleID: {type: "numeric", value: form.edit_prices},
                                 thisCurrencyID: {type: "numeric", value: thisCurrencyID},
                                 pricemonthly: {type: "decimal", value: pricemonthly, scale: 2}
-
                             },
                             sql = "
                                 UPDATE modules_prices
@@ -317,7 +349,7 @@ if (structKeyExists(form, "edit_prices")) {
 
                 if (thisField eq "priceyearly") {
                     priceyearly = evaluate("priceyearly_#thisCurrencyID#");
-                    if (isNumeric(priceyearly)) {
+                    if (isNumeric(priceyearly) and onetime eq 0) {
                         queryExecute(
                             options = {datasource = application.datasource},
                             params = {
@@ -334,6 +366,7 @@ if (structKeyExists(form, "edit_prices")) {
                         )
                     }
                 }
+
             }
         }
 
@@ -341,6 +374,8 @@ if (structKeyExists(form, "edit_prices")) {
         type = 1;
         isNetto = 0;
         onRequest = 0;
+        updateSQL = "";
+
         if (isNumeric(form.vat)) {
             vat = form.vat;
         }
@@ -353,6 +388,11 @@ if (structKeyExists(form, "edit_prices")) {
         if (structKeyExists(form, "request")) {
             onRequest = 1;
         }
+        if (itsOneTimePricing) {
+            updateSQL = "
+                ,decPriceMonthly = 0, decPriceYearly = 0
+            ";
+        }
 
         queryExecute(
             options = {datasource = application.datasource},
@@ -361,13 +401,13 @@ if (structKeyExists(form, "edit_prices")) {
                 vat: {type: "decimal", value: vat, scale: 2},
                 type: {type: "numeric", value: type},
                 isNetto: {type: "boolean", value: isNetto}
-
             },
             sql = "
                 UPDATE modules_prices
                 SET decVat = :vat,
                     intVatType = :type,
                     blnIsNet = :isNetto
+                    #updateSQL#
                 WHERE intModuleID = :moduleID
             "
         )

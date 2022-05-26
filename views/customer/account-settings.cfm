@@ -1,3 +1,8 @@
+
+<cfscript>
+objPlan = new com.plans(language=session.lng);
+</cfscript>
+
 <cfinclude template="/includes/header.cfm">
 <cfinclude template="/includes/navigation.cfm">
 
@@ -21,9 +26,32 @@
 
         <div class="row">
 
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">#getTrans('txtMyProfile')#</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <div class="d-flex justify-content-between">
+                                    <h4 class="mb-1"><b>#getTrans('txtEditProfile')#</b></h4>
+                                </div>
+                                <p class="mb-1 ">#getTrans('txtEditYourProfile')#</p>
+                            </a>
+                            <a href="#application.mainURL#/account-settings/reset-password" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <div class="d-flex justify-content-between">
+                                    <h4 class="mb-1"><b>#getTrans('titResetPassword')#</b></h4>
+                                </div>
+                                <p class="mb-1 ">#getTrans('txtResetOwnPassword')#</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <cfif session.admin>
-                <div class="col-sm-12 col-md-6">
-                    <div class="card mb-3">
+                <div class="col-lg-4 mb-3">
+                    <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">#getTrans('titGeneralSettings')#</h3>
                         </div>
@@ -58,48 +86,104 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card mt-3">
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Pakete und Module</h3>
+                            <h3 class="card-title">#getTrans('titPlansAndModules')#</h3>
                         </div>
                         <div class="card-body">
-                            <div class="list-group">
+
+                            <cfif session.currentPlan.planID gt 0>
+
+                                <cfset getStatus = objPlan.getPlanStatusAsText(session.currentPlan)>
+
+                                <dl class="row">
+
+                                    <dt class="col-5">#getTrans('titYourPlan')#:</dt>
+                                    <dd class="col-7">#session.currentPlan.planName#</dd>
+
+                                    <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
+                                    <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
+
+                                    <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
+                                    <dd class="col-7">#lsDateFormat(session.currentPlan.startDate, "Full")#</dd>
+
+                                    <cfif session.currentPlan.status eq "active">
+
+                                        <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
+                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endDate, "Full")#</dd>
+
+                                    <cfelseif session.currentPlan.status eq "canceled">
+
+                                        <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
+                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endDate, "Full")#</dd>
+                                        <dt class="col-5">#getTrans('txtInformation')#:</dt>
+                                        <dd class="col-7">#getStatus.statusText#</dd>
+
+                                    <cfelseif session.currentPlan.status eq "test">
+
+                                        <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
+                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endTestDate, "Full")#</dd>
+                                        <dt class="col-5">#getTrans('txtInformation')#:</dt>
+                                        <dd class="col-7">#getStatus.statusText#</dd>
+
+                                    </cfif>
+
+                                </dl>
+
+                                <cfif session.superAdmin>
+
+                                    <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
+                                        <div class="row mt-4">
+                                            <div class="button-group">
+                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
+                                                <a class="btn btn-outline-danger" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#session.currentPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a>
+                                            </div>
+                                        </div>
+                                    <cfelseif session.currentPlan.status eq "canceled">
+                                        <div class="row mt-4">
+                                            <div class="button-group">
+                                                <a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
+                                            </div>
+                                        </div>
+                                    <cfelseif session.currentPlan.status eq "free">
+                                        <div class="row mt-4">
+                                            <div class="button-group">
+                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
+                                            </div>
+                                        </div>
+                                    <cfelseif session.currentPlan.status eq "expired">
+                                        <div class="row mt-4">
+                                            <div class="button-group">
+                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
+                                            </div>
+                                        </div>
+                                    </cfif>
+
+                                </cfif>
+
+                            <cfelse>
+                                <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                            </cfif>
+
+                            <div class="list-group mt-4">
                                 <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
                                     </div>
-                                    <p class="mb-1 ">#getTrans('txtAddOrEditModules')#</p>
+                                    <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
                                 </a>
                             </div>
+
+
+
+
                         </div>
                     </div>
                 </div>
             </cfif>
-            <div class="col-sm-12 col-md-6">
 
-                <div class="card mb-0">
-                    <div class="card-header">
-                        <h3 class="card-title">#getTrans('txtMyProfile')#</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex justify-content-between">
-                                    <h4 class="mb-1"><b>#getTrans('txtEditProfile')#</b></h4>
-                                </div>
-                                <p class="mb-1 ">#getTrans('txtEditYourProfile')#</p>
-                            </a>
-                            <a href="#application.mainURL#/account-settings/reset-password" class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex justify-content-between">
-                                    <h4 class="mb-1"><b>#getTrans('titResetPassword')#</b></h4>
-                                </div>
-                                <p class="mb-1 ">#getTrans('txtResetOwnPassword')#</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
         </div>
         </cfoutput>
     </div>
