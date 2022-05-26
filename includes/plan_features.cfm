@@ -15,7 +15,7 @@
                             <td class="feat categoryName">
                                 <strong>#f.name#</strong>
                             </td>
-                            <cfloop array="#planObj#" index="p">
+                            <cfloop array="#planArray#" index="p">
                                 <td class="allPlans planName">#p.planName#</td>
                             </cfloop>
                         </tr>
@@ -23,10 +23,10 @@
                         <tr>
                             <td class="feat content-td-head">#f.name#</td>
 
-                            <cfloop array="#planObj#" index="p">
+                            <cfloop array="#planArray#" index="p">
                                 <cfset thisPlanID = p.planID>
                                 <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID, session.lng)>
-                                
+
                                 <td class="content-td-body">
                                     <cfif featureContent.checkmark>
                                         <i class="fas fa-check"></i>
@@ -35,7 +35,7 @@
                                     </cfif>
                                 </td>
                             </cfloop>
-                        </tr>    
+                        </tr>
                     </cfif>
 
                 </cfoutput>
