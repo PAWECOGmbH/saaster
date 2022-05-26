@@ -19,6 +19,9 @@
 <!--- Trumbowyg editor --->
 <script src="#application.mainURL#/dist/trumbowyg/trumbowyg.min.js"></script>
 
+<!--- Toggleinput JS --->
+<script src="#application.mainURL#/dist/js/jquery.toggleinput.js"></script>
+
 <!--- Custom JS --->
 <script src="#application.mainURL#/dist/js/custom.js"></script>
 

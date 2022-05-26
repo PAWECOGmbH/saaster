@@ -28,6 +28,11 @@ component displayname="customer" output="false" {
         } else {
             local.email = '';
         }
+        if (structKeyExists(arguments.optinValues, "language")) {
+            local.language = arguments.optinValues.language;
+        } else {
+            local.language = application.objGlobal.getDefaultLanguage().iso;
+        }
         if (structKeyExists(arguments.optinValues, "newUUID")) {
             local.newUUID = arguments.optinValues.newUUID;
         } else {
@@ -42,11 +47,12 @@ component displayname="customer" output="false" {
                 name: {type: "nvarchar", value: local.name},
                 company: {type: "nvarchar", value: local.company},
                 email: {type: "nvarchar", value: local.email},
+                language: {type: "nvarchar", value: local.language},
                 newUUID: {type: "nvarchar", value: local.newUUID}
             },
             sql = "
-                INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strUUID)
-                VALUES (:first_name, :name, :company, :email, :newUUID)
+                INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strLanguage, strUUID)
+                VALUES (:first_name, :name, :company, :email, :language, :newUUID)
             "
 
         );
@@ -76,6 +82,7 @@ component displayname="customer" output="false" {
         param name="local.first_name" default="";
         param name="local.last_name" default="";
         param name="local.email" default="";
+        param name="local.language" default="";
         param name="local.password" default=""; //(the password must be hashed already!)
         param name="local.uuid" default="";
 
@@ -98,6 +105,11 @@ component displayname="customer" output="false" {
             local.email = application.objGlobal.cleanUpText(arguments.customerStruct.strEmail, 100);
         } else {
             local.email = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "strLanguage")) {
+            local.language = arguments.customerStruct.strLanguage;
+        } else {
+            local.language = application.objGlobal.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.customerStruct, "hash")) {
             local.hash = trim(arguments.customerStruct.hash);
@@ -127,6 +139,7 @@ component displayname="customer" output="false" {
                     first_name: {type: "nvarchar", value: local.first_name},
                     last_name: {type: "nvarchar", value: local.last_name},
                     email: {type: "nvarchar", value: local.email},
+                    language: {type: "varchar", value: local.language},
                     hash: {type: "nvarchar", value: local.hash},
                     salt: {type: "nvarchar", value: local.salt},
                     uuid: {type: "nvarchar", value: local.uuid}
@@ -139,8 +152,8 @@ component displayname="customer" output="false" {
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-                    VALUES (@last_inserted_customer_id, now(), now(), :first_name, :last_name, :email, :hash, :salt, 1, 1, 1,
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
+                    VALUES (@last_inserted_customer_id, now(), now(), :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
                         IF(
                             (
                                 SELECT COUNT(intCustomerID)

@@ -1,15 +1,18 @@
 <cfoutput>
+
 <div class="mb-5">
     <div class="form-label">#getTrans('titPayment')#</div>
-    <div>
-        <label class="form-check form-check-inline">
-            <input class="form-check-input" name="payment_changer" type="radio" value="monthly" checked>
-            <span class="form-check-label">#getTrans('txtMonthly')#</span>
-        </label>
-        <label class="form-check form-check-inline">
-            <input class="form-check-input" name="payment_changer" type="radio" value="yearly">
-            <span class="form-check-label">#getTrans('txtYearly')#</span>
-        </label>
+    <div class="form-group radio-toggle has-toggle-input toggleradio mt-3">
+        <div class="form-check">
+            <label class="form-check-label active form-check form-check-inline monthly">
+                <input class="form-check-input" id="monthly" type="radio" name="payment_changer" value="monthly" style="visibility:hidden;" checked>
+                <span class="form-check-label">#getTrans('txtMonthly')#</span>
+            </label>
+            <label class="form-check-label form-check form-check-inline yearly">
+                <input class="form-check-input" id="yearly" type="radio" name="payment_changer" value="yearly" style="visibility:hidden;">
+                <span class="form-check-label">#getTrans('txtYearly')#</span>
+            </label>
+        </div>
     </div>
 </div>
 <div class="row row-cards">
@@ -28,7 +31,7 @@
                         <div class="text-uppercase text-muted h4">#i.planName#</div>
 
                         <!--- Price monthly --->
-                        <div style="min-height: 50px;" class="monthly">
+                        <div style="min-height: 50px;" class="price_box monthly">
                             <div class="fw-bold my-2 plan_price">
                                 <cfif i.onRequest>
                                     #getTrans('txtOnRequest')#
@@ -47,9 +50,9 @@
                                 </cfif>
                             </div>
                         </div>
-
+                        
                         <!--- Price yearly --->
-                        <div style="min-height: 50px; display: none;" class="yearly">
+                        <div style="min-height: 50px; display: none;" class="price_box yearly">
                             <div class="fw-bold my-2 plan_price">
                                 <cfif i.onRequest>
                                     #getTrans('txtOnRequest')#

@@ -45,6 +45,7 @@ if (structKeyExists(form, 'register_btn')) {
         optinValues.name = form.name;
         optinValues.company = form.company;
         optinValues.email = form.email;
+        optinValues.language = form.language;
         optinValues.newUUID = newUUID;
 
         <!--- Save the customer into the temporary table optin --->
@@ -77,6 +78,7 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "first_name");
             structDelete(session, "name");
             structDelete(session, "company");
+            structDelete(session, "language");
             structDelete(session, "email");
 
             getAlert('alertOptinSent', 'info');
