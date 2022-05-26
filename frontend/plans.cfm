@@ -46,7 +46,7 @@
                     <cfinclude template="/includes/plan_boxes.cfm">
                 </div>
                 <div class="text-center mb-4">
-                    <!--- <cfinclude template="/includes/plan_features.cfm"> --->
+                    <cfinclude template="/includes/plan_features.cfm">
                 </div>
             </cfif>
         </div>
