@@ -18,7 +18,8 @@ Linux:
 
 MacOS:
 
-- Not tested yet. Coming soon...
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- make (Install over xcode)
 
 ## Setup local development environment
 
