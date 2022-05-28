@@ -14,50 +14,43 @@
                 <div class="text-center mb-4">
                     <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="./handler/register.cfm">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration?reinit=3">
                     <input type="hidden" name="register_btn">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('formSignUp')#</h2>
                         <cfif structKeyExists(session, "alert")>
                             #session.alert#
                         </cfif>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formFirstName')# *</label>
                             <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formName')# *</label>
                             <input type="text" name="name" class="form-control" value="#session.name#"  minlength="3" maxlenght="100" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formCompanyName')#</label>
                             <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100">
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formEmailAddress')# *</label>
                             <input type="email" name="email" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formLanguage')#</label>
                             <select name="language" class="form-select">
                                 <cfloop list="#application.allLanguages#" index="i">
                                     <cfset lngIso = listfirst(i,"|")>
                                     <cfset lngName = listlast(i,"|")>
-                                    <option value="#lngIso#" >#lngName#</option>
+                                    <option value="#lngIso#" <cfif lngIso eq session.lng>selected</cfif>>#lngName#</option>
                                 </cfloop>
                             </select>
                         </div>
-
-
                         <div class="mb-3">
                             <label class="form-check">
                                 <input type="checkbox" class="form-check-input" required>
-                                <span class="form-check-label">Agree the <a href="./" target="_blank">terms and policy</a></span>
+                                <span class="form-check-label"><a href="./" target="_blank">#getTrans('txtAgreePolicy')#</a></span>
                             </label>
                         </div>
                         <div class="form-footer">
@@ -72,7 +65,7 @@
                 <div class="text-center mb-4">
                     <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="36" alt="Logo"></a>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="./handler/register.cfm">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration">
                     <input type="hidden" name="create_account">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('titChoosePassword')#</h2>

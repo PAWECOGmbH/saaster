@@ -10,11 +10,13 @@ if (structKeyExists(form, 'register_btn')) {
     param name="form.name" default="";
     param name="form.company" default="";
     param name="form.email" default="";
+    param name="form.language" default="";
 
     session.first_name = form.first_name;
     session.name = form.name;
     session.company = form.company;
     session.email = form.email;
+    session.lng = form.language;
 
     checkEmail = application.objGlobal.checkEmail(form.email);
 
@@ -78,7 +80,6 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "first_name");
             structDelete(session, "name");
             structDelete(session, "company");
-            structDelete(session, "language");
             structDelete(session, "email");
 
             getAlert('alertOptinSent', 'info');
@@ -297,6 +298,7 @@ if (structKeyExists(form, 'login_btn')) {
             session.user_name = objUserLogin.user_name;
             session.user_email = objUserLogin.user_email;
 			session.lastvisit = objUserLogin.last_login;
+            session.lng = objUserLogin.language;
 			session.admin = trueFalseFormat(objUserLogin.admin);
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
@@ -312,41 +314,28 @@ if (structKeyExists(form, 'login_btn')) {
             <!--- Set customers locale -> Todo: get the users setting --->
             session.user_locale = getLocale();
 
-
-            objUserLogin.language = 'de';
-
             <!--- Save current plan into a session --->
-            checkPlan = new com.plans(language=objUserLogin.language).getCurrentPlan(session.customer_id);
+            checkPlan = new com.plans(language=session.lng).getCurrentPlan(session.customer_id);
             session.currentPlan = checkPlan;
 
             <!--- Save current modules into a session --->
-            checkModules = new com.modules(language=objUserLogin.language).getBookedModules(session.customer_id);
+            checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
-            if (findNoCase("?", objUserLogin.redirect)) {
-                if(session.lastvisit EQ ""){
-                    if(session.admin){
-                        getAlert('txtUpdateInformation', 'warning');
-                        location url="#application.mainURL#/account-settings/company?l=#objUserLogin.language#" addtoken="false";
-                    }else {
-                        getAlert('txtUpdateInformation', 'warning');
-                        location url="#application.mainURL#/account-settings/my-profile?l=#objUserLogin.language#" addtoken="false";
-                    }
-                }else {
-                    location url="#objUserLogin.redirect#&l=#objUserLogin.language#" addtoken="false";
+            if (!len(trim(session.lastvisit))) {
+
+                getAlert('txtUpdateInformation', 'warning');
+
+                if (session.admin) {
+                    location url="#application.mainURL#/account-settings/company" addtoken="false";
+                } else {
+                    location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
                 }
+
             } else {
-                if(session.lastvisit EQ ""){
-                    if(session.admin){
-                        getAlert('txtUpdateInformation', 'warning');
-                        location url="#application.mainURL#/account-settings/company?l=#objUserLogin.language#" addtoken="false";
-                    }else {
-                        getAlert('txtUpdateInformation', 'warning');
-                        location url="#application.mainURL#/account-settings/my-profile?l=#objUserLogin.language#" addtoken="false";
-                    }
-                }else {
-                    location url="#objUserLogin.redirect#?l=#objUserLogin.language#" addtoken="false";
-                }
+
+                location url="#objUserLogin.redirect#" addtoken="false";
+
             }
 
 

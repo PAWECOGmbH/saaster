@@ -4,8 +4,8 @@ component displayname="user" output="false" {
     <!--- Login --->
     public struct function checkLogin() {
 
-        param name="form.email" default="" type="string";
-        param name="form.password" default="" type="string";
+        param name="arguments.email" default="" type="string";
+        param name="arguments.password" default="" type="string";
 
         local.returnStruct = structNew();
         local.returnStruct['loginCorrect'] = false;
@@ -38,7 +38,7 @@ component displayname="user" output="false" {
 
         if (qCheckLogin.recordCount) {
 
-            if (qCheckLogin.strPasswordHash eq hash(form.password & qCheckLogin.strPasswordSalt, 'SHA-512')) {
+            if (qCheckLogin.strPasswordHash eq hash(arguments.password & qCheckLogin.strPasswordSalt, 'SHA-512')) {
 
                 if (qCheckLogin.blnActive and qCheckLogin.tenant_active) {
 
