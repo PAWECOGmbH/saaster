@@ -49,7 +49,7 @@
             <!--- Save module array into a session --->
             session.currentModules = objModules.getBookedModules(session.customer_id);
             getAlert('msgModuleActivated');
-            location url="#application.mainURL#/dashboard" addtoken=false;
+            location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         }
 
@@ -85,7 +85,7 @@
                 <!--- Save module array into a session --->
                 session.currentModules = objModules.getBookedModules(session.customer_id);
                 getAlert('msgModuleActivated');
-                location url="#application.mainURL#/dashboard" addtoken=false;
+                location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
             }
 
@@ -138,7 +138,7 @@
                         invoiceID = newInvoice.newInvoiceID;
                     } else {
                         getAlert(newInvoice.message, 'danger');
-                        location url="#application.mainURL#/dashboard" addtoken=false;
+                        location url="#application.mainURL#/account-settings/modules" addtoken=false;
                     }
 
                     // Insert a position
@@ -171,7 +171,7 @@
                     if (!insPositions.success) {
                         objInvoice.deleteInvoice(invoiceID);
                         getAlert(insPositions.message, 'danger');
-                        location url="#application.mainURL#/dashboard" addtoken=false;
+                        location url="#application.mainURL#/account-settings/modules" addtoken=false;
                     }
 
                     // This is the variable for the payment type and can be overwritten by the PSP.
@@ -196,7 +196,7 @@
 
                     }
 
-                    location url="#application.mainURL#/dashboard" addtoken=false;
+                    location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
 
 
@@ -204,7 +204,7 @@
                 } else {
 
                     getAlert(insertBooking.message, 'danger');
-                    location url="#application.mainURL#/plans" addtoken=false;
+                    location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
                 }
 
@@ -213,12 +213,12 @@
 
                 param name="url.message" default="Error during the payment process!";
                 getAlert(url.message, 'danger');
-                location url="#application.mainURL#/plans" addtoken=false;
+                location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
 
             case "cancel":
                 // Send the user back to the plans
-                location url="#application.mainURL#/plans" addtoken=false;
+                location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         }
 

@@ -8,7 +8,7 @@ component displayname="customer" output="false" {
 
         if (len(trim(arguments.userID)) and arguments.userID gt 0) {
 
-            local.qCustomer = queryExecute(
+            local.qUser = queryExecute(
 
                 options = {datasource = application.datasource},
                 params = {
@@ -55,7 +55,7 @@ component displayname="customer" output="false" {
                 "
             )
 
-            local.userQuery = local.qCustomer;
+            local.userQuery = local.qUser;
 
         }
 

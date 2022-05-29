@@ -54,7 +54,7 @@
             break;
     }
 
-    getModal = createObject("component", "com.translate");
+    getModal = new com.translate();
 
 </cfscript>
 
