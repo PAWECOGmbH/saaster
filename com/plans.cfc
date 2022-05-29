@@ -381,51 +381,22 @@ component displayname="plans" output="false" {
                     local.structPlan['currencySign'] = local.getPlan.strCurrencyISO;
                 }
 
-                // Get all the included modules of the current plan                ;
+                // Get all the included modules of the current plan
                 structAppend(local.structPlan, getModulesIncluded(local.getPlan.intPlanID));
 
 
-                local.objPrices = new com.prices();
+                local.objPrices = new com.prices(
+                    vat=local.getPlan.decVat,
+                    vat_type=local.getPlan.intVatType,
+                    isnet=local.getPlan.blnIsNet,
+                    language=variables.language,
+                    currency=local.getPlan.strCurrencyISO
+                );
 
-                local.structPlan['vat_text_monthly'] = local.objPrices.getPriceData
-                    (
-                        price=local.getPlan.decPriceMonthly,
-                        vat=local.getPlan.decVat,
-                        vat_type=local.getPlan.intVatType,
-                        isnet=local.getPlan.blnIsNet,
-                        language=variables.language,
-                        currency=local.getPlan.strCurrencyISO
-                    ).vat_text;
-
-                local.structPlan['vat_text_yearly'] = local.objPrices.getPriceData
-                    (
-                        price=local.getPlan.decPriceYearly,
-                        vat=local.getPlan.decVat,
-                        vat_type=local.getPlan.intVatType,
-                        isnet=local.getPlan.blnIsNet,
-                        language=variables.language,
-                        currency=local.getPlan.strCurrencyISO
-                    ).vat_text;
-
-                local.structPlan['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
-                    (
-                        price=local.getPlan.decPriceMonthly,
-                        vat=local.getPlan.decVat,
-                        vat_type=local.getPlan.intVatType,
-                        isnet=local.getPlan.blnIsNet,
-                        language=variables.language,
-                        currency=local.getPlan.strCurrencyISO
-                    ).priceAfterVAT;
-
-                local.structPlan['priceYearlyAfterVAT'] = local.objPrices.getPriceData
-                    (
-                        price=local.getPlan.decPriceYearly,
-                        vat=local.getPlan.decVat,
-                        vat_type=local.getPlan.intVatType,
-                        isnet=local.getPlan.blnIsNet,
-                        language=variables.language,
-                        currency=local.getPlan.strCurrencyISO
-                    ).priceAfterVAT;
+                local.structPlan['vat_text_monthly'] = local.objPrices.getPriceData(price=local.getPlan.decPriceMonthly).vat_text;
+                local.structPlan['vat_text_yearly'] = local.objPrices.getPriceData(price=local.getPlan.decPriceYearly).vat_text;
+                local.structPlan['priceMonthlyAfterVAT'] = local.objPrices.getPriceData(price=local.getPlan.decPriceMonthly).priceAfterVAT;
+                local.structPlan['priceYearlyAfterVAT'] = local.objPrices.getPriceData(price=local.getPlan.decPriceYearly).priceAfterVAT;
 
                 // Build the booking link
 

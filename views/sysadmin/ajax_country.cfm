@@ -32,7 +32,7 @@
     </cfquery>
 
     <cfset qLanguages = application.objGlobal.getAllLanguages()>
-    <cfset timeZones = createObject("component", "com.sysadmin").getTimezones()>
+    <cfset timeZones = new com.sysadmin().getTimezones()>
 
     <cfoutput>
         <form action="#application.mainURL#/sysadm/countries" method="post">

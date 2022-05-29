@@ -13,11 +13,11 @@ if (structKeyExists(form, "new_invoice")) {
         setting = application.objGlobal;
 
         invoiceData['customerID'] = form.new_invoice;
-        invoiceData['prefix'] = setting.getSetting(invoiceData.customerID, 'settingInvoicePrefix');
+        invoiceData['prefix'] = setting.getSetting('settingInvoicePrefix');
         invoiceData['title'] = form.title;
         invoiceData['currency'] = setting.getDefaultCurrency().iso;
-        invoiceData['isNet'] = setting.getSetting(invoiceData.customerID, 'settingInvoiceNet');
-        invoiceData['vatType'] = setting.getSetting(invoiceData.customerID, 'settingStandardVatType');
+        invoiceData['isNet'] = setting.getSetting('settingInvoiceNet');
+        invoiceData['vatType'] = setting.getSetting('settingStandardVatType');
 
         if (!len(trim(invoiceData.currency))) {
             invoiceData.currency = "USD";

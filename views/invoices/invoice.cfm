@@ -8,7 +8,7 @@
     }
 
     // Get the invoice data
-    getInvoiceData = createObject("component", "com.invoices").getInvoiceData(thisInvoiceID);
+    getInvoiceData = new com.invoices().getInvoiceData(thisInvoiceID);
     if(not isStruct(getInvoiceData) or not arrayLen(getInvoiceData.positions)){
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }

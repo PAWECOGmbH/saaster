@@ -180,7 +180,7 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "language")) {
             local.language = arguments.userStruct.language;
         } else {
-            local.language = '';
+            local.language = application.objGlobal.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.userStruct, "superadmin")) {
             local.superadmin = arguments.userStruct.superadmin;
@@ -375,6 +375,11 @@ component displayname="user" output="false" {
         } else {
             local.mobile = '';
         }
+        if (structKeyExists(arguments.userStruct, "language")) {
+            local.language = arguments.userStruct.language;
+        } else {
+            local.language = application.objGlobal.getDefaultLanguage().iso;
+        }
         if (structKeyExists(arguments.userStruct, "admin")) {
             local.admin = arguments.userStruct.admin;
         } else {
@@ -411,11 +416,12 @@ component displayname="user" output="false" {
                     admin: {type: "boolean", value: local.admin},
                     superadmin: {type: "boolean", value: local.superadmin},
                     active: {type: "boolean", value: local.active},
+                    language: {type: "varchar", value: local.language},
                     newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, blnActive, blnAdmin, blnSuperAdmin, strUUID)
-                    VALUES (:customerID, now(), now(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :active, :admin, :superadmin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, strUUID)
+                    VALUES (:customerID, now(), now(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
                 "
 
             )

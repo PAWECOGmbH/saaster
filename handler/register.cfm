@@ -1,7 +1,7 @@
 
 <cfscript>
 
-objRegister = createObject("component", "com.register");
+objRegister = new com.register();
 
 <!--- Register new user step 1 --->
 if (structKeyExists(form, 'register_btn')) {
@@ -206,7 +206,7 @@ if (structKeyExists(form, 'create_account')) {
             StructInsert(customerStruct, "salt", hashedStruct.thisSalt);
 
             <!--- Save the customer into the db --->
-            insertCustomer = createObject("component", "com.register").insertCustomer(customerStruct);
+            insertCustomer = new com.register().insertCustomer(customerStruct);
 
             if (insertCustomer.success) {
 
@@ -322,21 +322,7 @@ if (structKeyExists(form, 'login_btn')) {
             checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
-            if (!len(trim(session.lastvisit))) {
-
-                getAlert('txtUpdateInformation', 'warning');
-
-                if (session.admin) {
-                    location url="#application.mainURL#/account-settings/company" addtoken="false";
-                } else {
-                    location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
-                }
-
-            } else {
-
-                location url="#objUserLogin.redirect#" addtoken="false";
-
-            }
+            location url="#objUserLogin.redirect#" addtoken="false";
 
 
         } else {

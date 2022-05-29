@@ -20,11 +20,11 @@ component displayname="Application" output="false" hint="Handle the application.
         include template="includes/settings.cfm";
 
         <!--- Object initialising --->
-        application.objGlobal = createObject("component", "com.global");
-        application.objUser = createObject("component", "com.user");
-        application.objCustomer = createObject("component", "com.customer");
+        application.objGlobal = new com.global();
+        application.objUser = new com.user();
+        application.objCustomer = new com.customer();
 
-        <!--- Save all languages into a list --->
+        <!--- Save all choosable languages into a list --->
         qLanguages = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -34,10 +34,15 @@ component displayname="Application" output="false" hint="Handle the application.
                 ORDER BY intPrio
             "
         )
-        param name="application.allLanguages" value="de|Deutsch";
         if (qLanguages.recordCount) {
             application.allLanguages = ValueList(qLanguages.lang);
         }
+
+        <!--- Load language struct and save it into the application scope --->
+        application.langStruct = application.objGlobal.initLanguages();
+
+        <!--- Load system setting struct and save it into the application scope --->
+        application.systemSettingStruct = application.objGlobal.initSystemSettings();
 
         return true;
 
@@ -58,8 +63,6 @@ component displayname="Application" output="false" hint="Handle the application.
 
         <!--- Save into the session --->
         session.lng = left(local.client_lang, 2);
-        session.lngLocale = local.client_lang;
-        session.langStruct = application.objGlobal.initLanguages(session.lng);
 
         return;
 
@@ -73,6 +76,7 @@ component displayname="Application" output="false" hint="Handle the application.
         if (structKeyExists(url, "reinit") and url.reinit eq 1) {
             structClear(APPLICATION);
             onApplicationStart();
+            application.langStruct = application.objGlobal.initLanguages();
         }
 
         <!--- Reinit Session --->
@@ -84,7 +88,7 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Reinit languages --->
         if (structKeyExists(url, "reinit") and url.reinit eq 3) {
             structDelete(session, "langStruct");
-            session.langStruct = application.objGlobal.initLanguages(session.lng);
+            application.langStruct = application.objGlobal.initLanguages();
         }
 
         <!--- Reinit Session AND Application AND languages --->
@@ -93,7 +97,7 @@ component displayname="Application" output="false" hint="Handle the application.
             structClear(APPLICATION);
             onApplicationStart();
             onSessionStart();
-            session.langStruct = application.objGlobal.initLanguages(session.lng);
+            application.langStruct = application.objGlobal.initLanguages();
         }
 
         <!--- Set locale --->
@@ -128,8 +132,7 @@ component displayname="Application" output="false" hint="Handle the application.
             )
             if (qCheckLanguage.cnt gt 0) {
                 session.lng = url.l;
-                <!--- Init languages in the actual language --->
-                session.langStruct = application.objGlobal.initLanguages(session.lng);
+                application.langStruct = application.objGlobal.initLanguages();
             }
 
         }

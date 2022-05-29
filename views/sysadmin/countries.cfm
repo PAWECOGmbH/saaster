@@ -76,8 +76,8 @@
     }
 
     qLanguages = application.objGlobal.getAllLanguages();
-    timeZones = createObject("component", "com.sysadmin").getTimezones();
-    getModal = createObject("component", "com.translate");
+    timeZones = new com.sysadmin().getTimezones();
+    getModal = new com.translate();
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">

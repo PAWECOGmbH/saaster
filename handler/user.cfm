@@ -108,6 +108,7 @@ if (structKeyExists(form, "user_new_btn")) {
     param name="form.admin" default="0";
     param name="form.superadmin" default="0";
     param name="form.active" default="0";
+    param name="form.language" default=session.lng;
 
     if (form.admin eq 1 or form.admin eq "on") {
         form.admin = 1;

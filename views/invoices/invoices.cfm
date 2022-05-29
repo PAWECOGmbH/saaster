@@ -1,5 +1,5 @@
 <cfscript>
-    objInvoice = createObject("component", "com.invoices");
+    objInvoice = new com.invoices();
     qInvoices = objInvoice.getInvoices(session.customer_id);
 </cfscript>
 

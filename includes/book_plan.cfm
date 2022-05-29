@@ -51,7 +51,7 @@
             newPlan = objPlans.getCurrentPlan(session.customer_id);
             session.currentPlan = newPlan;
             getAlert('msgPlanActivated');
-            location url="#application.mainURL#/dashboard" addtoken=false;
+            location url="#application.mainURL#/account-settings" addtoken=false;
 
         }
 
@@ -74,7 +74,7 @@
             } else {
 
                 // Back to dashboard
-                location url="#application.mainURL#/dashboard" addtoken=false;
+                location url="#application.mainURL#/account-settings" addtoken=false;
             }
 
 
@@ -124,7 +124,7 @@
                 <!--- Save the new plan into a session --->
                 session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
                 getAlert('msgPlanActivated');
-                location url="#application.mainURL#/dashboard" addtoken=false;
+                location url="#application.mainURL#/account-settings" addtoken=false;
 
             }
 
@@ -178,7 +178,7 @@
                         invoiceID = newInvoice.newInvoiceID;
                     } else {
                         getAlert(newInvoice.message, 'danger');
-                        location url="#application.mainURL#/dashboard" addtoken=false;
+                        location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
                     // Insert a position
@@ -211,7 +211,7 @@
                     if (!insPositions.success) {
                         objInvoice.deleteInvoice(invoiceID);
                         getAlert(insPositions.message, 'danger');
-                        location url="#application.mainURL#/dashboard" addtoken=false;
+                        location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
                     // This is the variable for the payment type and can be overwritten by the PSP.
@@ -235,7 +235,7 @@
                         session.currentPlan = newPlan;
                     }
 
-                    location url="#application.mainURL#/dashboard" addtoken=false;
+                    location url="#application.mainURL#/account-settings" addtoken=false;
 
 
 

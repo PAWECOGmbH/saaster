@@ -89,41 +89,133 @@ component displayname="globalFunctions" {
 
 
     <!--- Initialising the language variables --->
-    public struct function initLanguages(string thisLng) {
+    public struct function initLanguages() {
 
-        param name="arguments.thisLng" default=getDefaultLanguage().iso;
-        if (!len(trim(arguments.thisLng))) {
-            arguments.thisLng = "en";
-        }
+        // Get all languages in the database
+        local.qLanguages = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT strLanguageISO, strLanguageEN
+                FROM languages
+            "
+        )
 
-        local.myVarStruct = structNew();
+        loop query="local.qLanguages" {
 
-        try {
+            local.langIso = local.qLanguages.strLanguageISO
+            local.language[local.langIso] = structNew();
 
-            qTranslations = queryExecute(
+            try {
 
-                options = {datasource = application.datasource},
-                sql = "
-                    SELECT strVariable, strString#arguments.thisLng#
-                    FROM system_translations
-                "
-            )
+                // Get translations of the language
+                local.qTranslations = queryExecute(
+                    options = {datasource = application.datasource},
+                    sql = "
+                        SELECT strVariable, strStringEN, strString#local.langIso#
+                        FROM system_translations
+                    "
+                )
 
-            if (qTranslations.recordCount) {
+                local.translations = structNew();
+                loop query="local.qTranslations" {
+                    if (len(trim(qTranslations['strString' & local.langIso]))) {
+                        local.translations[qTranslations.strVariable] = qTranslations['strString' & local.langIso];
+                    } else {
+                       local.translations[qTranslations.strVariable] = qTranslations['strStringEN'];
+                    }
+                }
 
-                loop query = qTranslations {
-                    myVarStruct[qTranslations.strVariable] = qTranslations['strString' & arguments.thisLng];
-                };
+                local.language[local.langIso] = local.translations;
+
+            } catch (any) {
+
+                local.language[local.langIso] = "";
 
             }
 
-        } catch (any) {
-
-            initLanguages('en');
 
         }
 
-        return local.myVarStruct;
+
+        return local.language;
+
+
+    }
+
+
+    <!--- Translations --->
+    public string function getTrans(required string stringToTrans, string thisLanguage) {
+
+        local.translatedString = "--undefined--";
+
+        if (structKeyExists(arguments, "thisLanguage") and len(trim(arguments.thisLanguage))) {
+            local.thisLang = arguments.thisLanguage;
+        } else if (structKeyExists(session, "lng")) {
+            local.thisLang = session.lng;
+        } else {
+            local.thisLang = application.getLanguage.iso;
+        }
+
+        if (structKeyExists(application.langStruct, local.thisLang)) {
+            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
+        } else {
+            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
+        }
+
+        if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
+            local.translatedString = local.searchString[1].value;
+        }
+
+        return local.translatedString;
+
+
+    }
+
+
+    <!--- Initialising the system setting variables --->
+    public struct function initSystemSettings() {
+
+        local.settingStruct = structNew();
+
+        local.qSettings = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT strSettingVariable, strDefaultValue
+                FROM system_settings
+            "
+        )
+
+        loop query="local.qSettings" {
+            local.settingStruct[local.qSettings.strSettingVariable] = local.qSettings.strDefaultValue;
+        }
+
+        return local.settingStruct;
+
+    }
+
+
+    <!--- Get setting (system settings as well as customer settings) --->
+    public string function getSetting(required string settingVariable, numeric customerID) {
+
+        if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
+
+            // Todo: get the customers setting
+
+        } else {
+
+            if (structKeyExists(application.systemSettingStruct, arguments.settingVariable)) {
+                local.valueString = structFindKey(application.systemSettingStruct, arguments.settingVariable, "one");
+            } else {
+                local.valueString = "";
+            }
+
+            if (isArray(local.valueString) and arrayLen(local.valueString) gte 1) {
+                local.valueString = local.valueString[1].value;
+            }
+
+        }
+
+        return local.valueString;
 
     }
 
@@ -258,56 +350,6 @@ component displayname="globalFunctions" {
             return "";
 
         }
-
-    }
-
-
-    <!--- Translations --->
-    public string function getTrans(required string stringToTrans, string thisLanguage) {
-
-
-        if (structKeyExists(arguments, "thisLanguage") and len(trim(arguments.thisLanguage))) {
-
-            qTranslation = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    variable: {type: "nvarchar", value: arguments.stringToTrans}
-                },
-                sql = "
-                    SELECT strString#arguments.thisLanguage# as thisString
-                    FROM system_translations
-                    WHERE strVariable = :variable
-                    UNION
-                    SELECT strString#arguments.thisLanguage# as thisString
-                    FROM custom_translations
-                    WHERE strVariable = :variable
-                    LIMIT 1
-                "
-            )
-
-            if (qTranslation.recordCount) {
-                return qTranslation.thisString;
-            } else {
-                return "--undefined--";
-            }
-
-        } else {
-
-            if (len(trim(arguments.stringToTrans)) and structKeyExists(session, "langStruct")) {
-
-                if (structKeyExists(session.langStruct, arguments.stringToTrans)) {
-                    return session.langStruct[arguments.stringToTrans];
-                } else {
-                    return "--undefined--";
-                }
-
-            } else {
-                return "";
-
-            }
-
-        }
-
 
     }
 
@@ -672,38 +714,6 @@ component displayname="globalFunctions" {
 
 
         return local.isAllowed;
-
-    }
-
-
-    <!--- Get settings --->
-    public string function getSetting(required numeric customerID, required string settingVariable) {
-
-        qSetting = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: arguments.customerID},
-                settingVariable: {type: "nvarchar", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT strDefaultValue as thisValue
-                FROM system_settings
-                WHERE strSettingVariable = :settingVariable
-                UNION
-                SELECT customer_custom_settings.strSettingValue as thisValue
-                FROM custom_settings
-                INNER JOIN customer_custom_settings ON custom_settings.intCustomSettingID = customer_custom_settings.intCustomSettingID
-                WHERE customer_custom_settings.intCustomerID = :customerID
-                AND custom_settings.strSettingVariable = :settingVariable
-                LIMIT 1
-            "
-        )
-
-        if (qSetting.recordCount) {
-            return qSetting.thisValue;
-        } else {
-            return "";
-        }
 
     }
 

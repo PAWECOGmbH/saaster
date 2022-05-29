@@ -181,68 +181,20 @@ component displayname="modules" output="false" {
                 local.moduleStruct['currencySign'] = local.qModule.strCurrencyISO;
             }
 
-            local.objPrices = new com.prices();
+            local.objPrices = new com.prices(
+                vat=local.qModule.decVat,
+                vat_type=local.qModule.intVatType,
+                isnet=local.qModule.blnIsNet,
+                language=variables.language,
+                currency=local.qModule.strCurrencyISO
+            );
 
-            local.moduleStruct['vat_text_monthly'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceMonthly,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).vat_text;
-
-            local.moduleStruct['vat_text_yearly'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceYearly,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).vat_text;
-
-            local.moduleStruct['vat_text_onetime'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceOneTime,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).vat_text;
-
-            local.moduleStruct['priceMonthlyAfterVAT'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceMonthly,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).priceAfterVAT;
-
-            local.moduleStruct['priceYearlyAfterVAT'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceYearly,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).priceAfterVAT;
-
-            local.moduleStruct['priceOneTimeAfterVAT'] = local.objPrices.getPriceData
-                (
-                    price=local.qModule.decPriceOneTime,
-                    vat=local.qModule.decVat,
-                    vat_type=local.qModule.intVatType,
-                    isnet=local.qModule.blnIsNet,
-                    language=variables.language,
-                    currency=local.qModule.strCurrencyISO
-                ).priceAfterVAT;
-
+            local.moduleStruct['vat_text_monthly'] = local.objPrices.getPriceData(price=local.qModule.decPriceMonthly).vat_text;
+            local.moduleStruct['vat_text_yearly'] = local.objPrices.getPriceData(price=local.qModule.decPriceYearly).vat_text;
+            local.moduleStruct['vat_text_onetime'] = local.objPrices.getPriceData(price=local.qModule.decPriceOneTime).vat_text;
+            local.moduleStruct['priceMonthlyAfterVAT'] = local.objPrices.getPriceData(price=local.qModule.decPriceMonthly).priceAfterVAT;
+            local.moduleStruct['priceYearlyAfterVAT'] = local.objPrices.getPriceData(price=local.qModule.decPriceYearly).priceAfterVAT;
+            local.moduleStruct['priceOneTimeAfterVAT'] = local.objPrices.getPriceData(price=local.qModule.decPriceOneTime).priceAfterVAT;
 
             // Is the module included in plans?
             local.qCheckPlans = queryExecute(

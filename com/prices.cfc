@@ -1,6 +1,36 @@
 
 component displayname="prices" output="false" {
 
+    public any function init(numeric vat, numeric vat_type, numeric isnet, string language, string currency) {
+
+        variables.vat = 0;
+        variables.vat_type = application.objGlobal.getSetting('settingStandardVatType');
+        variables.isnet = application.objGlobal.getSetting('settingInvoiceNet');
+        variables.language = application.objGlobal.getDefaultLanguage().iso;
+        variables.currency = getCurrency().iso;
+
+        if (structKeyExists(arguments, "vat")) {
+            variables.vat = arguments.vat;
+        }
+        if (structKeyExists(arguments, "vat_type")) {
+            variables.vat_type = arguments.vat_type;
+        }
+        if (structKeyExists(arguments, "isnet")) {
+            variables.isnet = arguments.isnet;
+        }
+        if (structKeyExists(arguments, "language")) {
+            variables.language = arguments.language;
+        }
+        if (structKeyExists(arguments, "currency")) {
+            variables.currency = arguments.currency;
+        }
+
+        return this;
+
+    }
+
+
+
     public struct function getCurrency(any currency) {
 
         local.currStruct = structNew();
@@ -82,79 +112,53 @@ component displayname="prices" output="false" {
 
 
 
-    public struct function getPriceData(numeric price, numeric vat, numeric vat_type, boolean isNet, string language, string currency) {
-
-        local.price = 0;
-        local.vat = 0;
-        local.vat_type = application.objGlobal.getSetting(0, 'settingStandardVatType');
-        local.isNet = application.objGlobal.getSetting(0, 'settingInvoiceNet');
-        local.language = application.objGlobal.getDefaultLanguage().iso;
-        local.currency = getCurrency().iso;
-
-        if (structKeyExists(arguments, "language")) {
-            local.language = arguments.language;
-        }
-        if (structKeyExists(arguments, "price") and arguments.price gt 0) {
-            local.price = arguments.price;
-        }
-        if (structKeyExists(arguments, "vat") and arguments.vat gt 0) {
-            local.vat = arguments.vat;
-        }
-        if (structKeyExists(arguments, "vat_type")) {
-            local.vat_type = arguments.vat_type;
-        }
-        if (structKeyExists(arguments, "isNet")) {
-            local.isNet = arguments.isNet;
-        }
-        if (structKeyExists(arguments, "currency")) {
-            local.currency = arguments.currency;
-        }
+    public struct function getPriceData(required numeric price) {
 
         local.priceData = structNew();
-        local.priceData['price'] = local.price;
-        local.priceData['vat'] = local.vat;
-        local.priceData['vat_type'] = local.vat_type;
-        local.priceData['isNet'] = local.isNet;
-        local.priceData['currency'] = local.currency;
+        local.priceData['price'] = arguments.price;
+        local.priceData['vat'] = variables.vat;
+        local.priceData['vat_type'] = variables.vat_type;
+        local.priceData['isNet'] = variables.isNet;
+        local.priceData['currency'] = variables.currency;
 
         <!--- Calc prices --->
         local.objInvoice = new com.invoices();
 
-        local.vat_amount = local.objInvoice.calcVat(local.price, local.isNet, local.vat);
-        local.subtotal_price = local.price;
+        local.vat_amount = local.objInvoice.calcVat(arguments.price, variables.isNet, variables.vat);
+        local.subtotal_price = arguments.price;
 
         <!--- Add up subtotal and vat --->
-        if (local.isNet eq 1) {
+        if (variables.isNet eq 1) {
             local.total_price = local.subtotal_price + local.vat_amount;
         } else {
             local.total_price = local.subtotal_price;
         }
 
         <!--- Define vat text and sum --->
-        if (local.isNet eq 1) {
-            if (local.vat_type eq 1) {
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', local.language) & ' ' & local.vat & '%: ' & local.currency & ' ' & lsNumberFormat(local.vat_amount, '__,___.__');
+        if (variables.isNet eq 1) {
+            if (variables.vat_type eq 1) {
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', variables.language) & ' ' & variables.vat & '%: ' & variables.currency & ' ' & lsNumberFormat(local.vat_amount, '__,___.__');
             } else if (local.vat_type eq 3) {
                 local.total_price = local.subtotal_price;
                 local.priceData['vat_text']  = "";
             } else {
                 local.total_price = local.subtotal_price;
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtTotalExcl', local.language);
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtTotalExcl', variables.language);
             }
         } else {
-            if (local.vat_type eq 1) {
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtVatIncluded', local.language) & ' ' & local.vat & '%' & ': ' & local.currency & ' ' & lsNumberFormat(local.vat_amount, '__,___.__');
-            } else if (local.vat_type eq 3) {
+            if (variables.vat_type eq 1) {
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtVatIncluded', variables.language) & ' ' & variables.vat & '%' & ': ' & variables.currency & ' ' & lsNumberFormat(local.vat_amount, '__,___.__');
+            } else if (variables.vat_type eq 3) {
                 local.total_price = local.subtotal_price;
                 local.priceData['vat_text']  = "";
             } else {
                 local.total_price = local.subtotal_price;
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtTotalExcl', local.language);
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtTotalExcl', variables.language);
             }
         }
 
         <!--- Round total according customers setting --->
-        local.total_price = objInvoice.roundAmount(local.total_price, application.objGlobal.getSetting(0, 'settingRoundFactor'));
+        local.total_price = objInvoice.roundAmount(local.total_price, application.objGlobal.getSetting('settingRoundFactor'));
 
         local.priceData['priceAfterVAT'] = local.total_price;
 

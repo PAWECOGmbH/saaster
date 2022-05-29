@@ -4,7 +4,7 @@ component displayname="invoices" output="false" {
     private numeric function createInvoiceNumber(required numeric customerID) {
 
         <!--- Check start number --->
-        local.startNumber = application.objGlobal.getSetting(arguments.customerID, 'settingInvoiceNumberStart');
+        local.startNumber = application.objGlobal.getSetting('settingInvoiceNumberStart');
         local.nextNumber = local.startNumber;
 
         if (!isNumeric(trim(local.startNumber))) {
@@ -50,7 +50,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
         } else {
-            local.prefix = application.objGlobal.getSetting(local.customerID, 'settingInvoicePrefix');
+            local.prefix = application.objGlobal.getSetting('settingInvoicePrefix');
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
@@ -75,7 +75,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = application.objGlobal.getSetting(local.customerID, 'settingInvoiceNet');
+            local.isNet = application.objGlobal.getSetting('settingInvoiceNet');
         }
         if (structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0) {
             local.paymentStatusID = invoiceData.paymentStatusID;
@@ -85,7 +85,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = application.objGlobal.getSetting(local.customerID, 'settingStandardVatType');
+            local.vatType = application.objGlobal.getSetting('settingStandardVatType');
         }
 
         <!--- Total text --->
@@ -184,12 +184,12 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = application.objGlobal.getSetting(local.customerID, 'settingStandardNet');
+            local.isNet = application.objGlobal.getSetting('settingStandardNet');
         }
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = application.objGlobal.getSetting(local.customerID, 'settingStandardVatType');
+            local.vatType = application.objGlobal.getSetting('settingStandardVatType');
         }
 
         <!--- Total text --->
@@ -746,8 +746,8 @@ component displayname="invoices" output="false" {
 
         }
 
-        <!--- Round subtotal according customers setting --->
-        local.subtotal_price = roundAmount(local.subtotal_price, application.objGlobal.getSetting(qInvoicePositions.intCustomerID, 'settingRoundFactor'));
+        <!--- Round subtotal according to the setting --->
+        local.subtotal_price = roundAmount(local.subtotal_price, application.objGlobal.getSetting('settingRoundFactor'));
 
         <!--- Add up subtotal and vat --->
         if (qInvoicePositions.blnIsNet eq 1) {
@@ -756,8 +756,8 @@ component displayname="invoices" output="false" {
             local.total_price = local.subtotal_price;
         }
 
-        <!--- Round total according customers setting --->
-        local.total_price = roundAmount(local.total_price, application.objGlobal.getSetting(qInvoicePositions.intCustomerID, 'settingRoundFactor'));
+        <!--- Round total according to the setting --->
+        local.total_price = roundAmount(local.total_price, application.objGlobal.getSetting('settingRoundFactor'));
 
         <!--- Define total text --->
         if (qInvoicePositions.intVatType eq 1) {
