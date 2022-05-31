@@ -113,8 +113,8 @@
                                                         </form>
                                                     </div>
                                                 </div>
-                                                #getModal.init('plan_features', 'strFeatureName', qPlanFeatures.intPlanFeatureID, 100).openModal('featurename', cgi.path_info, 'Translate feature')#
-                                                #getModal.init('plan_features', 'strDescription', qPlanFeatures.intPlanFeatureID).openModal('featuredesc', cgi.path_info, 'Translate description')#
+                                                #getModal.args('plan_features', 'strFeatureName', qPlanFeatures.intPlanFeatureID, 100).openModal('featurename', cgi.path_info, 'Translate feature')#
+                                                #getModal.args('plan_features', 'strDescription', qPlanFeatures.intPlanFeatureID).openModal('featuredesc', cgi.path_info, 'Translate description')#
                                                 <cfif qPlanFeatures.recordCount gt 1>
                                                     <script>
                                                         // Save new prio

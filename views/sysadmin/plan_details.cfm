@@ -121,8 +121,8 @@
         <button type="submit" id="submit_button" class="btn btn-primary">Save details</button>
     </div>
 </form>
-#getModal.init('plans', 'strPlanName', qPlan.intPlanID, 100).openModal('plan_name', cgi.path_info, 'Translate plan name')#
-#getModal.init('plans', 'strShortDescription', qPlan.intPlanID).openModal('short_desc', cgi.path_info, 'Translate short description')#
-#getModal.init('plans', 'strButtonName', qPlan.intPlanID, 50).openModal('button_name', cgi.path_info, 'Translate button name')#
-#getModal.init('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 1)#
+#getModal.args('plans', 'strPlanName', qPlan.intPlanID, 100).openModal('plan_name', cgi.path_info, 'Translate plan name')#
+#getModal.args('plans', 'strShortDescription', qPlan.intPlanID).openModal('short_desc', cgi.path_info, 'Translate short description')#
+#getModal.args('plans', 'strButtonName', qPlan.intPlanID, 50).openModal('button_name', cgi.path_info, 'Translate button name')#
+#getModal.args('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 1)#
 </cfoutput>
