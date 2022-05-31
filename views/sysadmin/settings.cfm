@@ -95,8 +95,8 @@
                                                     <td class="text-left"><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon h4" style="font-size: 20px;"></td>
                                                 </tr>
                                             </form>
-                                            #getModal.init('custom_settings', 'strDefaultValue', qCustomSettings.intCustomSettingID, 255).openModal('cust_value', cgi.path_info, 'Translate default value')#
-                                            #getModal.init('custom_settings', 'strDescription', qCustomSettings.intCustomSettingID, 500).openModal('cust_desc', cgi.path_info, 'Translate description')#
+                                            #getModal.args('custom_settings', 'strDefaultValue', qCustomSettings.intCustomSettingID, 255).openModal('cust_value', cgi.path_info, 'Translate default value')#
+                                            #getModal.args('custom_settings', 'strDescription', qCustomSettings.intCustomSettingID, 500).openModal('cust_desc', cgi.path_info, 'Translate description')#
                                         </cfoutput>
                                     </tbody>
                                 </table>
@@ -196,8 +196,8 @@
                                                 <td class="text-left"><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon h4" style="font-size: 20px;"></td>
                                             </tr>
                                         </form>
-                                        #getModal.init('custom_settings', 'strDefaultValue', qCustomSettings.intCustomSettingID, 255).openModal('cust_value', cgi.path_info, 'Translate default value')#
-                                        #getModal.init('custom_settings', 'strDescription', qCustomSettings.intCustomSettingID, 500).openModal('cust_desc', cgi.path_info, 'Translate description')#
+                                        #getModal.args('custom_settings', 'strDefaultValue', qCustomSettings.intCustomSettingID, 255).openModal('cust_value', cgi.path_info, 'Translate default value')#
+                                        #getModal.args('custom_settings', 'strDescription', qCustomSettings.intCustomSettingID, 500).openModal('cust_desc', cgi.path_info, 'Translate description')#
                                     </cfoutput>
                                 </tbody>
                             </table>

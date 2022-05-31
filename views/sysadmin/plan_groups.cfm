@@ -127,7 +127,7 @@
                                                         </form>
                                                     </div>
                                                 </div>
-                                                #getModal.init('plan_groups', 'strGroupName', qPlanGroups.intPlanGroupID, 100).openModal('trans_plangroup', cgi.path_info, 'Translate plan group')#
+                                                #getModal.args('plan_groups', 'strGroupName', qPlanGroups.intPlanGroupID, 100).openModal('trans_plangroup', cgi.path_info, 'Translate plan group')#
                                                 <cfif qPlanGroups.recordCount gt 1>
                                                     <script>
                                                         // Save new prio

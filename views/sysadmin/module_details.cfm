@@ -81,7 +81,7 @@
         <button id="submit_button" type="submit" class="btn btn-primary">Save module</button>
     </div>
 </form>
-#getModal.init('modules', 'strModuleName', qModule.intModuleID).openModal('module_name', cgi.path_info, 'Translate description')#
-#getModal.init('modules', 'strShortDescription', qModule.intModuleID).openModal('short_desc', cgi.path_info, 'Translate description')#
-#getModal.init('modules', 'strDescription', qModule.intModuleID).openModal('desc', cgi.path_info, 'Translate description', 1)#
+#getModal.args('modules', 'strModuleName', qModule.intModuleID).openModal('module_name', cgi.path_info, 'Translate description')#
+#getModal.args('modules', 'strShortDescription', qModule.intModuleID).openModal('short_desc', cgi.path_info, 'Translate description')#
+#getModal.args('modules', 'strDescription', qModule.intModuleID).openModal('desc', cgi.path_info, 'Translate description', 1)#
 </cfoutput>
