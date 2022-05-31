@@ -1,6 +1,27 @@
 <cfscript>
+    param name="session.invoice_start" default=1 type="numeric";
+
+    // Check if url "start" exists
+    if (structKeyExists(url, "start") and not isNumeric(url.start)) {
+        abort;
+    }
+
+    // Pagination
+    getEntries = 10;
+    if( structKeyExists(url, 'start')){
+        session.invoice_start = url.start;
+    }
+    next = session.invoice_start+getEntries;
+    prev = session.invoice_start-getEntries;
+    session.invoice_sql_start = session.invoice_start-1;
+
+    if (session.invoice_sql_start eq 0){
+        session.invoice_sql_start = 1;
+    }
+
     objInvoice = new com.invoices();
-    qInvoices = objInvoice.getInvoices(session.customer_id);
+    qTotalInvoices = objInvoice.getInvoices(session.customer_id);
+    qInvoices = objInvoice.getInvoices(session.customer_id,session.invoice_sql_start,getEntries);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -66,6 +87,20 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="pt-4 card-footer d-flex align-items-center">
+                <ul class="pagination m-0 ms-auto">
+                    <li class="page-item <cfif session.invoice_start lt getEntries>disabled</cfif>">
+                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#prev#" tabindex="-1" aria-disabled="true">
+                            <i class="fas fa-angle-left"></i> prev
+                        </a>
+                    </li>
+                    <li class="ms-3 page-item <cfif qTotalInvoices.recordcount lt next>disabled</cfif>">
+                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#next#">
+                            next <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </cfoutput>
 

@@ -706,7 +706,7 @@ component displayname="invoices" output="false" {
 
         local.subtotal_price = 0;
         local.vat_total = 0;
-
+        
         if (qInvoicePositions.recordcount and len(trim(qInvoicePositions.decTotalPrice))) {
 
             <!--- Loop over all positions --->
@@ -823,10 +823,37 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Get customers invoices --->
-    public query function getInvoices(required numeric customerID) {
+    public query function getInvoices(required numeric customerID, numeric start, numeric amount) {
 
-        if (arguments.customerID gt 0) {
+        if (arguments.customerID gt 0 and arguments.start gt 0 and arguments.amount) {
 
+            qInvoice = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT  invoices.intInvoiceID as invoiceID,
+                            CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                            invoices.strInvoiceTitle as invoiceTitle,
+                            DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
+                            DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
+                            invoices.strCurrency as invoiceCurrency,
+                            invoices.decTotalPrice as invoiceTotal,
+                            invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
+                            invoice_status.strColor as invoiceStatusColor
+                    FROM invoices
+                    INNER JOIN invoice_status ON 1=1
+                    AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                    AND invoices.intPaymentStatusID > 1
+                    AND invoices.intCustomerID = :customerID
+                    LIMIT #arguments.start#, #arguments.amount#
+                "
+            )
+
+            return qInvoice;
+
+        }else {
             qInvoice = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -852,7 +879,6 @@ component displayname="invoices" output="false" {
             )
 
             return qInvoice;
-
         }
 
     }
