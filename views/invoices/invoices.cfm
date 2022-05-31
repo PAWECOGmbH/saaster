@@ -7,7 +7,7 @@
     }
 
     // Pagination
-    getEntries = 10;
+    getEntries = 20;
     if( structKeyExists(url, 'start')){
         session.invoice_start = url.start;
     }
