@@ -25,7 +25,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objCustomer = new com.customer();
 
         <!--- Save all choosable languages into a list --->
-        qLanguages = queryExecute(
+        local.qLanguages = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT CONCAT(strLanguageISO, '|', strLanguage) as lang
@@ -34,8 +34,8 @@ component displayname="Application" output="false" hint="Handle the application.
                 ORDER BY intPrio
             "
         )
-        if (qLanguages.recordCount) {
-            application.allLanguages = ValueList(qLanguages.lang);
+        if (local.qLanguages.recordCount) {
+            application.allLanguages = ValueList(local.qLanguages.lang);
         }
 
         <!--- Load language struct and save it into the application scope --->

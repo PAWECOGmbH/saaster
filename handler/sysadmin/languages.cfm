@@ -263,6 +263,18 @@ if (structKeyExists(url, "delete_language")) {
 
         }
 
+        // If there is only one language, make sure that it's choosable
+        getLngCount = application.objGlobal.getAllLanguages();
+        if (getLngCount.recordCount eq 1) {
+            queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    UPDATE languages
+                    SET blnChooseable = 1
+                "
+            )
+        }
+
         location url="#application.mainURL#/sysadmin/languages?reinit=1" addtoken="false";
 
 

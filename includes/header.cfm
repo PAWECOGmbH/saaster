@@ -23,7 +23,7 @@
             <cfinclude template="tenant_changer.cfm">
 
             <!--- Language changer --->
-            <cfif listLen(application.allLanguages) gt 1>
+            <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
                 <cfinclude template="lng.cfm">
             </cfif>
 
