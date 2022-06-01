@@ -92,47 +92,28 @@ component displayname="globalFunctions" {
     public struct function initLanguages() {
 
         // Get all languages in the database
-        local.qLanguages = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT strLanguageISO, strLanguageEN
-                FROM languages
-            "
-        )
+        local.qLanguages = getAllLanguages();
 
         loop query="local.qLanguages" {
 
             local.langIso = local.qLanguages.strLanguageISO
             local.language[local.langIso] = structNew();
 
-            try {
+            // Get translations of the language
+            local.qTranslations = queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT strVariable, strString#local.langIso#
+                    FROM system_translations
+                "
+            )
 
-                // Get translations of the language
-                local.qTranslations = queryExecute(
-                    options = {datasource = application.datasource},
-                    sql = "
-                        SELECT strVariable, strStringEN, strString#local.langIso#
-                        FROM system_translations
-                    "
-                )
-
-                local.translations = structNew();
-                loop query="local.qTranslations" {
-                    if (len(trim(qTranslations['strString' & local.langIso]))) {
-                        local.translations[qTranslations.strVariable] = qTranslations['strString' & local.langIso];
-                    } else {
-                       local.translations[qTranslations.strVariable] = qTranslations['strStringEN'];
-                    }
-                }
-
-                local.language[local.langIso] = local.translations;
-
-            } catch (any) {
-
-                local.language[local.langIso] = "";
-
+            local.translations = structNew();
+            loop query="local.qTranslations" {
+                local.translations[qTranslations.strVariable] = qTranslations['strString' & local.langIso];
             }
 
+            local.language[local.langIso] = local.translations;
 
         }
 

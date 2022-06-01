@@ -54,7 +54,11 @@
                                     <tbody id="dragndrop_body">
                                     <cfloop query="qLanguages">
                                         <tr id="sort_#qLanguages.intLanguageID#">
-                                            <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                            <cfif qLanguages.recordCount gt 1>
+                                                <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                            <cfelse>
+                                                <td class="text-center"></td>
+                                            </cfif>
                                             <td class="text-center">#qLanguages.intPrio#</td>
                                             <td>#qLanguages.strLanguageEN#</td>
                                             <td>#qLanguages.strLanguage#</td>
@@ -94,7 +98,13 @@
                                                                 <div class="col-lg-4">
                                                                     <label class="form-label">&nbsp;</label>
                                                                     <label class="form-check form-switch pt-2">
-                                                                        <input class="form-check-input" type="checkbox" name="chooseable" <cfif qLanguages.blnChooseable>checked</cfif>>
+                                                                        <cfif qLanguages.recordCount eq 1>
+                                                                            <input class="form-check-input" type="checkbox" name="chooseable" checked disabled>
+                                                                            <input type="hidden" name="chooseable" value="1">
+                                                                        <cfelse>
+                                                                            <input class="form-check-input" type="checkbox" name="chooseable" <cfif qLanguages.blnChooseable>checked</cfif>>
+                                                                        </cfif>
+
                                                                         <span class="form-check-label">Chooseable</span>
                                                                     </label>
                                                                 </div>
@@ -108,6 +118,7 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        <cfif qLanguages.recordCount gt 1>
                                         <script>
 
                                             // Save new prio
@@ -147,6 +158,7 @@
                                                 );
                                             }
                                         </script>
+                                        </cfif>
                                     </cfloop>
                                     </tbody>
                                     <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
