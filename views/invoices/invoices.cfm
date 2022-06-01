@@ -1,27 +1,30 @@
 <cfscript>
     param name="session.invoice_start" default=1 type="numeric";
+    local.getEntries = 20;
 
-    // Check if url "start" exists
-    if (structKeyExists(url, "start") and not isNumeric(url.start)) {
-        abort;
+    // Check if url "start" exists and if it matches the requirments
+    if (structKeyExists(url, "start")) {
+        if(not isNumeric(url.start))
+            location url="#application.mainurl#/account-settings/invoices?start=1" addtoken="false";
+
+        if (sgn(url.start) eq "-1")
+            location url="#application.mainurl#/account-settings/invoices?start=1" addtoken="false";
+            
+        session.invoice_start = url.start;
     }
 
     // Pagination
-    getEntries = 20;
-    if( structKeyExists(url, 'start')){
-        session.invoice_start = url.start;
-    }
-    next = session.invoice_start+getEntries;
-    prev = session.invoice_start-getEntries;
+    local.next = session.invoice_start+getEntries;
+    local.prev = session.invoice_start-getEntries;
     session.invoice_sql_start = session.invoice_start-1;
+    
+    local.objInvoice = new com.invoices();
+    local.qInvoices = objInvoice.getInvoices(session.customer_id,session.invoice_sql_start,local.getEntries);
 
-    if (session.invoice_sql_start eq 0){
-        session.invoice_sql_start = 1;
-    }
+    //Redirect if value larger then total invoices
+    if (structKeyExists(url, "start") and url.start GT local.qInvoices.totalCount)
+        location url="#application.mainurl#/account-settings/invoices?start=1" addtoken="false";
 
-    objInvoice = new com.invoices();
-    qTotalInvoices = objInvoice.getInvoices(session.customer_id);
-    qInvoices = objInvoice.getInvoices(session.customer_id,session.invoice_sql_start,getEntries);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -60,22 +63,23 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <cfloop query="qInvoices">
+                                <cfloop index="i" array="#local.qInvoices.arrayInvoices#">
+                                    <!--- <cfdump  var="#i.invoiceCurrency#"> --->
                                     <tr>
-                                        <td>#qInvoices.invoiceNumber#</td>
-                                        <td>#lsDateFormat(qInvoices.invoiceDate)#</td>
-                                        <td>#lsDateFormat(qInvoices.invoiceDueDate)#</td>
-                                        <td>#qInvoices.invoiceTitle#</td>
-                                        <td class="text-end">#qInvoices.invoiceCurrency# #lsNumberFormat(qInvoices.invoiceTotal, '__,___.__')#</td>
-                                        <td class="text-center">#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.invoiceStatusColor, qInvoices.invoiceStatusVariable)#</td>
+                                        <td>#i.invoiceNumber#</td>
+                                        <td>#lsDateFormat(i.invoiceDate)#</td>
+                                        <td>#lsDateFormat(i.invoiceDueDate)#</td>
+                                        <td>#i.invoiceTitle#</td>
+                                        <td class="text-end">#i.invoiceCurrency# #lsNumberFormat(i.invoiceTotal, '__,___.__')#</td>
+                                        <td class="text-center">#objInvoice.getInvoiceStatusBadge(session.lng, i.invoiceStatusColor, i.invoiceStatusVariable)#</td>
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#qInvoices.invoiceID#">#getTrans('txtViewInvoice')#</a>
-                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#qInvoices.invoiceID#">#getTrans('txtPrintInvoice')#</a>
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/#i.invoiceID#">#getTrans('txtViewInvoice')#</a>
+                                                    <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#i.invoiceID#">#getTrans('txtPrintInvoice')#</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -91,12 +95,12 @@
             <div class="pt-4 card-footer d-flex align-items-center">
                 <ul class="pagination m-0 ms-auto">
                     <li class="page-item <cfif session.invoice_start lt getEntries>disabled</cfif>">
-                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#prev#" tabindex="-1" aria-disabled="true">
+                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#local.prev#" tabindex="-1" aria-disabled="true">
                             <i class="fas fa-angle-left"></i> prev
                         </a>
                     </li>
-                    <li class="ms-3 page-item <cfif qTotalInvoices.recordcount lt next>disabled</cfif>">
-                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#next#">
+                    <li class="ms-3 page-item <cfif local.qInvoices.totalCount lt next>disabled</cfif>">
+                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?start=#local.next#">
                             next <i class="fas fa-angle-right"></i>
                         </a>
                     </li>

@@ -823,64 +823,78 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Get customers invoices --->
-    public query function getInvoices(required numeric customerID, numeric start, numeric amount) {
+    public struct function getInvoices(required numeric customerID, numeric start, numeric amount) {
 
-        if (arguments.customerID gt 0 and arguments.start gt 0 and arguments.amount) {
-
-            qInvoice = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-                    SELECT  invoices.intInvoiceID as invoiceID,
-                            CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                            invoices.strInvoiceTitle as invoiceTitle,
-                            DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
-                            DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
-                            invoices.strCurrency as invoiceCurrency,
-                            invoices.decTotalPrice as invoiceTotal,
-                            invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
-                            invoice_status.strColor as invoiceStatusColor
-                    FROM invoices
-                    INNER JOIN invoice_status ON 1=1
-                    AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                    AND invoices.intPaymentStatusID > 1
-                    AND invoices.intCustomerID = :customerID
-                    LIMIT #arguments.start#, #arguments.amount#
-                "
-            )
-
-            return qInvoice;
-
-        }else {
-            qInvoice = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-                    SELECT  invoices.intInvoiceID as invoiceID,
-                            CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                            invoices.strInvoiceTitle as invoiceTitle,
-                            DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
-                            DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
-                            invoices.strCurrency as invoiceCurrency,
-                            invoices.decTotalPrice as invoiceTotal,
-                            invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
-                            invoice_status.strColor as invoiceStatusColor
-                    FROM invoices
-                    INNER JOIN invoice_status ON 1=1
-                    AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                    AND invoices.intPaymentStatusID > 1
-                    AND invoices.intCustomerID = :customerID
-
-                "
-            )
-
-            return qInvoice;
+        local.queryLimit;
+        
+        if (structKeyExists(arguments, "start") and structKeyExists(arguments, "amount")){
+            local.queryLimit = "LIMIT #arguments.start#, #arguments.amount#"
         }
 
+        local.qTotalCount = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT COUNT(intCustomerID) as totalCount
+                FROM invoices
+                WHERE intCustomerID = :customerID
+                AND intPaymentStatusID > 1
+            "
+        )
+
+        local.structInvoices = structNew();
+        local.structInvoices['totalCount'] = qTotalCount.totalCount;
+        local.structInvoices['arrayInvoices'] = "";
+
+        local.qInvoice = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT  invoices.intInvoiceID as invoiceID,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle as invoiceTitle,
+                        DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
+                        DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
+                        invoices.strCurrency as invoiceCurrency,
+                        invoices.decTotalPrice as invoiceTotal,
+                        invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
+                        invoice_status.strColor as invoiceStatusColor
+                FROM invoices
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                AND invoices.intPaymentStatusID > 1
+                AND invoices.intCustomerID = :customerID
+                #local.queryLimit#
+                "
+        )
+
+        local.arrayInvoices = arrayNew(1);
+
+        cfloop(query="local.qInvoice") {
+
+            local.invoiceStruct = structNew();
+
+            local.invoiceStruct['invoiceID'] = local.qInvoice.invoiceID;
+            local.invoiceStruct['invoiceNumber'] = local.qInvoice.invoiceNumber;
+            local.invoiceStruct['invoiceTitle'] = local.qInvoice.invoiceTitle;
+            local.invoiceStruct['invoiceDate'] = local.qInvoice.invoiceDate;
+            local.invoiceStruct['invoiceDueDate'] = local.qInvoice.invoiceDueDate;
+            local.invoiceStruct['invoiceCurrency'] = local.qInvoice.invoiceCurrency;
+            local.invoiceStruct['invoiceTotal'] = local.qInvoice.invoiceTotal;
+            local.invoiceStruct['invoiceStatusVariable'] = local.qInvoice.invoiceStatusVariable;
+            local.invoiceStruct['invoiceStatusColor'] = local.qInvoice.invoiceStatusColor;
+
+            arrayAppend(local.arrayInvoices, local.invoiceStruct);
+
+        }
+
+        local.structInvoices['arrayInvoices'] = local.arrayInvoices;
+
+        return local.structInvoices;
     }
 
     <!--- Get invoice data --->
