@@ -861,15 +861,21 @@ component displayname="invoices" output="false" {
                         DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
-                        invoice_status.strInvoiceStatusVariable as invoiceStatusVariable,
-                        invoice_status.strColor as invoiceStatusColor
+                        (
+                            SELECT strColor 
+                            FROM invoice_status
+                            WHERE intPaymentStatusID = invoices.intPaymentStatusID
+                        ) as invoiceStatusColor,
+                        (
+                            SELECT strInvoiceStatusVariable 
+                            FROM invoice_status
+                            WHERE intPaymentStatusID = invoices.intPaymentStatusID
+                        ) as invoiceStatusVariable
                 FROM invoices
-                INNER JOIN invoice_status ON 1=1
-                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                AND invoices.intPaymentStatusID > 1
+                WHERE invoices.intPaymentStatusID > 1
                 AND invoices.intCustomerID = :customerID
                 #local.queryLimit#
-                "
+            "
         )
 
         local.arrayInvoices = arrayNew(1);
