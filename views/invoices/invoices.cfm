@@ -5,11 +5,13 @@
 
     // Check if url "start" exists and if it matches the requirments
     if (structKeyExists(url, "page")) {
-        if(not isNumeric(url.page))
+        if(not isNumeric(url.page)){
             location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+        }
 
-        if (sgn(url.page) eq "-1")
+        if (sgn(url.page) eq "-1"){
             location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+        }
             
         session.invoice_page = url.page;
     }
@@ -29,8 +31,9 @@
     local.qInvoices = objInvoice.getInvoices(session.customer_id,local.invoice_start,local.getEntries);
 
     //Redirect if value larger then total invoices
-    if (structKeyExists(url, "page") and url.page GT local.pages)
+    if (structKeyExists(url, "page") and url.page GT local.pages){
         location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+    }
 
 </cfscript>
 
