@@ -322,6 +322,9 @@ if (structKeyExists(form, 'login_btn')) {
             checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
+            <!--- Save custom settings struct into a session --->
+            session.customSettings = application.objGlobal.getCustomSettings(session.customer_id);
+
             location url="#objUserLogin.redirect#" addtoken="false";
 
 

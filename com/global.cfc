@@ -175,12 +175,43 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Get setting (system settings as well as customer settings) --->
+    <!--- Get the custom setting variables --->
+    public struct function getCustomSettings(required numeric customerID) {
+
+        local.settingStruct = structNew();
+
+        local.qSettings = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT customer_custom_settings.strSettingValue, custom_settings.strSettingVariable
+                FROM customer_custom_settings
+                INNER JOIN custom_settings ON customer_custom_settings.intCustomSettingID = custom_settings.intCustomSettingID
+                WHERE customer_custom_settings.intCustomerID = :customerID
+            "
+        )
+
+        loop query="local.qSettings" {
+            local.settingStruct[local.qSettings.strSettingVariable] = local.qSettings.strSettingValue;
+        }
+
+        return local.settingStruct;
+
+    }
+
+
+    <!--- Get setting (system settings as well as custom settings) --->
     public string function getSetting(required string settingVariable, numeric customerID) {
 
-        if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
+        if (structKeyExists(arguments, "customerID") and isNumeric(arguments.customerID)) {
 
-            // Todo: get the customers setting
+            if (structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable)) {
+                local.valueString = structFindKey(session.customSettings, arguments.settingVariable, "one");
+            } else {
+                local.valueString = "";
+            }
 
         } else {
 
@@ -190,10 +221,10 @@ component displayname="globalFunctions" {
                 local.valueString = "";
             }
 
-            if (isArray(local.valueString) and arrayLen(local.valueString) gte 1) {
-                local.valueString = local.valueString[1].value;
-            }
+        }
 
+        if (isArray(local.valueString) and arrayLen(local.valueString) gte 1) {
+            local.valueString = local.valueString[1].value;
         }
 
         return local.valueString;
