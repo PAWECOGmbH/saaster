@@ -51,10 +51,25 @@ if (structKeyExists(form, 'register_btn')) {
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
         if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
+            
+            MailTitel = "#getTrans('subjectConfirmEmail')#";
+            MailArt = "html";
+            cfsavecontent (variable = "MailInhalt") {
+
+                echo("#getTrans('titHello')# #form.first_name# #form.name#<br><br>
+                            #getTrans('txtPleaseConfirmEmail')#<br>
+                            <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a><br>
+                            (#getTrans('txtRegisterLinkNotWorking')#)
+                            <br><br>
+                            #getTrans('txtRegards')#<br>
+                            #getTrans('txtYourTeam')#<br>
+                            #application.appOwner#");
+            }
 
             <!--- Send double opt-in mail --->
             mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
-                echo (
+                include "/includes/mail_design.cfm";
+                /* echo (
                     "
                     <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
                     <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -71,7 +86,7 @@ if (structKeyExists(form, 'register_btn')) {
                         </body>
                     </html>
                     "
-                )
+                ) */
             }
 
             structDelete(session, "first_name");
@@ -373,9 +388,24 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
         );
 
 
+        MailTitel = "#getTrans('titResetPassword')#";
+        MailArt = "html";
+        cfsavecontent (variable = "MailInhalt") {
+
+            echo("#getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
+                        #getTrans('txtResetPassword')#<br>
+                        <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formPassword2')#</a><br>
+                        (#getTrans('txtRegisterLinkNotWorking')#)
+                        <br><br>
+                        #getTrans('txtRegards')#<br>
+                        #getTrans('txtYourTeam')#<br>
+                        #application.appOwner#");
+        }
+
         <!--- Send email to reset the password --->
         mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
-            echo (
+            include "/includes/mail_design.cfm";
+            /* echo (
                 "
                 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
                 <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -392,7 +422,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                     </body>
                 </html>
                 "
-            )
+            ) */
         }
 
     }

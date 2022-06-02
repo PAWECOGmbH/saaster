@@ -518,9 +518,24 @@ component displayname="user" output="false" {
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
+                MailTitel = "#getTrans('txtInvitationFrom')# #qUser.fromName#";
+                MailArt = "html";
+                cfsavecontent (variable = "MailInhalt") {
+
+                    echo("#getTrans('titHello')# #qUser.toName#<br><br>
+                                #local.invitationMail#<br><br>
+                                <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formSignIn')#</a><br><br>
+                                (#getTrans('txtRegisterLinkNotWorking')#)
+                                <br><br>
+                                #getTrans('txtRegards')#<br>
+                                #getTrans('txtYourTeam')#<br>
+                                #application.appOwner#");
+                }
+
                 <!--- Send activation link --->
                 mail from="#application.fromEmail#" to="#qUser.toEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
-                    echo (
+                    include "/includes/mail_design.cfm";
+                    /* echo (
                         "
                         <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
                         <html xmlns='http://www.w3.org/1999/xhtml'>
@@ -537,7 +552,7 @@ component displayname="user" output="false" {
                             </body>
                         </html>
                         "
-                    )
+                    ) */
                 }
 
                 local.argsReturnValue['message'] = getTrans('msgUserGotInvitation');
