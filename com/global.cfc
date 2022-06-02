@@ -235,14 +235,15 @@ component displayname="globalFunctions" {
 
     //Get language from iso or id
     public struct function getAnyLanguage(any reqLng) {
-        local.Language = {};
 
-        try {
-            if(isNumeric(arguments.reqLng)){
-                qGetLanguage = queryExecute(
+        if (structKeyExists(arguments, "reqLng")) {
+
+            if ( isNumeric(arguments.reqLng) ) {
+
+                local.qGetLanguage = queryExecute(
                     options = {datasource = application.datasource},
                     params = {
-                        lngID: {type: "varchar", value: arguments.reqLng}
+                        lngID: {type: "numeric", value: arguments.reqLng}
                     },
                     sql = "
                         SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
@@ -250,8 +251,10 @@ component displayname="globalFunctions" {
                         WHERE intLanguageID = :lngID
                     "
                 )
-            }else {
-                qGetLanguage = queryExecute(
+
+            } else {
+
+                local.qGetLanguage = queryExecute(
                     options = {datasource = application.datasource},
                     params = {
                         lngIso: {type: "varchar", value: arguments.reqLng}
@@ -262,29 +265,33 @@ component displayname="globalFunctions" {
                         WHERE strLanguageISO = :lngIso
                     "
                 )
+
             }
 
             if (qGetLanguage.recordCount) {
-                local.Language['lngID'] = qGetLanguage.intLanguageID;
-                local.Language['iso'] = qGetLanguage.strLanguageISO;
-                local.Language['lngEN'] = qGetLanguage.strLanguageEN;
-                local.Language['language'] = qGetLanguage.strLanguage;
+
+                local.language['lngID'] = local.qGetLanguage.intLanguageID;
+                local.language['iso'] = local.qGetLanguage.strLanguageISO;
+                local.language['lngEN'] = local.qGetLanguage.strLanguageEN;
+                local.language['language'] = local.qGetLanguage.strLanguage;
+
+                return local.language;
+
             }
 
-            return local.Language;
-        }catch(any e){
-            local.Language['Error'] = "Couldn't find any matching language!";
-            return local.Language;
+
         }
 
-
+        return getDefaultLanguage();
 
     }
+
 
     <!--- Create a uuid without dash, all lowercase and two ids combined  --->
     public string function getUUID() {
         return lcase(replace(createUUID(), "-", "", "all")) & lcase(replace(createUUID(), "-", "", "all"));
     }
+
 
     <!--- Alerts in diffrent colors (returns a session) --->
     public string function getAlert(required string alertVariable, string alertType) {

@@ -88,7 +88,7 @@
                                                 <tr <cfif qPlanGroups.recordCount gt 1>id="sort_#qPlanGroups.intPlanGroupID#"</cfif>>
                                                     <td class="move text-center"><cfif qPlanGroups.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qPlanGroups.intPrio#</td>
-                                                    <td>#qPlanGroups.strGroupName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
+                                                    <td>#qPlanGroups.strGroupName# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
                                                     <td>#qPlanGroups.strCountryName#</td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##plangroup_#qPlanGroups.intPlanGroupID#">Edit</a></td>
                                                     <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_group=#qPlanGroups.intPlanGroupID#', 'Delete plan group', 'Caution: If you delete a plan group, all the associated plans will also be deleted. Do you really want to delete this group irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
