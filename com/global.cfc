@@ -822,14 +822,14 @@ component displayname="globalFunctions" {
     // Get all languages
     public query function getAllLanguages(string whereFilter) {
 
-        param name="attributes.whereFilter" default="";
+        param name="arguments.whereFilter" default="";
 
         local.qAllLanguages = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT *
                 FROM languages
-                #attributes.whereFilter#
+                #arguments.whereFilter#
                 ORDER BY intPrio
             "
         )

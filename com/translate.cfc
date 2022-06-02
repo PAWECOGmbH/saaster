@@ -73,6 +73,8 @@ component displayname="translate" accessors="true" {
 
         // Loop over existing languages exept the default language
         local.getLng = application.objGlobal.getAllLanguages('WHERE blnDefault = 0');
+
+
         loop query = local.getLng {
             if (arguments.itsEditor eq 1) {
                 local.itsEditor = "editor";
