@@ -21,7 +21,7 @@ if (structKeyExists(form, "new_setting")) {
     )
 
     getAlert('New setting saved!');
-    location url="#application.mainURL#/sysadmin/settings" addtoken="false";
+    location url="#application.mainURL#/sysadmin/settings?reinit=1" addtoken="false";
 
 }
 
@@ -74,7 +74,7 @@ if (structKeyExists(form, "edit_setting")) {
     }
 
 
-    location url="#application.mainURL#/sysadmin/settings" addtoken="false";
+    location url="#application.mainURL#/sysadmin/settings?reinit=1" addtoken="false";
 
 }
 
@@ -103,7 +103,7 @@ if (structKeyExists(form, "edit_sysadmin_settings")) {
     }
 
     getAlert('Settings saved!');
-    location url="#application.mainURL#/sysadmin/system-settings" addtoken="false";
+    location url="#application.mainURL#/sysadmin/system-settings?reinit=1" addtoken="false";
 
 }
 
