@@ -2,39 +2,25 @@
     param name="session.invoice_page" default=1 type="numeric";
     local.objInvoice = new com.invoices();
     local.getEntries = 20;
-
-    // Check if url "start" exists and if it matches the requirments
-    if (structKeyExists(url, "page")) {
-        if(not isNumeric(url.page)){
-            location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
-        }
-
-        if (sgn(url.page) eq "-1"){
-            location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
-        }
-            
-        session.invoice_page = url.page;
-    }
-    
-    local.qTotalInvoices = objInvoice.getInvoices(session.customer_id);
-
-    local.pages = ceiling(local.qTotalInvoices.totalCount / local.getEntries);
-
     local.invoice_start = 0;
 
-    if (session.invoice_page > 1){
+    local.qTotalInvoices = objInvoice.getInvoices(session.customer_id).totalCount;
+    local.pages = ceiling(local.qTotalInvoices / local.getEntries);
+
+    // Check if url "page" exists and if it matches the requirments
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+        session.invoice_page = url.page;
+    } else {
+        location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+    }
+
+    if (session.invoice_page gt 1){
         local.tPage = session.invoice_page - 1;
         local.valueToAdd = 20 * tPage;
         local.invoice_start = local.invoice_start + local.valueToAdd;
     }
 
     local.qInvoices = objInvoice.getInvoices(session.customer_id,local.invoice_start,local.getEntries);
-
-    //Redirect if value larger then total invoices
-    if (structKeyExists(url, "page") and url.page GT local.pages){
-        location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
-    }
-
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
