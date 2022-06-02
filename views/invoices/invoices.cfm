@@ -94,7 +94,6 @@
                                         </tr>
                                     </cfloop>
                                     </tbody>
-
                                 </table>
                             </div>
                         </div>
@@ -129,7 +128,7 @@
                 </cfif>
             <cfelse>
                 <div class="alert alert-primary" role="alert">
-                    No invoices!
+                    #getTrans('txtNoInvoices')#
                 </div>
             </cfif>
         </cfoutput>
