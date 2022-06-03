@@ -1,44 +1,45 @@
-
-<cfmailparam name="charset" value="utf-8">
-<cfmailparam name="MIME-Version" value="1.0">
-<cfmailparam name="Content-Type" value="text/html; charset=utf-8">
-
-<cfparam name="variables.MailTitel" default="MailTitel">
-<cfparam name="variables.MailInhalt" default="MailInhalt">
-<cfparam name="variables.MailArt" default="html">
-
-<!--- general --->
-<cfset MailMaxWidthContent = 660>
-<cfset FontFamily = "Arial, Helvetica, sans-serif">
-<cfset FontColorTitle = "464646">
-<cfset FontColorSubtitle = "464646">
-<cfset FontSizeTitle = 21>
-<cfset FontSizeSubtitle = 16>
-<cfset FontColorText = "464646">
-<cfset FontSizeText = 14>
-<cfset FontColorTextSmall = "b2b2b2">
-<cfset FontSizeTextSmall = 12>
-
-<!--- view in browser --->
-<cfset HiddenOnLocalhost = 0>
-<cfset FontColorViewInBrowser = "b2b2b2">
-<cfset FontSizeViewInBrowser = 12>
-
-<!--- header --->
-<cfset HeaderBGColor = "f4f4f4">
-<cfset HeaderFontColor = "464646">
-<cfset HeaderFontSize = 14>
-
-<!--- buttons --->
-<cfset ButtonBGColor = "feda00">
-<cfset ButtonFontColor = "016aac">
-<cfset ButtonFontSize = 14>
+<cfscript>
+  cfmailparam( name="charset", value="utf-8" );
+  cfmailparam( name="MIME-Version", value=1.0 );
+  cfmailparam( name="Content-Type", value="text/html; charset=utf-8" );
+ 
+  param name="variables.MailTitle" default="MailTitle";
+  param name="variables.MailContent" default="MailContent";
+  param name="variables.MailType" default="html";
+  param name="variables.MailCustomID" default=0;
+  
+  //  general 
+  MailMaxWidthContent = 660;
+  FontFamily = "Arial, Helvetica, sans-serif";
+  FontColorTitle = "464646";
+  FontColorSubtitle = "464646";
+  FontSizeTitle = 21;
+  FontSizeSubtitle = 16;
+  FontColorText = "464646";
+  FontSizeText = 14;
+  FontColorTextSmall = "b2b2b2";
+  FontSizeTextSmall = 12;
+  //  view in browser 
+  HiddenOnLocalhost = 0;
+  FontColorViewInBrowser = "b2b2b2";
+  FontSizeViewInBrowser = 12;
+  //  header 
+  HeaderBGColor = "f4f4f4";
+  HeaderFontColor = "464646";
+  HeaderFontSize = 14;
+  //  buttons 
+  ButtonBGColor = "feda00";
+  ButtonFontColor = "016aac";
+  ButtonFontSize = 14;
+  getTrans = application.objGlobal.getTrans;
+  MailCustomer= application.objCustomer.getCustomerData(variables.MailCustomID);
+</cfscript>
 
 <!DOCTYPE html>
-<html lang="de">
+<html>
 
 <head>
-  <title><cfoutput>#variables.MailTitel#</cfoutput></title>
+  <title><cfoutput>#variables.MailTitle#</cfoutput></title>
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
@@ -158,7 +159,15 @@
                 <td colspan="3" style="padding: 20px 10px 30px 10px;" class="logo">
                   <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
-                      <td bgcolor="###HeaderBGColor#" width="100%" align="left"><a target="_blank"><img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0"></a></td>
+                      <td bgcolor="###HeaderBGColor#" width="100%" align="left">
+                        <a target="_blank">
+                          <cfif len(trim(MailCustomer.strLogo))>
+                            <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#MailCustomer.strLogo#" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0">
+                          <cfelse>
+                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0">
+                          </cfif>
+                        </a>
+                      </td>
                     </tr>
                   </table>
                 </td>
@@ -169,7 +178,7 @@
                   <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
                       <!--- <td style="padding: 0 0 0 20px; background-color: ##949399;"></td> --->
-                      <td style="padding: 10px 20px 10px 20px; background-color: ##337ab7; width: 100%; font-family: #FontFamily#; color: ##ffffff;">#variables.MailTitel#</td>
+                      <td style="padding: 10px 20px 10px 20px; background-color: ##337ab7; width: 100%; font-family: #FontFamily#; color: ##ffffff;">#variables.MailTitle#</td>
                     </tr>
                   </table>
                 </td>
@@ -177,14 +186,14 @@
               </tr>
               <tr>
                 <td width="9"></td>
-                <cfif variables.MailArt eq "html">
+                <cfif variables.MailType eq "html">
                   
                   <td align="center" valign="top" bgcolor="##FFFFFF" style="padding: 20px 20px 30px 20px; ">
                     
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" class="wrapper" style="font-size: #HeaderFontSize#px; font-family: #FontFamily#; color: ###HeaderFontColor#;">
                       <tr>
                         <td style="padding: 0 0 20px 0; font-size: #HeaderFontSize#px; font-family: #FontFamily#; color: ###HeaderFontColor#; text-decoration: none;">
-                          #variables.MailInhalt#
+                          #variables.MailContent#
                         </td>
                       </tr>							
                     </table>
@@ -201,8 +210,8 @@
     </tr>
   </table>
 
-  <cfif variables.MailArt neq "html">
-    <cfoutput>#variables.MailInhalt#</cfoutput>
+  <cfif variables.MailType neq "html">
+    <cfoutput>#variables.MailContent#</cfoutput>
   </cfif>
 
   <!-- TWO COLUMNS: FOOTER -->
@@ -226,23 +235,27 @@
                   <table width="100%" cellspacing="0" cellpadding="0" border="0">
                     <tr>
                       <td valign="top" style="padding: 20px;" class="mobile-wrapper">
+
                         <table cellpadding="0" cellspacing="0" border="0" align="left" width="47%" class="responsive-table">
                           <tr>
-                            <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 0px; font-family: #FontFamily#; color: ##ffffff; border:none;">
-                              <span style="font-size: 21px;">KONTAKT</span><br><br>									
-                              Muster Firma<br>
-                              Muster Strasse<br>
-                              Muster PLZ/Ort<br>
-                              Muster E-Mail<br>
+                            <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 22px; font-family: #FontFamily#; color: ##ffffff; border:none;">
+                              <span style="font-size: 21px;">#getTrans('txtContact')#</span><br><br>									
+                              #MailCustomer.strCompanyName#<br>
+                              #MailCustomer.strAddress#<br>
+                              #MailCustomer.strZIP# / #MailCustomer.strCity#<br>
+                              <a href="mailto:#MailCustomer.strEmail#" style="color: ##ffffff; text-decoration:none;">#MailCustomer.strEmail#</a><br>
+                              <cfif len(trim(MailCustomer.strPhone))>
+                                #MailCustomer.strPhone#
+                              </cfif>
                             </td>
                             <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td>
                           </tr>				
                         </table>
-
+                    
                         <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 20px; font-family: #FontFamily#; color: ##ffffff; border:none;">
-                              <span style="font-size: 21px;">NETWORK</span><br>
+                              <span style="font-size: 21px;">#getTrans('txtNetwork')#</span><br>
                               <!--- <a href="" class="normal" target="_blank" title="Besuchen Sie uns auf Facebook"><img width="30" src="/img/social/facebook.png" alt="Besuchen Sie uns auf Facebook" border="0"/></a>
                               <img src="/img/spacer.gif" width="2" />   --->                    
                             </td>
