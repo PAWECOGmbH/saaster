@@ -138,7 +138,7 @@ component displayname="prices" output="false" {
         if (variables.isNet eq 1) {
             if (variables.vat_type eq 1) {
                 local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', variables.language) & ' ' & variables.vat & '%: ' & variables.currency & ' ' & lsNumberFormat(local.vat_amount, '__,___.__');
-            } else if (local.vat_type eq 3) {
+            } else if (variables.vat_type eq 3) {
                 local.total_price = local.subtotal_price;
                 local.priceData['vat_text']  = "";
             } else {
