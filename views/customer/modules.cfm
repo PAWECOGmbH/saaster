@@ -10,17 +10,15 @@
     }
 
     objModules = new com.modules(language=session.lng, currencyID=currencyID);
-    objPlans = new com.plans(language=session.lng, currencyID=currencyID);
 
     getAllModules = objModules.getAllModules();
 
     getBookedModules = objModules.getBookedModules(session.customer_id);
-    getBookedPlans = objPlans.getCurrentPlan(session.customer_id);
 
     // Get included modules in booked plans as list
     includedModuleList = "";
-    if (structKeyExists(getBookedPlans, "modulesIncludedAsList")) {
-        includedModuleList = getBookedPlans.modulesIncludedAsList;
+    if (structKeyExists(session.currentPlan, "modulesIncludedAsList")) {
+        includedModuleList = session.currentPlan.modulesIncludedAsList;
     }
 
     // Get separately booked modules as list
@@ -79,6 +77,7 @@
                                         <cfif listFind(includedModuleList, module.moduleID)>
                                             <cfset bgColor = "bg-green">
                                             <cfset fontColor = "text-green">
+                                            <cfset objPlans = new com.plans(language=session.lng)>
                                         <cfelseif structKeyExists(moduleStatus, "fontColor")>
                                             <cfset bgColor = "bg-" & moduleStatus.fontColor>
                                             <cfset fontColor = "text-" & moduleStatus.fontColor>
@@ -141,6 +140,9 @@
                                                         <div class="text-muted">#module.short_description#</div>
                                                         <cfif listFind(includedModuleList, module.moduleID)>
                                                             <div class="text-green mt-3">#getTrans('txtIncludedInPlan')#</div>
+                                                            <cfif session.currentPlan.status eq "canceled">
+                                                                <div class="small text-red">#getTrans('txtCanceled')#</div>
+                                                            </cfif>
                                                         <cfelse>
                                                             <div class="mt-2">
                                                                 <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
@@ -254,14 +256,12 @@
 
                                                         </div>
                                                         <div class="row p-2 mt-4">
-                                                            <cfset includedInPlan = "">
                                                             <cfif listLen(module.includedPlans)>
                                                                 <div class="fw-bold">#getTrans('txtIncludedInPlans')#:</div>
                                                                 <div class="mt-3">
                                                                     <cfloop list="#module.includedPlans#" index="i">
-                                                                        <cfset planData = objPlans.getPlanDetail(i)>
                                                                         <ul class="my-0">
-                                                                            <li class="my-0 py-0">#planData.planName#</li>
+                                                                            <li class="my-0 py-0">#objPlans.getPlanDetail(i).planName#</li>
                                                                         </ul>
                                                                     </cfloop>
                                                                     <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
@@ -276,7 +276,7 @@
 
                                             </div>
                                         </div>
-                                        </cfif>
+                                    </cfif>
                                 </cfloop>
                             </div>
                         </div>

@@ -9,92 +9,34 @@ if (structKeyExists(url, "plan")) {
         // Revoke cancellation
         if (structKeyExists(url, "revoke")) {
 
-            try {
+            revokePlan = new com.cancel(session.customer_id, url.plan, 'plan', session.lng).revoke();
 
-                queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: session.customer_id},
-                        planID: {type: "numeric", value: url.plan},
-                        recurring: {type: "varchar", value: "active"}
-                    },
-                    sql = "
-
-                        UPDATE customer_bookings
-                        SET strRecurring = :recurring
-                        WHERE intCustomerID = :customerID
-                        AND intPlanID = :planID;
-
-                        INSERT INTO customer_bookings_history (intCustomerID, intPlanID, strRecurring)
-                        VALUES (:customerID, :planID, :recurring)
-
-                    "
-                )
-
-                getAlert('msgRevokedSuccessful', 'success');
-
-                <!--- Save current plan into a session --->
-                checkPlan = new com.plans(language=session.lng).getCurrentPlan(session.customer_id);
-                session.currentPlan = checkPlan;
-
-            } catch (any) {
-
-                getAlert('alertErrorOccured', 'danger');
-
-            }
-
-        } else {
-
-            // Only a SuperAdmin can cancel a plan
-            if (!session.superAdmin) {
-                getAlert('msgNoAccess', 'danger');
+            if (!revokePlan.success) {
+                getAlert(revokePlan.message, 'danger');
                 location url="#application.mainURL#/account-settings" addtoken="false";
             }
 
-            try {
+            getAlert('msgRevokedSuccessful', 'success');
 
-                queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: session.customer_id},
-                        planID: {type: "numeric", value: url.plan},
-                        recurring: {type: "varchar", value: "canceled"}
-                    },
-                    sql = "
+        } else {
 
-                        UPDATE customer_bookings
-                        SET strRecurring = :recurring
-                        WHERE intCustomerID = :customerID
-                        AND intPlanID = :planID;
+            cancelPlan = new com.cancel(session.customer_id, url.plan, 'plan', session.lng).cancel();
 
-                        INSERT INTO customer_bookings_history (intCustomerID, intPlanID, strRecurring)
-                        VALUES (:customerID, :planID, :recurring)
-
-                    "
-                )
-
-                getAlert('msgCanceledSuccessful', 'success');
-
-                <!--- Save current plan into a session --->
-                checkPlan = new com.plans(language=session.lng).getCurrentPlan(session.customer_id);
-                session.currentPlan = checkPlan;
-
-            } catch (any) {
-
-                getAlert('alertErrorOccured', 'danger');
-
+            if (!cancelPlan.success) {
+                getAlert(cancelPlan.message, 'danger');
+                location url="#application.mainURL#/account-settings" addtoken="false";
             }
 
-        }
+            getAlert('msgCanceledSuccessful', 'success');
 
+
+        }
 
         location url="#application.mainURL#/account-settings" addtoken="false";
 
     }
 
 }
-
-
 
 
 <!--- Cancel module or revoke cancellation --->
@@ -105,118 +47,26 @@ if (structKeyExists(url, "module")) {
         // Revoke cancellation
         if (structKeyExists(url, "revoke")) {
 
-            try {
+            revokeModule = new com.cancel(session.customer_id, url.module, 'module', session.lng).revoke();
 
-                queryExecute (
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: session.customer_id},
-                        moduleID: {type: "numeric", value: url.module},
-                        recurring: {type: "varchar", value: "active"}
-                    },
-                    sql = "
-
-                        UPDATE customer_bookings
-                        SET strRecurring = :recurring
-                        WHERE intCustomerID = :customerID
-                        AND intModuleID = :moduleID;
-
-                        INSERT INTO customer_bookings_history (intCustomerID, intModuleID, strRecurring)
-                        VALUES (:customerID, :moduleID, :recurring)
-
-                    "
-                )
-
-                getAlert('msgRevokedSuccessful', 'success');
-
-                <!--- Save current module array into a session --->
-                session.currentModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
-
-            } catch (any) {
-
-                getAlert('alertErrorOccured', 'danger');
-
-            }
-
-        } else {
-
-            // Only a SuperAdmin can cancel a module
-            if (!session.superAdmin) {
-                getAlert('msgNoAccess', 'danger');
+            if (!revokeModule.success) {
+                getAlert(revokeModule.message, 'danger');
                 location url="#application.mainURL#/account-settings/modules" addtoken="false";
             }
 
-            try {
-
-                objModules = new com.modules(language=session.lng);
-
-                // Check if the expiration date has already been reached
-                expirationDate = objModules.getModuleStatus(session.customer_id, url.module).endTestDate;
-                if (!isDate(expirationDate)) {
-                    expirationDate = objModules.getModuleStatus(session.customer_id, url.module).endDate;
-                }
-
-                // If the end date has been reached, delete the booking
-                if (dateCompare(expirationDate, now()) lt 0) {
+            getAlert('msgRevokedSuccessful', 'success');
 
 
-                    // We delete all the customers data using a function
-                    deleteData = objModules.deleteModuleData(session.customer_id, url.module);
+        } else {
 
+            cancelModule = new com.cancel(session.customer_id, url.module, 'module', session.lng).cancel();
 
-                    queryExecute (
-                        options = {datasource = application.datasource},
-                        params = {
-                            customerID: {type: "numeric", value: session.customer_id},
-                            moduleID: {type: "numeric", value: url.module},
-                            recurring: {type: "varchar", value: "deleted"}
-                        },
-                        sql = "
-
-                            DELETE FROM customer_bookings
-                            WHERE intCustomerID = :customerID
-                            AND intModuleID = :moduleID;
-
-                            INSERT INTO customer_bookings_history (intCustomerID, intModuleID, strRecurring)
-                            VALUES (:customerID, :moduleID, :recurring)
-
-                        "
-                    )
-
-                } else {
-
-                    queryExecute (
-                        options = {datasource = application.datasource},
-                        params = {
-                            customerID: {type: "numeric", value: session.customer_id},
-                            moduleID: {type: "numeric", value: url.module},
-                            recurring: {type: "varchar", value: "canceled"}
-                        },
-                        sql = "
-
-                            UPDATE customer_bookings
-                            SET strRecurring = :recurring
-                            WHERE intCustomerID = :customerID
-                            AND intModuleID = :moduleID;
-
-                            INSERT INTO customer_bookings_history (intCustomerID, intModuleID, strRecurring)
-                            VALUES (:customerID, :moduleID, :recurring)
-
-                        "
-                    )
-
-                }
-
-                getAlert('msgCanceledSuccessful', 'success');
-
-                <!--- Save current module array into a session --->
-                session.currentModules = objModules.getBookedModules(session.customer_id);
-
-            } catch (any) {
-
-                getAlert('alertErrorOccured', 'danger');
-
+            if (!cancelModule.success) {
+                getAlert(cancelModule.message, 'danger');
+                location url="#application.mainURL#/account-settings/modules" addtoken="false";
             }
+
+            getAlert('msgCanceledSuccessful', 'success');
 
         }
 
@@ -226,5 +76,7 @@ if (structKeyExists(url, "module")) {
     }
 
 }
+
+location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>
