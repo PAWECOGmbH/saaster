@@ -13,6 +13,15 @@
 <cfinclude template="/includes/header.cfm">
 <cfinclude template="/includes/navigation.cfm">
 
+<!--- <cfdump  var="#session.currentModules#">
+<cfdump  var="#session.currentPlan#"> --->
+
+
+
+<!--- <cfdump var="#new com.modules().getBookedModules(session.customer_id)#">
+
+<cfabort> --->
+
 <div class="page-wrapper">
     <cfoutput>
         <div class="container-xl">

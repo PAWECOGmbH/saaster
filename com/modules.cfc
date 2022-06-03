@@ -200,17 +200,48 @@ component displayname="modules" output="false" {
             local.qCheckPlans = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    moduleID: {type: "numeric", value: local.qModule.intModuleID}
+                    moduleID: {type: "numeric", value: local.qModule.intModuleID},
+                    lngID: {type: "numeric", value: variables.lngID},
                 },
                 sql = "
-                    SELECT GROUP_CONCAT(DISTINCT intPlanID) as planList
-                    FROM plans_modules
-                    WHERE intModuleID = :moduleID
+                    SELECT plans_modules.intPlanID,
+                    (
+                        IF
+                            (
+                                LENGTH(
+                                    (
+                                        SELECT strPlanName
+                                        FROM plans_trans
+                                        WHERE intPlanID = plans.intPlanID
+                                        AND intLanguageID = :lngID
+                                    )
+                                ),
+                                (
+                                    SELECT strPlanName
+                                    FROM plans_trans
+                                    WHERE intPlanID = plans.intPlanID
+                                    AND intLanguageID = :lngID
+                                ),
+                                plans.strPlanName
+                            )
+                    ) as strPlanName
+                    FROM plans_modules INNER JOIN plans ON plans_modules.intPlanID = plans.intPlanID
+                    WHERE plans_modules.intModuleID = :moduleID
                 "
             )
 
-            local.moduleStruct['includedPlans'] = local.qCheckPlans.planList;
+            local.planArray = arrayNew(1);
 
+            if (local.qCheckPlans.recordCount) {
+
+                local.planStruct = structNew();
+                local.planStruct['planID'] = local.qCheckPlans.intPlanID;
+                local.planStruct['name'] = local.qCheckPlans.strPlanName;
+                arrayAppend(local.planArray, local.planStruct);
+
+            }
+
+            local.moduleStruct['includedInPlans'] = local.planArray;
 
 
             // Build the booking link
@@ -272,11 +303,47 @@ component displayname="modules" output="false" {
                     local.moduleStruct['moduleID'] = local.qCurrentModules.intModuleID;
                     local.moduleStruct['moduleStatus'] = getModuleStatus(arguments.customerID, local.qCurrentModules.intModuleID);
                     local.moduleStruct['moduleData'] = getModuleData(local.qCurrentModules.intModuleID);
+                    local.moduleStruct['includedInCurrentPlan'] = false;
                     arrayAppend(local.moduleArray, local.moduleStruct);
 
                 }
 
             }
+
+            // Append also all included modules of the booked plan
+            local.objPlans = new com.plans(language=variables.language);
+            local.bookedPlan = local.objPlans.getCurrentPlan(arguments.customerID);
+            local.includedModules = local.objPlans.getModulesIncluded(local.bookedPlan.planID);
+
+            if (isArray(local.includedModules.modulesIncluded) and arrayLen(local.includedModules.modulesIncluded)) {
+
+                loop array=local.includedModules.modulesIncluded index="i" {
+
+                    local.moduleStruct = structNew();
+                    local.moduleStruct['moduleID'] = i.moduleID;
+                    local.moduleStruct['moduleData'] = getModuleData(i.moduleID);
+                    local.moduleStruct['includedInCurrentPlan'] = true;
+
+                    local.statusStruct = structNew();
+                    local.statusStruct['endDate'] = local.bookedPlan.endDate;
+                    local.statusStruct['endTestDate'] = local.bookedPlan.endTestDate;
+                    local.statusStruct['recurring'] = local.bookedPlan.recurring;
+                    local.statusStruct['startDate'] = local.bookedPlan.startDate;
+                    local.statusStruct['status'] = local.bookedPlan.status;
+
+                    local.statusText = local.objPlans.getPlanStatusAsText(local.bookedPlan);
+                    local.statusStruct['statusText'] = local.statusText.statusText;
+                    local.statusStruct['statusTitle'] = local.statusText.statusTitle;
+                    local.statusStruct['fontColor'] = local.statusText.fontColor;
+
+                    local.moduleStruct['moduleStatus'] = local.statusStruct;
+
+                    arrayAppend(local.moduleArray, local.moduleStruct);
+
+                }
+
+            }
+
 
         }
 
@@ -382,7 +449,7 @@ component displayname="modules" output="false" {
 
                 }
 
-                local.objPlans = new com.plans().init(language=variables.language);
+                local.objPlans = new com.plans(language=variables.language);
                 structAppend(local.moduleStruct, local.objPlans.getPlanStatusAsText(local.moduleStruct));
 
             }

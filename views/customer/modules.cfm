@@ -10,29 +10,13 @@
     }
 
     objModules = new com.modules(language=session.lng, currencyID=currencyID);
-
     getAllModules = objModules.getAllModules();
+    getBookedModules = session.currentModules;
 
-    getBookedModules = objModules.getBookedModules(session.customer_id);
 
-    // Get included modules in booked plans as list
-    includedModuleList = "";
-    if (structKeyExists(session.currentPlan, "modulesIncludedAsList")) {
-        includedModuleList = session.currentPlan.modulesIncludedAsList;
-    }
+    dump(getBookedModules);
 
-    // Get separately booked modules as list
-    bookedModuleList = "";
-    if (arrayLen(getBookedModules)) {
-        cfloop(array=getBookedModules, index="i") {
-            bookedModuleList = listAppend(bookedModuleList, i.moduleID);
-        }
-    }
 
-    totalModuleList = "";
-    totalModuleList = listAppend(totalModuleList, includedModuleList);
-    totalModuleList = listAppend(totalModuleList, bookedModuleList);
-    totalModuleList = listRemoveDuplicates(totalModuleList);
 
 </cfscript>
 
@@ -63,132 +47,139 @@
             </cfif>
         </div>
         <div class="container-xl">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">#getTrans('titModules')#</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <cfloop array="#getAllModules#" index="module">
-                                    <cfif module.active>
-                                        <cfset moduleStatus = objModules.getModuleStatus(session.customer_id, module.moduleID)>
-                                        <cfif listFind(includedModuleList, module.moduleID)>
-                                            <cfset bgColor = "bg-green">
-                                            <cfset fontColor = "text-green">
-                                            <cfset objPlans = new com.plans(language=session.lng)>
-                                        <cfelseif structKeyExists(moduleStatus, "fontColor")>
-                                            <cfset bgColor = "bg-" & moduleStatus.fontColor>
-                                            <cfset fontColor = "text-" & moduleStatus.fontColor>
-                                        <cfelse>
-                                            <cfset bgColor = "">
-                                            <cfset fontColor = "">
-                                        </cfif>
+            <cfif arrayLen(getBookedModules)>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">#getTrans('titBookedModules')#</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <cfloop array="#getBookedModules#" index="module">
                                         <div class="col-lg-3">
                                             <div class="card" style="min-height: 450px;">
-                                                <div class="card-status-top #bgColor#"></div>
+                                                <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>
                                                 <div class="card-body p-4 text-center">
-                                                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
-                                                    <h3 class="m-0 mb-1">#module.name#</h3>
-                                                    <cfif listFind(bookedModuleList, module.moduleID)>
-                                                        <table class="table text-start mt-4" style="width: 90%;">
+                                                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.moduleData.picture#)"></span>
+                                                    <h3 class="m-0 mb-1">#module.moduleData.name#</h3>
+                                                    <table class="table text-start mt-4" style="width: 90%;">
+                                                        <tr>
+                                                            <td width="60%">#getTrans('txtPlanStatus')#:</td>
+                                                            <td width="40%" class="text-#module.moduleStatus.fontColor#">#module.moduleStatus.statusTitle#</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>#getTrans('txtBookedOn')#:</td>
+                                                            <td>#lsDateFormat(module.moduleStatus.startDate)#</td>
+                                                        </tr>
+                                                        <cfif module.moduleStatus.recurring eq "onetime">
                                                             <tr>
-                                                                <td width="60%">#getTrans('txtPlanStatus')#:</td>
-                                                                <td width="40%" class="#fontColor#">#moduleStatus.statusTitle#</td>
+                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
                                                             </tr>
-                                                            <tr>
-                                                                <td>#getTrans('txtBookedOn')#:</td>
-                                                                <td>#lsDateFormat(moduleStatus.startDate)#</td>
-                                                            </tr>
-                                                            <cfif moduleStatus.recurring eq "onetime">
-                                                                <tr>
-                                                                    <td colspan="2" align="center">#moduleStatus.statusText#</td>
-                                                                </tr>
-                                                            <cfelseif moduleStatus.status eq "canceled">
-                                                                <cfif isDate(moduleStatus.endDate)>
-                                                                    <tr>
-                                                                        <td>#getTrans('txtExpiryDate')#:</td>
-                                                                        <td>#lsDateFormat(moduleStatus.endDate)#</td>
-                                                                    </tr>
-                                                                <cfelse>
-                                                                    <tr>
-                                                                        <td>#getTrans('txtExpiryDate')#:</td>
-                                                                        <td>#lsDateFormat(moduleStatus.endTestDate)#</td>
-                                                                    </tr>
-                                                                </cfif>
-                                                                </tr>
-                                                                    <td colspan="2" align="center">#moduleStatus.statusText#</td>
-                                                                </tr>
-                                                            <cfelseif moduleStatus.status eq "test">
+                                                        <cfelseif module.moduleStatus.status eq "canceled">
+                                                            <cfif isDate(module.moduleStatus.endDate)>
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
-                                                                    <td>#lsDateFormat(moduleStatus.endTestDate)#</td>
+                                                                    <td>#lsDateFormat(module.moduleStatus.endDate)#</td>
                                                                 </tr>
+                                                            <cfelse>
                                                                 <tr>
-                                                                    <td colspan="2" align="center">#moduleStatus.statusText#</td>
+                                                                    <td>#getTrans('txtExpiryDate')#:</td>
+                                                                    <td>#lsDateFormat(module.moduleStatus.endTestDate)#</td>
                                                                 </tr>
+                                                            </cfif>
+                                                            </tr>
+                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
+                                                            </tr>
+                                                        <cfelseif module.moduleStatus.status eq "test">
+                                                            <tr>
+                                                                <td>#getTrans('txtExpiryDate')#:</td>
+                                                                <td>#lsDateFormat(module.moduleStatus.endTestDate)#</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
+                                                            </tr>
 
-                                                            <cfelseif moduleStatus.status eq "active">
-                                                                <tr>
-                                                                    <td>#getTrans('txtRenewPlanOn')#:</td>
-                                                                    <td>#lsDateFormat(moduleStatus.endDate)#</td>
-                                                                </tr>
-                                                            </cfif>
-                                                        </table>
-                                                    <cfelse>
-                                                        <div class="text-muted">#module.short_description#</div>
-                                                        <cfif listFind(includedModuleList, module.moduleID)>
-                                                            <div class="text-green mt-3">#getTrans('txtIncludedInPlan')#</div>
-                                                            <cfif session.currentPlan.status eq "canceled">
-                                                                <div class="small text-red">#getTrans('txtCanceled')#</div>
-                                                            </cfif>
-                                                        <cfelse>
-                                                            <div class="mt-2">
-                                                                <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
-                                                                    <div class="small">#getTrans('txtFree')#</div>
-                                                                <cfelseif module.price_onetime gt 0>
-                                                                    <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_onetime, '_,___.__')# #lcase(getTrans('txtOneTime'))#</div>
-                                                                <cfelse>
-                                                                    <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')# #lcase(getTrans('txtMonthly'))#</div>
-                                                                </cfif>
-                                                            </div>
+                                                        <cfelseif module.moduleStatus.status eq "active">
+                                                            <tr>
+                                                                <td>#getTrans('txtRenewPlanOn')#:</td>
+                                                                <td>#lsDateFormat(module.moduleStatus.endDate)#</td>
+                                                            </tr>
                                                         </cfif>
-                                                    </cfif>
+                                                    </table>
                                                 </div>
                                                 <div class="d-flex">
-                                                    <!--- <cfdump var="#moduleStatus.status#"> --->
-                                                    <cfif listFind(totalModuleList, module.moduleID)>
-                                                        <cfif len(trim(module.settingPath))>
-                                                            <cfset settingLink = "#application.mainURL#/#module.settingPath#">
-                                                        <cfelse>
-                                                            <cfset settingLink = "##?">
-                                                        </cfif>
-                                                        <cfif listFind(includedModuleList, module.moduleID)>
-                                                            <a href="#settingLink#" class="card-btn">
-                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                            </a>
-                                                        <cfelse>
-                                                            <cfif (module.price_monthly gt 0 or module.price_onetime gt 0 or module.price_yearly gt 0) and moduleStatus.recurring neq "onetime" and session.superAdmin>
-                                                                <cfif moduleStatus.status eq "canceled">
-                                                                    <a href="#application.mainURL#/cancel?module=#module.moduleID#&revoke" class="card-btn text-blue">
-                                                                        <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
-                                                                    </a>
-                                                                <cfelse>
-                                                                    <a href="#settingLink#" class="card-btn">
-                                                                        <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                                    </a>
-                                                                    <a href="##?" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
-                                                                    </a>
-                                                                </cfif>
+                                                    <cfif len(trim(module.moduleData.settingPath))>
+                                                        <cfset settingLink = "#application.mainURL#/#module.moduleData.settingPath#">
+                                                    <cfelse>
+                                                        <cfset settingLink = "##?">
+                                                    </cfif>
+                                                    <cfif module.includedInCurrentPlan>
+                                                        <a href="#settingLink#" class="card-btn">
+                                                            <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                        </a>
+                                                    <cfelse>
+                                                        <cfif (module.moduleData.price_monthly gt 0 or module.moduleData.price_onetime gt 0 or module.moduleData.price_yearly gt 0) and module.moduleStatus.recurring neq "onetime" and session.superAdmin>
+                                                            <cfif module.moduleStatus.status eq "canceled">
+                                                                <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke" class="card-btn text-blue">
+                                                                    <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
+                                                                </a>
                                                             <cfelse>
                                                                 <a href="#settingLink#" class="card-btn">
                                                                     <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                 </a>
+                                                                <a href="##?" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
+                                                                    <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                </a>
                                                             </cfif>
+                                                        <cfelse>
+                                                            <a href="#settingLink#" class="card-btn">
+                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                            </a>
                                                         </cfif>
-                                                    <cfelse>
+                                                    </cfif>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </cfloop>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </cfif>
+
+            <cfif arrayLen(getAllModules)>
+                <div class="row mt-5">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">#getTrans('titAvailableModules')#</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <cfloop array="#getAllModules#" index="module">
+                                        <cfdump  var="#module#">
+                                        <cfif module.active>
+                                            <div class="col-lg-3">
+                                                <div class="card" style="min-height: 450px;">
+                                                    <div class="card-body p-4 text-center">
+                                                        <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
+                                                        <h3 class="m-0 mb-1">#module.name#</h3>
+                                                        <div class="text-muted">#module.short_description#</div>
+                                                        <div class="mt-2">
+                                                            <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
+                                                                <div class="small">#getTrans('txtFree')#</div>
+                                                            <cfelseif module.price_onetime gt 0>
+                                                                <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_onetime, '_,___.__')# #lcase(getTrans('txtOneTime'))#</div>
+                                                            <cfelse>
+                                                                <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')# #lcase(getTrans('txtMonthly'))#</div>
+                                                            </cfif>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex">
                                                         <a href="##?" class="card-btn w-50" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
                                                             <i class="fa-solid fa-circle-info pe-2"></i> Info
                                                         </a>
@@ -213,76 +204,80 @@
                                                                 </a>
                                                             </cfif>
                                                         </cfif>
-                                                    </cfif>
+                                                    </div>
+
+
+
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div id="modul_#module.moduleID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                                            <div id="modul_#module.moduleID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
 
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">#module.name#</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            #module.description#
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">#module.name#</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
-                                                        <div class="mb-3">
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                #module.description#
+                                                            </div>
+                                                            <div class="mb-3">
 
-                                                            <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
-                                                                <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
-                                                            <cfelseif module.price_onetime gt 0>
-                                                                <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_onetime, '_,___.__')#</div>
-                                                                <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
-                                                                <div class="text-muted small">#module.vat_text_onetime#</div>
-                                                            <cfelse>
-                                                                <div class="row my-3 col-md-12">
-                                                                    <div class="col-md-6">
-                                                                        <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
-                                                                        <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_monthly, '_,___.__')#</div>
-                                                                        <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
-                                                                        <div class="text-muted small">#module.vat_text_monthly#</div>
+                                                                <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
+                                                                    <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
+                                                                <cfelseif module.price_onetime gt 0>
+                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_onetime, '_,___.__')#</div>
+                                                                    <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
+                                                                    <div class="text-muted small">#module.vat_text_onetime#</div>
+                                                                <cfelse>
+                                                                    <div class="row my-3 col-md-12">
+                                                                        <div class="col-md-6">
+                                                                            <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_monthly, '_,___.__')#</div>
+                                                                            <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
+                                                                            <div class="text-muted small">#module.vat_text_monthly#</div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_yearly, '_,___.__')#</div>
+                                                                            <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
+                                                                            <div class="text-muted small">#module.vat_text_yearly#</div>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="col-md-6">
-                                                                        <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
-                                                                        <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_yearly, '_,___.__')#</div>
-                                                                        <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
-                                                                        <div class="text-muted small">#module.vat_text_yearly#</div>
-                                                                    </div>
-                                                                </div>
-                                                            </cfif>
+                                                                </cfif>
 
+                                                            </div>
+                                                            <div class="row p-2 mt-4">
+                                                                <cfif arrayLen(module.includedInPlans)>
+                                                                    <div class="fw-bold">#getTrans('txtIncludedInPlans')#:</div>
+                                                                    <div class="mt-3">
+                                                                        <cfloop array="#module.includedInPlans#" index="i">
+                                                                            <ul class="my-0">
+                                                                                <li class="my-0 py-0">#i.name#</li>
+                                                                            </ul>
+                                                                        </cfloop>
+                                                                        <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                                                                    </div>
+                                                                </cfif>
+                                                            </div>
                                                         </div>
-                                                        <div class="row p-2 mt-4">
-                                                            <cfif listLen(module.includedPlans)>
-                                                                <div class="fw-bold">#getTrans('txtIncludedInPlans')#:</div>
-                                                                <div class="mt-3">
-                                                                    <cfloop list="#module.includedPlans#" index="i">
-                                                                        <ul class="my-0">
-                                                                            <li class="my-0 py-0">#objPlans.getPlanDetail(i).planName#</li>
-                                                                        </ul>
-                                                                    </cfloop>
-                                                                    <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
-                                                                </div>
-                                                            </cfif>
+                                                        <div class="modal-footer">
+                                                            <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">#getTrans('btnClose')#</a>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">#getTrans('btnClose')#</a>
-                                                    </div>
+
                                                 </div>
-
                                             </div>
-                                        </div>
-                                    </cfif>
-                                </cfloop>
+                                        </cfif>
+                                    </cfloop>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </cfif>
+
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
