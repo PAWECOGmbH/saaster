@@ -530,8 +530,7 @@ component displayname="user" output="false" {
                     echo("#getTrans('titHello')# #qUser.toName#<br><br>
                                 #local.invitationMail#<br><br>
                                 <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formSignIn')#</a><br><br>
-                                (#getTrans('txtRegisterLinkNotWorking')#)
-                                <br><br>
+                                
                                 #getTrans('txtRegards')#<br>
                                 #getTrans('txtYourTeam')#<br>
                                 #application.appOwner#");

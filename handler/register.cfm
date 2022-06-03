@@ -58,9 +58,8 @@ if (structKeyExists(form, 'register_btn')) {
             cfsavecontent (variable = "MailContent") {
 
                 echo("#getTrans('titHello')# #form.first_name# #form.name#<br><br>
-                            #getTrans('txtPleaseConfirmEmail')#<br>
-                            <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a><br>
-                            (#getTrans('txtRegisterLinkNotWorking')#)
+                            #getTrans('txtPleaseConfirmEmail')#<br><br>
+                            <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
                             <br><br>
                             #getTrans('txtRegards')#<br>
                             #getTrans('txtYourTeam')#<br>
@@ -381,8 +380,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                         #getTrans('txtResetPassword')#
                         <br><br>
                         <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formPassword2')#</a>
-                        <br><br>
-                        (#getTrans('txtRegisterLinkNotWorking')#)
+                        
                         <br><br>
                         #getTrans('txtRegards')#<br>
                         #getTrans('txtYourTeam')#<br>
