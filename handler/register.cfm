@@ -54,27 +54,24 @@ if (structKeyExists(form, 'register_btn')) {
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
         if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
+            
+            MailTitle = "#getTrans('subjectConfirmEmail')#";
+            MailType = "html";
+            MailCustomID = 1;
+            cfsavecontent (variable = "MailContent") {
 
-            <!--- Send double opt-in mail --->
-            mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
-                echo (
-                    "
-                    <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
-                    <html xmlns='http://www.w3.org/1999/xhtml'>
-                        <head></head>
-                        <body style='font-family:Verdana, Geneva, sans-serif; font-size: 14px;'>
-                            #getTrans('titHello')# #form.first_name# #form.name#<br><br>
-                            #getTrans('txtPleaseConfirmEmail')#<br>
-                            <a href='#application.mainURL#/registration?u=#newUUID#'>#application.mainURL#/registration?u=#newUUID#</a><br>
-                            (#getTrans('txtRegisterLinkNotWorking')#)
+                echo("#getTrans('titHello')# #form.first_name# #form.name#<br><br>
+                            #getTrans('txtPleaseConfirmEmail')#<br><br>
+                            <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
                             <br><br>
                             #getTrans('txtRegards')#<br>
                             #getTrans('txtYourTeam')#<br>
-                            #application.appOwner#
-                        </body>
-                    </html>
-                    "
-                )
+                            #application.appOwner#");
+            }
+
+            <!--- Send double opt-in mail --->
+            mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
+                include "/includes/mail_design.cfm";
             }
 
             structDelete(session, "first_name");
@@ -388,26 +385,26 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
         );
 
 
-        <!--- Send email to reset the password --->
-        mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
-            echo (
-                "
-                <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
-                <html xmlns='http://www.w3.org/1999/xhtml'>
-                    <head></head>
-                    <body style='font-family:Verdana, Geneva, sans-serif; font-size: 14px;'>
-                        #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
-                        #getTrans('txtResetPassword')#<br>
-                        <a href='#application.mainURL#/registration?p=#newUUID#'>#application.mainURL#/registration?p=#newUUID#</a><br>
-                        (#getTrans('txtRegisterLinkNotWorking')#)
+        MailTitle = "#getTrans('titResetPassword')#";
+        MailType = "html";
+        MailUserdata = application.objCustomer.getUserDataByID(qCheckUser.intUserID);
+        MailCustomID = MailUserdata.intCustomerID;
+        cfsavecontent (variable = "MailContent") {
+
+            echo("#getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
+                        #getTrans('txtResetPassword')#
+                        <br><br>
+                        <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formPassword2')#</a>
+                        
                         <br><br>
                         #getTrans('txtRegards')#<br>
                         #getTrans('txtYourTeam')#<br>
-                        #application.appOwner#
-                    </body>
-                </html>
-                "
-            )
+                        #application.appOwner#");
+        }
+
+        <!--- Send email to reset the password --->
+        mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
+            include "/includes/mail_design.cfm";
         }
 
     }

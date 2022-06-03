@@ -519,31 +519,32 @@ component displayname="user" output="false" {
                 }
 
                 getTrans = application.objGlobal.getTrans;
+                
 
                 <!--- Replacing variables --->
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
-                <!--- Send activation link --->
-                mail from="#application.fromEmail#" to="#qUser.toEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
-                    echo (
-                        "
-                        <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
-                        <html xmlns='http://www.w3.org/1999/xhtml'>
-                            <head></head>
-                            <body style='font-family:Verdana, Geneva, sans-serif; font-size: 14px;'>
-                                #getTrans('titHello')# #qUser.toName#<br><br>
-                                #local.invitationMail#<br>
-                                <a href='#application.mainURL#/registration?u=#local.thisUUID#'>#application.mainURL#/registration?u=#local.thisUUID#</a><br>
-                                (#getTrans('txtRegisterLinkNotWorking')#)
-                                <br><br>
+
+                MailTitle = "#getTrans('txtInvitationFrom')# #qUser.fromName#";
+                MailType = "html";
+                MailUserdata = application.objCustomer.getUserDataByID(arguments.toUserID);
+                MailCustomID = MailUserdata.intCustomerID;
+
+                cfsavecontent (variable = "MailContent") {
+
+                    echo("#getTrans('titHello')# #qUser.toName#<br><br>
+                                #local.invitationMail#<br><br>
+                                <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formSignIn')#</a><br><br>
+                                
                                 #getTrans('txtRegards')#<br>
                                 #getTrans('txtYourTeam')#<br>
-                                #application.appOwner#
-                            </body>
-                        </html>
-                        "
-                    )
+                                #application.appOwner#");
+                }
+
+                <!--- Send activation link --->
+                mail from="#application.fromEmail#" to="#qUser.toEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
+                    include "/includes/mail_design.cfm";
                 }
 
                 local.argsReturnValue['message'] = getTrans('msgUserGotInvitation');
