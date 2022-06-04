@@ -27,5 +27,5 @@
 
 
 <!--- Include the payment services --->
-<cfinclude template="payment.cfm">
+<cfinclude template="/includes/payment.cfm">
 

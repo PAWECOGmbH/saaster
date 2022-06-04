@@ -50,6 +50,11 @@
             <!--- Save the new plan into a session --->
             newPlan = objPlans.getCurrentPlan(session.customer_id);
             session.currentPlan = newPlan;
+
+            <!--- Save the included modules into the module session --->
+            checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+            session.currentModules = checkModules;
+
             getAlert('msgPlanActivated');
             location url="#application.mainURL#/account-settings" addtoken=false;
 
@@ -123,6 +128,11 @@
 
                 <!--- Save the new plan into a session --->
                 session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                <!--- Save the included modules into the module session --->
+                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                session.currentModules = checkModules;
+
                 getAlert('msgPlanActivated');
                 location url="#application.mainURL#/account-settings" addtoken=false;
 
@@ -233,6 +243,9 @@
                         // If everything went well, save plan into the session
                         getAlert('msgThanksForPurchaseFindInvoice');
                         session.currentPlan = newPlan;
+                        <!--- Save the included modules into the module session --->
+                        checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                        session.currentModules = checkModules;
                     }
 
                     location url="#application.mainURL#/account-settings" addtoken=false;

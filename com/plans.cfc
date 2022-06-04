@@ -719,7 +719,6 @@ component displayname="plans" output="false" {
         local.moduleList = "";
 
         local.modulesStruct['modulesIncluded'] = local.modulesArray;
-        local.modulesStruct['modulesIncludedAsList'] = local.moduleList;
 
         if (isNumeric(arguments.planID) and arguments.planID gt 0) {
 
@@ -772,7 +771,6 @@ component displayname="plans" output="false" {
                 }
 
                 local.modulesStruct['modulesIncluded'] = local.modulesArray;
-                local.modulesStruct['modulesIncludedAsList'] = listRemoveDuplicates(local.moduleList);
 
             }
 
