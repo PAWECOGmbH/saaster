@@ -10,6 +10,8 @@
     }
 
     objModules = new com.modules(language=session.lng, currencyID=currencyID);
+    objPlan = new com.plans(language=session.lng, currencyID=currencyID);
+
     getBookedModules = session.currentModules;
     getBookedModulesAsList = "";
     if (arrayLen(getBookedModules)) {
@@ -111,15 +113,12 @@
                                                     </table>
                                                 </div>
                                                 <div class="d-flex">
-                                                    <cfif len(trim(module.moduleData.settingPath))>
-                                                        <cfset settingLink = "#application.mainURL#/#module.moduleData.settingPath#">
-                                                    <cfelse>
-                                                        <cfset settingLink = "##?">
-                                                    </cfif>
                                                     <cfif module.includedInCurrentPlan>
-                                                        <a href="#settingLink#" class="card-btn">
-                                                            <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                        </a>
+                                                        <cfif len(trim(module.moduleData.settingPath))>
+                                                            <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                            </a>
+                                                        </cfif>
                                                     <cfelse>
                                                         <cfif (module.moduleData.price_monthly gt 0 or module.moduleData.price_onetime gt 0 or module.moduleData.price_yearly gt 0) and module.moduleStatus.recurring neq "onetime" and session.superAdmin>
                                                             <cfif module.moduleStatus.status eq "canceled">
@@ -127,17 +126,21 @@
                                                                     <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
                                                                 </a>
                                                             <cfelse>
-                                                                <a href="#settingLink#" class="card-btn">
-                                                                    <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                                </a>
+                                                                <cfif len(trim(module.moduleData.settingPath))>
+                                                                    <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                                        <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                    </a>
+                                                                </cfif>
                                                                 <a href="##?" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
                                                                     <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                 </a>
                                                             </cfif>
                                                         <cfelse>
-                                                            <a href="#settingLink#" class="card-btn">
-                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                            </a>
+                                                            <cfif len(trim(module.moduleData.settingPath))>
+                                                                <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                                    <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                </a>
+                                                            </cfif>
                                                         </cfif>
                                                     </cfif>
 

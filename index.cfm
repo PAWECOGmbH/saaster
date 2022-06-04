@@ -6,13 +6,13 @@
 
 <!doctype html>
 <html lang="<cfoutput>#session.lng#</cfoutput>">
-	
-<cfinclude template="includes/head.cfm">	
-<body>	
+
+<cfinclude template="includes/head.cfm">
+<body>
 	<div class="page">
 		<cfinclude template="#thiscontent.thisPath#">
 	</div>
 	<cfinclude template="includes/js.cfm">
-</body>	
+</body>
 </html>
 <cfset structDelete(session, "alert") />

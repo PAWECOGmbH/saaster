@@ -1,6 +1,8 @@
-
 <cfscript>
-objPlan = new com.plans(language=session.lng);
+
+    objPlan = new com.plans(language=session.lng);
+    moduleArray = new com.modules().getAllModules();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -167,15 +169,18 @@ objPlan = new com.plans(language=session.lng);
                                 <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
                             </cfif>
 
-                            <div class="list-group mt-4">
-                                <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
-                                    </div>
-                                    <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
-                                </a>
-                            </div>
+                            <cfif arrayLen(moduleArray)>
 
+                                <div class="list-group mt-4">
+                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
+                                        </div>
+                                        <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
+                                    </a>
+                                </div>
+
+                            </cfif>
 
 
 

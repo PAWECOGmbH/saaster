@@ -37,14 +37,21 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Table prefix *</label>
+                    <label class="form-label">Table and folder prefix *</label>
                     <input type="text" class="form-control" name="prefix" placeholder="e.g. mymod_" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
+                    <small class="form-hint">
+                        We will create a folder with the prefix name as well as the <i>navigation.cfm</i> file. Please also always name your tables with your prefix!
+                    </small>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Setting path (first file)</label>
                     <div class="input-group">
-                        <span class="input-group-text">root/</span>
+                        <span class="input-group-text">modules/<cfif len(trim(qModule.strTabPrefix))>#qModule.strTabPrefix#/<cfelse>{prefix}/</cfif></span>
                         <input type="text" name="path" class="form-control" autocomplete="off" value="#HTMLEditFormat(qModule.strSettingPath)#" maxlength="255">
+                        <small class="form-hint">
+                            Specify the first file where your clients can make any settings (e.g. /settings). Make sure you add the <a href="#application.mainURL#/sysadmin/mappings">mapping</a> (under custom mappings).
+                            If you don't provide settings for your module, leave the filed empty.
+                        </small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -65,6 +72,9 @@
                             </div>
                         <cfelse>
                             <input name="pic" type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
+                            <small class="form-hint">
+                                Use a square for the best view
+                            </small>
                         </cfif>
                     </div>
                 </div>
