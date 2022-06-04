@@ -10,13 +10,15 @@
     }
 
     objModules = new com.modules(language=session.lng, currencyID=currencyID);
-    getAllModules = objModules.getAllModules();
     getBookedModules = session.currentModules;
+    getBookedModulesAsList = "";
+    if (arrayLen(getBookedModules)) {
+        loop array=getBookedModules index="i" {
+            getBookedModulesAsList = listAppend(getBookedModulesAsList, i.moduleID);
+        }
+    }
 
-
-    dump(getBookedModules);
-
-
+    getAllModules = objModules.getAllModules(getBookedModulesAsList);
 
 </cfscript>
 
@@ -48,7 +50,7 @@
         </div>
         <div class="container-xl">
             <cfif arrayLen(getBookedModules)>
-                <div class="row">
+                <div class="row mb-5">
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header">
@@ -57,7 +59,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getBookedModules#" index="module">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-3 mb-4">
                                             <div class="card" style="min-height: 450px;">
                                                 <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>
                                                 <div class="card-body p-4 text-center">
@@ -152,7 +154,7 @@
             </cfif>
 
             <cfif arrayLen(getAllModules)>
-                <div class="row mt-5">
+                <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header">
@@ -161,20 +163,23 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getAllModules#" index="module">
-                                        <cfdump  var="#module#">
-                                        <cfif module.active>
-                                            <div class="col-lg-3">
+                                        <cfif module.bookable or arrayLen(module.includedInPlans)>
+                                            <div class="col-lg-3 mb-4">
                                                 <div class="card" style="min-height: 450px;">
                                                     <div class="card-body p-4 text-center">
                                                         <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
                                                         <h3 class="m-0 mb-1">#module.name#</h3>
                                                         <div class="text-muted">#module.short_description#</div>
                                                         <div class="mt-2">
-                                                            <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
-                                                                <div class="small">#getTrans('txtFree')#</div>
+                                                            <cfif module.price_monthly eq 0 and module.price_onetime eq 0 and module.price_onetime eq 0>
+                                                                <cfif arrayLen(module.includedInPlans)>
+                                                                    <div class="small">#getTrans('txtIncludedInPlan')#</div>
+                                                                <cfelse>
+                                                                    <div class="small">#getTrans('txtFree')#</div>
+                                                                </cfif>
                                                             <cfelseif module.price_onetime gt 0>
                                                                 <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_onetime, '_,___.__')# #lcase(getTrans('txtOneTime'))#</div>
-                                                            <cfelse>
+                                                            <cfelseif module.price_monthly gt 0>
                                                                 <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')# #lcase(getTrans('txtMonthly'))#</div>
                                                             </cfif>
                                                         </div>
@@ -199,15 +204,14 @@
                                                                     <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                                 </a>
                                                             <cfelse>
-                                                                <a href="#module.bookingLinkF#" class="card-btn w-50">
-                                                                    <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
-                                                                </a>
+                                                                <cfif not arrayLen(module.includedInPlans)>
+                                                                    <a href="#module.bookingLinkF#" class="card-btn w-50">
+                                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                    </a>
+                                                                </cfif>
                                                             </cfif>
                                                         </cfif>
                                                     </div>
-
-
-
                                                 </div>
                                             </div>
                                             <div id="modul_#module.moduleID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>

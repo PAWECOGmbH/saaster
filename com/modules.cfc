@@ -36,13 +36,22 @@ component displayname="modules" output="false" {
 
 
     <!--- Get all modules --->
-    public array function getAllModules() {
+    public array function getAllModules(string except) {
+
+        if (structKeyExists(arguments, "except")) {
+            local.exceptList = "AND intModuleID NOT IN (#arguments.except#)";
+        } else {
+            local.exceptList = "";
+        }
 
         local.qModule = queryExecute(
             options = {datasource = application.datasource},
+
             sql = "
                 SELECT intModuleID
                 FROM modules
+                WHERE blnActive = 1
+                #local.exceptList#
                 ORDER BY intPrio
             "
         )
@@ -141,10 +150,10 @@ component displayname="modules" output="false" {
 
                 FROM modules
 
-                INNER JOIN modules_prices ON 1=1
+                LEFT JOIN modules_prices ON 1=1
                 AND modules.intModuleID = modules_prices.intModuleID
 
-                INNER JOIN currencies ON 1=1
+                LEFT JOIN currencies ON 1=1
                 AND modules_prices.intCurrencyID = currencies.intCurrencyID
                 AND currencies.intCurrencyID = :currencyID
 
@@ -152,6 +161,7 @@ component displayname="modules" output="false" {
 
             "
         )
+
 
         local.moduleStruct = structNew();
 
@@ -261,13 +271,7 @@ component displayname="modules" output="false" {
             local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "f", "module");
             local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
 
-        } else {
-
-            throw(message='No modules found!', detail='Did you add a new currency? If so, you need to re-save the prices of all your modules.');
-
         }
-
-
 
         return local.moduleStruct;
 
@@ -279,6 +283,7 @@ component displayname="modules" output="false" {
     public array function getBookedModules(required numeric customerID) {
 
         local.moduleArray = arrayNew(1);
+        local.moduleList = "";
 
         if (arguments.customerID gt 0) {
 
@@ -309,6 +314,7 @@ component displayname="modules" output="false" {
                 }
 
             }
+
 
             // Append also all included modules of the booked plan
             local.objPlans = new com.plans(language=variables.language);
@@ -343,7 +349,6 @@ component displayname="modules" output="false" {
                 }
 
             }
-
 
         }
 
