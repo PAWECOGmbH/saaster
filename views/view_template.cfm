@@ -1,6 +1,5 @@
 
 <cfinclude template="/includes/header.cfm">
-
 <cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">

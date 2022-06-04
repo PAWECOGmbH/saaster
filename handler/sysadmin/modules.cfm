@@ -145,9 +145,43 @@ if (structKeyExists(form, "edit_module")) {
             "
         )
 
-        if (picSuccess) {
+        <!--- Create the folder specified --->
+        createFolderSuccess = true;
+        if (!directoryExists(expandPath('/modules/#form.prefix#'))) {
+            try {
+                directoryCreate(expandPath('/modules/#form.prefix#'));
+            } catch (e any) {
+                createFolderSuccess = false;
+                getAlert('Could not create the folder!');
+            }
+        }
+
+        <!--- Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...) --->
+        createFileSuccess = true;
+        if (!fileExists(expandPath('/modules/#form.prefix#/navigation.cfm'))) {
+savecontent variable="naviContent" {
+writeOutput("
+<a href='#application.mainURL#/modules/#form.prefix#/' class='dropdown-item'>Your page 1</a>
+<a href='#application.mainURL#/modules/#form.prefix#/' class='dropdown-item'>Your page 2</a>
+<a href='#application.mainURL#/modules/#form.prefix#/' class='dropdown-item'>Your page 3</a>
+");
+}
+            try {
+                fileWrite(expandPath('/modules/#form.prefix#/navigation.cfm'), naviContent);
+            } catch (e any) {
+                createFileSuccess = false;
+                getAlert(e.message, 'danger');
+            }
+        }
+
+
+        if (picSuccess and createFolderSuccess) {
             getAlert('Module saved.');
         }
+
+        <!--- Refresh the session in order to see the changes --->
+        checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
+        session.currentModules = checkModules;
 
         location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
 

@@ -38,7 +38,7 @@ component displayname="modules" output="false" {
     <!--- Get all modules --->
     public array function getAllModules(string except) {
 
-        if (structKeyExists(arguments, "except")) {
+        if (structKeyExists(arguments, "except") and listLen(arguments.except)) {
             local.exceptList = "AND intModuleID NOT IN (#arguments.except#)";
         } else {
             local.exceptList = "";

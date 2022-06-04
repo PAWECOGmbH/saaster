@@ -51,6 +51,35 @@
                         </li>
                     </cfif>
 
+                    <!--- Modules --->
+                    <cfif isArray(session.currentModules) and arrayLen(session.currentModules)>
+                        <cfoutput>
+                        <cfloop array="#session.currentModules#" index="i">
+                            <cfif i.moduleStatus.status neq "expired">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                                        <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            <i class="fas fa-user-cog"></i>
+                                        </span> --->
+                                        <span class="nav-link-title">
+                                            #i.moduleData.name#
+                                        </span>
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <cfif fileExists(expandPath('/modules/#i.moduleData.table_prefix#/navigation.cfm'))>
+                                            <cfinclude template="/modules/#i.moduleData.table_prefix#/navigation.cfm">
+                                        </cfif>
+                                        <cfif len(trim(i.moduleData.settingPath))>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="#application.mainURL#/modules/#i.moduleData.table_prefix#/#i.moduleData.settingPath#" class="dropdown-item">#getTrans('txtSettings')#</a>
+                                        </cfif>
+                                    </div>
+                                </li>
+                            </cfif>
+                        </cfloop>
+                        </cfoutput>
+                    </cfif>
+
                 </ul>
             </div>
         </div>

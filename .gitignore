@@ -4,6 +4,9 @@ test.cfm
 ### Userdata folder ###
 userdata/**
 
+### Modules folder ###
+modules/**
+
 ### Config files ###
 .cfconfig.json
 .env
