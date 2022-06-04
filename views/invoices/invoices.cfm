@@ -8,10 +8,12 @@
     local.pages = ceiling(local.qTotalInvoices / local.getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {
         session.invoice_page = url.page;
     } else {
-        location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+        if (local.qTotalInvoices gt 0) {
+            location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
+        }
     }
 
     if (session.invoice_page gt 1){
@@ -91,7 +93,7 @@
                 <cfif local.pages neq 1>
                     <div class="card-body">
                         <ul class="pagination justify-content-center" id="pagination">
-                            
+
                             <!--- Prev arrow --->
                             <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
                                 <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_page-1#" tabindex="-1" aria-disabled="true">
@@ -105,7 +107,7 @@
                                     <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#i#">#i#</a>
                                 </li>
                             </cfloop>
-                            
+
                             <!--- Next arrow --->
                             <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
                                 <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_page+1#">
