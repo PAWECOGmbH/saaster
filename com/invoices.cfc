@@ -706,7 +706,7 @@ component displayname="invoices" output="false" {
 
         local.subtotal_price = 0;
         local.vat_total = 0;
-        
+
         if (qInvoicePositions.recordcount and len(trim(qInvoicePositions.decTotalPrice))) {
 
             <!--- Loop over all positions --->
@@ -826,7 +826,7 @@ component displayname="invoices" output="false" {
     public struct function getInvoices(required numeric customerID, numeric start, numeric amount) {
 
         local.queryLimit;
-        
+
         if (structKeyExists(arguments, "start") and structKeyExists(arguments, "amount")){
             local.queryLimit = "LIMIT #arguments.start#, #arguments.amount#"
         }
@@ -862,12 +862,12 @@ component displayname="invoices" output="false" {
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
                         (
-                            SELECT strColor 
+                            SELECT strColor
                             FROM invoice_status
                             WHERE intPaymentStatusID = invoices.intPaymentStatusID
                         ) as invoiceStatusColor,
                         (
-                            SELECT strInvoiceStatusVariable 
+                            SELECT strInvoiceStatusVariable
                             FROM invoice_status
                             WHERE intPaymentStatusID = invoices.intPaymentStatusID
                         ) as invoiceStatusVariable

@@ -11,6 +11,7 @@
     custZIP = getCustomerData.strZIP;
     custCity = getCustomerData.strCity;
     countryID = getCustomerData.intCountryID;
+    timezoneID = getCustomerData.intTimezoneID;
     custEmail = getCustomerData.strEmail;
     custPhone = getCustomerData.strPhone;
     custWebsite = getCustomerData.strWebsite;
@@ -38,13 +39,17 @@
     if(structKeyExists(session, "zip") and len(trim(session.zip))){
         custZIP = session.zip;
     }
-    
+
     if(structKeyExists(session, "city") and len(trim(session.city))){
         custCity = session.city;
     }
 
     if(structKeyExists(session, "countryID") and len(trim(session.countryID))){
         countryID = session.countryID;
+    }
+
+    if(structKeyExists(session, "timezoneID") and len(trim(session.timezoneID))){
+        timezoneID = session.timezoneID;
     }
 
     if(structKeyExists(session, "email") and len(trim(session.email))){
@@ -58,7 +63,7 @@
     if(structKeyExists(session, "website") and len(trim(session.website))){
         custWebsite = session.website;
     }
-    
+
     if(structKeyExists(session, "billing_name") and len(trim(session.billing_name))){
         custBillingAccountName = session.billing_name;
     }
@@ -75,6 +80,8 @@
         custBillingInfo = session.billing_info
     }
 
+    timeZones = new com.sysadmin().getTimezones();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -82,7 +89,7 @@
 <cfinclude template="/includes/navigation.cfm">
 <div class="page-wrapper">
     <div class="container-xl">
-        <cfoutput>   
+        <cfoutput>
         <div class="page-header mb-3">
             <h4 class="page-title"><cfoutput>#getTrans('titEditCompany')#</cfoutput></h4>
 
@@ -103,13 +110,13 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titLogo')#</h3>
-                    </div>                                
+                    </div>
                     <div class="card-body">
-                        <form action="#application.mainURL#/customer" method="post" enctype="multipart/form-data">                                        
-                            <div class="row mb-1"> 
+                        <form action="#application.mainURL#/customer" method="post" enctype="multipart/form-data">
+                            <div class="row mb-1">
                                 <cfif len(trim(getCustomerData.strLogo))>
                                     <div class="col-auto text-center">
-                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" alt="logo" style="max-height: 150px;">                                           
+                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" alt="logo" style="max-height: 150px;">
                                         <div class="d-flex flex-row flex-start">
                                             <div class="mt-3">
                                                 <a href="#application.mainURL#/customer?del_logo" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>
@@ -120,44 +127,44 @@
                                     <div class="mt-1">
                                         <input name="logo" required type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
                                     </div>
-                                    <div class="d-flex flex-row flex-start">    
+                                    <div class="d-flex flex-row flex-start">
                                         <div class="mt-3">
-                                            <button name="logo_upload_btn" class="btn btn-primary btn-block">#getTrans('btnUpload')#</button>                                           
+                                            <button name="logo_upload_btn" class="btn btn-primary btn-block">#getTrans('btnUpload')#</button>
                                         </div>
-                                    </div>        
+                                    </div>
                                 </cfif>
-                            </div>                                   
+                            </div>
                         </form>
                     </div>
-                </div> 
+                </div>
                 <!--- <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Account löschen</h3>
                     </div>
                     <div class="card-body">
-                        <form>        
+                        <form>
                             <p>Möchten Sie Ihren Account löschen?</p>
                             <div class="form-footer">
                                 <button class="btn btn-danger btn-block" id="click2" onclick="return confirm('?')">Account löschen</button>
                             </div>
                         </form>
                     </div>
-                </div> --->                            
-            </div>                       
+                </div> --->
+            </div>
             <div class="col-lg-8">
                 <form class="card" id="submit_form" method="post" action="#application.mainURL#/customer">
                     <input type="hidden" name="edit_company_btn">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titEditCompany')#</h3>
                     </div>
-                    <div class="card-body">                                    
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formCompanyName')# *</label>
                                     <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100" required>
                                 </div>
-                            </div>    
+                            </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formContactName')# *</label>
@@ -169,13 +176,13 @@
                                     <label class="form-label">#getTrans('formAddress')# *</label>
                                     <input type="text" name="address" class="form-control" value="#HTMLEditFormat(custAddress)#" minlength="3" maxlength="100" required>
                                 </div>
-                            </div> 
+                            </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formAddress2')#</label>
                                     <input type="text" name="address2" class="form-control" value="#HTMLEditFormat(custAddress2)#" maxlength="100">
                                 </div>
-                            </div>                                        
+                            </div>
                             <div class="col-sm-6 col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formZIP')# *</label>
@@ -188,16 +195,31 @@
                                     <input type="text" name="city" class="form-control" value="#HTMLEditFormat(custCity)#" minlength="3" maxlength="100" required>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-md-4">
-                                <div class="mb-3">
-                                    <label class="form-label">#getTrans('formCountry')#</label>                                    
-                                    <select name="countryID" type="text" class="form-select" placeholder="#getTrans('formCountry')#" id="select-users">
-                                        <cfloop query="qCountries">
-                                            <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
-                                        </cfloop>
-                                    </select>
+                            <cfif qCountries.recordCount>
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">#getTrans('formCountry')#</label>
+                                        <select name="countryID" class="form-select" required>
+                                            <option value=""></option>
+                                            <cfloop query="qCountries">
+                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                            </cfloop>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>  
+                            <cfelse>
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">#getTrans('titTimezone')#</label>
+                                        <select name="timezoneID" class="form-select" required>
+                                            <option value=""></option>
+                                            <cfloop array="#timeZones#" index="i">
+                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>(#i.utc#) #i.city# - #i.country#</option>
+                                            </cfloop>
+                                        </select>
+                                    </div>
+                                </div>
+                            </cfif>
                             <div class="col-md-5">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formEmailAddress')#</label>
@@ -215,20 +237,20 @@
                                     <label class="form-label">#getTrans('formWebsite')#</label>
                                     <input type="text" class="form-control" name="website" value="#HTMLEditFormat(custWebsite)#" maxlength="100">
                                 </div>
-                            </div>                                                              
+                            </div>
                         </div>
                     </div>
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titInvoiceSettings')#</h3>
                     </div>
-                    <div class="card-body">                                    
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formCompanyName')#</label>
                                     <input type="text" name="billing_name" class="form-control" value="#HTMLEditFormat(custBillingAccountName)#" maxlength="100">
                                 </div>
-                            </div>    
+                            </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formInvoiceEmail')#</label>
@@ -240,24 +262,24 @@
                                     <label class="form-label">#getTrans('formInvoiceAddress')#</label>
                                     <textarea class="form-control" name="billing_address" rows="6">#custBillingAddress#</textarea>
                                 </div>
-                            </div> 
+                            </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">#getTrans('formInvoiceInfo')#</label>
                                     <textarea class="form-control" name="billing_info" rows="6">#custBillingInfo#</textarea>
                                 </div>
-                            </div>                                                       
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer text-right">
                         <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
                     </div>
                 </form>
-                
-            </div>
-        </div>  
-        </cfoutput>                
-    </div>
-    <cfinclude template="/includes/footer.cfm"> 
 
-</div>    
+            </div>
+        </div>
+        </cfoutput>
+    </div>
+    <cfinclude template="/includes/footer.cfm">
+
+</div>

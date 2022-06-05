@@ -284,7 +284,7 @@
                                                                 <select name="timezone" class="form-select">
                                                                     <option value=""></option>
                                                                     <cfloop array="#timeZones#" index="i">
-                                                                        <option value="#i#">#i#</option>
+                                                                        <option value="#i.utc#">(#i.utc#) #i.city# - #i.country#</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>

@@ -10,7 +10,8 @@ if (structKeyExists(form, "edit_company_btn")) {
     param name="form.address2" default="";
     param name="form.zip" default="";
     param name="form.city" default="";
-    param name="form.countryID" default="1";
+    param name="form.countryID" default="0";
+    param name="form.timezoneID" default="0";
     param name="form.email" default="";
     param name="form.phone" default="";
     param name="form.website" default="";
@@ -26,13 +27,14 @@ if (structKeyExists(form, "edit_company_btn")) {
     session.zip = form.zip;
     session.city = form.city;
     session.countryID = form.countryID;
+    session.timezoneID = form.timezoneID;
     session.email = form.email;
     session.phone = form.phone;
     session.website = form.website;
     session.billing_name = form.billing_name;
     session.billing_email = form.billing_email;
     session.billing_address = form.billing_address;
-    session.billing_info = form.billing_info;  
+    session.billing_info = form.billing_info;
 
     <!--- Check whether the email is valid --->
     checkEmail = application.objGlobal.checkEmail(form.email);
@@ -53,7 +55,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     objCustomerEdit = application.objCustomer.updateCustomer(form, session.customer_id);
 
     if (objCustomerEdit.success) {
-        getAlert('msgChangesSaved', 'success');        
+        getAlert('msgChangesSaved', 'success');
     } else {
         getAlert(objCustomerEdit.message, 'danger');
     }
@@ -65,6 +67,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     structDelete(session, "address2");
     structDelete(session, "zip");
     structDelete(session, "countryID");
+    structDelete(session, "timezoneID");
     structDelete(session, "email");
     structDelete(session, "phone");
     structDelete(session, "website");
@@ -72,9 +75,10 @@ if (structKeyExists(form, "edit_company_btn")) {
     structDelete(session, "billing_email");
     structDelete(session, "billing_address");
     structDelete(session, "billing_info");
+    structDelete(session, "filledData");
 
 
-    location url="#application.mainURL#/account-settings/company" addtoken="false";   
+    location url="#application.mainURL#/account-settings/company" addtoken="false";
 
 
 }
@@ -90,7 +94,7 @@ if (structKeyExists(form, "logo_upload_btn")) {
     fileStruct.maxHeight = ""; // empty or pixels
     fileStruct.makeUnique = true; // true or false (default true)
     fileStruct.fileName = ""; // empty or any name; ex. uuid (without extension)
-    
+
     if (structKeyExists(form, "logo") and len(trim(form.logo))) {
 
         fileStruct.fileNameOrig = form.logo;
@@ -119,15 +123,15 @@ if (structKeyExists(form, "logo_upload_btn")) {
 
             getAlert(fileUpload.message, 'danger');
 
-        }            
-        
+        }
+
     } else {
 
         getAlert('msgPleaseChooseFile', 'warning');
 
     }
 
-    location url="#application.mainURL#/account-settings/company" addtoken="false"; 
+    location url="#application.mainURL#/account-settings/company" addtoken="false";
 
 
 
@@ -161,13 +165,13 @@ if (structKeyExists(url, "del_logo")) {
             },
             sql="
                 UPDATE customers
-                SET strLogo = ''                
+                SET strLogo = ''
                 WHERE intCustomerID = :customerID
             "
-        ) 
+        )
 
         location url="#application.mainURL#/account-settings/company" addtoken="false";
-        
+
     }
 
 }
@@ -182,7 +186,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
     if (!len(trim(company_name)) or !len(trim(contact_person))) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
-    
+
     tenantStruct = structNew();
     tenantStruct.company_name = form.company_name;
     tenantStruct.contact_person = form.contact_person;
@@ -215,8 +219,8 @@ if (structKeyExists(url, "delete")) {
     if (!isNumeric(url.delete) or url.delete lte 0) {
         getAlert('No tenant found!', 'danger');
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-    }        
-        
+    }
+
     <!--- User data of the user to be deleted --->
     getTenant = application.objCustomer.getCustomerData(url.delete);
 
@@ -229,13 +233,13 @@ if (structKeyExists(url, "delete")) {
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.intCustomerID);
 
     if (!checkTenantRange) {
-        getAlert('You are not allowed to delete this tenant!', 'danger');   
+        getAlert('You are not allowed to delete this tenant!', 'danger');
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-    }       
+    }
 
     <!--- Delete users photo --->
     if (len(trim(getTenant.strLogo))) {
-        
+
         photoPath = expandPath('../userdata/images/logos/#getTenant.strLogo#');
         objUserFileDelete = application.objGlobal.deleteFile(photoPath);
 
@@ -244,7 +248,7 @@ if (structKeyExists(url, "delete")) {
     <!--- Delete tenant --->
     queryExecute(
         options = {datasource = application.datasource, result="getAnswer"},
-        params = {                    
+        params = {
             customerID: {type: "numeric", value: getTenant.intCustomerID},
             myCustomerID: {type: "numeric", value: session.customer_id}
         },
@@ -257,7 +261,7 @@ if (structKeyExists(url, "delete")) {
         getAlert('alertTenantDeleted', 'success');
     } else {
         getAlert('No user found!', 'danger');
-    }     
+    }
 
     location url="#application.mainURL#/account-settings/tenants" addtoken="false";
 
@@ -265,10 +269,10 @@ if (structKeyExists(url, "delete")) {
 
 
 <!--- Activate or deactivate tenant --->
-if (structKeyExists(url, "change_tenant")) {    
+if (structKeyExists(url, "change_tenant")) {
 
     if (!isNumeric(url.change_tenant)) {
-        getAlert('The customerID is not of type numeric!', 'danger');   
+        getAlert('The customerID is not of type numeric!', 'danger');
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -286,10 +290,10 @@ if (structKeyExists(url, "change_tenant")) {
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, thisCustomerID);
 
     if (!checkTenantRange) {
-        getAlert('You are not allowed to edit this tenant!', 'danger');   
-        location url="#application.mainURL#/account-settings/tenants" addtoken="false";        
-    } 
-    
+        getAlert('You are not allowed to edit this tenant!', 'danger');
+        location url="#application.mainURL#/account-settings/tenants" addtoken="false";
+    }
+
     queryExecute(
         options = {datasource = application.datasource},
         params = {
@@ -301,8 +305,8 @@ if (structKeyExists(url, "change_tenant")) {
             SET blnActive = IF(blnActive = 1, 0, 1)
             WHERE intCustomerID = :customerID AND intCustomerID != :myCustomerID
         "
-    ) 
-   
+    )
+
 
     location url="#application.mainURL#/account-settings/tenants" addtoken="false";
 
