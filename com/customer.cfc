@@ -106,7 +106,12 @@ component displayname="customer" output="false" {
         if (structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID)) {
             local.countryID = arguments.customerStruct.countryID;
         } else {
-            local.countryID = 1;
+            local.countryID = 0;
+        }
+        if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID)) {
+            local.timezoneID = arguments.customerStruct.timezoneID;
+        } else {
+            local.timezoneID = 0;
         }
         if (structKeyExists(arguments.customerStruct, "email")) {
             local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100);
@@ -150,6 +155,7 @@ component displayname="customer" output="false" {
 
                 options = {datasource = application.datasource},
                 params = {
+                    customerID: {type: "numeric", value: arguments.customerID},
                     company: {type: "nvarchar", value: local.company},
                     contact: {type: "nvarchar", value: local.contact},
                     address: {type: "nvarchar", value: local.address},
@@ -157,15 +163,14 @@ component displayname="customer" output="false" {
                     zip: {type: "nvarchar", value: local.zip},
                     city: {type: "nvarchar", value: local.city},
                     countryID: {type: "numeric", value: local.countryID},
+                    timezoneID: {type: "numeric", value: local.timezoneID},
                     email: {type: "nvarchar", value: local.email},
                     phone: {type: "nvarchar", value: local.phone},
                     website: {type: "nvarchar", value: local.website},
                     billing_name: {type: "nvarchar", value: local.billing_name},
                     billing_email: {type: "nvarchar", value: local.billing_email},
                     billing_address: {type: "nvarchar", value: local.billing_address},
-                    billing_info: {type: "nvarchar", value: local.billing_info},
-
-                    intCustomerID: {type: "nvarchar", value: arguments.customerID}
+                    billing_info: {type: "nvarchar", value: local.billing_info}
                 },
                 sql = "
 
@@ -178,6 +183,7 @@ component displayname="customer" output="false" {
                         strZIP = :zip,
                         strCity = :city,
                         intCountryID = :countryID,
+                        intTimezoneID = :timezoneID,
                         strPhone = :phone,
                         strEmail = :email,
                         strWebsite = :website,
@@ -185,7 +191,7 @@ component displayname="customer" output="false" {
                         strBillingEmail = :billing_email,
                         strBillingAddress = :billing_address,
                         strBillingInfo = :billing_info
-                    WHERE intCustomerID = :intCustomerID
+                    WHERE intCustomerID = :customerID
 
                 "
 
@@ -316,20 +322,30 @@ component displayname="customer" output="false" {
 
         if (arguments.customerID gt 0) {
 
+            local.defLang = application.objGlobal.getDefaultLanguage().iso;
+
             local.qCustomer = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
+                    customerID: {type: "numeric", value: arguments.customerID},
+                    defLang: {type: "varchar", value: local.defLang}
                 },
                 sql = "
-                    SELECT customers.*, countries.strCountryName,
-                    (
-                        SELECT strLanguageISO
-                        FROM languages
-                        WHERE intLanguageID = countries.intLanguageID
-                    ) as strLanguageISO
-                    FROM customers INNER JOIN countries ON customers.intCountryID = countries.intCountryID
-                    WHERE customers.intCustomerID = :customerID
+                    SELECT *,
+                        (
+                            IF
+                            (
+                                customers.intCountryID > 0,
+                                (
+                                    SELECT languages.strLanguageISO
+                                    FROM countries INNER JOIN languages ON countries.intLanguageID = languages.intLanguageID
+                                    WHERE countries.intCountryID = customers.intCountryID
+                                ),
+                                :defLang
+                            )
+                        ) as strLanguageISO
+                    FROM customers
+                    WHERE intCustomerID = :customerID
                 "
             )
 

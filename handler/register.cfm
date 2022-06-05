@@ -54,7 +54,7 @@ if (structKeyExists(form, 'register_btn')) {
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
         if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
-            
+
             MailTitle = "#getTrans('subjectConfirmEmail')#";
             MailType = "html";
             MailCustomID = 1;
@@ -322,6 +322,13 @@ if (structKeyExists(form, 'login_btn')) {
             <!--- Save custom settings struct into a session --->
             session.customSettings = application.objGlobal.getCustomSettings(session.customer_id);
 
+            <!--- Is the needed data of the cutomer already filled out? --->
+            dataFilledIn = objRegister.checkFilledData(session.customer_id);
+
+            if (!dataFilledIn) {
+                session.filledData = false;
+            }
+
             location url="#objUserLogin.redirect#" addtoken="false";
 
 
@@ -395,7 +402,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                         #getTrans('txtResetPassword')#
                         <br><br>
                         <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formPassword2')#</a>
-                        
+
                         <br><br>
                         #getTrans('txtRegards')#<br>
                         #getTrans('txtYourTeam')#<br>

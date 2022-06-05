@@ -186,4 +186,25 @@ component displayname="customer" output="false" {
     }
 
 
+    <!--- Check whether the required data of a client has already been filled in --->
+    public boolean function checkFilledData(required numeric customerID) {
+
+        local.getCustomerData = application.objCustomer.getCustomerData(arguments.customerID);
+
+        if (!len(trim(local.getCustomerData.strAddress))) {
+            return false;
+        }
+        if (!len(trim(local.getCustomerData.strZIP))) {
+            return false;
+        }
+        if (!len(trim(local.getCustomerData.strCity))) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+
+
 }
