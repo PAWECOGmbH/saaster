@@ -15,7 +15,7 @@ UPDATE countries SET blnDefault = 1 WHERE intCountryID = 163;
 TRUNCATE TABLE `customer_user`;
 TRUNCATE TABLE `customers`;
 INSERT INTO `customers`
-VALUES (1, 0, now(), now(), 1, 'The SaaSter Company Ltd.', 'Peter Pan', 'Workingstreet 199', 'House 5b', '78000', 'Worksher', 163, '041 555 55 55',
+VALUES (1, 0, now(), now(), 1, 'The SaaSter Company Ltd.', 'Peter Pan', 'Workingstreet 199', 'House 5b', '78000', 'Worksher', 0, 0, '041 555 55 55',
 'admin@saaster.io', 'https://www.saaster.io', '', 'SaaSter Ldt.', 'office@saaster.io', 'Bookingstreet 100n\78010 Worksher 99', 'VAT 555-99-8785-99', now());
 
 -- ----------------------------
