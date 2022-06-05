@@ -78,6 +78,7 @@ if (structKeyExists(form, "edit_mapping")) {
         queryExecute(
             options = {datasource = application.datasource},
             params = {
+                mappingID: {type: "numeric", value: form.edit_mapping},
                 mapping: {type: "varchar", value: form.mapping},
                 thispath: {type: "varchar", value: form.path},
                 admin: {type: "boolean", value: admin},
@@ -91,6 +92,7 @@ if (structKeyExists(form, "edit_mapping")) {
                     blnOnlyAdmin = :admin,
                     blnOnlySuperAdmin = :superadmin,
                     blnOnlySysAdmin = :sysadmin
+                WHERE intCustomMappingID = :mappingID
             "
         )
 
