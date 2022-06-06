@@ -20,7 +20,7 @@
     custBillingAddress = getCustomerData.strBillingAddress;
     custBillingInfo = getCustomerData.strBillingInfo;
 
-    timeZones = new com.sysadmin().getTimezones();
+    timeZones = new com.time(session.customer_id).getTimezones();
 
 </cfscript>
 

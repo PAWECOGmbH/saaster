@@ -44,7 +44,7 @@ if (structKeyExists(form, "edit_country")) {
                 currency: {type: "varchar", value: form.currency},
                 region: {type: "nvarchar", value: form.region},
                 subregion: {type: "nvarchar", value: form.subregion},
-                timezone: {type: "varchar", value: form.timezone},
+                timezoneID: {type: "numeric", value: form.timezoneID},
                 flag: {type: "varchar", value: form.flag},
                 default: {type: "boolean", value: itsDefault},
                 thisID: {type: "numeric", value: form.edit_country}
@@ -59,7 +59,7 @@ if (structKeyExists(form, "edit_country")) {
                     strCurrency = :currency,
                     strRegion = :region,
                     strSubRegion = :subregion,
-                    strTimezone = :timezone,
+                    intTimezoneID = :timezoneID,
                     strFlagSVG = :flag,
                     blnDefault = :default
                 WHERE intCountryID = :thisID
@@ -157,7 +157,7 @@ if (structKeyExists(form, "new_country")) {
             currency: {type: "varchar", value: form.currency},
             region: {type: "nvarchar", value: form.region},
             subregion: {type: "nvarchar", value: form.subregion},
-            timezone: {type: "varchar", value: form.timezone},
+            timezoneID: {type: "numeric", value: form.timezoneID},
             flag: {type: "varchar", value: form.flag},
             default: {type: "boolean", value: itsDefault},
             active: {type: "boolean", value: 1},
@@ -165,9 +165,9 @@ if (structKeyExists(form, "new_country")) {
         },
         sql = "
             INSERT INTO countries (strCountryName, intLanguageID, strLocale, strISO1, strISO2, strCurrency, strRegion, strSubRegion,
-                strTimezone, strFlagSVG, blnActive, blnDefault, intPrio)
+                intTimezoneID, strFlagSVG, blnActive, blnDefault, intPrio)
             VALUES (:country, :languageID, :locale, :iso1, :iso2, :currency, :region, :subregion,
-                :timezone, :flag, :active, :default, :newPrio)
+                :timezoneID, :flag, :active, :default, :newPrio)
         "
     )
 

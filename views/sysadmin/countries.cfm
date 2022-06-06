@@ -53,8 +53,7 @@
                     strISO2 LIKE '%#session.c_search#%' OR
                     strCurrency LIKE '%#session.c_search#%' OR
                     strRegion LIKE '%#session.c_search#%' OR
-                    strSubRegion LIKE '%#session.c_search#%' OR
-                    strTimezone   LIKE '%#session.c_search#%'
+                    strSubRegion LIKE '%#session.c_search#%'
                 )
                 ORDER BY #session.c_sort#
                 LIMIT #session.sql_start#, #getEntries#
@@ -76,7 +75,7 @@
     }
 
     qLanguages = application.objGlobal.getAllLanguages();
-    timeZones = new com.sysadmin().getTimezones();
+    timeZones = new com.time(session.customer_id).getTimezones();
     getModal = new com.translate();
 </cfscript>
 

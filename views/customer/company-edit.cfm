@@ -80,7 +80,7 @@
         custBillingInfo = session.billing_info
     }
 
-    timeZones = new com.sysadmin().getTimezones();
+    timeZones = new com.time(session.customer_id).getTimezones();
 
 </cfscript>
 
@@ -214,7 +214,7 @@
                                         <select name="timezoneID" class="form-select" required>
                                             <option value=""></option>
                                             <cfloop array="#timeZones#" index="i">
-                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>(#i.utc#) #i.city# - #i.country#</option>
+                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>#i.country# - #i.city# (#i.utc#) </option>
                                             </cfloop>
                                         </select>
                                     </div>

@@ -3,7 +3,7 @@
     param name="session.ci_sort" default="strCountryName ASC" type="string";
 
     if(structKeyExists(form, "search") and len(trim(form.search))) {
-        session.ci_search = form.search; 
+        session.ci_search = form.search;
     }else if (structKeyExists(form, "delete") or structKeyExists(url, "delete")) {
         session.ci_search = "";
     }
@@ -35,8 +35,7 @@
                     strISO2 LIKE '%#session.ci_search#%' OR
                     strCurrency LIKE '%#session.ci_search#%' OR
                     strRegion LIKE '%#session.ci_search#%' OR
-                    strSubRegion LIKE '%#session.ci_search#%' OR
-                    strTimezone   LIKE '%#session.ci_search#%'
+                    strSubRegion LIKE '%#session.ci_search#%'
                 )
                 ORDER BY #session.ci_sort#
             "
@@ -50,7 +49,7 @@
                 WHERE blnActive = 0
                 ORDER BY #session.ci_sort#
             "
-        );   
+        );
     }
 
 </cfscript>
