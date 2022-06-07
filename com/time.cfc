@@ -134,4 +134,46 @@ component displayname="sysadmin" output="false" {
 
 
 
+    public struct function calcTZOffset(required string timeZoneID, boolean returnTimezones="false") {
+        // Init the timezome java class
+        var tz = createObject( "java", "java.util.TimeZone" );
+
+        // Get the timezone info
+        var tzInfo = tz.getTimeZone(
+            javaCast( "string", arguments.timeZoneID )
+        );
+
+        // Get the offset for the timezone
+        var tzOffset = tzInfo.getOffset(
+            javaCast("long", 0)
+        );
+
+        // Get the offset hours
+        var tzOffsetHours = tzOffset / 3600000;
+
+        //Check if the timezone is observing DST
+        var inDST = tzInfo.observesDaylightTime();
+        var tzOffsetHoursDST = inDST ? tzOffsetHours + 1 : tzOffsetHours;
+
+        //Return
+        var offset = {
+            inDST = inDST,
+            timeZone = arguments.timeZoneID,
+            offsetMillis = tzOffset,
+            offsetHours = tzOffsetHours,
+            dstOffsetHours = tzOffsetHoursDST,
+            timeZones = (arguments.returnTimezones)? tz.getAvailableIDs(): [] //Allow the user to return all the timezones (optional)
+        };
+
+
+        dump(offset);
+        abort;
+
+
+        //writeOutput(tzOffset / 3600000);
+        return offset;
+    }
+
+
+
 }
