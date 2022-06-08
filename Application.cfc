@@ -11,9 +11,9 @@ component displayname="Application" output="false" hint="Handle the application.
     setting showdebugoutput = true;
     setting requesttimeout = 60;
     processingdirective pageEncoding="utf-8";
-    setTimezone("UTC+00:00");
+    setTimezone("UTC+00:00"); // Do NOT change this setting!
 
-    <!--- onApplicationStart fires when the application is first created --->
+
     public boolean function onApplicationStart() {
 
 
@@ -71,7 +71,7 @@ component displayname="Application" output="false" hint="Handle the application.
     }
 
 
-    <!--- onRequestStart fires at first part of page processing --->
+
     public boolean function onRequestStart(required string TargetPage) {
 
         <!--- Reinit Application --->

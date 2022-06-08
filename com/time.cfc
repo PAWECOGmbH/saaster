@@ -19,7 +19,7 @@ component displayname="sysadmin" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            variables.timezone = getTimezoneBy(variables.timezoneID).timezone;
+            variables.timezone = getTheTimezone(variables.timezoneID).timezone;
 
         }
 
@@ -28,7 +28,7 @@ component displayname="sysadmin" output="false" {
     }
 
 
-    private struct function getTimezoneBy(required any timezone) {
+    private struct function getTheTimezone(required any timezone) {
 
         local.structTimezone = structNew();
 
@@ -89,27 +89,20 @@ component displayname="sysadmin" output="false" {
 
     }
 
-    // Get users current date/time using the timezone
-    public date function getNow() {
 
-        local.userDate = now();
+    public date function utc2local(date utcDate) {
 
-        if (variables.customerID gt 0) {
-            local.userDate = utc2local(now(), variables.timezone, variables.customerID);
+        if (structKeyExists(arguments, "utcDate")) {
+            local.utcDate = arguments.utcDate;
+        } else {
+            local.utcDate = now();
         }
-
-        return local.userDate;
-
-    }
-
-
-    public date function utc2local(required date utcDate, required string timezone) {
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
 
         // Get infos of the corresponding timezone
-        local.zoneInfos = local.objJAVATimezone.getTimeZone(arguments.timezone);
+        local.zoneInfos = local.objJAVATimezone.getTimeZone(variables.timezone);
 
         // Get utc offset of timezone
         local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
@@ -119,12 +112,12 @@ component displayname="sysadmin" output="false" {
 
         // Add hours to time if dst
         if (local.inDST) {
-            local.localDate = dateAdd("h", local.offsetHours+1, arguments.utcDate);
+            local.localDate = dateAdd("h", local.offsetHours+1, local.utcDate);
         } else {
-            local.localDate = arguments.utcDate;
+            local.localDate = dateAdd("h", local.offsetHours, local.utcDate);
         }
 
-        return createODBCDateTime(local.localDate);
+        return local.localDate;
 
     }
 

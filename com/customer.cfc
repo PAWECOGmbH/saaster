@@ -175,7 +175,7 @@ component displayname="customer" output="false" {
                 sql = "
 
                     UPDATE customers
-                    SET dtmMutDate = now(),
+                    SET dtmMutDate = UTC_TIMESTAMP(),
                         strCompanyName = :company,
                         strContactPerson = :contact,
                         strAddress = :address,
@@ -263,7 +263,7 @@ component displayname="customer" output="false" {
                 sql = "
 
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson)
-                    VALUES (:intCustParentID, now(), now(), 1, :company_name,
+                    VALUES (:intCustParentID, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, :company_name,
                         (SELECT intCountryID FROM countries WHERE blnDefault = 1), :contact_person);
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
