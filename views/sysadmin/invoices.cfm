@@ -32,7 +32,6 @@
     }
 
     if (len(trim(session.i_search))) {
-
         local.qTotalInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
@@ -113,7 +112,6 @@
     }
 
     if (len(trim(session.i_search))) {
-
         local.qInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
@@ -141,8 +139,6 @@
                         ) as customerName
 
                 FROM invoices
-                WHERE 1=1
-                #session.status_sql#
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
