@@ -1,25 +1,23 @@
 
 <cfscript>
-
     param name="session.i_search" default="" type="string";
     param name="session.i_sort" default="invoiceNumber" type="string";
-    param name="session.i_start" default=1 type="numeric";
     param name="session.status" default=0 type="numeric";
-    param name="status_sql" default="";
+    param name="session.invoice_page" default=1 type="numeric";
+    param name="session.status_sql" default="";
 
-    // Check if url "start" exists
-    if (structKeyExists(url, "start") and not isNumeric(url.start)) {
-        abort;
-    }
+    local.getEntries = 10;
+    local.invoice_start = 0;
 
-    // Pagination
-    getEntries = 10;
-    if( structKeyExists(url, 'start')){
-        session.i_start = url.start;
+    // Status
+    if(structKeyExists(form, 'status')){
+        session.status = form.status;
+        if (session.status gt 0) {
+            session.status_sql = "AND invoices.intPaymentStatusID = #session.status#";
+        }else {
+            session.status_sql = "";
+        }
     }
-    next = session.i_start+getEntries;
-    prev = session.i_start-getEntries;
-    session.sql_i_start = session.i_start-1;
 
     // Search
     if(structKeyExists(form, 'search') and len(trim(form.search))){
@@ -33,28 +31,12 @@
         session.i_sort = form.sort;
     }
 
-    // Status
-    if(structKeyExists(form, 'status')){
-        session.status = form.status;
-        if (session.status gt 0) {
-            status_sql = "AND invoices.intPaymentStatusID = #session.status#";
-        }
-    }
-
-    qTotalInvoices = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT COUNT(intInvoiceID) as totalInvoices
-            FROM invoices
-        "
-    )
-
     if (len(trim(session.i_search))) {
 
-        qInvoices = queryExecute (
+        local.qTotalInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
-                SELECT  invoices.intInvoiceID,
+                SELECT  COUNT(intInvoiceID) as totalInvoices,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle,
                         invoices.dtmInvoiceDate,
@@ -81,7 +63,7 @@
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #status_sql#
+                #session.status_sql#
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
@@ -102,7 +84,90 @@
                     )
 
                 ORDER BY #session.i_sort#
-                LIMIT #session.sql_i_start#, #getEntries#
+                LIMIT #local.invoice_start#, #local.getEntries#
+            "
+        )
+    } else {
+        local.qTotalInvoices = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intInvoiceID) as totalInvoices
+                FROM invoices
+                WHERE 1=1
+                #session.status_sql#
+            "
+        ) 
+    }
+
+    local.pages = ceiling(local.qTotalInvoices.totalInvoices / local.getEntries);
+
+    // Check if url "page" exists and if it matches the requirments
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+        session.invoice_page = url.page;
+    }
+
+    if (session.invoice_page gt 1){
+        local.tPage = session.invoice_page - 1;
+        local.valueToAdd = local.getEntries * tPage;
+        local.invoice_start = local.invoice_start + local.valueToAdd;
+    }
+
+    if (len(trim(session.i_search))) {
+
+        local.qInvoices = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT  invoices.intInvoiceID,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle,
+                        invoices.dtmInvoiceDate,
+                        invoices.dtmDueDate,
+                        invoices.strCurrency,
+                        invoices.decTotalPrice,
+                        invoice_status.strInvoiceStatusVariable,
+                        invoice_status.strColor,
+                        IF(
+                            LENGTH(customers.strCompanyName),
+                            customers.strCompanyName,
+                            IF(
+                                LENGTH(invoices.intUserID),
+                                (
+                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                                    FROM users
+                                    WHERE intUserID = invoices.intUserID
+                                ),
+                                customers.strContactPerson
+                            )
+                        ) as customerName
+
+                FROM invoices
+                WHERE 1=1
+                #session.status_sql#
+
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                #session.status_sql#
+
+                INNER JOIN customers ON 1=1
+                AND invoices.intCustomerID = customers.intCustomerID
+
+                WHERE (
+                    CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) LIKE '%#session.i_search#%' OR
+                    invoices.strInvoiceTitle LIKE '%#session.i_search#%' OR
+                    invoices.decTotalPrice LIKE '%#session.i_search#%' OR
+                    invoices.strCurrency LIKE '%#session.i_search#%' OR
+                    customers.strCompanyName LIKE '%#session.i_search#%' OR
+                    customers.strContactPerson LIKE '%#session.i_search#%' OR
+                        (
+                            SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                            FROM users
+                            WHERE intUserID = invoices.intUserID
+                        ) LIKE '%#replace(session.i_search, " ", "%", "all")#%'
+
+                    )
+
+                ORDER BY #session.i_sort#
+                LIMIT #local.invoice_start#, #local.getEntries#
             "
         )
 
@@ -110,7 +175,7 @@
     } else {
 
 
-        qInvoices = queryExecute (
+        local.qInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT  invoices.intInvoiceID,
@@ -140,13 +205,13 @@
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #status_sql#
+                #session.status_sql#
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
 
                 ORDER BY #session.i_sort#
-                LIMIT #session.sql_i_start#, #getEntries#
+                LIMIT #local.invoice_start#, #local.getEntries#
             "
         )
 
@@ -194,7 +259,7 @@
                         </div>
                         <div class="card-body">
                             <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
-                            <form action="#application.mainURL#/sysadmin/invoices?start=1" method="post">
+                            <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">
                                 <div class="row">
                                     <div class="col-lg-3">
                                         <label class="form-label">Search for invoice:</label>
@@ -303,20 +368,33 @@
                                 <div class="col-lg-12 text-center text-red">There are no invoices found.</div>
                             </cfif>
                         </div>
-                        <div class="pt-4 card-footer d-flex align-items-center">
-                            <ul class="pagination m-0 ms-auto">
-                                <li class="page-item <cfif session.i_start lte getEntries>disabled</cfif>">
-                                    <a class="page-link" href="#application.mainURL#/sysadmin/invoices?start=#prev#" tabindex="-1" aria-disabled="true">
-                                        <i class="fas fa-angle-left"></i> prev
-                                    </a>
-                                </li>
-                                <li class="ms-3 page-item <cfif qTotalInvoices.totalInvoices lt next>disabled</cfif>">
-                                    <a class="page-link" href="#application.mainURL#/sysadmin/invoices?start=#next#">
-                                        next <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <cfif local.pages neq 1 and qInvoices.recordCount>
+                            <div class="card-body">
+                                <ul class="pagination justify-content-center" id="pagination">
+                                    
+                                    <!--- Prev arrow --->
+                                    <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page-1#" tabindex="-1" aria-disabled="true">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+        
+                                    <!--- Pages --->
+                                    <cfloop index="i" from="1" to="#local.pages#">
+                                        <li class="page-item <cfif session.invoice_page eq i>active</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#i#">#i#</a>
+                                        </li>
+                                    </cfloop>
+                                    
+                                    <!--- Next arrow --->
+                                    <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page+1#">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </cfif>
                     </div>
                 </div>
             </div>
