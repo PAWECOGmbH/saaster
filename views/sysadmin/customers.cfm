@@ -1,21 +1,10 @@
 <cfscript>
     param name="session.cust_search" default="" type="string";
     param name="session.cust_sort" default="intPrio" type="string";
-    param name="session.cust_start" default=1 type="numeric";
+    param name="session.customers_page" default=1 type="numeric";
 
-    // Check if url "start" exists
-    if (structKeyExists(url, "start") and not isNumeric(url.start)) {
-        abort;
-    }
-
-    // Pagination
-    getEntries = 10;
-    if( structKeyExists(url, 'start')){
-        session.cust_start = url.start;
-    }
-    next = session.cust_start+getEntries;
-    prev = session.cust_start-getEntries;
-    session.cust_sql_start = session.cust_start-1;
+    local.getEntries = 10;
+    local.cust_start = 0;
 
     // Search
     if(structKeyExists(form, 'search') and len(trim(form.search))){
@@ -28,10 +17,10 @@
     if(structKeyExists(form, 'sort')){
         session.cust_sort = form.sort;
     }
-
+    
     if (len(trim(session.cust_search))) {
         
-        qTotalCustomers = queryExecute(
+        local.qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
@@ -51,10 +40,38 @@
                 OR customers.strCity LIKE '%#session.cust_search#%'
                 OR customers.strEmail LIKE '%#session.cust_search#%'
                 AND customers.blnActive = 1
+
+                ORDER BY #session.cust_sort#
+                LIMIT #local.cust_start#, #getEntries#
             "
         )
+    }
+    else {
+        local.qTotalCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intCustomerID) as totalCustomers
+                FROM customers
+                WHERE blnActive = 1
+            "
+        )
+    }
 
-        qCustomers = queryExecute(
+    local.pages = ceiling(local.qTotalCustomers.totalCustomers / local.getEntries);
+
+    // Check if url "page" exists and if it matches the requirments
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+        session.customers_page = url.page;
+    }
+
+    if (session.customers_page gt 1){
+        local.tPage = session.customers_page - 1;
+        local.valueToAdd = local.getEntries * tPage;
+        local.cust_start = local.cust_start + local.valueToAdd;
+    }
+
+    if (len(trim(session.cust_search))) {
+        local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson, 
@@ -80,21 +97,11 @@
                 AND customers.blnActive = 1 
 
                 ORDER BY #session.cust_sort#
-                LIMIT #session.cust_sql_start#, #getEntries#
+                LIMIT #local.cust_start#, #getEntries#
             "
         );
-    }
-    else {
-        qTotalCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intCustomerID) as totalCustomers
-                FROM customers
-                WHERE blnActive = 1
-            "
-        )
-        
-        qCustomers = queryExecute(
+    }else {
+        local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT customers.*, countries.strCountryName
@@ -102,10 +109,11 @@
                 LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
                 WHERE customers.blnActive = 1
                 ORDER BY #session.cust_sort#
-                LIMIT #session.cust_sql_start#, #getEntries#
+                LIMIT #local.cust_start#, #getEntries#
             "
         );
     }
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -136,7 +144,7 @@
         <div class="container-xl">
             <div class="row">
                 <div class="col-lg-12">
-                    <form action="#application.mainURL#/sysadmin/customers?start=1" method="post">
+                    <form action="#application.mainURL#/sysadmin/customers?page=1" method="post">
                         <div class="row">
                             <div class="col-lg-4">
                                 <label class="form-label">Search for customer:</label>
@@ -224,20 +232,33 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="pt-4 card-footer d-flex align-items-center">
-                            <ul class="pagination m-0 ms-auto">
-                                <li class="page-item <cfif session.cust_start lt getEntries>disabled</cfif>">
-                                    <a class="page-link" href="#application.mainURL#/sysadmin/customers?start=#prev#" tabindex="-1" aria-disabled="true">
-                                        <i class="fas fa-angle-left"></i> prev
-                                    </a>
-                                </li>
-                                <li class="ms-3 page-item <cfif qTotalCustomers.totalCustomers lt next>disabled</cfif>">
-                                    <a class="page-link" href="#application.mainURL#/sysadmin/customers?start=#next#">
-                                        next <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <cfif local.pages neq 1 and qCustomers.recordCount>
+                            <div class="card-body">
+                                <ul class="pagination justify-content-center" id="pagination">
+                                    
+                                    <!--- Prev arrow --->
+                                    <li class="page-item <cfif session.customers_page eq 1>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#session.customers_page-1#" tabindex="-1" aria-disabled="true">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+        
+                                    <!--- Pages --->
+                                    <cfloop index="i" from="1" to="#local.pages#">
+                                        <li class="page-item <cfif session.customers_page eq i>active</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#i#">#i#</a>
+                                        </li>
+                                    </cfloop>
+                                    
+                                    <!--- Next arrow --->
+                                    <li class="page-item <cfif session.customers_page gte local.pages>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#session.customers_page+1#">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </cfif>
                     </div>
                 </div>
             </div>
