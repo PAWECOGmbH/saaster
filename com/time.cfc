@@ -6,7 +6,7 @@ component displayname="sysadmin" output="false" {
 
         variables.customerID = 0;
         variables.timezoneID = 0;
-        variables.timezone = "UTC+00:00";
+        variables.timezone = "";
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -19,7 +19,7 @@ component displayname="sysadmin" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            variables.timezone = getTimezones(tzID=variables.timezoneID)[1].utc;
+            variables.timezone = getTimezoneBy(variables.timezoneID).timezone;
 
         }
 
@@ -28,68 +28,49 @@ component displayname="sysadmin" output="false" {
     }
 
 
-    // Get users current date using the timezone
-    public date function currentDate() {
+    private struct function getTimezoneBy(required any timezone) {
 
-        local.userDate = now();
+        local.structTimezone = structNew();
 
-        if (variables.customerID gt 0) {
-            local.userDate = utc2local(now(), variables.timezone, variables.customerID);
+        if (isNumeric(arguments.timezone)) {
+            local.qryWhere = "WHERE intTimeZoneID = " & arguments.timezone;
+        } else {
+            local.qryWhere = "WHERE strTimezone = '#arguments.timezone#'";
+        }
+
+        local.qTimezone = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT intTimeZoneID, strUTC, strTimezone, strCity
+                FROM timezones
+                #local.qryWhere#
+            "
+        )
+
+        if (local.qTimezone.recordCount) {
+
+            local.structTimezone = structNew();
+            local.structTimezone['id'] = local.qTimezone.intTimeZoneID;
+            local.structTimezone['utc'] = local.qTimezone.strUTC;
+            local.structTimezone['city'] = local.qTimezone.strCity;
+            local.structTimezone['timezone'] = local.qTimezone.strTimezone;
 
         }
 
-        return local.userDate;
+        return local.structTimezone;
 
     }
 
 
-    public array function getTimezones(numeric tzID, string timezone) {
 
-        if (structKeyExists(arguments, "tzID") and arguments.tzID gt 0) {
-            local.whereSQL = "WHERE intTimeZoneID = " & arguments.tzID;
-        } else if (structKeyExists(arguments, "timezone")) {
-            local.whereSQL = "WHERE strUTC = '#arguments.timezone#'";
-        } else {
-            local.whereSQL = "";
-        }
-
-
-        // We set summer time for the corresponding countries from the last Sunday in March to the last Sunday in October.
-        // Yes, some countries have different days, but we ignore that for now.
-
-        // Get the last Sunday in March this Year
-        local.monthMarch = createDate(year(now()),3,1);
-        local.lastDayOfMarch = dateAdd("m",1, monthMarch) - 1;
-        local.theLastSundayInMarch = (lastDayOfMarch - dayOfWeek( lastDayOfMarch ) + 1);
-        if (month( theLastSundayInMarch ) neq month( monthMarch )) {
-            local.theLastSundayInMarch = (theLastSundayInMarch - 7);
-
-        }
-        local.theLastSundayInMarch = createODBCDate(local.theLastSundayInMarch);
-
-        // Get the last Sunday in October this Year
-        local.monthOctober = createDate(year(now()),10,1);
-        local.lastDayOfOctober = dateAdd("m",1, monthOctober) - 1;
-        local.theLastSundayInOctober = (lastDayOfOctober - dayOfWeek( lastDayOfOctober ) + 1);
-        if (month( theLastSundayInOctober ) neq month( monthOctober )) {
-            local.theLastSundayInOctober = (theLastSundayInOctober - 7);
-
-        }
-        local.theLastSundayInOctober = createODBCDate(local.theLastSundayInOctober);
-
-        if ((local.theLastSundayInMarch <= createODBCDate(currentDate())) and (local.theLastSundayInOctober >= createODBCDate(currentDate()))) {
-            local.getColumn = "strUTCSummer";
-        } else {
-            local.getColumn = "strUTCWinter";
-        }
+    public array function getTimezones() {
 
         local.qTimezones = queryExecute (
             options = {datasource = application.datasource},
             sql = "
-                SELECT intTimeZoneID, strCity, strCountry, strUTCSummer, #local.getColumn# as strUTC
+                SELECT intTimeZoneID, strUTC, strTimezone, strCity
                 FROM timezones
-                #local.whereSQL#
-                ORDER BY strCountry
+                ORDER BY strTimezone
             "
         )
 
@@ -100,7 +81,7 @@ component displayname="sysadmin" output="false" {
             local.structTimezone['id'] = local.qTimezones.intTimeZoneID;
             local.structTimezone['utc'] = local.qTimezones.strUTC;
             local.structTimezone['city'] = local.qTimezones.strCity;
-            local.structTimezone['country'] = local.qTimezones.strCountry;
+            local.structTimezone['timezone'] = local.qTimezones.strTimezone;
             arrayAppend(local.arrayTimezone, local.structTimezone);
         }
 
@@ -108,72 +89,44 @@ component displayname="sysadmin" output="false" {
 
     }
 
+    // Get users current date/time using the timezone
+    public date function getNow() {
 
-    public date function local2utc(required date localDate) {
+        local.userDate = now();
 
-        if (isDate(arguments.localDate)) {
-            local.utcDate = dateTimeFormat(date:arguments.localDate,timezone:'UTC+00:00');
-        } else {
-            local.utcDate = dateTimeFormat(date:now(),timezone:'UTC+00:00');
+        if (variables.customerID gt 0) {
+            local.userDate = utc2local(now(), variables.timezone, variables.customerID);
         }
 
-        return createODBCDateTime(local.utcDate);
+        return local.userDate;
 
     }
 
 
     public date function utc2local(required date utcDate, required string timezone) {
 
-        local.hourDiff = replace(replace(arguments.timezone, "UTC", ""), ":00", "");
-        local.newDate = dateAdd("h", local.hourDiff, arguments.utcDate);
+        // Init the Java object
+        local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
 
-        return createODBCDateTime(local.newDate);
+        // Get infos of the corresponding timezone
+        local.zoneInfos = local.objJAVATimezone.getTimeZone(arguments.timezone);
 
+        // Get utc offset of timezone
+        local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
+
+        // Are we having dst time?
+        local.inDST = local.zoneInfos.observesDaylightTime();
+
+        // Add hours to time if dst
+        if (local.inDST) {
+            local.localDate = dateAdd("h", local.offsetHours+1, arguments.utcDate);
+        } else {
+            local.localDate = arguments.utcDate;
+        }
+
+        return createODBCDateTime(local.localDate);
 
     }
-
-
-
-    public struct function calcTZOffset(required string timeZoneID, boolean returnTimezones="false") {
-        // Init the timezome java class
-        var tz = createObject( "java", "java.util.TimeZone" );
-
-        // Get the timezone info
-        var tzInfo = tz.getTimeZone(
-            javaCast( "string", arguments.timeZoneID )
-        );
-
-        // Get the offset for the timezone
-        var tzOffset = tzInfo.getOffset(
-            javaCast("long", 0)
-        );
-
-        // Get the offset hours
-        var tzOffsetHours = tzOffset / 3600000;
-
-        //Check if the timezone is observing DST
-        var inDST = tzInfo.observesDaylightTime();
-        var tzOffsetHoursDST = inDST ? tzOffsetHours + 1 : tzOffsetHours;
-
-        //Return
-        var offset = {
-            inDST = inDST,
-            timeZone = arguments.timeZoneID,
-            offsetMillis = tzOffset,
-            offsetHours = tzOffsetHours,
-            dstOffsetHours = tzOffsetHoursDST,
-            timeZones = (arguments.returnTimezones)? tz.getAvailableIDs(): [] //Allow the user to return all the timezones (optional)
-        };
-
-
-        dump(offset);
-        abort;
-
-
-        //writeOutput(tzOffset / 3600000);
-        return offset;
-    }
-
 
 
 }

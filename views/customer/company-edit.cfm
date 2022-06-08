@@ -214,7 +214,7 @@
                                         <select name="timezoneID" class="form-select" required>
                                             <option value=""></option>
                                             <cfloop array="#timeZones#" index="i">
-                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>#i.country# - #i.city# (#i.utc#) </option>
+                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>#i.timezone# - #i.city# (#i.utc#) </option>
                                             </cfloop>
                                         </select>
                                     </div>
