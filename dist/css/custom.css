@@ -139,3 +139,6 @@ td.feature {
       width: 15%;
       margin: 0 auto;
   }
+  .bottom_line textarea{
+      height: 36px;
+  }
