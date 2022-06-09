@@ -66,7 +66,7 @@
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
-
+ 
                 WHERE (
                     CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) LIKE '%#session.i_search#%' OR
                     invoices.strInvoiceTitle LIKE '%#session.i_search#%' OR
@@ -81,6 +81,7 @@
                         ) LIKE '%#replace(session.i_search, " ", "%", "all")#%'
 
                     )
+
 
                 ORDER BY #session.i_sort#
                 LIMIT #local.invoice_start#, #local.getEntries#
@@ -367,25 +368,61 @@
                         <cfif local.pages neq 1 and qInvoices.recordCount>
                             <div class="card-body">
                                 <ul class="pagination justify-content-center" id="pagination">
-                                    
+
+                                    <!--- First page --->
+                                    <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=1" tabindex="-1" aria-disabled="true">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+
                                     <!--- Prev arrow --->
                                     <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page-1#" tabindex="-1" aria-disabled="true">
                                             <i class="fas fa-angle-left"></i>
                                         </a>
                                     </li>
-        
+                                    
                                     <!--- Pages --->
-                                    <cfloop index="i" from="1" to="#local.pages#">
-                                        <li class="page-item <cfif session.invoice_page eq i>active</cfif>">
-                                            <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#i#">#i#</a>
-                                        </li>
-                                    </cfloop>
+                                    <cfif session.invoice_page + 4 gt local.pages>
+                                        <cfset blockPage = local.pages>
+                                    <cfelse>
+                                        <cfset blockPage = session.invoice_page + 4>
+                                    </cfif>
+                                    
+                                    <cfif blockPage neq local.pages>
+                                        <cfloop index="j" from="#session.invoice_page#" to="#blockPage#">
+                                            <cfif not blockPage gt local.pages>
+                                                <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
+                                                </li>
+                                            </cfif>
+                                        </cfloop>
+                                    <cfelseif blockPage lt 5>
+                                        <cfloop index="j" from="1" to="#local.pages#">
+                                            <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
+                                                <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
+                                            </li>
+                                        </cfloop>
+                                    <cfelse>
+                                        <cfloop index="j" from="#local.pages - 4#" to="#local.pages#">
+                                                <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
+                                                </li>
+                                        </cfloop>
+                                    </cfif>
                                     
                                     <!--- Next arrow --->
                                     <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page+1#">
                                             <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+
+                                    <!--- Last page --->
+                                    <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#local.pages#">
+                                            <i class="fas fa-angle-double-right"></i>
                                         </a>
                                     </li>
                                 </ul>

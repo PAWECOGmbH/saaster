@@ -1,21 +1,11 @@
 <cfscript>
     param name="session.c_search" default="" type="string";
     param name="session.c_sort" default="intPrio" type="string";
-    param name="session.start" default=1 type="numeric";
+    param name="session.c_page" default=1 type="numeric";
 
-    // Check if url "start" exists
-    if (structKeyExists(url, "start") and not isNumeric(url.start)) {
-        abort;
-    }
 
-    // Pagination
-    getEntries = 10;
-    if( structKeyExists(url, 'start')){
-        session.start = url.start;
-    }
-    next = session.start+getEntries;
-    prev = session.start-getEntries;
-    session.sql_start = session.start-1;
+    local.getEntries = 10;
+    local.c_start = 0;
 
     // Search
     if(structKeyExists(form, 'search') and len(trim(form.search))){
@@ -29,17 +19,58 @@
         session.c_sort = form.sort;
     }
 
-    qTotalCountries = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT COUNT(intCountryID) as totalCountries
-            FROM countries
-            WHERE blnActive = 1
-        "
-    );
+    if (len(trim(session.c_search))) {
+        local.qTotalCountries = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
+                FROM countries
+                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
+                WHERE blnActive = 1
+                AND (
+                    strCountryName LIKE '%#session.c_search#%' OR
+                    strLocale LIKE '%#session.c_search#%' OR
+                    strISO1 LIKE '%#session.c_search#%' OR
+                    strISO2 LIKE '%#session.c_search#%' OR
+                    strCurrency LIKE '%#session.c_search#%' OR
+                    strRegion LIKE '%#session.c_search#%' OR
+                    strSubRegion LIKE '%#session.c_search#%' OR
+                    strTimezone   LIKE '%#session.c_search#%'
+                )
+                ORDER BY #session.c_sort#
+                LIMIT #local.c_start#, #getEntries#
+            "
+        );
+    }
+    else {
+        local.qTotalCountries = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
+                FROM countries
+                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
+                WHERE blnActive = 1
+                ORDER BY #session.c_sort#
+                LIMIT #local.c_start#, #getEntries#
+            "
+        )
+    }
+
+    local.pages = ceiling(local.qTotalCountries.totalCountries / local.getEntries);
+
+    // Check if url "page" exists and if it matches the requirments
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+        session.c_page = url.page;
+    }
+
+    if (session.c_page gt 1){
+        local.tPage = session.c_page - 1;
+        local.valueToAdd = local.getEntries * tPage;
+        local.c_start = local.c_start + local.valueToAdd;
+    }
 
     if (len(trim(session.c_search))) {
-        qCountries = queryExecute(
+        local.qCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT countries.*, languages.strLanguageEN
@@ -57,12 +88,12 @@
                     strTimezone   LIKE '%#session.c_search#%'
                 )
                 ORDER BY #session.c_sort#
-                LIMIT #session.sql_start#, #getEntries#
+                LIMIT #local.c_start#, #getEntries#
             "
         );
     }
     else {
-        qCountries = queryExecute(
+        local.qCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT countries.*, languages.strLanguageEN
@@ -70,7 +101,7 @@
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
                 ORDER BY #session.c_sort#
-                LIMIT #session.sql_start#, #getEntries#
+                LIMIT #local.c_start#, #getEntries#
             "
         )
     }
@@ -130,7 +161,7 @@
                     <div class="card">
                         <div class="card-body">
                             <p>You have <b>#qTotalCountries.totalCountries#</b> countries activated. If you want to activate more countries, click to the "Import" or "New country" button.</p>
-                            <form action="#application.mainURL#/sysadmin/countries?start=1" method="post">
+                            <form action="#application.mainURL#/sysadmin/countries?page=1" method="post">
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <label class="form-label">Search for country:</label>
@@ -175,20 +206,20 @@
                                             <th width="5%"></th>
                                         </tr>
                                     </thead>
-                                    <cfif qCountries.recordCount>
+                                    <cfif local.qCountries.recordCount>
                                         <tbody id="dragndrop_body">
-                                            <cfloop query="qCountries">
+                                            <cfloop query="local.qCountries">
                                                 <tr>
-                                                    <td class="text-center">#qCountries.intPrio#</td>
-                                                    <td class="text-center">#yesNoFormat(qCountries.blnDefault)#</td>
-                                                    <td>#qCountries.strCountryName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
-                                                    <td class="text-center">#qCountries.strISO1#</td>
-                                                    <td>#qCountries.strRegion#</td>
-                                                    <td>#qCountries.strLanguageEN#</td>
-                                                    <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
-                                                    <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
+                                                    <td class="text-center">#local.qCountries.intPrio#</td>
+                                                    <td class="text-center">#yesNoFormat(local.qCountries.blnDefault)#</td>
+                                                    <td>#local.qCountries.strCountryName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#local.qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
+                                                    <td class="text-center">#local.qCountries.strISO1#</td>
+                                                    <td>#local.qCountries.strRegion#</td>
+                                                    <td>#local.qCountries.strLanguageEN#</td>
+                                                    <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_country.cfm?countryID=#local.qCountries.intCountryID#">Edit</a></td>
+                                                    <td><cfif !local.qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#local.qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
                                                 </tr>
-                                                #getModal.args('countries', 'strCountryName', qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#
+                                                #getModal.args('countries', 'strCountryName', local.qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#
                                             </cfloop>
                                         </tbody>
                                     <cfelse>
@@ -315,20 +346,64 @@
                                     </div>
                                 </table>
                             </div>
-                            <div class="pt-4 card-footer d-flex align-items-center">
-                                <ul class="pagination m-0 ms-auto">
-                                    <li class="page-item <cfif session.start lt getEntries>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?start=#prev#" tabindex="-1" aria-disabled="true">
-                                            <i class="fas fa-angle-left"></i> prev
-                                        </a>
-                                    </li>
-                                    <li class="ms-3 page-item <cfif qTotalCountries.totalCountries lt next>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?start=#next#">
-                                            next <i class="fas fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                            <cfif local.pages neq 1 and local.qCountries.recordCount>
+                                <div class="card-body">
+                                    <ul class="pagination justify-content-center" id="pagination">
+                                        
+                                        <!--- First Page --->
+                                        <li class="page-item <cfif session.c_page eq 1>disabled</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=1" tabindex="-1" aria-disabled="true">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+
+                                        <!--- Prev arrow --->
+                                        <li class="page-item <cfif session.c_page eq 1>disabled</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.c_page-1#" tabindex="-1" aria-disabled="true">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                        
+                                        <!--- Pages --->
+                                        <cfif session.c_page + 4 gt local.pages>
+                                            <cfset blockPage = local.pages>
+                                        <cfelse>
+                                            <cfset blockPage = session.c_page + 4>
+                                        </cfif>
+                                        
+                                        <cfif blockPage neq local.pages>
+                                            <cfloop index="j" from="#session.c_page#" to="#blockPage#">
+                                                <cfif not blockPage gt local.pages>
+                                                    <li class="page-item <cfif session.c_page eq j>active</cfif>">
+                                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                    </li>
+                                                </cfif>
+                                            </cfloop>
+                                        <cfelse>
+                                            <cfloop index="j" from="#local.pages - 4#" to="#local.pages#">
+                                                    <li class="page-item <cfif session.c_page eq j>active</cfif>">
+                                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                    </li>
+                                            </cfloop>
+                                        </cfif>
+
+                                        
+                                        <!--- Next arrow --->
+                                        <li class="page-item <cfif session.c_page gte local.pages>disabled</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.c_page+1#">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+
+                                        <!--- Last Page --->
+                                        <li class="page-item <cfif session.c_page gte local.pages>disabled</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#local.pages#">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </cfif>
                         </div>
                     </div>
                 </div>
