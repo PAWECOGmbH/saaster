@@ -19,7 +19,11 @@ component displayname="sysadmin" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
+            if (variables.timezoneID gt 0) {
+                variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
+            } else {
+                variables.timezone = getTimezoneByID(1).timezone;
+            }
 
         }
 
@@ -28,7 +32,7 @@ component displayname="sysadmin" output="false" {
     }
 
 
-    public struct function getTimezoneByID(numeric timezoneID) {
+    public struct function getTimezoneByID(required numeric timezoneID) {
 
         local.structTimezone = structNew();
 

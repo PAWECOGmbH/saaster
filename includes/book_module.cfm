@@ -164,10 +164,14 @@
                         position[1]['unit'] = getTrans('TitMonth', session.lng);
                         position[1]['price'] = moduleDetails.price_monthly;
                         priceAfterVAT = moduleDetails.priceMonthlyAfterVAT;
-                    } else {
+                    } else if (moduleStatus.recurring eq 'yearly') {
                         position[1]['unit'] = getTrans('TitYear', session.lng);
                         position[1]['price'] = moduleDetails.price_yearly;
                         priceAfterVAT = moduleDetails.priceYearlyAfterVAT;
+                    } else {
+                        position[1]['unit'] = getTrans('txtOneTime', session.lng);
+                        position[1]['price'] = moduleDetails.price_onetime;
+                        priceAfterVAT = moduleDetails.priceOnetimeAfterVAT;
                     }
                     arrayAppend(positionArray, position[1]);
                     posInfo['positions'] = positionArray;

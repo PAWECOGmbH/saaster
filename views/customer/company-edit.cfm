@@ -80,7 +80,7 @@
         custBillingInfo = session.billing_info
     }
 
-    timeZones = new com.time(session.customer_id).getTimezones();
+    timeZones = application.getTime.getTimezones();
 
 </cfscript>
 

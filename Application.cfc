@@ -36,9 +36,7 @@ component displayname="Application" output="false" hint="Handle the application.
                 ORDER BY intPrio
             "
         )
-        if (local.qLanguages.recordCount) {
-            application.allLanguages = ValueList(local.qLanguages.lang);
-        }
+        application.allLanguages = ValueList(local.qLanguages.lang);
 
         <!--- Load language struct and save it into the application scope --->
         application.langStruct = application.objGlobal.initLanguages();
@@ -55,7 +53,21 @@ component displayname="Application" output="false" hint="Handle the application.
     public void function onSessionStart() {
 
         <!--- Check browser language --->
-        local.firstString = listFirst(cgi.http_accept_language, ";");
+        local.browserLng = application.objLanguage.getBrowserLng(cgi.http_accept_language).lng;
+
+        <!--- Check whether the language is active in project --->
+        local.checkLng = findNoCase(local.browserLng, application.allLanguages);
+
+        <!--- Save the language into the session --->
+        session.lng = local.checkLng ? local.browserLng : application.objGlobal.getDefaultLanguage().iso;
+
+
+
+
+
+
+
+        /* local.firstString = listFirst(cgi.http_accept_language, ";");
         local.checkLeft = listFirst(firstString, ",");
         if (find("-", local.checkLeft)) {
             local.client_lang = listFirst(local.firstString, ",");
@@ -68,8 +80,8 @@ component displayname="Application" output="false" hint="Handle the application.
         session.lng = left(local.client_lang, 2);
 
         <!--- Set customers locale using his browser --->
-        local.newlocale = application.objLanguage.toLocale(language=local.client_lang);
-        local.oldlocale = setLocale(newlocale);
+        newlocale = application.objLanguage.toLocale(language=local.client_lang);
+        oldlocale = setLocale(newlocale); */
 
         return;
 
@@ -106,6 +118,17 @@ component displayname="Application" output="false" hint="Handle the application.
             onSessionStart();
             application.langStruct = application.objGlobal.initLanguages();
         }
+
+
+        <!--- Set the locale of the browser --->
+        local.browserLocale = application.objLanguage.getBrowserLng(cgi.http_accept_language).code;
+
+        <!--- Set customers locale using his browser --->
+        setLocale(application.objLanguage.toLocale(language=local.browserLocale));
+
+        /* dump(oldlocale);
+        abort; */
+
 
         return true;
 

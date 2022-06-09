@@ -75,7 +75,7 @@
     }
 
     qLanguages = application.objGlobal.getAllLanguages();
-    timeZones = new com.time(session.customer_id).getTimezones();
+    timeZones = application.getTime.getTimezones();
     getModal = new com.translate();
 </cfscript>
 
@@ -283,7 +283,7 @@
                                                                 <select name="timezone" class="form-select">
                                                                     <option value=""></option>
                                                                     <cfloop array="#timeZones#" index="i">
-                                                                        <option value="#i.utc#">(#i.utc#) #i.city# - #i.country#</option>
+                                                                        <option value="#i.utc#">#i.timezone# - #i.city# (#i.utc#)</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>

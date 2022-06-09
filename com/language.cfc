@@ -1,7 +1,34 @@
 
 component displayname="language" output="false" {
 
-    // Change browsers language to locale
+
+    // Get the language of the browser and return language and code
+    public struct function getBrowserLng(required string browserInfo) {
+
+        local.browserData = structNew();
+
+        local.firstString = listFirst(arguments.browserInfo, ";");
+        local.checkLeft = listFirst(firstString, ",");
+        if (find("-", local.checkLeft)) {
+            local.lng_code = listFirst(local.firstString, ",");
+        } else {
+            local.lng_code = listLast(local.firstString, ",");
+        }
+        local.client_lang = replace(listfirst(lng_code), "-", "_", "ALL");
+        local.lng = left(local.lng_code, 2);
+
+        local.browserData['code'] = local.client_lang;
+        local.browserData['lng'] = local.lng;
+
+        return local.browserData;
+
+    }
+
+
+
+
+
+    // Convert the language code of the browser into the locale of CF
     public string function toLocale(string language) {
 
         if (structKeyExists(arguments, "language")) {
