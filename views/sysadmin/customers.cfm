@@ -19,28 +19,23 @@
     }
     
     if (len(trim(session.cust_search))) {
-        
         local.qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers
+                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson, 
+                customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
                 FROM customers
 
-                INNER JOIN users 
+                LEFT JOIN countries
+                ON countries.intCountryID = customers.intCountryID
+
+                INNER JOIN users
                 ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
-                OR users.strEmail LIKE '%#session.cust_search#%' 
-                OR users.strFirstName LIKE '%#session.cust_search#%' 
-                OR users.strLastName LIKE '%#session.cust_search#%'
-                OR customers.strContactPerson LIKE '%#session.cust_search#%'
-                OR customers.strAddress LIKE '%#session.cust_search#%'
-                OR customers.strZIP LIKE '%#session.cust_search#%'
-                OR customers.strCity LIKE '%#session.cust_search#%'
-                OR customers.strEmail LIKE '%#session.cust_search#%'
-                AND customers.blnActive = 1
-
+                
+                WHERE customers.blnActive = 1
+                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity)
+                AGAINST ('*#session.cust_search#*' IN BOOLEAN MODE)
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
             "
@@ -78,24 +73,16 @@
                 customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
                 FROM customers
 
-                LEFT JOIN countries 
+                LEFT JOIN countries
                 ON countries.intCountryID = customers.intCountryID
 
-                INNER JOIN users 
+                INNER JOIN users
                 ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.strCompanyName LIKE '%#session.cust_search#%' 
-                OR users.strEmail LIKE '%#session.cust_search#%' 
-                OR users.strFirstName LIKE '%#session.cust_search#%' 
-                OR users.strLastName LIKE '%#session.cust_search#%'
-                OR customers.strContactPerson LIKE '%#session.cust_search#%'
-                OR customers.strAddress LIKE '%#session.cust_search#%'
-                OR customers.strZIP LIKE '%#session.cust_search#%'
-                OR customers.strCity LIKE '%#session.cust_search#%'
-                OR customers.strEmail LIKE '%#session.cust_search#%'
-                AND customers.blnActive = 1 
-
+                
+                WHERE customers.blnActive = 1
+                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity)
+                AGAINST ('*#session.cust_search#*' IN BOOLEAN MODE)
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
             "
@@ -188,39 +175,39 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <cfoutput query="qCustomers">
+                                            <cfoutput query="local.qCustomers">
                                                 <tr>
                                                     <td data-label="Name">
                                                         <div class="d-flex py-1 align-items-center">
-                                                            <cfif len(trim(qCustomers.strLogo))>
-                                                                <img src="#application.mainURL#/userdata/images/logos/#qCustomers.strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#qCustomers.strCompanyName#">
+                                                            <cfif len(trim(local.qCustomers.strLogo))>
+                                                                <img src="#application.mainURL#/userdata/images/logos/#local.qCustomers.strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#local.qCustomers.strCompanyName#">
                                                             <cfelse>
-                                                                <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
+                                                                <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(local.qCustomers.strCompanyName,2)#</div>
                                                             </cfif>
-                                                            <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
+                                                            <a href="#application.mainURL#/sysadmin/customers/details/#local.qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
-                                                                    <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
+                                                                    <div class="font-weight-medium">#local.qCustomers.strCompanyName#</div>
                                                                 </div>
                                                             </a>
                                                         </div>
                                                     </td>
 
                                                     <td data-label="Contact">
-                                                        <div>#qCustomers.strContactPerson#</div>
-                                                        <div class="text-muted">#qCustomers.strEmail#</div>
+                                                        <div>#local.qCustomers.strContactPerson#</div>
+                                                        <div class="text-muted">#local.qCustomers.strEmail#</div>
                                                     </td>
 
                                                     <td data-label="City">
-                                                        #qCustomers.strCity#
+                                                        #local.qCustomers.strCity#
                                                     </td>
 
                                                     <td data-label="Country">
-                                                        #qCustomers.strCountryName#
+                                                        #local.qCustomers.strCountryName#
                                                     </td>
 
                                                     <td>
                                                         <div class="btn-list flex-nowrap">
-                                                            <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomers.intCustomerID#" class="btn">
+                                                            <a href="#application.mainURL#/sysadmin/customers/edit/#local.qCustomers.intCustomerID#" class="btn">
                                                                 Edit
                                                             </a>
                                                         </div>
@@ -232,10 +219,17 @@
                                 </div>
                             </div>
                         </div>
-                        <cfif local.pages neq 1 and qCustomers.recordCount>
+                        <cfif local.pages neq 1 and local.qCustomers.recordCount>
                             <div class="card-body">
                                 <ul class="pagination justify-content-center" id="pagination">
                                     
+                                    <!--- First arrow --->
+                                    <li class="page-item <cfif session.customers_page eq 1>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=1" tabindex="-1" aria-disabled="true">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+
                                     <!--- Prev arrow --->
                                     <li class="page-item <cfif session.customers_page eq 1>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#session.customers_page-1#" tabindex="-1" aria-disabled="true">
@@ -244,16 +238,45 @@
                                     </li>
         
                                     <!--- Pages --->
-                                    <cfloop index="i" from="1" to="#local.pages#">
-                                        <li class="page-item <cfif session.customers_page eq i>active</cfif>">
-                                            <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#i#">#i#</a>
-                                        </li>
-                                    </cfloop>
+                                    <cfif session.customers_page + 4 gt local.pages>
+                                        <cfset blockPage = local.pages>
+                                    <cfelse>
+                                        <cfset blockPage = session.customers_page + 4>
+                                    </cfif>
                                     
+                                    <cfif blockPage neq local.pages>
+                                        <cfloop index="j" from="#session.customers_page#" to="#blockPage#">
+                                            <cfif not blockPage gt local.pages>
+                                                <li class="page-item <cfif session.customers_page eq j>active</cfif>">
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#j#">#j#</a>
+                                                </li>
+                                            </cfif>
+                                        </cfloop>
+                                    <cfelseif blockPage lt 5>
+                                        <cfloop index="j" from="1" to="#local.pages#">
+                                            <li class="page-item <cfif session.customers_page eq j>active</cfif>">
+                                                <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#j#">#j#</a>
+                                            </li>
+                                        </cfloop>
+                                    <cfelse>
+                                        <cfloop index="j" from="#local.pages - 4#" to="#local.pages#">
+                                                <li class="page-item <cfif session.customers_page eq j>active</cfif>">
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#j#">#j#</a>
+                                                </li>
+                                        </cfloop>
+                                    </cfif>
+
                                     <!--- Next arrow --->
                                     <li class="page-item <cfif session.customers_page gte local.pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#session.customers_page+1#">
                                             <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+
+                                    <!--- Last page --->
+                                    <li class="page-item <cfif session.customers_page gte local.pages>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=#local.pages#">
+                                            <i class="fas fa-angle-double-right"></i>
                                         </a>
                                     </li>
                                 </ul>
