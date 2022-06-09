@@ -19,7 +19,7 @@ component displayname="sysadmin" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            variables.timezone = getTheTimezone(variables.timezoneID).timezone;
+            variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
 
         }
 
@@ -28,22 +28,19 @@ component displayname="sysadmin" output="false" {
     }
 
 
-    private struct function getTheTimezone(required any timezone) {
+    public struct function getTimezoneByID(numeric timezoneID) {
 
         local.structTimezone = structNew();
 
-        if (isNumeric(arguments.timezone)) {
-            local.qryWhere = "WHERE intTimeZoneID = " & arguments.timezone;
-        } else {
-            local.qryWhere = "WHERE strTimezone = '#arguments.timezone#'";
-        }
-
         local.qTimezone = queryExecute (
             options = {datasource = application.datasource},
+            params = {
+                timezoneID: {type: "numeric", value: structKeyExists(arguments, "timezoneID")?arguments.timezoneID:variables.timezoneID}
+            },
             sql = "
                 SELECT intTimeZoneID, strUTC, strTimezone, strCity
                 FROM timezones
-                #local.qryWhere#
+                WHERE intTimeZoneID = :timezoneID
             "
         )
 

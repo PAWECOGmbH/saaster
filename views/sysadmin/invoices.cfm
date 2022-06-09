@@ -263,10 +263,10 @@
                                     <table class="table table-vcenter table-mobile-md card-table">
                                         <thead>
                                             <tr>
-                                                <th>Date</th>
+                                                <th>Date (UTC)</th>
                                                 <th>Number</th>
                                                 <th>Status</th>
-                                                <th>Due date</th>
+                                                <th>Due date (UTC)</th>
                                                 <th>Customer</th>
                                                 <th>Currency</th>
                                                 <th class="text-end">Total</th>
@@ -276,13 +276,13 @@
                                         <tbody>
                                         <cfloop query="qInvoices">
                                             <tr>
-                                                <td>#LSDateFormat(qInvoices.dtmInvoiceDate)#</td>
+                                                <td>#lsDateFormat(qInvoices.dtmInvoiceDate)#</td>
                                                 <td>#qInvoices.invoiceNumber#</td>
                                                 <td>#objInvoice.getInvoiceStatusBadge('en', qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
-                                                <td>#LSDateFormat(qInvoices.dtmDueDate)#</td>
+                                                <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
                                                 <td>#qInvoices.customerName#</td>
                                                 <td>#qInvoices.strCurrency#</td>
-                                                <td class="text-end">#lsNumberFormat(qInvoices.decTotalPrice, '_,___.__')#</td>
+                                                <td class="text-end">#lsNumberFormat(qInvoices.decTotalPrice)#</td>
                                                 <td class="text-end float-end">
                                                     <div class="btn-list flex-nowrap">
                                                         <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">

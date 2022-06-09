@@ -66,10 +66,10 @@
                                     <cfloop index="i" array="#local.qInvoices.arrayInvoices#">
                                         <tr>
                                             <td>#i.invoiceNumber#</td>
-                                            <td>#lsDateFormat(i.invoiceDate)#</td>
-                                            <td>#lsDateFormat(i.invoiceDueDate)#</td>
+                                            <td>#lsDateFormat(getTime.utc2local(utcDate=i.invoiceDate))#</td>
+                                            <td>#lsDateFormat(getTime.utc2local(utcDate=i.invoiceDueDate))#</td>
                                             <td>#i.invoiceTitle#</td>
-                                            <td class="text-end">#i.invoiceCurrency# #lsNumberFormat(i.invoiceTotal, '__,___.__')#</td>
+                                            <td class="text-end">#i.invoiceCurrency# #lsNumberFormat(i.invoiceTotal)#</td>
                                             <td class="text-center">#objInvoice.getInvoiceStatusBadge(session.lng, i.invoiceStatusColor, i.invoiceStatusVariable)#</td>
                                             <td class="text-end">
                                                 <div class="btn-list flex-nowrap">

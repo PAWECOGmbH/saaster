@@ -94,15 +94,15 @@
                                     <div class="row">
                                         <div class="col-lg-3 text-center">
                                             <b>Invoice amount</b><br />
-                                            #lsNumberFormat(qInvoice.total, "_,___.__")# #qInvoice.currency#
+                                            #lsNumberFormat(qInvoice.total)# #qInvoice.currency#
                                         </div>
                                         <div class="col-lg-3 text-center text-green">
                                             <b>Payments received</b><br />
-                                            #lsNumberFormat(qInvoice.amountPaid, "_,___.__")# #qInvoice.currency#
+                                            #lsNumberFormat(qInvoice.amountPaid)# #qInvoice.currency#
                                         </div>
                                         <div class="col-lg-3 text-center text-red">
                                             <b>Open amount</b><br />
-                                            #lsNumberFormat(qInvoice.amountOpen, "_,___.__")# #qInvoice.currency#
+                                            #lsNumberFormat(qInvoice.amountOpen)# #qInvoice.currency#
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
@@ -138,13 +138,13 @@
                                                     <p class="mb-1"><b>#pos.title#</b></p>
                                                     <div class="text-muted">#pos.description#</div>
                                                 </td>
-                                                <td valign="top" class="text-end">#lsnumberFormat(pos.quantity, "__.__")# #pos.unit#</td>
+                                                <td valign="top" class="text-end">#lsNumberFormat(pos.quantity)# #pos.unit#</td>
                                                 <td valign="top" class="text-end">
-                                                    <p class="m-0">#lsnumberFormat(pos.singlePrice, "_,___.__")#</p>
-                                                    <p class="text-muted small">(#lsnumberFormat(pos.vat, "__.__")#%)</p>
+                                                    <p class="m-0">#lsNumberFormat(pos.singlePrice)#</p>
+                                                    <p class="text-muted small">(#lsNumberFormat(pos.vat)#%)</p>
                                                 </td>
                                                 <td valign="top" class="text-end"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
-                                                <td valign="top" class="text-end">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
+                                                <td valign="top" class="text-end">#lsNumberFormat(pos.totalPrice)#</td>
                                                 <td valign="top" class="text-end">
                                                     <cfif qInvoice.paymentstatusID eq 1>
                                                         <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
@@ -156,7 +156,7 @@
                                         <tr>
                                             <td></td>
                                             <td colspan="4"><b>Total</b></td>
-                                            <td class="text-end pr-0"><b>#lsnumberFormat(qInvoice.subtotal, "_,___.__")#</b></td>
+                                            <td class="text-end pr-0"><b>#lsNumberFormat(qInvoice.subtotal)#</b></td>
                                         </tr>
                                         <cfif arrayLen(qInvoice.vatArray)>
                                             <tr><td colspan="100%" style="border: 0;" class="py-1"></td></tr>
@@ -164,7 +164,7 @@
                                                 <tr>
                                                     <td class="pb-1 pt-0" style="border: 0;"></td>
                                                     <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#vat.vatText#</td>
-                                                    <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsnumberFormat(vat.amount, "_,___.__")#</td>
+                                                    <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsNumberFormat(vat.amount)#</td>
                                                 </tr>
                                             </cfloop>
                                             <tr><td colspan="100%" style="border: 0;" class="py-1"></td></tr>
@@ -172,7 +172,7 @@
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
                                             <td style="border-top: 1px solid;" colspan="4"><b>#qInvoice.totaltext#</b></td>
-                                            <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsnumberFormat(qInvoice.total, "_,___.__")#</b></td>
+                                            <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsNumberFormat(qInvoice.total)#</b></td>
                                         </tr>
                                         <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
                                     </tbody>

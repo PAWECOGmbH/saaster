@@ -24,6 +24,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objGlobal = new com.global();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
+        application.objLanguage = new com.language();
 
         <!--- Save all choosable languages into a list --->
         local.qLanguages = queryExecute(
@@ -66,6 +67,10 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Save into the session --->
         session.lng = left(local.client_lang, 2);
 
+        <!--- Set customers locale using his browser --->
+        local.newlocale = application.objLanguage.toLocale(language=local.client_lang);
+        local.oldlocale = setLocale(newlocale);
+
         return;
 
     }
@@ -100,13 +105,6 @@ component displayname="Application" output="false" hint="Handle the application.
             onApplicationStart();
             onSessionStart();
             application.langStruct = application.objGlobal.initLanguages();
-        }
-
-        <!--- Set locale --->
-        if (structKeyExists(session, "user_locale")) {
-            setLocale(session.user_locale);
-        } else {
-            setLocale(getLocale());
         }
 
         return true;
@@ -166,6 +164,9 @@ component displayname="Application" output="false" hint="Handle the application.
 
         <!--- Check whether the user has access to corresponding sections --->
         if (structKeyExists(session, "user_id")) {
+
+            // Init the time.cfc (its here because we need a user session)
+            application.getTime = new com.time(session.customer_id);
 
             local.no_access = false;
 

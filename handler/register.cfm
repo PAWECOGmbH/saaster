@@ -294,7 +294,7 @@ if (structKeyExists(form, 'login_btn')) {
             session.customer_id = objUserLogin.customer_id;
             session.user_name = objUserLogin.user_name;
             session.user_email = objUserLogin.user_email;
-			session.lastvisit = objUserLogin.last_login;
+			session.last_login = objUserLogin.last_login;
             session.lng = objUserLogin.language;
 			session.admin = trueFalseFormat(objUserLogin.admin);
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
@@ -307,9 +307,6 @@ if (structKeyExists(form, 'login_btn')) {
             } else if (session.superadmin) {
                 session.admin = true;
             }
-
-            <!--- Set customers locale -> Todo: get the users setting --->
-            session.user_locale = getLocale();
 
             <!--- Save current plan into a session --->
             checkPlan = new com.plans(language=session.lng).getCurrentPlan(session.customer_id);

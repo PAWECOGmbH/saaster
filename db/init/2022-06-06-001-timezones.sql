@@ -6,7 +6,22 @@ ALTER TABLE countries
 CHANGE COLUMN strTimezone intTimezoneID smallint(3) NULL DEFAULT NULL AFTER strSubRegion,
 ADD INDEX `_intTimezoneID`(`intTimezoneID`) USING BTREE;
 
+ALTER TABLE customer_bookings
+DROP COLUMN `timestamp`,
+MODIFY COLUMN `dtmStartDate` datetime NULL DEFAULT NULL AFTER `intModuleID`,
+MODIFY COLUMN `dtmEndDate` datetime NULL DEFAULT NULL AFTER `dtmStartDate`,
+MODIFY COLUMN `dtmEndTestDate` datetime NULL DEFAULT NULL AFTER `dtmEndDate`;
 
+ALTER TABLE customer_bookings_history
+DROP COLUMN `timestamp`,
+MODIFY COLUMN `dtmStartDate` datetime NULL DEFAULT NULL AFTER `intModuleID`,
+MODIFY COLUMN `dtmEndDate` datetime NULL DEFAULT NULL AFTER `dtmStartDate`,
+MODIFY COLUMN `dtmEndTestDate` datetime NULL DEFAULT NULL AFTER `dtmEndDate`;
+
+ALTER TABLE invoices
+DROP COLUMN `timestamp`,
+MODIFY COLUMN `dtmInvoiceDate` datetime NOT NULL AFTER `strInvoiceTitle`,
+MODIFY COLUMN `dtmDueDate` datetime NOT NULL AFTER `dtmInvoiceDate`;
 
 
 -- ----------------------------

@@ -74,7 +74,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td>#getTrans('txtBookedOn')#:</td>
-                                                            <td>#lsDateFormat(module.moduleStatus.startDate)#</td>
+                                                            <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.startDate))#</td>
                                                         </tr>
                                                         <cfif module.moduleStatus.recurring eq "onetime">
                                                             <tr>
@@ -84,12 +84,12 @@
                                                             <cfif isDate(module.moduleStatus.endDate)>
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
-                                                                    <td>#lsDateFormat(module.moduleStatus.endDate)#</td>
+                                                                    <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
                                                                 </tr>
                                                             <cfelse>
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
-                                                                    <td>#lsDateFormat(module.moduleStatus.endTestDate)#</td>
+                                                                    <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endTestDate))#</td>
                                                                 </tr>
                                                             </cfif>
                                                             </tr>
@@ -98,7 +98,7 @@
                                                         <cfelseif module.moduleStatus.status eq "test">
                                                             <tr>
                                                                 <td>#getTrans('txtExpiryDate')#:</td>
-                                                                <td>#lsDateFormat(module.moduleStatus.endTestDate)#</td>
+                                                                <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endTestDate))#</td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
@@ -107,7 +107,7 @@
                                                         <cfelseif module.moduleStatus.status eq "active">
                                                             <tr>
                                                                 <td>#getTrans('txtRenewPlanOn')#:</td>
-                                                                <td>#lsDateFormat(module.moduleStatus.endDate)#</td>
+                                                                <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
                                                             </tr>
                                                         </cfif>
                                                     </table>
@@ -181,9 +181,9 @@
                                                                     <div class="small">#getTrans('txtFree')#</div>
                                                                 </cfif>
                                                             <cfelseif module.price_onetime gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_onetime, '_,___.__')# #lcase(getTrans('txtOneTime'))#</div>
+                                                                <div class="small text-muted">#module.currencySign# #lsNumberFormat(module.price_onetime)# #lcase(getTrans('txtOneTime'))#</div>
                                                             <cfelseif module.price_monthly gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')# #lcase(getTrans('txtMonthly'))#</div>
+                                                                <div class="small text-muted">#module.currencySign# #lsNumberFormat(module.price_monthly)# #lcase(getTrans('txtMonthly'))#</div>
                                                             </cfif>
                                                         </div>
                                                     </div>
@@ -198,8 +198,8 @@
                                                                         <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                                     </a>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="#module.bookingLinkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsnumberFormat(module.price_monthly, '_,___.__')#)</a>
-                                                                        <a class="dropdown-item" href="#module.bookingLinkY#">#getTrans('txtYearly')# (#module.currencySign# #lsnumberFormat(module.price_yearly, '_,___.__')#)</a>
+                                                                        <a class="dropdown-item" href="#module.bookingLinkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsNumberFormat(module.price_monthly)#)</a>
+                                                                        <a class="dropdown-item" href="#module.bookingLinkY#">#getTrans('txtYearly')# (#module.currencySign# #lsNumberFormat(module.price_yearly)#)</a>
                                                                     </div>
                                                                 </div>
                                                             <cfelseif module.price_onetime gt 0>
@@ -234,20 +234,20 @@
                                                                 <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
                                                                     <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
                                                                 <cfelseif module.price_onetime gt 0>
-                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_onetime, '_,___.__')#</div>
+                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_onetime)#</div>
                                                                     <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
                                                                     <div class="text-muted small">#module.vat_text_onetime#</div>
                                                                 <cfelse>
                                                                     <div class="row my-3 col-md-12">
                                                                         <div class="col-md-6">
                                                                             <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_monthly, '_,___.__')#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_monthly)#</div>
                                                                             <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
                                                                             <div class="text-muted small">#module.vat_text_monthly#</div>
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsnumberFormat(module.price_yearly, '_,___.__')#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_yearly)#</div>
                                                                             <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
                                                                             <div class="text-muted small">#module.vat_text_yearly#</div>
                                                                         </div>
