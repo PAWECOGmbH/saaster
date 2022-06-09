@@ -18,6 +18,15 @@
     if (not checkTenantRange) {
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }
+
+    qPayments = new com.invoices().getInvoicePayments(thisInvoiceID);
+
+    sumPaid = 0
+    for (i=1; i<=qPayments.recordcount; i++){
+        sumPaid = qPayments.decAmount[i] + sumPaid;
+    }
+    resultPayment = getInvoiceData.total - sumPaid;
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -53,10 +62,17 @@
             <div class="card card-lg ps-5 pe-5">
                 <div class="card-body">
                     <div class="row ps-5 pe-5">
-                        <div class="col-6 mt-5">
+                        <div class="col-12 mt-5">
+                            <cfif len(trim(getCustomerData.strLogo))>
+                                <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" width="260" style="display: block; width: 260px; font-size: 16px; float: right;" border="0">
+                            <cfelse>
+                                <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="260" style="display: block; width: 260px; font-size: 16px;float: right;" border="0">
+                            </cfif>
+                        </div>
+                        <div class="col-6">
                             <address class="mt-5">
                                 #getCustomerData.strBillingAccountName#<br />
-                                #replace(getCustomerData.strBillingAddress, chr(13), "<br />")#
+                                #replace(getCustomerData.strBillingAddress, chr(13), "<br />")#<br />
                             </address>
                         </div>
                         <div class="col-6 text-end">
@@ -114,12 +130,15 @@
                                         <td valign="top" class="text-center"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                         <td valign="top" class="text-end pr-0">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
                                     </tr>
+
                                 </cfloop>
                                 <tr>
                                     <td></td>
                                     <td colspan="4"><b>#getTrans('titTotal')#</b></td>
                                     <td class="text-end pr-0"><b>#lsnumberFormat(getInvoiceData.subtotal, "_,___.__")#</b></td>
                                 </tr>
+                                
+                               
                                 <cfif arrayLen(getInvoiceData.vatArray)>
                                     <tr><td colspan="100%" style="border: 0;" class="py-1"></td></tr>
                                     <cfloop array="#getInvoiceData.vatArray#" index="vat">
@@ -129,13 +148,32 @@
                                             <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsnumberFormat(vat.amount, "_,___.__")#</td>
                                         </tr>
                                     </cfloop>
+
                                     <tr><td colspan="100%" style="border: 0;" class="py-1"></td></tr>
+
                                 </cfif>
                                 <tr>
                                     <td style="border-top: 1px solid;"></td>
                                     <td style="border-top: 1px solid;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
                                     <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsnumberFormat(getInvoiceData.total, "_,___.__")#</b></td>
                                 </tr>
+                                <cfif qPayments.recordCount>
+                                    <cfloop query="qPayments">
+                                        <tr>
+                                            <td style="border-top: 1px solid;"></td>
+                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(qPayments.dtmPayDate)# (#qPayments.strPaymentType#):</td>
+                                            <td style="border-top: 1px solid;" class="text-end pr-0">- #lsnumberFormat(qPayments.decAmount, "_,___.__")#</td>
+                                        </tr>
+                                        
+                                    </cfloop>
+                                    
+                                    <tr>
+                                        <td style="border-top: 2px inset;"></td>
+                                        <td style="border-top: 2px inset;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                        <td style="border-top: 2px inset;" class="text-end pr-0"><b>#lsnumberFormat(resultPayment, "_,___.__")#</b></td>
+                                    </tr>
+                                </cfif>
+
                                 <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
                             </tbody>
                         </table>

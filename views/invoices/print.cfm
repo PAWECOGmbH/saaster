@@ -19,6 +19,14 @@
         abort;
     }
 
+    qPayments = new com.invoices().getInvoicePayments(thisInvoiceID);
+
+    sumPaid = 0
+    for (i=1; i<=qPayments.recordcount; i++){
+        sumPaid = qPayments.decAmount[i] + sumPaid;
+    }
+    resultPayment = getInvoiceData.total - sumPaid;
+
 </cfscript>
 
 <cfdocument
@@ -42,7 +50,9 @@
             <tr>
                 <td align="right" height="100" valign="top">
                     <cfif len(trim(getCustomerData.strLogo))>
-                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" style="max-height: 100px;">
+                        <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" width="180" style="display: block; width: 180px; font-size: 16px;" border="0">
+                    <cfelse>
+                        <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="180" style="display: block; width: 180px; font-size: 16px;" border="0">
                     </cfif>
                 </td>
             </tr>
@@ -126,10 +136,26 @@
                             <tr><td colspan="100%"></td></tr>
                         </cfif>
                         <tr>
-                            <td style="border-top: 1px solid gray;"></td>
-                            <td style="border-top: 1px solid gray;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
-                            <td style="border-top: 1px solid gray;" align="right"><b>#lsnumberFormat(getInvoiceData.total, "_,___.__")#</b></td>
+                            <td style="border-top: 1px solid gray; padding: 5px 0;"></td>
+                            <td style="border-top: 1px solid gray; padding: 5px 0;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
+                            <td style="border-top: 1px solid gray; padding: 5px 0;" align="right"><b>#lsnumberFormat(getInvoiceData.total, "_,___.__")#</b></td>
                         </tr>
+
+                        <cfif qPayments.recordCount>
+                            <cfloop query="qPayments">
+                                <tr>
+                                    <td style="border-top: 1px solid; padding: 5px 0;"></td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(qPayments.dtmPayDate)# (#qPayments.strPaymentType#):</td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsnumberFormat(qPayments.decAmount, "_,___.__")#</td>
+                                </tr>
+                            </cfloop>
+                            
+                            <tr>
+                                <td style="border-top: 1px solid gray;"></td>
+                                <td style="border-top: 1px solid gray;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsnumberFormat(resultPayment, "_,___.__")#</b></td>
+                            </tr>
+                        </cfif>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin-bottom: 2px;"></td></tr>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin: 0;"></td></tr>
                     </table>
@@ -138,7 +164,14 @@
         </table>
         <cfdocumentitem type="footer">
             <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
-                <tr><td align="center">#application.appOwner#</td></tr>
+                <tr>
+                    <td align="center">
+                        <b>#application.appOwner#</b> #getCustomerData.strAddress#, #getCustomerData.strZip# #getCustomerData.strCity#<br> 
+                        E-Mail : #getCustomerData.strEMail# | 
+                        #getTrans('formPhone')#: #getCustomerData.strPhone# | Website: #getCustomerData.strWebsite#
+                        
+                    </td>
+                </tr>
             </table>
         </cfdocumentitem>
     </body>
