@@ -1,24 +1,40 @@
 
 component displayname="Application" output="false" hint="Handle the application." {
 
-    this.name = "saaster.io";
+    // Datasource and custom variables you'll find in root/config.cfm
+    include template="config.cfm";
+
+    // Configurations from the config table
+    variables.objConfig = new com.config();
+    variables.configData = variables.objConfig.getConfigData();
+
+    // Dynamic values (table)
+    this.name = variables.configData.applicationname;
+    this.sessiontimeout = variables.configData.sessiontimeout;
+    this.pdf.type = variables.configData.pdf_type;
+    setting requesttimeout = variables.configData.requesttimeout;
+
+    // Fixed values
     this.sessionmanagement = true;
-    this.sessiontimeout = CreateTimeSpan(00,03,00,00);
     this.setdomaincookies = true;
-    this.pdf.type = "classic";
-    this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
-    setting enablecfoutputonly = true;
-    setting showdebugoutput = true;
-    setting requesttimeout = 60;
     processingdirective pageEncoding="utf-8";
-    setTimezone("UTC+00:00"); // Do NOT change this setting!
+    this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
+    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!
 
 
     public boolean function onApplicationStart() {
 
+        application.datasource = variables.datasource;
 
-        <!--- ####### APPLICATION SETTINGS -> please update for your project --->
-        include template="includes/settings.cfm";
+        // Dynamic values (table)
+        application.projectName = variables.configData.appName;
+        application.appOwner = variables.configData.appOwner;
+        application.fromEmail = variables.configData.fromEmail;
+        application.toEmail = variables.configData.toEmail;
+        application.mainURL = variables.configData.mainURL;
+        application.usersIP = variables.configData.usersIP;
+        application.userTempImg = variables.configData.userTempImg;
+
 
         <!--- Object initialising --->
         application.objGlobal = new com.global();
@@ -60,28 +76,6 @@ component displayname="Application" output="false" hint="Handle the application.
 
         <!--- Save the language into the session --->
         session.lng = local.checkLng ? local.browserLng : application.objGlobal.getDefaultLanguage().iso;
-
-
-
-
-
-
-
-        /* local.firstString = listFirst(cgi.http_accept_language, ";");
-        local.checkLeft = listFirst(firstString, ",");
-        if (find("-", local.checkLeft)) {
-            local.client_lang = listFirst(local.firstString, ",");
-        } else {
-            local.client_lang = listLast(local.firstString, ",");
-        }
-        local.client_lang = replace(listfirst(client_lang), "-", "_", "ALL");
-
-        <!--- Save into the session --->
-        session.lng = left(local.client_lang, 2);
-
-        <!--- Set customers locale using his browser --->
-        newlocale = application.objLanguage.toLocale(language=local.client_lang);
-        oldlocale = setLocale(newlocale); */
 
         return;
 
@@ -125,10 +119,6 @@ component displayname="Application" output="false" hint="Handle the application.
 
         <!--- Set customers locale using his browser --->
         setLocale(application.objLanguage.toLocale(language=local.browserLocale));
-
-        /* dump(oldlocale);
-        abort; */
-
 
         return true;
 
@@ -225,9 +215,6 @@ component displayname="Application" output="false" hint="Handle the application.
             }
 
         }
-
-
-
 
 
         include template="\#ARGUMENTS.TargetPage#";

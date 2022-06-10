@@ -1,5 +1,5 @@
 
-component displayname="sysadmin" output="false" {
+component displayname="time" output="false" {
 
 
     public any function init(numeric customerID) {
