@@ -7,8 +7,10 @@
         abort;
     }
 
+    objInvoices = new com.invoices();
+
     // Get the invoice data
-    getInvoiceData = new com.invoices().getInvoiceData(thisInvoiceID);
+    getInvoiceData = objInvoices.getInvoiceData(thisInvoiceID);
     if(not isStruct(getInvoiceData) or not arrayLen(getInvoiceData.positions)) {
         abort;
     }
@@ -19,13 +21,7 @@
         abort;
     }
 
-    qPayments = new com.invoices().getInvoicePayments(thisInvoiceID);
-
-    sumPaid = 0
-    for (i=1; i<=qPayments.recordcount; i++){
-        sumPaid = qPayments.decAmount[i] + sumPaid;
-    }
-    resultPayment = getInvoiceData.total - sumPaid;
+    qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
 </cfscript>
 
@@ -153,7 +149,7 @@
                             <tr>
                                 <td style="border-top: 1px solid gray;"></td>
                                 <td style="border-top: 1px solid gray;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
-                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsnumberFormat(resultPayment, "_,___.__")#</b></td>
+                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsnumberFormat(getInvoiceData.amountOpen, "_,___.__")#</b></td>
                             </tr>
                         </cfif>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin-bottom: 2px;"></td></tr>
