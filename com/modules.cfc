@@ -370,10 +370,7 @@ component displayname="modules" output="false" {
                     moduleID: {type: "numeric", value: arguments.moduleID}
                 },
                 sql = "
-                    SELECT  intModuleID, blnPaused, strRecurring,
-                            DATE_FORMAT(dtmStartDate, '%Y-%m-%d') as dtmStartDate,
-                            DATE_FORMAT(dtmEndDate, '%Y-%m-%d') as dtmEndDate,
-                            DATE_FORMAT(dtmEndTestDate, '%Y-%m-%d') as dtmEndTestDate
+                    SELECT intModuleID, blnPaused, strRecurring, dtmStartDate, dtmEndDate, dtmEndTestDate
                     FROM customer_bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID

@@ -119,6 +119,7 @@
 
                     <!--- Get module status --->
                     moduleStatus = objModules.getModuleStatus(session.customer_id, moduleDetails.moduleID);
+                    getTime = application.getTime;
 
                     // Make invoice struct
                     invoiceStruct = structNew();
@@ -149,7 +150,12 @@
                     positionArray = arrayNew(1);
 
                     position = structNew();
-                    position[1]['title'] = moduleDetails.name & ' ' & lsDateFormat(moduleStatus.startDate) & ' - ' & lsDateFormat(moduleStatus.endDate);
+                    if (moduleStatus.status eq "onetime") {
+                        position[1]['title'] = moduleDetails.name;
+                    } else {
+                        position[1]['title'] = moduleDetails.name & ' ' & lsDateFormat(getTime.utc2local(utcDate=moduleStatus.startDate)) & ' - ' & lsDateFormat(getTime.utc2local(utcDate=moduleStatus.endDate));
+                    }
+
                     position[1]['description'] = moduleDetails.short_description;
                     position[1]['quantity'] = 1;
                     position[1]['discountPercent'] = 0;
@@ -158,10 +164,14 @@
                         position[1]['unit'] = getTrans('TitMonth', session.lng);
                         position[1]['price'] = moduleDetails.price_monthly;
                         priceAfterVAT = moduleDetails.priceMonthlyAfterVAT;
-                    } else {
+                    } else if (moduleStatus.recurring eq 'yearly') {
                         position[1]['unit'] = getTrans('TitYear', session.lng);
                         position[1]['price'] = moduleDetails.price_yearly;
                         priceAfterVAT = moduleDetails.priceYearlyAfterVAT;
+                    } else {
+                        position[1]['unit'] = getTrans('txtOneTime', session.lng);
+                        position[1]['price'] = moduleDetails.price_onetime;
+                        priceAfterVAT = moduleDetails.priceOnetimeAfterVAT;
                     }
                     arrayAppend(positionArray, position[1]);
                     posInfo['positions'] = positionArray;

@@ -147,13 +147,13 @@ component displayname="customer" output="false" {
                 sql = "
 
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail)
-                    VALUES (0, now(), now(), 1, :company_name,
+                    VALUES (0, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, :company_name,
                         (SELECT intCountryID FROM countries WHERE blnDefault = 1), CONCAT(:first_name, ' ', :last_name), :email);
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
                     INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-                    VALUES (@last_inserted_customer_id, now(), now(), :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
+                    VALUES (@last_inserted_customer_id, UTC_TIMESTAMP(), UTC_TIMESTAMP(), :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
                         IF(
                             (
                                 SELECT COUNT(intCustomerID)
@@ -198,6 +198,9 @@ component displayname="customer" output="false" {
             return false;
         }
         if (!len(trim(local.getCustomerData.strCity))) {
+            return false;
+        }
+        if (local.getCustomerData.intCountryID eq 0 and local.getCustomerData.intTimezoneID eq 0) {
             return false;
         }
 

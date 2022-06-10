@@ -28,7 +28,7 @@
             <table class="table table-vcenter table-mobile-md card-table">
                 <thead>
                     <tr>
-                        <th width="30%">Date</th>
+                        <th width="30%">Date (UTC)</th>
                         <th width="30%">Payment type</th>
                         <th width="30%" class="text-end">Amount #currency#</th>
                         <th width="10%" class="text-center"></th>
@@ -43,14 +43,14 @@
                         </div>
                     </td>
                     <td><input type="text" name="payment_type" class="form-control" maxlength="50" placeholder="Credit card"></td>
-                    <td><input type="text" name="amount" class="form-control text-end" maxlength="5" <cfif amountOpen gt 0>value="#lsnumberformat(amountOpen, '___.__')#"</cfif>></td>
+                    <td><input type="text" name="amount" class="form-control text-end" maxlength="5" <cfif amountOpen gt 0>value="#amountOpen#"</cfif>></td>
                     <td class="text-center"><i onclick="sendPayment();" class="far fa-check-circle h1 text-green mt-2" style="cursor: pointer;"></i></td>
                 </tr>
                 <cfloop query="qPayments">
                     <tr>
-                        <td>#LSDateFormat(qPayments.dtmPayDate)#</td>
+                        <td>#lsDateFormat(qPayments.dtmPayDate)#</td>
                         <td>#qPayments.strPaymentType#</td>
-                        <td class="text-end">#lsNumberFormat(qPayments.decAmount, '_,___.__')#</td>
+                        <td class="text-end">#lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                         <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2" style="cursor: pointer;"></i></td>
                     </tr>
                 </cfloop>

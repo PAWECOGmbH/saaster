@@ -37,7 +37,7 @@ customer = new MockData().mock(
 
     <cfquery datasource="#application.datasource#" result="neueID">
         INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail, strAddress, strZIP, strCity)
-        VALUES (0, now(), now(), 1, '#companyname#', 0#customer.countryID#, '#contactname#', '#customer.email#', '#addr#', '#customer.zip#', '#thisCity#')
+        VALUES (0, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, '#companyname#', 0#customer.countryID#, '#contactname#', '#customer.email#', '#addr#', '#customer.zip#', '#thisCity#')
     </cfquery>
 
     <cfset thisRow = 0>
@@ -52,7 +52,7 @@ customer = new MockData().mock(
 
         <cfquery datasource="#application.datasource#">
             INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-            VALUES (#neueID.generatedkey#, now(), now(), '#usr.first_name#', '#usr.last_name#', '#thisEmail#', '#hash#', '#salt#', 1, #isAdmin#, #isSuperAdmin#, 0)
+            VALUES (#neueID.generatedkey#, UTC_TIMESTAMP(), UTC_TIMESTAMP(), '#usr.first_name#', '#usr.last_name#', '#thisEmail#', '#hash#', '#salt#', 1, #isAdmin#, #isSuperAdmin#, 0)
         </cfquery>
 
         <cfset isSuperAdmin = 0>

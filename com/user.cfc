@@ -61,7 +61,7 @@ component displayname="user" output="false" {
                         },
                         sql = "
                             UPDATE users
-                            SET dtmLastLogin = now(),
+                            SET dtmLastLogin = UTC_TIMESTAMP(),
                                 strUUID = ''
                             WHERE intUserID = :thisUserID
                         "
@@ -421,7 +421,7 @@ component displayname="user" output="false" {
                 },
                 sql = "
                     INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, strUUID)
-                    VALUES (:customerID, now(), now(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
+                    VALUES (:customerID, UTC_TIMESTAMP(), UTC_TIMESTAMP(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
                 "
 
             )
@@ -519,7 +519,7 @@ component displayname="user" output="false" {
                 }
 
                 getTrans = application.objGlobal.getTrans;
-                
+
 
                 <!--- Replacing variables --->
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
@@ -536,7 +536,7 @@ component displayname="user" output="false" {
                     echo("#getTrans('titHello')# #qUser.toName#<br><br>
                                 #local.invitationMail#<br><br>
                                 <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formSignIn')#</a><br><br>
-                                
+
                                 #getTrans('txtRegards')#<br>
                                 #getTrans('txtYourTeam')#<br>
                                 #application.appOwner#");

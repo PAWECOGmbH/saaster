@@ -109,24 +109,24 @@
                                     <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
 
                                     <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
-                                    <dd class="col-7">#lsDateFormat(session.currentPlan.startDate, "Full")#</dd>
+                                    <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
 
                                     <cfif session.currentPlan.status eq "active">
 
                                         <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endDate, "Full")#</dd>
+                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
 
                                     <cfelseif session.currentPlan.status eq "canceled">
 
                                         <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endDate, "Full")#</dd>
+                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
                                         <dt class="col-5">#getTrans('txtInformation')#:</dt>
                                         <dd class="col-7">#getStatus.statusText#</dd>
 
                                     <cfelseif session.currentPlan.status eq "test">
 
                                         <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(session.currentPlan.endTestDate, "Full")#</dd>
+                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
                                         <dt class="col-5">#getTrans('txtInformation')#:</dt>
                                         <dd class="col-7">#getStatus.statusText#</dd>
 

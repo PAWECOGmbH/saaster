@@ -34,10 +34,10 @@
                             <tr>
                                 <td>#qPrices.strCurrencyEN# (#qPrices.strCurrencyISO#)</td>
                                 <td align="right">
-                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceMonthly, '__.__'))#" maxlength="10" required>
+                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(decimalFormat(qPrices.decPriceMonthly))#" maxlength="10" required>
                                 </td>
                                 <td align="right">
-                                    <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceYearly, '__.__'))#" maxlength="10">
+                                    <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(decimalFormat(qPrices.decPriceYearly))#" maxlength="10">
                                 </td>
                             </tr>
                         </cfloop>
@@ -51,7 +51,7 @@
                 <div class="col-lg-3 me-3 mb-3">
                     <div class="mb-3 text-end w-75">
                         <label class="form-label text-end">Vat (%)</label>
-                        <input type="text" name="vat" class="form-control text-end" autocomplete="off" value="#trim(numberFormat(qPrices.decVat, '__.__'))#" maxlength="10">
+                        <input type="text" name="vat" class="form-control text-end" autocomplete="off" value="#trim(decimalFormat(qPrices.decVat))#" maxlength="10">
                     </div>
                 </div>
                 <div class="col-lg-6">

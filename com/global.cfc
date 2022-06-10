@@ -432,7 +432,7 @@ component displayname="globalFunctions" {
                     lngID: {type: "numeric", value: qLngID.intLanguageID}
                 },
                 sql = "
-                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio,
+                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID,
                     IF(
                         LENGTH(
                             (
@@ -464,7 +464,7 @@ component displayname="globalFunctions" {
                     lngID: {type: "numeric", value: qLngID.intLanguageID}
                 },
                 sql = "
-                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio,
+                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID,
                     IF(
                         LENGTH(
                             (

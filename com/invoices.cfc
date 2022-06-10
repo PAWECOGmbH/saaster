@@ -113,8 +113,8 @@ component displayname="invoices" output="false" {
                     invoiceNumber: {type: "numeric", value: local.invoiceNumber},
                     prefix: {type: "nvarchar", value: local.prefix},
                     title: {type: "nvarchar", value: local.title},
-                    invoiceDate: {type: "date", value: local.invoiceDate},
-                    dueDate: {type: "date", value: local.dueDate},
+                    invoiceDate: {type: "datetime", value: local.invoiceDate},
+                    dueDate: {type: "datetime", value: local.dueDate},
                     currency: {type: "nvarchar", value: local.currency},
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType},
@@ -215,8 +215,8 @@ component displayname="invoices" output="false" {
                     invoiceID: {type: "numeric", value: local.invoiceID},
                     userID: {type: "numeric", value: local.userID},
                     title: {type: "nvarchar", value: local.title},
-                    invoiceDate: {type: "date", value: local.invoiceDate},
-                    dueDate: {type: "date", value: local.dueDate},
+                    invoiceDate: {type: "datetime", value: local.invoiceDate},
+                    dueDate: {type: "datetime", value: local.dueDate},
                     currency: {type: "nvarchar", value: local.currency},
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType}
@@ -719,9 +719,9 @@ component displayname="invoices" output="false" {
 
                 <!--- Define vat text and sum --->
                 if (qInvoicePositions.blnIsNet eq 1) {
-                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
+                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 } else {
-                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & numberFormat(qInvoicePositions.decVat, '__.__') & '%';
+                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 }
 
                 if (qInvoicePositions.intVatType eq 1) {
@@ -857,8 +857,8 @@ component displayname="invoices" output="false" {
                 SELECT  invoices.intInvoiceID as invoiceID,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle as invoiceTitle,
-                        DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%d') as invoiceDate,
-                        DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%d') as invoiceDueDate,
+                        invoices.dtmInvoiceDate as invoiceDate,
+                        invoices.dtmDueDate as invoiceDueDate,
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
                         (
@@ -930,8 +930,8 @@ component displayname="invoices" output="false" {
                 local.invoiceInfo['userID'] = qInvoice.intUserID;
                 local.invoiceInfo['number'] = qInvoice.strPrefix & qInvoice.intInvoiceNumber;
                 local.invoiceInfo['title'] = qInvoice.strInvoiceTitle;
-                local.invoiceInfo['date'] = dateFormat(qInvoice.dtmInvoiceDate, 'yyyy-mm-dd');
-                local.invoiceInfo['dueDate'] = dateFormat(qInvoice.dtmDueDate, 'yyyy-mm-dd');
+                local.invoiceInfo['date'] = qInvoice.dtmInvoiceDate;
+                local.invoiceInfo['dueDate'] = qInvoice.dtmDueDate;
                 local.invoiceInfo['currency'] = qInvoice.strCurrency;
                 local.invoiceInfo['vatType'] = qInvoice.intVatType;
                 local.invoiceInfo['isNet'] = qInvoice.blnIsNet;
@@ -1109,7 +1109,7 @@ component displayname="invoices" output="false" {
                 params = {
                     invoiceID: {type: "numeric", value: local.invoiceID},
                     customerID: {type: "numeric", value: local.customerID},
-                    paydate: {type: "date", value: local.date},
+                    paydate: {type: "datetime", value: local.date},
                     amount: {type: "decimal", value: local.amount, scale: 2},
                     type: {type: "varchar", value: local.type}
                 },

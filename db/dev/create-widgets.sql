@@ -17,8 +17,8 @@ CREATE TABLE `widgets`  (
 -- ----------------------------
 -- Records of widgets
 -- ----------------------------
-INSERT INTO `widgets` VALUES (1, 'Sales', 'widgets/sales.cfm', 1, 3);
-INSERT INTO `widgets` VALUES (2, 'Sales', 'widgets/sales.cfm', 1, 3);
+INSERT INTO `widgets` VALUES (1, 'Last Login', 'widgets/welcome.cfm', 1, 3);
+INSERT INTO `widgets` VALUES (2, '  ', 'widgets/sales.cfm', 1, 3);
 
 
 SET FOREIGN_KEY_CHECKS = 1;
