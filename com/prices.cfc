@@ -137,7 +137,7 @@ component displayname="prices" output="false" {
         <!--- Define vat text and sum --->
         if (variables.isNet eq 1) {
             if (variables.vat_type eq 1) {
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', variables.language) & ' ' & variables.vat & '%: ' & variables.currency & ' ' & lsNumberFormat(local.vat_amount);
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', variables.language) & ' ' & variables.vat & '%: ' & variables.currency & ' ' & lsCurrencyFormat(local.vat_amount, "none");
             } else if (variables.vat_type eq 3) {
                 local.total_price = local.subtotal_price;
                 local.priceData['vat_text']  = "";
@@ -147,7 +147,7 @@ component displayname="prices" output="false" {
             }
         } else {
             if (variables.vat_type eq 1) {
-                local.priceData['vat_text']  = application.objGlobal.getTrans('txtVatIncluded', variables.language) & ' ' & variables.vat & '%' & ': ' & variables.currency & ' ' & lsNumberFormat(local.vat_amount);
+                local.priceData['vat_text']  = application.objGlobal.getTrans('txtVatIncluded', variables.language) & ' ' & variables.vat & '%' & ': ' & variables.currency & ' ' & lsCurrencyFormat(local.vat_amount, "none");
             } else if (variables.vat_type eq 3) {
                 local.total_price = local.subtotal_price;
                 local.priceData['vat_text']  = "";

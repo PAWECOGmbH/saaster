@@ -181,9 +181,9 @@
                                                                     <div class="small">#getTrans('txtFree')#</div>
                                                                 </cfif>
                                                             <cfelseif module.price_onetime gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsNumberFormat(module.price_onetime)# #lcase(getTrans('txtOneTime'))#</div>
+                                                                <div class="small text-muted">#module.currencySign# #lsCurrencyFormat(module.price_onetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
                                                             <cfelseif module.price_monthly gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsNumberFormat(module.price_monthly)# #lcase(getTrans('txtMonthly'))#</div>
+                                                                <div class="small text-muted">#module.currencySign# #lsCurrencyFormat(module.price_monthly, "none")# #lcase(getTrans('txtMonthly'))#</div>
                                                             </cfif>
                                                         </div>
                                                     </div>
@@ -198,8 +198,8 @@
                                                                         <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
                                                                     </a>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="#module.bookingLinkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsNumberFormat(module.price_monthly)#)</a>
-                                                                        <a class="dropdown-item" href="#module.bookingLinkY#">#getTrans('txtYearly')# (#module.currencySign# #lsNumberFormat(module.price_yearly)#)</a>
+                                                                        <a class="dropdown-item" href="#module.bookingLinkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.price_monthly, "none")#)</a>
+                                                                        <a class="dropdown-item" href="#module.bookingLinkY#">#getTrans('txtYearly')# (#module.currencySign# #lsCurrencyFormat(module.price_yearly, "none")#)</a>
                                                                     </div>
                                                                 </div>
                                                             <cfelseif module.price_onetime gt 0>
@@ -234,20 +234,20 @@
                                                                 <cfif module.price_monthly eq 0 and module.price_onetime eq 0>
                                                                     <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
                                                                 <cfelseif module.price_onetime gt 0>
-                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_onetime)#</div>
+                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.price_onetime, "none")#</div>
                                                                     <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
                                                                     <div class="text-muted small">#module.vat_text_onetime#</div>
                                                                 <cfelse>
                                                                     <div class="row my-3 col-md-12">
                                                                         <div class="col-md-6">
                                                                             <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_monthly)#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.price_monthly, "none")#</div>
                                                                             <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
                                                                             <div class="text-muted small">#module.vat_text_monthly#</div>
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsNumberFormat(module.price_yearly)#</div>
+                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.price_yearly, "none")#</div>
                                                                             <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
                                                                             <div class="text-muted small">#module.vat_text_yearly#</div>
                                                                         </div>

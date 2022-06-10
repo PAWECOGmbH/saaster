@@ -39,7 +39,7 @@
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#
                                     <cfelse>
-                                        <span class="currency">#i.currencySign#</span> #lsNumberFormat(i.priceMonthly)#
+                                        <span class="currency">#i.currencySign#</span> #lsCurrencyFormat(i.priceMonthly, "none")#
                                     </cfif>
                                 </cfif>
                             </div>
@@ -60,7 +60,7 @@
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#
                                     <cfelse>
-                                        <span class="currency">#i.currencySign#</span> #lsNumberFormat(i.priceYearly)#
+                                        <span class="currency">#i.currencySign#</span> #lsCurrencyFormat(i.priceYearly, "none")#
                                     </cfif>
                                 </cfif>
                             </div>

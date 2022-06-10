@@ -100,19 +100,19 @@
                                     <b>#pos.title#</b><br />
                                     #pos.description#
                                 </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsNumberFormat(pos.quantity)# #pos.unit#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.quantity, "none")# #pos.unit#</td>
                                 <td valign="top" align="right" style="border-bottom: 1px solid gray;">
-                                    #lsNumberFormat(pos.singlePrice)#<br />
+                                    #lsCurrencyFormat(pos.singlePrice, "none")#<br />
                                     <span style="font-size: 9px; color: gray;">(#pos.vat#%)</span>
                                 </td>
                                 <td valign="top" align="center" style="border-bottom: 1px solid gray;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsNumberFormat(pos.totalPrice)#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                             </tr>
                         </cfloop>
                         <tr>
                             <td></td>
                             <td colspan="4"><b>#getTrans('titTotal')#</b></td>
-                            <td align="right"><b>#lsNumberFormat(getInvoiceData.subtotal)#</b></td>
+                            <td align="right"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
                         </tr>
                         <cfif arrayLen(getInvoiceData.vatArray)>
                             <tr><td colspan="6"></td></tr>
@@ -120,7 +120,7 @@
                                 <tr>
                                     <td></td>
                                     <td colspan="4" style="font-size: 10px;">#vat.vatText#</td>
-                                    <td align="right">#lsNumberFormat(vat.amount)#</td>
+                                    <td align="right">#lsCurrencyFormat(vat.amount, "none")#</td>
                                 </tr>
                             </cfloop>
                             <tr><td colspan="100%"></td></tr>
@@ -128,7 +128,7 @@
                         <tr>
                             <td style="border-top: 1px solid gray;"></td>
                             <td style="border-top: 1px solid gray;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
-                            <td style="border-top: 1px solid gray;" align="right"><b>#lsNumberFormat(getInvoiceData.total)#</b></td>
+                            <td style="border-top: 1px solid gray;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                         </tr>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin-bottom: 2px;"></td></tr>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin: 0;"></td></tr>

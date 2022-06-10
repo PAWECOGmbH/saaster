@@ -282,7 +282,7 @@
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
                                                 <td>#qInvoices.customerName#</td>
                                                 <td>#qInvoices.strCurrency#</td>
-                                                <td class="text-end">#lsNumberFormat(qInvoices.decTotalPrice)#</td>
+                                                <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
                                                 <td class="text-end float-end">
                                                     <div class="btn-list flex-nowrap">
                                                         <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">

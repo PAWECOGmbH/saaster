@@ -5,8 +5,7 @@ component displayname="sysadmin" output="false" {
     public any function init(numeric customerID) {
 
         variables.customerID = 0;
-        variables.timezoneID = 0;
-        variables.timezone = "";
+        variables.timezoneID = 31;
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -19,27 +18,33 @@ component displayname="sysadmin" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            if (variables.timezoneID gt 0) {
-                variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
-            } else {
-                variables.timezone = getTimezoneByID(1).timezone;
+            if (!isNumeric(variables.timezoneID)) {
+                variables.timezoneID = 31;
             }
 
         }
+
+        variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
 
         return this;
 
     }
 
 
-    public struct function getTimezoneByID(required numeric timezoneID) {
+    public struct function getTimezoneByID(timezoneID) {
 
         local.structTimezone = structNew();
+
+        if (structKeyExists(arguments, "timezoneID") and isNumeric(arguments.timezoneID)) {
+            local.timezoneID = arguments.timezoneID;
+        } else {
+            local.timezoneID = variables.timezoneID;
+        }
 
         local.qTimezone = queryExecute (
             options = {datasource = application.datasource},
             params = {
-                timezoneID: {type: "numeric", value: structKeyExists(arguments, "timezoneID")?arguments.timezoneID:variables.timezoneID}
+                timezoneID: {type: "numeric", value: local.timezoneID}
             },
             sql = "
                 SELECT intTimeZoneID, strUTC, strTimezone, strCity

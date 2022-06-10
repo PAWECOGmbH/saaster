@@ -719,9 +719,9 @@ component displayname="invoices" output="false" {
 
                 <!--- Define vat text and sum --->
                 if (qInvoicePositions.blnIsNet eq 1) {
-                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & lsNumberFormat(qInvoicePositions.decVat) & '%';
+                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 } else {
-                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsNumberFormat(qInvoicePositions.decVat) & '%';
+                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 }
 
                 if (qInvoicePositions.intVatType eq 1) {

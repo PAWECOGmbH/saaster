@@ -41,6 +41,13 @@ if (structKeyExists(url, "switch")) {
             checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
             session.currentModules = checkModules;
 
+            <!--- Is the needed data of the cutomer already filled out? --->
+            dataFilledIn = new com.register().checkFilledData(session.customer_id);
+
+            if (!dataFilledIn) {
+                session.filledData = false;
+            }
+
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {
