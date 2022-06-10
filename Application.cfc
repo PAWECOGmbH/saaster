@@ -6,7 +6,7 @@ component displayname="Application" output="false" hint="Handle the application.
 
     // Configurations from the config table
     variables.objConfig = new com.config();
-    variables.configData = variables.objConfig.getConfigData();
+    variables.configData = variables.objConfig.getConfigData(variables.datasource);
 
     // Dynamic values (table)
     this.name = variables.configData.applicationname;
