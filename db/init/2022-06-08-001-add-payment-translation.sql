@@ -5,7 +5,4 @@ INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtIncoPayments', 'Zahlungseingang', 'Incoming payments');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtAmount', 'Menge', 'Amount');
-
-INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtRemainingAmount', 'Restbetrag', 'Remaining amount');
