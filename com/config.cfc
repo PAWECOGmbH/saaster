@@ -2,10 +2,10 @@
 component displayname="config" output="false" {
 
     // Get config data for the application
-    public struct function getConfigData() {
+    public struct function getConfigData(string datasource) {
 
         local.qCheck = queryExecute(
-            options = {datasource = application.datasource},
+            options = {datasource = arguments.datasource},
             sql = "
                 SELECT strVariable, strValue
                 FROM config
