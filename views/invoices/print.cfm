@@ -141,15 +141,15 @@
                             <cfloop query="qPayments">
                                 <tr>
                                     <td style="border-top: 1px solid; padding: 5px 0;"></td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(qPayments.dtmPayDate)# (#qPayments.strPaymentType#):</td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsnumberFormat(qPayments.decAmount, "_,___.__")#</td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                 </tr>
                             </cfloop>
-                            
+
                             <tr>
                                 <td style="border-top: 1px solid gray;"></td>
                                 <td style="border-top: 1px solid gray;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
-                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsnumberFormat(getInvoiceData.amountOpen, "_,___.__")#</b></td>
+                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                             </tr>
                         </cfif>
                         <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin-bottom: 2px;"></td></tr>
@@ -162,10 +162,10 @@
             <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
                 <tr>
                     <td align="center">
-                        <b>#application.appOwner#</b> #getCustomerData.strAddress#, #getCustomerData.strZip# #getCustomerData.strCity#<br> 
-                        E-Mail : #getCustomerData.strEMail# | 
+                        <b>#application.appOwner#</b> #getCustomerData.strAddress#, #getCustomerData.strZip# #getCustomerData.strCity#<br>
+                        E-Mail : #getCustomerData.strEMail# |
                         #getTrans('formPhone')#: #getCustomerData.strPhone# | Website: #getCustomerData.strWebsite#
-                        
+
                     </td>
                 </tr>
             </table>
