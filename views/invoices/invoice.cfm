@@ -134,8 +134,8 @@
                                     <td colspan="4"><b>#getTrans('titTotal')#</b></td>
                                     <td class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
                                 </tr>
-                                
-                               
+
+
                                 <cfif arrayLen(getInvoiceData.vatArray)>
                                     <tr><td colspan="100%" style="border: 0;" class="py-1"></td></tr>
                                     <cfloop array="#getInvoiceData.vatArray#" index="vat">
@@ -158,16 +158,16 @@
                                     <cfloop query="qPayments">
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
-                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(qPayments.dtmPayDate)# (#qPayments.strPaymentType#):</td>
-                                            <td style="border-top: 1px solid;" class="text-end pr-0">- #lsnumberFormat(qPayments.decAmount, "_,___.__")#</td>
+                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                            <td style="border-top: 1px solid;" class="text-end pr-0">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                         </tr>
-                                        
+
                                     </cfloop>
-                                    
+
                                     <tr>
                                         <td style="border-top: 2px inset;"></td>
                                         <td style="border-top: 2px inset;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
-                                        <td style="border-top: 2px inset;" class="text-end pr-0"><b>#lsnumberFormat(getInvoiceData.amountOpen, "_,___.__")#</b></td>
+                                        <td style="border-top: 2px inset;" class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                                     </tr>
                                 </cfif>
 
