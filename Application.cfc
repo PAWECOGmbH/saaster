@@ -11,8 +11,9 @@ component displayname="Application" output="false" hint="Handle the application.
     setting showdebugoutput = true;
     setting requesttimeout = 60;
     processingdirective pageEncoding="utf-8";
+    setTimezone("UTC+00:00"); // Do NOT change this setting!
 
-    <!--- onApplicationStart fires when the application is first created --->
+
     public boolean function onApplicationStart() {
 
 
@@ -23,6 +24,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objGlobal = new com.global();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
+        application.objLanguage = new com.language();
 
         <!--- Save all choosable languages into a list --->
         local.qLanguages = queryExecute(
@@ -34,9 +36,7 @@ component displayname="Application" output="false" hint="Handle the application.
                 ORDER BY intPrio
             "
         )
-        if (local.qLanguages.recordCount) {
-            application.allLanguages = ValueList(local.qLanguages.lang);
-        }
+        application.allLanguages = ValueList(local.qLanguages.lang);
 
         <!--- Load language struct and save it into the application scope --->
         application.langStruct = application.objGlobal.initLanguages();
@@ -53,7 +53,21 @@ component displayname="Application" output="false" hint="Handle the application.
     public void function onSessionStart() {
 
         <!--- Check browser language --->
-        local.firstString = listFirst(cgi.http_accept_language, ";");
+        local.browserLng = application.objLanguage.getBrowserLng(cgi.http_accept_language).lng;
+
+        <!--- Check whether the language is active in project --->
+        local.checkLng = findNoCase(local.browserLng, application.allLanguages);
+
+        <!--- Save the language into the session --->
+        session.lng = local.checkLng ? local.browserLng : application.objGlobal.getDefaultLanguage().iso;
+
+
+
+
+
+
+
+        /* local.firstString = listFirst(cgi.http_accept_language, ";");
         local.checkLeft = listFirst(firstString, ",");
         if (find("-", local.checkLeft)) {
             local.client_lang = listFirst(local.firstString, ",");
@@ -65,12 +79,16 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Save into the session --->
         session.lng = left(local.client_lang, 2);
 
+        <!--- Set customers locale using his browser --->
+        newlocale = application.objLanguage.toLocale(language=local.client_lang);
+        oldlocale = setLocale(newlocale); */
+
         return;
 
     }
 
 
-    <!--- onRequestStart fires at first part of page processing --->
+
     public boolean function onRequestStart(required string TargetPage) {
 
         <!--- Reinit Application --->
@@ -101,12 +119,16 @@ component displayname="Application" output="false" hint="Handle the application.
             application.langStruct = application.objGlobal.initLanguages();
         }
 
-        <!--- Set locale --->
-        if (structKeyExists(session, "user_locale")) {
-            setLocale(session.user_locale);
-        } else {
-            setLocale(getLocale());
-        }
+
+        <!--- Set the locale of the browser --->
+        local.browserLocale = application.objLanguage.getBrowserLng(cgi.http_accept_language).code;
+
+        <!--- Set customers locale using his browser --->
+        setLocale(application.objLanguage.toLocale(language=local.browserLocale));
+
+        /* dump(oldlocale);
+        abort; */
+
 
         return true;
 
@@ -165,6 +187,9 @@ component displayname="Application" output="false" hint="Handle the application.
 
         <!--- Check whether the user has access to corresponding sections --->
         if (structKeyExists(session, "user_id")) {
+
+            // Init the time.cfc (its here because we need a user session)
+            application.getTime = new com.time(session.customer_id);
 
             local.no_access = false;
 

@@ -169,6 +169,7 @@
 
                     <!--- Save the new plan into a variable --->
                     newPlan = objPlans.getCurrentPlan(session.customer_id);
+                    getTime = application.getTime;
 
                     // Make invoice struct
                     invoiceStruct = structNew();
@@ -199,7 +200,7 @@
                     positionArray = arrayNew(1);
 
                     position = structNew();
-                    position[1]['title'] = planDetails.planName & ' ' & lsDateFormat(newPlan.startDate) & ' - ' & lsDateFormat(newPlan.endDate);
+                    position[1]['title'] = planDetails.planName & ' ' & lsDateFormat(getTime.utc2local(utcDate=newPlan.startDate)) & ' - ' & lsDateFormat(getTime.utc2local(utcDate=newPlan.endDate));
                     position[1]['description'] = planDetails.shortDescription;
                     position[1]['quantity'] = 1;
                     position[1]['discountPercent'] = 0;

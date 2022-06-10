@@ -77,8 +77,8 @@
                                 #getTrans('txtDueDate')#:
                             </td>
                             <td width="30%">
-                                #dateFormat(getInvoiceData.date, "dd.mm.yyyy")#<br />
-                                #dateFormat(getInvoiceData.dueDate, "dd.mm.yyyy")#
+                                #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#<br />
+                                #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
                             </td>
                             <td width="50%" valign="top">
                                 #replace(getCustomerData.strBillingInfo, chr(13), "<br />")#
@@ -106,19 +106,19 @@
                                     <b>#pos.title#</b><br />
                                     #pos.description#
                                 </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsnumberFormat(pos.quantity, "__.__")# #pos.unit#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.quantity, "none")# #pos.unit#</td>
                                 <td valign="top" align="right" style="border-bottom: 1px solid gray;">
-                                    #lsnumberFormat(pos.singlePrice, "_,___.__")#<br />
+                                    #lsCurrencyFormat(pos.singlePrice, "none")#<br />
                                     <span style="font-size: 9px; color: gray;">(#pos.vat#%)</span>
                                 </td>
                                 <td valign="top" align="center" style="border-bottom: 1px solid gray;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsnumberFormat(pos.totalPrice, "_,___.__")#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                             </tr>
                         </cfloop>
                         <tr>
                             <td></td>
                             <td colspan="4"><b>#getTrans('titTotal')#</b></td>
-                            <td align="right"><b>#lsnumberFormat(getInvoiceData.subtotal, "_,___.__")#</b></td>
+                            <td align="right"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
                         </tr>
                         <cfif arrayLen(getInvoiceData.vatArray)>
                             <tr><td colspan="6"></td></tr>
@@ -126,7 +126,7 @@
                                 <tr>
                                     <td></td>
                                     <td colspan="4" style="font-size: 10px;">#vat.vatText#</td>
-                                    <td align="right">#lsnumberFormat(vat.amount, "_,___.__")#</td>
+                                    <td align="right">#lsCurrencyFormat(vat.amount, "none")#</td>
                                 </tr>
                             </cfloop>
                             <tr><td colspan="100%"></td></tr>
@@ -134,7 +134,7 @@
                         <tr>
                             <td style="border-top: 1px solid gray; padding: 5px 0;"></td>
                             <td style="border-top: 1px solid gray; padding: 5px 0;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
-                            <td style="border-top: 1px solid gray; padding: 5px 0;" align="right"><b>#lsnumberFormat(getInvoiceData.total, "_,___.__")#</b></td>
+                            <td style="border-top: 1px solid gray; padding: 5px 0;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                         </tr>
 
                         <cfif qPayments.recordCount>

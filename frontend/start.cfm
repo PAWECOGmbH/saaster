@@ -1,7 +1,7 @@
 start
 
-<!--- <cfdump  var="#GetLocale()#">
-<cfdump  var="#LSNumberFormat(1000, '__,___.__')#"> --->
+
+<cfdump  var="#lsCurrencyFormat(1000, "none")#">
 
 <!--- <cfset objPrices = new com.prices()>
 

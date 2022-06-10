@@ -51,7 +51,7 @@ component displayname="notifications" output="false" {
                 },
                 sql = "
                     INSERT INTO notifications (intCustomerID, intUserID, dtmCreated, strTitle, strDescription, strLink, dtmRead)
-                    VALUES (:customerID, :userID, now(), :title, :description, :link, NULL)
+                    VALUES (:customerID, :userID, UTC_TIMESTAMP(), :title, :description, :link, NULL)
                 "
             )
 

@@ -32,7 +32,7 @@
     </cfquery>
 
     <cfset qLanguages = application.objGlobal.getAllLanguages()>
-    <cfset timeZones = new com.sysadmin().getTimezones()>
+    <cfset timeZones = new com.time(session.customer_id).getTimezones()>
 
     <cfoutput>
         <form action="#application.mainURL#/sysadm/countries" method="post">
@@ -112,9 +112,9 @@
                     </div>
                     <div class="col-lg-6 mb-3">
                         <label class="form-label">Timezone</label>
-                        <select name="timezone" class="form-select">
+                        <select name="timezoneID" class="form-select">
                             <cfloop array="#timeZones#" index="i">
-                                <option value="#i.utc#" <cfif i.utc eq qCountry.strTimezone>selected</cfif>>(#i.utc#) #i.city# - #i.country#</option>
+                                <option value="#i.id#" <cfif i.id eq qCountry.intTimezoneID>selected</cfif>>(#i.utc#) #i.city# - #i.timezone#</option>
                             </cfloop>
                         </select>
                     </div>

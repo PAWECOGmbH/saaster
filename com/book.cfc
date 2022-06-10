@@ -121,9 +121,9 @@ component displayname="book" output="false" {
                             params = {
                                 customerID: {type: "numeric", value: arguments.customerID},
                                 thisID: {type: "numeric", value: local.thisID},
-                                dateStart: {type: "date", value: local.startDate},
-                                dateEnd: {type: "date", value: local.tillDate},
-                                dateTestEnd: {type: "date", value: local.testTillDate},
+                                dateStart: {type: "datetime", value: local.startDate},
+                                dateEnd: {type: "datetime", value: local.tillDate},
+                                dateTestEnd: {type: "datetime", value: local.testTillDate},
                                 paused: {type: "boolean", value: 0},
                                 recurring: {type: "varchar", value: local.recurring}
                             },
@@ -150,9 +150,9 @@ component displayname="book" output="false" {
                             params = {
                                 customerID: {type: "numeric", value: arguments.customerID},
                                 thisID: {type: "numeric", value: local.thisID},
-                                dateStart: {type: "date", value: local.startDate},
-                                dateEnd: {type: "date", value: local.tillDate},
-                                dateTestEnd: {type: "date", value: local.testTillDate},
+                                dateStart: {type: "datetime", value: local.startDate},
+                                dateEnd: {type: "datetime", value: local.tillDate},
+                                dateTestEnd: {type: "datetime", value: local.testTillDate},
                                 paused: {type: "boolean", value: 0},
                                 recurring: {type: "varchar", value: local.recurring}
                             },
@@ -191,9 +191,9 @@ component displayname="book" output="false" {
                         params = {
                             customerID: {type: "numeric", value: arguments.customerID},
                             thisID: {type: "numeric", value: local.thisID},
-                            dateStart: {type: "date", value: local.startDate},
-                            dateEnd: {type: "date", value: local.tillDate},
-                            dateTestEnd: {type: "date", value: local.testTillDate},
+                            dateStart: {type: "datetime", value: local.startDate},
+                            dateEnd: {type: "datetime", value: local.tillDate},
+                            dateTestEnd: {type: "datetime", value: local.testTillDate},
                             paused: {type: "boolean", value: 0},
                             recurring: {type: "varchar", value: local.recurring}
                         },

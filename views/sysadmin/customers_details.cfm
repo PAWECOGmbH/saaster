@@ -76,7 +76,7 @@
                                         #qCustomer.strZIP# #qCustomer.strCity#
                                     </div>
                                     <div>
-                                        #qCustomer.strCountryName#
+                                        <!--- #qCustomer.strCountryName# --->
                                     </div>
                                 </div>
                                 <div class="me-5 flex-column text-muted ps-3">

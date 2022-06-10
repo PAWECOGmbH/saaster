@@ -53,8 +53,7 @@
                     strISO2 LIKE '%#session.c_search#%' OR
                     strCurrency LIKE '%#session.c_search#%' OR
                     strRegion LIKE '%#session.c_search#%' OR
-                    strSubRegion LIKE '%#session.c_search#%' OR
-                    strTimezone   LIKE '%#session.c_search#%'
+                    strSubRegion LIKE '%#session.c_search#%'
                 )
                 ORDER BY #session.c_sort#
                 LIMIT #session.sql_start#, #getEntries#
@@ -76,7 +75,7 @@
     }
 
     qLanguages = application.objGlobal.getAllLanguages();
-    timeZones = new com.sysadmin().getTimezones();
+    timeZones = application.getTime.getTimezones();
     getModal = new com.translate();
 </cfscript>
 
@@ -284,7 +283,7 @@
                                                                 <select name="timezone" class="form-select">
                                                                     <option value=""></option>
                                                                     <cfloop array="#timeZones#" index="i">
-                                                                        <option value="#i.utc#">(#i.utc#) #i.city# - #i.country#</option>
+                                                                        <option value="#i.utc#">#i.timezone# - #i.city# (#i.utc#)</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>

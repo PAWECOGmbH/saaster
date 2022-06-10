@@ -1,4 +1,3 @@
-
 <html>
 <head>
     <meta charset="utf-8"/>
@@ -32,7 +31,7 @@
 <cfif structKeyExists(session, "currentPlan") and isDate(session.currentPlan.endTestDate) and !findNoCase("frontend", thiscontent.thisPath)>
     <cfoutput>
     <cfif dateformat(now(), 'yyyy-mm-dd') lte dateformat(session.currentPlan.endTestDate, 'yyyy-mm-dd')>
-        <div class="text-center col-lg-12 bg-blue py-2">#getTrans('txtTestUntil')#: #lsDateFormat(session.currentPlan.endTestDate, 'Full')#</div>
+        <div class="text-center col-lg-12 bg-blue py-2">#getTrans('txtTestUntil')#: #lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</div>
     <cfelse>
         <div class="text-center col-lg-12 bg-red py-2">#getTrans('txtTestTimeExpired')#</div>
     </cfif>

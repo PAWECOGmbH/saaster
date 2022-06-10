@@ -39,7 +39,7 @@
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#
                                     <cfelse>
-                                        <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceMonthly, '__,___.__')#
+                                        <span class="currency">#i.currencySign#</span> #lsCurrencyFormat(i.priceMonthly, "none")#
                                     </cfif>
                                 </cfif>
                             </div>
@@ -50,7 +50,7 @@
                                 </cfif>
                             </div>
                         </div>
-                        
+
                         <!--- Price yearly --->
                         <div style="min-height: 50px; display: none;" class="price_box yearly">
                             <div class="fw-bold my-2 plan_price">
@@ -60,7 +60,7 @@
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#
                                     <cfelse>
-                                        <span class="currency">#i.currencySign#</span> #lsnumberFormat(i.priceYearly, '__,___.__')#
+                                        <span class="currency">#i.currencySign#</span> #lsCurrencyFormat(i.priceYearly, "none")#
                                     </cfif>
                                 </cfif>
                             </div>
