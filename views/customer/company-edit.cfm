@@ -1,9 +1,10 @@
 
 <cfscript>
-    // getCustomerData you'll find in index.cfm
-    qCountries = application.objGlobal.getCountry(language=session.lng);
 
-    // Set default values
+    qCountries = application.objGlobal.getCountry(language=session.lng);
+    timeZones = application.getTime.getTimezones();
+
+    // getCustomerData you'll find in index.cfm
     custCompany = getCustomerData.strCompanyName;
     custContactPerson = getCustomerData.strContactPerson;
     custAddress = getCustomerData.strAddress;
@@ -80,7 +81,7 @@
         custBillingInfo = session.billing_info
     }
 
-    timeZones = application.getTime.getTimezones();
+
 
 </cfscript>
 
@@ -198,7 +199,7 @@
                             <cfif qCountries.recordCount>
                                 <div class="col-sm-6 col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label">#getTrans('formCountry')#</label>
+                                        <label class="form-label">#getTrans('formCountry')# *</label>
                                         <select name="countryID" class="form-select" required>
                                             <option value=""></option>
                                             <cfloop query="qCountries">
@@ -210,7 +211,7 @@
                             <cfelse>
                                 <div class="col-sm-6 col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label">#getTrans('titTimezone')#</label>
+                                        <label class="form-label">#getTrans('titTimezone')# *</label>
                                         <select name="timezoneID" class="form-select" required>
                                             <option value=""></option>
                                             <cfloop array="#timeZones#" index="i">
