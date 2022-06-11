@@ -58,22 +58,13 @@
                 <div class="card-body">
                     <div class="row ps-5 pe-5">
                         <div class="col-12 mt-5">
-                            <cfif len(trim(getCustomerData.strLogo))>
-                                <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" width="260" style="display: block; width: 260px; font-size: 16px; float: right;" border="0">
-                            <cfelse>
-                                <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="260" style="display: block; width: 260px; font-size: 16px;float: right;" border="0">
-                            </cfif>
+                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="260" style="display: block; width: 260px; font-size: 16px;float: right;" border="0">
                         </div>
                         <div class="col-6">
                             <address class="mt-5">
                                 #getCustomerData.strBillingAccountName#<br />
                                 #replace(getCustomerData.strBillingAddress, chr(13), "<br />")#<br />
                             </address>
-                        </div>
-                        <div class="col-6 text-end">
-                            <cfif len(trim(getCustomerData.strLogo))>
-                                <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" alt="logo" style="max-height: 100px;">
-                            </cfif>
                         </div>
                         <div class="col-12 mt-5">
                             <p><b>#getTrans('titInvoice')# #getInvoiceData.number#</b></p>

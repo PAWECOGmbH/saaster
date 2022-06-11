@@ -219,6 +219,7 @@ if (structKeyExists(form, "settings")) {
         param name="form.invoice_date" default="";
         param name="form.due_date" default="";
         param name="form.type" default="1";
+        param name="form.language" default=getLanguage().iso;
 
         if (isDate(form.invoice_date)) {
             invoice_date = form.invoice_date;
@@ -245,6 +246,7 @@ if (structKeyExists(form, "settings")) {
         invoiceStruct['dueDate'] = due_date;
         invoiceStruct['isNet'] = netto;
         invoiceStruct['vatType'] = form.type;
+        invoiceStruct['language'] = form.language;
 
         updInvoice = objInvoice.updateInvoice(invoiceStruct);
 

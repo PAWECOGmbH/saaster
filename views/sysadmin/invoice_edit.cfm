@@ -28,7 +28,6 @@
 
 </cfscript>
 
-
 <cfinclude template="/includes/header.cfm">
 <cfinclude template="/includes/navigation.cfm">
 
@@ -47,15 +46,52 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
                         </ol>
                     </div>
-                    <cfif qInvoice.paymentstatusID eq 1>
-                        <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                            <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
-                                <i class="fas fa-plus pe-3"></i> Add position
-                            </a>
-                        </div>
-                    </cfif>
+                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                        <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-search pe-3"></i> Preview
+                        </a>
+                    </div>
                 </div>
             </div>
+
+
+            <!--- <div class="row mb-3">
+
+                <div class="col-lg-6 mb-3">
+                    <div class="page-header">
+                        <h4 class="page-title">Invoice #qInvoice.number#</h4>
+                        <ol class="breadcrumb breadcrumb-dots">
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
+                            <li class="breadcrumb-item">SysAdmin</li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
+                        </ol>
+                    </div>
+                </div> --->
+                <!--- <div class="col-lg-6 mb-3">
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <div class="page-header text-end">
+                                <div>
+                                    <cfif qInvoice.paymentstatusID eq 1>
+                                        <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
+                                            <i class="fas fa-plus pe-3"></i> Add position
+                                        </a>
+                                    </cfif>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="page-header">
+                                <div>
+                                    <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
+                                        <i class="fas fa-search pe-3"></i> Preview
+                                    </a>
+                                <div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> --->
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
@@ -80,11 +116,20 @@
                                     </p>
                                 </div>
                                 <div class="col-lg-6 text-end pe-3">
-                                    <cfif qInvoice.paymentstatusID gt 1>
-                                        <a href="##" data-bs-toggle="modal" class="openPopupPayments" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
-                                    <cfelse>
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
-                                    </cfif>
+                                    <div class="btn-group">
+                                        <cfif qInvoice.paymentstatusID eq 1>
+                                            <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-outline-primary">
+                                                <i class="fas fa-plus me-3"></i> Add position
+                                            </a>
+                                        </cfif>
+                                        <div class="ms-4 mt-2">
+                                            <cfif qInvoice.paymentstatusID gt 1>
+                                                <a href="##" data-bs-toggle="modal" class="openPopupPayments" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
+                                            <cfelse>
+                                                <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
+                                            </cfif>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -326,13 +371,23 @@
                     <label class="form-label">Title *</label>
                     <input type="text" name="title" class="form-control" maxlength="50" value="#htmleditformat(qInvoice.title)#" required>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Person</label>
+                    <select name="userID" class="form-select">
+                        <option value=""></option>
+                        <cfloop query="qUsers">
+                            <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#qUsers.strFirstName# #qUsers.strLastName#</option>
+                        </cfloop>
+                    </select>
+                </div>
                 <div class="row mb-3">
                     <div class="col-lg-6">
-                        <label class="form-label">Person</label>
-                        <select name="userID" class="form-select">
-                            <option value=""></option>
-                            <cfloop query="qUsers">
-                                <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#qUsers.strFirstName# #qUsers.strLastName#</option>
+                        <label class="form-label">Language</label>
+                        <select name="language" class="form-select">
+                            <cfloop list="#application.allLanguages#" index="i">
+                                <cfset lngIso = listfirst(i,"|")>
+                                <cfset lngName = listlast(i,"|")>
+                                <option value="#lngIso#" <cfif lngIso eq qInvoice.language>selected</cfif>>#lngName#</option>
                             </cfloop>
                         </select>
                     </div>

@@ -88,17 +88,14 @@ component displayname="invoices" output="false" {
             local.vatType = application.objGlobal.getSetting('settingStandardVatType');
         }
 
-        <!--- Total text --->
-        local.customerLng = application.objCustomer.getCustomerData(local.customerID).strLanguageISO;
-        if (!len(trim(local.customerLng))) {
-            local.customerLng = application.objGlobal.getDefaultLanguage().iso;
-        }
+        local.customerLng = application.objGlobal.getDefaultLanguage().iso;
+
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.customerLng);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.customerLng);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.customerLng);
         } else {
             local.total_text = "Total";
         }
@@ -115,15 +112,16 @@ component displayname="invoices" output="false" {
                     title: {type: "nvarchar", value: local.title},
                     invoiceDate: {type: "datetime", value: local.invoiceDate},
                     dueDate: {type: "datetime", value: local.dueDate},
-                    currency: {type: "nvarchar", value: local.currency},
+                    currency: {type: "varchar", value: local.currency},
+                    language: {type: "nvarchar", value: local.customerLng},
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
                     total_text: {type: "nvarchar", value: local.total_text}
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID)
+                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO)
+                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language)
                 "
             )
 
@@ -191,18 +189,19 @@ component displayname="invoices" output="false" {
         } else {
             local.vatType = application.objGlobal.getSetting('settingStandardVatType');
         }
+        if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
+            local.language = invoiceData.language;
+        } else {
+            local.language = application.objGlobal.getDefaultLanguage().iso;;
+        }
 
         <!--- Total text --->
-        local.customerLng = application.objCustomer.getCustomerData(local.customerID).strLanguageISO;
-        if (!len(trim(local.customerLng))) {
-            local.customerLng = application.objGlobal.getDefaultLanguage().iso;
-        }
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', customerLng);
+            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -210,16 +209,18 @@ component displayname="invoices" output="false" {
         try {
 
              queryExecute(
-                options = {datasource = application.datasource, result="getNewID"},
+                options = {datasource = application.datasource},
                 params = {
                     invoiceID: {type: "numeric", value: local.invoiceID},
                     userID: {type: "numeric", value: local.userID},
                     title: {type: "nvarchar", value: local.title},
                     invoiceDate: {type: "datetime", value: local.invoiceDate},
                     dueDate: {type: "datetime", value: local.dueDate},
-                    currency: {type: "nvarchar", value: local.currency},
+                    currency: {type: "varchar", value: local.currency},
+                    total_text: {type: "nvarchar", value: local.total_text},
                     isNet: {type: "boolean", value: local.isNet},
-                    vatType: {type: "numeric", value: local.vatType}
+                    vatType: {type: "numeric", value: local.vatType},
+                    language: {type: "varchar", value: local.language}
                 },
                 sql = "
                     UPDATE invoices
@@ -228,11 +229,14 @@ component displayname="invoices" output="false" {
                         dtmInvoiceDate = :invoiceDate,
                         dtmDueDate = :dueDate,
                         strCurrency = :currency,
+                        strTotalText = :total_text,
                         blnIsNet = :isNet,
-                        intVatType = :vatType
+                        intVatType = :vatType,
+                        strLanguageISO = :language
                     WHERE intInvoiceID = :invoiceID
                 "
             )
+
 
         } catch (any e) {
 
@@ -680,17 +684,15 @@ component displayname="invoices" output="false" {
                 invoiceID: {type: "numeric", value: arguments.invoiceID}
             },
             sql = "
-                SELECT invoices.intCustomerID, invoices.blnIsNet, invoices.intVatType, invoice_positions.*
+                SELECT invoices.intCustomerID, invoices.blnIsNet, invoices.intVatType, invoices.strLanguageISO, invoice_positions.*
                 FROM invoices LEFT JOIN invoice_positions ON invoices.intInvoiceID = invoice_positions.intInvoiceID
                 WHERE invoices.intInvoiceID = :invoiceID
             "
         )
 
-        <!--- Customers language --->
-        local.customerLng = application.objCustomer.getCustomerData(qInvoicePositions.intCustomerID).strLanguageISO;
-        if (!len(trim(local.customerLng))) {
-            local.customerLng = application.objGlobal.getDefaultLanguage().iso;
-        }
+        <!--- Get language from the first entry in positions --->
+        local.customerLng = qInvoicePositions.strLanguageISO;
+
 
         <!--- Delete vat table --->
         queryExecute(
@@ -938,6 +940,7 @@ component displayname="invoices" output="false" {
                 local.invoiceInfo['subtotal'] = qInvoice.decSubTotalPrice;
                 local.invoiceInfo['total'] = qInvoice.decTotalPrice;
                 local.invoiceInfo['totaltext'] = qInvoice.strTotalText;
+                local.invoiceInfo['language'] = qInvoice.strLanguageISO;
                 local.invoiceInfo['paymentstatus'] = application.objGlobal.getTrans(qInvoice.strInvoiceStatusVariable);
                 local.invoiceInfo['paymentstatusVar'] = qInvoice.strInvoiceStatusVariable;
                 local.invoiceInfo['paymentstatusID'] = qInvoice.intPaymentStatusID;
