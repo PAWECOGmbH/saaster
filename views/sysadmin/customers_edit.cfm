@@ -10,7 +10,7 @@
     qCustomers = application.objCustomer.getCustomerData(thisCustomerID);
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
-    
+
     if(not qCustomers.recordCount){
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
@@ -23,6 +23,7 @@
     custZIP = qCustomers.strZIP;
     custCity = qCustomers.strCity;
     countryID = qCustomers.intCountryID;
+    timezoneID = qCustomers.intTimezoneID;
     custEmail = qCustomers.strEmail;
     custPhone = qCustomers.strPhone;
     custWebsite = qCustomers.strWebsite;
@@ -50,7 +51,7 @@
     if(structKeyExists(session, "zip") and len(trim(session.zip))){
         custZIP = session.zip;
     }
-    
+
     if(structKeyExists(session, "city") and len(trim(session.city))){
         custCity = session.city;
     }
@@ -70,7 +71,7 @@
     if(structKeyExists(session, "website") and len(trim(session.website))){
         custWebsite = session.website;
     }
-    
+
     if(structKeyExists(session, "billing_name") and len(trim(session.billing_name))){
         custBillingAccountName = session.billing_name;
     }
@@ -86,10 +87,12 @@
     if(structKeyExists(session, "billing_info") and len(trim(session.billing_info))){
         custBillingInfo = session.billing_info
     }
+
+    timeZones = application.getTime.getTimezones();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-
 <cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
@@ -127,14 +130,14 @@
                                     <div class="card-header">
                                         <h3 class="card-title">Edit company</h3>
                                     </div>
-                                    <div class="card-body">                                    
+                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Company Name *</label>
                                                     <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100" required>
                                                 </div>
-                                            </div>    
+                                            </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Contact person *</label>
@@ -146,13 +149,13 @@
                                                     <label class="form-label">Address *</label>
                                                     <input type="text" name="address" class="form-control" value="#HTMLEditFormat(custAddress)#" minlength="3" maxlength="100" required>
                                                 </div>
-                                            </div> 
+                                            </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Additional address</label>
                                                     <input type="text" name="address2" class="form-control" value="#HTMLEditFormat(custAddress2)#" maxlength="100">
                                                 </div>
-                                            </div>                                        
+                                            </div>
                                             <div class="col-sm-6 col-md-3">
                                                 <div class="mb-3">
                                                     <label class="form-label">ZIP *</label>
@@ -165,16 +168,31 @@
                                                     <input type="text" name="city" class="form-control" value="#HTMLEditFormat(custCity)#" minlength="3" maxlength="100" required>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-6 col-md-4">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Country</label>                                    
-                                                    <select name="countryID" type="text" class="form-select" placeholder="Country" id="select-users">
-                                                        <cfloop query="qCountries">
-                                                            <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
-                                                        </cfloop>
-                                                    </select>
+                                            <cfif qCountries.recordCount>
+                                                <div class="col-sm-6 col-md-4">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Country *</label>
+                                                        <select name="countryID" class="form-select" required>
+                                                            <option value=""></option>
+                                                            <cfloop query="qCountries">
+                                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                            </cfloop>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </div>  
+                                            <cfelse>
+                                                <div class="col-sm-6 col-md-4">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Timezone *</label>
+                                                        <select name="timezoneID" class="form-select" required>
+                                                            <option value=""></option>
+                                                            <cfloop array="#timeZones#" index="i">
+                                                                <option value="#i.id#" <cfif i.id eq timezoneID>selected</cfif>>#i.timezone# - #i.city# (#i.utc#) </option>
+                                                            </cfloop>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </cfif>
                                             <div class="col-md-5">
                                                 <div class="mb-3">
                                                     <label class="form-label">Email address</label>
@@ -192,20 +210,20 @@
                                                     <label class="form-label">Website</label>
                                                     <input type="text" class="form-control" name="website" value="#HTMLEditFormat(custWebsite)#" maxlength="100">
                                                 </div>
-                                            </div>                                                       
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="card-header">
                                         <h3 class="card-title">Invoice settings</h3>
                                     </div>
-                                    <div class="card-body">                                    
+                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Company Name</label>
                                                     <input type="text" name="billing_name" class="form-control" value="#HTMLEditFormat(custBillingAccountName)#" maxlength="100">
                                                 </div>
-                                            </div>    
+                                            </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Invoice email address</label>
@@ -217,13 +235,13 @@
                                                     <label class="form-label">Invoice address</label>
                                                     <textarea class="form-control" name="billing_address" rows="6">#custBillingAddress#</textarea>
                                                 </div>
-                                            </div> 
+                                            </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Invoice information</label>
                                                     <textarea class="form-control" name="billing_info" rows="6">#custBillingInfo#</textarea>
                                                 </div>
-                                            </div>                                                       
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="card-footer text-right">
@@ -233,7 +251,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                        
+
                         </div>
                     </div>
                 </div>
