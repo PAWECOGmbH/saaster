@@ -1,7 +1,7 @@
 
 <cfscript>
 customer = new MockData().mock(
-    $num = 100,
+    $num = 10,
     company_name = "words",
     address = "words",
     addr_number = "string-numeric:2",
