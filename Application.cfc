@@ -1,10 +1,10 @@
 
 component displayname="Application" output="false" hint="Handle the application." {
 
-    // Datasource and custom variables you'll find in root/config.cfm
+    // Datasource and custom variables
     include template="config.cfm";
 
-    // Configurations from the config table
+    // Configurations from the config table (you can use the setup routine {mainURL}/setup)
     variables.objConfig = new com.config();
     variables.configData = variables.objConfig.getConfigData(variables.datasource);
 
@@ -32,8 +32,12 @@ component displayname="Application" output="false" hint="Handle the application.
         application.fromEmail = variables.configData.fromEmail;
         application.toEmail = variables.configData.toEmail;
         application.mainURL = variables.configData.mainURL;
-        application.usersIP = variables.configData.usersIP;
         application.userTempImg = variables.configData.userTempImg;
+        if (variables.configData.usersIP eq "live") {
+            application.usersIP = cgi.remote_addr;
+        } else {
+            application.usersIP = variables.configData.usersIP;
+        }
 
 
         <!--- Object initialising --->
