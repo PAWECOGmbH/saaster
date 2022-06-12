@@ -1,33 +1,25 @@
 <cfscript>
 
-if (structKeyExists(form, "countryID")) {
+if (structKeyExists(form, "step1")) {
 
-    queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            cID: {type: "numeric", value: form.countryID}
-        },
-        sql = "
-            UPDATE setup_saaster
-            SET intDefaultCountryID = :cID
-        "
-    )
+    loop list=form.fieldnames index="field" {
+        if (field neq "step1" and field neq "fieldnames") {
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    thisField: {type: "varchar", value: field},
+                    thisValue: {type: "varchar", value: evaluate(field)}
+                },
+                sql = "
+                    UPDATE config
+                    SET strValue = :thisValue
+                    WHERE strVariable = :thisField
 
-}
+                "
+            )
+        }
+    }
 
-qSetup = queryExecute(
-    options = {datasource = application.datasource},
-    sql = "
-        SELECT blnWorldWide
-        FROM setup_saaster
-    "
-)
-
-worldwide = true;
-countrybased = false;
-if (qSetup.blnWorldWide eq 0) {
-    worldwide = false;
-    countrybased = true;
 }
 
 </cfscript>
@@ -54,14 +46,14 @@ if (qSetup.blnWorldWide eq 0) {
             <label class="form-label">Make your choice:</label>
             <div class="form-selectgroup">
                 <label class="form-selectgroup-item">
-                    <input type="radio" name="world" value="1" class="form-selectgroup-input" <cfif worldwide>checked</cfif>>
+                    <input type="radio" name="world" value="1" class="form-selectgroup-input" checked>
                     <span class="form-selectgroup-label">
                         <i class="fas fa-globe-americas"></i>
                         Worldwide
                     </span>
                 </label>
                 <label class="form-selectgroup-item">
-                    <input type="radio" name="world" value="0" class="form-selectgroup-input" <cfif countrybased>checked</cfif>>
+                    <input type="radio" name="world" value="0" class="form-selectgroup-input">
                     <span class="form-selectgroup-label w-100">
                         <i class="fas fa-flag-usa"></i>
                         Country based

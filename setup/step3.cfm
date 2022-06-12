@@ -2,30 +2,17 @@
 
 if (structKeyExists(form, "world") and form.world eq 0) {
 
-    queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            ww: {type: "numeric", value: 0}
-        },
-        sql = "
-            UPDATE setup_saaster
-            SET blnWorldWide = :ww
-        "
-    )
-
     location url="step2b.cfm" addtoken="false";
 
-} else if (structKeyExists(form, "world") and form.world eq 1) {
+} else {
 
     queryExecute(
         options = {datasource = application.datasource},
-        params = {
-            ww: {type: "numeric", value: 1}
-        },
         sql = "
-            UPDATE setup_saaster
-            SET blnWorldWide = :ww,
-                strCountryList = ''
+            UPDATE countries
+            SET blnDefault = 0,
+                blnActive = 0
+
         "
     )
 
@@ -36,11 +23,13 @@ if (structKeyExists(form, "countryID")) {
     queryExecute(
         options = {datasource = application.datasource},
         params = {
-            cIDs: {type: "varchar", value: form.countryID}
+            countryID: {type: "numeric", value: form.countryID}
         },
         sql = "
-            UPDATE setup_saaster
-            SET strCountryList = :cIDs
+            UPDATE countries
+            SET blnDefault = 1
+            WHERE intCountryID = :countryID
+
         "
     )
 
@@ -89,14 +78,6 @@ if (structKeyExists(form, "new_lang")) {
 
 }
 
-qSetup = queryExecute(
-    options = {datasource = application.datasource},
-    sql = "
-        SELECT intDefaultLanguageID
-        FROM setup_saaster
-    "
-)
-
 qLanguages = queryExecute(
     options = {datasource = application.datasource},
     sql = "
@@ -134,7 +115,7 @@ qLanguages = queryExecute(
             <div class="mt-4">
                 <cfloop query="qLanguages">
                     <label class="form-check">
-                        <input type="radio" name="langID" value="#qLanguages.intLanguageID#" class="form-check-input" <cfif qSetup.intDefaultLanguageID eq qLanguages.intLanguageID>checked</cfif>>
+                        <input type="radio" name="langID" value="#qLanguages.intLanguageID#" class="form-check-input" >
                         <span class="form-check-label">#qLanguages.strLanguageEN# (#qLanguages.strLanguageISO#)</span>
                     </label>
                 </cfloop>

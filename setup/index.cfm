@@ -35,7 +35,7 @@ try {
 
 <div class="card-body">
 
-    <h2 class="card-title text-center mb-4">Setup saaster</h2>
+    <h2 class="card-title text-center mb-4">Setup routine</h2>
 
     <cfif structKeyExists(session, "alert")>
         <cfoutput>#session.alert#</cfoutput>
