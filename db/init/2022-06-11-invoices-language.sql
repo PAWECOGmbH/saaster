@@ -5,5 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE invoices
 ADD COLUMN strLanguageISO varchar(2) NOT NULL AFTER intPaymentStatusID;
 
+DROP TABLE IF EXISTS setup_saaster;
+
 
 SET FOREIGN_KEY_CHECKS = 1;
