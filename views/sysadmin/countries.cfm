@@ -73,7 +73,7 @@
         local.qCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT countries.*, languages.strLanguageEN
+                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
                 FROM countries
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
@@ -84,7 +84,8 @@
                     strISO2 LIKE '%#session.c_search#%' OR
                     strCurrency LIKE '%#session.c_search#%' OR
                     strRegion LIKE '%#session.c_search#%' OR
-                    strSubRegion LIKE '%#session.c_search#%'
+                    strSubRegion LIKE '%#session.c_search#%' OR
+                    strTimezone   LIKE '%#session.c_search#%'
                 )
                 ORDER BY #session.c_sort#
                 LIMIT #local.c_start#, #getEntries#
