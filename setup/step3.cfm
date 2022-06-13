@@ -1,91 +1,87 @@
 <cfscript>
 
-if (structKeyExists(form, "world") and form.world eq 0) {
+    if (structKeyExists(form, "new_lang")) {
 
-    location url="step2b.cfm" addtoken="false";
+        param name="form.lng_en" default="";
+        param name="form.lng_own" default="";
+        param name="form.iso" default="";
 
-} else {
+        try {
 
-    queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            UPDATE countries
-            SET blnDefault = 0,
-                blnActive = 0
+            qNewPrio = queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT MAX(intPrio)+1 as newPrio
+                    FROM languages
+                "
+            )
 
-        "
-    )
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    lng_en: {type: "varchar", value: left(form.lng_en, 20)},
+                    lng_own: {type: "varchar", value: left(form.lng_own, 20)},
+                    iso: {type: "varchar", value: left(form.iso, 2)},
+                    newPrio: {type: "numeric", value: qNewPrio.newPrio}
+                },
+                sql = "
+                    ALTER TABLE system_translations ADD COLUMN strString#ucase(form.iso)# longtext;
+                    ALTER TABLE custom_translations ADD COLUMN strString#ucase(form.iso)# longtext;
+                    INSERT INTO languages (strLanguageISO, strLanguageEN, strLanguage, intPrio, blnDefault, blnChooseable)
+                    VALUES (:iso, :lng_en, :lng_own, :newPrio, 0, 1)
+                "
+            )
 
-}
+            getAlert('Language added!');
+            location url="step2.cfm" addtoken="false";
 
-if (structKeyExists(form, "countryID")) {
+        } catch (any e) {
 
-    queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            countryID: {type: "numeric", value: form.countryID}
-        },
-        sql = "
-            UPDATE countries
-            SET blnDefault = 1
-            WHERE intCountryID = :countryID
+            throw(e.message);
+            abort;
 
-        "
-    )
+        }
 
-}
+    }
 
-if (structKeyExists(form, "new_lang")) {
+    param name="form.translated" default=0;
 
-    param name="form.lng_en" default="";
-    param name="form.lng_own" default="";
-    param name="form.iso" default="";
+    if (!structKeyExists(form, "langID") or !isNumeric(form.langID)) {
+        getAlert('Please choose the default language!', 'warning');
+        location url="step2.cfm" addtoken="false";
+    }
 
-    try {
+    // Lets translate content, if its a new language
+    if (form.langID neq 1 and form.langID neq 2 and form.translated neq 1) {
+        location url="step2b.cfm?newlng=#form.langID#" addtoken="false";
+    }
 
-        qNewPrio = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT MAX(intPrio)+1 as newPrio
-                FROM languages
-            "
-        )
+
+    if (structKeyExists(form, "langID")) {
 
         queryExecute(
             options = {datasource = application.datasource},
             params = {
-                lng_en: {type: "varchar", value: left(form.lng_en, 20)},
-                lng_own: {type: "varchar", value: left(form.lng_own, 20)},
-                iso: {type: "varchar", value: left(form.iso, 2)},
-                newPrio: {type: "numeric", value: qNewPrio.newPrio}
+                lngID: {type: "numeric", value: form.langID}
             },
             sql = "
-                ALTER TABLE system_translations ADD COLUMN strString#ucase(form.iso)# longtext;
-                ALTER TABLE custom_translations ADD COLUMN strString#ucase(form.iso)# longtext;
-                INSERT INTO languages (strLanguageISO, strLanguageEN, strLanguage, intPrio, blnDefault, blnChooseable)
-                VALUES (:iso, :lng_en, :lng_own, :newPrio, 0, 1)
+                UPDATE languages SET blnDefault = 0;
+                UPDATE languages
+                SET blnDefault = 1
+                WHERE intLanguageID = :lngID
             "
         )
 
-        getAlert('Language added!');
-
-    } catch (any e) {
-
-        throw(e.message);
-        abort;
-
     }
 
-}
-
-qLanguages = queryExecute(
-    options = {datasource = application.datasource},
-    sql = "
-        SELECT intLanguageID, strLanguageEN, strLanguageISO
-        FROM languages
-        ORDER BY intPrio
-    "
-)
+    qCurrencies = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT intCurrencyID, strCurrencyISO, strCurrencyEN
+            FROM currencies
+            ORDER BY intPrio
+        "
+    )
 
 </cfscript>
 
@@ -97,77 +93,29 @@ qLanguages = queryExecute(
         <a href="step1.cfm" class="step-item "></a>
         <a href="step2.cfm" class="step-item "></a>
         <span href="#" class="step-item active"></span>
-        <span href="#" class="step-item"></span>
     </div>
 
-    <h2 class="card-title text-center mb-4">Choose your default language</h2>
+    <h2 class="card-title text-center mb-4">Choose your default currency</h2>
     <p>
-        Now select <b>the default language</b> in your project.<br />
-        <span class="text-red">Note:</span> You <b>CANNOT</b> change the default language later!
+        If you miss your default currency, just choose another one. You can add more currencies later.
     </p>
 
     <cfoutput>
-    <cfif structKeyExists(session, "alert")>
-        #session.alert#
-    </cfif>
-    <form action="step4.cfm" method="post">
+    <form action="end.cfm" method="post">
         <div class="mb-3">
-            <div class="mt-4">
-                <cfloop query="qLanguages">
+            <div class="divide-y">
+                <cfloop query="qCurrencies">
                     <label class="form-check">
-                        <input type="radio" name="langID" value="#qLanguages.intLanguageID#" class="form-check-input" >
-                        <span class="form-check-label">#qLanguages.strLanguageEN# (#qLanguages.strLanguageISO#)</span>
+                        <input type="radio" name="currencyID" value="#qCurrencies.intCurrencyID#" class="form-check-input">
+                        <span class="form-check-label">#qCurrencies.strCurrencyEN# (#qCurrencies.strCurrencyISO#)</span>
                     </label>
                 </cfloop>
             </div>
         </div>
-        <div class="mb-3">
-            <p><a href="##" data-bs-toggle="modal" data-bs-target="##lng_new"><i class="fas fa-plus pe-3"></i> Add language</a></p>
-            <p class="small">(Add a new language only if you miss your default language. You can add more languages later.)</p>
-        </div>
         <div class="mb-3 text-center">
-            <button type="submit" class="btn btn-primary w-100">Save and next</button>
+            <button type="submit" class="btn btn-primary w-100">Save and finish setup</button>
         </div>
     </form>
-
-    <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-        <form action="step3.cfm" method="post">
-            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">New language</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Language (english)</label>
-                            <input type="text" name="lng_en" class="form-control" autocomplete="off" maxlength="20" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Language (in its language)</label>
-                            <input type="text" name="lng_own" class="form-control" autocomplete="off" maxlength="20" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-2">
-                                <div class="mb-3">
-                                    <label class="form-label">ISO code</label>
-                                    <div class="input-group input-group-flat">
-                                        <input type="text" class="form-control" name="iso" autocomplete="off" maxlength="2" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
-                        <button type="submit" name="new_lang" class="btn btn-primary ms-auto">
-                            Save language
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
     </cfoutput>
 
 </div>
