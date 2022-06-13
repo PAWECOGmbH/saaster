@@ -8,20 +8,10 @@ try {
         options = {datasource = application.datasource},
         sql = "
             SELECT *
-            FROM setup_saaster
+            FROM optin
         "
     )
 
-    //Check if there is already an entry in the table
-    if (!qSetup.recordCount) {
-        queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                INSERT INTO setup_saaster (intDefaultCountryID)
-                VALUES (0)
-            "
-        )
-    }
 
 } catch (any e) {
 
