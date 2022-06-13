@@ -4,15 +4,11 @@ component displayname="Application" output="false" hint="Handle the application.
     // Datasource and custom variables
     include template="config.cfm";
 
-    // Configurations from the config table (you can use the setup routine {mainURL}/setup)
-    variables.objConfig = new com.config();
-    variables.configData = variables.objConfig.getConfigData(variables.datasource);
-
     // Dynamic values (table)
-    this.name = variables.configData.applicationname;
-    this.sessiontimeout = variables.configData.sessiontimeout;
-    this.pdf.type = variables.configData.pdf_type;
-    setting requesttimeout = variables.configData.requesttimeout;
+    this.name = variables.applicationname;
+    this.sessiontimeout = variables.sessiontimeout;
+    this.pdf.type = variables.pdf_type;
+    setting requesttimeout = variables.requesttimeout;
 
     // Fixed values
     this.sessionmanagement = true;
@@ -27,16 +23,16 @@ component displayname="Application" output="false" hint="Handle the application.
         application.datasource = variables.datasource;
 
         // Dynamic values (table)
-        application.projectName = variables.configData.appName;
-        application.appOwner = variables.configData.appOwner;
-        application.fromEmail = variables.configData.fromEmail;
-        application.toEmail = variables.configData.toEmail;
-        application.mainURL = variables.configData.mainURL;
-        application.userTempImg = variables.configData.userTempImg;
-        if (variables.configData.usersIP eq "live") {
-            application.usersIP = cgi.remote_addr;
+        application.projectName = variables.appName;
+        application.appOwner = variables.appOwner;
+        application.fromEmail = variables.fromEmail;
+        application.toEmail = variables.toEmail;
+        application.mainURL = variables.mainURL;
+        application.userTempImg = variables.userTempImg;
+        if (variables.devDomain eq cgi.server_name) {
+            application.usersIP = variables.usersIP;
         } else {
-            application.usersIP = variables.configData.usersIP;
+            application.usersIP = cgi.remote_addr;
         }
 
 

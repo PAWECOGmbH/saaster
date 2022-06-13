@@ -1,22 +1,12 @@
 <cfscript>
-    param name="form.translated" default=0; 
+
+    param name="form.translated" default=0;
 
     if (!structKeyExists(form, "langID") or !isNumeric(form.langID)) {
         getAlert('Please choose the default language!', 'warning');
         location url="step3.cfm" addtoken="false";
     }
 
-    queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            lID: {type: "numeric", value: form.langID}
-        },
-        sql = "
-            UPDATE setup_saaster
-            SET intDefaultLanguageID = :lID
-        "
-    )
-    
     // Lets translate content, if its a new language
     if (form.langID neq 1 and form.langID neq 2 and form.translated neq 1) {
         location url="step3b.cfm?newlng=#form.langID#" addtoken="false";
@@ -30,6 +20,7 @@
             ORDER BY intPrio
         "
     )
+
 </cfscript>
 
 
