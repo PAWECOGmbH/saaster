@@ -25,13 +25,13 @@ try {
 
 <div class="card-body">
 
-    <h2 class="card-title text-center mb-4">Setup routine</h2>
+    <h2 class="card-title text-center mb-4">Setup routine for saaster</h2>
 
     <cfif structKeyExists(session, "alert")>
         <cfoutput>#session.alert#</cfoutput>
     </cfif>
     <div class="form-footer">
-        <a href="step1.cfm" class="btn btn-primary w-100">Start</a>
+        <a href="step1.cfm" class="btn btn-primary w-100">Start setup</a>
     </div>
 
 </div>

@@ -37,7 +37,6 @@ qCountries = queryExecute(
 <div class="card-body">
 
     <div class="steps steps-counter steps-blue">
-        <a href="step1.cfm" class="step-item "></a>
         <span href="#" class="step-item active"></span>
         <span href="#" class="step-item"></span>
         <span href="#" class="step-item"></span>
@@ -48,7 +47,7 @@ qCountries = queryExecute(
         Please select the country you want to define as the default country.
     </p>
 
-    <form action="step3.cfm" method="post">
+    <form action="step2.cfm" method="post">
         <div class="mb-3">
             <select name="countryID" class="form-select" id="select_box" required>
                 <option value="">Select Country</option>

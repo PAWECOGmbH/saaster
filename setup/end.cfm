@@ -2,7 +2,6 @@
 
 if (structKeyExists(form, "currencyID")) {
 
-    // take over default values
     queryExecute(
         options = {datasource = application.datasource},
         params = {
@@ -14,6 +13,18 @@ if (structKeyExists(form, "currencyID")) {
         "
     )
 
+    qThisLng = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT strLanguageISO
+            FROM languages
+            WHERE blnDefault = 1
+        "
+    )
+
+    // set the new language session
+    session.lng = qThisLng.strLanguageISO;
+
 
     getAlert('Setup done! Please register now with a sysadmin e-mail address.');
     location url="#application.mainURL#/register?reinit=3" addtoken="false";
@@ -21,7 +32,7 @@ if (structKeyExists(form, "currencyID")) {
 
 } else {
 
-    location url="step4.cfm" addtoken="false";
+    location url="step3.cfm" addtoken="false";
 
 }
 
