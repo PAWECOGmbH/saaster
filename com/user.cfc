@@ -140,7 +140,7 @@ component displayname="user" output="false" {
 
 
     <!--- Update user --->
-    public struct function updateUser(required struct userStruct, required numeric userID, numeric comfirmMailChange) {
+    public struct function updateUser(required struct userStruct, required numeric userID, boolean comfirmMailChange) {
 
         <!--- Default variables --->
         local.argsReturnValue = structNew();
@@ -205,7 +205,7 @@ component displayname="user" output="false" {
 
         try {
 
-            if (structKeyExists(arguments, 'comfirmMailChange') and arguments.comfirmMailChange neq 1){
+            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
                 <!--- update the user --->
                 queryExecute(
 

@@ -76,21 +76,16 @@ if (structKeyExists(form, "edit_profile_btn")) {
         structDelete(session, "email");
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
-    CofirmRespond = 0
 
     <!--- Check if the E-Mail ist changed --->
     if(thisReferer eq 'my-profile'){
         MailConfirm = IniUserObj.MailChangeConfirm(form.email, thisUserID);
-        
-        if(MailConfirm eq 1){
-            CofirmRespond = 1;
-        }else{
-            CofirmRespond = 0;
-        }
+    }else{
+        MailConfirm = false
     }
 
     <!--- Save the user using a function --->
-    objUserEdit = IniUserObj.updateUser(form, thisUserID, CofirmRespond);
+    objUserEdit = IniUserObj.updateUser(form, thisUserID, MailConfirm);
     
     if (objUserEdit.success) {
         getAlert('msgChangesSaved', 'success');
