@@ -1,8 +1,8 @@
 <cfscript>
 	qCustomer = application.objCustomer.getUserDataByID(session.user_ID);
 
-    IniUserObj = application.objUser;
-    UserMail = qCustomer.strEmail;
+    iniUserObj = application.objUser;
+    userMail = qCustomer.strEmail;
 
     if (structKeyExists(url, "c") and len(trim(url.c)) eq 64){
         
@@ -22,15 +22,15 @@
 
         local.userID = qOptinUser.intUserID
         
-        objMailUpdate = IniUserObj.UpdateEmail(url.nMail, local.userID);
+        objMailUpdate = iniUserObj.UpdateEmail(url.nMail, local.userID);
 
         if (objMailUpdate.success) {
-            getAlert('E-Mail updated', 'success');
+            getAlert('email updated', 'success');
         } else {
             getAlert('No user found!', 'danger');
         }
 
-        UserMail = url.NMail;
+        userMail = url.nMail;
     }
 </cfscript>
 
@@ -127,7 +127,7 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label class="form-label">#getTrans('formEmailAddress')# *</label>
-                                            <input type="email" class="form-control" name="email" value="#UserMail#" maxlength="100" minlength="3" required>
+                                            <input type="email" class="form-control" name="email" value="#userMail#" maxlength="100" minlength="3" required>
                                         </div>
                                     </div>
                                         <div class="col-sm-6 col-md-4 mb-3">

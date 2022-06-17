@@ -204,130 +204,131 @@ component displayname="user" output="false" {
         }
 
         try {
+            <!--- update the user --->
+            queryExecute(
 
-            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
-                <!--- update the user --->
+                options = {datasource = application.datasource, result="check"},
+                params = {
+                    intUserID: {type: "numeric", value: arguments.userID},
+                    salutation: {type: "nvarchar", value: local.salutation},
+                    first_name: {type: "nvarchar", value: local.first_name},
+                    last_name: {type: "nvarchar", value: local.last_name},
+                    phone: {type: "nvarchar", value: local.phone},
+                    mobile: {type: "nvarchar", value: local.mobile},
+                    language: {type: "nvarchar", value: local.language},
+                    admin: {type: "numeric", value: local.admin},
+                    superadmin: {type: "numeric", value: local.superadmin},
+                    active: {type: "numeric", value: local.active}
+                },
+                sql = "
+
+                    UPDATE users
+                    SET strSalutation = :salutation,
+                        strFirstName = :first_name,
+                        strLastName = :last_name,
+                        strPhone = :phone,
+                        strMobile = :mobile,
+                        strLanguage = :language,
+                        blnAdmin = :admin,
+                        blnSuperAdmin = :superadmin,
+                        blnActive = :active
+                    WHERE intUserID = :intUserID
+
+                "
+
+            )
+
+            if (listLen(local.tenantID)) {
+
+                <!--- Delete tenants to which the user has no access  --->
                 queryExecute(
 
                     options = {datasource = application.datasource, result="check"},
                     params = {
-                        intUserID: {type: "numeric", value: arguments.userID},
-                        salutation: {type: "nvarchar", value: local.salutation},
-                        first_name: {type: "nvarchar", value: local.first_name},
-                        last_name: {type: "nvarchar", value: local.last_name},
-                        email: {type: "nvarchar", value: local.email},
-                        phone: {type: "nvarchar", value: local.phone},
-                        mobile: {type: "nvarchar", value: local.mobile},
-                        language: {type: "nvarchar", value: local.language},
-                        admin: {type: "numeric", value: local.admin},
-                        superadmin: {type: "numeric", value: local.superadmin},
-                        active: {type: "numeric", value: local.active}
+                        userID: {type: "numeric", value: arguments.userID}
                     },
                     sql = "
-
-                        UPDATE users
-                        SET strSalutation = :salutation,
-                            strFirstName = :first_name,
-                            strLastName = :last_name,
-                            strEmail = :email,
-                            strPhone = :phone,
-                            strMobile = :mobile,
-                            strLanguage = :language,
-                            blnAdmin = :admin,
-                            blnSuperAdmin = :superadmin,
-                            blnActive = :active
-                        WHERE intUserID = :intUserID
-
+                        DELETE FROM customer_user
+                        WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
                     "
 
                 )
 
-                if (listLen(local.tenantID)) {
+                <!--- Insert tenants to which the user has access  --->
+                cfloop( list = local.tenantID, index = "local.t" ) {
 
-                    <!--- Delete tenants to which the user has no access  --->
                     queryExecute(
 
-                        options = {datasource = application.datasource, result="check"},
+                        options = {datasource = application.datasource},
                         params = {
+                            tenantID: {type: "numeric", value: local.t},
                             userID: {type: "numeric", value: arguments.userID}
                         },
                         sql = "
-                            DELETE FROM customer_user
-                            WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
+                            INSERT INTO customer_user (intCustomerID, intUserID)
+                            SELECT * FROM
+                            (
+                                SELECT :tenantID as thisTenantID, :userID as thisUserID
+                            ) as tmp
+                            WHERE NOT EXISTS
+                            (
+                                SELECT intCustomerID
+                                FROM customer_user
+                                WHERE intCustomerID = :tenantID AND intUserID = :userID
+                            )
                         "
 
                     )
 
-                    <!--- Insert tenants to which the user has access  --->
-                    cfloop( list = local.tenantID, index = "local.t" ) {
+                }
 
-                        queryExecute(
+                <!--- At least one tenant must be defined as standard --->
+                qCheckStandard = queryExecute(
 
-                            options = {datasource = application.datasource},
-                            params = {
-                                tenantID: {type: "numeric", value: local.t},
-                                userID: {type: "numeric", value: arguments.userID}
-                            },
-                            sql = "
-                                INSERT INTO customer_user (intCustomerID, intUserID)
-                                SELECT * FROM
-                                (
-                                    SELECT :tenantID as thisTenantID, :userID as thisUserID
-                                ) as tmp
-                                WHERE NOT EXISTS
-                                (
-                                    SELECT intCustomerID
-                                    FROM customer_user
-                                    WHERE intCustomerID = :tenantID AND intUserID = :userID
-                                )
-                            "
+                    options = {datasource = application.datasource},
+                    params = {
+                        userID: {type: "numeric", value: arguments.userID}
+                    },
+                    sql = "
+                        SELECT SUM(blnStandard) as hasStandard
+                        FROM customer_user
+                        WHERE intUserID = :userID
+                    "
+                )
 
-                        )
+                if (qCheckStandard.hasStandard eq 0) {
 
-                    }
-
-                    <!--- At least one tenant must be defined as standard --->
-                    qCheckStandard = queryExecute(
+                    queryExecute(
 
                         options = {datasource = application.datasource},
                         params = {
                             userID: {type: "numeric", value: arguments.userID}
                         },
                         sql = "
-                            SELECT SUM(blnStandard) as hasStandard
-                            FROM customer_user
+                            UPDATE customer_user
+                            SET blnStandard = 1
                             WHERE intUserID = :userID
+                            ORDER BY intCustomerID
+                            LIMIT 1
                         "
                     )
 
-                    if (qCheckStandard.hasStandard eq 0) {
-
-                        queryExecute(
-
-                            options = {datasource = application.datasource},
-                            params = {
-                                userID: {type: "numeric", value: arguments.userID}
-                            },
-                            sql = "
-                                UPDATE customer_user
-                                SET blnStandard = 1
-                                WHERE intUserID = :userID
-                                ORDER BY intCustomerID
-                                LIMIT 1
-                            "
-                        )
-
-                    }
-
                 }
+
+            }
+
+            
+            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
+
+                updateMail = UpdateEmail(local.email, arguments.userID);
 
                 local.argsReturnValue['message'] = "OK";
                 local.argsReturnValue['success'] = true;
 
+
             } else {
 
-                local.argsReturnValue['message'] = "#getTrans('alertOptinSent')#";
-                local.argsReturnValue['success'] = false;
+                application.objGlobal.getAlert('alertOptinSent', 'info');
             }
 
         } catch(any){
@@ -598,7 +599,7 @@ component displayname="user" output="false" {
 
     }
  
-    public any function MailChangeConfirm(required string useremail, required numeric mailuserID){
+    public boolean function MailChangeConfirm(required string useremail, required numeric mailuserID){
         
         getTrans = application.objGlobal.getTrans;
 
@@ -652,20 +653,18 @@ component displayname="user" output="false" {
             mail from="#application.fromEmail#" to="#qUsersMailCheck.stremail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
                 include "/includes/mail_design.cfm";
             }
-            MailChanged = 1;
+            MailChanged = true;
         }else{
-            MailChanged = 0;
+            MailChanged = false;
         }
 
         return MailChanged;
         
     }
 
-    public any function UpdateEmail(required string newUserMail, required numeric ConUserID){
+    public struct function UpdateEmail(required string newUserMail, required numeric ConUserID){
 
         local.argsReturnValue = structNew();
-        local.argsReturnValue['message'] = "";
-        local.argsReturnValue['success'] = false;
 
         queryExecute(
 
@@ -683,7 +682,7 @@ component displayname="user" output="false" {
             "
         )
 
-        local.argsReturnValue['message'] = "Email updated";
+        local.argsReturnValue['message'] = "email updated";
         local.argsReturnValue['success'] = true;
 
         return local.argsReturnValue;
