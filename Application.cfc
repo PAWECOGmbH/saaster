@@ -35,6 +35,13 @@ component displayname="Application" output="false" hint="Handle the application.
             application.usersIP = cgi.remote_addr;
         }
 
+        <!--- Payrexx initialising --->
+        local.payrexxStruct = structNew();
+        local.payrexxStruct['payrexxAPIurl'] = variables.payrexxAPIurl;
+        local.payrexxStruct['payrexxAPIinstance'] = variables.payrexxAPIinstance;
+        local.payrexxStruct['payrexxAPIkey'] = variables.payrexxAPIkey;
+        application.payrexxStruct = local.payrexxStruct;
+
 
         <!--- Object initialising --->
         application.objGlobal = new com.global();

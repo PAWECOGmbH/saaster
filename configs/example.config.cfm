@@ -69,4 +69,21 @@ variables.userTempImg = "http://www.clker.com/cliparts/A/Y/O/m/o/N/placeholder-m
 
 
 
+// ####################################
+//  PAYREXX SETTINGS
+// ####################################
+
+// The basic URL to the Payrexx API
+variables.payrexxAPIurl = "https://api.payrexx.com/v1.0/";
+
+// Your personal Payrexx instance
+variables.payrexxAPIinstance = "";
+
+// Your API key from Payrexx
+variables.payrexxAPIkey = "";
+
+// Look and feel of your payment page (id from Payrexx)
+variables.lookAndFeelProfile = "";
+
+
 </cfscript>

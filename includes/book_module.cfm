@@ -100,6 +100,19 @@
     // Response values for "message" you can use for any messages (optional)
     if (structKeyExists(url, "psp_response")) {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
         thisResponse = url.psp_response;
         param name="url.message" default="";
         if (len(trim(url.message))) {
@@ -237,6 +250,6 @@
     }
 </cfscript>
 
-<cfoutput>
+<!--- <cfoutput>
 <a href="#application.mainURL#/book?module=#url.module#&psp_response=success">OK, done!</a>
-</cfoutput>
+</cfoutput> --->
