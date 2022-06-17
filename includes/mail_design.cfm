@@ -248,19 +248,19 @@
                                 #MailCustomer.strPhone#
                               </cfif>
                             </td>
-                            <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td>
+                            <!--- <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td> --->
                           </tr>				
                         </table>
                     
-                        <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
+                        <!--- <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 20px; font-family: #FontFamily#; color: ##ffffff; border:none;">
                               <span style="font-size: 21px;">#getTrans('txtNetwork')#</span><br>
-                              <!--- <a href="" class="normal" target="_blank" title="Besuchen Sie uns auf Facebook"><img width="30" src="/img/social/facebook.png" alt="Besuchen Sie uns auf Facebook" border="0"/></a>
-                              <img src="/img/spacer.gif" width="2" />   --->                    
+                              <a href="" class="normal" target="_blank" title="Besuchen Sie uns auf Facebook"><img width="30" src="/img/social/facebook.png" alt="Besuchen Sie uns auf Facebook" border="0"/></a>
+                              <img src="/img/spacer.gif" width="2" />                 
                             </td>
                           </tr>
-                        </table>
+                        </table>  --->    
                       </td>
                     </tr>								
                   </table>

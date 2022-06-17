@@ -140,7 +140,7 @@ component displayname="user" output="false" {
 
 
     <!--- Update user --->
-    public struct function updateUser(required struct userStruct, required numeric userID) {
+    public struct function updateUser(required struct userStruct, required numeric userID, numeric comfirmMailChange) {
 
         <!--- Default variables --->
         local.argsReturnValue = structNew();
@@ -205,129 +205,134 @@ component displayname="user" output="false" {
 
         try {
 
-            <!--- update the user --->
-            queryExecute(
-
-                options = {datasource = application.datasource, result="check"},
-                params = {
-                    intUserID: {type: "numeric", value: arguments.userID},
-                    salutation: {type: "nvarchar", value: local.salutation},
-                    first_name: {type: "nvarchar", value: local.first_name},
-                    last_name: {type: "nvarchar", value: local.last_name},
-                    email: {type: "nvarchar", value: local.email},
-                    phone: {type: "nvarchar", value: local.phone},
-                    mobile: {type: "nvarchar", value: local.mobile},
-                    language: {type: "nvarchar", value: local.language},
-                    admin: {type: "numeric", value: local.admin},
-                    superadmin: {type: "numeric", value: local.superadmin},
-                    active: {type: "numeric", value: local.active}
-                },
-                sql = "
-
-                    UPDATE users
-                    SET strSalutation = :salutation,
-                        strFirstName = :first_name,
-                        strLastName = :last_name,
-                        strEmail = :email,
-                        strPhone = :phone,
-                        strMobile = :mobile,
-                        strLanguage = :language,
-                        blnAdmin = :admin,
-                        blnSuperAdmin = :superadmin,
-                        blnActive = :active
-                    WHERE intUserID = :intUserID
-
-                "
-
-            )
-
-
-            if (listLen(local.tenantID)) {
-
-                <!--- Delete tenants to which the user has no access  --->
+            if (structKeyExists(arguments, 'comfirmMailChange') and arguments.comfirmMailChange neq 1){
+                <!--- update the user --->
                 queryExecute(
 
                     options = {datasource = application.datasource, result="check"},
                     params = {
-                        userID: {type: "numeric", value: arguments.userID}
+                        intUserID: {type: "numeric", value: arguments.userID},
+                        salutation: {type: "nvarchar", value: local.salutation},
+                        first_name: {type: "nvarchar", value: local.first_name},
+                        last_name: {type: "nvarchar", value: local.last_name},
+                        email: {type: "nvarchar", value: local.email},
+                        phone: {type: "nvarchar", value: local.phone},
+                        mobile: {type: "nvarchar", value: local.mobile},
+                        language: {type: "nvarchar", value: local.language},
+                        admin: {type: "numeric", value: local.admin},
+                        superadmin: {type: "numeric", value: local.superadmin},
+                        active: {type: "numeric", value: local.active}
                     },
                     sql = "
-                        DELETE FROM customer_user
-                        WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
+
+                        UPDATE users
+                        SET strSalutation = :salutation,
+                            strFirstName = :first_name,
+                            strLastName = :last_name,
+                            strEmail = :email,
+                            strPhone = :phone,
+                            strMobile = :mobile,
+                            strLanguage = :language,
+                            blnAdmin = :admin,
+                            blnSuperAdmin = :superadmin,
+                            blnActive = :active
+                        WHERE intUserID = :intUserID
+
                     "
 
                 )
 
-                <!--- Insert tenants to which the user has access  --->
-                cfloop( list = local.tenantID, index = "local.t" ) {
+                if (listLen(local.tenantID)) {
 
+                    <!--- Delete tenants to which the user has no access  --->
                     queryExecute(
 
-                        options = {datasource = application.datasource},
+                        options = {datasource = application.datasource, result="check"},
                         params = {
-                            tenantID: {type: "numeric", value: local.t},
                             userID: {type: "numeric", value: arguments.userID}
                         },
                         sql = "
-                            INSERT INTO customer_user (intCustomerID, intUserID)
-                            SELECT * FROM
-                            (
-                                SELECT :tenantID as thisTenantID, :userID as thisUserID
-                            ) as tmp
-                            WHERE NOT EXISTS
-                            (
-                                SELECT intCustomerID
-                                FROM customer_user
-                                WHERE intCustomerID = :tenantID AND intUserID = :userID
-                            )
+                            DELETE FROM customer_user
+                            WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
                         "
 
                     )
 
-                }
+                    <!--- Insert tenants to which the user has access  --->
+                    cfloop( list = local.tenantID, index = "local.t" ) {
 
-                <!--- At least one tenant must be defined as standard --->
-                qCheckStandard = queryExecute(
+                        queryExecute(
 
-                    options = {datasource = application.datasource},
-                    params = {
-                        userID: {type: "numeric", value: arguments.userID}
-                    },
-                    sql = "
-                        SELECT SUM(blnStandard) as hasStandard
-                        FROM customer_user
-                        WHERE intUserID = :userID
-                    "
-                )
+                            options = {datasource = application.datasource},
+                            params = {
+                                tenantID: {type: "numeric", value: local.t},
+                                userID: {type: "numeric", value: arguments.userID}
+                            },
+                            sql = "
+                                INSERT INTO customer_user (intCustomerID, intUserID)
+                                SELECT * FROM
+                                (
+                                    SELECT :tenantID as thisTenantID, :userID as thisUserID
+                                ) as tmp
+                                WHERE NOT EXISTS
+                                (
+                                    SELECT intCustomerID
+                                    FROM customer_user
+                                    WHERE intCustomerID = :tenantID AND intUserID = :userID
+                                )
+                            "
 
-                if (qCheckStandard.hasStandard eq 0) {
+                        )
 
-                    queryExecute(
+                    }
+
+                    <!--- At least one tenant must be defined as standard --->
+                    qCheckStandard = queryExecute(
 
                         options = {datasource = application.datasource},
                         params = {
                             userID: {type: "numeric", value: arguments.userID}
                         },
                         sql = "
-                            UPDATE customer_user
-                            SET blnStandard = 1
+                            SELECT SUM(blnStandard) as hasStandard
+                            FROM customer_user
                             WHERE intUserID = :userID
-                            ORDER BY intCustomerID
-                            LIMIT 1
                         "
                     )
 
+                    if (qCheckStandard.hasStandard eq 0) {
+
+                        queryExecute(
+
+                            options = {datasource = application.datasource},
+                            params = {
+                                userID: {type: "numeric", value: arguments.userID}
+                            },
+                            sql = "
+                                UPDATE customer_user
+                                SET blnStandard = 1
+                                WHERE intUserID = :userID
+                                ORDER BY intCustomerID
+                                LIMIT 1
+                            "
+                        )
+
+                    }
+
                 }
 
-            }
+                local.argsReturnValue['message'] = "OK";
+                local.argsReturnValue['success'] = true;
 
-            local.argsReturnValue['message'] = "OK";
-            local.argsReturnValue['success'] = true;
+            } else {
+
+                local.argsReturnValue['message'] = "#getTrans('alertOptinSent')#";
+                local.argsReturnValue['success'] = false;
+            }
 
         } catch(any){
 
             local.argsReturnValue['message'] = cfcatch.message;
-
 
         }
 
@@ -590,6 +595,98 @@ component displayname="user" output="false" {
         }
 
         return local.myImgStruct;
+
+    }
+ 
+    public any function MailChangeConfirm(required string useremail, required numeric mailuserID){
+        
+        getTrans = application.objGlobal.getTrans;
+
+        qUsersMailCheck = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: arguments.mailuserID}
+            },
+            sql = "
+                SELECT *
+                FROM users
+                WHERE intUserID = :userID
+            "
+        )
+
+        if(qUsersMailCheck.stremail neq arguments.useremail){
+
+            newUUID = application.objGlobal.getUUID();
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    intUserID: {type: "numeric", value: arguments.MailuserID},
+                    strUUID: {type: "nvarchar", value: newUUID}
+                },
+                sql = "
+                    UPDATE users
+                    SET strUUID = :strUUID
+                    WHERE intUserID = :intUserID
+                "
+            )
+
+            MailTitle = "#getTrans('subjectConfirmEmail')#";
+            MailType = "html";
+            MailUserdata = application.objCustomer.getUserDataByID(arguments.MailuserID);
+            MailCustomID = MailUserdata.intCustomerID;
+            toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
+
+            cfsavecontent (variable = "MailContent") {
+
+                echo("#getTrans('titHello')# #toName#<br><br>
+                        #getTrans('txtComfirmEmailChange')#<br><br>
+                        <a href='#application.mainURL#/account-settings/my-profile?c=#MailUserdata.strUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
+                        <br><br>
+                        #getTrans('txtRegards')#<br>
+                        #getTrans('txtYourTeam')#<br>
+                        #application.appOwner#");
+            }
+
+            <!--- Send activation link --->
+            mail from="#application.fromEmail#" to="#qUsersMailCheck.stremail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
+                include "/includes/mail_design.cfm";
+            }
+            MailChanged = 1;
+        }else{
+            MailChanged = 0;
+        }
+
+        return MailChanged;
+        
+    }
+
+    public any function UpdateEmail(required string newUserMail, required numeric ConUserID){
+
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
+
+        queryExecute(
+
+            options = {datasource = application.datasource, result="MailUpdate"},
+            params = {
+                intUserID: {type: "numeric", value: arguments.ConUserID},
+                email: {type: "nvarchar", value: arguments.newUserMail}
+            },
+            sql = "
+
+                UPDATE users
+                SET strEmail = :email
+                WHERE intUserID = :intUserID
+
+            "
+        )
+
+        local.argsReturnValue['message'] = "Email updated";
+        local.argsReturnValue['success'] = true;
+
+        return local.argsReturnValue;
 
     }
 }
