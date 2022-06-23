@@ -23,22 +23,11 @@
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
+                SELECT COUNT(intCountryID) as totalCountries
                 FROM countries
-                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
-                AND (
-                    strCountryName LIKE '%#session.c_search#%' OR
-                    strLocale LIKE '%#session.c_search#%' OR
-                    strISO1 LIKE '%#session.c_search#%' OR
-                    strISO2 LIKE '%#session.c_search#%' OR
-                    strCurrency LIKE '%#session.c_search#%' OR
-                    strRegion LIKE '%#session.c_search#%' OR
-                    strSubRegion LIKE '%#session.c_search#%' OR
-                    strTimezone   LIKE '%#session.c_search#%'
-                )
-                ORDER BY #session.c_sort#
-                LIMIT #local.c_start#, #getEntries#
+                AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
+                AGAINST ('*#session.c_search#*' IN BOOLEAN MODE)
             "
         );
     }
@@ -46,12 +35,9 @@
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
+                SELECT COUNT(intCountryID) as totalCountries
                 FROM countries
-                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
-                ORDER BY #session.c_sort#
-                LIMIT #local.c_start#, #getEntries#
             "
         )
     }
@@ -73,20 +59,12 @@
         local.qCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(intCountryID) as totalCountries, countries.*, languages.strLanguageEN
+                SELECT countries.*, languages.strLanguageEN
                 FROM countries
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
-                AND (
-                    strCountryName LIKE '%#session.c_search#%' OR
-                    strLocale LIKE '%#session.c_search#%' OR
-                    strISO1 LIKE '%#session.c_search#%' OR
-                    strISO2 LIKE '%#session.c_search#%' OR
-                    strCurrency LIKE '%#session.c_search#%' OR
-                    strRegion LIKE '%#session.c_search#%' OR
-                    strSubRegion LIKE '%#session.c_search#%' OR
-                    strTimezone   LIKE '%#session.c_search#%'
-                )
+                AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
+                AGAINST ('*#session.c_search#*' IN BOOLEAN MODE)
                 ORDER BY #session.c_sort#
                 LIMIT #local.c_start#, #getEntries#
             "
@@ -160,7 +138,7 @@
                 <div class="col-md-12 col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <p>You have <b>#qTotalCountries.totalCountries#</b> countries activated. If you want to activate more countries, click to the "Import" or "New country" button.</p>
+                            <p>You have <b>#local.qTotalCountries.totalCountries#</b> countries activated. If you want to activate more countries, click to the "Import" or "New country" button.</p>
                             <form action="#application.mainURL#/sysadmin/countries?page=1" method="post">
                                 <div class="row">
                                     <div class="col-lg-4">
@@ -378,6 +356,12 @@
                                                         <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
                                                     </li>
                                                 </cfif>
+                                            </cfloop>
+                                        <cfelseif blockPage lt 5>
+                                            <cfloop index="j" from="1" to="#local.pages#">
+                                                <li class="page-item <cfif session.c_page eq j>active</cfif>">
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                </li>
                                             </cfloop>
                                         <cfelse>
                                             <cfloop index="j" from="#local.pages - 4#" to="#local.pages#">

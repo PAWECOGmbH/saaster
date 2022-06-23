@@ -66,22 +66,14 @@
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
- 
+
                 WHERE (
-                    CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) LIKE '%#session.i_search#%' OR
-                    invoices.strInvoiceTitle LIKE '%#session.i_search#%' OR
-                    invoices.decTotalPrice LIKE '%#session.i_search#%' OR
-                    invoices.strCurrency LIKE '%#session.i_search#%' OR
-                    customers.strCompanyName LIKE '%#session.i_search#%' OR
-                    customers.strContactPerson LIKE '%#session.i_search#%' OR
-                        (
-                            SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
-                            FROM users
-                            WHERE intUserID = invoices.intUserID
-                        ) LIKE '%#replace(session.i_search, " ", "%", "all")#%'
-
-                    )
-
+                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
+                    AGAINST ('*#session.i_search#*' IN BOOLEAN MODE)
+                    OR
+                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity)
+                    AGAINST ('*#session.i_search#*' IN BOOLEAN MODE)
+                )
 
                 ORDER BY #session.i_sort#
                 LIMIT #local.invoice_start#, #local.getEntries#
