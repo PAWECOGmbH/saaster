@@ -43,7 +43,8 @@
                     customers.strCompanyName, 
                     customers.strContactPerson, 
                     customers.strAddress, 
-                    customers.strZIP, DstrCity, 
+                    customers.strZIP, 
+                    customers.strCity, 
                     customers.strEmail
                 )
                 #local.searchString#
