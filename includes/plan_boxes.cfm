@@ -1,5 +1,9 @@
 <cfoutput>
 
+<cfif structKeyExists(session, "alert")>
+    #session.alert#
+</cfif>
+
 <div class="mb-5">
     <div class="form-label">#getTrans('titPayment')#</div>
     <div class="form-group radio-toggle has-toggle-input toggleradio mt-3">
@@ -90,12 +94,12 @@
                             <cfelse>
 
                                 <!--- Button monthly --->
-                                <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
+                                <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
                                     <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                 </div>
 
                                 <!--- Button yearly --->
-                                <div class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>" style="display: none;">
+                                <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
                                     <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                 </div>
 
@@ -128,12 +132,12 @@
                 <cfif !i.itsFree and !i.onRequest>
 
                     <!--- Price monthly --->
-                    <div class="row pt-2 small monthly">
+                    <div class="row pt-2 small price_box monthly">
                         <p class="text-muted">#i.vat_text_monthly#</p>
                     </div>
 
                     <!--- Price yearly --->
-                    <div class="row pt-2 small yearly" style="display: none;">
+                    <div class="row pt-2 small price_box yearly" style="display: none;">
                         <p class="text-muted">#i.vat_text_yearly#</p>
                     </div>
 

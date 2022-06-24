@@ -95,22 +95,34 @@
 
 
     // Is the call coming from payment service provider (PSP)?
-    // Please make sure you provide the url variables "psp_response" and "message" with the corresponding values:
-    // Response values for "psp_response" can be: succcess, failed or cancel (required)
-    // Response values for "message" you can use for any messages (optional)
     if (structKeyExists(url, "psp_response")) {
 
         thisResponse = url.psp_response;
-        param name="url.message" default="";
-        if (len(trim(url.message))) {
-            thisMessage = url.message;
-        } else {
-            thisMessage = "";
-        }
+        thisUUID = url.uuid;
 
         switch (thisResponse) {
 
             case "success":
+
+                // Get the webhook data
+                objPayrexx = new com.payrexx();
+
+                // If we are in dev mode, get the JSON data from ftp server
+                if (application.environment eq "dev") {
+                    include template="/frontend/payrexx_webhook.cfm";
+                }
+
+                // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
+                loop from="1" to="10" index="i" {
+                    sleep(1000);
+                    getWebhook = objPayrexx.getWebhook(session.customer_id, thisUUID, 'confirmed');
+                    if (getWebhook.recordCount) {
+                        break;
+                    }
+                }
+
+                thisPaymentType = getWebhook.recordCount ? getWebhook.strPaymentBrand : "Online payment";
+                payrexxID = getWebhook.recordCount ? getWebhook.intPayrexxID : 0;
 
                 // Make a book for the module
                 insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=moduleDetails, itsTest=false, recurring=variables.recurring);
@@ -184,15 +196,14 @@
                         location url="#application.mainURL#/account-settings/modules" addtoken=false;
                     }
 
-                    // This is the variable for the payment type and can be overwritten by the PSP.
-                    param name="thisPaymentType" default="Credit card";
-
                     // Insert payment
                     payment = structNew();
                     payment['invoiceID'] = invoiceID;
+                    payment['customerID'] = session.customer_id;
                     payment['date'] = now();
                     payment['amount'] = priceAfterVAT;
                     payment['type'] = thisPaymentType;
+                    payment['payrexxID'] = payrexxID;
 
                     insPayment = objInvoice.insertPayment(payment);
 
@@ -221,13 +232,12 @@
 
             case "failed":
 
-                param name="url.message" default="Error during the payment process!";
-                getAlert(url.message, 'danger');
+                getAlert('Error during the payment process!', 'danger');
                 location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
 
             case "cancel":
-                // Send the user back to the plans
+                // Send the user back to the modules
                 location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         }
@@ -235,8 +245,5 @@
 
 
     }
-</cfscript>
 
-<cfoutput>
-<a href="#application.mainURL#/book?module=#url.module#&psp_response=success">OK, done!</a>
-</cfoutput>
+</cfscript>

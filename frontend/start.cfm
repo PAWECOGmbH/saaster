@@ -1,9 +1,22 @@
 start
 
+<cfscript>
 
-<cfdump  var="#lsCurrencyFormat(1000, "none")#">
+objPayrexx = new com.payrexx();
 
-<!--- <cfset objPrices = new com.prices()>
+/* dump(objPayrexx.getGateway(6437208)); */
 
-<cfdump  var="#objPrices.getCurrency()#"> --->
+payloadStruct = structNew();
+paymentStruct['amount'] = 100;
+paymentStruct['purpose'] = "test";
+paymentStruct['referenceId'] = session.customer_id;
+
+test = objPayrexx.callPayrexx(paymentStruct, "POST", "Transaction", 5589914);
+
+dump(test);
+
+/* dump(objPayrexx.callPayrexx(payloadStruct, "GET", "Transaction")); */
+
+</cfscript>
+
 

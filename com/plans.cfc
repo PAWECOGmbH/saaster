@@ -54,8 +54,6 @@ component displayname="plans" output="false" {
 
         }
 
-
-
         // If countryID is still 0, then get over ip
         if (local.thisCountryID eq 0) {
 

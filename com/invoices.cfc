@@ -817,7 +817,7 @@ component displayname="invoices" output="false" {
         if (arguments.factor eq 5) {
             local.rounded_price = round(arguments.amount*20)/20;
         } else {
-            local.rounded_price = arguments.amount;
+            local.rounded_price = numberFormat(arguments.amount, "__.__");
         }
 
         return local.rounded_price;
@@ -1100,6 +1100,11 @@ component displayname="invoices" output="false" {
         } else {
             local.customerID = 0;
         }
+        if (structKeyExists(arguments.paymentStruct, "payrexxID")) {
+            local.payrexxID = paymentStruct.payrexxID;
+        } else {
+            local.payrexxID = 0;
+        }
 
         local.invoiceID = paymentStruct.invoiceID;
         local.date = paymentStruct.date;
@@ -1114,11 +1119,12 @@ component displayname="invoices" output="false" {
                     customerID: {type: "numeric", value: local.customerID},
                     paydate: {type: "datetime", value: local.date},
                     amount: {type: "decimal", value: local.amount, scale: 2},
-                    type: {type: "varchar", value: local.type}
+                    type: {type: "varchar", value: local.type},
+                    payrexxID: {type: "numeric", value: local.payrexxID}
                 },
                 sql = "
-                    INSERT INTO payments (intInvoiceID, intCustomerID, decAmount, dtmPayDate, strPaymentType)
-                    VALUES (:invoiceID, :customerID, :amount, :paydate, :type)
+                    INSERT INTO payments (intInvoiceID, intCustomerID, decAmount, dtmPayDate, strPaymentType, intPayrexxID)
+                    VALUES (:invoiceID, :customerID, :amount, :paydate, :type, :payrexxID)
                 "
             )
 
