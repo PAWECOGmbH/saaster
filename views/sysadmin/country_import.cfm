@@ -34,7 +34,15 @@
                 SELECT *
                 FROM countries
                 WHERE blnActive = 0
-                AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
+                AND MATCH (
+                    countries.strCountryName,
+                    countries.strLocale,
+                    countries.strISO1,
+                    countries.strISO2,
+                    countries.strCurrency,
+                    countries.strRegion,
+                    countries.strSubRegion
+                )
                 #local.searchString#
                 ORDER BY #session.ci_sort#
             "

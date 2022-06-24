@@ -32,7 +32,15 @@
                 SELECT COUNT(intCountryID) as totalCountries
                 FROM countries
                 WHERE blnActive = 1
-                AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
+                AND MATCH (
+                    countries.strCountryName,
+                    countries.strLocale,
+                    countries.strISO1,
+                    countries.strISO2,
+                    countries.strCurrency,
+                    countries.strRegion,
+                    countries.strSubRegion
+                )
                 #local.searchString#
             "
         );
@@ -51,7 +59,7 @@
     local.pages = ceiling(local.qTotalCountries.totalCountries / local.getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {
         session.c_page = url.page;
     }
 
@@ -339,7 +347,7 @@
                             <cfif local.pages neq 1 and local.qCountries.recordCount>
                                 <div class="card-body">
                                     <ul class="pagination justify-content-center" id="pagination">
-                                        
+
                                         <!--- First Page --->
                                         <li class="page-item <cfif session.c_page eq 1>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=1" tabindex="-1" aria-disabled="true">
@@ -353,14 +361,14 @@
                                                 <i class="fas fa-angle-left"></i>
                                             </a>
                                         </li>
-                                        
+
                                         <!--- Pages --->
                                         <cfif session.c_page + 4 gt local.pages>
                                             <cfset blockPage = local.pages>
                                         <cfelse>
                                             <cfset blockPage = session.c_page + 4>
                                         </cfif>
-                                        
+
                                         <cfif blockPage neq local.pages>
                                             <cfloop index="j" from="#session.c_page#" to="#blockPage#">
                                                 <cfif not blockPage gt local.pages>
@@ -383,7 +391,7 @@
                                             </cfloop>
                                         </cfif>
 
-                                        
+
                                         <!--- Next arrow --->
                                         <li class="page-item <cfif session.c_page gte local.pages>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.c_page+1#">
