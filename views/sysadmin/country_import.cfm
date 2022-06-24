@@ -22,21 +22,28 @@
     );
 
     if(len(trim(session.ci_search))){
+        if (FindNoCase("@",session.ci_search)){
+            local.searchString = 'AGAINST (''"#session.ci_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.ci_search#"''*'' IN BOOLEAN MODE)'
+        }
+
         qCountries = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT *
                 FROM countries
                 WHERE blnActive = 0
-                AND (
-                    strCountryName LIKE '%#session.ci_search#%' OR
-                    strLocale LIKE '%#session.ci_search#%' OR
-                    strISO1 LIKE '%#session.ci_search#%' OR
-                    strISO2 LIKE '%#session.ci_search#%' OR
-                    strCurrency LIKE '%#session.ci_search#%' OR
-                    strRegion LIKE '%#session.ci_search#%' OR
-                    strSubRegion LIKE '%#session.ci_search#%'
+                AND MATCH (
+                    countries.strCountryName,
+                    countries.strLocale,
+                    countries.strISO1,
+                    countries.strISO2,
+                    countries.strCurrency,
+                    countries.strRegion,
+                    countries.strSubRegion
                 )
+                #local.searchString#
                 ORDER BY #session.ci_sort#
             "
         );
