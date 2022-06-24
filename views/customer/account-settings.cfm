@@ -96,77 +96,81 @@
                         </div>
                         <div class="card-body">
 
-                            <cfif session.currentPlan.planID gt 0>
+                            <cfif objPlan.prepareForGroupID().groupID gt 0>
 
-                                <cfset getStatus = objPlan.getPlanStatusAsText(session.currentPlan)>
+                                <cfif session.currentPlan.planID gt 0>
 
-                                <dl class="row">
+                                    <cfset getStatus = objPlan.getPlanStatusAsText(session.currentPlan)>
 
-                                    <dt class="col-5">#getTrans('titYourPlan')#:</dt>
-                                    <dd class="col-7">#session.currentPlan.planName#</dd>
+                                    <dl class="row">
 
-                                    <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
-                                    <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
+                                        <dt class="col-5">#getTrans('titYourPlan')#:</dt>
+                                        <dd class="col-7">#session.currentPlan.planName#</dd>
 
-                                    <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
-                                    <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
+                                        <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
+                                        <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
 
-                                    <cfif session.currentPlan.status eq "active">
+                                        <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
+                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
 
-                                        <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                                        <cfif session.currentPlan.status eq "active">
 
-                                    <cfelseif session.currentPlan.status eq "canceled">
+                                            <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
+                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
 
-                                        <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
-                                        <dt class="col-5">#getTrans('txtInformation')#:</dt>
-                                        <dd class="col-7">#getStatus.statusText#</dd>
+                                        <cfelseif session.currentPlan.status eq "canceled">
 
-                                    <cfelseif session.currentPlan.status eq "test">
+                                            <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
+                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                                            <dt class="col-5">#getTrans('txtInformation')#:</dt>
+                                            <dd class="col-7">#getStatus.statusText#</dd>
 
-                                        <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
-                                        <dt class="col-5">#getTrans('txtInformation')#:</dt>
-                                        <dd class="col-7">#getStatus.statusText#</dd>
+                                        <cfelseif session.currentPlan.status eq "test">
+
+                                            <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
+                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
+                                            <dt class="col-5">#getTrans('txtInformation')#:</dt>
+                                            <dd class="col-7">#getStatus.statusText#</dd>
+
+                                        </cfif>
+
+                                    </dl>
+
+                                    <cfif session.superAdmin>
+
+                                        <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
+                                            <div class="row mt-4">
+                                                <div class="button-group">
+                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
+                                                    <a class="btn btn-outline-danger" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#session.currentPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a>
+                                                </div>
+                                            </div>
+                                        <cfelseif session.currentPlan.status eq "canceled">
+                                            <div class="row mt-4">
+                                                <div class="button-group">
+                                                    <a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
+                                                </div>
+                                            </div>
+                                        <cfelseif session.currentPlan.status eq "free">
+                                            <div class="row mt-4">
+                                                <div class="button-group">
+                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
+                                                </div>
+                                            </div>
+                                        <cfelseif session.currentPlan.status eq "expired">
+                                            <div class="row mt-4">
+                                                <div class="button-group">
+                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
+                                                </div>
+                                            </div>
+                                        </cfif>
 
                                     </cfif>
 
-                                </dl>
-
-                                <cfif session.superAdmin>
-
-                                    <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
-                                        <div class="row mt-4">
-                                            <div class="button-group">
-                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
-                                                <a class="btn btn-outline-danger" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#session.currentPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a>
-                                            </div>
-                                        </div>
-                                    <cfelseif session.currentPlan.status eq "canceled">
-                                        <div class="row mt-4">
-                                            <div class="button-group">
-                                                <a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
-                                            </div>
-                                        </div>
-                                    <cfelseif session.currentPlan.status eq "free">
-                                        <div class="row mt-4">
-                                            <div class="button-group">
-                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
-                                            </div>
-                                        </div>
-                                    <cfelseif session.currentPlan.status eq "expired">
-                                        <div class="row mt-4">
-                                            <div class="button-group">
-                                                <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
-                                            </div>
-                                        </div>
-                                    </cfif>
-
+                                <cfelse>
+                                    <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
                                 </cfif>
 
-                            <cfelse>
-                                <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
                             </cfif>
 
                             <cfif arrayLen(moduleArray)>

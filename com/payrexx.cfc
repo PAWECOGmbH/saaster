@@ -10,49 +10,28 @@ component displayname="payrexx" output="false" {
     }
 
 
-    // Create a gateway
-    public struct function createGateway(required struct payload) {
+    // Get the webhook data
+    public query function getWebhook(required numeric customerID, required string thisUUID, required string status) {
 
-        local.payloadStruct = structNew();
-        local.payloadStruct['amount'] = "1";
-        local.payloadStruct['currency'] = "USD";
-        local.payloadStruct['skipResultPage'] = true;
+        local.qWebhook = queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID = {type: "numeric", value: arguments.customerID},
+                uuid = {type: "varchar", value: arguments.thisUUID},
+                status = {type: "varchar", value: arguments.status}
+            },
+            sql = "
+                SELECT *
+                FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND strUUID = :uuid
+                AND strStatus = :status
+            "
+        )
 
-        if (structKeyExists(arguments.payload, "amount") and isNumeric(arguments.payload.amount)) {
-            local.payloadStruct['amount'] = arguments.payload.amount * 100;
-        }
-        if (structKeyExists(arguments.payload, "currency")) {
-            local.payloadStruct['currency'] = arguments.payload.currency;
-        }
-        if (structKeyExists(arguments.payload, "purpose")) {
-            local.payloadStruct['purpose'] = arguments.payload.purpose;
-        }
-        if (structKeyExists(arguments.payload, "successRedirectUrl")) {
-            local.payloadStruct['successRedirectUrl'] = arguments.payload.successRedirectUrl;
-        }
-        if (structKeyExists(arguments.payload, "failedRedirectUrl")) {
-            local.payloadStruct['failedRedirectUrl'] = arguments.payload.failedRedirectUrl;
-        }
-        if (structKeyExists(arguments.payload, "cancelRedirectUrl")) {
-            local.payloadStruct['cancelRedirectUrl'] = arguments.payload.cancelRedirectUrl;
-        }
-        if (structKeyExists(arguments.payload, "referenceId")) {
-            local.payloadStruct['referenceId'] = arguments.payload.referenceId;
-        }
-        if (structKeyExists(arguments.payload, "subscriptionState") and isBoolean(arguments.payload.subscriptionState)) {
-            local.payloadStruct['subscriptionState'] = arguments.payload.subscriptionState;
-        }
-        if (structKeyExists(arguments.payload, "subscriptionInterval")) {
-            local.payloadStruct['subscriptionInterval'] = arguments.payload.subscriptionInterval;
-        }
-        if (structKeyExists(arguments.payload, "lookAndFeelProfile")) {
-            local.payloadStruct['lookAndFeelProfile'] = arguments.payload.lookAndFeelProfile;
-        }
-
-        return callPayrexx(local.payloadStruct, "POST", "Gateway");
+        return local.qWebhook;
 
     }
-
 
 
     public struct function callPayrexx(required struct payload, string method, string object, numeric thisID) {
@@ -70,9 +49,6 @@ component displayname="payrexx" output="false" {
         if (structKeyExists(arguments, "thisID") and isNumeric(arguments.thisID)) {
             local.thisID = arguments.thisID;
         }
-        if (structKeyExists(arguments, "apiSignature")) {
-            local.apiSignature = arguments.apiSignature;
-        }
 
         local.apiSignature = makeAPISignature(arguments.payload);
 
@@ -88,10 +64,17 @@ component displayname="payrexx" output="false" {
 
                 cfhttp( url=local.callingURL, result="httpRes", method="GET" ) {};
 
+                break;
+
 
             case "POST":
 
-                local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                if (isNumeric(local.thisID)) {
+                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
+                } else {
+                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                }
+
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
                 cfhttp( url=local.callingURL, result="httpRes", method="POST" ) {
@@ -100,10 +83,12 @@ component displayname="payrexx" output="false" {
                     cfhttpparam( type="body", value=local.bodyString );
                 }
 
-
-
+                break;
 
         }
+
+
+
 
         if (httpRes.status_text eq "OK" and isJSON(httpRes.filecontent)) {
             local.respond = deserializeJSON(httpRes.filecontent);
@@ -112,8 +97,6 @@ component displayname="payrexx" output="false" {
         }
 
         return local.respond;
-
-
 
     }
 

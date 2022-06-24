@@ -83,7 +83,10 @@ variables.payrexxAPIinstance = "";
 variables.payrexxAPIkey = "";
 
 // Look and feel of your payment page (id from Payrexx)
-variables.lookAndFeelProfile = "";
+variables.payrexxDesignID = "";
+
+// Webhook directory for developing environment
+variables.payrexxWebhookDev = "";
 
 
 </cfscript>

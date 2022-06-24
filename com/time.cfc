@@ -24,7 +24,14 @@ component displayname="time" output="false" {
 
         }
 
-        variables.timezone = getTimezoneByID(variables.timezoneID).timezone;
+        local.timezoneStruct = getTimezoneByID(variables.timezoneID);
+
+        if (structKeyExists(local.timezoneStruct, "timezone")) {
+            variables.timezone = local.timezoneStruct.timezone;
+        } else {
+            variables.timezone = "Etc/GMT";
+        }
+
 
         return this;
 
@@ -124,6 +131,39 @@ component displayname="time" output="false" {
         }
 
         return local.localDate;
+
+    }
+
+
+    // Convert a given date with the timezone to utc
+    public date function local2utc(required date givenDate, required string timezone) {
+
+        if (isDate(arguments.givenDate)) {
+            local.givenDate = arguments.givenDate;
+        } else {
+            local.givenDate = now();
+        }
+
+        // Init the Java object
+        local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
+
+        // Get infos of the corresponding timezone
+        local.zoneInfos = local.objJAVATimezone.getTimeZone(arguments.timezone);
+
+        // Get utc offset of timezone
+        local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
+
+        // Are we having dst time?
+        local.inDST = local.zoneInfos.observesDaylightTime();
+
+        // Subtract hours if dst
+        if (local.inDST) {
+            local.offsetHours = local.offsetHours+1;
+        }
+
+        local.utcDate = dateAdd("h", -local.offsetHours, local.givenDate);
+
+        return local.utcDate;
 
     }
 

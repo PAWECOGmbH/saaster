@@ -37,8 +37,6 @@
         getAlert('Sorry, no plans were found!', 'warning');
     }
 
-    //dump(groupStruct);
-
 </cfscript>
 
 

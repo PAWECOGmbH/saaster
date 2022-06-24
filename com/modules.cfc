@@ -88,13 +88,12 @@ component displayname="modules" output="false" {
             sql = "
                 SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture, modules.intNumTestDays,
                 modules.blnBookable, modules.intPrio, modules.blnActive, modules.strSettingPath,
-                currencies.strCurrencyISO, currencies.strCurrencySign,
+                currencies.strCurrencyISO, currencies.strCurrencySign, currencies.intCurrencyID,
                 COALESCE(modules_prices.blnIsNet,0) as blnIsNet,
                 COALESCE(modules_prices.decPriceMonthly,0) as decPriceMonthly,
                 COALESCE(modules_prices.decPriceYearly,0) as decPriceYearly,
                 COALESCE(modules_prices.decPriceOneTime,0) as decPriceOneTime,
                 COALESCE(modules_prices.decVat,0) as decVat,
-                COALESCE(modules_prices.intCurrencyID,0) as intCurrencyID,
                 COALESCE(modules_prices.intVatType,0) as intVatType,
                 IF(
                     LENGTH(
@@ -150,12 +149,12 @@ component displayname="modules" output="false" {
 
                 FROM modules
 
-                LEFT JOIN modules_prices ON 1=1
+                INNER JOIN modules_prices ON 1=1
                 AND modules.intModuleID = modules_prices.intModuleID
 
-                LEFT JOIN currencies ON 1=1
+                INNER JOIN currencies ON 1=1
                 AND modules_prices.intCurrencyID = currencies.intCurrencyID
-                AND currencies.intCurrencyID = :currencyID
+                AND modules_prices.intCurrencyID = :currencyID
 
                 WHERE modules.intModuleID = :moduleID
 

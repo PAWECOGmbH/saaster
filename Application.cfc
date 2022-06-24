@@ -27,12 +27,15 @@ component displayname="Application" output="false" hint="Handle the application.
         application.appOwner = variables.appOwner;
         application.fromEmail = variables.fromEmail;
         application.toEmail = variables.toEmail;
-        application.mainURL = variables.mainURL;
         application.userTempImg = variables.userTempImg;
         if (variables.devDomain eq cgi.server_name) {
+            application.environment = "dev";
             application.usersIP = variables.usersIP;
+            application.mainURL = "http://" & variables.devDomain;
         } else {
+            application.environment = "prod";
             application.usersIP = cgi.remote_addr;
+            application.mainURL = variables.mainURL;
         }
 
         <!--- Payrexx initialising --->
