@@ -172,6 +172,7 @@
                             <h3 class="card-title">Customers</h3>
                         </div>
                         <div class="card-body">
+                            <p>There are <b>#local.qTotalCustomers.totalCustomers#</b> invoices in the database.</p>
                             <div class="card">
                                 <div class="table-responsive">
                                     <table class="table table-vcenter table-mobile-md card-table">
