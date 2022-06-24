@@ -20,6 +20,12 @@
     }
 
     if (len(trim(session.c_search))) {
+        if (FindNoCase("@",session.c_search)){
+            local.searchString = 'AGAINST (''"#session.c_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.c_search#"''*'' IN BOOLEAN MODE)'
+        }
+
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -27,7 +33,7 @@
                 FROM countries
                 WHERE blnActive = 1
                 AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
-                AGAINST ('*#session.c_search#*' IN BOOLEAN MODE)
+                #local.searchString#
             "
         );
     }
@@ -56,6 +62,12 @@
     }
 
     if (len(trim(session.c_search))) {
+        if (FindNoCase("@",session.c_search)){
+            local.searchString = 'AGAINST (''"#session.c_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.c_search#"''*'' IN BOOLEAN MODE)'
+        }
+
         local.qCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -64,7 +76,7 @@
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
                 AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
-                AGAINST ('*#session.c_search#*' IN BOOLEAN MODE)
+                #local.searchString#
                 ORDER BY #session.c_sort#
                 LIMIT #local.c_start#, #getEntries#
             "
