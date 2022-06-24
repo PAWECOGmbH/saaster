@@ -32,6 +32,12 @@
     }
 
     if (len(trim(session.i_search))) {
+        if (FindNoCase("@",session.i_search)){
+            local.searchString = 'AGAINST (''"#session.i_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.i_search#"''*'' IN BOOLEAN MODE)'
+        }
+
         local.qTotalInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
@@ -69,10 +75,10 @@
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    AGAINST ('*#session.i_search#*' IN BOOLEAN MODE)
+                    #local.searchString#
                     OR
-                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity)
-                    AGAINST ('*#session.i_search#*' IN BOOLEAN MODE)
+                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
+                    #local.searchString#
                 )
 
                 ORDER BY #session.i_sort#
