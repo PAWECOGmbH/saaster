@@ -6,3 +6,5 @@ VALUES ('txtIncoPayments', 'Zahlungseingang', 'Incoming payment');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtRemainingAmount', 'Restbetrag', 'Remaining amount');
+
+SET FOREIGN_KEY_CHECKS = 1;
