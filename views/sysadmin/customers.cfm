@@ -19,6 +19,11 @@
     }
     
     if (len(trim(session.cust_search))) {
+        if (FindNoCase("@",session.cust_search)){
+            local.searchString = 'AGAINST (''"#session.cust_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.cust_search#"''*'' IN BOOLEAN MODE)'
+        }
         local.qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -34,8 +39,8 @@
                 OR customers.intCustParentID = users.intCustomerID
                 
                 WHERE customers.blnActive = 1
-                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity)
-                AGAINST ('*#session.cust_search#*' IN BOOLEAN MODE)
+                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity, customers.strEmail)
+                #local.searchString#
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
             "
@@ -66,6 +71,11 @@
     }
 
     if (len(trim(session.cust_search))) {
+        if (FindNoCase("@",session.cust_search)){
+            local.searchString = 'AGAINST (''"#session.cust_search#"'' IN BOOLEAN MODE)'
+        }else {
+            local.searchString = 'AGAINST (''*''"#session.cust_search#"''*'' IN BOOLEAN MODE)'
+        }
         local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -81,8 +91,8 @@
                 OR customers.intCustParentID = users.intCustomerID
                 
                 WHERE customers.blnActive = 1
-                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity)
-                AGAINST ('*#session.cust_search#*' IN BOOLEAN MODE)
+                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity, customers.strEmail)
+                #local.searchString#
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
             "
