@@ -39,7 +39,13 @@
                 OR customers.intCustParentID = users.intCustomerID
                 
                 WHERE customers.blnActive = 1
-                AND MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
+                AND MATCH (
+                    customers.strCompanyName, 
+                    customers.strContactPerson, 
+                    customers.strAddress, 
+                    customers.strZIP, DstrCity, 
+                    customers.strEmail
+                )
                 #local.searchString#
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
@@ -91,7 +97,14 @@
                 OR customers.intCustParentID = users.intCustomerID
                 
                 WHERE customers.blnActive = 1
-                AND MATCH (strCompanyName, strContactPerson, strAddress, strZIP, strCity, customers.strEmail)
+                AND MATCH (
+                    customers.strCompanyName, 
+                    customers.strContactPerson, 
+                    customers.strAddress, 
+                    customers.strZIP, 
+                    customers.strCity, 
+                    customers.strEmail
+                )
                 #local.searchString#
                 ORDER BY #session.cust_sort#
                 LIMIT #local.cust_start#, #getEntries#
