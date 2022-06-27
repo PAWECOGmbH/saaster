@@ -17,12 +17,17 @@
     if(structKeyExists(form, 'sort')){
         session.cust_sort = form.sort;
     }
+
+    // Filter out unsupport search characters
+    local.searchTerm = ReplaceList(trim(session.cust_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    local.searchTerm = replace(local.searchTerm,' - ', "-", "all");
     
-    if (len(trim(session.cust_search))) {
-        if (FindNoCase("@",session.cust_search)){
-            local.searchString = 'AGAINST (''"#session.cust_search#"'' IN BOOLEAN MODE)'
+    if (len(trim(local.searchTerm))) {
+
+        if (FindNoCase("@",local.searchTerm)){
+            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#session.cust_search#"''*'' IN BOOLEAN MODE)'
+            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
         }
         local.qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
@@ -77,11 +82,11 @@
         local.cust_start = local.cust_start + local.valueToAdd;
     }
 
-    if (len(trim(session.cust_search))) {
-        if (FindNoCase("@",session.cust_search)){
-            local.searchString = 'AGAINST (''"#session.cust_search#"'' IN BOOLEAN MODE)'
+    if (len(trim(local.searchTerm))) {
+        if (FindNoCase("@",local.searchTerm)){
+            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#session.cust_search#"''*'' IN BOOLEAN MODE)'
+            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
         }
         local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
@@ -162,9 +167,9 @@
                                 <div class="input-group mb-2">
                                     <input type="text" name="search" class="form-control" minlength="1" placeholder="Search for…">
                                     <button class="btn bg-green-lt" type="submit">Go!</button>
-                                    <cfif len(trim(session.cust_search))>
+                                    <cfif len(trim(local.searchTerm))>
                                         <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                            #session.cust_search# <i class="ms-2 fas fa-times"></i>
+                                            #local.searchTerm# <i class="ms-2 fas fa-times"></i>
                                         </button>
                                     </cfif>
                                 </div>

@@ -21,11 +21,15 @@
         "
     );
 
-    if(len(trim(session.ci_search))){
-        if (FindNoCase("@",session.ci_search)){
-            local.searchString = 'AGAINST (''"#session.ci_search#"'' IN BOOLEAN MODE)'
+    // Filter out unsupport search characters
+    local.searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    local.searchTerm = replace(local.searchTerm,' - ', "-", "all");
+
+    if(len(trim(local.searchTerm))){
+        if (FindNoCase("@",local.searchTerm)){
+            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#session.ci_search#"''*'' IN BOOLEAN MODE)'
+            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
         qCountries = queryExecute (
@@ -103,9 +107,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.ci_search))>
+                                            <cfif len(trim(local.searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #session.ci_search# <i class="ms-2 fas fa-times"></i>
+                                                    #local.searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>

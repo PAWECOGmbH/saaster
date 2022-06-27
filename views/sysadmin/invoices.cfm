@@ -31,11 +31,15 @@
         session.i_sort = form.sort;
     }
 
-    if (len(trim(session.i_search))) {
-        if (FindNoCase("@",session.i_search)){
-            local.searchString = 'AGAINST (''"#session.i_search#"'' IN BOOLEAN MODE)'
+    // Filter out unsupport search characters
+    local.searchTerm = ReplaceList(trim(session.i_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    local.searchTerm = replace(local.searchTerm,' - ', "-", "all");
+
+    if (len(trim(local.searchTerm))) {
+        if (FindNoCase("@",local.searchTerm)){
+            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#session.i_search#"''*'' IN BOOLEAN MODE)'
+            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
         local.qTotalInvoices = queryExecute (
@@ -110,7 +114,7 @@
         local.invoice_start = local.invoice_start + local.valueToAdd;
     }
 
-    if (len(trim(session.i_search))) {
+    if (len(trim(local.searchTerm))) {
         local.qInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
@@ -147,19 +151,12 @@
                 AND invoices.intCustomerID = customers.intCustomerID
 
                 WHERE (
-                    CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) LIKE '%#session.i_search#%' OR
-                    invoices.strInvoiceTitle LIKE '%#session.i_search#%' OR
-                    invoices.decTotalPrice LIKE '%#session.i_search#%' OR
-                    invoices.strCurrency LIKE '%#session.i_search#%' OR
-                    customers.strCompanyName LIKE '%#session.i_search#%' OR
-                    customers.strContactPerson LIKE '%#session.i_search#%' OR
-                        (
-                            SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
-                            FROM users
-                            WHERE intUserID = invoices.intUserID
-                        ) LIKE '%#replace(session.i_search, " ", "%", "all")#%'
-
-                    )
+                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
+                    #local.searchString#
+                    OR
+                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
+                    #local.searchString#
+                )
 
                 ORDER BY #session.i_sort#
                 LIMIT #local.invoice_start#, #local.getEntries#
@@ -250,7 +247,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Invoices overview #session.i_search#</h3>
+                            <h3 class="card-title">Invoices overview #local.searchTerm#</h3>
                         </div>
                         <div class="card-body">
                             <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
@@ -261,9 +258,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.i_search))>
+                                            <cfif len(trim(local.searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #session.i_search# <i class="ms-2 fas fa-times"></i>
+                                                    #local.searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>
