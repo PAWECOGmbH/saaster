@@ -142,3 +142,15 @@ td.feature {
   .bottom_line textarea{
       height: 36px;
   }
+
+
+  .widget-options{
+    position: absolute;
+    top:0;
+    right: 0;
+    padding:3px 10px;
+    background-color: #000;
+    color:#fff;
+    z-index: 100;
+    display: none;
+  }

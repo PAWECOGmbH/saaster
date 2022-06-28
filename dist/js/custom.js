@@ -192,6 +192,23 @@ $(document).ready(function(){
 	});
 	
 
-	
+	//Dashboard widget sorting
+	$('div.dashboard .card').on('mouseover', function(){
+		$(this).find('div.widget-options').css('display', 'block');
+	});
+	$('div.dashboard .card').on('mouseout', function(){
+		$(this).find('div.widget-options').css('display', 'none');
+	});
+
+	$('div.dashboard').sortable({
+		handle: '.move-widget',
+		stop: function(event, ui) {
+			console.log( $(this).sortable('serialize') );
+
+			$.post('/handler/widget_sort.cfm', {sortorder:$(this).sortable('serialize')});
+
+
+		}
+	});
 		
 });

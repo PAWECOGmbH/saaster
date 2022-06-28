@@ -5,6 +5,7 @@
             SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
             FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
             WHERE widgets.blnActive = 1
+            ORDER BY intPrio
         "
     )
     objPrices = new com.prices();
@@ -44,12 +45,15 @@
         <div class="page-body">
             <div class="container-xl">
 
-                <div class="row row-deck row-cards">
+                <div class="row row-deck row-cards dashboard">
 
                     <cfloop query="qWidgets">
 
-                        <div class="col-lg-#qWidgets.intSizeRatio#">
+                        <div id="id_#qWidgets.intWidgetID#" class="widget col-lg-#qWidgets.intSizeRatio#">
                             <div class="card">
+                                <div class="widget-options">
+                                    <i class="fas fa-arrows-up-down-left-right move-widget" style="cursor:grab;"></i>
+                                </div>
                                 <div class="card-body">
                                     <cfinclude template="/#qWidgets.strFilePath#">
                                 </div>
