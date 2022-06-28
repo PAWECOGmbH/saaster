@@ -38,10 +38,13 @@
 
 <h3 style="margin-bottom: 4px; margin-top: 8px;">Create invoices:</h3>
 <p style="margin-bottom: 0px; margin-top: 0px;">
-    If you want to generate invoices for a certain customer, fill out the ID field.
+    If you want to generate invoices for a certain customer, fill out the ID field
 </p>
 <p style="margin-bottom: 0px; margin-top: 0px;">
-    Leave the ID field at zero if you want to use random customers.
+    with the CustomerID. Leave the ID field at zero if you want to use random
+</p>
+<p style="margin-bottom: 0px; margin-top: 0px;">
+    customers.
 </p>
 <br>
 <form action="index.cfm?method=createInvoices" method="post">
