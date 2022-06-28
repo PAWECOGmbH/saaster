@@ -83,6 +83,7 @@
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     #searchString#
+                    OR invoices.intInvoiceNumber = '#searchTerm#'
                 )
 
                 ORDER BY #session.i_sort#
@@ -156,6 +157,7 @@
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     #searchString#
+                    OR invoices.intInvoiceNumber = '#searchTerm#'
                 )
 
                 ORDER BY #session.i_sort#
@@ -274,24 +276,42 @@
                                                     ALL
                                                 </span>
                                             </label>
+
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="1" class="form-selectgroup-input" <cfif session.status eq 1>checked</cfif>>
                                                 <span class="form-selectgroup-label <cfif session.status neq 1>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'muted', 'statInvoiceDraft')#
                                                 </span>
                                             </label>
+
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="2" class="form-selectgroup-input" <cfif session.status eq 2>checked</cfif>>
                                                 <span class="form-selectgroup-label <cfif session.status neq 2>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'blue', 'statInvoiceOpen')#
                                                 </span>
                                             </label>
+
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="3" class="form-selectgroup-input" <cfif session.status eq 3>checked</cfif>>
                                                 <span class="form-selectgroup-label <cfif session.status neq 3>no-border</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge('en', 'green', 'statInvoicePaid')#
                                                 </span>
                                             </label>
+
+                                            <label class="form-selectgroup-item">
+                                                <input type="radio" onclick="this.form.submit()" name="status" value="4" class="form-selectgroup-input" <cfif session.status eq 4>checked</cfif>>
+                                                <span class="form-selectgroup-label <cfif session.status neq 4>no-border</cfif>">
+                                                    #objInvoice.getInvoiceStatusBadge('en', 'orange', 'statInvoicePartPaid')#
+                                                </span>
+                                            </label>
+
+                                            <label class="form-selectgroup-item">
+                                                <input type="radio" onclick="this.form.submit()" name="status" value="5" class="form-selectgroup-input" <cfif session.status eq 5>checked</cfif>>
+                                                <span class="form-selectgroup-label <cfif session.status neq 5>no-border</cfif>">
+                                                    #objInvoice.getInvoiceStatusBadge('en', 'purple', 'statInvoiceCanceled')#
+                                                </span>
+                                            </label>
+
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="6" class="form-selectgroup-input" <cfif session.status eq 6>checked</cfif>>
                                                 <span class="form-selectgroup-label <cfif session.status neq 6>no-border</cfif>">
