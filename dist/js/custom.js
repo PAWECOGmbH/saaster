@@ -88,6 +88,7 @@ function hideResult() {
 }
 
 
+
 $(document).ready(function(){
 
 	$('#dragndrop_body').sortable({

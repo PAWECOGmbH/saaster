@@ -118,47 +118,7 @@
                                                 </form>
                                             </div>
                                         </div>
-                                        <cfif qLanguages.recordCount gt 1>
-                                        <script>
-
-                                            // Save new prio
-                                            function fnSaveSort(){
-
-                                                var jsonTmp = "[";
-                                                    $('##dragndrop_body > tr').each(function (i, row) {
-                                                        var divbox = $(this).attr('id');
-                                                        var aTR = divbox.split('_');
-                                                        var newslist = 0;
-                                                        jsonTmp += "{\"prio\" :" + (i+1) + ',';
-                                                        if(newslist != 0){
-                                                            var setlist = JSON.stringify(newslist);
-                                                            jsonTmp += "\"strBoxList\" :" + setlist + ',';
-                                                        }
-                                                        jsonTmp += "\"intLanguageID\" :" + aTR[1] + '},';
-                                                    }
-                                                );
-
-                                                jsonTmp += jsonTmp.slice(0,-1);
-                                                jsonTmp += "]]";
-
-                                                var ajaxResponse = $.ajax({
-                                                    type: "post",
-                                                    url: "#application.mainURL#/handler/ajax_sort.cfm?languages",
-                                                    contentType: "application/json",
-                                                    data: JSON.stringify( jsonTmp )
-                                                })
-
-                                                // Response
-                                                ajaxResponse.then(
-                                                    function( apiResponse ){
-                                                        if(apiResponse.trim() == 'ok'){
-                                                            location.href = '#application.mainURL#/sysadmin/languages';
-                                                        }
-                                                    }
-                                                );
-                                            }
-                                        </script>
-                                        </cfif>
+                                        
                                     </cfloop>
                                     </tbody>
                                     <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
@@ -217,3 +177,47 @@
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
 </div>
+
+<cfif qLanguages.recordCount gt 1>
+    <cfoutput>
+    <script>
+
+        // Save new prio
+        function fnSaveSort(){
+
+            var jsonTmp = "[";
+                $('##dragndrop_body > tr').each(function (i, row) {
+                    var divbox = $(this).attr('id');
+                    var aTR = divbox.split('_');
+                    var newslist = 0;
+                    jsonTmp += "{\"prio\" :" + (i+1) + ',';
+                    if(newslist != 0){
+                        var setlist = JSON.stringify(newslist);
+                        jsonTmp += "\"strBoxList\" :" + setlist + ',';
+                    }
+                    jsonTmp += "\"intLanguageID\" :" + aTR[1] + '},';
+                }
+            );
+
+            jsonTmp += jsonTmp.slice(0,-1);
+            jsonTmp += "]]";
+
+            var ajaxResponse = $.ajax({
+                type: "post",
+                url: "#application.mainURL#/handler/ajax_sort.cfm?languages",
+                contentType: "application/json",
+                data: JSON.stringify( jsonTmp )
+            })
+
+            // Response
+            ajaxResponse.then(
+                function( apiResponse ){
+                    if(apiResponse.trim() == 'ok'){
+                        location.href = '#application.mainURL#/sysadmin/languages';
+                    }
+                }
+            );
+        }
+    </script>
+    </cfoutput>
+</cfif>
