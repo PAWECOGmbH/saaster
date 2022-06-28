@@ -6,8 +6,8 @@
     param name="session.invoice_page" default=1 type="numeric";
     param name="session.status_sql" default="";
 
-    local.getEntries = 10;
-    local.invoice_start = 0;
+    getEntries = 10;
+    invoice_start = 0;
 
     // Status
     if(structKeyExists(form, 'status')){
@@ -32,17 +32,17 @@
     }
 
     // Filter out unsupport search characters
-    local.searchTerm = ReplaceList(trim(session.i_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
-    local.searchTerm = replace(local.searchTerm,' - ', "-", "all");
+    searchTerm = ReplaceList(trim(session.i_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    searchTerm = replace(searchTerm,' - ', "-", "all");
 
-    if (len(trim(local.searchTerm))) {
-        if (FindNoCase("@",local.searchTerm)){
-            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
+    if (len(trim(searchTerm))) {
+        if (FindNoCase("@",searchTerm)){
+            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        local.qTotalInvoices = queryExecute (
+        qTotalInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT  COUNT(intInvoiceID) as totalInvoices,
@@ -79,18 +79,18 @@
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #local.searchString#
+                    #searchString#
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #local.searchString#
+                    #searchString#
                 )
 
                 ORDER BY #session.i_sort#
-                LIMIT #local.invoice_start#, #local.getEntries#
+                LIMIT #invoice_start#, #getEntries#
             "
         )
     } else {
-        local.qTotalInvoices = queryExecute(
+        qTotalInvoices = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT COUNT(intInvoiceID) as totalInvoices
@@ -101,21 +101,21 @@
         ) 
     }
 
-    local.pages = ceiling(local.qTotalInvoices.totalInvoices / local.getEntries);
+    pages = ceiling(qTotalInvoices.totalInvoices / getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {  
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {  
         session.invoice_page = url.page;
     }
 
     if (session.invoice_page gt 1){
-        local.tPage = session.invoice_page - 1;
-        local.valueToAdd = local.getEntries * tPage;
-        local.invoice_start = local.invoice_start + local.valueToAdd;
+        tPage = session.invoice_page - 1;
+        valueToAdd = getEntries * tPage;
+        invoice_start = invoice_start + valueToAdd;
     }
 
-    if (len(trim(local.searchTerm))) {
-        local.qInvoices = queryExecute (
+    if (len(trim(searchTerm))) {
+        qInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT  invoices.intInvoiceID,
@@ -152,14 +152,14 @@
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #local.searchString#
+                    #searchString#
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #local.searchString#
+                    #searchString#
                 )
 
                 ORDER BY #session.i_sort#
-                LIMIT #local.invoice_start#, #local.getEntries#
+                LIMIT #invoice_start#, #getEntries#
             "
         )
 
@@ -167,7 +167,7 @@
     } else {
 
 
-        local.qInvoices = queryExecute (
+        qInvoices = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT  invoices.intInvoiceID,
@@ -203,7 +203,7 @@
                 AND invoices.intCustomerID = customers.intCustomerID
 
                 ORDER BY #session.i_sort#
-                LIMIT #local.invoice_start#, #local.getEntries#
+                LIMIT #invoice_start#, #getEntries#
             "
         )
 
@@ -247,7 +247,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Invoices overview #local.searchTerm#</h3>
+                            <h3 class="card-title">Invoices overview #searchTerm#</h3>
                         </div>
                         <div class="card-body">
                             <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
@@ -258,9 +258,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(local.searchTerm))>
+                                            <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #local.searchTerm# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>
@@ -360,7 +360,7 @@
                                 <div class="col-lg-12 text-center text-red">There are no invoices found.</div>
                             </cfif>
                         </div>
-                        <cfif local.pages neq 1 and qInvoices.recordCount>
+                        <cfif pages neq 1 and qInvoices.recordCount>
                             <div class="card-body">
                                 <ul class="pagination justify-content-center" id="pagination">
 
@@ -379,28 +379,28 @@
                                     </li>
                                     
                                     <!--- Pages --->
-                                    <cfif session.invoice_page + 4 gt local.pages>
-                                        <cfset blockPage = local.pages>
+                                    <cfif session.invoice_page + 4 gt pages>
+                                        <cfset blockPage = pages>
                                     <cfelse>
                                         <cfset blockPage = session.invoice_page + 4>
                                     </cfif>
                                     
-                                    <cfif blockPage neq local.pages>
+                                    <cfif blockPage neq pages>
                                         <cfloop index="j" from="#session.invoice_page#" to="#blockPage#">
-                                            <cfif not blockPage gt local.pages>
+                                            <cfif not blockPage gt pages>
                                                 <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
                                                     <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
                                                 </li>
                                             </cfif>
                                         </cfloop>
                                     <cfelseif blockPage lt 5>
-                                        <cfloop index="j" from="1" to="#local.pages#">
+                                        <cfloop index="j" from="1" to="#pages#">
                                             <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
                                                 <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
                                             </li>
                                         </cfloop>
                                     <cfelse>
-                                        <cfloop index="j" from="#local.pages - 4#" to="#local.pages#">
+                                        <cfloop index="j" from="#pages - 4#" to="#pages#">
                                                 <li class="page-item <cfif session.invoice_page eq j>active</cfif>">
                                                     <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#j#">#j#</a>
                                                 </li>
@@ -408,15 +408,15 @@
                                     </cfif>
                                     
                                     <!--- Next arrow --->
-                                    <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
+                                    <li class="page-item <cfif session.invoice_page gte pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page+1#">
                                             <i class="fas fa-angle-right"></i>
                                         </a>
                                     </li>
 
                                     <!--- Last page --->
-                                    <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#local.pages#">
+                                    <li class="page-item <cfif session.invoice_page gte pages>disabled</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#pages#">
                                             <i class="fas fa-angle-double-right"></i>
                                         </a>
                                     </li>

@@ -22,14 +22,14 @@
     );
 
     // Filter out unsupport search characters
-    local.searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
-    local.searchTerm = replace(local.searchTerm,' - ', "-", "all");
+    searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    searchTerm = replace(searchTerm,' - ', "-", "all");
 
-    if(len(trim(local.searchTerm))){
-        if (FindNoCase("@",local.searchTerm)){
-            local.searchString = 'AGAINST (''"#local.searchTerm#"'' IN BOOLEAN MODE)'
+    if(len(trim(searchTerm))){
+        if (FindNoCase("@",searchTerm)){
+            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            local.searchString = 'AGAINST (''*''"#local.searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
         qCountries = queryExecute (
@@ -47,7 +47,7 @@
                     countries.strRegion,
                     countries.strSubRegion
                 )
-                #local.searchString#
+                #searchString#
                 ORDER BY #session.ci_sort#
             "
         );
@@ -107,9 +107,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(local.searchTerm))>
+                                            <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #local.searchTerm# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>
