@@ -1,9 +1,27 @@
 <cfscript>
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
+    param name="session.visSysTrans" default="0" type="numeric";
 
     s_badge_custom = "";
     s_badge_system = "";
+
+    if(structKeyExists(url, "vis")) {
+        switch(url.vis) {
+            case "show":
+                session.search = "";
+                session.visSysTrans = 1; 
+                break;
+
+            case "hide": 
+                session.search = "";
+                session.visSysTrans = 0; 
+                break;
+
+            default: 
+                session.visSysTrans = 0; 
+        }
+    }
 
     if(structKeyExists(form, "search") and len(trim(form.search))) {
         session.search = form.search;
@@ -23,6 +41,7 @@
 
     // When entering a search
     if(len(trim(session.search))) {
+        session.visSysTrans = 0
 
         // Custom results
         defaultQueryCustom = "
@@ -52,25 +71,24 @@
             s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
         }
 
-
         // System results
         defaultQuerySys = "
         SELECT *
         FROM system_translations
         WHERE strVariable LIKE '%#session.search#%'
         ";
-        orListSys = "";
+        orListCustom = "";
         orderQrySys = "
             ORDER BY strVariable
         ";
 
         // Loop over query and append to query string
         loop query=qLanguages {
-            orListCustom = listAppend(orListSys, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
+            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
         }
 
         cfquery(datasource=application.datasource name="qSystemResults") {
-            writeOutput(defaultQuerySys & orListSys & orderQrySys);
+            writeOutput(defaultQuerySys & orListCustom & orderQrySys);
         }
 
         s_badge_system = "";
@@ -83,6 +101,16 @@
 
         // Create getModal object
         getModal = new com.translate();
+    }
+
+    if(session.visSysTrans) {
+        qSystemResults = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM system_translations
+            "
+        );
     }
 </cfscript>
 
@@ -137,8 +165,7 @@
                                         </form>
                                     </div>
                                     <div class="col-lg-8 text-end px-4">
-                                        <br>
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary">
+                                        <a  data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary trans-btn">
                                             <i class="fas fa-plus pe-3"></i> Add custom translation
                                         </a>
                                     </div>
@@ -183,7 +210,7 @@
                                                                             </cfloop>
                                                                         </div>
                                                                         <div class="modal-footer">
-                                                                            <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                            <a class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                             <button type="submit" class="btn btn-primary ms-auto">
                                                                                 Save translation
                                                                             </button>
@@ -222,7 +249,7 @@
                                                                 </cfloop>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                <a  class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                 <button type="submit" class="btn btn-primary ms-auto">
                                                                     Save translation
                                                                 </button>
@@ -241,20 +268,36 @@
                             <div class="card-body">
                                 <div class="card-title">System translations</div>
                                 <p class="text-red">The system translations are used by the developers of the saaster.io project. Users of the tool should only perform translations and not change any variables. Co-developers can request changes via Github.</p>
-                                <div class="col-lg-4">
-                                    <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
-                                        <label class="form-label">Search for translations:</label>
-                                        <div class="input-group mb-2">
-                                            <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
-                                            <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.search))>
-                                                <button class="btn bg-red-lt" name="delete" type="submit">Delete search!</button>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                            <label class="form-label">Search for translations:</label>
+                                            <div class="input-group mb-2">
+                                                <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
+                                                <button class="btn bg-green-lt" type="submit">Go!</button>
+                                                <cfif len(trim(session.search))>
+                                                    <button class="btn bg-red-lt" name="delete" type="submit">Delete search!</button>
+                                                </cfif>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-8 text-end px-4">
+                                            <cfif session.visSysTrans>
+                                                <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
+                                                    <i class="fas fa-eye-slash  pe-3"></i> 
+                                                    Hide translations
+                                                </a>
+                                            <cfelse>
+                                                <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=system" class="btn btn-primary trans-btn">
+                                                    <i class="fas fa-eye pe-3"></i> 
+                                                    Show all translations
+                                                </a>
                                             </cfif>
-                                        </div>
-                                    </form>
+                                        </a>
+                                    </div>
                                 </div>
                                 <div class="row">
-                                    <cfif len(trim(session.search))>
+                                    <cfif len(trim(session.search)) or session.visSysTrans>
                                         <cfif qSystemResults.recordCount>
                                             <div class="table-responsive">
                                                 <table class="table table-vcenter card-table">
@@ -290,7 +333,7 @@
                                                                                 </cfloop>
                                                                             </div>
                                                                             <div class="modal-footer">
-                                                                                <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                                <a  class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                                 <button type="submit" class="btn btn-primary ms-auto">
                                                                                     Save translation
                                                                                 </button>
