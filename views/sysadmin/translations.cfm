@@ -2,9 +2,14 @@
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
     param name="session.visSysTrans" default="0" type="numeric";
+    param name="session.displayLanguage" default="#application.objGlobal.getDefaultLanguage().iso#" type="string";
 
     s_badge_custom = "";
     s_badge_system = "";
+
+    if(structKeyExists(form, "displayLanguage")){
+        session.displayLanguage = form.displayLanguage;
+    }
 
     if(structKeyExists(url, "vis")) {
         switch(url.vis) {
@@ -286,7 +291,19 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-8 text-end px-4">
+                                    <div class="col-lg-4 trans-display-lng">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                            <label class="form-label">Display language:</label>
+                                            <div>
+                                                <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
+                                                    <cfoutput query="qLanguages">
+                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                    </cfoutput>
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 text-end px-4">
                                             <cfif session.visSysTrans>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
                                                     <i class="fas fa-eye-slash  pe-3"></i> 
@@ -309,14 +326,14 @@
                                                     <thead>
                                                         <tr>
                                                             <th width="30%">Variable</th>
-                                                            <th width="70%">Text</th>
+                                                            <th width="70%">Text (#session.displayLanguage#)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <cfloop query="qSystemResults">
                                                             <tr>
                                                                 <td>#qSystemResults.strVariable#</td>
-                                                                <td>#evaluate("qSystemResults.strString#application.objGlobal.getDefaultLanguage().iso#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
+                                                                <td>#evaluate("qSystemResults.strString#session.displayLanguage#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
                                                             </tr>
                                                             <!--- Modal for translations --->
                                                             <div id="syst_modal_#qSystemResults.intSystTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
