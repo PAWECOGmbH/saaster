@@ -144,6 +144,7 @@
                         <ul class="nav nav-tabs" data-bs-toggle="tabs">
                             <li class="nav-item"><a href="##custom" class="nav-link <cfif url.tr eq "custom">active</cfif>" data-bs-toggle="tab">Custom translations #s_badge_custom#</a></li>
                             <li class="nav-item"><a href="##system" class="nav-link <cfif url.tr eq "system">active</cfif>" data-bs-toggle="tab">System translations #s_badge_system#</a></li>
+                            <li class="nav-item"><a href="##bulk" class="nav-link <cfif url.tr eq "bulk">active</cfif>" data-bs-toggle="tab">Bulk translate</a></li>
                         </ul>
                     </div>
                     <div class="tab-content">
@@ -354,6 +355,74 @@
                             </div>
 
                         </div>
+                        
+                        <div id="bulk" class="card tab-pane show <cfif url.tr eq "bulk">active</cfif>">
+                            <div class="card-body">
+                                <div class="card-title">Bulk translate</div>
+                                <p>
+                                    Here you can translate a complete language via the Deepl API. 
+                                    A Deepl API key is required for this. Please check if the language 
+                                    you want to translate is supported.
+                                </p>
+                                <form class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                    <div class="col-lg-5">
+                                        <label for="fromLang">From:</label>
+                                        <select name="fromLang" class="form-select" required>
+                                            <option value="">Select Language</option>
+                                            <cfoutput query="qLanguages">
+                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                            </cfoutput>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 trans-arrow-box">
+                                        <i class="fa fa-long-arrow-right trans-arrow" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <label for="toLang">To:</label>
+                                        <select name="toLang" class="form-select" required>
+                                            <option value="">Select Language</option>
+                                            <cfoutput query="qLanguages">
+                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                            </cfoutput>
+                                        </select>
+                                    </div>
+                                    <br>
+                                    
+                                    <label for="apiKey">API Key:</label>
+                                    <div class="col-lg-8">
+                                        <input type="text" name="apiKey" class="form-control" minlength="10" maxlength="100" placeholder="Please enter a valid API key..." required="">
+                                        <input type="hidden" name="bulk_translate">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="apiType" id="apiFree" value="0" class="form-selectgroup-input" checked="">
+                                            <span class="form-selectgroup-label">
+                                                DeepL API Free
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="apiType" id"apipro"="" value="1" class="form-selectgroup-input">
+                                            <span class="form-selectgroup-label">
+                                                DeepL API Pro
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="mt-2 trans-submit-btn">
+                                        <button id="transButton" class="btn btn-primary btn-block">
+                                            Translate
+                                        </button>
+                                    </div>
+                                    <div class="progress mb-2" style="display: none;">
+                                        <div class="progress-bar" style="width: 38%" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="38% Complete">
+                                          <span class="visually-hidden">38% Complete</span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

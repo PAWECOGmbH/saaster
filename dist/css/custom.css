@@ -165,3 +165,16 @@ td.feature {
 .trans-btn {
     margin-top: 30px;
 }
+
+.trans-arrow-box {
+    font-size: 32px;
+    text-align: center;
+}
+
+.trans-arrow {
+    margin-top: 20px;
+}
+
+.trans-submit-btn {
+    padding-top: 20px;
+}
