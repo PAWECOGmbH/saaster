@@ -136,6 +136,10 @@
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
+            <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
+                <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
+                <div class="text-muted">This can take a couple minutes.</div>
+            </div>
         </div>
         <div class="container-xl">
             <div class="row">
@@ -364,7 +368,7 @@
                                     A Deepl API key is required for this. Please check if the language 
                                     you want to translate is supported.
                                 </p>
-                                <form class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                <form onsubmit="loading()" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
                                     <div class="col-lg-5">
                                         <label for="fromLang">From:</label>
                                         <select name="fromLang" class="form-select" required>
@@ -422,7 +426,11 @@
                                 </form>
                             </div>
                         </div>
-
+                        <script>
+                            function loading() {
+                                document.getElementById('loadingAlert').style.display='';
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
