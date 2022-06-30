@@ -368,7 +368,7 @@
                                     A Deepl API key is required for this. Please check if the language 
                                     you want to translate is supported.
                                 </p>
-                                <form onsubmit="loading()" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
                                     <div class="col-lg-5">
                                         <label for="fromLang">From:</label>
                                         <select name="fromLang" class="form-select" required>
@@ -414,14 +414,9 @@
                                         </label>
                                     </div>
                                     <div class="mt-2 trans-submit-btn">
-                                        <button id="transButton" class="btn btn-primary btn-block">
+                                        <button id="submit_button" class="btn btn-primary btn-block">
                                             Translate
                                         </button>
-                                    </div>
-                                    <div class="progress mb-2" style="display: none;">
-                                        <div class="progress-bar" style="width: 38%" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="38% Complete">
-                                          <span class="visually-hidden">38% Complete</span>
-                                        </div>
                                     </div>
                                 </form>
                             </div>
