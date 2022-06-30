@@ -252,8 +252,24 @@
                             <h3 class="card-title">Invoices overview #searchTerm#</h3>
                         </div>
                         <div class="card-body">
-                            <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
                             <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
+                                    </div>
+                                    <div class="col-lg-4 invoices-sort">
+                                        <div class="form-label invoices-sort-label">Sort invoices</div>
+                                        <select class="form-select" name="sort" onchange="this.form.submit()">
+                                            <option value="invoiceNumber ASC" <cfif session.i_sort eq "invoiceNumber ASC">selected</cfif>>By invoice number asc</option>
+                                            <option value="invoiceNumber DESC" <cfif session.i_sort eq "invoiceNumber DESC">selected</cfif>>By invoice number desc</option>
+                                            <option value="dtmInvoiceDate ASC" <cfif session.i_sort eq "dtmInvoiceDate ASC">selected</cfif>>By invoice date asc</option>
+                                            <option value="dtmInvoiceDate DESC" <cfif session.i_sort eq "dtmInvoiceDate DESC">selected</cfif>>By invoice date desc</option>
+                                            <option value="dtmDueDate ASC" <cfif session.i_sort eq "dtmDueDate ASC">selected</cfif>>By due date asc</option>
+                                            <option value="dtmDueDate DESC" <cfif session.i_sort eq "dtmDueDate DESC">selected</cfif>>By due date desc</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-lg-3">
                                         <label class="form-label">Search for invoice:</label>
@@ -320,7 +336,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3">
+                                  <!---   <div class="col-lg-3">
                                         <div class="mb-3">
                                             <div class="form-label">Sort invoices</div>
                                             <select class="form-select" name="sort" onchange="this.form.submit()">
@@ -332,7 +348,7 @@
                                                 <option value="dtmDueDate DESC" <cfif session.i_sort eq "dtmDueDate DESC">selected</cfif>>By due date desc</option>
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> --->
                                 </div>
                             </form>
                             <cfif qInvoices.recordCount>
