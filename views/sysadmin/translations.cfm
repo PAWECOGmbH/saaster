@@ -174,7 +174,19 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-8 text-end px-4">
+                                    <div class="col-lg-4 trans-display-lng">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=custom" method="post">
+                                            <label class="form-label">Display language:</label>
+                                            <div>
+                                                <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
+                                                    <cfoutput query="qLanguages">
+                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                    </cfoutput>
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 text-end px-4">
                                         <a  data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary trans-btn">
                                             <i class="fas fa-plus pe-3"></i> Add custom translation
                                         </a>
