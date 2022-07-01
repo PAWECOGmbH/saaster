@@ -193,6 +193,37 @@ $(document).ready(function(){
 	});
 	
 
-	
+	$('div.dashboard').sortable({
+		handle: '.move-widget',
+		placeholder: 'ui-state-highlight',
+		start: function(e, ui ){
+			ui.placeholder.height(ui.helper.outerHeight());
+			ui.placeholder.width(ui.helper.outerWidth());
+	   	},
+		stop: function(event, ui) {
+			$.post('/dashboard-settings', {sortorder:$(this).sortable('serialize')});
+		}
+	});
+
+	$('.disable-widget').on('change', function(){
+
+		var $isvisible = $(this).closest('div.card-header').find('span.isvisible');
+		var $isinvisible = $(this).closest('div.card-header').find('span.isinvisible');
+		var $targetWidget = $(this).closest('div.card').find('div.card-body');
+
+		if( $(this).prop('checked') ){
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:1}, function(){
+				$targetWidget.removeClass('widget-disabled');
+				$isinvisible.hide();
+				$isvisible.show();
+			});
+		}else{
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:0}, function(){
+				$targetWidget.addClass('widget-disabled');
+				$isvisible.hide();
+				$isinvisible.show();
+			});
+		}
+	});
 		
 });

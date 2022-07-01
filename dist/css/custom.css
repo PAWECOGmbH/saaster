@@ -187,3 +187,16 @@ td.feature {
     min-width: 100px;
     margin-top: 8px;
 }
+
+div.dashboard div.card-header label.form-check{
+    margin: 0;
+    padding: 0;
+}
+
+.widget-disabled{
+    opacity: 0.5;
+}
+
+.ui-state-highlight{
+    background: #eee;
+}
