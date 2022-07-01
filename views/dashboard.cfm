@@ -15,19 +15,26 @@
     //remove User Widgets that have been deactivated by Admin
     qRemoveWidgets = queryExecute(
         options = {datasource = application.datasource},
+        params = {
+            user_id: {type: "numeric", value: session.USER_ID},
+            allWidgets: {type: "varchar", value: allWidgets, list: true, separator: ","}
+        },
         sql = "
             DELETE FROM user_widgets
-            WHERE intUserID = #session.USER_ID#
-            AND intWidgetID NOT IN(#allWidgets#)
+            WHERE intUserID = :user_id
+            AND intWidgetID NOT IN(:allWidgets)
         "
     );
     
     qOldUserWidgets = queryExecute(
         options = {datasource = application.datasource},
+        params = {
+            user_id: {type: "numeric", value: session.USER_ID}
+        },
         sql = "
             SELECT intWidgetID
             FROM user_widgets
-            WHERE intUserID = #session.USER_ID#
+            WHERE intUserID = :user_id
         "
     );
     oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
@@ -41,9 +48,14 @@
 
             qInsertWidgets = queryExecute(
                 options = {datasource = application.datasource},
+                params = {
+                    widget_id: {type: "numeric", value: row.intWidgetID},
+                    user_id: {type: "numeric", value: session.USER_ID},
+                    sortorder: {type: "numeric", value: lastUserWidgetPrio}
+                },
                 sql = "
                     INSERT INTO user_widgets (intWidgetID, intUserID, intPrio, blnActive)
-                    VALUES (#row.intWidgetID#, #session.USER_ID#, #lastUserWidgetPrio#, 1) 
+                    VALUES (:widget_id, :user_id, :sortorder, 1)
                 "
             )
 
@@ -53,6 +65,9 @@
 
     qUserWidgets = queryExecute(
         options = {datasource = application.datasource},
+        params = {
+            user_id: {type: "numeric", value: session.USER_ID}
+        },
         sql = "
             SELECT
                 user_widgets.intPrio, 
@@ -71,7 +86,7 @@
                 widget_ratio
                 ON 
                     widgets.intRatioID = widget_ratio.intRatioID
-            WHERE intUserID = #session.USER_ID#
+            WHERE intUserID = :user_id
             ORDER BY intPrio
         "
     );
