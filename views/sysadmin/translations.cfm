@@ -1,9 +1,32 @@
 <cfscript>
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
+    param name="session.visSysTrans" default="0" type="numeric";
+    param name="session.displayLanguage" default="#application.objGlobal.getDefaultLanguage().iso#" type="string";
 
     s_badge_custom = "";
     s_badge_system = "";
+
+    if(structKeyExists(form, "displayLanguage")){
+        session.displayLanguage = form.displayLanguage;
+    }
+
+    if(structKeyExists(url, "vis")) {
+        switch(url.vis) {
+            case "show":
+                session.search = "";
+                session.visSysTrans = 1; 
+                break;
+
+            case "hide": 
+                session.search = "";
+                session.visSysTrans = 0; 
+                break;
+
+            default: 
+                session.visSysTrans = 0; 
+        }
+    }
 
     if(structKeyExists(form, "search") and len(trim(form.search))) {
         session.search = form.search;
@@ -23,6 +46,7 @@
 
     // When entering a search
     if(len(trim(session.search))) {
+        session.visSysTrans = 0
 
         // Custom results
         defaultQueryCustom = "
@@ -52,25 +76,24 @@
             s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
         }
 
-
         // System results
         defaultQuerySys = "
         SELECT *
         FROM system_translations
         WHERE strVariable LIKE '%#session.search#%'
         ";
-        orListSys = "";
+        orListCustom = "";
         orderQrySys = "
             ORDER BY strVariable
         ";
 
         // Loop over query and append to query string
         loop query=qLanguages {
-            orListCustom = listAppend(orListSys, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
+            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
         }
 
         cfquery(datasource=application.datasource name="qSystemResults") {
-            writeOutput(defaultQuerySys & orListSys & orderQrySys);
+            writeOutput(defaultQuerySys & orListCustom & orderQrySys);
         }
 
         s_badge_system = "";
@@ -83,6 +106,16 @@
 
         // Create getModal object
         getModal = new com.translate();
+    }
+
+    if(session.visSysTrans) {
+        qSystemResults = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM system_translations
+            "
+        );
     }
 </cfscript>
 
@@ -108,6 +141,10 @@
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
+            <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
+                <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
+                <div class="text-muted">This can take a couple minutes.</div>
+            </div>
         </div>
         <div class="container-xl">
             <div class="row">
@@ -116,6 +153,7 @@
                         <ul class="nav nav-tabs" data-bs-toggle="tabs">
                             <li class="nav-item"><a href="##custom" class="nav-link <cfif url.tr eq "custom">active</cfif>" data-bs-toggle="tab">Custom translations #s_badge_custom#</a></li>
                             <li class="nav-item"><a href="##system" class="nav-link <cfif url.tr eq "system">active</cfif>" data-bs-toggle="tab">System translations #s_badge_system#</a></li>
+                            <li class="nav-item"><a href="##bulk" class="nav-link <cfif url.tr eq "bulk">active</cfif>" data-bs-toggle="tab">Bulk translate</a></li>
                         </ul>
                     </div>
                     <div class="tab-content">
@@ -136,9 +174,20 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-8 text-end px-4">
-                                        <br>
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary">
+                                    <div class="col-lg-4 trans-display-lng">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=custom" method="post">
+                                            <label class="form-label">Display language:</label>
+                                            <div>
+                                                <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
+                                                    <cfoutput query="qLanguages">
+                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                    </cfoutput>
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 text-end px-4">
+                                        <a  data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary trans-btn">
                                             <i class="fas fa-plus pe-3"></i> Add custom translation
                                         </a>
                                     </div>
@@ -183,7 +232,7 @@
                                                                             </cfloop>
                                                                         </div>
                                                                         <div class="modal-footer">
-                                                                            <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                            <a class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                             <button type="submit" class="btn btn-primary ms-auto">
                                                                                 Save translation
                                                                             </button>
@@ -222,7 +271,7 @@
                                                                 </cfloop>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                <a  class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                 <button type="submit" class="btn btn-primary ms-auto">
                                                                     Save translation
                                                                 </button>
@@ -241,34 +290,62 @@
                             <div class="card-body">
                                 <div class="card-title">System translations</div>
                                 <p class="text-red">The system translations are used by the developers of the saaster.io project. Users of the tool should only perform translations and not change any variables. Co-developers can request changes via Github.</p>
-                                <div class="col-lg-4">
-                                    <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
-                                        <label class="form-label">Search for translations:</label>
-                                        <div class="input-group mb-2">
-                                            <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
-                                            <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.search))>
-                                                <button class="btn bg-red-lt" name="delete" type="submit">Delete search!</button>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                            <label class="form-label">Search for translations:</label>
+                                            <div class="input-group mb-2">
+                                                <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
+                                                <button class="btn bg-green-lt" type="submit">Go!</button>
+                                                <cfif len(trim(session.search))>
+                                                    <button class="btn bg-red-lt" name="delete" type="submit">Delete search!</button>
+                                                </cfif>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 trans-display-lng">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                            <label class="form-label">Display language:</label>
+                                            <div>
+                                                <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
+                                                    <cfoutput query="qLanguages">
+                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                    </cfoutput>
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 text-end px-4">
+                                            <cfif session.visSysTrans>
+                                                <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
+                                                    <i class="fas fa-eye-slash  pe-3"></i> 
+                                                    Hide translations
+                                                </a>
+                                            <cfelse>
+                                                <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=system" class="btn btn-primary trans-btn">
+                                                    <i class="fas fa-eye pe-3"></i> 
+                                                    Show all translations
+                                                </a>
                                             </cfif>
-                                        </div>
-                                    </form>
+                                        </a>
+                                    </div>
                                 </div>
                                 <div class="row">
-                                    <cfif len(trim(session.search))>
+                                    <cfif len(trim(session.search)) or session.visSysTrans>
                                         <cfif qSystemResults.recordCount>
                                             <div class="table-responsive">
                                                 <table class="table table-vcenter card-table">
                                                     <thead>
                                                         <tr>
                                                             <th width="30%">Variable</th>
-                                                            <th width="70%">Text</th>
+                                                            <th width="70%">Text (#session.displayLanguage#)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <cfloop query="qSystemResults">
                                                             <tr>
                                                                 <td>#qSystemResults.strVariable#</td>
-                                                                <td>#evaluate("qSystemResults.strString#application.objGlobal.getDefaultLanguage().iso#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
+                                                                <td>#evaluate("qSystemResults.strString#session.displayLanguage#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
                                                             </tr>
                                                             <!--- Modal for translations --->
                                                             <div id="syst_modal_#qSystemResults.intSystTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -290,7 +367,7 @@
                                                                                 </cfloop>
                                                                             </div>
                                                                             <div class="modal-footer">
-                                                                                <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                                                                                <a  class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
                                                                                 <button type="submit" class="btn btn-primary ms-auto">
                                                                                     Save translation
                                                                                 </button>
@@ -311,6 +388,73 @@
                             </div>
 
                         </div>
+                        
+                        <div id="bulk" class="card tab-pane show <cfif url.tr eq "bulk">active</cfif>">
+                            <div class="card-body">
+                                <div class="card-title">Bulk translate</div>
+                                <p>
+                                    Here you can translate a complete language via the Deepl API. 
+                                    A Deepl API key is required for this. Please check if the language 
+                                    you want to translate is supported.
+                                </p>
+                                <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                    <div class="col-lg-5">
+                                        <label for="fromLang">From:</label>
+                                        <select name="fromLang" class="form-select" required>
+                                            <option value="">Select Language</option>
+                                            <cfoutput query="qLanguages">
+                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                            </cfoutput>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 trans-arrow-box">
+                                        <i class="fa fa-long-arrow-right trans-arrow" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <label for="toLang">To:</label>
+                                        <select name="toLang" class="form-select" required>
+                                            <option value="">Select Language</option>
+                                            <cfoutput query="qLanguages">
+                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                            </cfoutput>
+                                        </select>
+                                    </div>
+                                    <br>
+                                    
+                                    <label for="apiKey">API Key:</label>
+                                    <div class="col-lg-8">
+                                        <input type="text" name="apiKey" class="form-control" minlength="10" maxlength="100" placeholder="Please enter a valid API key..." required="">
+                                        <input type="hidden" name="bulk_translate">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="apiType" id="apiFree" value="0" class="form-selectgroup-input" checked="">
+                                            <span class="form-selectgroup-label">
+                                                DeepL API Free
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="apiType" id"apipro"="" value="1" class="form-selectgroup-input">
+                                            <span class="form-selectgroup-label">
+                                                DeepL API Pro
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="mt-2 trans-submit-btn">
+                                        <button id="submit_button" class="btn btn-primary btn-block">
+                                            Translate
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <script>
+                            function loading() {
+                                document.getElementById('loadingAlert').style.display='';
+                            }
+                        </script>
                     </div>
                 </div>
             </div>

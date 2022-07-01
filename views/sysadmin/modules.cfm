@@ -73,43 +73,7 @@
                                                     <td><a href="#application.mainURL#/sysadmin/modules/edit/#qModules.intModuleID#" class="btn">Edit</a></td>
                                                     <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_module=#qModules.intModuleID#', 'Delete module', 'Are you sure you want to delete this module?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
-                                                <cfif qModules.recordCount gt 1>
-                                                    <script>
-                                                        // Save new prio
-                                                        function fnSaveSort(){
-
-                                                            var jsonTmp = "[";
-                                                                $('##dragndrop_body > tr').each(function (i, row) {
-                                                                    var divbox = $(this).attr('id');
-                                                                    var aTR = divbox.split('_');
-                                                                    var newslist = 0;
-                                                                    jsonTmp += "{\"prio\" :" + (i+1) + ',';
-                                                                    if(newslist != 0){
-                                                                        var setlist = JSON.stringify(newslist);
-                                                                        jsonTmp += "\"strBoxList\" :" + setlist + ',';
-                                                                    }
-                                                                    jsonTmp += "\"intModuleID\" :" + aTR[1] + '},';
-                                                                }
-                                                            );
-                                                            jsonTmp += jsonTmp.slice(0,-1);
-                                                            jsonTmp += "]]";
-                                                            var ajaxResponse = $.ajax({
-                                                                type: "post",
-                                                                url: "#application.mainURL#/handler/ajax_sort.cfm?modules",
-                                                                contentType: "application/json",
-                                                                data: JSON.stringify( jsonTmp )
-                                                            })
-                                                            // Response
-                                                            ajaxResponse.then(
-                                                                function( apiResponse ){
-                                                                    if(apiResponse.trim() == 'ok'){
-                                                                        location.href = '#application.mainURL#/sysadmin/modules';
-                                                                    }
-                                                                }
-                                                            );
-                                                        }
-                                                    </script>
-                                                </cfif>
+                                                
                                             </cfloop>
                                         </tbody>
                                     <cfelse>
@@ -153,3 +117,43 @@
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
 </div>
+
+<cfif qModules.recordCount gt 1>
+    <cfoutput>
+    <script>
+        // Save new prio
+        function fnSaveSort(){
+
+            var jsonTmp = "[";
+                $('##dragndrop_body > tr').each(function (i, row) {
+                    var divbox = $(this).attr('id');
+                    var aTR = divbox.split('_');
+                    var newslist = 0;
+                    jsonTmp += "{\"prio\" :" + (i+1) + ',';
+                    if(newslist != 0){
+                        var setlist = JSON.stringify(newslist);
+                        jsonTmp += "\"strBoxList\" :" + setlist + ',';
+                    }
+                    jsonTmp += "\"intModuleID\" :" + aTR[1] + '},';
+                }
+            );
+            jsonTmp += jsonTmp.slice(0,-1);
+            jsonTmp += "]]";
+            var ajaxResponse = $.ajax({
+                type: "post",
+                url: "#application.mainURL#/handler/ajax_sort.cfm?modules",
+                contentType: "application/json",
+                data: JSON.stringify( jsonTmp )
+            })
+            // Response
+            ajaxResponse.then(
+                function( apiResponse ){
+                    if(apiResponse.trim() == 'ok'){
+                        location.href = '#application.mainURL#/sysadmin/modules';
+                    }
+                }
+            );
+        }
+    </script>
+    </cfoutput>
+</cfif>
