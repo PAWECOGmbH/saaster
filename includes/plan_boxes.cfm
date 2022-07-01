@@ -1,5 +1,7 @@
 <cfoutput>
 
+
+
 <cfif structKeyExists(session, "alert")>
     #session.alert#
 </cfif>
@@ -81,31 +83,105 @@
                             #replace(i.shortDescription, chr(13), "<br />")#
                         </div>
 
-                        <!--- If there is a user session, send the user to the booking or to the dashboard --->
+                        <!--- If there is a user session, send the user to the booking page --->
                         <cfif structKeyExists(session, "customer_id") and session.customer_id gt 0>
 
-                            <cfif i.itsFree eq 1>
+                            <!--- Check whether the user has already a plan and is doing a down- or upgrade --->
+                            <cfset toManyUsers = false>
+                            <cfset alertDowngrade = false>
+                            <cfset alertUpgrade = false>
+                            <cfif len(trim(session.currentPlan.status))>
+                                <cfif i.priceMonthly lt session.currentPlan.priceMonthly>
+                                    <!--- Check whether the customer has registered more users than the new plan provides --->
+                                    <cfif (i.maxUsers gt 0) and application.objUser.getAllUsers(session.customer_id).recordCount gt i.maxUsers>
+                                        <cfset toManyUsers = true>
+                                    </cfif>
+                                    <!--- Downgrade --->
+                                    <cfset alertDowngrade = true>
+                                <cfelseif i.priceMonthly gt session.currentPlan.priceMonthly>
+                                    <cfset alertUpgrade = true>
+                                </cfif>
+                            </cfif>
 
-                                <!--- Button free --->
+                            <cfif toManyUsers>
+
+                                <cfset usersToDelete = application.objUser.getAllUsers(session.customer_id).recordCount - i.maxUsers>
+
                                 <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                    <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                    <a class="btn w-100" onclick="sweetAlert('error', '#application.mainURL#/account-settings/users', '#getTrans('titDowngradeNotPossible')#', '#getTrans('txtDowngradeNotPossibleText')# #usersToDelete#', 'OK', '#getTrans('btnToTheUsers')#')">#getTrans('btnActivate')#</a>
                                 </div>
 
                             <cfelse>
 
-                                <!--- Button monthly --->
-                                <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                    <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
-                                </div>
+                                <cfif i.itsFree eq 1>
 
-                                <!--- Button yearly --->
-                                <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                    <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
-                                </div>
+                                    <!--- Button free --->
+                                    <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+
+                                        <cfif alertDowngrade>
+                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkF#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                        <cfelse>
+                                            <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                        </cfif>
+
+                                    </div>
+
+                                <cfelse>
+
+                                    <cfif alertDowngrade>
+
+                                        <!--- Button monthly --->
+                                        <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
+                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkM#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                        </div>
+                                        <!--- Button yearly --->
+                                        <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
+                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkY#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                        </div>
+
+                                    <cfelseif alertUpgrade>
+
+                                        <!--- Get the amount to pay right know monthly --->
+                                        <cfset structMonth = objPlans.calculateUpgrade(session.customer_id, i.planID, 'monthly')>
+                                        <cfset amountToPayM = getTrans('txtYouAreUpgrading') & " " & getTrans('txtToPayToday') & " " & i.currencySign & " " & lsCurrencyFormat(structMonth.toPayNow, "none")>
+                                        <cfif structMonth.toPayNow lt 0>
+                                            <cfset amountToPayM = getTrans('txtYouAreUpgrading') & " " & getTrans('txtYouGetRefund') & " " & i.currencySign & " " & lsCurrencyFormat(replace(structMonth.toPayNow, '-', ''), "none")>
+                                        </cfif>
+
+                                        <!--- Get the amount to pay right know yearly --->
+                                        <cfset structYear = objPlans.calculateUpgrade(session.customer_id, i.planID, 'yearly')>
+                                        <cfset amountToPayY = getTrans('txtYouAreUpgrading') & " " & getTrans('txtToPayToday') & " " & i.currencySign & " " & lsCurrencyFormat(structYear.toPayNow, "none")>
+                                        <cfif structYear.toPayNow lt 0>
+                                            <cfset amountToPayY = getTrans('txtYouAreUpgrading') & " " & getTrans('txtYouGetRefund') & " " & i.currencySign & " " & lsCurrencyFormat(replace(structYear.toPayNow, '-', ''), "none")>
+                                        </cfif>
+
+                                        <!--- Button monthly --->
+                                        <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
+                                            <a class="btn w-100" onclick="sweetAlert('info', '#i.bookingLinkM#', '#getTrans('titUpgrade')#', '#amountToPayM#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
+                                        </div>
+                                        <!--- Button yearly --->
+                                        <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
+                                            <a class="btn w-100" onclick="sweetAlert('info', '#i.bookingLinkY#', '#getTrans('titUpgrade')#', '#amountToPayY#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
+                                        </div>
+
+                                    <cfelse>
+
+                                        <!--- Button monthly --->
+                                        <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
+                                            <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                        </div>
+                                        <!--- Button yearly --->
+                                        <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
+                                            <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                        </div>
+
+                                    </cfif>
+
+                                </cfif>
 
                             </cfif>
 
-                        <!--- otherwise send to registration form --->
+                        <!--- otherwise send to the registration form --->
                         <cfelse>
 
                             <cfif i.itsFree eq 1>
@@ -115,7 +191,7 @@
                             </cfif>
 
                             <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register?redirect=#URLEncodedFormat(redirectLink)#" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                                <a href="#application.mainURL#/register?redirect=#application.mainURL#/plans" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                         </cfif>

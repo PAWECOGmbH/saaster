@@ -28,6 +28,7 @@
 
     objPlans = new com.plans(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
     objInvoice = new com.invoices();
+    objPayrexx = new com.payrexx();
 
     // As we have all the infos, save it into variables
     variables.planID = planStruct.planID;
@@ -38,114 +39,11 @@
     // Get more plan infos
     planDetails = objPlans.getPlanDetail(variables.planID);
 
-    // Is it a free plan?
-    if (planDetails.itsFree) {
-
-        // Book the free plan
-
-        insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
-
-        if (insertBooking.success) {
-
-            <!--- Save the new plan into a session --->
-            newPlan = objPlans.getCurrentPlan(session.customer_id);
-            session.currentPlan = newPlan;
-
-            <!--- Save the included modules into the module session --->
-            checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-            session.currentModules = checkModules;
-
-            getAlert('msgPlanActivated');
-            location url="#application.mainURL#/account-settings" addtoken=false;
-
-        }
-
-    }
-
     // Check customers current plan (if exists)
     currentPlan = objPlans.getCurrentPlan(session.customer_id);
 
-    // Is there already a plan?
-    if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
 
-        // Is it the same plan?
-        if (currentPlan.planID eq planDetails.planID) {
-
-            // If the plan has been expired, renew
-            if (currentPlan.status eq "expired") {
-
-                // Do nothing and let the customer book... down to the next step
-
-            } else {
-
-                // Back to dashboard
-                getAlert('msgPlanActivated');
-                location url="#application.mainURL#/account-settings" addtoken=false;
-
-            }
-
-
-        } else {
-
-            // The customer wants to make an up- or downgrade
-            // Todo: recalculate the fee
-
-            // .... then go down to the next step
-
-        }
-
-
-
-
-    }
-
-
-
-
-    // Do we have to provide any test days?
-    if (isNumeric(planDetails.testDays) and planDetails.testDays gt 0) {
-
-        // The customer can only test plans that he has not already tested.
-        qTestedPlans = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: session.customer_id},
-                planID: {type: "numeric", value: variables.planID}
-            },
-            sql = "
-                SELECT intPlanID
-                FROM customer_bookings_history
-                WHERE intCustomerID = :customerID
-                AND intPlanID = :planID
-                AND LENGTH(dtmEndTestDate) > 0
-            "
-        )
-
-        if (!qTestedPlans.recordCount) {
-
-            // Book the plan and let the customer test
-            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=true, recurring=variables.recurring);
-
-            if (insertBooking.success) {
-
-                <!--- Save the new plan into a session --->
-                session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
-
-                <!--- Save the included modules into the module session --->
-                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-                session.currentModules = checkModules;
-
-                getAlert('msgPlanActivated');
-                location url="#application.mainURL#/account-settings" addtoken=false;
-
-            }
-
-        }
-
-    }
-
-
-    // Is the call coming from payment service provider (PSP)?
+    // Is the call coming from our PSP?
     if (structKeyExists(url, "psp_response")) {
 
         thisResponse = url.psp_response;
@@ -156,9 +54,7 @@
             case "success":
 
                 // Get the webhook data
-                objPayrexx = new com.payrexx();
-
-                // If we are in dev mode, get the JSON data from ftp server
+                // If we are in dev mode, get the JSON data from the given server
                 if (application.environment eq "dev") {
                     include template="/frontend/payrexx_webhook.cfm";
                 }
@@ -180,12 +76,12 @@
 
                 if (insertBooking.success) {
 
-                    <!--- Save the new plan into a variable --->
                     newPlan = objPlans.getCurrentPlan(session.customer_id);
                     getTime = application.getTime;
 
                     // Make invoice struct
                     invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = insertBooking.bookingID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = planDetails.planName;
                     invoiceStruct['invoiceDate'] = now();
@@ -281,16 +177,197 @@
 
 
             case "cancel":
+
                 // Send the user back to the plans
                 location url="#application.mainURL#/plans" addtoken=false;
+
 
         }
 
 
 
-    }
-</cfscript>
+    // Booking process
+    } else {
 
-<!--- <cfoutput>
-<a href="#application.mainURL#/book?plan=#url.plan#&psp_response=success">OK, done!</a>
-</cfoutput> --->
+
+        upgrading = false;
+
+        // Is there already a plan?
+        if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
+
+            // Is it the same plan?
+            if (currentPlan.planID eq planDetails.planID) {
+
+                // If the plan has been expired, renew
+                if (currentPlan.status eq "expired") {
+
+                    // Do nothing and let the customer book... down to the next step
+
+                } else {
+
+                    // Back to dashboard
+                    getAlert('msgPlanActivated');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                }
+
+
+            } else {
+
+                // The customer wants to make an up- or downgrade
+
+                // Upgrade
+                if (currentPlan.priceMonthly lt planDetails.priceMonthly) {
+
+
+
+                    // Calculate the amount to be charged right now
+                    recalcStruct = objPlans.calculateUpgrade(session.customer_id, planDetails.planID, variables.recurring);
+                    amountToPay = recalcStruct.toPayNow;
+
+                    payloadStruct = structNew();
+                    paymentStruct['amount'] = amountToPay;
+                    paymentStruct['purpose'] = getTrans('titUpgrade') & " " & planDetails.planName;
+                    paymentStruct['referenceId'] = session.customer_id;
+
+                    dump(objPayrexx.reCharge(paymentStruct, session.customer_id));
+                    abort;
+
+                    test = objPayrexx.
+
+
+
+
+                    dump(planDetails);
+                    abort;
+
+
+
+
+
+
+
+
+                    abort;
+
+                    // If the amount is greater than 0, try to charge the customers credit card
+
+
+                    // Try to charge the customers credit card
+                    objPayrexx = new com.payrexx();
+
+                    payloadStruct = structNew();
+                    paymentStruct['amount'] = 100;
+                    paymentStruct['purpose'] = "test";
+                    paymentStruct['referenceId'] = session.customer_id;
+
+                    test = objPayrexx.callPayrexx(paymentStruct, "POST", "Transaction", 5589914);
+
+                    dump(test);
+
+
+
+                    upgrading = true;
+
+
+                // Downgrade or same price
+                } else {
+
+                    insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+                    if (insertBooking.success) {
+
+                        <!--- Save the new plan into a session --->
+                        session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                        <!--- Save the included modules into the module session --->
+                        checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                        session.currentModules = checkModules;
+
+                        getAlert('msgPlanActivated');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+
+                    }
+
+
+                }
+
+
+            }
+
+
+        }
+
+
+        // Is it a free plan?
+        if (planDetails.itsFree and !upgrading) {
+
+            // Book the free plan
+
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+            if (insertBooking.success) {
+
+                <!--- Save the new plan into a session --->
+                newPlan = objPlans.getCurrentPlan(session.customer_id);
+                session.currentPlan = newPlan;
+
+                <!--- Save the included modules into the module session --->
+                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                session.currentModules = checkModules;
+
+                getAlert('msgPlanActivated');
+                location url="#application.mainURL#/account-settings" addtoken=false;
+
+            }
+
+        }
+
+
+        // Do we have to provide any test days?
+        if (isNumeric(planDetails.testDays) and planDetails.testDays gt 0 and !upgrading) {
+
+            // The customer can only test plans that he has not already tested.
+            qTestedPlans = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: session.customer_id},
+                    planID: {type: "numeric", value: variables.planID}
+                },
+                sql = "
+                    SELECT intPlanID
+                    FROM customer_bookings_history
+                    WHERE intCustomerID = :customerID
+                    AND intPlanID = :planID
+                    AND LENGTH(dtmEndTestDate) > 0
+                "
+            )
+
+            if (!qTestedPlans.recordCount) {
+
+                // Book the plan and let the customer test
+                insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=true, recurring=variables.recurring);
+
+                if (insertBooking.success) {
+
+                    <!--- Save the new plan into a session --->
+                    session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgPlanActivated');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                }
+
+            }
+
+        }
+
+
+    }
+
+
+</cfscript>

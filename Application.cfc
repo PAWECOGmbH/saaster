@@ -22,7 +22,7 @@ component displayname="Application" output="false" hint="Handle the application.
 
         application.datasource = variables.datasource;
 
-        // Dynamic values (table)
+        // Dynamic values
         application.projectName = variables.appName;
         application.appOwner = variables.appOwner;
         application.fromEmail = variables.fromEmail;

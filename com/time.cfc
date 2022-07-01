@@ -18,7 +18,7 @@ component displayname="time" output="false" {
                 variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
             }
 
-            if (!isNumeric(variables.timezoneID)) {
+            if (!isNumeric(variables.timezoneID) or variables.timezoneID eq 0) {
                 variables.timezoneID = 31;
             }
 
@@ -31,7 +31,6 @@ component displayname="time" output="false" {
         } else {
             variables.timezone = "Etc/GMT";
         }
-
 
         return this;
 
@@ -46,6 +45,10 @@ component displayname="time" output="false" {
             local.timezoneID = arguments.timezoneID;
         } else {
             local.timezoneID = variables.timezoneID;
+        }
+
+        if (local.timezoneID eq 0) {
+            local.timezoneID = 31;
         }
 
         local.qTimezone = queryExecute (

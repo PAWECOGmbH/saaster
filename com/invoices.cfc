@@ -46,6 +46,11 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
+        if (structKeyExists(invoiceData, "customerBookingID") and isNumeric(invoiceData.customerBookingID)) {
+            local.customerBookingID = invoiceData.customerBookingID;
+        } else {
+            local.customerBookingID = 0;
+        }
         local.invoiceNumber = createInvoiceNumber(local.customerID);
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
@@ -117,11 +122,12 @@ component displayname="invoices" output="false" {
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
-                    total_text: {type: "nvarchar", value: local.total_text}
+                    total_text: {type: "nvarchar", value: local.total_text},
+                    customerBookingID: {type: "numeric", value: local.customerBookingID},
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language)
+                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO,intCustomerBookingID)
+                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :customerBookingID)
                 "
             )
 

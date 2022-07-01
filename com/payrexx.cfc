@@ -33,6 +33,44 @@ component displayname="payrexx" output="false" {
 
     }
 
+    // Try to recharge the customers credit card. If not success, start a new transaction.
+    public struct function reCharge(required struct payload, required numeric customerID) {
+
+        dump(arguments.payload);
+
+
+        // Get the confirmed transaction id
+        local.qTransaction = queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID = {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT intTransactionID
+                FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND strStatus = 'confirmed'
+                LIMIT 1
+            "
+        )
+
+        // Try to charge
+        if (local.qTransaction.recordCount) {
+
+            local.charge = callPayrexx(arguments.payload, "POST", "Transaction", local.qTransaction.intTransactionID);
+
+            dump(local.charge);
+            abort;
+
+        }
+
+
+
+
+
+
+    }
+
 
     public struct function callPayrexx(required struct payload, string method, string object, numeric thisID) {
 

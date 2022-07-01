@@ -22,7 +22,6 @@
     objPayrexx = new com.payrexx();
     paymentStruct = structNew();
 
-
     if (structKeyExists(url, "module")) {
         recurring = moduleStruct.recurring;
         thisStruct = moduleDetails;
@@ -37,15 +36,18 @@
         paymentStruct['purpose'] = thisStruct.planName;
     }
     if (structKeyExists(thisStruct, "priceOneTimeAfterVAT") and thisStruct.priceOneTimeAfterVAT gt 0) {
-        paymentStruct['amount'] = thisStruct.priceOneTimeAfterVAT * 100;
+        thisAmount = thisStruct.priceOneTimeAfterVAT * 100;
+        paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
         paymentStruct['preAuthorization'] = false;
     } else {
         if (recurring eq "y") {
-            paymentStruct['amount'] = thisStruct.priceYearlyAfterVAT * 100;
+            thisAmount = thisStruct.priceYearlyAfterVAT * 100;
+            paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
             paymentStruct['preAuthorization'] = true;
             paymentStruct['chargeOnAuthorization'] = true;
         } else {
-            paymentStruct['amount'] = thisStruct.priceMonthlyAfterVAT * 100;
+            thisAmount = thisStruct.priceMonthlyAfterVAT * 100;
+            paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
             paymentStruct['preAuthorization'] = true;
             paymentStruct['chargeOnAuthorization'] = true;
         }

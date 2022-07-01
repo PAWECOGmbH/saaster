@@ -1,14 +1,20 @@
 
 function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 
-	if (type == 'warning') {
+	if (type == "warning") {
+		dangerMode = true;
+	} else {
+		dangerMode = false;
+	}
+
+	if (buttonOne != '' && buttonTwo != '') {
 
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "warning",
+			icon: type,
 			buttons: [buttonOne, buttonTwo],
-			dangerMode: true,
+			dangerMode: dangerMode,
 		})
 		.then((willDelete) => {
 			if (willDelete) {
@@ -21,7 +27,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "success"
+			icon: type
 		})
 
 	}
@@ -190,8 +196,8 @@ $(document).ready(function(){
 		$("#submit_button").attr("disabled", true).addClass("not-allowed");
 		return true;
 	});
-	
 
-	
-		
+
+
+
 });

@@ -110,6 +110,8 @@ component displayname="book" output="false" {
                 "
             )
 
+            argsReturnValue['bookingID'] = local.qCheckBookings.intCustomerBookingID;
+
             if (local.qCheckBookings.recordCount) {
 
                 try {
@@ -187,7 +189,7 @@ component displayname="book" output="false" {
                 try {
 
                     queryExecute (
-                        options = {datasource = application.datasource},
+                        options = {datasource = application.datasource, result="newID"},
                         params = {
                             customerID: {type: "numeric", value: arguments.customerID},
                             thisID: {type: "numeric", value: local.thisID},
@@ -199,14 +201,16 @@ component displayname="book" output="false" {
                         },
                         sql = "
 
+                            INSERT INTO customer_bookings_history (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
+                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring);
+
                             INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
                             VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring);
 
-                            INSERT INTO customer_bookings_history (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
-
                         "
                     )
+
+                    argsReturnValue['bookingID'] = newID.generated_key;
 
                 } catch (e any) {
 

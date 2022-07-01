@@ -147,7 +147,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                     </cfloop>
                                 </div>
                             </div>

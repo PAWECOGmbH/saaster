@@ -135,6 +135,7 @@
 
                     // Make invoice struct
                     invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = insertBooking.newID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = moduleDetails.name;
                     invoiceStruct['invoiceDate'] = now();
