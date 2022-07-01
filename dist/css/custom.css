@@ -177,4 +177,12 @@ td.feature {
 
 .trans-submit-btn {
     padding-top: 20px;
+
+.invoices-sort {
+    display: flex;
+}
+
+.invoices-sort-label {
+    min-width: 100px;
+    margin-top: 8px;
 }
