@@ -1,28 +1,28 @@
 <cfscript>
-    param name="session.invoice_page" default=1 type="numeric";
-    local.objInvoice = new com.invoices();
-    local.getEntries = 20;
-    local.invoice_start = 0;
+    param name="session.invoice_c_page" default=1 type="numeric";
+    objInvoice = new com.invoices();
+    getEntries = 20;
+    invoice_start = 0;
 
-    local.qTotalInvoices = objInvoice.getInvoices(session.customer_id).totalCount;
-    local.pages = ceiling(local.qTotalInvoices / local.getEntries);
+    qTotalInvoices = objInvoice.getInvoices(session.customer_id).totalCount;
+    pages = ceiling(qTotalInvoices / getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt local.pages) {
-        session.invoice_page = url.page;
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {
+        session.invoice_c_page = url.page;
     } else {
-        if (local.qTotalInvoices gt 0) {
+        if (qTotalInvoices gt 0) {
             location url="#application.mainurl#/account-settings/invoices?page=1" addtoken="false";
         }
     }
 
-    if (session.invoice_page gt 1){
-        local.tPage = session.invoice_page - 1;
-        local.valueToAdd = 20 * tPage;
-        local.invoice_start = local.invoice_start + local.valueToAdd;
+    if (session.invoice_c_page gt 1){
+        tPage = session.invoice_c_page - 1;
+        valueToAdd = 20 * tPage;
+        invoice_start = invoice_start + valueToAdd;
     }
 
-    local.qInvoices = objInvoice.getInvoices(session.customer_id,local.invoice_start,local.getEntries);
+    qInvoices = objInvoice.getInvoices(session.customer_id,invoice_start,getEntries);
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -45,7 +45,7 @@
                 </cfif>
             </div>
 
-            <cfif !ArrayIsEmpty(local.qInvoices.arrayInvoices)>
+            <cfif !ArrayIsEmpty(qInvoices.arrayInvoices)>
                 <div class="row">
                     <div class="col-md-12 col-lg-12">
                         <div class="card">
@@ -63,7 +63,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <cfloop index="i" array="#local.qInvoices.arrayInvoices#">
+                                    <cfloop index="i" array="#qInvoices.arrayInvoices#">
                                         <tr>
                                             <td>#i.invoiceNumber#</td>
                                             <td>#lsDateFormat(getTime.utc2local(utcDate=i.invoiceDate))#</td>
@@ -90,28 +90,64 @@
                         </div>
                     </div>
                 </div>
-                <cfif local.pages neq 1>
+                <cfif pages neq 1>
                     <div class="card-body">
                         <ul class="pagination justify-content-center" id="pagination">
 
+                            <!--- First page --->
+                            <li class="page-item <cfif session.invoice_c_page eq 1>disabled</cfif>">
+                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=1" tabindex="-1" aria-disabled="true">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+
                             <!--- Prev arrow --->
-                            <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
-                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_page-1#" tabindex="-1" aria-disabled="true">
+                            <li class="page-item <cfif session.invoice_c_page eq 1>disabled</cfif>">
+                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_c_page-1#" tabindex="-1" aria-disabled="true">
                                     <i class="fas fa-angle-left"></i>
                                 </a>
                             </li>
 
                             <!--- Pages --->
-                            <cfloop index="i" from="1" to="#local.pages#">
-                                <li class="page-item <cfif session.invoice_page eq i>active</cfif>">
-                                    <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#i#">#i#</a>
-                                </li>
-                            </cfloop>
+                            <cfif session.invoice_c_page + 4 gt pages>
+                                <cfset blockPage = pages>
+                            <cfelse>
+                                <cfset blockPage = session.invoice_c_page + 4>
+                            </cfif>
+                            
+                            <cfif blockPage neq pages>
+                                <cfloop index="j" from="#session.invoice_c_page#" to="#blockPage#">
+                                    <cfif not blockPage gt pages>
+                                        <li class="page-item <cfif session.invoice_c_page eq j>active</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#j#">#j#</a>
+                                        </li>
+                                    </cfif>
+                                </cfloop>
+                            <cfelseif blockPage lt 5>
+                                <cfloop index="j" from="1" to="#pages#">
+                                    <li class="page-item <cfif session.invoice_c_page eq j>active</cfif>">
+                                        <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#j#">#j#</a>
+                                    </li>
+                                </cfloop>
+                            <cfelse>
+                                <cfloop index="j" from="#pages - 4#" to="#pages#">
+                                        <li class="page-item <cfif session.invoice_c_page eq j>active</cfif>">
+                                            <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#j#">#j#</a>
+                                        </li>
+                                </cfloop>
+                            </cfif>
 
                             <!--- Next arrow --->
-                            <li class="page-item <cfif session.invoice_page gte local.pages>disabled</cfif>">
-                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_page+1#">
+                            <li class="page-item <cfif session.invoice_c_page gte pages>disabled</cfif>">
+                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#session.invoice_c_page+1#">
                                     <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+
+                            <!--- Last page --->
+                            <li class="page-item <cfif session.invoice_c_page gte pages>disabled</cfif>">
+                                <a class="page-link" href="#application.mainURL#/account-settings/invoices?page=#pages#">
+                                    <i class="fas fa-angle-double-right"></i>
                                 </a>
                             </li>
                         </ul>
