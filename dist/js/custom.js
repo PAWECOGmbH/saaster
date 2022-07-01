@@ -192,22 +192,36 @@ $(document).ready(function(){
 	});
 	
 
-	//Dashboard widget sorting
-	$('div.dashboard .card').on('mouseover', function(){
-		$(this).find('div.widget-options').css('display', 'block');
-	});
-	$('div.dashboard .card').on('mouseout', function(){
-		$(this).find('div.widget-options').css('display', 'none');
-	});
-
 	$('div.dashboard').sortable({
 		handle: '.move-widget',
+		placeholder: 'ui-state-highlight',
+		start: function(e, ui ){
+			ui.placeholder.height(ui.helper.outerHeight());
+			ui.placeholder.width(ui.helper.outerWidth());
+	   	},
 		stop: function(event, ui) {
-			console.log( $(this).sortable('serialize') );
+			$.post('/dashboard-settings', {sortorder:$(this).sortable('serialize')});
+		}
+	});
 
-			$.post('/handler/widget_sort.cfm', {sortorder:$(this).sortable('serialize')});
+	$('.disable-widget').on('change', function(){
 
+		var $isvisible = $(this).closest('div.card-header').find('span.isvisible');
+		var $isinvisible = $(this).closest('div.card-header').find('span.isinvisible');
+		var $targetWidget = $(this).closest('div.card').find('div.card-body');
 
+		if( $(this).prop('checked') ){
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:1}, function(){
+				$targetWidget.removeClass('widget-disabled');
+				$isinvisible.hide();
+				$isvisible.show();
+			});
+		}else{
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:0}, function(){
+				$targetWidget.addClass('widget-disabled');
+				$isvisible.hide();
+				$isinvisible.show();
+			});
 		}
 	});
 		

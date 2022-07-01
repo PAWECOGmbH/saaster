@@ -1,7 +1,0 @@
-﻿SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
-ALTER TABLE `widgets` 
-ADD COLUMN `intPrio` tinyint(4) NULL AFTER `intRatioID`;
-
-SET FOREIGN_KEY_CHECKS = 1;

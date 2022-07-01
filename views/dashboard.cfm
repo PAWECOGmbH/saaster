@@ -1,14 +1,83 @@
 <cfscript>
+
+    objPrices = new com.prices();
+
     qWidgets = queryExecute(
         options = {datasource = application.datasource},
         sql = "
             SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
             FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
             WHERE widgets.blnActive = 1
+        "
+    );
+    allWidgets = valueList(qWidgets.intWidgetID);
+
+    //remove User Widgets that have been deactivated by Admin
+    qRemoveWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            DELETE FROM user_widgets
+            WHERE intUserID = #session.USER_ID#
+            AND intWidgetID NOT IN(#allWidgets#)
+        "
+    );
+    
+    qOldUserWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT intWidgetID
+            FROM user_widgets
+            WHERE intUserID = #session.USER_ID#
+        "
+    );
+    oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
+    lastUserWidgetPrio = qOldUserWidgets.recordCount;
+
+    for(row in qWidgets){
+
+        if(not listFind(oldUserWidgetIDs, row.intWidgetID)){
+
+            lastUserWidgetPrio++;
+
+            qInsertWidgets = queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    INSERT INTO user_widgets (intWidgetID, intUserID, intPrio, blnActive)
+                    VALUES (#row.intWidgetID#, #session.USER_ID#, #lastUserWidgetPrio#, 1) 
+                "
+            )
+
+        }
+        
+    }
+
+    qUserWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT
+                user_widgets.intPrio, 
+                user_widgets.blnActive, 
+                widgets.intWidgetID, 
+                widgets.strWidgetName, 
+                widgets.strFilePath, 
+                widget_ratio.intSizeRatio
+            FROM
+                widgets
+                INNER JOIN
+                user_widgets
+                ON 
+                    widgets.intWidgetID = user_widgets.intWidgetID
+                INNER JOIN
+                widget_ratio
+                ON 
+                    widgets.intRatioID = widget_ratio.intRatioID
+            WHERE intUserID = #session.USER_ID#
             ORDER BY intPrio
         "
-    )
-    objPrices = new com.prices();
+    );
+
+
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -47,21 +116,79 @@
 
                 <div class="row row-deck row-cards dashboard">
 
-                    <cfloop query="qWidgets">
+                    <cfparam name="session.dashboardedit" default="0" />
+                    
+                    <cfloop query="qUserWidgets">
 
-                        <div id="id_#qWidgets.intWidgetID#" class="widget col-lg-#qWidgets.intSizeRatio#">
-                            <div class="card">
-                                <div class="widget-options">
-                                    <i class="fas fa-arrows-up-down-left-right move-widget" style="cursor:grab;"></i>
-                                </div>
-                                <div class="card-body">
-                                    <cfinclude template="/#qWidgets.strFilePath#">
+                        <cfif session.dashboardedit eq 1>
+
+                            <!---============== dashboard edit mode ==============--->
+
+                            <div id="id_#qUserWidgets.intWidgetID#" class="widget col-lg-#qUserWidgets.intSizeRatio#">
+                                <div class="card">
+
+                                    <cfif session.dashboardedit eq 1>
+                                        <div class="card-header d-flex">
+                                            <div style="margin-right:15px">
+                                                <i class="fas fa-bars move-widget" style="cursor:grab;"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <span class="isvisible" style="<cfif qUserWidgets.blnActive eq 1>display:block<cfelse>display:none</cfif>">#getTrans('txtWidgetVisible')#</span>
+                                                <span class="isinvisible" style="<cfif qUserWidgets.blnActive eq 0>display:block<cfelse>display:none</cfif>">#getTrans('txtWidgetHidden')#</span>
+                                            </div>
+                                            <div style="margin-left:15px">
+                                                <label class="form-check form-switch">
+                                                    <input class="form-check-input disable-widget" type="checkbox" name="active" value="#qUserWidgets.intWidgetID#" <cfif qUserWidgets.blnActive>checked</cfif>>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </cfif>
+
+                                    <div class="card-body<cfif qUserWidgets.blnActive neq 1> widget-disabled</cfif>">
+                                        <!--- check if file exists --->
+                                        <cfif fileExists(expandPath("/#qUserWidgets.strFilePath#"))>
+                                            <cfinclude template="/#qUserWidgets.strFilePath#">
+                                        <cfelse>
+                                            #getTrans('txtCheckWidgetPath')#
+                                        </cfif>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+
+                        <cfelseif qUserWidgets.blnActive eq 1>
+
+                            <!---============== dashboard default ==============--->
+
+                            <div class="col-lg-#qUserWidgets.intSizeRatio#">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!--- check if file exists --->
+                                        <cfif fileExists(expandPath("/#qUserWidgets.strFilePath#"))>
+                                            <cfinclude template="/#qUserWidgets.strFilePath#">
+                                        <cfelse>
+                                            #getTrans('txtCheckWidgetPath')#
+                                        </cfif>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </cfif>
 
                     </cfloop>
 
+                </div>
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        <form action="#application.mainURL#/dashboard-settings" method="post">
+                            <cfif session.dashboardedit eq 0>
+                                <input type="hidden" name="dashboardedit" value="1">
+                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>
+                            <cfelse>
+                                <input type="hidden" name="dashboardedit" value="0">
+                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
+                            </cfif>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

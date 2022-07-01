@@ -144,7 +144,7 @@ td.feature {
   }
 
 
-  .widget-options{
+  /* .widget-options{
     position: absolute;
     top:0;
     right: 0;
@@ -153,4 +153,18 @@ td.feature {
     color:#fff;
     z-index: 100;
     display: none;
+  } */
+
+  
+  div.dashboard div.card-header label.form-check{
+    margin: 0;
+    padding: 0;
+  }
+
+  .widget-disabled{
+    opacity: 0.5;
+  }
+
+  .ui-state-highlight{
+    background: #eee;
   }
