@@ -22,7 +22,7 @@ component displayname="book" output="false" {
         if (structKeyExists(arguments, "recurring")) {
             local.argsJSon['recurring'] = arguments.recurring;
         } else {
-            local.argsJSon['recurring'] = "m";
+            local.argsJSon['recurring'] = "monthly";
         }
         local.argsJSon['lngID'] = arguments.lngID;
         local.argsJSon['currencyID'] = arguments.currencyID;
@@ -66,13 +66,13 @@ component displayname="book" output="false" {
 
             } else {
 
-                if (structKeyExists(arguments, "recurring") and arguments.recurring eq "y") {
+                if (structKeyExists(arguments, "recurring") and arguments.recurring eq "yearly") {
 
                     // Yearly subscription
                     local.tillDate = dateAdd("yyyy", 1, local.startDate);
                     local.recurring = "yearly";
 
-                } else if (structKeyExists(arguments, "recurring") and arguments.recurring eq "m") {
+                } else if (structKeyExists(arguments, "recurring") and arguments.recurring eq "monthly") {
 
                     // Monthly subscription
                     local.tillDate = dateAdd("m", 1, local.startDate);

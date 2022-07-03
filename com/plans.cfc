@@ -405,11 +405,11 @@ component displayname="plans" output="false" {
                 if (!len(trim(local.getPlan.strBookingLink))) {
 
                     local.objBook = new com.book();
-                    local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "m", "plan");
+                    local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "monthly", "plan");
                     local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & local.bookingStringM;
-                    local.bookingStringY = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "y", "plan");
+                    local.bookingStringY = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "yearly", "plan");
                     local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & local.bookingStringY;
-                    local.bookingStringF = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "f", "plan");
+                    local.bookingStringF = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "free", "plan");
                     local.structPlan['bookingLinkF'] = application.mainURL & "/book?plan=" & local.bookingStringF;
 
                 }
@@ -908,7 +908,7 @@ component displayname="plans" output="false" {
             sql = "
                 SELECT  customer_bookings.intPlanID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
                         customer_bookings.strRecurring, customer_bookings.intPlanID,
-                        invoices.decTotalPrice, invoices.intVatType, invoices.strCurrency
+                        invoices.decSubTotalPrice, invoices.intVatType, invoices.strCurrency
                 FROM customer_bookings
                 INNER JOIN invoices ON 1=1
                 AND customer_bookings.intCustomerBookingID = invoices.intCustomerBookingID
@@ -923,13 +923,13 @@ component displayname="plans" output="false" {
         if (local.qPaidAmount.recordCount) {
 
             // The amount the customer has paid
-            local.paidAmount = local.qPaidAmount.decTotalPrice;
+            local.paidAmount = local.qPaidAmount.decSubTotalPrice;
 
             // Check whether its a yearly or monthly subscription
             local.recurring = local.qPaidAmount.strRecurring;
 
             // How many days has the current subscription?
-            if (arguments.recurring eq "yearly" or arguments.recurring eq "y") {
+            if (arguments.recurring eq "yearly") {
                 local.subscriptionDays = daysInYear(local.qPaidAmount.dtmStartDate);
             } else {
                 local.subscriptionDays = daysInMonth(local.qPaidAmount.dtmStartDate);
@@ -949,10 +949,10 @@ component displayname="plans" output="false" {
             local.planData = getPlanDetail(arguments.newPlanID);
 
             // Get the price of the new plan
-            if (arguments.recurring eq "yearly" or arguments.recurring eq "y") {
-                local.newPrice = local.planData.priceYearlyAfterVAT;
+            if (arguments.recurring eq "yearly") {
+                local.newPrice = local.planData.priceYearly;
             } else {
-                local.newPrice = local.planData.priceMonthlyAfterVAT;
+                local.newPrice = local.planData.priceMonthly;
             }
 
             // Calculate the day price of the new plan
@@ -971,7 +971,7 @@ component displayname="plans" output="false" {
             local.upgradeStruct['newPlanID'] = arguments.newPlanID;
             local.upgradeStruct['paidAmount'] = local.paidAmount;
             local.upgradeStruct['toPayNow'] = local.priceToChargeTotal;
-            local.upgradeStruct['currency'] = arguments.recurring;
+            local.upgradeStruct['currency'] = local.qPaidAmount.strCurrency;
             local.upgradeStruct['recurring'] = arguments.recurring;
 
 

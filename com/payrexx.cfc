@@ -10,66 +10,67 @@ component displayname="payrexx" output="false" {
     }
 
 
+    // Charge the customer's credit card using the webhook's transactionID
+    public struct function chargeAmount(required struct payload, required numeric transactionID) {
+
+        local.returnValue = structNew();
+        local.returnValue['success'] = false;
+        local.returnValue['data'] = "";
+
+        local.charge = callPayrexx(arguments.payload, "POST", "Transaction", arguments.transactionID);
+
+        if (structKeyExists(local.charge, "status") and local.charge.status eq "success") {
+
+            local.returnValue['success'] = true;
+            local.returnValue['data'] = local.charge.data[1];
+
+
+
+
+        }
+
+        return local.returnValue;
+
+
+    }
+
+
     // Get the webhook data
-    public query function getWebhook(required numeric customerID, required string thisUUID, required string status) {
+    public query function getWebhook(required numeric customerID, required string status) {
 
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
             params: {
                 customerID = {type: "numeric", value: arguments.customerID},
-                uuid = {type: "varchar", value: arguments.thisUUID},
                 status = {type: "varchar", value: arguments.status}
             },
             sql = "
                 SELECT *
                 FROM payrexx
                 WHERE intCustomerID = :customerID
-                AND strUUID = :uuid
                 AND strStatus = :status
             "
         )
 
-        return local.qWebhook;
+        local.webhookData = local.qWebhook;
 
-    }
+        if (!local.webhookData.recordCount) {
 
-    // Try to recharge the customers credit card. If not success, start a new transaction.
-    public struct function reCharge(required struct payload, required numeric customerID) {
-
-        dump(arguments.payload);
-
-
-        // Get the confirmed transaction id
-        local.qTransaction = queryExecute(
-            options: {datasource = application.datasource},
-            params: {
-                customerID = {type: "numeric", value: arguments.customerID}
-            },
-            sql = "
-                SELECT intTransactionID
-                FROM payrexx
-                WHERE intCustomerID = :customerID
-                AND strStatus = 'confirmed'
-                LIMIT 1
-            "
-        )
-
-        // Try to charge
-        if (local.qTransaction.recordCount) {
-
-            local.charge = callPayrexx(arguments.payload, "POST", "Transaction", local.qTransaction.intTransactionID);
-
-            dump(local.charge);
-            abort;
+            // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
+            loop from="1" to="10" index="i" {
+                sleep(1000);
+                local.webhookData = getWebhook(arguments.customerID, 'authorized');
+                if (local.webhookData.recordCount) {
+                    break;
+                }
+            }
 
         }
 
-
-
-
-
+        return local.webhookData;
 
     }
+
 
 
     public struct function callPayrexx(required struct payload, string method, string object, numeric thisID) {

@@ -33,17 +33,27 @@ INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('txtToPayToday', 'Der heute zu bezahlende Betrag:', 'The amount to pay today:');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtYouGetRefund', 'Sie erhalten eine Gutschrift, welche bei den nächsten Abbuchungen angerechnet wird: ', 'You will receive a refund, which will be credited to your next direct debit:');
+VALUES ('txtYouCantUpgrade', 'Der von Ihnen gewünschte Plan kann noch nicht geändert werden, das der Betrag kleiner ist, als Sie bereits bezahlt haben. Bitte warten Sie, bis die aktuelle Laufzeit kurz vor dem Ende steht.', 'The plan you have requested cannot yet be changed because the amount is less than you have already paid. Please wait until the current period is about to end.');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('btnYesUpgrade', 'Ja, jetzt upgraden!', 'Yes, upgrade now!');
 
 
+ALTER TABLE `payrexx`
+DROP COLUMN `blnPreAuthorization`,
+ADD COLUMN `strCardNumber` varchar(20) NULL AFTER `strPaymentBrand`;
 
 ALTER TABLE `payrexx`
 ADD CONSTRAINT `frn_payrexx_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
+ALTER TABLE `payrexx`
+RENAME INDEX `frn_payrexx_customer` TO `_intCustomerID`,
+ADD INDEX `_intTransactionID`(`intTransactionID`) USING BTREE;
+
+ALTER TABLE `payrexx`
+DROP COLUMN `strUUID`;
+
 ALTER TABLE `invoices`
-MODIFY COLUMN `intCustomerBookingID` int(11) NULL DEFAULT 0 AFTER `strLanguageISO`;
+ADD COLUMN `intCustomerBookingID` int(11) NULL DEFAULT 0 AFTER `strLanguageISO`;
 
 SET FOREIGN_KEY_CHECKS = 1;

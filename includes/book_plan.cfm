@@ -47,29 +47,27 @@
     if (structKeyExists(url, "psp_response")) {
 
         thisResponse = url.psp_response;
-        thisUUID = url.uuid;
 
         switch (thisResponse) {
 
             case "success":
 
-                // Get the webhook data
-                // If we are in dev mode, get the JSON data from the given server
+                // If we are in dev mode, call the JSON data from the given server
                 if (application.environment eq "dev") {
                     include template="/frontend/payrexx_webhook.cfm";
                 }
 
-                // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
-                loop from="1" to="10" index="i" {
-                    sleep(1000);
-                    getWebhook = objPayrexx.getWebhook(session.customer_id, thisUUID, 'confirmed');
-                    if (getWebhook.recordCount) {
-                        break;
-                    }
+                // Get the webhook data
+                getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+
+                // If there is no data from the webhook, send the customer back and try again
+                if (!getWebhook.recordCount) {
+                    getAlert('alertErrorOccured', 'warning');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
                 }
 
-                thisPaymentType = getWebhook.recordCount ? getWebhook.strPaymentBrand : "Online payment";
-                payrexxID = getWebhook.recordCount ? getWebhook.intPayrexxID : 0;
+                thisPaymentType = getWebhook.strPaymentBrand;
+                payrexxID = getWebhook.intPayrexxID;
 
                 // Make a book for the plan
                 insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
@@ -84,8 +82,6 @@
                     invoiceStruct['customerBookingID'] = insertBooking.bookingID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = planDetails.planName;
-                    invoiceStruct['invoiceDate'] = now();
-                    invoiceStruct['dueDate'] = now();
                     invoiceStruct['currency'] = planDetails.currency;
                     invoiceStruct['isNet'] = planDetails.isNet;
                     invoiceStruct['vatType'] = planDetails.vatType;
@@ -134,6 +130,13 @@
                         location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
+                    // Charge the amount now (Payrexx)
+                    chargeNow = objInvoice.payInvoice(invoiceID);
+                    if (!chargeNow.success) {
+                        getAlert(chargeNow.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
                     // Insert payment
                     payment = structNew();
                     payment['invoiceID'] = invoiceID;
@@ -146,18 +149,20 @@
                     insPayment = objInvoice.insertPayment(payment);
 
                     if (!insPayment.success) {
-                        objInvoice.deleteInvoice(invoiceID);
                         getAlert(insPayment.message, 'danger');
-                    } else {
-                        // If everything went well, save plan into the session
-                        getAlert('msgThanksForPurchaseFindInvoice');
-                        session.currentPlan = newPlan;
-                        <!--- Save the included modules into the module session --->
-                        checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-                        session.currentModules = checkModules;
+                        location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
-                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                    // Save plan into the session
+                    session.currentPlan = newPlan;
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgThanksForPurchaseFindInvoice');
+                    location url="#application.mainURL#/dashboard" addtoken=false;
 
 
 
@@ -171,8 +176,7 @@
 
             case "failed":
 
-                param name="url.message" default="Error during the payment process!";
-                getAlert(url.message, 'danger');
+                getAlert('alertErrorOccured', 'warning');
                 location url="#application.mainURL#/plans" addtoken=false;
 
 
@@ -192,14 +196,15 @@
 
         upgrading = false;
 
+
         // Is there already a plan?
         if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
 
             // Is it the same plan?
-            if (currentPlan.planID eq planDetails.planID) {
+            if (currentPlan.planID eq planDetails.planID or currentPlan.status eq "free") {
 
                 // If the plan has been expired, renew
-                if (currentPlan.status eq "expired") {
+                if (currentPlan.status eq "expired" or currentPlan.status eq "free") {
 
                     // Do nothing and let the customer book... down to the next step
 
@@ -219,53 +224,134 @@
                 // Upgrade
                 if (currentPlan.priceMonthly lt planDetails.priceMonthly) {
 
-
-
                     // Calculate the amount to be charged right now
                     recalcStruct = objPlans.calculateUpgrade(session.customer_id, planDetails.planID, variables.recurring);
-                    amountToPay = recalcStruct.toPayNow;
 
-                    payloadStruct = structNew();
-                    paymentStruct['amount'] = amountToPay;
-                    paymentStruct['purpose'] = getTrans('titUpgrade') & " " & planDetails.planName;
-                    paymentStruct['referenceId'] = session.customer_id;
+                    qBookingID = queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: session.customer_id},
+                            planID: {type: "numeric", value: currentPlan.planID},
+                            dateStart: {type: "datetime", value: now()},
+                            dateEnd: {type: "datetime", value: currentPlan.endDate},
+                            recurring: {type: "varchar", value: variables.recurring},
+                            newPlanID: {type: "numeric", value: planDetails.planID}
+                        },
+                        sql = "
 
-                    dump(objPayrexx.reCharge(paymentStruct, session.customer_id));
-                    abort;
+                            UPDATE customer_bookings
+                            SET dtmStartDate = :dateStart,
+                                dtmEndDate = :dateEnd,
+                                strRecurring = :recurring,
+                                intPlanID = :newPlanID
+                            WHERE intCustomerID = :customerID
+                            AND intPlanID = :planID;
 
-                    test = objPayrexx.
+                            INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, strRecurring)
+                            VALUES (:customerID, :newPlanID, :dateStart, :dateEnd, :recurring);
 
+                            SELECT intCustomerBookingID
+                            FROM customer_bookings
+                            WHERE intCustomerID = :customerID
+                            AND intPlanID = :newPlanID;
 
-
-
-                    dump(planDetails);
-                    abort;
-
-
-
-
-
-
-
-
-                    abort;
-
-                    // If the amount is greater than 0, try to charge the customers credit card
-
-
-                    // Try to charge the customers credit card
-                    objPayrexx = new com.payrexx();
-
-                    payloadStruct = structNew();
-                    paymentStruct['amount'] = 100;
-                    paymentStruct['purpose'] = "test";
-                    paymentStruct['referenceId'] = session.customer_id;
-
-                    test = objPayrexx.callPayrexx(paymentStruct, "POST", "Transaction", 5589914);
-
-                    dump(test);
+                        "
+                    )
 
 
+                    // Make invoice struct
+                    invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = qBookingID.intCustomerBookingID;
+                    invoiceStruct['customerID'] = session.customer_id;
+                    invoiceStruct['title'] = getTrans('titUpgrade') & " " & planDetails.planName;
+                    invoiceStruct['currency'] = planDetails.currency;
+                    invoiceStruct['isNet'] = planDetails.isNet;
+                    invoiceStruct['vatType'] = planDetails.vatType;
+                    invoiceStruct['paymentStatusID'] = 2;
+
+                    // Make invoice and get invoice id
+                    newInvoice = objInvoice.createInvoice(invoiceStruct);
+
+                    if (newInvoice.success) {
+                        invoiceID = newInvoice.newInvoiceID;
+                    } else {
+                        getAlert(newInvoice.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // Insert a position
+                    posInfo = structNew();
+                    posInfo['invoiceID'] = invoiceID;
+                    posInfo['append'] = false;
+
+                    positionArray = arrayNew(1);
+
+                    getTime = application.getTime;
+
+                    // Main position
+                    position = structNew();
+                    position[1]['title'] = planDetails.planName & ' ' & lsDateFormat(getTime.utc2local(utcDate=now())) & ' - ' & lsDateFormat(getTime.utc2local(utcDate=currentPlan.endDate)) & ' (' & getTrans('titUpgrade') & ')';
+                    position[1]['description'] = planDetails.shortDescription;
+                    position[1]['quantity'] = 1;
+                    position[1]['discountPercent'] = 0;
+                    position[1]['vat'] = planDetails.vat;
+                    position[1]['price'] = recalcStruct.toPayNow;
+                    arrayAppend(positionArray, position[1]);
+                    posInfo['positions'] = positionArray;
+
+                    insPositions = objInvoice.insertInvoicePositions(posInfo);
+
+                    if (!insPositions.success) {
+                        objInvoice.deleteInvoice(invoiceID);
+                        getAlert(insPositions.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // Charge the amount now (Payrexx)
+                    chargeNow = objInvoice.payInvoice(invoiceID);
+                    if (!chargeNow.success) {
+                        getAlert(chargeNow.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // If we are in dev mode, call the JSON data from the given server
+                    if (application.environment eq "dev") {
+                        include template="/frontend/payrexx_webhook.cfm";
+                    }
+
+                    // Get the webhook data
+                    getWebhook = objPayrexx.getWebhook(session.customer_id, 'confirmed');
+                    if (!getWebhook.recordCount) {
+                        getAlert('alertErrorOccured', 'warning');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+
+                    // Insert payment
+                    payment = structNew();
+                    payment['invoiceID'] = invoiceID;
+                    payment['customerID'] = session.customer_id;
+                    payment['date'] = now();
+                    payment['amount'] = objInvoice.getInvoiceData(invoiceID).total;
+                    payment['type'] = getWebhook.strPaymentBrand;
+                    payment['payrexxID'] = getWebhook.intPayrexxID;
+
+                    insPayment = objInvoice.insertPayment(payment);
+
+                    if (!insPayment.success) {
+                        getAlert(insPayment.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    <!--- Save the new plan into a session --->
+                    session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgThanksForPurchaseFindInvoice');
+                    location url="#application.mainURL#/dashboard" addtoken=false;
 
                     upgrading = true;
 

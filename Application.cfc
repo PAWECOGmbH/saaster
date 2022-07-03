@@ -170,6 +170,8 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Is there a redirect coming in url? --->
         if (structKeyExists(url, "redirect")) {
             session.redirect = application.mainURL & "/" & url.redirect;
+        } else if (structKeyExists(url, "del_redirect")) {
+            structDelete(session, "redirect");
         }
 
         <!--- If there is no session, send to login --->
