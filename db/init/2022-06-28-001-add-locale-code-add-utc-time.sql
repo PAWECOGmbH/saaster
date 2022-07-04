@@ -1,19 +1,3 @@
-/*
- Navicat MySQL Data Transfer
-
- Source Server         : saaster
- Source Server Type    : MySQL
- Source Server Version : 50737
- Source Host           : localhost:3306
- Source Schema         : database
-
- Target Server Type    : MySQL
- Target Server Version : 50737
- File Encoding         : 65001
-
- Date: 28/06/2022 17:13:10
-*/
-
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
