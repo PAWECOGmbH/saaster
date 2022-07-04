@@ -13,18 +13,37 @@
     allWidgets = valueList(qWidgets.intWidgetID);
 
     //remove User Widgets that have been deactivated by Admin
-    qRemoveWidgets = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            user_id: {type: "numeric", value: session.USER_ID},
-            allWidgets: {type: "varchar", value: allWidgets, list: true, separator: ","}
-        },
-        sql = "
-            DELETE FROM user_widgets
-            WHERE intUserID = :user_id
-            AND intWidgetID NOT IN(:allWidgets)
-        "
-    );
+
+    if(listLen(allWidgets)){
+
+        qRemoveWidgets = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                user_id: {type: "numeric", value: session.USER_ID},
+                allWidgets: {type: "varchar", value: allWidgets, list: true, separator: ","}
+            },
+            sql = "
+                DELETE FROM user_widgets
+                WHERE intUserID = :user_id
+                AND intWidgetID NOT IN(:allWidgets)
+            "
+        );
+
+    }else{
+        
+        qRemoveWidgets = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                user_id: {type: "numeric", value: session.USER_ID}
+            },
+            sql = "
+                DELETE FROM user_widgets
+                WHERE intUserID = :user_id
+            "
+        );
+
+    }
+
     
     qOldUserWidgets = queryExecute(
         options = {datasource = application.datasource},
@@ -192,19 +211,25 @@
                     </cfloop>
 
                 </div>
-                <div class="row mt-4">
-                    <div class="col text-center">
-                        <form action="#application.mainURL#/dashboard-settings" method="post">
-                            <cfif session.dashboardedit eq 0>
-                                <input type="hidden" name="dashboardedit" value="1">
-                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>
-                            <cfelse>
-                                <input type="hidden" name="dashboardedit" value="0">
-                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
-                            </cfif>
-                        </form>
-                    </div>
-                </div>
+
+                <cfif qUserWidgets.recordcount>
+
+                    <div class="row mt-4">
+                        <div class="col text-center">
+                            <form action="#application.mainURL#/dashboard-settings" method="post">
+                                <cfif session.dashboardedit eq 0>
+                                    <input type="hidden" name="dashboardedit" value="1">
+                                    <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>
+                                <cfelse>
+                                    <input type="hidden" name="dashboardedit" value="0">
+                                    <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
+                                </cfif>
+                            </form>
+                        </div>
+                    </div>    
+
+                </cfif>
+
             </div>
         </div>
     </cfoutput>
