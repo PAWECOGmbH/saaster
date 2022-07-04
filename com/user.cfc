@@ -666,24 +666,33 @@ component displayname="user" output="false" {
 
         local.argsReturnValue = structNew();
 
-        queryExecute(
+        try {
 
-            options = {datasource = application.datasource, result="MailUpdate"},
-            params = {
-                intUserID: {type: "numeric", value: arguments.ConUserID},
-                email: {type: "nvarchar", value: arguments.newUserMail}
-            },
-            sql = "
+             queryExecute(
 
-                UPDATE users
-                SET strEmail = :email
-                WHERE intUserID = :intUserID
+                options = {datasource = application.datasource, result="MailUpdate"},
+                params = {
+                    intUserID: {type: "numeric", value: arguments.ConUserID},
+                    email: {type: "nvarchar", value: arguments.newUserMail}
+                },
+                sql = "
 
-            "
-        )
+                    UPDATE users
+                    SET strEmail = :email
+                    WHERE intUserID = :intUserID
 
-        local.argsReturnValue['message'] = "email updated";
-        local.argsReturnValue['success'] = true;
+                "
+            )
+
+            local.argsReturnValue['message'] = "email updated";
+            local.argsReturnValue['success'] = true;
+
+        }
+        catch(any) {
+
+            local.argsReturnValue['message'] = cfcatch.message;
+            local.argsReturnValue['success'] = false;
+        }
 
         return local.argsReturnValue;
 
