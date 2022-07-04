@@ -248,11 +248,11 @@
                                 #MailCustomer.strPhone#
                               </cfif>
                             </td>
-                            <!--- <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td> --->
+                            <!--- Reserved for later <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td> --->
                           </tr>				
                         </table>
                     
-                        <!--- <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
+                        <!--- Reserved for later <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 20px; font-family: #FontFamily#; color: ##ffffff; border:none;">
                               <span style="font-size: 21px;">#getTrans('txtNetwork')#</span><br>
