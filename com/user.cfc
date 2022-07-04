@@ -140,7 +140,7 @@ component displayname="user" output="false" {
 
 
     <!--- Update user --->
-    public struct function updateUser(required struct userStruct, required numeric userID) {
+    public struct function updateUser(required struct userStruct, required numeric userID, boolean comfirmMailChange) {
 
         <!--- Default variables --->
         local.argsReturnValue = structNew();
@@ -204,7 +204,6 @@ component displayname="user" output="false" {
         }
 
         try {
-
             <!--- update the user --->
             queryExecute(
 
@@ -214,7 +213,6 @@ component displayname="user" output="false" {
                     salutation: {type: "nvarchar", value: local.salutation},
                     first_name: {type: "nvarchar", value: local.first_name},
                     last_name: {type: "nvarchar", value: local.last_name},
-                    email: {type: "nvarchar", value: local.email},
                     phone: {type: "nvarchar", value: local.phone},
                     mobile: {type: "nvarchar", value: local.mobile},
                     language: {type: "nvarchar", value: local.language},
@@ -228,7 +226,6 @@ component displayname="user" output="false" {
                     SET strSalutation = :salutation,
                         strFirstName = :first_name,
                         strLastName = :last_name,
-                        strEmail = :email,
                         strPhone = :phone,
                         strMobile = :mobile,
                         strLanguage = :language,
@@ -240,7 +237,6 @@ component displayname="user" output="false" {
                 "
 
             )
-
 
             if (listLen(local.tenantID)) {
 
@@ -321,13 +317,23 @@ component displayname="user" output="false" {
 
             }
 
-            local.argsReturnValue['message'] = "OK";
-            local.argsReturnValue['success'] = true;
+            
+            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
+
+                updateMail = UpdateEmail(local.email, arguments.userID);
+
+                local.argsReturnValue['message'] = "OK";
+                local.argsReturnValue['success'] = true;
+
+
+            } else {
+
+                application.objGlobal.getAlert('alertOptinSent', 'info');
+            }
 
         } catch(any){
 
             local.argsReturnValue['message'] = cfcatch.message;
-
 
         }
 
@@ -590,6 +596,105 @@ component displayname="user" output="false" {
         }
 
         return local.myImgStruct;
+
+    }
+ 
+    public boolean function MailChangeConfirm(required string useremail, required numeric mailuserID){
+        
+        getTrans = application.objGlobal.getTrans;
+
+        qUsersMailCheck = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: arguments.mailuserID}
+            },
+            sql = "
+                SELECT *
+                FROM users
+                WHERE intUserID = :userID
+            "
+        )
+
+        if(qUsersMailCheck.stremail neq arguments.useremail){
+
+            newUUID = application.objGlobal.getUUID();
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    intUserID: {type: "numeric", value: arguments.MailuserID},
+                    strUUID: {type: "nvarchar", value: newUUID}
+                },
+                sql = "
+                    UPDATE users
+                    SET strUUID = :strUUID
+                    WHERE intUserID = :intUserID
+                "
+            )
+
+            MailTitle = "#getTrans('subjectConfirmEmail')#";
+            MailType = "html";
+            MailUserdata = application.objCustomer.getUserDataByID(arguments.MailuserID);
+            MailCustomID = MailUserdata.intCustomerID;
+            toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
+
+            cfsavecontent (variable = "MailContent") {
+
+                echo("#getTrans('titHello')# #toName#<br><br>
+                        #getTrans('txtComfirmEmailChange')#<br><br>
+                        <a href='#application.mainURL#/account-settings/my-profile?c=#MailUserdata.strUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
+                        <br><br>
+                        #getTrans('txtRegards')#<br>
+                        #getTrans('txtYourTeam')#<br>
+                        #application.appOwner#");
+            }
+
+            <!--- Send activation link --->
+            mail from="#application.fromEmail#" to="#qUsersMailCheck.stremail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
+                include "/includes/mail_design.cfm";
+            }
+            MailChanged = true;
+        }else{
+            MailChanged = false;
+        }
+
+        return MailChanged;
+        
+    }
+
+    public struct function UpdateEmail(required string newUserMail, required numeric ConUserID){
+
+        local.argsReturnValue = structNew();
+
+        try {
+
+             queryExecute(
+
+                options = {datasource = application.datasource, result="MailUpdate"},
+                params = {
+                    intUserID: {type: "numeric", value: arguments.ConUserID},
+                    email: {type: "nvarchar", value: arguments.newUserMail}
+                },
+                sql = "
+
+                    UPDATE users
+                    SET strEmail = :email
+                    WHERE intUserID = :intUserID
+
+                "
+            )
+
+            local.argsReturnValue['message'] = "email updated";
+            local.argsReturnValue['success'] = true;
+
+        }
+        catch(any) {
+
+            local.argsReturnValue['message'] = cfcatch.message;
+            local.argsReturnValue['success'] = false;
+        }
+
+        return local.argsReturnValue;
 
     }
 }
