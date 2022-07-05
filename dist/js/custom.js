@@ -195,15 +195,25 @@ $(document).ready(function(){
 
 	$('div.dashboard').sortable({
 		handle: '.move-widget',
-		placeholder: 'ui-state-highlight',
-		start: function(e, ui ){
-			ui.placeholder.height(ui.helper.outerHeight());
-			ui.placeholder.width(ui.helper.outerWidth());
+		tolerance: 'pointer',
+		placeholder: 'widget-placeholder',
+		start: function(event, ui ){
+			var classes = ui.item.attr('class').split(/\s+/);
+			for(var x=0; x<classes.length; x++){   
+			  	if (classes[x].indexOf("col") > -1){
+					ui.placeholder.addClass(classes[x]);
+				}
+			}
+			ui.placeholder.css({      
+				width: ui.item.innerWidth() - 30 + 1,
+				height: ui.item.innerHeight() - 15 + 1,     
+				padding: ui.item.css("padding")
+			}); 
 	   	},
 		stop: function(event, ui) {
 			$.post('/dashboard-settings', {sortorder:$(this).sortable('serialize')});
 		}
-	});
+	}).disableSelection();
 
 	$('.disable-widget').on('change', function(){
 
