@@ -197,6 +197,9 @@ div.dashboard div.card-header label.form-check{
     opacity: 0.5;
 }
 
-.ui-state-highlight{
-    background: #eee;
+.widget-placeholder{
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
 }
