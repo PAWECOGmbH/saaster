@@ -201,6 +201,13 @@ div.dashboard div.card-header label.form-check {
     background: #eee;
 }
 
+.widget-placeholder{
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
+}
+
 .trans-text pre {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
