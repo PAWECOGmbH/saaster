@@ -267,7 +267,7 @@
                                                                             <cfloop query="qLanguages">
                                                                                 <div class="mb-3">
                                                                                     <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                    <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                    <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                 </div>
                                                                             </cfloop>
                                                                         </div>
@@ -306,7 +306,7 @@
                                                                 <cfloop query="qLanguages">
                                                                     <div class="mb-3">
                                                                         <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                        <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
+                                                                        <textarea oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
                                                                     </div>
                                                                 </cfloop>
                                                             </div>
@@ -412,7 +412,7 @@
                                                                                 <cfloop query="qLanguages">
                                                                                     <div class="mb-3">
                                                                                         <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                        <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                        <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                     </div>
                                                                                 </cfloop>
                                                                             </div>
