@@ -201,7 +201,7 @@ div.dashboard div.card-header label.form-check {
     background: #eee;
 }
 
-pre {
+.trans-text pre {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
@@ -212,7 +212,7 @@ pre {
 }
 
 .trans-text {
-    width: 90%;
+    width: 750px;
 }
 
 .trans-link {
