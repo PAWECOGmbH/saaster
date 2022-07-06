@@ -163,7 +163,7 @@ td.feature {
 }
 
 .trans-btn {
-    margin-top: 30px;
+    margin-top: 27px;
 }
 
 .trans-arrow-box {
@@ -188,15 +188,33 @@ td.feature {
     margin-top: 8px;
 }
 
-div.dashboard div.card-header label.form-check{
+div.dashboard div.card-header label.form-check {
     margin: 0;
     padding: 0;
 }
 
-.widget-disabled{
+.widget-disabled {
     opacity: 0.5;
 }
 
-.ui-state-highlight{
+.ui-state-highlight {
     background: #eee;
+}
+
+pre {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.trans-container {
+    display: flex;
+    align-items: center;
+}
+
+.trans-text {
+    width: 90%;
+}
+
+.trans-link {
+    padding-left: 10px;
 }
