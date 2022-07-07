@@ -261,7 +261,7 @@ if (structKeyExists(url, "delete_language")) {
                     options = {datasource = application.datasource},
                     params = {
                         oldlng: {type: "varchar", value: qLanguage.strLanguageISO},
-                        newlng: {type: "varchar", value: application.objGlobal.getDefaultLanguage().iso}
+                        newlng: {type: "varchar", value: getDefaultLanguage().iso}
                     },
                     sql = "
                         UPDATE users

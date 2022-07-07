@@ -162,8 +162,19 @@ td.feature {
     height: 36px;
 }
 
+.widget-options{
+    position: absolute;
+    top:0;
+    right: 0;
+    padding:3px 10px;
+    background-color: #000;
+    color:#fff;
+    z-index: 100;
+    display: none;
+  }
+
 .trans-btn {
-    margin-top: 30px;
+    margin-top: 27px;
 }
 
 .trans-arrow-box {
@@ -197,12 +208,36 @@ div.dashboard div.card-header label.form-check {
     opacity: 0.5;
 }
 
-.widget-placeholder {
-    border: 1px dotted #bbb;
-    margin: 1em 1em 1em 1em;
-    height: 50px;
-    background-color: #f8f8f8;
+.ui-state-highlight {
+    background: #eee;
 }
+
+.widget-placeholder {
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
+}
+
+.trans-text pre {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.trans-container {
+    display: flex;
+    align-items: center;
+}
+
+.trans-text {
+    width: 750px;
+}
+
+.trans-link {
+    padding-left: 10px;
+}
+
+.form-select:focus-visible{color: inherit !important;}
 
 .avatar {
     object-fit: cover;

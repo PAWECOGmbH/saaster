@@ -1,5 +1,5 @@
 <cfscript>
-    
+
     <!--- Company edit --->
     if (structKeyExists(form, "edit_company_btn")) {
         param name="form.company" default="";
@@ -23,7 +23,7 @@
             getAlert('alertEnterEmail', 'warning');
             location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";
         }
-    
+
         if (len(trim(form.billing_email))) {
             checkEmail = application.objGlobal.checkEmail(form.billing_email);
             if (!checkEmail) {
@@ -31,18 +31,18 @@
                 location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";
             }
         }
-    
+
         <!--- Save the customer using a function --->
         objCustomerEdit = application.objCustomer.updateCustomer(form, form.edit_company_btn);
-    
+
         if (objCustomerEdit.success) {
-            getAlert('msgChangesSaved', 'success');        
+            getAlert('msgChangesSaved', 'success');
         } else {
             getAlert(objCustomerEdit.message, 'danger');
         }
 
-        location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";   
-    
+        location url="#application.mainURL#/sysadmin/customers/edit/#form.edit_company_btn#" addtoken="false";
+
     }
 
     if (structKeyExists(form, "edit_user")) {
@@ -107,11 +107,11 @@
         objupdateUser = application.objUser.updateUser(allData, form.user_id);
 
         if (objupdateUser.success) {
-            getAlert('msgChangesSaved', 'success');        
+            getAlert('msgChangesSaved', 'success');
         } else {
             getAlert(objCustomerEdit.message, 'danger');
         }
-        
-        location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";   
+
+        location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
     }
 </cfscript>

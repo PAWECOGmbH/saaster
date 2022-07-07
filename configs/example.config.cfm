@@ -19,6 +19,9 @@ variables.devDomain = "localhost";
 // Enter the URL of your project (incl. http:// or https://)
 variables.mainURL = "http://localhost";
 
+// Password for the Scheduler (url.pass)
+variables.schedulePassword = "saaster2022";
+
 
 
 // ####################################

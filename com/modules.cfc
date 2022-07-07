@@ -261,13 +261,13 @@ component displayname="modules" output="false" {
             // bookingLinkF: free
 
             local.objBook = new com.book();
-            local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "m", "module");
+            local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "monthly", "module");
             local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
-            local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "y", "module");
+            local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "yearly", "module");
             local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
-            local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "o", "module");
+            local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "onetime", "module");
             local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
-            local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "f", "module");
+            local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "free", "module");
             local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
 
         }

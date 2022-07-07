@@ -1,14 +1,20 @@
 
 function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 
-	if (type == 'warning') {
+	if (type == "warning") {
+		dangerMode = true;
+	} else {
+		dangerMode = false;
+	}
+
+	if (buttonOne != '' && buttonTwo != '') {
 
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "warning",
+			icon: type,
 			buttons: [buttonOne, buttonTwo],
-			dangerMode: true,
+			dangerMode: dangerMode,
 		})
 		.then((willDelete) => {
 			if (willDelete) {
@@ -21,7 +27,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "success"
+			icon: type
 		})
 
 	}
@@ -86,7 +92,6 @@ function hideResult() {
 	document.getElementById("livesearch").innerHTML="";
 	return;
 }
-
 
 
 $(document).ready(function(){
@@ -191,24 +196,25 @@ $(document).ready(function(){
 		$("#submit_button").attr("disabled", true).addClass("not-allowed");
 		return true;
 	});
-	
 
+
+	//Dashboard widget sorting
 	$('div.dashboard').sortable({
 		handle: '.move-widget',
 		tolerance: 'pointer',
 		placeholder: 'widget-placeholder',
 		start: function(event, ui ){
 			var classes = ui.item.attr('class').split(/\s+/);
-			for(var x=0; x<classes.length; x++){   
+			for(var x=0; x<classes.length; x++){
 			  	if (classes[x].indexOf("col") > -1){
 					ui.placeholder.addClass(classes[x]);
 				}
 			}
-			ui.placeholder.css({      
+			ui.placeholder.css({
 				width: ui.item.innerWidth() - 30 + 1,
-				height: ui.item.innerHeight() - 15 + 1,     
+				height: ui.item.innerHeight() - 15 + 1,
 				padding: ui.item.css("padding")
-			}); 
+			});
 	   	},
 		stop: function(event, ui) {
 			$.post('/dashboard-settings', {sortorder:$(this).sortable('serialize')});
@@ -235,5 +241,5 @@ $(document).ready(function(){
 			});
 		}
 	});
-		
+
 });

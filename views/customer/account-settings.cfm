@@ -96,7 +96,7 @@
                         </div>
                         <div class="card-body">
 
-                            <cfif objPlan.prepareForGroupID().groupID gt 0>
+                            <cfif objPlan.prepareForGroupID(customerID=session.customer_id).groupID gt 0>
 
                                 <cfif session.currentPlan.planID gt 0>
 
@@ -121,7 +121,11 @@
                                         <cfelseif session.currentPlan.status eq "canceled">
 
                                             <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                                            <cfif isDate(session.currentPlan.endDate)>
+                                                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                                            <cfelse>
+                                                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
+                                            </cfif>
                                             <dt class="col-5">#getTrans('txtInformation')#:</dt>
                                             <dd class="col-7">#getStatus.statusText#</dd>
 

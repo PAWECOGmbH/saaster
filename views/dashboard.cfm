@@ -1,7 +1,5 @@
 <cfscript>
 
-    objPrices = new com.prices();
-
     qWidgets = queryExecute(
         options = {datasource = application.datasource},
         sql = "
@@ -10,16 +8,16 @@
             WHERE widgets.blnActive = 1
         "
     );
+
     allWidgets = valueList(qWidgets.intWidgetID);
 
-    //remove User Widgets that have been deactivated by Admin
-
+    // Remove user widgets that have been deactivated by admin
     if(listLen(allWidgets)){
 
         qRemoveWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.USER_ID},
+                user_id: {type: "numeric", value: session.user_id},
                 allWidgets: {type: "varchar", value: allWidgets, list: true, separator: ","}
             },
             sql = "
@@ -30,11 +28,11 @@
         );
 
     }else{
-        
+
         qRemoveWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.USER_ID}
+                user_id: {type: "numeric", value: session.user_id}
             },
             sql = "
                 DELETE FROM user_widgets
@@ -44,11 +42,11 @@
 
     }
 
-    
+
     qOldUserWidgets = queryExecute(
         options = {datasource = application.datasource},
         params = {
-            user_id: {type: "numeric", value: session.USER_ID}
+            user_id: {type: "numeric", value: session.user_id}
         },
         sql = "
             SELECT intWidgetID
@@ -56,6 +54,7 @@
             WHERE intUserID = :user_id
         "
     );
+
     oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
     lastUserWidgetPrio = qOldUserWidgets.recordCount;
 
@@ -69,7 +68,7 @@
                 options = {datasource = application.datasource},
                 params = {
                     widget_id: {type: "numeric", value: row.intWidgetID},
-                    user_id: {type: "numeric", value: session.USER_ID},
+                    user_id: {type: "numeric", value: session.user_id},
                     sortorder: {type: "numeric", value: lastUserWidgetPrio}
                 },
                 sql = "
@@ -79,34 +78,33 @@
             )
 
         }
-        
+
     }
 
     qUserWidgets = queryExecute(
         options = {datasource = application.datasource},
         params = {
-            user_id: {type: "numeric", value: session.USER_ID}
+            user_id: {type: "numeric", value: session.user_id}
         },
         sql = "
             SELECT
-                user_widgets.intPrio, 
-                user_widgets.blnActive, 
-                widgets.intWidgetID, 
-                widgets.strWidgetName, 
-                widgets.strFilePath, 
+                user_widgets.intPrio,
+                user_widgets.blnActive,
+                widgets.intWidgetID,
+                widgets.strWidgetName,
+                widgets.strFilePath,
                 widget_ratio.intSizeRatio
-            FROM
-                widgets
-                INNER JOIN
-                user_widgets
-                ON 
-                    widgets.intWidgetID = user_widgets.intWidgetID
-                INNER JOIN
-                widget_ratio
-                ON 
-                    widgets.intRatioID = widget_ratio.intRatioID
-            WHERE intUserID = :user_id
-            ORDER BY intPrio
+
+            FROM widgets
+            INNER JOIN user_widgets ON 1=1
+            AND widgets.intWidgetID = user_widgets.intWidgetID
+
+            INNER JOIN widget_ratio ON 1=1
+            AND widgets.intRatioID = widget_ratio.intRatioID
+
+            WHERE user_widgets.intUserID = :user_id
+            ORDER BY user_widgets.intPrio
+
         "
     );
 
@@ -116,15 +114,6 @@
 
 <cfinclude template="/includes/header.cfm">
 <cfinclude template="/includes/navigation.cfm">
-
-<!--- <cfdump  var="#session.currentModules#">
-<cfdump  var="#session.currentPlan#"> --->
-
-
-
-<!--- <cfdump var="#new com.modules().getBookedModules(session.customer_id)#">
-
-<cfabort> --->
 
 <div class="page-wrapper">
     <cfoutput>
@@ -151,7 +140,7 @@
                 <div class="row row-deck row-cards dashboard">
 
                     <cfparam name="session.dashboardedit" default="0" />
-                    
+
                     <cfloop query="qUserWidgets">
 
                         <cfif session.dashboardedit eq 1>
@@ -226,7 +215,7 @@
                                 </cfif>
                             </form>
                         </div>
-                    </div>    
+                    </div>
 
                 </cfif>
 
