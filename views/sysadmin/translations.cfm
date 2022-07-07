@@ -1,7 +1,7 @@
 <cfscript>
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
-    param name="session.visSysTrans" default="0" type="numeric";
+    param name="session.visTrans" default="0" type="numeric";
     param name="session.displayLanguage" default="#application.objGlobal.getDefaultLanguage().iso#" type="string";
 
     s_badge_custom = "";
@@ -15,16 +15,16 @@
         switch(url.vis) {
             case "show":
                 session.search = "";
-                session.visSysTrans = 1; 
+                session.visTrans = 1; 
                 break;
 
             case "hide": 
                 session.search = "";
-                session.visSysTrans = 0; 
+                session.visTrans = 0; 
                 break;
 
             default: 
-                session.visSysTrans = 0; 
+                session.visTrans = 0; 
         }
     }
 
@@ -46,7 +46,7 @@
 
     // When entering a search
     if(len(trim(session.search))) {
-        session.visSysTrans = 0
+        session.visTrans = 0
 
         // Custom results
         defaultQueryCustom = "
@@ -108,12 +108,20 @@
         getModal = new com.translate();
     }
 
-    if(session.visSysTrans) {
+    if(session.visTrans) {
         qSystemResults = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT *
                 FROM system_translations
+            "
+        );
+
+        qCustomResults = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM custom_translations
             "
         );
     }
@@ -143,7 +151,7 @@
             </cfif>
             <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
                 <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
-                <div class="text-muted">This can take a couple minutes.</div>
+                <div class="text-muted">This can take a couple of minutes.</div>
             </div>
         </div>
         <div class="container-xl">
@@ -174,7 +182,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-4 trans-display-lng">
+                                    <div class="col-lg-2 trans-display-lng">
                                         <form action="#application.mainURL#/sysadmin/translations?tr=custom" method="post">
                                             <label class="form-label">Display language:</label>
                                             <div>
@@ -186,32 +194,64 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-4 text-end px-4">
+                                    <div class="col-lg-3 px-4">
                                         <a  data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary trans-btn">
                                             <i class="fas fa-plus pe-3"></i> Add custom translation
                                         </a>
                                     </div>
+                                    <div class="col-lg-3 text-end px-4">
+                                        <cfif session.visTrans>
+                                            <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=custom" class="btn btn-primary trans-btn">
+                                                <i class="fas fa-eye-slash  pe-3"></i> 
+                                                Hide translations
+                                            </a>
+                                        <cfelse>
+                                            <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=custom" class="btn btn-primary trans-btn">
+                                                <i class="fas fa-eye pe-3"></i> 
+                                                Show all translations
+                                            </a>
+                                        </cfif>
+                                    </a>
+                                </div>
                                 </div>
                                 <div class="row">
 
                                     <div class="table-responsive">
                                         <table class="table table-vcenter card-table">
-                                            <cfif len(trim(session.search))>
+                                            <cfif len(trim(session.search)) or session.visTrans>
                                                 <thead>
                                                     <tr>
                                                         <th width="30%">Variable</th>
-                                                        <th width="65%">Text #qLanguages.strLanguageEN# (default)</th>
+                                                        <th width="65%">Text (#session.displayLanguage#)</th>
                                                         <th width="5%"></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                 <cfif qCustomResults.recordCount>
                                                     <cfloop query="qCustomResults">
+                                                        <cfset transTextCustom = HTMLCodeFormat(Left(evaluate("qCustomResults.strString#ucase(session.displayLanguage)#"), 250)) >
                                                         <tr>
                                                             <td>#qCustomResults.strVariable#</td>
-                                                            <td>#evaluate("qCustomResults.strString#ucase(application.objGlobal.getDefaultLanguage().iso)#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##modal_#qCustomResults.intCustTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
-                                                            <td class="text-left"><a href="#application.mainURL#/sysadm/translations?delete_trans=#qCustomResults.intCustTransID#" title="Delete"><i class="fas fa-times text-red" style="font-size: 20px;"></i></a></td>
+                                                            <td>
+                                                                <div class="trans-container">
+                                                                    <div class="trans-text">
+                                                                        #transTextCustom#
+                                                                    </div>
+                                                                    <div>
+                                                                        <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##modal_#qCustomResults.intCustTransID#">
+                                                                            <i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-left">
+                                                                <a href="#application.mainURL#/sysadm/translations?delete_trans=#qCustomResults.intCustTransID#" title="Delete">
+                                                                    <i class="fas fa-times text-red" style="font-size: 20px;"></i>
+                                                                </a>
+                                                            </td>
                                                         </tr>
+
+
                                                         <!--- Modal for translations --->
                                                         <div id="modal_#qCustomResults.intCustTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -227,7 +267,7 @@
                                                                             <cfloop query="qLanguages">
                                                                                 <div class="mb-3">
                                                                                     <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                    <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                    <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                 </div>
                                                                             </cfloop>
                                                                         </div>
@@ -266,7 +306,7 @@
                                                                 <cfloop query="qLanguages">
                                                                     <div class="mb-3">
                                                                         <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                        <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
+                                                                        <textarea oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
                                                                     </div>
                                                                 </cfloop>
                                                             </div>
@@ -303,7 +343,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-4 trans-display-lng">
+                                    <div class="col-lg-2 trans-display-lng">
                                         <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
                                             <label class="form-label">Display language:</label>
                                             <div>
@@ -315,8 +355,8 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="col-lg-4 text-end px-4">
-                                            <cfif session.visSysTrans>
+                                    <div class="col-lg-6 text-end px-4">
+                                            <cfif session.visTrans>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
                                                     <i class="fas fa-eye-slash  pe-3"></i> 
                                                     Hide translations
@@ -331,7 +371,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <cfif len(trim(session.search)) or session.visSysTrans>
+                                    <cfif len(trim(session.search)) or session.visTrans>
                                         <cfif qSystemResults.recordCount>
                                             <div class="table-responsive">
                                                 <table class="table table-vcenter card-table">
@@ -343,9 +383,19 @@
                                                     </thead>
                                                     <tbody>
                                                         <cfloop query="qSystemResults">
+                                                            <cfset transText = HTMLCodeFormat(Left(evaluate("qSystemResults.strString#session.displayLanguage#"), 250)) >
                                                             <tr>
                                                                 <td>#qSystemResults.strVariable#</td>
-                                                                <td>#evaluate("qSystemResults.strString#session.displayLanguage#")# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a></td>
+                                                                <td>
+                                                                    <div class="trans-container">
+                                                                        <div class="trans-text">
+                                                                            #transText# 
+                                                                        </div>
+                                                                        <div>
+                                                                            <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                                             <!--- Modal for translations --->
                                                             <div id="syst_modal_#qSystemResults.intSystTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -362,7 +412,7 @@
                                                                                 <cfloop query="qLanguages">
                                                                                     <div class="mb-3">
                                                                                         <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                        <textarea class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                        <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                     </div>
                                                                                 </cfloop>
                                                                             </div>
@@ -394,8 +444,7 @@
                                 <div class="card-title">Bulk translate</div>
                                 <p>
                                     Here you can translate a complete language via the Deepl API. 
-                                    A Deepl API key is required for this. Please check if the language 
-                                    you want to translate is supported.
+                                    A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
                                 <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
                                     <div class="col-lg-5">
