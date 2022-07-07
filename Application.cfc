@@ -22,7 +22,7 @@ component displayname="Application" output="false" hint="Handle the application.
 
         application.datasource = variables.datasource;
 
-        // Dynamic values (table)
+        // Dynamic values
         application.projectName = variables.appName;
         application.appOwner = variables.appOwner;
         application.fromEmail = variables.fromEmail;
@@ -170,6 +170,8 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Is there a redirect coming in url? --->
         if (structKeyExists(url, "redirect")) {
             session.redirect = application.mainURL & "/" & url.redirect;
+        } else if (structKeyExists(url, "del_redirect")) {
+            structDelete(session, "redirect");
         }
 
         <!--- If there is no session, send to login --->

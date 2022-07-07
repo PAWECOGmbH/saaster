@@ -28,6 +28,7 @@
 
     objPlans = new com.plans(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
     objInvoice = new com.invoices();
+    objPayrexx = new com.payrexx();
 
     // As we have all the infos, save it into variables
     variables.planID = planStruct.planID;
@@ -38,158 +39,49 @@
     // Get more plan infos
     planDetails = objPlans.getPlanDetail(variables.planID);
 
-    // Is it a free plan?
-    if (planDetails.itsFree) {
-
-        // Book the free plan
-
-        insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
-
-        if (insertBooking.success) {
-
-            <!--- Save the new plan into a session --->
-            newPlan = objPlans.getCurrentPlan(session.customer_id);
-            session.currentPlan = newPlan;
-
-            <!--- Save the included modules into the module session --->
-            checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-            session.currentModules = checkModules;
-
-            getAlert('msgPlanActivated');
-            location url="#application.mainURL#/account-settings" addtoken=false;
-
-        }
-
-    }
-
     // Check customers current plan (if exists)
     currentPlan = objPlans.getCurrentPlan(session.customer_id);
 
-    // Is there already a plan?
-    if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
 
-        // Is it the same plan?
-        if (currentPlan.planID eq planDetails.planID) {
-
-            // If the plan has been expired, renew
-            if (currentPlan.status eq "expired") {
-
-                // Do nothing and let the customer book... down to the next step
-
-            } else {
-
-                // Back to dashboard
-                getAlert('msgPlanActivated');
-                location url="#application.mainURL#/account-settings" addtoken=false;
-
-            }
-
-
-        } else {
-
-            // The customer wants to make an up- or downgrade
-            // Todo: recalculate the fee
-
-            // .... then go down to the next step
-
-        }
-
-
-
-
-    }
-
-
-
-
-    // Do we have to provide any test days?
-    if (isNumeric(planDetails.testDays) and planDetails.testDays gt 0) {
-
-        // The customer can only test plans that he has not already tested.
-        qTestedPlans = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: session.customer_id},
-                planID: {type: "numeric", value: variables.planID}
-            },
-            sql = "
-                SELECT intPlanID
-                FROM customer_bookings_history
-                WHERE intCustomerID = :customerID
-                AND intPlanID = :planID
-                AND LENGTH(dtmEndTestDate) > 0
-            "
-        )
-
-        if (!qTestedPlans.recordCount) {
-
-            // Book the plan and let the customer test
-            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=true, recurring=variables.recurring);
-
-            if (insertBooking.success) {
-
-                <!--- Save the new plan into a session --->
-                session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
-
-                <!--- Save the included modules into the module session --->
-                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-                session.currentModules = checkModules;
-
-                getAlert('msgPlanActivated');
-                location url="#application.mainURL#/account-settings" addtoken=false;
-
-            }
-
-        }
-
-    }
-
-
-    // Is the call coming from payment service provider (PSP)?
+    // Is the call coming from our PSP?
     if (structKeyExists(url, "psp_response")) {
 
         thisResponse = url.psp_response;
-        thisUUID = url.uuid;
 
         switch (thisResponse) {
 
             case "success":
 
-                // Get the webhook data
-                objPayrexx = new com.payrexx();
-
-                // If we are in dev mode, get the JSON data from ftp server
+                // If we are in dev mode, call the JSON data from the given server
                 if (application.environment eq "dev") {
                     include template="/frontend/payrexx_webhook.cfm";
                 }
 
-                // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
-                loop from="1" to="10" index="i" {
-                    sleep(1000);
-                    getWebhook = objPayrexx.getWebhook(session.customer_id, thisUUID, 'confirmed');
-                    if (getWebhook.recordCount) {
-                        break;
-                    }
+                // Get the webhook data
+                getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+
+                // If there is no data from the webhook, send the customer back and try again
+                if (!getWebhook.recordCount) {
+                    getAlert('alertErrorOccured', 'warning');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
                 }
 
-                thisPaymentType = getWebhook.recordCount ? getWebhook.strPaymentBrand : "Online payment";
-                payrexxID = getWebhook.recordCount ? getWebhook.intPayrexxID : 0;
+                thisPaymentType = getWebhook.strPaymentBrand;
+                payrexxID = getWebhook.intPayrexxID;
 
                 // Make a book for the plan
                 insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
 
                 if (insertBooking.success) {
 
-                    <!--- Save the new plan into a variable --->
                     newPlan = objPlans.getCurrentPlan(session.customer_id);
                     getTime = application.getTime;
 
                     // Make invoice struct
                     invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = insertBooking.bookingID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = planDetails.planName;
-                    invoiceStruct['invoiceDate'] = now();
-                    invoiceStruct['dueDate'] = now();
                     invoiceStruct['currency'] = planDetails.currency;
                     invoiceStruct['isNet'] = planDetails.isNet;
                     invoiceStruct['vatType'] = planDetails.vatType;
@@ -238,6 +130,13 @@
                         location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
+                    // Charge the amount now (Payrexx)
+                    chargeNow = objInvoice.payInvoice(invoiceID);
+                    if (!chargeNow.success) {
+                        getAlert(chargeNow.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
                     // Insert payment
                     payment = structNew();
                     payment['invoiceID'] = invoiceID;
@@ -250,18 +149,20 @@
                     insPayment = objInvoice.insertPayment(payment);
 
                     if (!insPayment.success) {
-                        objInvoice.deleteInvoice(invoiceID);
                         getAlert(insPayment.message, 'danger');
-                    } else {
-                        // If everything went well, save plan into the session
-                        getAlert('msgThanksForPurchaseFindInvoice');
-                        session.currentPlan = newPlan;
-                        <!--- Save the included modules into the module session --->
-                        checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-                        session.currentModules = checkModules;
+                        location url="#application.mainURL#/account-settings" addtoken=false;
                     }
 
-                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                    // Save plan into the session
+                    session.currentPlan = newPlan;
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgThanksForPurchaseFindInvoice');
+                    location url="#application.mainURL#/dashboard" addtoken=false;
 
 
 
@@ -275,22 +176,284 @@
 
             case "failed":
 
-                param name="url.message" default="Error during the payment process!";
-                getAlert(url.message, 'danger');
+                getAlert('alertErrorOccured', 'warning');
                 location url="#application.mainURL#/plans" addtoken=false;
 
 
             case "cancel":
+
                 // Send the user back to the plans
                 location url="#application.mainURL#/plans" addtoken=false;
+
 
         }
 
 
 
-    }
-</cfscript>
+    // Booking process
+    } else {
 
-<!--- <cfoutput>
-<a href="#application.mainURL#/book?plan=#url.plan#&psp_response=success">OK, done!</a>
-</cfoutput> --->
+
+        upgrading = false;
+
+
+        // Is there already a plan?
+        if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0 and currentPlan.status neq "expired") {
+
+            // Is it the same plan?
+            if (currentPlan.planID eq planDetails.planID or currentPlan.status eq "free") {
+
+                // If the plan has been expired, renew
+                if (currentPlan.status eq "expired" or currentPlan.status eq "free") {
+
+                    // Do nothing and let the customer book... down to the next step
+
+                } else {
+
+                    // Back to dashboard
+                    getAlert('msgPlanActivated');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                }
+
+
+            } else {
+
+                // The customer wants to make an up- or downgrade
+
+                // Upgrade
+                if (currentPlan.priceMonthly lt planDetails.priceMonthly) {
+
+                    // Calculate the amount to be charged right now
+                    recalcStruct = objPlans.calculateUpgrade(session.customer_id, planDetails.planID, variables.recurring);
+
+                    qBookingID = queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: session.customer_id},
+                            planID: {type: "numeric", value: currentPlan.planID},
+                            dateStart: {type: "datetime", value: now()},
+                            dateEnd: {type: "datetime", value: currentPlan.endDate},
+                            recurring: {type: "varchar", value: variables.recurring},
+                            newPlanID: {type: "numeric", value: planDetails.planID}
+                        },
+                        sql = "
+
+                            UPDATE customer_bookings
+                            SET dtmStartDate = :dateStart,
+                                dtmEndDate = :dateEnd,
+                                strRecurring = :recurring,
+                                intPlanID = :newPlanID
+                            WHERE intCustomerID = :customerID
+                            AND intPlanID = :planID;
+
+                            INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, strRecurring)
+                            VALUES (:customerID, :newPlanID, :dateStart, :dateEnd, :recurring);
+
+                            SELECT intCustomerBookingID
+                            FROM customer_bookings
+                            WHERE intCustomerID = :customerID
+                            AND intPlanID = :newPlanID;
+
+                        "
+                    )
+
+
+                    // Make invoice struct
+                    invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = qBookingID.intCustomerBookingID;
+                    invoiceStruct['customerID'] = session.customer_id;
+                    invoiceStruct['title'] = getTrans('titUpgrade') & " " & planDetails.planName;
+                    invoiceStruct['currency'] = planDetails.currency;
+                    invoiceStruct['isNet'] = planDetails.isNet;
+                    invoiceStruct['vatType'] = planDetails.vatType;
+                    invoiceStruct['paymentStatusID'] = 2;
+
+                    // Make invoice and get invoice id
+                    newInvoice = objInvoice.createInvoice(invoiceStruct);
+
+                    if (newInvoice.success) {
+                        invoiceID = newInvoice.newInvoiceID;
+                    } else {
+                        getAlert(newInvoice.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // Insert a position
+                    posInfo = structNew();
+                    posInfo['invoiceID'] = invoiceID;
+                    posInfo['append'] = false;
+
+                    positionArray = arrayNew(1);
+
+                    getTime = application.getTime;
+
+                    // Main position
+                    position = structNew();
+                    position[1]['title'] = planDetails.planName & ' ' & lsDateFormat(getTime.utc2local(utcDate=now())) & ' - ' & lsDateFormat(getTime.utc2local(utcDate=currentPlan.endDate)) & ' (' & getTrans('titUpgrade') & ')';
+                    position[1]['description'] = planDetails.shortDescription;
+                    position[1]['quantity'] = 1;
+                    position[1]['discountPercent'] = 0;
+                    position[1]['vat'] = planDetails.vat;
+                    position[1]['price'] = recalcStruct.toPayNow;
+                    arrayAppend(positionArray, position[1]);
+                    posInfo['positions'] = positionArray;
+
+                    insPositions = objInvoice.insertInvoicePositions(posInfo);
+
+                    if (!insPositions.success) {
+                        objInvoice.deleteInvoice(invoiceID);
+                        getAlert(insPositions.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // Charge the amount now (Payrexx)
+                    chargeNow = objInvoice.payInvoice(invoiceID);
+                    if (!chargeNow.success) {
+                        getAlert(chargeNow.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    // If we are in dev mode, call the JSON data from the given server
+                    if (application.environment eq "dev") {
+                        include template="/frontend/payrexx_webhook.cfm";
+                    }
+
+                    // Get the webhook data
+                    getWebhook = objPayrexx.getWebhook(session.customer_id, 'confirmed');
+                    if (!getWebhook.recordCount) {
+                        getAlert('alertErrorOccured', 'warning');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+
+                    // Insert payment
+                    payment = structNew();
+                    payment['invoiceID'] = invoiceID;
+                    payment['customerID'] = session.customer_id;
+                    payment['date'] = now();
+                    payment['amount'] = objInvoice.getInvoiceData(invoiceID).total;
+                    payment['type'] = getWebhook.strPaymentBrand;
+                    payment['payrexxID'] = getWebhook.intPayrexxID;
+
+                    insPayment = objInvoice.insertPayment(payment);
+
+                    if (!insPayment.success) {
+                        getAlert(insPayment.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
+
+                    <!--- Save the new plan into a session --->
+                    session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgThanksForPurchaseFindInvoice');
+                    location url="#application.mainURL#/dashboard" addtoken=false;
+
+                    upgrading = true;
+
+
+                // Downgrade or same price
+                } else {
+
+                    insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+                    if (insertBooking.success) {
+
+                        <!--- Save the new plan into a session --->
+                        session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                        <!--- Save the included modules into the module session --->
+                        checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                        session.currentModules = checkModules;
+
+                        getAlert('msgPlanActivated');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+
+                    }
+
+
+                }
+
+
+            }
+
+
+        }
+
+
+        // Is it a free plan?
+        if (planDetails.itsFree and !upgrading) {
+
+            // Book the free plan
+
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+            if (insertBooking.success) {
+
+                <!--- Save the new plan into a session --->
+                newPlan = objPlans.getCurrentPlan(session.customer_id);
+                session.currentPlan = newPlan;
+
+                <!--- Save the included modules into the module session --->
+                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                session.currentModules = checkModules;
+
+                getAlert('msgPlanActivated');
+                location url="#application.mainURL#/account-settings" addtoken=false;
+
+            }
+
+        }
+
+
+        // Do we have to provide any test days?
+        if (isNumeric(planDetails.testDays) and planDetails.testDays gt 0 and !upgrading) {
+
+            // The customer can only test plans that he has not already tested.
+            qTestedPlans = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: session.customer_id},
+                    planID: {type: "numeric", value: variables.planID}
+                },
+                sql = "
+                    SELECT intPlanID
+                    FROM customer_bookings_history
+                    WHERE intCustomerID = :customerID
+                    AND intPlanID = :planID
+                    AND LENGTH(dtmEndTestDate) > 0
+                "
+            )
+
+            if (!qTestedPlans.recordCount) {
+
+                // Book the plan and let the customer test
+                insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=true, recurring=variables.recurring);
+
+                if (insertBooking.success) {
+
+                    <!--- Save the new plan into a session --->
+                    session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
+
+                    <!--- Save the included modules into the module session --->
+                    checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgPlanActivated');
+                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                }
+
+            }
+
+        }
+
+
+    }
+
+
+</cfscript>

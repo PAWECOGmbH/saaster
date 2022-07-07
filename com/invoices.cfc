@@ -46,6 +46,11 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
+        if (structKeyExists(invoiceData, "customerBookingID") and isNumeric(invoiceData.customerBookingID)) {
+            local.customerBookingID = invoiceData.customerBookingID;
+        } else {
+            local.customerBookingID = 0;
+        }
         local.invoiceNumber = createInvoiceNumber(local.customerID);
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
@@ -117,11 +122,12 @@ component displayname="invoices" output="false" {
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
-                    total_text: {type: "nvarchar", value: local.total_text}
+                    total_text: {type: "nvarchar", value: local.total_text},
+                    customerBookingID: {type: "numeric", value: local.customerBookingID},
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language)
+                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intCustomerBookingID)
+                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :customerBookingID)
                 "
             )
 
@@ -1245,7 +1251,49 @@ component displayname="invoices" output="false" {
     }
 
 
+    // Pay invoice over Payrexx
+    public struct function payInvoice(required numeric invoiceID) {
 
+        local.returnValue = structNew();
+        local.returnValue['success'] = false;
+        local.returnValue['message'] = "";
+
+        local.qOpenInvoices = queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+                invoiceID: {type: "numeric", value: arguments.invoiceID}
+            },
+            sql = "
+                SELECT invoices.strPrefix, invoices.intInvoiceNumber, invoices.strInvoiceTitle,
+                        invoices.decTotalPrice, invoices.intCustomerID, payrexx.intTransactionID
+                FROM invoices INNER JOIN payrexx ON invoices.intCustomerID = payrexx.intCustomerID
+                WHERE invoices.intInvoiceID = :invoiceID
+
+            "
+        )
+
+        if (local.qOpenInvoices.recordCount) {
+
+            local.paymentStruct = structNew();
+            local.paymentStruct['amount'] = local.qOpenInvoices.decTotalPrice * 100;
+            local.paymentStruct['purpose'] = local.qOpenInvoices.strInvoiceTitle;
+            local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID;
+
+            // Charge over Payrexx
+            local.charge = new com.payrexx().chargeAmount(local.paymentStruct, local.qOpenInvoices.intTransactionID);
+
+            if (local.charge.success) {
+                local.returnValue['success'] = true;
+                local.returnValue['message'] = local.charge.data;
+            }
+
+
+        }
+
+        return local.returnValue;
+
+    }
 
 
 

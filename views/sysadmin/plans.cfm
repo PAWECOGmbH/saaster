@@ -78,14 +78,9 @@
                                 <div class="col-lg-6">
                                     <h3>Plans & Prices</h3>
                                 </div>
-                                <!--- <cfif qPlanGroups.recordCount>
-                                    <div class="col-lg-6 text-end pe-3">
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##plans_preview"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
-                                    </div>
-                                </cfif> --->
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">
-                                        <a href="#application.mainURL#/plans?flush" target="_blank">Flush the cache</a>
+                                        <a href="#application.mainURL#/plans" target="_blank"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
                                     </div>
                                 </cfif>
                             </div>

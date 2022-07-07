@@ -115,7 +115,7 @@
                 // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
                 loop from="1" to="10" index="i" {
                     sleep(1000);
-                    getWebhook = objPayrexx.getWebhook(session.customer_id, thisUUID, 'confirmed');
+                    getWebhook = objPayrexx.getWebhook(session.customer_id, 'confirmed');
                     if (getWebhook.recordCount) {
                         break;
                     }
@@ -135,6 +135,7 @@
 
                     // Make invoice struct
                     invoiceStruct = structNew();
+                    invoiceStruct['customerBookingID'] = insertBooking.newID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = moduleDetails.name;
                     invoiceStruct['invoiceDate'] = now();

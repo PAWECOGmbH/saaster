@@ -13,7 +13,11 @@
 <cfinclude template="includes/head.cfm">
 <body>
 	<div class="page">
-		<cfinclude template="#thiscontent.thisPath#">
+		<cfif fileExists(thiscontent.thisPath)>
+			<cfinclude template="#thiscontent.thisPath#">
+		<cfelse>
+			<cfinclude template="/frontend/start.cfm">
+		</cfif>
 	</div>
 	<cfinclude template="includes/js.cfm">
 	<cfif structKeyExists(session, "filledData")>
