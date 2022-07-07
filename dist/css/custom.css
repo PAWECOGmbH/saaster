@@ -188,18 +188,22 @@ td.feature {
     margin-top: 8px;
 }
 
-div.dashboard div.card-header label.form-check{
+div.dashboard div.card-header label.form-check {
     margin: 0;
     padding: 0;
 }
 
-.widget-disabled{
+.widget-disabled {
     opacity: 0.5;
 }
 
-.widget-placeholder{
-	border: 1px dotted #bbb;
-	margin: 1em 1em 1em 1em;
-	height: 50px;
-    background-color:#f8f8f8;
+.widget-placeholder {
+    border: 1px dotted #bbb;
+    margin: 1em 1em 1em 1em;
+    height: 50px;
+    background-color: #f8f8f8;
+}
+
+.avatar {
+    object-fit: cover;
 }
