@@ -142,3 +142,4 @@ td.feature {
   .bottom_line textarea{
       height: 36px;
   }
+  .form-select:focus-visible{color: inherit !important;}
