@@ -236,3 +236,5 @@ div.dashboard div.card-header label.form-check {
 .trans-link {
     padding-left: 10px;
 }
+
+.form-select:focus-visible{color: inherit !important;}
