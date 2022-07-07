@@ -39,6 +39,20 @@ component displayname="customer" output="false" {
             local.newUUID = application.objGlobal.getUUID();
         }
 
+        // Delete already existing records in optin table
+        queryExecute(
+
+            options = {datasource = '#application.datasource#'},
+            params = {
+                check_mail: {type: "nvarchar", value: local.email},
+            },
+            sql = "
+                DELETE FROM optin 
+                WHERE strEmail = :check_mail;
+            "
+
+        );
+
         queryExecute(
 
             options = {datasource = '#application.datasource#', result = 'getNewID'},

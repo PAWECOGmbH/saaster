@@ -1,17 +1,20 @@
-
 a {
     outline: none;
 }
-.dropify-message > .file-icon > p {
+
+.dropify-message>.file-icon>p {
     font-size: 20px;
 }
+
 .fa_icon {
     border: 0;
     background: none;
 }
+
 .bottom_line {
     border-bottom: 1px solid black;
 }
+
 .loader {
     position: fixed;
     left: 0px;
@@ -19,18 +22,21 @@ a {
     width: 100%;
     height: 100%;
     z-index: 9999;
-    background: url('../img/loader.gif') 50% 50% no-repeat rgb(249,249,249);
+    background: url('../img/loader.gif') 50% 50% no-repeat rgb(249, 249, 249);
     opacity: .8;
 }
+
 #checkall tr:hover {
     background: #eee;
     cursor: pointer;
 }
-.plan-cards > ul {
+
+.plan-cards>ul {
     list-style-type: none;
     padding: 0;
 }
-.plan-cards > ul li::before {
+
+.plan-cards>ul li::before {
     font-family: "FontAwesome";
     content: "\f00c";
     padding: 0 10px 0 0;
@@ -42,11 +48,13 @@ a {
     font-size: 270%;
     font-weight: 600;
 }
+
 .currency {
     font-size: 60%;
 }
 
-.trumbowyg-box, .trumbowyg-editor {
+.trumbowyg-box,
+.trumbowyg-editor {
     min-height: 150px;
 }
 
@@ -64,7 +72,8 @@ table.planFeatures {
     width: 100%;
 }
 
-table.planFeatures > th, td {
+table.planFeatures>th,
+td {
     padding: 15px;
 }
 
@@ -84,34 +93,41 @@ td.category {
 td.feature {
     font-size: 14px;
 }
-.content-td-head{
-    border: 1px solid #cccccc; 
+
+.content-td-head {
+    border: 1px solid #cccccc;
     border-left: none;
     padding: 25px 15px;
 }
 
-.content-td-body{
-    border: 1px solid #cccccc; border-right: none;
+.content-td-body {
+    border: 1px solid #cccccc;
+    border-right: none;
 }
 
-.planName, .categoryName{
+.planName,
+.categoryName {
     border-bottom: 1px #000000 solid;
 }
-.categoryName{
+
+.categoryName {
     padding-top: 50px;
 }
-.allPlans{
+
+.allPlans {
     font-size: 0px
 }
 
-.categorie1 .allPlans{
+.categorie1 .allPlans {
     font-size: 0.875rem;
 }
 
-.feat{
+.feat {
     width: 30%;
 }
-.has-toggle-input label, .has-toggle-input.radio label {
+
+.has-toggle-input label,
+.has-toggle-input.radio label {
     display: block;
     float: left;
     padding: 5px 10px;
@@ -122,23 +138,90 @@ td.feature {
     line-height: normal;
     overflow: hidden;
     cursor: pointer;
-  }
-  
-  .has-toggle-input label.active {
+}
+
+.has-toggle-input label.active {
     background: #1d60b0;
     border-color: #1d60b0;
     color: white;
     font-weight: bolder;
-  }
+}
 
-  .has-toggle-input label:first-of-type { margin-left: auto; }
-  
-  .has-toggle-input label:last-of-type { }
+.has-toggle-input label:first-of-type {
+    margin-left: auto;
+}
 
-  .toggleradio{
-      width: 15%;
-      margin: 0 auto;
-  }
-  .bottom_line textarea{
-      height: 36px;
-  }
+.has-toggle-input label:last-of-type {}
+
+.toggleradio {
+    width: 15%;
+    margin: 0 auto;
+}
+
+.bottom_line textarea {
+    height: 36px;
+}
+
+.trans-btn {
+    margin-top: 27px;
+}
+
+.trans-arrow-box {
+    font-size: 32px;
+    text-align: center;
+}
+
+.trans-arrow {
+    margin-top: 20px;
+}
+
+.trans-submit-btn {
+    padding-top: 20px;
+}
+
+.invoices-sort {
+    display: flex;
+}
+
+.invoices-sort-label {
+    min-width: 100px;
+    margin-top: 8px;
+}
+
+div.dashboard div.card-header label.form-check {
+    margin: 0;
+    padding: 0;
+}
+
+.widget-disabled {
+    opacity: 0.5;
+}
+
+.ui-state-highlight {
+    background: #eee;
+}
+
+.widget-placeholder{
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
+}
+
+.trans-text pre {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.trans-container {
+    display: flex;
+    align-items: center;
+}
+
+.trans-text {
+    width: 750px;
+}
+
+.trans-link {
+    padding-left: 10px;
+}

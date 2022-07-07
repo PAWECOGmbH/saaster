@@ -1,5 +1,7 @@
 <cfscript>
 
+iniUserObj = application.objUser;
+
 <!--- User edit --->
 if (structKeyExists(form, "edit_profile_btn")) {
 
@@ -42,6 +44,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
     } else {
         form.active = 0;
     }
+    
 
     <!--- Check whether the email is valid --->
     checkEmail = application.objGlobal.checkEmail(form.email);
@@ -74,9 +77,16 @@ if (structKeyExists(form, "edit_profile_btn")) {
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
 
-    <!--- Save the user using a function --->
-    objUserEdit = application.objUser.updateUser(form, thisUserID);
+    <!--- Check if the email is changed --->
+    if(thisReferer eq 'my-profile'){
+        mailconfirm = iniUserObj.MailChangeConfirm(form.email, thisUserID);
+    }else{
+        mailconfirm = false
+    }
 
+    <!--- Save the user using a function --->
+    objUserEdit = iniUserObj.updateUser(form, thisUserID, mailconfirm);
+    
     if (objUserEdit.success) {
         getAlert('msgChangesSaved', 'success');
         if (thisReferer eq "my-profile"){

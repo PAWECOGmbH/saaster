@@ -1,5 +1,37 @@
 <cfscript>
 	qCustomer = application.objCustomer.getUserDataByID(session.user_ID);
+
+    iniUserObj = application.objUser;
+    userMail = qCustomer.strEmail;
+
+    if (structKeyExists(url, "c") and len(trim(url.c)) eq 64){
+        
+        qOptinUser = queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+            strUUID: {type: "nvarchar", value: url.c}
+            },
+            sql = "
+                SELECT *
+                FROM users
+                WHERE strUUID = :strUUID
+            "
+        )
+        cReferer = "my-profile";
+
+        local.userID = qOptinUser.intUserID
+        
+        objMailUpdate = iniUserObj.UpdateEmail(url.nMail, local.userID);
+
+        if (objMailUpdate.success) {
+            getAlert('email updated', 'success');
+        } else {
+            getAlert('No user found!', 'danger');
+        }
+
+        userMail = url.nMail;
+    }
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -95,7 +127,7 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label class="form-label">#getTrans('formEmailAddress')# *</label>
-                                            <input type="email" class="form-control" name="email" value="#qCustomer.strEmail#" maxlength="100" minlength="3" required>
+                                            <input type="email" class="form-control" name="email" value="#userMail#" maxlength="100" minlength="3" required>
                                         </div>
                                     </div>
                                         <div class="col-sm-6 col-md-4 mb-3">

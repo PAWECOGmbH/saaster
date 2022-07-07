@@ -1,203 +1,228 @@
+<cfscript>
 
-function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
+    qWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
+            FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
+            WHERE widgets.blnActive = 1
+        "
+    );
 
-	if (type == "warning") {
-		dangerMode = true;
-	} else {
-		dangerMode = false;
-	}
+    allWidgets = valueList(qWidgets.intWidgetID);
 
-	if (buttonOne != '' && buttonTwo != '') {
+    // Remove user widgets that have been deactivated by admin
+    if(listLen(allWidgets)){
 
-		swal({
-			title: textOne,
-			text: textTwo,
-			icon: type,
-			buttons: [buttonOne, buttonTwo],
-			dangerMode: dangerMode,
-		})
-		.then((willDelete) => {
-			if (willDelete) {
-				window.location.href = thisURL;
-			}
-		});
+        qRemoveWidgets = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                user_id: {type: "numeric", value: session.user_id},
+                allWidgets: {type: "varchar", value: allWidgets, list: true, separator: ","}
+            },
+            sql = "
+                DELETE FROM user_widgets
+                WHERE intUserID = :user_id
+                AND intWidgetID NOT IN(:allWidgets)
+            "
+        );
 
-	} else {
+    }else{
 
-		swal({
-			title: textOne,
-			text: textTwo,
-			icon: type
-		})
+        qRemoveWidgets = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                user_id: {type: "numeric", value: session.user_id}
+            },
+            sql = "
+                DELETE FROM user_widgets
+                WHERE intUserID = :user_id
+            "
+        );
 
-	}
-
-};
-
-// Save payment
-function sendPayment() {
-	var paymentModal = $('#dyn_modal-content');
-	var formData = $("#sendPayment").serialize();
-	var formAction = $("#sendPayment").attr("action");
-	var formReturn = $("#sendPayment").data("return");
-	$.ajax({
-		type: "POST",
-		url: formAction,
-		data: formData,
-		success: function (){
-			paymentModal.load(formReturn);
-		}
-	});
-}
-
-// Delete payment
-function deletePayment(paymentID) {
-
-	var paymentModal = $('#dyn_modal-content');
-	var formData = 'delete=' + paymentID;
-	var formAction = $("#sendPayment").attr("action");
-	var formReturn = $("#sendPayment").data("return");
-	$.ajax({
-		type: "POST",
-		url: formAction,
-		data: formData,
-		success: function(){
-			paymentModal.load(formReturn);
-		}
-	});
-}
-
-// for invoices (sysadmin)
-function showResult(str) {
-	if (str.length==0) {
-		document.getElementById("livesearch").innerHTML="";
-		return;
-	}
-	var xmlhttp=new XMLHttpRequest();
-	xmlhttp.onreadystatechange=function() {
-		if (this.readyState==4 && this.status==200) {
-			document.getElementById("livesearch").innerHTML=this.responseText;
-		}
-	}
-	xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
-	xmlhttp.send();
-}
-function intoTf(c, i) {
-	var customer_name = document.getElementById("searchfield");
-	customer_name.value = c;
-	var customer_id = document.getElementById("customer_id");
-	customer_id.value = i;
-}
-function hideResult() {
-	document.getElementById("livesearch").innerHTML="";
-	return;
-}
+    }
 
 
-$(document).ready(function(){
+    qOldUserWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+            user_id: {type: "numeric", value: session.user_id}
+        },
+        sql = "
+            SELECT intWidgetID
+            FROM user_widgets
+            WHERE intUserID = :user_id
+        "
+    );
 
-	$('#dragndrop_body').sortable({
-		handle: ".move",
-		start: function (event, ui) {
-			if (navigator.userAgent.toLowerCase().match(/firefoxy/) && ui.helper !== undefined) {
-				alert('ff');
-				ui.helper.css('position', 'absolute').css('margin-top', $(window).scrollTop());
-				//wire up event that changes the margin whenever the window scrolls.
-				$(window).bind('scroll.sortableplaylist', function () {
-					ui.helper.css('position', 'absolute').css('margin-top', $(window).scrollTop());
-				});
-			}
-		},
-		beforeStop: function (event, ui) {
-			if (navigator.userAgent.toLowerCase().match(/firefoxy/) && ui.offset !== undefined) {
-				$(window).unbind('scroll.sortableplaylist');
-				ui.helper.css('margin-top', 0);
-			}
-		},
-		helper: function (e, ui) {
-		ui.children().each(function () {
-			$(this).width($(this).width());
-		});
-		return ui;
-		},
-		scroll: true,
-		stop: function (event, ui) {
-			fnSaveSort();
-		}
-	});
+    oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
+    lastUserWidgetPrio = qOldUserWidgets.recordCount;
 
+    for(row in qWidgets){
 
-	$(".hand").mouseup(function(){
-		$(".hand").css( "cursor","grab");
-	}).mousedown(function(){
-		$(".hand").css( "cursor","grabbing");
-	});
+        if(not listFind(oldUserWidgetIDs, row.intWidgetID)){
 
+            lastUserWidgetPrio++;
 
-	$("#checkAll").change(function () {
-		$("input:checkbox").prop('checked', $(this).prop("checked"));
-	});
-	$('#checkall tr').click(function(event) {
-		if (event.target.type !== 'checkbox') {
-			$(':checkbox', this).trigger('click');
-		}
-	});
+            qInsertWidgets = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    widget_id: {type: "numeric", value: row.intWidgetID},
+                    user_id: {type: "numeric", value: session.user_id},
+                    sortorder: {type: "numeric", value: lastUserWidgetPrio}
+                },
+                sql = "
+                    INSERT INTO user_widgets (intWidgetID, intUserID, intPrio, blnActive)
+                    VALUES (:widget_id, :user_id, :sortorder, 1)
+                "
+            )
 
+        }
 
-	// load modal with dynamic content (general)
-	$('.openPopup').on('click',function(){
-		var dataURL = $(this).attr('data-href');
-		$('#dyn_modal-content').load(dataURL,function(){
-			$('#dynModal').modal('show');
-		});
-	});
+    }
 
-	// load modal with dynamic content for payments
-	$('.openPopupPayments').on('click',function(){
-		var dataURL = $(this).attr('data-href');
-		$('#dyn_modal-content').load(dataURL,function(){
-			$('#dynModalPayments').modal('show');
-			window.Litepicker && (new Litepicker({
-				element: document.getElementById('payment_date'),
-				buttonText: {
-					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
-				},
-			}));
-		});
-	});
+    qUserWidgets = queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+            user_id: {type: "numeric", value: session.user_id}
+        },
+        sql = "
+            SELECT
+                user_widgets.intPrio,
+                user_widgets.blnActive,
+                widgets.intWidgetID,
+                widgets.strWidgetName,
+                widgets.strFilePath,
+                widget_ratio.intSizeRatio
 
-	// Load trumbowyg editor
-	$('.editor').each(function(index, element){
-		var $this = $(element);
-		$this.trumbowyg({
-			btns: [
-				['viewHTML'], ['bold', 'italic'], ['link'], ['formatting'], ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'], ['unorderedList', 'orderedList']
-			]
-		});
-	});
-	$('.radio-toggle').toggleInput();
-	// Change plan prices
-	$('.form-check-label').click(function() {
-		if ($(this).hasClass("yearly")) {
-			$(".price_box.yearly").show();
-			$(".price_box.monthly").hide();
-		}
-		else if ($(this).hasClass("monthly")){
-			$(".price_box.yearly").hide();
-			$(".price_box.monthly").show();
-		}
-	});
+            FROM widgets
+            INNER JOIN user_widgets ON 1=1
+            AND widgets.intWidgetID = user_widgets.intWidgetID
 
+            INNER JOIN widget_ratio ON 1=1
+            AND widgets.intRatioID = widget_ratio.intRatioID
 
-	$('.dropify').dropify();
+            WHERE user_widgets.intUserID = :user_id
+            ORDER BY user_widgets.intPrio
 
-	$("#submit_form").submit(function () {
-		$("#submit_button").attr("disabled", true).addClass("not-allowed");
-		return true;
-	});
+        "
+    );
 
 
 
+</cfscript>
 
-});
+<cfinclude template="/includes/header.cfm">
+<cfinclude template="/includes/navigation.cfm">
+
+<div class="page-wrapper">
+    <cfoutput>
+        <div class="container-xl">
+
+            <div class="row mb-3">
+                <div class="col-md-12 col-lg-12">
+
+                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                        <h4 class="page-title">Dashboard by #getCustomerData.strCompanyName#</h4>
+
+                    </div>
+
+
+                </div>
+            </div>
+            <cfif structKeyExists(session, "alert")>
+                #session.alert#
+            </cfif>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+
+                <div class="row row-deck row-cards dashboard">
+
+                    <cfparam name="session.dashboardedit" default="0" />
+
+                    <cfloop query="qUserWidgets">
+
+                        <cfif session.dashboardedit eq 1>
+
+                            <!---============== dashboard edit mode ==============--->
+
+                            <div id="id_#qUserWidgets.intWidgetID#" class="widget col-lg-#qUserWidgets.intSizeRatio#">
+                                <div class="card">
+
+                                    <cfif session.dashboardedit eq 1>
+                                        <div class="card-header d-flex">
+                                            <div style="margin-right:15px">
+                                                <i class="fas fa-bars move-widget" style="cursor:grab;"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <span class="isvisible" style="<cfif qUserWidgets.blnActive eq 1>display:block<cfelse>display:none</cfif>">#getTrans('txtWidgetVisible')#</span>
+                                                <span class="isinvisible" style="<cfif qUserWidgets.blnActive eq 0>display:block<cfelse>display:none</cfif>">#getTrans('txtWidgetHidden')#</span>
+                                            </div>
+                                            <div style="margin-left:15px">
+                                                <label class="form-check form-switch">
+                                                    <input class="form-check-input disable-widget" type="checkbox" name="active" value="#qUserWidgets.intWidgetID#" <cfif qUserWidgets.blnActive>checked</cfif>>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </cfif>
+
+                                    <div class="card-body<cfif qUserWidgets.blnActive neq 1> widget-disabled</cfif>">
+                                        <!--- check if file exists --->
+                                        <cfif fileExists(expandPath("/#qUserWidgets.strFilePath#"))>
+                                            <cfinclude template="/#qUserWidgets.strFilePath#">
+                                        <cfelse>
+                                            #getTrans('txtCheckWidgetPath')#
+                                        </cfif>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <cfelseif qUserWidgets.blnActive eq 1>
+
+                            <!---============== dashboard default ==============--->
+
+                            <div class="col-lg-#qUserWidgets.intSizeRatio#">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!--- check if file exists --->
+                                        <cfif fileExists(expandPath("/#qUserWidgets.strFilePath#"))>
+                                            <cfinclude template="/#qUserWidgets.strFilePath#">
+                                        <cfelse>
+                                            #getTrans('txtCheckWidgetPath')#
+                                        </cfif>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </cfif>
+
+                    </cfloop>
+
+                </div>
+
+                <cfif qUserWidgets.recordcount>
+
+                    <div class="row mt-4">
+                        <div class="col text-center">
+                            <form action="#application.mainURL#/dashboard-settings" method="post">
+                                <cfif session.dashboardedit eq 0>
+                                    <input type="hidden" name="dashboardedit" value="1">
+                                    <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>
+                                <cfelse>
+                                    <input type="hidden" name="dashboardedit" value="0">
+                                    <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
+                                </cfif>
+                            </form>
+                        </div>
+                    </div>
+
+                </cfif>
+
+            </div>
+        </div>
+    </cfoutput>
+    <cfinclude template="/includes/footer.cfm">
+</div>
+
+

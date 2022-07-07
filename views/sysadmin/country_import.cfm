@@ -21,22 +21,33 @@
         "
     );
 
-    if(len(trim(session.ci_search))){
+    // Filter out unsupport search characters
+    searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    searchTerm = replace(searchTerm,' - ', "-", "all");
+
+    if(len(trim(searchTerm))){
+        if (FindNoCase("@",searchTerm)){
+            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+        }else {
+            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+        }
+
         qCountries = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT *
                 FROM countries
                 WHERE blnActive = 0
-                AND (
-                    strCountryName LIKE '%#session.ci_search#%' OR
-                    strLocale LIKE '%#session.ci_search#%' OR
-                    strISO1 LIKE '%#session.ci_search#%' OR
-                    strISO2 LIKE '%#session.ci_search#%' OR
-                    strCurrency LIKE '%#session.ci_search#%' OR
-                    strRegion LIKE '%#session.ci_search#%' OR
-                    strSubRegion LIKE '%#session.ci_search#%'
+                AND MATCH (
+                    countries.strCountryName,
+                    countries.strLocale,
+                    countries.strISO1,
+                    countries.strISO2,
+                    countries.strCurrency,
+                    countries.strRegion,
+                    countries.strSubRegion
                 )
+                #searchString#
                 ORDER BY #session.ci_sort#
             "
         );
@@ -96,9 +107,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.ci_search))>
+                                            <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #session.ci_search# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>

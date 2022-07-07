@@ -2,9 +2,7 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtIncoPayments', 'Zahlungseingang', 'Incoming payment');
+VALUES ('txtPrivacyPolicy', 'Beispiel Text', 'Example text');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtRemainingAmount', 'Restbetrag', 'Remaining amount');
-
-SET FOREIGN_KEY_CHECKS = 1;
+VALUES ('titlePrivacyPolicy', 'Datenschutzerklärung', 'Privacy policy');
