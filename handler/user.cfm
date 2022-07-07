@@ -214,10 +214,20 @@ if (structKeyExists(form, "photo_upload_btn")) {
 
     if (structKeyExists(form, "photo") and len(trim(form.photo))) {
 
+        allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
         fileStruct.fileNameOrig = form.photo;
 
+        // Check if file is a valid image
+        try {
+            ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
+        }
+        catch("java.io.IOException" error){
+            getAlert('msgFileUploadError', 'danger');
+            location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
+        }
+
         <!--- Sending the data into a function --->
-        fileUpload = application.objGlobal.uploadFile(fileStruct);
+        fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
 
         if (fileUpload.success) {
 
@@ -249,9 +259,6 @@ if (structKeyExists(form, "photo_upload_btn")) {
     }
 
     location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
-
-
-
 
 }
 

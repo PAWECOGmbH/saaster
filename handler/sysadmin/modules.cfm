@@ -53,6 +53,8 @@ if (structKeyExists(form, "edit_module")) {
 
         if (structKeyExists(form, "pic") and len(trim(form.pic))) {
 
+            allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
+
             fileStruct = structNew();
             fileStruct.filePath = expandPath('/userdata/images/modules'); //absolute path
             fileStruct.maxSize = "500"; // empty or kb
@@ -63,8 +65,17 @@ if (structKeyExists(form, "edit_module")) {
 
             fileStruct.fileNameOrig = form.pic;
 
+            // Check if file is a valid image
+            try {
+                ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
+            }
+            catch("java.io.IOException" error){
+                getAlert('msgFileUploadError', 'danger');
+                location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
+            }
+
             <!--- Sending the data into a function --->
-            fileUpload = application.objGlobal.uploadFile(fileStruct);
+            fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
 
             if (fileUpload.success) {
 

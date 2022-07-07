@@ -87,6 +87,8 @@ if (structKeyExists(form, "edit_company_btn")) {
 <!--- Logo upload --->
 if (structKeyExists(form, "logo_upload_btn")) {
 
+    allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
+
     fileStruct = structNew();
     fileStruct.filePath = expandPath('/userdata/images/logos'); //absolute path
     fileStruct.maxSize = "500"; // empty or kb
@@ -99,8 +101,17 @@ if (structKeyExists(form, "logo_upload_btn")) {
 
         fileStruct.fileNameOrig = form.logo;
 
+        // Check if file is a valid image
+        try {
+            ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
+        }
+        catch("java.io.IOException" error){
+            getAlert('msgFileUploadError', 'danger');
+            location url="#application.mainURL#/account-settings/company" addtoken="false";
+        }
+
         <!--- Sending the data into a function --->
-        fileUpload = application.objGlobal.uploadFile(fileStruct);
+        fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
 
         if (fileUpload.success) {
 
@@ -132,9 +143,6 @@ if (structKeyExists(form, "logo_upload_btn")) {
     }
 
     location url="#application.mainURL#/account-settings/company" addtoken="false";
-
-
-
 
 }
 
