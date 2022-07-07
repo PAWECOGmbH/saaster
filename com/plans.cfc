@@ -135,7 +135,8 @@ component displayname="plans" output="false" {
             options = {datasource = application.datasource},
             params = {
                 languageID: {type: "numeric", value: variables.lngID},
-                currencyID: {type: "numeric", value: variables.currencyID}
+                currencyID: {type: "numeric", value: variables.currencyID},
+                planGroupID: {type: "numeric", value: arguments.planGroupID}
             },
             sql = "
                 SELECT
@@ -284,12 +285,15 @@ component displayname="plans" output="false" {
                 LEFT JOIN currencies ON 1=1
                 AND plan_prices.intCurrencyID = currencies.intCurrencyID
 
-                WHERE !ISNULL(plans.intPlanID)
+                WHERE plans.intPlanGroupID = :planGroupID
 
                 ORDER BY plans.intPrio
 
             "
         )
+
+        //dump(local.getPlan);
+        //abort;
 
         local.arrPlan = arrayNew(1);
 
@@ -405,11 +409,11 @@ component displayname="plans" output="false" {
                 if (!len(trim(local.getPlan.strBookingLink))) {
 
                     local.objBook = new com.book();
-                    local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "m", "plan");
+                    local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "monthly", "plan");
                     local.structPlan['bookingLinkM'] = application.mainURL & "/book?plan=" & local.bookingStringM;
-                    local.bookingStringY = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "y", "plan");
+                    local.bookingStringY = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "yearly", "plan");
                     local.structPlan['bookingLinkY'] = application.mainURL & "/book?plan=" & local.bookingStringY;
-                    local.bookingStringF = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "f", "plan");
+                    local.bookingStringF = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "free", "plan");
                     local.structPlan['bookingLinkF'] = application.mainURL & "/book?plan=" & local.bookingStringF;
 
                 }
@@ -582,6 +586,7 @@ component displayname="plans" output="false" {
         local.planStruct['endTestDate'] = "";
         local.planStruct['modulesIncluded'] = "";
         local.planStruct['recurring'] = "";
+        local.planStruct['priceMonthly'] = 0;
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -589,7 +594,8 @@ component displayname="plans" output="false" {
                 options = {datasource = application.datasource},
                 params = {
                     customerID: {type: "numeric", value: arguments.customerID},
-                    languageID: {type: "numeric", value: variables.lngID}
+                    languageID: {type: "numeric", value: variables.lngID},
+                    currency: {type: "numeric", value: application.objGlobal.getDefaultCurrency().currencyID}
                 },
                 sql = "
                     SELECT  customer_bookings.intPlanID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
@@ -614,7 +620,13 @@ component displayname="plans" output="false" {
                                         ),
                                         plans.strPlanName
                                     )
-                            ) as strPlanName
+                            ) as strPlanName,
+                            (
+                                SELECT decPriceMonthly
+                                FROM plan_prices
+                                WHERE intPlanID = plans.intPlanID
+                                AND intCurrencyID = :currency
+                            ) as decPriceMonthly
                     FROM customer_bookings
                     INNER JOIN plans ON customer_bookings.intPlanID = plans.intPlanID
                     WHERE customer_bookings.intCustomerID = :customerID
@@ -629,6 +641,7 @@ component displayname="plans" output="false" {
                 local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
                 local.planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
                 local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
+                local.planStruct['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
 
                 // Is already a plan defined?
                 if (local.qCurrentPlan.intPlanID gt 0) {
@@ -641,7 +654,11 @@ component displayname="plans" output="false" {
                     // Is the plan canceled?
                     } else if (local.qCurrentPlan.strRecurring eq "canceled") {
 
-                        local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                        if (isDate(local.qCurrentPlan.dtmEndDate)) {
+                            local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                        } else {
+                            local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
+                        }
                         local.planStruct['status'] = 'canceled';
 
                     } else {
@@ -884,8 +901,93 @@ component displayname="plans" output="false" {
     }
 
 
+    public struct function calculateUpgrade(required numeric customerID, required numeric newPlanID, required string recurring) {
+
+        // Get the already paid amount
+        local.qPaidAmount = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT  customer_bookings.intPlanID, customer_bookings.dtmStartDate, customer_bookings.dtmEndDate,
+                        customer_bookings.strRecurring, customer_bookings.intPlanID,
+                        invoices.decSubTotalPrice, invoices.intVatType, invoices.strCurrency
+                FROM customer_bookings
+                INNER JOIN invoices ON 1=1
+                AND customer_bookings.intCustomerBookingID = invoices.intCustomerBookingID
+                AND customer_bookings.intCustomerID = :customerID
+                AND invoices.intPaymentStatusID = 3
+                ORDER BY invoices.intInvoiceID DESC
+                LIMIT 1
+            "
+        )
+
+        local.upgradeStruct = structNew();
+        local.paidAmount = 0;
+
+        if (local.qPaidAmount.recordCount) {
+
+            // The amount the customer has paid
+            local.paidAmount = local.qPaidAmount.decSubTotalPrice;
+
+            // Check whether its a yearly or monthly subscription
+            local.recurring = local.qPaidAmount.strRecurring;
+
+            // How many days has the current subscription?
+            if (arguments.recurring eq "yearly") {
+                local.subscriptionDays = daysInYear(local.qPaidAmount.dtmStartDate);
+            } else {
+                local.subscriptionDays = daysInMonth(local.qPaidAmount.dtmStartDate);
+            }
+
+            // How many days has the current subscription been running?
+            local.daysRunning = dateDiff("d", local.qPaidAmount.dtmStartDate, now());
+
+            // Calculate the day price of the current subscription
+            local.dayPrice = numberFormat(local.paidAmount/local.subscriptionDays, "__.__");
+
+            // The price to be charged for the old subscription
+            local.priceToChargeOld = local.daysRunning * local.dayPrice;
 
 
+            // Get the data of the new plan ////////////////////
+            local.planData = getPlanDetail(arguments.newPlanID);
+
+            // Get the price of the new plan
+            if (arguments.recurring eq "yearly") {
+                local.newPrice = local.planData.priceYearly;
+            } else {
+                local.newPrice = local.planData.priceMonthly;
+            }
+
+            // Calculate the day price of the new plan
+            local.dayPriceNew = numberFormat(local.newPrice/local.subscriptionDays, "__.__");
+
+            // How many days till the end of the period?
+            local.daysTillEnd = local.subscriptionDays - dateFormat(now(), "d");
+
+            // The price to be charged for the new subscription (now)
+            local.priceToChargeNew = local.daysTillEnd * local.dayPriceNew;
+
+            // Old and new together less amount already paid
+            local.priceToChargeTotal = local.priceToChargeOld + local.priceToChargeNew - local.paidAmount;
+
+            local.upgradeStruct['oldPlanID'] = local.qPaidAmount.intPlanID;
+            local.upgradeStruct['newPlanID'] = arguments.newPlanID;
+            local.upgradeStruct['paidAmount'] = local.paidAmount;
+            local.upgradeStruct['toPayNow'] = local.priceToChargeTotal;
+            local.upgradeStruct['currency'] = local.qPaidAmount.strCurrency;
+            local.upgradeStruct['recurring'] = arguments.recurring;
+
+
+        }
+
+
+        return local.upgradeStruct;
+
+
+    }
 
 
 }

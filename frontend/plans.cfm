@@ -1,12 +1,3 @@
-
-<cfif structKeyExists(url, "flush")>
-    <cfset cacheAction = "flush">
-<cfelse>
-    <cfset cacheAction = "cache">
-</cfif>
-
-<cfcache action="#cacheAction#" timespan="#CreateTimeSpan(0,6,0,0)#">
-
 <cfscript>
 
     objPlans = new com.plans();
@@ -59,5 +50,3 @@
     </div>
 </div>
 </cfoutput>
-
-</cfcache>

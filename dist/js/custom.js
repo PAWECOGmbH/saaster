@@ -1,14 +1,20 @@
 
 function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 
-	if (type == 'warning') {
+	if (type == "warning") {
+		dangerMode = true;
+	} else {
+		dangerMode = false;
+	}
+
+	if (buttonOne != '' && buttonTwo != '') {
 
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "warning",
+			icon: type,
 			buttons: [buttonOne, buttonTwo],
-			dangerMode: true,
+			dangerMode: dangerMode,
 		})
 		.then((willDelete) => {
 			if (willDelete) {
@@ -21,7 +27,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: "success"
+			icon: type
 		})
 
 	}
@@ -190,8 +196,50 @@ $(document).ready(function(){
 		$("#submit_button").attr("disabled", true).addClass("not-allowed");
 		return true;
 	});
-	
 
-	
-		
+
+	//Dashboard widget sorting
+	$('div.dashboard').sortable({
+		handle: '.move-widget',
+		tolerance: 'pointer',
+		placeholder: 'widget-placeholder',
+		start: function(event, ui ){
+			var classes = ui.item.attr('class').split(/\s+/);
+			for(var x=0; x<classes.length; x++){
+			  	if (classes[x].indexOf("col") > -1){
+					ui.placeholder.addClass(classes[x]);
+				}
+			}
+			ui.placeholder.css({
+				width: ui.item.innerWidth() - 30 + 1,
+				height: ui.item.innerHeight() - 15 + 1,
+				padding: ui.item.css("padding")
+			});
+	   	},
+		stop: function(event, ui) {
+			$.post('/dashboard-settings', {sortorder:$(this).sortable('serialize')});
+		}
+	}).disableSelection();
+
+	$('.disable-widget').on('change', function(){
+
+		var $isvisible = $(this).closest('div.card-header').find('span.isvisible');
+		var $isinvisible = $(this).closest('div.card-header').find('span.isinvisible');
+		var $targetWidget = $(this).closest('div.card').find('div.card-body');
+
+		if( $(this).prop('checked') ){
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:1}, function(){
+				$targetWidget.removeClass('widget-disabled');
+				$isinvisible.hide();
+				$isvisible.show();
+			});
+		}else{
+			$.post('/dashboard-settings', {action:'disable', id:$(this).val(), active:0}, function(){
+				$targetWidget.addClass('widget-disabled');
+				$isvisible.hide();
+				$isinvisible.show();
+			});
+		}
+	});
+
 });

@@ -54,8 +54,9 @@
                     <!--- Modules --->
                     <cfif isArray(session.currentModules) and arrayLen(session.currentModules)>
                         <cfoutput>
+                        <cfset moduleList = "">
                         <cfloop array="#session.currentModules#" index="i">
-                            <cfif i.moduleStatus.status neq "expired">
+                            <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and not listFind(moduleList, i.moduleID)>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                                         <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -76,6 +77,7 @@
                                     </div>
                                 </li>
                             </cfif>
+                            <cfset moduleList = listAppend(moduleList, i.moduleID)>
                         </cfloop>
                         </cfoutput>
                     </cfif>

@@ -3,11 +3,12 @@
 
 // This file is called up by Payrexx as soon as a payment has been made.
 // The webhook contains a JSON with information about the customer's payment.
-// The script saves the information from the JSON into the database.
 
+
+// For local purpose: We get the JSON file via cfhttp
 if (application.environment eq "dev") {
 
-    // For locale purpose: We get the JSON file via cfhttp
+
     cfhttp( url=variables.payrexxWebhookDev, result="httpRes", method="GET" ) {}
 
     if (isJSON(httpRes.filecontent)) {
@@ -16,6 +17,8 @@ if (application.environment eq "dev") {
         throw('No JSON file found!');
     }
 
+
+// Called by Payrexx (Webhook)
 } else {
 
     if (!isDefined(form)) {
@@ -42,6 +45,7 @@ if (structKeyExists(jsonData, "transaction")) {
     serviceProviderID = 0;
     payrexxFee = 0;
     paymentBrand = "";
+    cardNumber = "";
 
     if (structKeyExists(webhookData, "referenceId") and isNumeric(webhookData.referenceId) and webhookData.referenceId gt 0) {
         customerID = webhookData.referenceId;
@@ -82,6 +86,9 @@ if (structKeyExists(jsonData, "transaction")) {
             paymentBrand = webhookData.payment.brand;
             paymentBrand = left(uCase(paymentBrand), 1) & right(paymentBrand, len(paymentBrand) -1);
         }
+        if (structKeyExists(webhookData.payment, "cardNumber")) {
+            cardNumber = webhookData.payment.cardNumber;
+        }
     }
 
 
@@ -101,23 +108,41 @@ if (structKeyExists(jsonData, "transaction")) {
                 serviceProvider: {type: "varchar", value: serviceProvider},
                 serviceProviderID: {type: "numeric", value: serviceProviderID},
                 payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
-                paymentBrand: {type: "nvarchar", value: paymentBrand}
+                paymentBrand: {type: "nvarchar", value: paymentBrand},
+                cardNumber: {type: "varchar", value: cardNumber}
             },
             sql = "
-                UPDATE payrexx
-                SET intTransactionID = :transID,
-                    dtmTimeUTC = :dateTime,
-                    strStatus = :status,
-                    strLanguage = :language,
-                    strPSP = :serviceProvider,
-                    intPSPID = :serviceProviderID,
-                    decAmount = :paymentAmount,
-                    decPayrexxFee = :payrexxFee,
-                    strPaymentBrand = :paymentBrand
-                WHERE intCustomerID = :customerID
-                AND intGatewayID = :gatewayID
-            "
+                INSERT INTO payrexx
+                (
+                    intCustomerID,
+                    dtmTimeUTC,
+                    intGatewayID,
+                    intTransactionID,
+                    strStatus,
+                    strLanguage,
+                    strPSP,
+                    intPSPID,
+                    decAmount,
+                    decPayrexxFee,
+                    strPaymentBrand,
+                    strCardNumber
+                )
+                VALUES (
+                    :customerID,
+                    :dateTime,
+                    :gatewayID,
+                    :transID,
+                    :status,
+                    :language,
+                    :serviceProvider,
+                    :serviceProviderID,
+                    :paymentAmount,
+                    :payrexxFee,
+                    :paymentBrand,
+                    :cardNumber
+                )
 
+            "
         )
 
         writeOutput("OK");

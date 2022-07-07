@@ -12,13 +12,18 @@
     custCity = getCustomerData.strCity;
     countryID = getCustomerData.intCountryID;
     timezoneID = getCustomerData.intTimezoneID;
-    custEmail = getCustomerData.strEmail;
     custPhone = getCustomerData.strPhone;
     custWebsite = getCustomerData.strWebsite;
     custBillingAccountName = getCustomerData.strBillingAccountName;
     custBillingEmail = getCustomerData.strBillingEmail;
     custBillingAddress = getCustomerData.strBillingAddress;
     custBillingInfo = getCustomerData.strBillingInfo;
+
+    if (len(trim(getCustomerData.strEmail))) {
+        custEmail = getCustomerData.strEmail;
+    } else {
+        custEmail = session.user_email;
+    }
 
     timeZones = application.getTime.getTimezones();
 
@@ -30,6 +35,7 @@
         <div class="modal-content">
             <form action="#application.mainURL#/customer" method="post">
             <input type="hidden" name="edit_company_btn">
+            <input type="hidden" name="email" value="#custEmail#">
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-4"></div>
@@ -58,10 +64,6 @@
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formCity')# *</label>
                             <input type="text" name="city" class="form-control" value="#HTMLEditFormat(custCity)#" minlength="3" maxlength="100" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">#getTrans('formEmailAddress')#</label>
-                            <input type="email" class="form-control" name="email" value="#custEmail#" maxlength="100">
                         </div>
                         <cfif qCountries.recordCount>
                             <div class="mb-3">

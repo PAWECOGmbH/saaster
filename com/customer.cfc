@@ -108,10 +108,10 @@ component displayname="customer" output="false" {
         } else {
             local.countryID = 0;
         }
-        if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID)) {
+        if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0) {
             local.timezoneID = arguments.customerStruct.timezoneID;
         } else {
-            local.timezoneID = 0;
+            local.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
         }
         if (structKeyExists(arguments.customerStruct, "email")) {
             local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100);
@@ -331,19 +331,7 @@ component displayname="customer" output="false" {
                     defLang: {type: "varchar", value: local.defLang}
                 },
                 sql = "
-                    SELECT *,
-                        (
-                            IF
-                            (
-                                customers.intCountryID > 0,
-                                (
-                                    SELECT languages.strLanguageISO
-                                    FROM countries INNER JOIN languages ON countries.intLanguageID = languages.intLanguageID
-                                    WHERE countries.intCountryID = customers.intCountryID
-                                ),
-                                :defLang
-                            )
-                        ) as strLanguageISO
+                    SELECT *
                     FROM customers
                     WHERE intCustomerID = :customerID
                 "

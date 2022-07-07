@@ -39,6 +39,20 @@ component displayname="customer" output="false" {
             local.newUUID = application.objGlobal.getUUID();
         }
 
+        // Delete already existing records in optin table
+        queryExecute(
+
+            options = {datasource = '#application.datasource#'},
+            params = {
+                check_mail: {type: "nvarchar", value: local.email},
+            },
+            sql = "
+                DELETE FROM optin 
+                WHERE strEmail = :check_mail;
+            "
+
+        );
+
         queryExecute(
 
             options = {datasource = '#application.datasource#', result = 'getNewID'},
@@ -200,8 +214,14 @@ component displayname="customer" output="false" {
         if (!len(trim(local.getCustomerData.strCity))) {
             return false;
         }
-        if (local.getCustomerData.intCountryID eq 0 and local.getCustomerData.intTimezoneID eq 0) {
-            return false;
+        if (application.objGlobal.getCountry().recordCount) {
+            if (local.getCustomerData.intCountryID eq 0 or !len(trim(getCustomerData.intCountryID))) {
+                return false;
+            }
+        } else {
+            if (local.getCustomerData.intTimezoneID eq 0 or !len(trim(getCustomerData.intTimezoneID))) {
+                return false;
+            }
         }
 
         return true;
