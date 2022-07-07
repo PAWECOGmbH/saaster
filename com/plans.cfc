@@ -135,7 +135,8 @@ component displayname="plans" output="false" {
             options = {datasource = application.datasource},
             params = {
                 languageID: {type: "numeric", value: variables.lngID},
-                currencyID: {type: "numeric", value: variables.currencyID}
+                currencyID: {type: "numeric", value: variables.currencyID},
+                planGroupID: {type: "numeric", value: arguments.planGroupID}
             },
             sql = "
                 SELECT
@@ -284,12 +285,15 @@ component displayname="plans" output="false" {
                 LEFT JOIN currencies ON 1=1
                 AND plan_prices.intCurrencyID = currencies.intCurrencyID
 
-                WHERE !ISNULL(plans.intPlanID)
+                WHERE plans.intPlanGroupID = :planGroupID
 
                 ORDER BY plans.intPrio
 
             "
         )
+
+        //dump(local.getPlan);
+        //abort;
 
         local.arrPlan = arrayNew(1);
 
@@ -914,6 +918,8 @@ component displayname="plans" output="false" {
                 AND customer_bookings.intCustomerBookingID = invoices.intCustomerBookingID
                 AND customer_bookings.intCustomerID = :customerID
                 AND invoices.intPaymentStatusID = 3
+                ORDER BY invoices.intInvoiceID DESC
+                LIMIT 1
             "
         )
 

@@ -12,13 +12,18 @@
     custCity = getCustomerData.strCity;
     countryID = getCustomerData.intCountryID;
     timezoneID = getCustomerData.intTimezoneID;
-    custEmail = getCustomerData.strEmail;
     custPhone = getCustomerData.strPhone;
     custWebsite = getCustomerData.strWebsite;
     custBillingAccountName = getCustomerData.strBillingAccountName;
     custBillingEmail = getCustomerData.strBillingEmail;
     custBillingAddress = getCustomerData.strBillingAddress;
     custBillingInfo = getCustomerData.strBillingInfo;
+
+    if (len(trim(getCustomerData.strEmail))) {
+        custEmail = getCustomerData.strEmail;
+    } else {
+        custEmail = session.user_email;
+    }
 
     timeZones = application.getTime.getTimezones();
 

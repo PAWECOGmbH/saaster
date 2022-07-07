@@ -90,7 +90,7 @@
                             <cfset toManyUsers = false>
                             <cfset alertDowngrade = false>
                             <cfset alertUpgrade = false>
-                            <cfif len(trim(session.currentPlan.status))>
+                            <cfif len(trim(session.currentPlan.status)) and session.currentPlan.status neq "expired" and !i.onRequest>
                                 <cfif i.priceMonthly lt session.currentPlan.priceMonthly>
                                     <!--- Check whether the customer has registered more users than the new plan provides --->
                                     <cfif (i.maxUsers gt 0) and application.objUser.getAllUsers(session.customer_id).recordCount gt i.maxUsers>
@@ -119,9 +119,9 @@
                                     <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
 
                                         <cfif alertDowngrade>
-                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkF#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkF#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
                                         <cfelse>
-                                            <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                            <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </cfif>
 
                                     </div>
@@ -132,11 +132,11 @@
 
                                         <!--- Button monthly --->
                                         <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkM#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkM#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
                                         </div>
                                         <!--- Button yearly --->
                                         <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                            <a class="btn w-100" onclick="sweetAlert('warning', '#i.bookingLinkY#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkY#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
                                         </div>
 
                                     <cfelseif alertUpgrade>
@@ -153,23 +153,23 @@
                                         <cfif amountToPayM gte 0>
                                             <!--- Button monthly --->
                                             <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                                <a class="btn w-100" onclick="sweetAlert('info', '#i.bookingLinkM#', '#getTrans('titUpgrade')#', '#textToPayTodayM#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
+                                                <a class="btn w-100 plan" onclick="sweetAlert('info', '#i.bookingLinkM#', '#getTrans('titUpgrade')#', '#textToPayTodayM#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
                                             </div>
                                         <cfelse>
                                             <!--- Button monthly --->
                                             <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                                <a class="btn w-100" onclick="sweetAlert('warning', '', '#getTrans('titUpgrade')#', '#getTrans('txtYouCantUpgrade')#', '', '')">#getTrans('btnActivate')#</a>
+                                                <a class="btn w-100 plan" onclick="sweetAlert('warning', '', '#getTrans('titUpgrade')#', '#getTrans('txtYouCantUpgrade')#', '', '')">#getTrans('btnActivate')#</a>
                                             </div>
                                         </cfif>
                                         <cfif amountToPayY gte 0>
                                             <!--- Button yearly --->
                                             <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                                <a class="btn w-100" onclick="sweetAlert('info', '#i.bookingLinkY#', '#getTrans('titUpgrade')#', '#textToPayTodayY#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
+                                                <a class="btn w-100 plan" onclick="sweetAlert('info', '#i.bookingLinkY#', '#getTrans('titUpgrade')#', '#textToPayTodayY#', '#getTrans('btnWantWait')#', '#getTrans('btnYesUpgrade')#')">#getTrans('btnActivate')#</a>
                                             </div>
                                         <cfelse>
                                             <!--- Button yearly --->
                                             <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                                <a class="btn w-100" onclick="sweetAlert('warning', '', '#getTrans('titUpgrade')#', '#getTrans('txtYouCantUpgrade')#', '', '')">#getTrans('btnActivate')#</a>
+                                                <a class="btn w-100 plan" onclick="sweetAlert('warning', '', '#getTrans('titUpgrade')#', '#getTrans('txtYouCantUpgrade')#', '', '')">#getTrans('btnActivate')#</a>
                                             </div>
                                         </cfif>
 
@@ -177,11 +177,11 @@
 
                                         <!--- Button monthly --->
                                         <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                            <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </div>
                                         <!--- Button yearly --->
                                         <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                            <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </div>
 
                                     </cfif>
@@ -200,7 +200,7 @@
                             </cfif>
 
                             <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register?redirect=plans" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                                <a href="#application.mainURL#/register?redirect=plans" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                         </cfif>
