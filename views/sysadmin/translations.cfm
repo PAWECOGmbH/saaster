@@ -2,7 +2,7 @@
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
     param name="session.visTrans" default="0" type="numeric";
-    param name="session.displayLanguage" default="#application.objGlobal.getDefaultLanguage().iso#" type="string";
+    param name="session.displayLanguage" default="#getDefaultLanguage().iso#" type="string";
 
     s_badge_custom = "";
     s_badge_system = "";
@@ -15,16 +15,16 @@
         switch(url.vis) {
             case "show":
                 session.search = "";
-                session.visTrans = 1; 
+                session.visTrans = 1;
                 break;
 
-            case "hide": 
+            case "hide":
                 session.search = "";
-                session.visTrans = 0; 
+                session.visTrans = 0;
                 break;
 
-            default: 
-                session.visTrans = 0; 
+            default:
+                session.visTrans = 0;
         }
     }
 
@@ -202,12 +202,12 @@
                                     <div class="col-lg-3 text-end px-4">
                                         <cfif session.visTrans>
                                             <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=custom" class="btn btn-primary trans-btn">
-                                                <i class="fas fa-eye-slash  pe-3"></i> 
+                                                <i class="fas fa-eye-slash  pe-3"></i>
                                                 Hide translations
                                             </a>
                                         <cfelse>
                                             <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=custom" class="btn btn-primary trans-btn">
-                                                <i class="fas fa-eye pe-3"></i> 
+                                                <i class="fas fa-eye pe-3"></i>
                                                 Show all translations
                                             </a>
                                         </cfif>
@@ -358,12 +358,12 @@
                                     <div class="col-lg-6 text-end px-4">
                                             <cfif session.visTrans>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
-                                                    <i class="fas fa-eye-slash  pe-3"></i> 
+                                                    <i class="fas fa-eye-slash  pe-3"></i>
                                                     Hide translations
                                                 </a>
                                             <cfelse>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=system" class="btn btn-primary trans-btn">
-                                                    <i class="fas fa-eye pe-3"></i> 
+                                                    <i class="fas fa-eye pe-3"></i>
                                                     Show all translations
                                                 </a>
                                             </cfif>
@@ -389,7 +389,7 @@
                                                                 <td>
                                                                     <div class="trans-container">
                                                                         <div class="trans-text">
-                                                                            #transText# 
+                                                                            #transText#
                                                                         </div>
                                                                         <div>
                                                                             <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a>
@@ -438,12 +438,12 @@
                             </div>
 
                         </div>
-                        
+
                         <div id="bulk" class="card tab-pane show <cfif url.tr eq "bulk">active</cfif>">
                             <div class="card-body">
                                 <div class="card-title">Bulk translate</div>
                                 <p>
-                                    Here you can translate a complete language via the Deepl API. 
+                                    Here you can translate a complete language via the Deepl API.
                                     A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
                                 <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
@@ -469,7 +469,7 @@
                                         </select>
                                     </div>
                                     <br>
-                                    
+
                                     <label for="apiKey">API Key:</label>
                                     <div class="col-lg-8">
                                         <input type="text" name="apiKey" class="form-control" minlength="10" maxlength="100" placeholder="Please enter a valid API key..." required="">
