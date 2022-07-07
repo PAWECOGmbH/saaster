@@ -496,7 +496,15 @@ component displayname="globalFunctions" {
 
 
     <!--- Uploading a file such as a pdf or an image --->
-    public struct function uploadFile(required struct uploadArgs) {
+    public struct function uploadFile(required struct uploadArgs, required array allowedFileTypes) {
+
+        local.allowedFileTypesList;
+        local.acceptFileTypesList;
+
+        cfloop(array=arguments.allowedFileTypes item="i") {
+            local.acceptFileTypesList = local.acceptFileTypesList & "image/" & i & ",";
+            local.allowedFileTypesList = local.allowedFileTypesList & i & ",";
+        }
 
         <!--- Default variables --->
         local.argsReturnValue = structNew();
@@ -573,8 +581,14 @@ component displayname="globalFunctions" {
                 uploadTheFile = FileUpload(
                     fileField = arguments.uploadArgs.fileNameOrig,
                     destination = arguments.uploadArgs.filepath,
-                    nameConflict = local.nameConflict
+                    nameConflict = local.nameConflict,
+                    accept = local.acceptFileTypesList
                 );
+                // Second check of uploaded file. Mimetype could be spoofed.
+                if (not listFindNoCase(local.allowedFileTypesList, uploadTheFile.serverFileExt)) {
+                    local.argsReturnValue['message'] = 'msgFileUploadError';
+                    return local.argsReturnValue;
+                }
             } catch (any e) {
                 local.argsReturnValue['message'] = e.message;
                 return local.argsReturnValue;
