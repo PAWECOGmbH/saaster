@@ -86,6 +86,7 @@
                     invoiceStruct['isNet'] = planDetails.isNet;
                     invoiceStruct['vatType'] = planDetails.vatType;
                     invoiceStruct['paymentStatusID'] = 2;
+                    invoiceStruct['language'] = session.lng;
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
@@ -268,6 +269,7 @@
                     invoiceStruct['isNet'] = planDetails.isNet;
                     invoiceStruct['vatType'] = planDetails.vatType;
                     invoiceStruct['paymentStatusID'] = 2;
+                    invoiceStruct['language'] = session.lng;
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
