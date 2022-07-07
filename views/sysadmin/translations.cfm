@@ -151,7 +151,7 @@
             </cfif>
             <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
                 <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
-                <div class="text-muted">This can take a couple minutes.</div>
+                <div class="text-muted">This can take a couple of minutes.</div>
             </div>
         </div>
         <div class="container-xl">
@@ -444,8 +444,7 @@
                                 <div class="card-title">Bulk translate</div>
                                 <p>
                                     Here you can translate a complete language via the Deepl API. 
-                                    A Deepl API key is required for this. Please check if the language 
-                                    you want to translate is supported.
+                                    A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
                                 <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
                                     <div class="col-lg-5">
