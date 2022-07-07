@@ -92,15 +92,18 @@ component displayname="invoices" output="false" {
         } else {
             local.vatType = application.objGlobal.getSetting('settingStandardVatType');
         }
-
-        local.customerLng = application.objGlobal.getDefaultLanguage().iso;
+        if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
+            local.language = invoiceData.language;
+        } else {
+            local.language = application.objGlobal.getDefaultLanguage().iso;
+        }
 
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.customerLng);
+            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.customerLng);
+            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -118,7 +121,7 @@ component displayname="invoices" output="false" {
                     invoiceDate: {type: "datetime", value: local.invoiceDate},
                     dueDate: {type: "datetime", value: local.dueDate},
                     currency: {type: "varchar", value: local.currency},
-                    language: {type: "nvarchar", value: local.customerLng},
+                    language: {type: "nvarchar", value: local.language},
                     isNet: {type: "boolean", value: local.isNet},
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},

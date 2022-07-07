@@ -98,7 +98,6 @@
     if (structKeyExists(url, "psp_response")) {
 
         thisResponse = url.psp_response;
-        thisUUID = url.uuid;
 
         switch (thisResponse) {
 
@@ -135,7 +134,7 @@
 
                     // Make invoice struct
                     invoiceStruct = structNew();
-                    invoiceStruct['customerBookingID'] = insertBooking.newID;
+                    invoiceStruct['customerBookingID'] = insertBooking.bookingID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = moduleDetails.name;
                     invoiceStruct['invoiceDate'] = now();
@@ -144,6 +143,7 @@
                     invoiceStruct['isNet'] = moduleDetails.isNet;
                     invoiceStruct['vatType'] = moduleDetails.vat_type;
                     invoiceStruct['paymentStatusID'] = 2;
+                    invoiceStruct['language'] = session.lng;
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
