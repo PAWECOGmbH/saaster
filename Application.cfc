@@ -164,7 +164,7 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Global variables --->
         getTrans = application.objGlobal.getTrans;
         getAlert = application.objGlobal.getAlert;
-        getLanguage = application.objGlobal.getDefaultLanguage();
+        getDefaultLanguage = application.objGlobal.getDefaultLanguage;
         getAnyLanguage = application.objGlobal.getAnyLanguage;
 
         <!--- Is there a redirect coming in url? --->
