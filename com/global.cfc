@@ -495,14 +495,38 @@ component displayname="globalFunctions" {
     }
 
 
+    // Build the needed lists for the upload form
+    public struct function buildAllowedFileLists(required array imageFileTypes) {
+        local.allowedFileTypesList;
+        local.acceptFileTypesList;
+    
+        cfloop(array=arguments.imageFileTypes item="i" index="index") {
+            if (index lt ArrayLen(arguments.imageFileTypes))
+            {
+                local.acceptFileTypesList =  local.acceptFileTypesList & '"' & i & '"' & ", ";
+                local.allowedFileTypesList =  local.allowedFileTypesList & "." & i & ", ";
+            }else {
+                local.acceptFileTypesList =  local.acceptFileTypesList & '"' & i & '"';
+                local.allowedFileTypesList =  local.allowedFileTypesList & "." & i;
+            }
+        }
+
+        local.output = {
+            "allowedFileTypesList": local.allowedFileTypesList, 
+            "acceptFileTypesList": local.acceptFileTypesList
+        }
+
+        return local.output
+    }
+
+
     <!--- Uploading a file such as a pdf or an image --->
     public struct function uploadFile(required struct uploadArgs, required array allowedFileTypes) {
 
         local.allowedFileTypesList;
         local.acceptFileTypesList;
 
-        cfloop(array=arguments.allowedFileTypes item="i") {
-            local.acceptFileTypesList = local.acceptFileTypesList & "image/" & i & ",";
+        cfloop(array=arguments.allowedFileTypes item="i" index="index") {
             local.allowedFileTypesList = local.allowedFileTypesList & i & ",";
         }
 
@@ -581,8 +605,8 @@ component displayname="globalFunctions" {
                 uploadTheFile = FileUpload(
                     fileField = arguments.uploadArgs.fileNameOrig,
                     destination = arguments.uploadArgs.filepath,
-                    nameConflict = local.nameConflict,
-                    accept = local.acceptFileTypesList
+                    nameConflict = local.nameConflict/* ,
+                    accept = local.acceptFileTypesList */
                 );
                 // Second check of uploaded file. Mimetype could be spoofed.
                 if (not listFindNoCase(local.allowedFileTypesList, uploadTheFile.serverFileExt)) {

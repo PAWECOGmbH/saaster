@@ -95,15 +95,13 @@ if (structKeyExists(form, "edit_company_btn")) {
 <!--- Logo upload --->
 if (structKeyExists(form, "logo_upload_btn")) {
 
-    allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
-
     fileStruct = structNew();
     fileStruct.filePath = expandPath('/userdata/images/logos'); //absolute path
     fileStruct.maxSize = "500"; // empty or kb
     fileStruct.maxWidth = "1000"; // empty or pixels
     fileStruct.maxHeight = ""; // empty or pixels
     fileStruct.makeUnique = true; // true or false (default true)
-    fileStruct.fileName = ""; // empty or any name; ex. uuid (without extension)
+    fileStruct.fileName = lcase(replace(createUUID(),"-", "", "all")); // empty or any name; ex. uuid (without extension)
 
     if (structKeyExists(form, "logo") and len(trim(form.logo))) {
 
@@ -113,13 +111,17 @@ if (structKeyExists(form, "logo_upload_btn")) {
         try {
             ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
         }
-        catch("java.io.IOException" error){
-            getAlert('msgFileUploadError', 'danger');
+        catch("java.io.IOException" e){
+            getAlert( "msgFileUploadError", 'danger');
             location url="#application.mainURL#/account-settings/company" addtoken="false";
+        }
+        catch(any e){
+            getAlert( e.message, 'danger');
+            location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
         <!--- Sending the data into a function --->
-        fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
+        fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
         if (fileUpload.success) {
 

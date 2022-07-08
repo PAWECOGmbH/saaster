@@ -210,24 +210,27 @@ if (structKeyExists(form, "photo_upload_btn")) {
     fileStruct.maxWidth = "500"; // empty or pixels
     fileStruct.maxHeight = ""; // empty or pixels
     fileStruct.makeUnique = true; // true or false (default true)
-    fileStruct.fileName = ""; // empty or any name; ex. uuid (without extension)
+    fileStruct.fileName = lcase(replace(createUUID(),"-", "", "all")); // empty or any name; ex. uuid (without extension)
 
     if (structKeyExists(form, "photo") and len(trim(form.photo))) {
 
-        allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
         fileStruct.fileNameOrig = form.photo;
 
         // Check if file is a valid image
         try {
             ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
         }
-        catch("java.io.IOException" error){
-            getAlert('msgFileUploadError', 'danger');
+        catch("java.io.IOException" e){
+            getAlert( "msgFileUploadError", 'danger');
+            location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
+        } 
+        catch(any e){
+            getAlert( e.message, 'danger');
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
         <!--- Sending the data into a function --->
-        fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
+        fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
         if (fileUpload.success) {
 

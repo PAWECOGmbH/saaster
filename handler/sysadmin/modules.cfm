@@ -53,15 +53,13 @@ if (structKeyExists(form, "edit_module")) {
 
         if (structKeyExists(form, "pic") and len(trim(form.pic))) {
 
-            allowedFileTypes = ["jpeg","png","jpg","gif","bmp"];
-
             fileStruct = structNew();
             fileStruct.filePath = expandPath('/userdata/images/modules'); //absolute path
             fileStruct.maxSize = "500"; // empty or kb
             fileStruct.maxWidth = "1000"; // empty or pixels
             fileStruct.maxHeight = "1000"; // empty or pixels
             fileStruct.makeUnique = true; // true or false (default true)
-            fileStruct.fileName = ""; // empty or any name; ex. uuid (without extension)
+            fileStruct.fileName = lcase(replace(createUUID(),"-", "", "all")); // empty or any name; ex. uuid (without extension)
 
             fileStruct.fileNameOrig = form.pic;
 
@@ -69,13 +67,17 @@ if (structKeyExists(form, "edit_module")) {
             try {
                 ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
             }
-            catch("java.io.IOException" error){
-                getAlert('msgFileUploadError', 'danger');
+            catch("java.io.IOException" e){
+                getAlert( "msgFileUploadError", 'danger');
                 location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
+            }
+            catch(any e){
+                getAlert( e.message, 'danger');
+                location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
             }
 
             <!--- Sending the data into a function --->
-            fileUpload = application.objGlobal.uploadFile(fileStruct, allowedFileTypes);
+            fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
             if (fileUpload.success) {
 
