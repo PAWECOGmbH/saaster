@@ -47,7 +47,7 @@ component displayname="customer" output="false" {
                 check_mail: {type: "nvarchar", value: local.email},
             },
             sql = "
-                DELETE FROM optin 
+                DELETE FROM optin
                 WHERE strEmail = :check_mail;
             "
 
@@ -156,18 +156,19 @@ component displayname="customer" output="false" {
                     language: {type: "varchar", value: local.language},
                     hash: {type: "nvarchar", value: local.hash},
                     salt: {type: "nvarchar", value: local.salt},
-                    uuid: {type: "nvarchar", value: local.uuid}
+                    uuid: {type: "nvarchar", value: local.uuid},
+                    dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
 
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail)
-                    VALUES (0, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, :company_name,
+                    VALUES (0, :dateNow, :dateNow, 1, :company_name,
                         (SELECT intCountryID FROM countries WHERE blnDefault = 1), CONCAT(:first_name, ' ', :last_name), :email);
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
                     INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-                    VALUES (@last_inserted_customer_id, UTC_TIMESTAMP(), UTC_TIMESTAMP(), :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
+                    VALUES (@last_inserted_customer_id, :dateNow, :dateNow, :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
                         IF(
                             (
                                 SELECT COUNT(intCustomerID)

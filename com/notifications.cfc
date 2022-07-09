@@ -47,11 +47,12 @@ component displayname="notifications" output="false" {
                     userID: {type: "numeric", value: local.userID},
                     title: {type: "nvarchar", value: local.title},
                     description: {type: "nvarchar", value: local.description},
-                    link: {type: "nvarchar", value: local.link}
+                    link: {type: "nvarchar", value: local.link},
+                    dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
                     INSERT INTO notifications (intCustomerID, intUserID, dtmCreated, strTitle, strDescription, strLink, dtmRead)
-                    VALUES (:customerID, :userID, UTC_TIMESTAMP(), :title, :description, :link, NULL)
+                    VALUES (:customerID, :userID, :dateNow, :title, :description, :link, NULL)
                 "
             )
 

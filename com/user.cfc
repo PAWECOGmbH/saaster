@@ -57,11 +57,12 @@ component displayname="user" output="false" {
 
                         options = {datasource = application.datasource},
                         params = {
-                            thisUserID: {type: "nvarchar", value: local.returnStruct.user_id}
+                            thisUserID: {type: "nvarchar", value: local.returnStruct.user_id},
+                            dateNow: {type: "datetime", value: now()}
                         },
                         sql = "
                             UPDATE users
-                            SET dtmLastLogin = UTC_TIMESTAMP(),
+                            SET dtmLastLogin = :dateNow,
                                 strUUID = ''
                             WHERE intUserID = :thisUserID
                         "
@@ -317,7 +318,7 @@ component displayname="user" output="false" {
 
             }
 
-            
+
             if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
 
                 updateMail = UpdateEmail(local.email, arguments.userID);
@@ -423,11 +424,12 @@ component displayname="user" output="false" {
                     superadmin: {type: "boolean", value: local.superadmin},
                     active: {type: "boolean", value: local.active},
                     language: {type: "varchar", value: local.language},
-                    newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID}
+                    newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
+                    dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
                     INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, strUUID)
-                    VALUES (:customerID, UTC_TIMESTAMP(), UTC_TIMESTAMP(), :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
+                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
                 "
 
             )
@@ -598,9 +600,9 @@ component displayname="user" output="false" {
         return local.myImgStruct;
 
     }
- 
+
     public boolean function MailChangeConfirm(required string useremail, required numeric mailuserID){
-        
+
         getTrans = application.objGlobal.getTrans;
 
         qUsersMailCheck = queryExecute(
@@ -659,7 +661,7 @@ component displayname="user" output="false" {
         }
 
         return MailChanged;
-        
+
     }
 
     public struct function UpdateEmail(required string newUserMail, required numeric ConUserID){

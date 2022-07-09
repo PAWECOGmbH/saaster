@@ -44,6 +44,7 @@ variables.requesttimeout = 60;
 variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
 variables.documentsFileTypes = ["pdf"];
 
+
 // ####################################
 //  OPERATOR SETTINGS
 // ####################################
