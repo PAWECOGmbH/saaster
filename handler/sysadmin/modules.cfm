@@ -59,12 +59,25 @@ if (structKeyExists(form, "edit_module")) {
             fileStruct.maxWidth = "1000"; // empty or pixels
             fileStruct.maxHeight = "1000"; // empty or pixels
             fileStruct.makeUnique = true; // true or false (default true)
-            fileStruct.fileName = ""; // empty or any name; ex. uuid (without extension)
+            fileStruct.fileName = lcase(replace(createUUID(),"-", "", "all")); // empty or any name; ex. uuid (without extension)
 
             fileStruct.fileNameOrig = form.pic;
 
+            // Check if file is a valid image
+            try {
+                ImageRead(ExpandPath("#fileStruct.fileNameOrig#"));
+            }
+            catch("java.io.IOException" e){
+                getAlert( "msgFileUploadError", 'danger');
+                location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
+            }
+            catch(any e){
+                getAlert( e.message, 'danger');
+                location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
+            }
+
             <!--- Sending the data into a function --->
-            fileUpload = application.objGlobal.uploadFile(fileStruct);
+            fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
             if (fileUpload.success) {
 

@@ -212,7 +212,7 @@ div.dashboard div.card-header label.form-check {
     background: #eee;
 }
 
-.widget-placeholder{
+.widget-placeholder {
 	border: 1px dotted #bbb;
 	margin: 1em 1em 1em 1em;
 	height: 50px;
@@ -238,3 +238,7 @@ div.dashboard div.card-header label.form-check {
 }
 
 .form-select:focus-visible{color: inherit !important;}
+
+.avatar {
+    object-fit: cover;
+}

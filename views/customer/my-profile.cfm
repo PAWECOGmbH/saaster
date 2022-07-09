@@ -32,6 +32,11 @@
 
         userMail = url.nMail;
     }
+
+    fileList = application.objGlobal.buildAllowedFileLists(variables.imageFileTypes);
+    
+    allowedFileTypesList = fileList.allowedFileTypesList;
+    acceptFileTypesList = fileList.acceptFileTypesList; 
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -85,7 +90,7 @@
                                         </div>
                                     <cfelse>
                                         <div class="mt-3">
-                                            <input name="photo" required type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
+                                            <input name="photo" required type="file" accept="#allowedFileTypesList#" class="dropify" data-height="100" data-allowed-file-extensions='[#acceptFileTypesList#]' data-max-file-size="3M" />
                                         </div>
                                         <div class="mt-3">
                                             <button name="photo_upload_btn" class="btn btn-primary btn-block">#getTrans('btnUpload')#</button>

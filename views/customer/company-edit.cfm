@@ -81,7 +81,10 @@
         custBillingInfo = session.billing_info
     }
 
-
+    fileList = application.objGlobal.buildAllowedFileLists(variables.imageFileTypes);
+    
+    allowedFileTypesList = fileList.allowedFileTypesList;
+    acceptFileTypesList = fileList.acceptFileTypesList; 
 
 </cfscript>
 
@@ -126,7 +129,7 @@
                                     </div>
                                     <cfelse>
                                     <div class="mt-1">
-                                        <input name="logo" required type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
+                                        <input name="logo" required type="file" accept="#allowedFileTypesList#" class="dropify" data-height="100" data-allowed-file-extensions='[#acceptFileTypesList#]' data-max-file-size="3M" />
                                     </div>
                                     <div class="d-flex flex-row flex-start">
                                         <div class="mt-3">

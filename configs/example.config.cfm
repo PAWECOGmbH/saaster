@@ -40,7 +40,9 @@ variables.pdf_type = "classic";
 // RequestTimeout in seconds
 variables.requesttimeout = 60;
 
-
+// Set allowed image file types
+variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
+variables.documentsFileTypes = ["pdf"];
 
 // ####################################
 //  OPERATOR SETTINGS

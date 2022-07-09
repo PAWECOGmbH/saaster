@@ -1,3 +1,9 @@
+<cfscript>
+    fileList = application.objGlobal.buildAllowedFileLists(variables.imageFileTypes);
+    
+    allowedFileTypesList = fileList.allowedFileTypesList;
+    acceptFileTypesList = fileList.acceptFileTypesList; 
+</cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
 <input type="hidden" name="edit_module" value="#qModule.intModuleID#">
@@ -71,7 +77,7 @@
                                 <p><a href="#application.mainURL#/sysadm/modules?delete_pic=#qModule.intModuleID#">Delete picture</a></p>
                             </div>
                         <cfelse>
-                            <input name="pic" type="file" accept=".jpg, .jpeg, .png, .svg, .bmp" class="dropify" data-height="100" data-allowed-file-extensions='["jpg", "jpeg", "png", "svg", "bmp"]' data-max-file-size="3M" />
+                            <input name="pic" type="file" accept="#allowedFileTypesList#" class="dropify" data-height="100" data-allowed-file-extensions='[#acceptFileTypesList#]' data-max-file-size="3M" />
                             <small class="form-hint">
                                 Use a square for the best view
                             </small>
