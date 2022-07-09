@@ -86,7 +86,7 @@
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
                                                                     <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
                                                                 </tr>
-                                                            <cfelse>
+                                                            <cfelseif isDate(module.moduleStatus.endTestDate)>
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
                                                                     <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endTestDate))#</td>

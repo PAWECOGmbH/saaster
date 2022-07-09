@@ -834,12 +834,12 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Get customers invoices --->
-    public struct function getInvoices(required numeric customerID, numeric start, numeric amount) {
+    public struct function getInvoices(required numeric customerID, numeric start, numeric count) {
 
         local.queryLimit;
 
-        if (structKeyExists(arguments, "start") and structKeyExists(arguments, "amount")){
-            local.queryLimit = "LIMIT #arguments.start#, #arguments.amount#"
+        if (structKeyExists(arguments, "start") and structKeyExists(arguments, "count")){
+            local.queryLimit = "LIMIT #arguments.start#, #arguments.count#"
         }
 
         local.qTotalCount = queryExecute(
@@ -872,6 +872,7 @@ component displayname="invoices" output="false" {
                         invoices.dtmDueDate as invoiceDueDate,
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
+                        invoices.strLanguageISO as invoiceLanguage,
                         (
                             SELECT strColor
                             FROM invoice_status
@@ -904,6 +905,7 @@ component displayname="invoices" output="false" {
             local.invoiceStruct['invoiceTotal'] = local.qInvoice.invoiceTotal;
             local.invoiceStruct['invoiceStatusVariable'] = local.qInvoice.invoiceStatusVariable;
             local.invoiceStruct['invoiceStatusColor'] = local.qInvoice.invoiceStatusColor;
+            local.invoiceStruct['invoiceLanguage'] = local.qInvoice.invoiceLanguage;
 
             arrayAppend(local.arrayInvoices, local.invoiceStruct);
 
