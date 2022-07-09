@@ -71,6 +71,11 @@ if (structKeyExists(url, "module")) {
         }
 
 
+        <!--- Save the modules into the module session --->
+        checkModules = new com.modules(language=getAnyLanguage(session.lng).iso).getBookedModules(session.customer_id);
+        session.currentModules = checkModules;
+
+
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
 
     }

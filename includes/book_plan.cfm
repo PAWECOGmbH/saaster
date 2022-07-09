@@ -87,6 +87,8 @@
                     invoiceStruct['vatType'] = planDetails.vatType;
                     invoiceStruct['paymentStatusID'] = 2;
                     invoiceStruct['language'] = session.lng;
+                    invoiceStruct['invoiceDate'] = getTime.utc2local(utcDate=now());
+                    invoiceStruct['dueDate'] = getTime.utc2local(utcDate=now());
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
@@ -228,41 +230,28 @@
                     // Calculate the amount to be charged right now
                     recalcStruct = objPlans.calculateUpgrade(session.customer_id, planDetails.planID, variables.recurring);
 
-                    qBookingID = queryExecute (
-                        options = {datasource = application.datasource},
-                        params = {
-                            customerID: {type: "numeric", value: session.customer_id},
-                            planID: {type: "numeric", value: currentPlan.planID},
-                            dateStart: {type: "datetime", value: now()},
-                            dateEnd: {type: "datetime", value: currentPlan.endDate},
-                            recurring: {type: "varchar", value: variables.recurring},
-                            newPlanID: {type: "numeric", value: planDetails.planID}
-                        },
-                        sql = "
+                    // Update booking table
+                    updateStruct = structNew();
+                    updateStruct['customerID'] = session.customer_id;
+                    updateStruct['planID'] = currentPlan.planID;
+                    updateStruct['dateStart'] = now();
+                    updateStruct['dateEnd'] = currentPlan.endDate;
+                    updateStruct['recurring'] = variables.recurring;
+                    updateStruct['newPlanID'] = planDetails.planID;
 
-                            UPDATE customer_bookings
-                            SET dtmStartDate = :dateStart,
-                                dtmEndDate = :dateEnd,
-                                strRecurring = :recurring,
-                                intPlanID = :newPlanID
-                            WHERE intCustomerID = :customerID
-                            AND intPlanID = :planID;
+                    updateBooking = objPlans.updateCurrentPlan(updateStruct);
 
-                            INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, strRecurring)
-                            VALUES (:customerID, :newPlanID, :dateStart, :dateEnd, :recurring);
-
-                            SELECT intCustomerBookingID
-                            FROM customer_bookings
-                            WHERE intCustomerID = :customerID
-                            AND intPlanID = :newPlanID;
-
-                        "
-                    )
+                    if (updateBooking.success) {
+                        customerBookingID = updateBooking.customerBookingID
+                    } else {
+                        getAlert(updateBooking.message, 'danger');
+                        location url="#application.mainURL#/account-settings" addtoken=false;
+                    }
 
 
                     // Make invoice struct
                     invoiceStruct = structNew();
-                    invoiceStruct['customerBookingID'] = qBookingID.intCustomerBookingID;
+                    invoiceStruct['customerBookingID'] = customerBookingID;
                     invoiceStruct['customerID'] = session.customer_id;
                     invoiceStruct['title'] = getTrans('titUpgrade') & " " & planDetails.planName;
                     invoiceStruct['currency'] = planDetails.currency;
@@ -270,6 +259,8 @@
                     invoiceStruct['vatType'] = planDetails.vatType;
                     invoiceStruct['paymentStatusID'] = 2;
                     invoiceStruct['language'] = session.lng;
+                    invoiceStruct['invoiceDate'] = getTime.utc2local(utcDate=now());
+                    invoiceStruct['dueDate'] = getTime.utc2local(utcDate=now());
 
                     // Make invoice and get invoice id
                     newInvoice = objInvoice.createInvoice(invoiceStruct);
@@ -441,7 +432,7 @@
                     <!--- Save the new plan into a session --->
                     session.currentPlan = objPlans.getCurrentPlan(session.customer_id);
 
-                    <!--- Save the included modules into the module session --->
+                    <!--- Save the modules into the module session --->
                     checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
                     session.currentModules = checkModules;
 

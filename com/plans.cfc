@@ -640,8 +640,11 @@ component displayname="plans" output="false" {
                 local.planStruct['planName'] = local.qCurrentPlan.strPlanName;
                 local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
                 local.planStruct['startDate'] = local.qCurrentPlan.dtmStartDate;
+                local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
+                local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
                 local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
                 local.planStruct['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
+
 
                 // Is already a plan defined?
                 if (local.qCurrentPlan.intPlanID gt 0) {
@@ -654,11 +657,6 @@ component displayname="plans" output="false" {
                     // Is the plan canceled?
                     } else if (local.qCurrentPlan.strRecurring eq "canceled") {
 
-                        if (isDate(local.qCurrentPlan.dtmEndDate)) {
-                            local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
-                        } else {
-                            local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
-                        }
                         local.planStruct['status'] = 'canceled';
 
                     } else {
@@ -669,13 +667,11 @@ component displayname="plans" output="false" {
                             // Is the test phase still valid? | YES
                             if (dateDiff("d", now(), local.qCurrentPlan.dtmEndTestDate) gte 0) {
 
-                                local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
                                 local.planStruct['status'] = 'test';
 
                             // NO
                             } else {
 
-                                local.planStruct['endTestDate'] = local.qCurrentPlan.dtmEndTestDate;
                                 local.planStruct['status'] = 'expired';
 
                             }
@@ -686,20 +682,17 @@ component displayname="plans" output="false" {
                             if (local.qCurrentPlan.blnFree) {
 
                                 local.planStruct['status'] = 'free';
-                                local.planStruct['endDate'] = "";
 
                             } else {
 
                                 // Is a plan running?
                                 if (isDate(local.qCurrentPlan.dtmEndDate)) {
 
-                                    local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
                                     local.planStruct['status'] = 'active';
 
                                     // Still valid?
                                     if (dateDiff("d", now(), local.qCurrentPlan.dtmEndDate) lt 0) {
 
-                                        local.planStruct['endDate'] = local.qCurrentPlan.dtmEndDate;
                                         local.planStruct['status'] = 'expired';
 
                                     }
@@ -985,6 +978,97 @@ component displayname="plans" output="false" {
 
 
         return local.upgradeStruct;
+
+
+    }
+
+
+    public struct function updateCurrentPlan(required struct plan) {
+
+        local.returnArgs = structNew();
+        local.returnArgs['success']  = false;
+        local.returnArgs['message']  = "";
+
+        local.customerID = 0;
+        local.planID = 0;
+        local.dateStart = now();
+        local.dateEnd = now();
+        local.recurring = "monthly";
+        local.newPlanID = 0;
+
+        if (structKeyExists(arguments.plan, "customerID")) {
+            local.customerID = arguments.plan.customerID;
+        }
+        if (structKeyExists(arguments.plan, "planID")) {
+            local.planID = arguments.plan.planID;
+        }
+        if (structKeyExists(arguments.plan, "dateStart")) {
+            local.dateStart = arguments.plan.dateStart;
+        }
+        if (structKeyExists(arguments.plan, "dateEnd")) {
+            local.dateEnd = arguments.plan.dateEnd;
+        }
+        if (structKeyExists(arguments.plan, "recurring")) {
+            local.recurring = arguments.plan.recurring;
+        }
+        if (structKeyExists(arguments.plan, "newPlanID")) {
+            local.newPlanID = arguments.plan.newPlanID;
+        }
+
+
+        try {
+
+            queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: local.customerID},
+                    planID: {type: "numeric", value: local.planID},
+                    dateStart: {type: "datetime", value: local.dateStart},
+                    dateEnd: {type: "datetime", value: local.dateEnd},
+                    recurring: {type: "varchar", value: local.recurring},
+                    newPlanID: {type: "numeric", value: local.newPlanID}
+                },
+                sql = "
+
+                    UPDATE customer_bookings
+                    SET dtmStartDate = :dateStart,
+                        dtmEndDate = :dateEnd,
+                        strRecurring = :recurring,
+                        intPlanID = :newPlanID
+                    WHERE intCustomerID = :customerID
+                    AND intPlanID = :planID;
+
+                    INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, strRecurring)
+                    VALUES (:customerID, :newPlanID, :dateStart, :dateEnd, :recurring);
+
+                "
+            )
+
+        } catch (e any) {
+
+            local.returnArgs['message'] = e.message;
+            return local.returnArgs;
+
+        }
+
+        // return customerBookingID
+        local.qCustBooking = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: local.customerID},
+                newPlanID: {type: "numeric", value: local.newPlanID}
+            },
+            sql = "
+                SELECT intCustomerBookingID
+                FROM customer_bookings
+                WHERE intCustomerID = :customerID
+                AND intPlanID = :newPlanID
+            "
+        )
+
+        local.returnArgs['customerBookingID'] = local.qCustBooking.intCustomerBookingID;
+        local.returnArgs['success'] = true;
+        return local.returnArgs;
 
 
     }

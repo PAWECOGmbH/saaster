@@ -49,6 +49,8 @@ component displayname="payrexx" output="false" {
                 FROM payrexx
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
+                ORDER BY dtmTimeUTC DESC
+                LIMIT 1
             "
         )
 

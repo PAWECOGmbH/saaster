@@ -381,7 +381,8 @@ component displayname="modules" output="false" {
                 local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
                 local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
                 local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
-                local.moduleStruct['endDate'] = "";
+                local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+
 
                 // Is the plan paused?
                 if (local.qCurrentModules.blnPaused eq 1) {
@@ -393,6 +394,7 @@ component displayname="modules" output="false" {
 
                     local.moduleStruct['status'] = 'canceled';
 
+
                 } else {
 
                     // Is a test phase running?
@@ -401,13 +403,11 @@ component displayname="modules" output="false" {
                         // Is the test phase still valid? | YES
                         if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
 
-                            local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
                             local.moduleStruct['status'] = 'test';
 
                         // NO
                         } else {
 
-                            local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
                             local.moduleStruct['status'] = 'expired';
 
                         }
@@ -431,13 +431,11 @@ component displayname="modules" output="false" {
                             // Is a module running?
                             if (isDate(local.qCurrentModules.dtmEndDate)) {
 
-                                local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
                                 local.moduleStruct['status'] = 'active';
 
                                 // Still valid?
                                 if (dateDiff("d", now(), local.qCurrentModules.dtmEndDate) lt 0) {
 
-                                    local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
                                     local.moduleStruct['status'] = 'expired';
 
                                 }
@@ -462,10 +460,86 @@ component displayname="modules" output="false" {
     }
 
 
-    // In this function we will delete all the users data out of a module (ex. after a cancellation)
-    public void function deleteModuleData(required numeric customerID, required numeric moduleID) {
+    public struct function updateCurrentModule(required struct module) {
 
-        // Make your queries!
+        local.returnArgs = structNew();
+        local.returnArgs['success']  = false;
+        local.returnArgs['message']  = "";
+
+        local.customerID = 0;
+        local.moduleID = 0;
+        local.dateStart = now();
+        local.dateEnd = now();
+        local.recurring = "monthly";
+
+        if (structKeyExists(arguments.module, "customerID")) {
+            local.customerID = arguments.module.customerID;
+        }
+        if (structKeyExists(arguments.module, "moduleID")) {
+            local.moduleID = arguments.module.moduleID;
+        }
+        if (structKeyExists(arguments.module, "dateStart")) {
+            local.dateStart = arguments.module.dateStart;
+        }
+        if (structKeyExists(arguments.module, "dateEnd")) {
+            local.dateEnd = arguments.module.dateEnd;
+        }
+        if (structKeyExists(arguments.module, "recurring")) {
+            local.recurring = arguments.module.recurring;
+        }
+
+
+        try {
+
+            queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: local.customerID},
+                    moduleID: {type: "numeric", value: local.moduleID},
+                    dateStart: {type: "datetime", value: local.dateStart},
+                    dateEnd: {type: "datetime", value: local.dateEnd},
+                    recurring: {type: "varchar", value: local.recurring}
+                },
+                sql = "
+
+                    UPDATE customer_bookings
+                    SET dtmStartDate = :dateStart,
+                        dtmEndDate = :dateEnd,
+                        strRecurring = :recurring
+                    WHERE intCustomerID = :customerID
+                    AND intModuleID = :moduleID;
+
+                    INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, strRecurring)
+                    VALUES (:customerID, :moduleID, :dateStart, :dateEnd, :recurring);
+
+                "
+            )
+
+        } catch (e any) {
+
+            local.returnArgs['message'] = e.message;
+            return local.returnArgs;
+
+        }
+
+        // return customerBookingID
+        local.qCustBooking = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: local.customerID},
+                moduleID: {type: "numeric", value: local.moduleID}
+            },
+            sql = "
+                SELECT intCustomerBookingID
+                FROM customer_bookings
+                WHERE intCustomerID = :customerID
+                AND intModuleID = :moduleID
+            "
+        )
+
+        local.returnArgs['customerBookingID'] = local.qCustBooking.intCustomerBookingID;
+        local.returnArgs['success'] = true;
+        return local.returnArgs;
 
 
     }
