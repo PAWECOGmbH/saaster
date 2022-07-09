@@ -35,9 +35,12 @@ component name="mockdata-functions" {
 
             queryExecute(
                 options = {datasource = application.datasource, result="neueID"},
+                params = {
+                    dateNow: {type: "datetime", value: now()}
+                },
                 sql = "
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail, strAddress, strZIP, strCity)
-                    VALUES (0, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, '#companyname#', 0#customer.countryID#, '#contactname#', '#customer.email#', '#addr#', '#customer.zip#', '#thisCity#')
+                    VALUES (0, :dateNow, :dateNow, 1, '#companyname#', 0#customer.countryID#, '#contactname#', '#customer.email#', '#addr#', '#customer.zip#', '#thisCity#')
                 "
             )
 
@@ -53,9 +56,12 @@ component name="mockdata-functions" {
 
                 queryExecute(
                     options = {datasource = application.datasource},
+                    params = {
+                        dateNow: {type: "datetime", value: now()}
+                    },
                     sql = "
                         INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-                        VALUES (#neueID.generatedkey#, UTC_TIMESTAMP(), UTC_TIMESTAMP(), '#usr.first_name#', '#usr.last_name#', '#thisEmail#', '#hash#', '#salt#', 1, #isAdmin#, #isSuperAdmin#, 0)
+                        VALUES (#neueID.generatedkey#, :dateNow, :dateNow, '#usr.first_name#', '#usr.last_name#', '#thisEmail#', '#hash#', '#salt#', 1, #isAdmin#, #isSuperAdmin#, 0)
                     "
                 )
 
@@ -78,7 +84,7 @@ component name="mockdata-functions" {
         objInvoice = new com.invoices();
         invoiceData = structNew();
         setting = application.objGlobal;
-        
+
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "

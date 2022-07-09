@@ -155,6 +155,7 @@ component displayname="customer" output="false" {
 
                 options = {datasource = application.datasource},
                 params = {
+                    mutDate: {type: "datetime", value: now()},
                     customerID: {type: "numeric", value: arguments.customerID},
                     company: {type: "nvarchar", value: local.company},
                     contact: {type: "nvarchar", value: local.contact},
@@ -175,7 +176,7 @@ component displayname="customer" output="false" {
                 sql = "
 
                     UPDATE customers
-                    SET dtmMutDate = UTC_TIMESTAMP(),
+                    SET dtmMutDate = :mutDate,
                         strCompanyName = :company,
                         strContactPerson = :contact,
                         strAddress = :address,
@@ -258,12 +259,13 @@ component displayname="customer" output="false" {
                     company_name: {type: "nvarchar", value: local.company_name},
                     contact_person: {type: "nvarchar", value: local.contact_person},
                     intCustParentID: {type: "numeric", value: local.customerID},
-                    intUserID: {type: "numeric", value: local.userID}
+                    intUserID: {type: "numeric", value: local.userID},
+                    dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
 
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson)
-                    VALUES (:intCustParentID, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 1, :company_name,
+                    VALUES (:intCustParentID, :dateNow, :dateNow, 1, :company_name,
                         (SELECT intCountryID FROM countries WHERE blnDefault = 1), :contact_person);
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
