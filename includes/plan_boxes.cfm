@@ -90,7 +90,7 @@
                             <cfset toManyUsers = false>
                             <cfset alertDowngrade = false>
                             <cfset alertUpgrade = false>
-                            <cfif len(trim(session.currentPlan.status)) and session.currentPlan.status neq "expired" and !i.onRequest>
+                            <cfif len(trim(session.currentPlan.status)) and session.currentPlan.status neq "expired" and session.currentPlan.status neq "test" and !i.onRequest>
                                 <cfif i.priceMonthly lt session.currentPlan.priceMonthly>
                                     <!--- Check whether the customer has registered more users than the new plan provides --->
                                     <cfif (i.maxUsers gt 0) and application.objUser.getAllUsers(session.customer_id).recordCount gt i.maxUsers>
