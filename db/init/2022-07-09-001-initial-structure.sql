@@ -946,7 +946,7 @@ INSERT INTO `system_mappings` VALUES (2, 'register', 'frontend/register.cfm', 0,
 INSERT INTO `system_mappings` VALUES (3, 'password', 'frontend/password.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (4, 'dashboard', 'views/dashboard.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (5, 'account-settings/my-profile', 'views/customer/my-profile.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (6, 'customer', 'handler/customer.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (6, 'customer', 'handler/customer.cfm', 1, 0, 0);
 INSERT INTO `system_mappings` VALUES (7, 'global', 'handler/global.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (9, 'registration', 'handler/register.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (12, 'account-settings', 'views/customer/account-settings.cfm', 0, 0, 0);
