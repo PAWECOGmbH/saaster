@@ -110,6 +110,11 @@
                             <li class="breadcrumb-item active">#qCustomers.strCompanyName#</li>
                         </ol>
                     </div>
+                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                        <a href="#application.mainURL#/sysadmin/customers/details/#thisCustomerID#" class="btn btn-primary">
+                            <i class="fas fa-angle-double-left pe-3"></i> Back to detail view
+                        </a>
+                    </div>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>

@@ -201,7 +201,7 @@
 
 
         // Is there already a plan?
-        if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0 and currentPlan.status neq "expired") {
+        if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0 and currentPlan.status neq "expired" and currentPlan.status neq "test") {
 
             // Is it the same plan?
             if (currentPlan.planID eq planDetails.planID or currentPlan.status eq "free") {

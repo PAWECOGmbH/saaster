@@ -99,13 +99,13 @@
                 WHERE 1=1
                 #session.status_sql#
             "
-        ) 
+        )
     }
 
     pages = ceiling(qTotalInvoices.totalInvoices / getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {  
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {
         session.invoice_page = url.page;
     }
 
@@ -336,19 +336,6 @@
                                             </label>
                                         </div>
                                     </div>
-                                  <!---   <div class="col-lg-3">
-                                        <div class="mb-3">
-                                            <div class="form-label">Sort invoices</div>
-                                            <select class="form-select" name="sort" onchange="this.form.submit()">
-                                                <option value="invoiceNumber ASC" <cfif session.i_sort eq "invoiceNumber ASC">selected</cfif>>By invoice number asc</option>
-                                                <option value="invoiceNumber DESC" <cfif session.i_sort eq "invoiceNumber DESC">selected</cfif>>By invoice number desc</option>
-                                                <option value="dtmInvoiceDate ASC" <cfif session.i_sort eq "dtmInvoiceDate ASC">selected</cfif>>By invoice date asc</option>
-                                                <option value="dtmInvoiceDate DESC" <cfif session.i_sort eq "dtmInvoiceDate DESC">selected</cfif>>By invoice date desc</option>
-                                                <option value="dtmDueDate ASC" <cfif session.i_sort eq "dtmDueDate ASC">selected</cfif>>By due date asc</option>
-                                                <option value="dtmDueDate DESC" <cfif session.i_sort eq "dtmDueDate DESC">selected</cfif>>By due date desc</option>
-                                            </select>
-                                        </div>
-                                    </div> --->
                                 </div>
                             </form>
                             <cfif qInvoices.recordCount>
@@ -376,8 +363,8 @@
                                                 <td>#qInvoices.customerName#</td>
                                                 <td>#qInvoices.strCurrency#</td>
                                                 <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
-                                                <td class="text-end float-end">
-                                                    <div class="btn-list flex-nowrap">
+                                                <td class="text-end">
+                                                    <div class="btn-list flex-nowrap float-end">
                                                         <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                             Action
                                                         </button>
@@ -413,14 +400,14 @@
                                             <i class="fas fa-angle-left"></i>
                                         </a>
                                     </li>
-                                    
+
                                     <!--- Pages --->
                                     <cfif session.invoice_page + 4 gt pages>
                                         <cfset blockPage = pages>
                                     <cfelse>
                                         <cfset blockPage = session.invoice_page + 4>
                                     </cfif>
-                                    
+
                                     <cfif blockPage neq pages>
                                         <cfloop index="j" from="#session.invoice_page#" to="#blockPage#">
                                             <cfif not blockPage gt pages>
@@ -442,7 +429,7 @@
                                                 </li>
                                         </cfloop>
                                     </cfif>
-                                    
+
                                     <!--- Next arrow --->
                                     <li class="page-item <cfif session.invoice_page gte pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page+1#">

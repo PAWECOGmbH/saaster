@@ -104,12 +104,12 @@
         allData.last_name = form.last_name
         allData.salutation = form.salutation
 
-        objupdateUser = application.objUser.updateUser(allData, form.user_id);
+        objupdateUser = application.objUser.updateUser(allData, form.user_id, false);
 
         if (objupdateUser.success) {
             getAlert('msgChangesSaved', 'success');
         } else {
-            getAlert(objCustomerEdit.message, 'danger');
+            getAlert(objupdateUser.message, 'danger');
         }
 
         location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";

@@ -21,7 +21,7 @@
     // Filter out unsupport search characters
     searchTerm = ReplaceList(trim(session.cust_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
     searchTerm = replace(searchTerm,' - ', "-", "all");
-    
+
     if (len(trim(searchTerm))) {
 
         if (FindNoCase("@",searchTerm)){
@@ -32,24 +32,21 @@
         qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson, 
-                customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
+                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson,
+                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
                 FROM customers
-
-                LEFT JOIN countries
-                ON countries.intCountryID = customers.intCountryID
 
                 INNER JOIN users
                 ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
-                
+
                 WHERE customers.blnActive = 1
                 AND MATCH (
-                    customers.strCompanyName, 
-                    customers.strContactPerson, 
-                    customers.strAddress, 
-                    customers.strZIP, 
-                    customers.strCity, 
+                    customers.strCompanyName,
+                    customers.strContactPerson,
+                    customers.strAddress,
+                    customers.strZIP,
+                    customers.strCity,
                     customers.strEmail
                 )
                 #searchString#
@@ -72,7 +69,7 @@
     pages = ceiling(qTotalCustomers.totalCustomers / getEntries);
 
     // Check if url "page" exists and if it matches the requirments
-    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {  
+    if (structKeyExists(url, "page") and isNumeric(url.page) and not url.page lte 0 and not url.page gt pages) {
         session.customers_page = url.page;
     }
 
@@ -91,24 +88,21 @@
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson, 
-                customers.strCity, customers.strEmail, customers.strLogo, countries.strCountryName
+                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
+                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
                 FROM customers
-
-                LEFT JOIN countries
-                ON countries.intCountryID = customers.intCountryID
 
                 INNER JOIN users
                 ON customers.intCustomerID = users.intCustomerID
                 OR customers.intCustParentID = users.intCustomerID
-                
+
                 WHERE customers.blnActive = 1
                 AND MATCH (
-                    customers.strCompanyName, 
-                    customers.strContactPerson, 
-                    customers.strAddress, 
-                    customers.strZIP, 
-                    customers.strCity, 
+                    customers.strCompanyName,
+                    customers.strContactPerson,
+                    customers.strAddress,
+                    customers.strZIP,
+                    customers.strCity,
                     customers.strEmail
                 )
                 #searchString#
@@ -130,6 +124,8 @@
         );
     }
 
+    cntCountries = application.objGlobal.getCountry().recordCount;
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -150,7 +146,7 @@
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item active">Customers</li>
                         </ol>
-                    </div>    
+                    </div>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -197,11 +193,11 @@
                                     <table class="table table-vcenter table-mobile-md card-table">
                                         <thead>
                                             <tr>
-                                                <th>Company</th>
-                                                <th>Contact</th>
-                                                <th>City</th>
-                                                <th>Country</th>
-                                                <th class="w-1"></th>
+                                                <th width="30%">Company</th>
+                                                <th width="20%">Contact</th>
+                                                <th width="20%">City</th>
+                                                <th width="20%">Phone</th>
+                                                <th width="5%"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -221,20 +217,16 @@
                                                             </a>
                                                         </div>
                                                     </td>
-
                                                     <td data-label="Contact">
                                                         <div>#qCustomers.strContactPerson#</div>
                                                         <div class="text-muted">#qCustomers.strEmail#</div>
                                                     </td>
-
                                                     <td data-label="City">
                                                         #qCustomers.strCity#
                                                     </td>
-
-                                                    <td data-label="Country">
-                                                        #qCustomers.strCountryName#
+                                                    <td data-label="Phone">
+                                                        #qCustomers.strPhone#
                                                     </td>
-
                                                     <td>
                                                         <div class="btn-list flex-nowrap">
                                                             <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomers.intCustomerID#" class="btn">
@@ -252,7 +244,7 @@
                         <cfif pages neq 1 and qCustomers.recordCount>
                             <div class="card-body">
                                 <ul class="pagination justify-content-center" id="pagination">
-                                    
+
                                     <!--- First arrow --->
                                     <li class="page-item <cfif session.customers_page eq 1>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/customers?page=1" tabindex="-1" aria-disabled="true">
@@ -266,14 +258,14 @@
                                             <i class="fas fa-angle-left"></i>
                                         </a>
                                     </li>
-        
+
                                     <!--- Pages --->
                                     <cfif session.customers_page + 4 gt pages>
                                         <cfset blockPage = pages>
                                     <cfelse>
                                         <cfset blockPage = session.customers_page + 4>
                                     </cfif>
-                                    
+
                                     <cfif blockPage neq pages>
                                         <cfloop index="j" from="#session.customers_page#" to="#blockPage#">
                                             <cfif not blockPage gt pages>
