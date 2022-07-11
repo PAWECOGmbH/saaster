@@ -28,21 +28,19 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			title: textOne,
 			text: textTwo,
 			icon: type
-		})
+		}).then(function(){
+
+			$('a.plan').each(function(i, obj) {
+				$(this).text(obj.text);
+				$(this).removeClass('disabled');
+			});
+
+		});
 
 	}
 
 };
 
-
-function disableBtn(btnClass){
-
-	$('a.' + btnClass).each(function(i, obj) {
-		console.log(i);
-		console.log(obj);
-	});
-
-};
 
 // Save payment
 function sendPayment() {
@@ -253,7 +251,7 @@ $(document).ready(function(){
 	});
 
 
-	//Plans+Proces overview, disable buttons when changing plan
+	//Plans+Process overview, disable buttons when changing plan
 	$('a.plan').on('click', function(){
 
 		$('a.plan').each(function(i, obj) {
