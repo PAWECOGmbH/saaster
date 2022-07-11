@@ -19,7 +19,8 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		.then((willDelete) => {
 			if (willDelete) {
 				window.location.href = thisURL;
-			}
+			};
+			refreshThings();
 		});
 
 	} else {
@@ -29,18 +30,19 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			text: textTwo,
 			icon: type
 		}).then(function(){
-
-			$('a.plan').each(function(i, obj) {
-				$(this).text(obj.text);
-				$(this).removeClass('disabled');
-			});
-
+			refreshThings();
 		});
 
 	}
 
 };
 
+function refreshThings(){
+	$('a.plan').each(function(i, obj) {
+		$(this).text(obj.text);
+		$(this).removeClass('disabled');
+	});
+}
 
 // Save payment
 function sendPayment() {
