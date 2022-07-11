@@ -34,6 +34,16 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 
 };
 
+
+function disableBtn(btnClass){
+
+	$('a.' + btnClass).each(function(i, obj) {
+		console.log(i);
+		console.log(obj);
+	});
+
+};
+
 // Save payment
 function sendPayment() {
 	var paymentModal = $('#dyn_modal-content');
@@ -241,5 +251,17 @@ $(document).ready(function(){
 			});
 		}
 	});
+
+
+	//Plans+Proces overview, disable buttons when changing plan
+	$('a.plan').on('click', function(){
+
+		$('a.plan').each(function(i, obj) {
+			$(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;' + obj.text);
+			$(this).addClass('disabled');
+		});
+
+	});
+
 
 });
