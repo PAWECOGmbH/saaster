@@ -31,8 +31,7 @@ if (url.pass eq variables.schedulePassword) {
         sql = "
             SELECT *
             FROM customer_bookings
-            WHERE blnPaused = 0
-            AND (DATE(dtmEndDate) <= DATE(:utcDate) OR DATE(dtmEndTestDate) <= DATE(:utcDate))
+            WHERE (DATE(dteEndDate) <= DATE(:utcDate) OR DATE(dteEndTestDate) <= DATE(:utcDate))
             AND (strRecurring = 'monthly' OR strRecurring = 'yearly' OR strRecurring = 'canceled')
         "
     )
@@ -57,7 +56,7 @@ if (url.pass eq variables.schedulePassword) {
                 currencyID = 0;
             }
 
-            startDate = qRenewBookings.dtmEndDate;
+            startDate = qRenewBookings.dteEndDate;
             if (qRenewBookings.strRecurring eq "monthly") {
                 endDate = dateAdd("m", 1, startDate);
             } else if (qRenewBookings.strRecurring eq "yearly") {
@@ -73,7 +72,7 @@ if (url.pass eq variables.schedulePassword) {
 
                 // Make invoice struct
                 invoiceStruct = structNew();
-                invoiceStruct['customerBookingID'] = qRenewBookings.intCustomerBookingID;
+                invoiceStruct['customerBookingID'] = qRenewBookings.intBookingID;
                 invoiceStruct['customerID'] = qRenewBookings.intCustomerID;
                 invoiceStruct['title'] = getTrans('titRenewal') & " " & planData.planName;
                 invoiceStruct['currency'] = lastInvoice.invoiceCurrency;
@@ -211,7 +210,7 @@ if (url.pass eq variables.schedulePassword) {
 
                 // Make invoice struct
                 invoiceStruct = structNew();
-                invoiceStruct['customerBookingID'] = qRenewBookings.intCustomerBookingID;
+                invoiceStruct['customerBookingID'] = qRenewBookings.intBookingID;
                 invoiceStruct['customerID'] = qRenewBookings.intCustomerID;
                 invoiceStruct['title'] = getTrans('titRenewal') & " " & moduleData.name;
                 invoiceStruct['currency'] = lastInvoice.invoiceCurrency;
@@ -353,8 +352,8 @@ if (url.pass eq variables.schedulePassword) {
                     params = {
                         customerID: {type: "numeric", value: qRenewBookings.intCustomerID},
                         moduleID: {type: "numeric", value: qRenewBookings.intModuleID},
-                        dateStart: {type: "datetime", value: qRenewBookings.dtmStartDate},
-                        dateEnd: {type: "datetime", value: qRenewBookings.dtmEndDate},
+                        dateStart: {type: "datetime", value: qRenewBookings.dteStartDate},
+                        dateEnd: {type: "datetime", value: qRenewBookings.dteEndDate},
                         recurring: {type: "varchar", value: qRenewBookings.strRecurring}
                     },
                     sql = "
@@ -363,7 +362,7 @@ if (url.pass eq variables.schedulePassword) {
                         WHERE intCustomerID = :customerID
                         AND intModuleID = :moduleID;
 
-                        INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, strRecurring)
+                        INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dteStartDate, dteEndDate, strRecurring)
                         VALUES (:customerID, :moduleID, :dateStart, :dateEnd, :recurring)
 
                     "
@@ -376,18 +375,15 @@ if (url.pass eq variables.schedulePassword) {
                     params = {
                         customerID: {type: "numeric", value: qRenewBookings.intCustomerID},
                         planID: {type: "numeric", value: qRenewBookings.intPlanID},
-                        dateStart: {type: "datetime", value: qRenewBookings.dtmStartDate},
-                        dateEnd: {type: "datetime", value: qRenewBookings.dtmEndDate},
+                        dateStart: {type: "datetime", value: qRenewBookings.dteStartDate},
+                        dateEnd: {type: "datetime", value: qRenewBookings.dteEndDate},
                         recurring: {type: "varchar", value: qRenewBookings.strRecurring}
                     },
                     sql = "
 
                         DELETE FROM customer_bookings
                         WHERE intCustomerID = :customerID
-                        AND intPlanID = :planID;
-
-                        INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, strRecurring)
-                        VALUES (:customerID, :planID, :dateStart, :dateEnd, :recurring)
+                        AND intPlanID = :planID
 
                     "
                 )

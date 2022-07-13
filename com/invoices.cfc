@@ -46,10 +46,10 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
-        if (structKeyExists(invoiceData, "customerBookingID") and isNumeric(invoiceData.customerBookingID)) {
-            local.customerBookingID = invoiceData.customerBookingID;
+        if (structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID)) {
+            local.bookingID = invoiceData.bookingID;
         } else {
-            local.customerBookingID = 0;
+            local.bookingID = 0;
         }
         local.invoiceNumber = createInvoiceNumber(local.customerID);
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
@@ -126,11 +126,11 @@ component displayname="invoices" output="false" {
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
                     total_text: {type: "nvarchar", value: local.total_text},
-                    customerBookingID: {type: "numeric", value: local.customerBookingID},
+                    bookingID: {type: "numeric", value: local.bookingID},
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intCustomerBookingID)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :customerBookingID)
+                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
+                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
                 "
             )
 

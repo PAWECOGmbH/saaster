@@ -124,10 +124,7 @@ component displayname="cancel" output="false" {
                     UPDATE customer_bookings
                     SET strRecurring = :recurring
                     WHERE intCustomerID = :customerID
-                    AND #variables.thisField# = :thisID;
-
-                    INSERT INTO customer_bookings_history (intCustomerID, #variables.thisField#, strRecurring)
-                    VALUES (:customerID, :thisID, :recurring)
+                    AND #variables.thisField# = :thisID
 
                 "
             )

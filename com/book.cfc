@@ -51,14 +51,54 @@ component displayname="book" output="false" {
         variables.argsReturnValue['message'] = "";
         variables.argsReturnValue['success'] = false;
 
-        local.startDate = now();
+        // UTC date of today
+        local.startDate = dateFormat(now(), "yyyy/mm/dd");
+
+        // Data of the plan/module to be booked
         local.bookingData = arguments.bookingData;
+
+        // Data of the modules the customer already has
+        if (variables.type eq "module") {
+
+            local.objModules = new com.modules(currencyID=local.bookingData.currencyID);
+            local.currentData = local.objModules.getBookedModules(arguments.customerID);
+            local.moduleID = local.bookingData.moduleID;
+            local.planID = "";
+
+
+        // Data of the plan the customer already has
+        } else {
+
+            local.objPlans = new com.plans(currencyID=local.bookingData.currencyID);
+            local.currentData = local.objPlans.getCurrentPlan(arguments.customerID);
+            local.planID = local.bookingData.planID;
+            local.moduleID = "";
+
+        }
+
+        dump(local.currentData);
+        dump(local.bookingData);
+        //abort;
+
+
 
         if (isStruct(local.bookingData)) {
 
             local.tillDate = "";
             local.testTillDate = "";
             local.recurring = "";
+
+
+            // Does the customer already have a plan?
+
+
+
+
+
+
+
+
+
 
             if (structKeyExists(arguments, "itsTest") and arguments.itsTest) {
 
@@ -70,12 +110,14 @@ component displayname="book" output="false" {
 
                     // Yearly subscription
                     local.tillDate = dateAdd("yyyy", 1, local.startDate);
+                    local.tillDate = dateAdd("d", -1, local.tillDate);
                     local.recurring = "yearly";
 
                 } else if (structKeyExists(arguments, "recurring") and arguments.recurring eq "monthly") {
 
                     // Monthly subscription
                     local.tillDate = dateAdd("m", 1, local.startDate);
+                    local.tillDate = dateAdd("d", -1, local.tillDate);
                     local.recurring = "monthly";
 
                 } else {
@@ -87,139 +129,38 @@ component displayname="book" output="false" {
                 }
             }
 
-            if (variables.type eq "module") {
-                local.thisID = local.bookingData.moduleID;
-                local.column = "intModuleID";
-                local.queryStatement = "AND intModuleID = #local.thisID#";
-            } else {
-                local.thisID = local.bookingData.planID;
-                local.column = "intPlanID";
-                local.queryStatement = "AND intPlanID > 0";
-            }
 
-            local.qCheckBookings = queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-                    SELECT intCustomerBookingID, intPlanID
-                    FROM customer_bookings
-                    WHERE intCustomerID = :customerID
-                    #local.queryStatement#
-                "
-            )
 
-            argsReturnValue['bookingID'] = local.qCheckBookings.intCustomerBookingID;
+            try {
 
-            if (local.qCheckBookings.recordCount) {
+                queryExecute (
+                    options = {datasource = application.datasource, result = "qNewID"},
+                    params = {
+                        customerID: {type: "numeric", value: arguments.customerID},
+                        planID: {type: "numeric", value: local.planID},
+                        moduleID: {type: "numeric", value: local.moduleID},
+                        dateStart: {type: "date", value: local.startDate},
+                        dateEnd: {type: "date", value: local.tillDate},
+                        dateTestEnd: {type: "date", value: local.testTillDate},
+                        recurring: {type: "varchar", value: local.recurring}
+                    },
+                    sql = "
 
-                try {
+                        INSERT INTO customer_bookings (intCustomerID, intPlanID, intModuleID, dteStartDate, dteEndDate, dteEndTestDate, strRecurring)
+                        VALUES (:customerID, :planID, :moduleID, :dateStart, :dateEnd, :dateTestEnd, :recurring)
 
-                    if (variables.type eq "module") {
+                    "
+                )
 
-                        queryExecute (
-                            options = {datasource = application.datasource},
-                            params = {
-                                customerID: {type: "numeric", value: arguments.customerID},
-                                thisID: {type: "numeric", value: local.thisID},
-                                dateStart: {type: "datetime", value: local.startDate},
-                                dateEnd: {type: "datetime", value: local.tillDate},
-                                dateTestEnd: {type: "datetime", value: local.testTillDate},
-                                paused: {type: "boolean", value: 0},
-                                recurring: {type: "varchar", value: local.recurring}
-                            },
-                            sql = "
+                argsReturnValue['bookingID'] = qNewID.generated_key;
 
-                                UPDATE customer_bookings
-                                SET dtmStartDate = :dateStart,
-                                    dtmEndDate = :dateEnd,
-                                    dtmEndTestDate = :dateTestEnd,
-                                    strRecurring = :recurring
-                                WHERE intCustomerID = :customerID
-                                AND intModuleID = :thisID;
+            } catch (any e) {
 
-                                INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                                VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
-
-                            "
-                        )
-
-                    } else {
-
-                        queryExecute (
-                            options = {datasource = application.datasource},
-                            params = {
-                                customerID: {type: "numeric", value: arguments.customerID},
-                                thisID: {type: "numeric", value: local.thisID},
-                                dateStart: {type: "datetime", value: local.startDate},
-                                dateEnd: {type: "datetime", value: local.tillDate},
-                                dateTestEnd: {type: "datetime", value: local.testTillDate},
-                                paused: {type: "boolean", value: 0},
-                                recurring: {type: "varchar", value: local.recurring}
-                            },
-                            sql = "
-
-                                UPDATE customer_bookings
-                                SET intPlanID = :thisID,
-                                    dtmStartDate = :dateStart,
-                                    dtmEndDate = :dateEnd,
-                                    dtmEndTestDate = :dateTestEnd,
-                                    strRecurring = :recurring
-                                WHERE intCustomerID = :customerID
-                                AND intModuleID IS NULL;
-
-                                INSERT INTO customer_bookings_history (intCustomerID, intPlanID, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                                VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring)
-
-                            "
-                        )
-
-                    }
-
-                } catch (e any) {
-
-                    argsReturnValue['message'] = e.messsage;
-                    return argsReturnValue;
-
-                }
-
-            } else {
-
-                try {
-
-                    queryExecute (
-                        options = {datasource = application.datasource, result="newID"},
-                        params = {
-                            customerID: {type: "numeric", value: arguments.customerID},
-                            thisID: {type: "numeric", value: local.thisID},
-                            dateStart: {type: "datetime", value: local.startDate},
-                            dateEnd: {type: "datetime", value: local.tillDate},
-                            dateTestEnd: {type: "datetime", value: local.testTillDate},
-                            paused: {type: "boolean", value: 0},
-                            recurring: {type: "varchar", value: local.recurring}
-                        },
-                        sql = "
-
-                            INSERT INTO customer_bookings_history (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring);
-
-                            INSERT INTO customer_bookings (intCustomerID, #local.column#, dtmStartDate, dtmEndDate, dtmEndTestDate, blnPaused, strRecurring)
-                            VALUES (:customerID, :thisID, :dateStart, :dateEnd, :dateTestEnd, :paused, :recurring);
-
-                        "
-                    )
-
-                    argsReturnValue['bookingID'] = newID.generated_key;
-
-                } catch (e any) {
-
-                    argsReturnValue['message'] = e.messsage;
-                    return argsReturnValue;
-
-                }
+                argsReturnValue['message'] = e.message;
+                return argsReturnValue;
 
             }
+
 
         }
 

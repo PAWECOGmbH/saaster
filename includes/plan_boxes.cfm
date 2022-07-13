@@ -119,9 +119,9 @@
                                     <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
 
                                         <cfif alertDowngrade>
-                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkF#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkO#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
                                         <cfelse>
-                                            <a href="#i.bookingLinkF#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                            <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </cfif>
 
                                     </div>

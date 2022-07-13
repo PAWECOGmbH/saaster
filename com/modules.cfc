@@ -369,7 +369,7 @@ component displayname="modules" output="false" {
                     moduleID: {type: "numeric", value: arguments.moduleID}
                 },
                 sql = "
-                    SELECT intModuleID, blnPaused, strRecurring, dtmStartDate, dtmEndDate, dtmEndTestDate
+                    SELECT intModuleID, strRecurring, dteStartDate, dteEndDate, dteEndTestDate
                     FROM customer_bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID
@@ -378,19 +378,14 @@ component displayname="modules" output="false" {
 
             if (local.qCurrentModules.recordCount) {
 
-                local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
-                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                local.moduleStruct['startDate'] = local.qCurrentModules.dteStartDate;
+                local.moduleStruct['endTestDate'] = local.qCurrentModules.dteEndTestDate;
                 local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
-                local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
+                local.moduleStruct['endDate'] = local.qCurrentModules.dteEndDate;
 
-
-                // Is the plan paused?
-                if (local.qCurrentModules.blnPaused eq 1) {
-
-                    local.moduleStruct['status'] = 'paused';
 
                 // Is a module or plan canceled?
-                } else if (local.qCurrentModules.strRecurring eq "canceled") {
+                if (local.qCurrentModules.strRecurring eq "canceled") {
 
                     local.moduleStruct['status'] = 'canceled';
 
@@ -398,10 +393,10 @@ component displayname="modules" output="false" {
                 } else {
 
                     // Is a test phase running?
-                    if (isDate(local.qCurrentModules.dtmStartDate) and isDate(local.qCurrentModules.dtmEndTestDate)) {
+                    if (isDate(local.qCurrentModules.dteStartDate) and isDate(local.qCurrentModules.dteEndTestDate)) {
 
                         // Is the test phase still valid? | YES
-                        if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
+                        if (dateDiff("d", now(), local.qCurrentModules.dteEndTestDate) gte 0) {
 
                             local.moduleStruct['status'] = 'test';
 
@@ -415,7 +410,7 @@ component displayname="modules" output="false" {
                     } else {
 
                         // See if there is a free module running
-                        if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
+                        if (!len(trim(local.qCurrentModules.dteEndDate)) and !len(trim(local.qCurrentModules.dteEndTestDate))) {
 
                             // Get module data
                             local.moduleData = getModuleData(arguments.moduleID);
@@ -429,12 +424,12 @@ component displayname="modules" output="false" {
                         } else {
 
                             // Is a module running?
-                            if (isDate(local.qCurrentModules.dtmEndDate)) {
+                            if (isDate(local.qCurrentModules.dteEndDate)) {
 
                                 local.moduleStruct['status'] = 'active';
 
                                 // Still valid?
-                                if (dateDiff("d", now(), local.qCurrentModules.dtmEndDate) lt 0) {
+                                if (dateDiff("d", now(), local.qCurrentModules.dteEndDate) lt 0) {
 
                                     local.moduleStruct['status'] = 'expired';
 
@@ -503,19 +498,16 @@ component displayname="modules" output="false" {
                 sql = "
 
                     UPDATE customer_bookings
-                    SET dtmStartDate = :dateStart,
-                        dtmEndDate = :dateEnd,
+                    SET dteStartDate = :dateStart,
+                        dteEndDate = :dateEnd,
                         strRecurring = :recurring
                     WHERE intCustomerID = :customerID
-                    AND intModuleID = :moduleID;
-
-                    INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, strRecurring)
-                    VALUES (:customerID, :moduleID, :dateStart, :dateEnd, :recurring);
+                    AND intModuleID = :moduleID
 
                 "
             )
 
-        } catch (e any) {
+        } catch (any e) {
 
             local.returnArgs['message'] = e.message;
             return local.returnArgs;
@@ -530,14 +522,14 @@ component displayname="modules" output="false" {
                 moduleID: {type: "numeric", value: local.moduleID}
             },
             sql = "
-                SELECT intCustomerBookingID
+                SELECT intBookingID
                 FROM customer_bookings
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
             "
         )
 
-        local.returnArgs['customerBookingID'] = local.qCustBooking.intCustomerBookingID;
+        local.returnArgs['customerBookingID'] = local.qCustBooking.intBookingID;
         local.returnArgs['success'] = true;
         return local.returnArgs;
 

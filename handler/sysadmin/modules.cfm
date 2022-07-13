@@ -163,7 +163,7 @@ if (structKeyExists(form, "edit_module")) {
         if (!directoryExists(expandPath('/modules/#form.prefix#'))) {
             try {
                 directoryCreate(expandPath('/modules/#form.prefix#'));
-            } catch (e any) {
+            } catch (any e) {
                 createFolderSuccess = false;
                 getAlert('Could not create the folder!');
             }
@@ -181,7 +181,7 @@ writeOutput("
 }
             try {
                 fileWrite(expandPath('/modules/#form.prefix#/navigation.cfm'), naviContent);
-            } catch (e any) {
+            } catch (any e) {
                 createFileSuccess = false;
                 getAlert(e.message, 'danger');
             }

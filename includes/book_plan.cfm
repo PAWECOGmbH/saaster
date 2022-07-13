@@ -197,7 +197,119 @@
     } else {
 
 
-        upgrading = false;
+        //dump(currentPlan);
+        //dump(planStruct);
+        //dump(planDetails);
+
+        makeBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+        dump(makeBooking);
+
+        abort;
+
+
+
+        // Is there already a plan?
+        if (structKeyExists(currentPlan, "planID") and currentPlan.planID gt 0) {
+
+            // Same plan
+            if (currentPlan.planID eq planStruct.planID) {
+
+                // Same recurring type
+                if (currentPlan.recurring eq planStruct.recurring) {
+
+                    location url="#application.mainURL#/account-settings" addtoken=false;
+
+                // Other recurring type
+                } else {
+
+                    // From yearly to monthly
+                    if (currentPlan.recurring eq "yearly" and planStruct.recurring eq "monthly") {
+
+                        // Add entry to the table with one month runtime (append) and change the recurring type
+                        insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+
+                    }
+
+                    // From monthly to yearly
+
+
+
+
+                    // From test to monthly/yearly
+
+
+                    // From monthly/yearly/test to free
+
+
+
+
+
+
+
+                }
+
+            }
+
+
+            // Downgrade
+
+
+
+            // Upgrade
+
+
+
+
+        }
+
+
+        abort;
+
+
+
+
+
+
+        // Is it a free plan?
+        if (planDetails.itsFree) {
+
+            // Book the free plan
+
+            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+
+            if (insertBooking.success) {
+
+                <!--- Save the new plan into a session --->
+                newPlan = objPlans.getCurrentPlan(session.customer_id);
+                session.currentPlan = newPlan;
+
+                <!--- Save the included modules into the module session --->
+                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+                session.currentModules = checkModules;
+
+                getAlert('msgPlanActivated');
+
+            } else {
+
+                getAlert(insertBooking.message, 'danger');
+
+            }
+
+            location url="#application.mainURL#/account-settings" addtoken=false;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* upgrading = false;
 
 
         // Is there already a plan?
@@ -375,32 +487,10 @@
             }
 
 
-        }
+        } */
 
 
-        // Is it a free plan?
-        if (planDetails.itsFree and !upgrading) {
 
-            // Book the free plan
-
-            insertBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
-
-            if (insertBooking.success) {
-
-                <!--- Save the new plan into a session --->
-                newPlan = objPlans.getCurrentPlan(session.customer_id);
-                session.currentPlan = newPlan;
-
-                <!--- Save the included modules into the module session --->
-                checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
-                session.currentModules = checkModules;
-
-                getAlert('msgPlanActivated');
-                location url="#application.mainURL#/account-settings" addtoken=false;
-
-            }
-
-        }
 
 
         // Do we have to provide any test days?
@@ -418,7 +508,7 @@
                     FROM customer_bookings_history
                     WHERE intCustomerID = :customerID
                     AND intPlanID = :planID
-                    AND LENGTH(dtmEndTestDate) > 0
+                    AND LENGTH(dteEndTestDate) > 0
                 "
             )
 

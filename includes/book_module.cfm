@@ -71,7 +71,7 @@
                 FROM customer_bookings_history
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
-                AND LENGTH(dtmEndTestDate) > 0
+                AND LENGTH(dteEndTestDate) > 0
             "
         )
 
