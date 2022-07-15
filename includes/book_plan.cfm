@@ -201,7 +201,7 @@
         //dump(planStruct);
         //dump(planDetails);
 
-        makeBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, itsTest=false, recurring=variables.recurring);
+        makeBooking = objBook.makeBooking(customerID=session.customer_id, bookingData=planDetails, recurring=variables.recurring);
 
         dump(makeBooking);
 

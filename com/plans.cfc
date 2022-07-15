@@ -576,6 +576,8 @@ component displayname="plans" output="false" {
 
     public struct function getCurrentPlan(required numeric customerID) {
 
+        local.utcDate = dateFormat(now(), "yyyy-mm-dd");
+
         local.planStruct = structNew();
         local.planStruct['planID'] = 0;
         local.planStruct['planName'] = "";
@@ -595,11 +597,15 @@ component displayname="plans" output="false" {
                 params = {
                     customerID: {type: "numeric", value: arguments.customerID},
                     languageID: {type: "numeric", value: variables.lngID},
-                    currency: {type: "numeric", value: application.objGlobal.getDefaultCurrency().currencyID}
+                    currencyID: {type: "numeric", value: variables.currencyID},
+                    utcDate: {type: "date", value: local.utcDate}
                 },
                 sql = "
-                    SELECT  customer_bookings.intPlanID, customer_bookings.dteStartDate, customer_bookings.dteEndDate,
-                            customer_bookings.dteEndTestDate, customer_bookings.strRecurring,
+                    SELECT  customer_bookings.intPlanID,
+                            customer_bookings.strRecurring,
+                            DATE_FORMAT(customer_bookings.dteStartDate, '%Y-%m-%e') as dteStartDate,
+                            DATE_FORMAT(customer_bookings.dteEndDate, '%Y-%m-%e') as dteEndDate,
+                            DATE_FORMAT(customer_bookings.dteEndTestDate, '%Y-%m-%e') as dteEndTestDate,
                             plans.intMaxUsers, plans.blnFree,
                             (
                                 IF
@@ -625,11 +631,15 @@ component displayname="plans" output="false" {
                                 SELECT decPriceMonthly
                                 FROM plan_prices
                                 WHERE intPlanID = plans.intPlanID
-                                AND intCurrencyID = :currency
+                                AND intCurrencyID = :currencyID
                             ) as decPriceMonthly
                     FROM customer_bookings
                     INNER JOIN plans ON customer_bookings.intPlanID = plans.intPlanID
                     WHERE customer_bookings.intCustomerID = :customerID
+                    AND DATE(customer_bookings.dteStartDate) <= DATE(:utcDate)
+                    AND (DATE(customer_bookings.dteEndDate) >= DATE(:utcDate) OR DATE(dteEndTestDate) >= DATE(:utcDate))
+                    LIMIT 1
+
                 "
             )
 

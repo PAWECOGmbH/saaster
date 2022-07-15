@@ -18,7 +18,7 @@ setting requesttimeout = 1000;
 param name="url.pass" default="";
 if (url.pass eq variables.schedulePassword) {
 
-    utcDate = now();
+    utcDate = dateFormat(now(), "yyyy-mm-dd");
     objInvoice = new com.invoices();
     objPrices = new com.prices();
     objPayrexx = new com.payrexx();
@@ -26,7 +26,7 @@ if (url.pass eq variables.schedulePassword) {
     qRenewBookings = queryExecute(
         options = {datasource = application.datasource},
         params = {
-            utcDate: {type: "datetime", value: utcDate}
+            utcDate: {type: "date", value: utcDate}
         },
         sql = "
             SELECT *

@@ -90,7 +90,7 @@
                             <cfset toManyUsers = false>
                             <cfset alertDowngrade = false>
                             <cfset alertUpgrade = false>
-                            <cfif len(trim(session.currentPlan.status)) and session.currentPlan.status neq "expired" and session.currentPlan.status neq "test" and !i.onRequest>
+                            <cfif len(trim(session.currentPlan.status)) and session.currentPlan.status neq "expired" and !i.onRequest>
                                 <cfif i.priceMonthly lt session.currentPlan.priceMonthly>
                                     <!--- Check whether the customer has registered more users than the new plan provides --->
                                     <cfif (i.maxUsers gt 0) and application.objUser.getAllUsers(session.customer_id).recordCount gt i.maxUsers>
@@ -102,6 +102,9 @@
                                     <cfset alertUpgrade = true>
                                 </cfif>
                             </cfif>
+
+
+                            <cfdump  var="#toManyUsers#">
 
                             <cfif toManyUsers>
 
@@ -118,17 +121,17 @@
                                     <!--- Button free --->
                                     <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
 
-                                        <cfif alertDowngrade>
-                                            <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkO#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
-                                        <cfelse>
+                                        <!--- <cfif alertDowngrade> --->
+                                            <!--- <a class="btn w-100 plan" onclick="sweetAlert('warning', '#i.bookingLinkO#', '#getTrans('titDowngrade')#', '#getTrans('txtYouAreDowngrading')#', '#getTrans('btnWantWait')#', '#getTrans('btnYesDowngrade')#')">#getTrans('btnActivate')#</a>
+                                        <cfelse> --->
                                             <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
-                                        </cfif>
+                                        <!--- </cfif> --->
 
                                     </div>
 
                                 <cfelse>
 
-                                    <cfif alertDowngrade>
+                                    <!--- <cfif alertDowngrade>
 
                                         <!--- Button monthly --->
                                         <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
@@ -173,7 +176,7 @@
                                             </div>
                                         </cfif>
 
-                                    <cfelse>
+                                    <cfelse> --->
 
                                         <!--- Button monthly --->
                                         <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
@@ -184,7 +187,7 @@
                                             <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </div>
 
-                                    </cfif>
+                                    <!--- </cfif> --->
 
                                 </cfif>
 
@@ -200,7 +203,7 @@
                             </cfif>
 
                             <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register?redirect=plans" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                                <a href="#application.mainURL#/register?redirect=#redirectLink#" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                         </cfif>
