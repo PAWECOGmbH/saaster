@@ -33,7 +33,7 @@ component displayname="cancel" output="false" {
             },
             sql = "
                 SELECT intCustomerID
-                FROM customer_bookings
+                FROM bookings
                 WHERE intCustomerID = :customerID
                 AND #variables.thisField# = :thisID
             "
@@ -69,12 +69,12 @@ component displayname="cancel" output="false" {
                 },
                 sql = "
 
-                    UPDATE customer_bookings
+                    UPDATE bookings
                     SET strRecurring = :recurring
                     WHERE intCustomerID = :customerID
                     AND #variables.thisField# = :thisID;
 
-                    INSERT INTO customer_bookings_history (intCustomerID, #variables.thisField#, strRecurring)
+                    INSERT INTO bookings_history (intCustomerID, #variables.thisField#, strRecurring)
                     VALUES (:customerID, :thisID, :recurring)
 
                 "
@@ -121,7 +121,7 @@ component displayname="cancel" output="false" {
                 },
                 sql = "
 
-                    UPDATE customer_bookings
+                    UPDATE bookings
                     SET strRecurring = :recurring
                     WHERE intCustomerID = :customerID
                     AND #variables.thisField# = :thisID

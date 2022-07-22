@@ -30,7 +30,7 @@ if (url.pass eq variables.schedulePassword) {
         },
         sql = "
             SELECT *
-            FROM customer_bookings
+            FROM bookings
             WHERE (DATE(dteEndDate) <= DATE(:utcDate) OR DATE(dteEndTestDate) <= DATE(:utcDate))
             AND (strRecurring = 'monthly' OR strRecurring = 'yearly' OR strRecurring = 'canceled')
         "
@@ -358,11 +358,11 @@ if (url.pass eq variables.schedulePassword) {
                     },
                     sql = "
 
-                        DELETE FROM customer_bookings
+                        DELETE FROM bookings
                         WHERE intCustomerID = :customerID
                         AND intModuleID = :moduleID;
 
-                        INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dteStartDate, dteEndDate, strRecurring)
+                        INSERT INTO bookings_history (intCustomerID, intModuleID, dteStartDate, dteEndDate, strRecurring)
                         VALUES (:customerID, :moduleID, :dateStart, :dateEnd, :recurring)
 
                     "
@@ -381,7 +381,7 @@ if (url.pass eq variables.schedulePassword) {
                     },
                     sql = "
 
-                        DELETE FROM customer_bookings
+                        DELETE FROM bookings
                         WHERE intCustomerID = :customerID
                         AND intPlanID = :planID
 

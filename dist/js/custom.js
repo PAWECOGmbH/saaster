@@ -7,7 +7,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		dangerMode = false;
 	}
 
-	if (buttonOne != '' && buttonTwo != '') {
+	if (buttonTwo != '') {
 
 		swal({
 			title: textOne,
@@ -20,7 +20,6 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			if (willDelete) {
 				window.location.href = thisURL;
 			};
-			/* refreshThings(); */
 		});
 
 	} else {
@@ -28,9 +27,8 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: type
-		/* }).then(function(){
-			refreshThings(); */
+			icon: type,
+			buttons: [buttonOne]
 		});
 
 	}
@@ -264,7 +262,7 @@ $(document).ready(function(){
 
 	}); */
 
-
+	// Update the plan
 	$('.plan_edit').on('click', function(){
 
 		var plan_id = $(this).val();

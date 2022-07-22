@@ -2,29 +2,36 @@
 <cfscript>
 
     // Here we process the payment via Payrexx
-
+    // It's used for onetime paid modules or for new recurring plans/modules
+    // Hint: For recurring payments we charge the amount directly via transaction id
 
     objPayrexx = new com.payrexx();
     paymentStruct = structNew();
 
     if (structKeyExists(url, "module")) {
-        recurring = moduleStruct.recurring;
-        thisStruct = moduleDetails;
+
         redirectString = "#application.mainURL#/book?module=#url.module#&psp_response=";
         failLink = "#application.mainURL#/account-settings/modules";
         paymentStruct['purpose'] = thisStruct.name;
+
     } else {
-        recurring = planStruct.recurring;
-        thisStruct = planDetails;
+
         redirectString = "#application.mainURL#/book?plan=#url.plan#&psp_response=";
         failLink = "#application.mainURL#/plans";
         paymentStruct['purpose'] = thisStruct.planName;
+
     }
+
+    // If it's a onetime paid module, charge the amount immediately
     if (structKeyExists(thisStruct, "priceOneTimeAfterVAT") and thisStruct.priceOneTimeAfterVAT gt 0) {
+
         thisAmount = thisStruct.priceOneTimeAfterVAT * 100;
         paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
         paymentStruct['preAuthorization'] = false;
+
     } else {
+
+        // If it's a recurring plan or module, only make a preAuthorization
         if (recurring eq "yearly") {
             thisAmount = thisStruct.priceYearlyAfterVAT * 100;
             paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
@@ -34,6 +41,7 @@
             paymentStruct['amount'] = numberFormat(thisAmount, "__.__");
             paymentStruct['preAuthorization'] = true;
         }
+
     }
 
     paymentStruct['skipResultPage'] = true;

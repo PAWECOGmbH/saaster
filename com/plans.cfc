@@ -292,9 +292,6 @@ component displayname="plans" output="false" {
             "
         )
 
-        //dump(local.getPlan);
-        //abort;
-
         local.arrPlan = arrayNew(1);
 
         if (local.getPlan.recordCount) {
@@ -314,7 +311,7 @@ component displayname="plans" output="false" {
                 local.structPlan['buttonName'] = '';
                 local.structPlan['bookingLinkM'] = '';
                 local.structPlan['bookingLinkY'] = '';
-                local.structPlan['bookingLinkF'] = '';
+                local.structPlan['bookingLinkO'] = '';
                 local.structPlan['recommended'] = 0;
                 local.structPlan['maxUsers'] = 0;
                 local.structPlan['testDays'] = 0;
@@ -345,7 +342,7 @@ component displayname="plans" output="false" {
                 if (len(trim(local.getPlan.strBookingLink))) {
                     local.structPlan['bookingLinkM'] = local.getPlan.strBookingLink;
                     local.structPlan['bookingLinkY'] = local.getPlan.strBookingLink;
-                    local.structPlan['bookingLinkF'] = local.getPlan.strBookingLink;
+                    local.structPlan['bookingLinkO'] = local.getPlan.strBookingLink;
                 }
                 if (isBoolean(local.getPlan.blnRecommended)) {
                     local.structPlan['recommended'] = local.getPlan.blnRecommended;
@@ -400,13 +397,13 @@ component displayname="plans" output="false" {
                 local.structPlan['priceMonthlyAfterVAT'] = local.objPrices.getPriceData(price=local.getPlan.decPriceMonthly).priceAfterVAT;
                 local.structPlan['priceYearlyAfterVAT'] = local.objPrices.getPriceData(price=local.getPlan.decPriceYearly).priceAfterVAT;
 
+
                 // Build the booking link
-
-                // bookingLinkM: monthly
-                // bookingLinkY: yearly
-                // bookingLinkO: onetime/free
-
                 if (!len(trim(local.getPlan.strBookingLink))) {
+
+                    // bookingLinkM: monthly
+                    // bookingLinkY: yearly
+                    // bookingLinkO: onetime/free
 
                     local.objBook = new com.book();
                     local.bookingStringM = local.objBook.init('plan').createBookingLink(getPlan.intPlanID, variables.lngID, variables.currencyID, "monthly", "plan");
@@ -585,10 +582,11 @@ component displayname="plans" output="false" {
         local.planStruct['maxUsers'] = 1;
         local.planStruct['startDate'] = "";
         local.planStruct['endDate'] = "";
-        local.planStruct['endTestDate'] = "";
         local.planStruct['modulesIncluded'] = "";
         local.planStruct['recurring'] = "";
         local.planStruct['priceMonthly'] = 0;
+
+        local.nextPlan = structNew();
 
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
@@ -601,11 +599,9 @@ component displayname="plans" output="false" {
                     utcDate: {type: "date", value: local.utcDate}
                 },
                 sql = "
-                    SELECT  customer_bookings.intPlanID,
-                            customer_bookings.strRecurring,
-                            DATE_FORMAT(customer_bookings.dteStartDate, '%Y-%m-%e') as dteStartDate,
-                            DATE_FORMAT(customer_bookings.dteEndDate, '%Y-%m-%e') as dteEndDate,
-                            DATE_FORMAT(customer_bookings.dteEndTestDate, '%Y-%m-%e') as dteEndTestDate,
+                    SELECT  bookings.intBookingID, bookings.strRecurring, bookings.intPlanID, bookings.strStatus,
+                            DATE_FORMAT(bookings.dteStartDate, '%Y-%m-%e') as dteStartDate,
+                            DATE_FORMAT(bookings.dteEndDate, '%Y-%m-%e') as dteEndDate,
                             plans.intMaxUsers, plans.blnFree,
                             (
                                 IF
@@ -633,12 +629,12 @@ component displayname="plans" output="false" {
                                 WHERE intPlanID = plans.intPlanID
                                 AND intCurrencyID = :currencyID
                             ) as decPriceMonthly
-                    FROM customer_bookings
-                    INNER JOIN plans ON customer_bookings.intPlanID = plans.intPlanID
-                    WHERE customer_bookings.intCustomerID = :customerID
-                    AND DATE(customer_bookings.dteStartDate) <= DATE(:utcDate)
-                    AND (DATE(customer_bookings.dteEndDate) >= DATE(:utcDate) OR DATE(dteEndTestDate) >= DATE(:utcDate))
-                    LIMIT 1
+                    FROM bookings
+                    INNER JOIN plans ON bookings.intPlanID = plans.intPlanID
+                    WHERE bookings.intCustomerID = :customerID
+                    AND (DATE(bookings.dteStartDate) <= DATE(:utcDate)
+                    AND DATE(bookings.dteEndDate) >= DATE(:utcDate))
+                    OR bookings.strStatus = 'waiting'
 
                 "
             )
@@ -646,67 +642,36 @@ component displayname="plans" output="false" {
 
             if (local.qCurrentPlan.recordCount) {
 
-                local.planStruct['planID'] = local.qCurrentPlan.intPlanID;
-                local.planStruct['planName'] = local.qCurrentPlan.strPlanName;
-                local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
-                local.planStruct['startDate'] = local.qCurrentPlan.dteStartDate;
-                local.planStruct['endDate'] = local.qCurrentPlan.dteEndDate;
-                local.planStruct['endTestDate'] = local.qCurrentPlan.dteEndTestDate;
-                local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
-                local.planStruct['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
+                // We must loop because there could be more than only one entry, but max. two
+                loop query=local.qCurrentPlan {
+
+                    // The first entry is the current plan
+                    if (local.qCurrentPlan.currentrow eq 1) {
+
+                        local.planStruct['planID'] = local.qCurrentPlan.intPlanID;
+                        local.planStruct['planName'] = local.qCurrentPlan.strPlanName;
+                        local.planStruct['status'] = local.qCurrentPlan.strStatus;
+                        local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
+                        local.planStruct['startDate'] = dateFormat(local.qCurrentPlan.dteStartDate, 'yyyy-mm-dd');
+                        local.planStruct['endDate'] = dateFormat(local.qCurrentPlan.dteEndDate, 'yyyy-mm-dd');
+                        local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
+                        local.planStruct['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
+                        local.planStruct['bookingID'] = local.qCurrentPlan.intBookingID;
+
+                    }
 
 
-                // Is already a plan defined?
-                if (local.qCurrentPlan.intPlanID gt 0) {
+                    // If we get more than one entry, there must be another plan after the expiration
+                    if (local.qCurrentPlan.currentrow eq 2) {
 
-                    // Is the plan canceled?
-                    if (local.qCurrentPlan.strRecurring eq "canceled") {
-
-                        local.planStruct['status'] = 'canceled';
-
-                    } else {
-
-                        // Is a test phase running?
-                        if (isDate(local.qCurrentPlan.dteStartDate) and isDate(local.qCurrentPlan.dteEndTestDate)) {
-
-                            // Is the test phase still valid? | YES
-                            if (dateDiff("d", now(), local.qCurrentPlan.dteEndTestDate) gte 0) {
-
-                                local.planStruct['status'] = 'test';
-
-                            // NO
-                            } else {
-
-                                local.planStruct['status'] = 'expired';
-
-                            }
-
-                        } else {
-
-                            // See if there is a free plan running
-                            if (local.qCurrentPlan.blnFree) {
-
-                                local.planStruct['status'] = 'free';
-
-                            } else {
-
-                                // Is a plan running?
-                                if (isDate(local.qCurrentPlan.dteEndDate)) {
-
-                                    local.planStruct['status'] = 'active';
-
-                                    // Still valid?
-                                    if (dateDiff("d", now(), local.qCurrentPlan.dteEndDate) lt 0) {
-
-                                        local.planStruct['status'] = 'expired';
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
+                        // Append the second plan to the existing struct
+                        local.nextPlan['planID'] = local.qCurrentPlan.intPlanID;
+                        local.nextPlan['planName'] = local.qCurrentPlan.strPlanName;
+                        local.nextPlan['maxUsers'] = local.qCurrentPlan.intMaxUsers;
+                        local.nextPlan['startDate'] = dateFormat(local.qCurrentPlan.dteStartDate, 'yyyy-mm-dd');
+                        local.nextPlan['endDate'] = dateFormat(local.qCurrentPlan.dteEndDate, 'yyyy-mm-dd');
+                        local.nextPlan['recurring'] = local.qCurrentPlan.strRecurring;
+                        local.nextPlan['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
 
                     }
 
@@ -718,6 +683,8 @@ component displayname="plans" output="false" {
             }
 
         }
+
+        local.planStruct['nextPlan'] = local.nextPlan;
 
         return local.planStruct;
 
@@ -908,13 +875,13 @@ component displayname="plans" output="false" {
                 customerID: {type: "numeric", value: arguments.customerID}
             },
             sql = "
-                SELECT  customer_bookings.intPlanID, customer_bookings.dteStartDate, customer_bookings.dteEndDate,
-                        customer_bookings.strRecurring, customer_bookings.intPlanID,
+                SELECT  bookings.intPlanID, bookings.dteStartDate, bookings.dteEndDate,
+                        bookings.strRecurring, bookings.intPlanID,
                         invoices.decSubTotalPrice, invoices.intVatType, invoices.strCurrency
-                FROM customer_bookings
+                FROM bookings
                 INNER JOIN invoices ON 1=1
-                AND customer_bookings.intBookingID = invoices.intBookingID
-                AND customer_bookings.intCustomerID = :customerID
+                AND bookings.intBookingID = invoices.intBookingID
+                AND bookings.intCustomerID = :customerID
                 AND invoices.intPaymentStatusID = 3
                 ORDER BY invoices.intInvoiceID DESC
                 LIMIT 1
@@ -926,27 +893,27 @@ component displayname="plans" output="false" {
 
         if (local.qPaidAmount.recordCount) {
 
-            // The amount the customer has paid
+            // The amount the customer has paid (without vat)
             local.paidAmount = local.qPaidAmount.decSubTotalPrice;
 
-            // Check whether its a yearly or monthly subscription
-            local.recurring = local.qPaidAmount.strRecurring;
+            // Get the recurring of the current plan
+            local.currentRecurring = getCurrentPlan(arguments.customerID).recurring;
 
-            // How many days has the current subscription?
-            if (arguments.recurring eq "yearly") {
-                local.subscriptionDays = daysInYear(local.qPaidAmount.dteStartDate);
+            // Price per day
+            if (local.currentRecurring eq "yearly") {
+                local.pricePerDay = local.paidAmount/365;
             } else {
-                local.subscriptionDays = daysInMonth(local.qPaidAmount.dteStartDate);
+                local.pricePerDay = local.paidAmount/30;
             }
 
             // How many days has the current subscription been running?
             local.daysRunning = dateDiff("d", local.qPaidAmount.dteStartDate, now());
 
-            // Calculate the day price of the current subscription
-            local.dayPrice = numberFormat(local.paidAmount/local.subscriptionDays, "__.__");
+            // Cost of the number of running days
+            local.costRunningDays = local.daysRunning*local.pricePerDay;
 
-            // The price to be charged for the old subscription
-            local.priceToChargeOld = local.daysRunning * local.dayPrice;
+            // Credit for not used days
+            local.credit = local.paidAmount - local.costRunningDays;
 
 
             // Get the data of the new plan ////////////////////
@@ -959,22 +926,14 @@ component displayname="plans" output="false" {
                 local.newPrice = local.planData.priceMonthly;
             }
 
-            // Calculate the day price of the new plan
-            local.dayPriceNew = numberFormat(local.newPrice/local.subscriptionDays, "__.__");
-
-            // How many days till the end of the period?
-            local.daysTillEnd = local.subscriptionDays - dateFormat(now(), "d");
-
             // The price to be charged for the new subscription (now)
-            local.priceToChargeNew = local.daysTillEnd * local.dayPriceNew;
+            local.priceToChargeNow = numberFormat(local.newPrice - local.credit, "__.__");
 
-            // Old and new together less amount already paid
-            local.priceToChargeTotal = local.priceToChargeOld + local.priceToChargeNew - local.paidAmount;
 
             local.upgradeStruct['oldPlanID'] = local.qPaidAmount.intPlanID;
             local.upgradeStruct['newPlanID'] = arguments.newPlanID;
             local.upgradeStruct['paidAmount'] = local.paidAmount;
-            local.upgradeStruct['toPayNow'] = local.priceToChargeTotal;
+            local.upgradeStruct['toPayNow'] = local.priceToChargeNow;
             local.upgradeStruct['currency'] = local.qPaidAmount.strCurrency;
             local.upgradeStruct['recurring'] = arguments.recurring;
 
@@ -988,7 +947,7 @@ component displayname="plans" output="false" {
     }
 
 
-    public struct function updateCurrentPlan(required struct plan) {
+    /* public struct function updateCurrentPlan(required struct plan) {
 
         local.returnArgs = structNew();
         local.returnArgs['success']  = false;
@@ -1035,7 +994,7 @@ component displayname="plans" output="false" {
                 },
                 sql = "
 
-                    UPDATE customer_bookings
+                    UPDATE bookings
                     SET dteStartDate = :dateStart,
                         dteEndDate = :dateEnd,
                         strRecurring = :recurring,
@@ -1062,7 +1021,7 @@ component displayname="plans" output="false" {
             },
             sql = "
                 SELECT intBookingID
-                FROM customer_bookings
+                FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intPlanID = :newPlanID
             "
@@ -1073,7 +1032,7 @@ component displayname="plans" output="false" {
         return local.returnArgs;
 
 
-    }
+    } */
 
 
 }

@@ -293,7 +293,7 @@ component displayname="modules" output="false" {
                 },
                 sql = "
                     SELECT intModuleID
-                    FROM customer_bookings
+                    FROM bookings
                     WHERE intCustomerID = :customerID
                     AND intModuleID > 0
                 "
@@ -370,7 +370,7 @@ component displayname="modules" output="false" {
                 },
                 sql = "
                     SELECT intModuleID, strRecurring, dteStartDate, dteEndDate, dteEndTestDate
-                    FROM customer_bookings
+                    FROM bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID
                 "
@@ -497,7 +497,7 @@ component displayname="modules" output="false" {
                 },
                 sql = "
 
-                    UPDATE customer_bookings
+                    UPDATE bookings
                     SET dteStartDate = :dateStart,
                         dteEndDate = :dateEnd,
                         strRecurring = :recurring
@@ -523,7 +523,7 @@ component displayname="modules" output="false" {
             },
             sql = "
                 SELECT intBookingID
-                FROM customer_bookings
+                FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
             "

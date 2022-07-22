@@ -68,7 +68,7 @@
             },
             sql = "
                 SELECT intModuleID
-                FROM customer_bookings_history
+                FROM bookings_history
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
                 AND LENGTH(dteEndTestDate) > 0

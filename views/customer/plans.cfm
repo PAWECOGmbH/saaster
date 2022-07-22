@@ -9,29 +9,26 @@
         location url="#application.mainURL#/plans" addtoken="false";
     }
 
-
-    objPlans = new com.plans();
-    objInvoices = new com.invoices();
-    objPrices = new com.prices();
-
-    // Get plan data using the booked plan
-    planDetail = objPlans.getPlanDetail(bookedPlan.planID);
-
     // Get the currency of the last invoice
-    invoices = objInvoices.getInvoices(session.customer_id, 0, 1);
-    if (invoices.totalCount gt 0) {
-        currency = invoices.arrayInvoices[1].invoiceCurrency;
-        currencyID = objPrices.getCurrency(currency).id;
-    } else {
+    currency = application.objCustomer.getCustomerData(session.customer_id).strCurrency;
+
+    // Init prices
+    objPrices = new com.prices(language=session.lng, currency=currency);
+
+    // Get the currency id of the last invoice
+    currencyID = objPrices.getCurrency(currency).id;
+    if (currencyID eq 0) {
         currencyID = objPrices.getCurrency().id;
     }
 
-    // Get all plans of the current plan group
-    objPlan = objPlans.init(language=session.lng, currencyID=currencyID);
-    planArray = objPlan.getPlans(planDetail.planGroupID);
+    // Init plans
+    objPlans = new com.plans(language=session.lng, currencyID=currencyID);
 
+    // Get plan data using the booked plan
+    planDetail = objPlans.getPlanDetail(bookedPlan.planID);
+    planArray = objPlans.getPlans(planDetail.planGroupID);
 
-    dump(bookedPlan);
+    //dump(planArray);
 
 
 
@@ -74,51 +71,56 @@
                         <div class="card-body">
                             <div class="row">
 
-                                <div class="col-lg-4">
+                                <div class="col-lg-5">
 
                                     <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">1</span> #getTrans('titYourPlan')#:</h2>
 
                                     <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column mb-3">
                                     <cfloop array="#planArray#" index="i">
-                                        <cfif !i.onRequest>
-                                            <label class="form-selectgroup-item flex-fill">
-                                                <input type="radio" name="planID" value="#i.planID#" class="form-selectgroup-input plan_edit" <cfif bookedPlan.planID eq i.planID>checked</cfif>>
-                                                <div class="form-selectgroup-label d-flex align-items-top p-3">
-                                                    <div class="me-3">
-                                                        <span class="form-selectgroup-check"></span>
+                                        <label class="form-selectgroup-item flex-fill">
+                                            <input type="radio" name="planID" value="#i.planID#" class="form-selectgroup-input plan_edit" <cfif i.onRequest>disabled="true"</cfif> <cfif bookedPlan.planID eq i.planID>checked</cfif>>
+                                            <div class="form-selectgroup-label d-flex align-items-top p-3">
+                                                <div class="me-3">
+                                                    <span class="form-selectgroup-check"></span>
+                                                </div>
+                                                <div>
+                                                    <div class="card-title mb-4">#i.planName#</div>
+                                                    <div class="card-subtitle">
+                                                        #getTrans('txtMonthlyPayment')#:
+                                                        <cfif i.onRequest>
+                                                            <b>#getTrans('txtOnRequest')#</b>
+                                                        <cfelseif i.itsFree eq 1>
+                                                            <b>#getTrans('txtFree')#</b>
+                                                        <cfelse>
+                                                            <b>#i.currencySign# #lsCurrencyFormat(i.priceMonthly, "none")#</b> #lcase(getTrans('txtMonthly'))#<br />
+                                                            <span class="small">
+                                                                #i.vat_text_monthly#
+                                                            </span>
+                                                        </cfif>
+                                                    </div>
+                                                    <div class="card-subtitle">
+                                                        #getTrans('txtYearlyPayment')#:
+                                                        <cfif i.onRequest>
+                                                            <b>#getTrans('txtOnRequest')#</b>
+                                                        <cfelseif i.itsFree eq 1>
+                                                            <b>#getTrans('txtFree')#</b>
+                                                        <cfelse>
+                                                            <b>#i.currencySign# #lsCurrencyFormat(i.priceYearly, "none")#</b> #lcase(getTrans('txtYearly'))#<br />
+                                                            <span class="small">
+                                                                #i.vat_text_yearly#
+                                                            </span>
+                                                        </cfif>
                                                     </div>
                                                     <div>
-                                                        <div class="card-title mb-4">#i.planName#</div>
-                                                        <div class="card-subtitle">
-                                                            #getTrans('txtMonthlyPayment')#:
-                                                            <cfif i.itsFree eq 1>
-                                                                <b>#getTrans('txtFree')#</b>
-                                                            <cfelse>
-                                                                <b>#i.currencySign# #lsCurrencyFormat(i.priceMonthly, "none")#</b> #lcase(getTrans('txtMonthly'))#<br />
-                                                                <span class="small">
-                                                                    #i.vat_text_monthly#
-                                                                </span>
-                                                            </cfif>
-                                                        </div>
-                                                        <div class="card-subtitle">
-                                                            #getTrans('txtYearlyPayment')#:
-                                                            <cfif i.itsFree eq 1>
-                                                                <b>#getTrans('txtFree')#</b>
-                                                            <cfelse>
-                                                                <b>#i.currencySign# #lsCurrencyFormat(i.priceYearly, "none")#</b> #lcase(getTrans('txtYearly'))#<br />
-                                                                <span class="small">
-                                                                    #i.vat_text_yearly#
-                                                                </span>
-                                                            </cfif>
-
-                                                        </div>
-                                                        <div>
+                                                        <cfif i.onRequest>
+                                                            <p><a href="#i.bookingLinkM#" target="_blank">#i.buttonName#</a></p>
+                                                        <cfelse>
                                                             <p><a href="#application.mainURL#/plans" target="_blank">#getTrans('txtInformation')#</a></p>
-                                                        </div>
+                                                        </cfif>
                                                     </div>
                                                 </div>
-                                            </label>
-                                        </cfif>
+                                            </div>
+                                        </label>
                                     </cfloop>
                                     </div>
 
@@ -126,7 +128,7 @@
 
                                 <div class="col-lg-1"></div>
 
-                                <div class="col-lg-7">
+                                <div class="col-lg-6">
 
                                     <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">2</span> #getTrans('titBillingCycle')#:</h2>
 
@@ -166,37 +168,48 @@
                                     <h2 class="mb-4 mt-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">3</span> #getTrans('titOrderSummary')#:</h2>
 
                                     <div class="card">
-                                        <div class="card-body p-4">
+
+                                        <div class="card-body" id="change_plan">
+
+                                            <!--- Display the current plan --->
                                             <cfinclude  template="/includes/plan_view.cfm">
+
+                                            <cfif bookedPlan.status eq "expired">
+                                                <cfif bookedPlan.recurring eq "monthly">
+                                                    <p class="mt-4"><a href="#planDetail.bookingLinkM#" class="btn btn-success plan w-100">#getTrans('txtRenewNow')#</a></p>
+                                                <cfelse>
+                                                    <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success plan w-100">#getTrans('txtRenewNow')#</a></p>
+                                                </cfif>
+                                            <cfelse>
+                                                <cfif not structKeyExists(url, "recurring")>
+                                                    <p><a class="btn" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
+                                                </cfif>
+                                            </cfif>
+
                                         </div>
-                                        <div class="card-footer">
-                                            <div class="d-flex">
 
-                                                <div id="change_plan" class="row">
 
-                                                    <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
 
-                                                        <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
+                                        <!--- <cfif bookedPlan.status eq "active" or bookedPlan.status eq "test">
 
-                                                    <cfelseif session.currentPlan.status eq "canceled">
+                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
 
-                                                        <a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
+                                        <cfelseif bookedPlan.status eq "canceled">
 
-                                                    <cfelseif session.currentPlan.status eq "free">
+                                            <a href="#application.mainURL#/cancel?plan=#bookedPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
 
-                                                        <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
+                                        <cfelseif bookedPlan.status eq "free">
 
-                                                    <cfelseif session.currentPlan.status eq "expired">
+                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
 
-                                                        <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
+                                        <cfelseif bookedPlan.status eq "expired">
 
-                                                    </cfif>
+                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
 
-                                                    <a class="btn ms-auto" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#session.currentPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a>
+                                        </cfif> --->
 
-                                                </div>
-                                            </div>
-                                        </div>
+
+
                                     </div>
 
                                 </div>

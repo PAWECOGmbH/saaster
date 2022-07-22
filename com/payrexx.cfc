@@ -50,26 +50,10 @@ component displayname="payrexx" output="false" {
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
                 ORDER BY dtmTimeUTC DESC
-                LIMIT 1
             "
         )
 
-        local.webhookData = local.qWebhook;
-
-        if (!local.webhookData.recordCount) {
-
-            // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
-            loop from="1" to="10" index="i" {
-                sleep(1000);
-                local.webhookData = getWebhook(arguments.customerID, 'authorized');
-                if (local.webhookData.recordCount) {
-                    break;
-                }
-            }
-
-        }
-
-        return local.webhookData;
+        return local.qWebhook;
 
     }
 
@@ -119,6 +103,25 @@ component displayname="payrexx" output="false" {
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
                 cfhttp( url=local.callingURL, result="httpRes", method="POST" ) {
+                    cfhttpparam( name="Content-Type", type="header", value="application/json" );
+                    cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
+                    cfhttpparam( type="body", value=local.bodyString );
+                }
+
+                break;
+
+
+            case "DEL":
+
+                if (isNumeric(local.thisID)) {
+                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
+                } else {
+                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                }
+
+                local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
+
+                cfhttp( url=local.callingURL, result="httpRes", method="DELETE" ) {
                     cfhttpparam( name="Content-Type", type="header", value="application/json" );
                     cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
                     cfhttpparam( type="body", value=local.bodyString );

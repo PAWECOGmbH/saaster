@@ -333,7 +333,14 @@ component displayname="customer" output="false" {
                     defLang: {type: "varchar", value: local.defLang}
                 },
                 sql = "
-                    SELECT *
+                    SELECT *,
+                    (
+                        SELECT strCurrency
+                        FROM invoices
+                        WHERE intCustomerID = :customerID
+                        ORDER BY intInvoiceID DESC
+                        LIMIT 1
+                    ) as strCurrency
                     FROM customers
                     WHERE intCustomerID = :customerID
                 "

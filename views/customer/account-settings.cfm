@@ -1,6 +1,6 @@
 <cfscript>
 
-    objPlan = new com.plans(language=session.lng);
+    objPlans = new com.plans(language=session.lng);
     moduleArray = new com.modules().getAllModules();
 
 </cfscript>
@@ -85,6 +85,14 @@
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtViewInvoices')#</p>
                                 </a>
+                                <cfif session.superadmin>
+                                    <a href="#application.mainURL#/account-settings/payment" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titPaymentSettings')#</b></h4>
+                                        </div>
+                                        <p class="mb-1 ">#getTrans('txtPaymentSettings')#</p>
+                                    </a>
+                                </cfif>
                             </div>
                         </div>
                     </div>
@@ -94,21 +102,29 @@
                         <div class="card-header">
                             <h3 class="card-title">#getTrans('titPlansAndModules')#</h3>
                         </div>
-                        <div class="card-body ">
+                        <div class="card-body">
 
-                            <cfinclude  template="/includes/plan_view.cfm">
+                            <cfif session.currentPlan.planID gt 0>
 
-                            <cfif session.superAdmin>
-                                <cfif session.currentPlan.planID gt 0>
+                                <!--- Display the current plan --->
+                                <cfinclude template="/includes/plan_view.cfm">
+
+                                <cfif session.superAdmin>
+
                                     <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex justify-content-between">
                                             <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
                                         </div>
                                         <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
                                     </a>
-                                <cfelse>
-                                    <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
                                 </cfif>
+
+                            <cfelse>
+
+                                <p>#getTrans('msgNoPlanBooked')#</p>
+                                <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
                             </cfif>
 
                             <cfif arrayLen(moduleArray)>

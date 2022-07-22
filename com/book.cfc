@@ -1,10 +1,13 @@
 
 component displayname="book" output="false" {
 
-    public any function init(string type) {
+    public any function init(string type, string language) {
 
         param name="arguments.type" default="plan";
         variables.type = arguments.type;
+
+        param name="arguments.language" default="en";
+        variables.language = arguments.language;
 
         return this;
 
@@ -46,168 +49,475 @@ component displayname="book" output="false" {
     }
 
 
-    // Make a booking
-    public struct function makeBooking(required numeric customerID, required struct bookingData, required string recurring) {
+    // We prepare the booking requested by the customer and return the data. If required, an entry can be made in the DB immediately.
+    public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking) {
 
-        variables.argsReturnValue = structNew();
-        variables.argsReturnValue['message'] = "";
-        variables.argsReturnValue['success'] = false;
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
 
-        local.planID = "";
-        local.moduleID = "";
-
-        // Data of the plan/module to be booked
+        local.getTrans = application.objGlobal.getTrans;
         local.bookingData = arguments.bookingData;
-        dump(local.bookingData);
+        local.planID = 0;
+        local.moduleID = 0;
+        local.startDate = "";
+        local.endDate = "";
+        local.recurring = arguments.recurring;
+        local.canBook = true;
+        local.message = "";
+        local.amountToPay = 0;
+        local.status = "";
+        local.bookingID = 0;
+        local.invoiceID = 0;
+        local.firstPlan = false;
+        local.firstModule = false;
 
-        // Get the currency of the plan
-        if (isNumeric(local.bookingData.currencyID) and local.bookingData.currencyID) {
+        local.getTime = application.getTime;
+        local.theDateNow = local.getTime.utc2local(utcDate=now());
+
+        local.argsReturnValue = structNew();
+
+        local.messageStruct = structNew();
+        local.messageStruct['title'] = "";
+        local.messageStruct['message'] = "";
+
+        local.invoiceTitle = "";
+        local.invoicePositionTitle = "";
+        local.invoiceCurrency = "";
+        local.invoiceLanguage = "";
+
+
+        //dump(local.bookingData);
+
+
+        if (structKeyExists(local.bookingData, "planID")) {
+            local.planID = local.bookingData.planID;
+        }
+        if (structKeyExists(local.bookingData, "moduleID")) {
+            local.moduleID = local.bookingData.moduleID;
+        }
+        if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
             local.currencyID = local.bookingData.currencyID;
         } else {
-            local.currencyID = 0;
+            local.currencyID = new com.prices().getCurrency().id;
         }
 
-        local.startDate = "";
-        local.tillDate = "";
-        local.testTillDate = "";
-        local.recurring = "";
-        local.hadTest = false;
 
-        // Plan
-        if (variables.type eq "plan") {
+        // We have to book a plan
+        if (local.planID gt 0) {
 
-            // New plan ID
-            local.planID = local.bookingData.planID;
-
-            // Data of the plan the customer already has
+            // Get the current plan of the customer
             local.objPlans = new com.plans(currencyID=local.currencyID);
             local.currentPlan = local.objPlans.getCurrentPlan(arguments.customerID);
 
-            dump(local.currentPlan);
-            //abort;
+            //dump(local.currentPlan);
 
 
-            // Set the start date (first booking)
-            if (local.currentPlan.planID eq 0) {
+            // It's the first plan
+            if (!len(trim(local.currentPlan.status))) {
 
-                local.startDate = dateFormat(now(), "yyyy-mm-dd");
+                local.firstPlan = true;
 
-            // Set the start date (followed booking)
+                local.startDate = dateFormat(local.theDateNow, "yyyy-mm-dd");
+
+                // Do we have to provide any test days?
+                if (local.bookingData.testDays gt 0) {
+
+                    local.endDate = dateFormat(dateAdd("d", local.bookingData.testDays, local.startDate), "yyyy-mm-dd");
+                    local.status = "test";
+
+                } else {
+
+                    // Is it a free plan?
+                    if (local.bookingData.itsFree) {
+
+                         local.recurring = "onetime";
+                         local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+
+                    } else {
+
+                        // Define the end date
+                        if (local.recurring eq "monthly") {
+                            local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                            local.amountToPay = local.bookingData.priceMonthlyAfterVAT;
+                        } else if (local.recurring eq "yearly") {
+                            local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                            local.amountToPay = local.bookingData.priceYearlyAfterVAT;
+                        }
+
+                    }
+
+                    local.status = "active";
+
+                    // Set some invoice variables
+                    local.invoiceTitle = local.getTrans('titPlan') & ": " & local.bookingData.planName;
+                    local.invoicePositionTitle = local.bookingData.planName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                    local.invoiceCurrency = local.bookingData.currency;
+                    local.invoiceLanguage = variables.language;
+
+
+                }
+
+
+            // The customer has already a plan
             } else {
 
-                if (isDate(local.currentPlan.endTestDate)) {
-                    local.startDate = dateFormat(dateAdd("d", 1, local.currentPlan.endTestDate), "yyyy-mm-dd");
-                    local.hadTest = true;
-                } else {
+
+                // If the user is in test time
+                if (local.currentPlan.status eq "test") {
+
+                    // Define the start date
                     local.startDate = dateFormat(dateAdd("d", 1, local.currentPlan.endDate), "yyyy-mm-dd");
+
+                    // Define the end date
+                    if (local.recurring eq "monthly") {
+                        local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                        local.amountToPay = local.bookingData.priceMonthlyAfterVAT;
+                    } else if (local.recurring eq "yearly") {
+                        local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                        local.amountToPay = local.bookingData.priceYearlyAfterVAT;
+                    }
+
+                    local.status = "active";
+
+                    // Set some invoice variables
+                    local.invoiceTitle = local.getTrans('titPlan') & ": " & local.bookingData.planName;
+                    local.invoicePositionTitle = local.bookingData.planName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                    local.invoiceCurrency = local.bookingData.currency;
+                    local.invoiceLanguage = variables.language;
+
+
+                // If the user has an active plan it must be an up- or downgrade
+                } else if (local.currentPlan.status eq "active") {
+
+                    // The customer wants to change the cycle (same plan)
+                    if (local.currentPlan.planID eq local.bookingData.planID) {
+
+                        // From monthly to yearly
+                        if (local.currentPlan.recurring eq "monthly" and local.recurring eq "yearly") {
+
+                            // Define the start date
+                            local.startDate = dateFormat(local.theDateNow, "yyyy-mm-dd");
+
+                            // Define the end date
+                            local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                            local.planPrice = local.bookingData.priceYearlyAfterVAT;
+
+                            // Get the diffrence to pay today
+                            local.calculateUpgrade = local.objPlans.calculateUpgrade(arguments.customerID, local.planID, local.recurring);
+                            if (structKeyExists(local.calculateUpgrade, "toPayNow")) {
+                                local.amountToPay = local.calculateUpgrade.toPayNow;
+                            } else {
+                                local.amountToPay = local.planPrice;
+                            }
+
+                            local.status = "active";
+
+                            local.messageStruct['title'] = local.getTrans('titCycleChange');
+                            local.messageStruct['message'] = local.getTrans('txtYouAreUpgrading');
+                            local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
+
+                            // Set some invoice variables
+                            local.invoiceTitle = local.getTrans('titCycleChange') & " " & lcase(local.getTrans('txtMonthly')) & "/" & lcase(local.getTrans('txtYearly'));
+                            local.invoicePositionTitle = local.bookingData.planName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            local.invoiceCurrency = local.bookingData.currency;
+                            local.invoiceLanguage = variables.language;
+
+
+                        } else {
+
+
+                            // Define the start date (a downgrade begins at the end of the current plan)
+                            local.startDate = dateFormat(dateAdd("d", 1, local.currentPlan.endDate), "yyyy-mm-dd");
+
+                            // Define the end date
+                            local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+
+                            local.status = "waiting";
+
+                            local.messageStruct['title'] = local.getTrans('titCycleChange');
+                            local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(application.getTime.utc2local(utcDate=local.startDate));
+                            local.messageStruct['button'] = local.getTrans('btnYesDowngrade');
+
+
+                        }
+
+
+
+                    } else {
+
+
+                        // Upgrade
+                        if (local.bookingData.priceMonthly gt local.currentPlan.priceMonthly) {
+
+                            // Define the start date
+                            local.startDate = dateFormat(local.theDateNow, "yyyy-mm-dd");
+
+                            // Define the end date
+                            if (local.recurring eq "monthly") {
+                                local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                                local.planPrice = local.bookingData.priceMonthlyAfterVAT;
+                            } else if (local.recurring eq "yearly") {
+                                local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                                local.planPrice = local.bookingData.priceYearlyAfterVAT;
+                            }
+
+                            local.status = "active";
+
+                            // Get the amount to pay
+                            local.calculateUpgrade = local.objPlans.calculateUpgrade(arguments.customerID, local.planID, local.recurring);
+                            if (structKeyExists(local.calculateUpgrade, "toPayNow")) {
+                                local.amountToPay = local.calculateUpgrade.toPayNow;
+                            } else {
+                                local.amountToPay = local.planPrice;
+                            }
+
+                            local.messageStruct['title'] = local.getTrans('titUpgrade');
+                            local.messageStruct['message'] = local.getTrans('txtYouAreUpgrading');
+                            local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
+
+                            // Set some invoice variables
+                            local.invoiceTitle = local.getTrans('titUpgrade') & ": " & local.bookingData.planName;
+                            local.invoicePositionTitle = local.bookingData.planName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            local.invoiceCurrency = local.bookingData.currency;
+                            local.invoiceLanguage = variables.language;
+
+
+
+                        // Downgrade
+                        } else {
+
+
+                            // Check whether the customer has registered more users than the new plan provides
+                            if ((local.bookingData.maxUsers gt 0) and (application.objUser.getAllUsers(arguments.customerID).recordCount gt local.bookingData.maxUsers)) {
+
+                                local.canBook = false;
+                                local.usersToDelete = application.objUser.getAllUsers(arguments.customerID).recordCount - local.bookingData.maxUsers;
+
+                                local.messageStruct['title'] = local.getTrans('titDowngradeNotPossible');
+                                local.messageStruct['message'] = local.getTrans('txtDowngradeNotPossibleText') & " " & local.usersToDelete;
+                                local.messageStruct['button'] = local.getTrans('btnToTheUsers');
+                                local.messageStruct['link'] = application.mainURL & "/account-settings/users";
+
+                            } else {
+
+
+                                // Define the start date (a downgrade begins at the end of the current plan)
+                                local.startDate = dateFormat(dateAdd("d", 1, local.currentPlan.endDate), "yyyy-mm-dd");
+
+                                // Define the end date
+                                if (local.recurring eq "monthly") {
+                                    local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                                } else if (local.recurring eq "yearly") {
+                                    local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                                }
+
+                                local.status = "waiting";
+
+
+                                local.messageStruct['title'] = local.getTrans('titDowngrade');
+                                local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(application.getTime.utc2local(utcDate=local.startDate));
+                                local.messageStruct['button'] = local.getTrans('btnYesDowngrade');
+
+
+                            }
+
+                        }
+
+                    }
+
+
                 }
 
             }
 
-            // Free plan
-            if (local.bookingData.itsFree eq 1) {
-
-                local.recurring = "onetime";
-
-            }
-
-            // Test days
-            if (local.bookingData.testDays gt 0 and !local.hadTest) {
-
-                local.testTillDate = dateFormat(dateAdd("d", local.bookingData.testDays, local.startDate), "yyyy-mm-dd");
-
-            // Live plan
-            } else {
-
-                if (arguments.recurring eq "yearly") {
-
-                    // Yearly subscription
-                    local.tillDate = dateAdd("yyyy", 1, local.startDate);
-                    local.tillDate = dateFormat(dateAdd("d", -1, local.tillDate), "yyyy-mm-dd");
-                    local.recurring = "yearly";
-
-                } else {
-
-                    // Monthly subscription
-                    local.tillDate = dateAdd("m", 1, local.startDate);
-                    local.tillDate = dateFormat(dateAdd("d", -1, local.tillDate), "yyyy-mm-dd");
-                    local.recurring = "monthly";
-
-                }
-
-            }
 
 
-
-
-
-            dump(local.startDate);
-            dump(local.tillDate);
-            dump(local.testTillDate);
-            dump(local.recurring);
-            dump(local.hadTest);
-
-
-
-
-
-
-
-
-        // Data of the modules the customer already has
+        // We have to book a module
         } else {
 
-            local.objModules = new com.modules(currencyID=local.currencyID);
-            local.currentData = local.objModules.getBookedModules(arguments.customerID);
-            local.moduleID = local.bookingData.moduleID;
-            local.planID = "";
+            local.firstModule = true;
+
 
         }
 
 
 
-        // Insert booking
-        try {
+        // If desired, we save the plan or module
+        if (structKeyExists(arguments, "makeBooking") and arguments.makeBooking) {
 
-            queryExecute (
-                options = {datasource = application.datasource, result = "qNewID"},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID},
-                    planID: {type: "numeric", value: local.planID},
-                    moduleID: {type: "numeric", value: local.moduleID},
-                    dateStart: {type: "date", value: local.startDate},
-                    dateEnd: {type: "date", value: local.tillDate},
-                    dateTestEnd: {type: "date", value: local.testTillDate},
-                    recurring: {type: "varchar", value: local.recurring}
-                },
-                sql = "
+            try {
 
-                    INSERT INTO customer_bookings (intCustomerID, intPlanID, intModuleID, dteStartDate, dteEndDate, dteEndTestDate, strRecurring)
-                    VALUES (:customerID, :planID, :moduleID, :dateStart, :dateEnd, :dateTestEnd, :recurring)
+                queryExecute (
+                    options = {datasource = application.datasource, result="newID"},
+                    params = {
+                        customerID: {type: "numeric", value: arguments.customerID},
+                        planID: {type: "numeric", value: local.planID},
+                        moduleID: {type: "numeric", value: local.moduleID},
+                        dateStart: {type: "date", value: local.startDate},
+                        dateEnd: {type: "date", value: local.endDate},
+                        recurring: {type: "varchar", value: local.recurring},
+                        status: {type: "varchar", value: local.status}
+                    },
+                    sql = "
+                        INSERT INTO bookings (intCustomerID, intPlanID, intModuleID, dteStartDate, dteEndDate, strRecurring, strStatus)
+                        VALUES (:customerID, :planID, :moduleID, :dateStart, :dateEnd, :recurring, :status)
+                    "
+                )
 
-                "
-            )
+                local.bookingID = newID.generated_key;
 
-            argsReturnValue['bookingID'] = qNewID.generated_key;
-            argsReturnValue['message'] = "OK";
-            argsReturnValue['success'] = true;
+            } catch (any e) {
+
+                local.argsReturnValue['message'] = e.message;
+                local.argsReturnValue['success'] = false;
+                return local.argsReturnValue;
+
+            }
 
 
-        } catch (any e) {
 
-            argsReturnValue['message'] = e.message;
+
+            // If desired, we make an invoice and try to charge the amount via Payrexx
+            if (structKeyExists(arguments, "makeInvoice") and arguments.makeInvoice) {
+
+                local.objInvoice = new com.invoices();
+                local.objPrices = new com.prices(
+                    vat=local.bookingData.vat,
+                    vat_type=local.bookingData.vatType,
+                    isnet=local.bookingData.isNet,
+                    language=local.invoiceLanguage,
+                    currency=local.invoiceCurrency
+                );
+
+                // Make invoice struct
+                local.invoiceStruct = structNew();
+                local.invoiceStruct['bookingID'] = local.bookingID;
+                local.invoiceStruct['customerID'] = arguments.customerID;
+                local.invoiceStruct['title'] = local.invoiceTitle;
+                local.invoiceStruct['currency'] = local.invoiceCurrency;
+                local.invoiceStruct['isNet'] = local.bookingData.isNet;
+                local.invoiceStruct['vatType'] = local.bookingData.vatType;
+                local.invoiceStruct['paymentStatusID'] = 2;
+                local.invoiceStruct['language'] = local.invoiceLanguage;
+                local.invoiceStruct['invoiceDate'] = now();
+                local.invoiceStruct['dueDate'] = now();
+
+                // Make invoice and get invoice id
+                local.newInvoice = local.objInvoice.createInvoice(local.invoiceStruct);
+
+                if (local.newInvoice.success) {
+                    local.invoiceID = newInvoice.newInvoiceID;
+                } else {
+                    local.argsReturnValue['message'] = local.newInvoice.message;
+                    local.argsReturnValue['success'] = false;
+                    return local.argsReturnValue;
+                }
+
+                // Insert a position
+                local.posInfo = structNew();
+                local.posInfo['invoiceID'] = local.invoiceID;
+                local.posInfo['append'] = false;
+
+                local.positionArray = arrayNew(1);
+
+                local.position = structNew();
+                local.position[1]['title'] = local.invoicePositionTitle;
+                local.position[1]['description'] = local.bookingData.shortDescription;
+                local.position[1]['quantity'] = 1;
+                local.position[1]['discountPercent'] = 0;
+                local.position[1]['vat'] = local.bookingData.vat;
+                local.position[1]['price'] = local.amountToPay;
+                local.priceAfterVAT = local.objPrices.getPriceData(local.amountToPay);
+                if (local.recurring eq 'monthly') {
+                    local.position[1]['unit'] = local.getTrans('TitMonth', local.invoiceLanguage);
+                } else {
+                    local.position[1]['unit'] = local.getTrans('TitYear', local.invoiceLanguage);
+                }
+                arrayAppend(local.positionArray, local.position[1]);
+                local.posInfo['positions'] = local.positionArray;
+
+                local.insPositions = local.objInvoice.insertInvoicePositions(local.posInfo);
+
+                if (!local.insPositions.success) {
+                    local.objInvoice.deleteInvoice(local.invoiceID);
+                    local.argsReturnValue['message'] = local.insPositions.message;
+                    local.argsReturnValue['success'] = false;
+                    return local.argsReturnValue;
+                }
+
+                // Charge the amount now (Payrexx)
+                local.chargeNow = local.objInvoice.payInvoice(local.invoiceID);
+                if (!local.chargeNow.success) {
+                    local.argsReturnValue['message'] = local.chargeNow.message;
+                    local.argsReturnValue['success'] = false;
+                    return local.argsReturnValue;
+                }
+
+                // Insert payment
+                local.payment = structNew();
+                local.payment['invoiceID'] = local.invoiceID;
+                local.payment['customerID'] = arguments.customerID;
+                local.payment['date'] = now();
+                local.payment['amount'] = local.priceAfterVAT;
+
+                local.insPayment = local.objInvoice.insertPayment(local.payment);
+
+                if (!local.insPayment.success) {
+                    local.argsReturnValue['message'] = local.insPayment.message;
+                    local.argsReturnValue['success'] = false;
+                    return local.argsReturnValue;
+                }
+
+            }
+
+
+
 
         }
 
-        return argsReturnValue;
+
+
+
+
+        local.argsReturnValue['planID'] = local.planID;
+        local.argsReturnValue['moduleID'] = local.moduleID;
+        local.argsReturnValue['startDate'] = local.startDate;
+        local.argsReturnValue['endDate'] = local.endDate;
+        local.argsReturnValue['recurring'] = local.recurring;
+        local.argsReturnValue['currencyID'] = local.currencyID;
+        local.argsReturnValue['canBook'] = local.canBook;
+        local.argsReturnValue['message'] = local.messageStruct;
+        local.argsReturnValue['amountToPay'] = local.amountToPay;
+        local.argsReturnValue['status'] = local.status;
+        local.argsReturnValue['bookingID'] = local.bookingID;
+        local.argsReturnValue['invoiceID'] = local.invoiceID;
+        local.argsReturnValue['success'] = true;
+
+        return local.argsReturnValue;
+
 
 
     }
 
 
 
+    // If something went wrong, delete the entry
+    public void function deleteBooking(required numeric customerID, required numeric bookingID) {
 
+        queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID},
+                bookingID: {type: "numeric", value: arguments.bookingID}
+            },
+            sql = "
+                DELETE FROM bookings
+                WHERE intBookingID = :bookingID
+                AND intCustomerID = :customerID
+            "
+        )
 
+    }
 
 
 }
