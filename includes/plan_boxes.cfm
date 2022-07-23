@@ -1,3 +1,16 @@
+
+<cfscript>
+
+    // If there is a customer session and no payment methods are defined, send him to the payment page
+    if (structKeyExists(session, "customer_id") and session.customer_id gt 0 and session.superAdmin) {
+        getWebhook = new com.payrexx().getWebhook(session.customer_id, 'authorized', 1);
+        if (!getWebhook.recordCount) {
+            location url="#application.mainURL#/account-settings/payment" addtoken="false";
+        }
+    }
+
+</cfscript>
+
 <cfoutput>
 
 <cfif structKeyExists(session, "alert")>

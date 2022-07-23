@@ -148,6 +148,38 @@ if (structKeyExists(url, "add")) {
 }
 
 
+// Update default payment method
+if (structKeyExists(url, "default")) {
+
+    if (isNumeric(url.default) and url.default gt 0) {
+
+        queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID: {type: "numeric", value: session.customer_id},
+                id: {type: "numeric", value: url.default}
+            },
+            sql = "
+
+                UPDATE payrexx
+                SET blnDefault = 0
+                WHERE intCustomerID = :customerID;
+
+                UPDATE payrexx
+                SET blnDefault = 1
+                WHERE intCustomerID = :customerID
+                AND intPayrexxID = :id
+
+            "
+        )
+
+        location url="#application.mainURL#/account-settings/payment" addtoken="false";
+
+    }
+
+}
+
+
 location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>

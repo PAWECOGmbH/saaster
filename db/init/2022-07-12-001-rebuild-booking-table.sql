@@ -20,6 +20,11 @@ INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmi
 VALUES ('payment-settings', 'handler/payment.cfm', 0, 1, 0);
 
 
+
+ALTER TABLE `payrexx`
+ADD COLUMN `blnDefault` tinyint(1) NULL DEFAULT 0 AFTER `strCardNumber`;
+
+
 -- ----------------------------
 -- Table structure for bookings
 -- ----------------------------
@@ -129,6 +134,9 @@ VALUES ('msgWeDoNotCharge', 'Bitte beachten Sie, dass beim Hinzufügen einer neu
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('msgPaymentMethodAdded', 'Die neue Zahlungsart wurde erfolgreich erfasst.', 'The new payment method has been added successfully.');
+
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('msgPaymentMethodAdded', 'Möchten Sie diese Zahlungsart wirklich entfernen?', 'Do you really want to remove this payment method?');
 
 
 SET FOREIGN_KEY_CHECKS = 1;

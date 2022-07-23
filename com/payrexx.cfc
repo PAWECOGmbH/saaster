@@ -36,7 +36,13 @@ component displayname="payrexx" output="false" {
 
 
     // Get the webhook data
-    public query function getWebhook(required numeric customerID, required string status) {
+    public query function getWebhook(required numeric customerID, required string status, boolean default) {
+
+        if (structKeyExists(arguments, "default") and isBoolean(arguments.default)) {
+            local.sql_query = "AND blnDefault = " & arguments.default;
+        } else {
+            local.sql_query = "";
+        }
 
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
@@ -49,6 +55,7 @@ component displayname="payrexx" output="false" {
                 FROM payrexx
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
+                #local.sql_query#
                 ORDER BY dtmTimeUTC DESC
             "
         )

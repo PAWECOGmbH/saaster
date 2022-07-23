@@ -49,16 +49,28 @@
                             <cfif getWebhook.recordCount>
                                 <cfloop query="getWebhook">
                                     <div class="row align-items-center mb-4">
-                                        <div class="col-lg-2">
+                                        <div class="col-lg-2 mb-2">
                                             <img src="/dist/img/payments/card_#lcase(replace(getWebhook.strPaymentBrand,' ', '-', 'all'))#.svg" class="avatar-lg">
                                         </div>
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-2 mb-3">
                                             <div class="font-weight-medium">#getWebhook.strPaymentBrand#</div>
                                             <div class="text-muted">#getWebhook.strCardNumber#</div>
                                         </div>
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-4 mb-3">
+                                            <label class="form-check form-switch">
+                                                <cfif getWebhook.blndefault eq 1>
+                                                    <input class="form-check-input" type="checkbox" name="default" checked <cfif getWebhook.recordCount eq 1>disabled</cfif>>
+                                                <cfelse>
+                                                    <input onclick="window.location.href='#application.mainURL#/payment-settings?default=#getWebhook.intPayrexxID#'" class="form-check-input" type="checkbox" name="default">
+                                                </cfif>
+                                                <span class="form-check-label">#getTrans('btnSetStandard')#</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-lg-4 mb-3">
                                             <cfif getWebhook.recordCount gt 1>
-                                                <a href="#application.mainURL#/payment-settings?del=#getWebhook.intPayrexxID#" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
+                                                <cfif getWebhook.blndefault eq 0>
+                                                    <a onclick="sweetAlert('warning', '#application.mainURL#/payment-settings?del=#getWebhook.intPayrexxID#', '#getTrans('btnRemovePaymentMethod')#', '#getTrans('msgRemovePaymentMethod')#', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
+                                                </cfif>
                                             <cfelse>
                                                 <a onclick="sweetAlert('info', '', '', '#getTrans('msgNeedOnePaymentType')#', 'OK')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
                                             </cfif>

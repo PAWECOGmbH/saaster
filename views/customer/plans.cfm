@@ -172,7 +172,7 @@
                                         <div class="card-body" id="change_plan">
 
                                             <!--- Display the current plan --->
-                                            <cfinclude  template="/includes/plan_view.cfm">
+                                            <cfinclude template="/includes/plan_view.cfm">
 
                                             <cfif bookedPlan.status eq "expired">
                                                 <cfif bookedPlan.recurring eq "monthly">
@@ -187,28 +187,6 @@
                                             </cfif>
 
                                         </div>
-
-
-
-                                        <!--- <cfif bookedPlan.status eq "active" or bookedPlan.status eq "test">
-
-                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
-
-                                        <cfelseif bookedPlan.status eq "canceled">
-
-                                            <a href="#application.mainURL#/cancel?plan=#bookedPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
-
-                                        <cfelseif bookedPlan.status eq "free">
-
-                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
-
-                                        <cfelseif bookedPlan.status eq "expired">
-
-                                            <a href="#application.mainURL#/account-settings/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
-
-                                        </cfif> --->
-
-
 
                                     </div>
 
