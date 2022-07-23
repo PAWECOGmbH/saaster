@@ -136,7 +136,7 @@ INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('msgPaymentMethodAdded', 'Die neue Zahlungsart wurde erfolgreich erfasst.', 'The new payment method has been added successfully.');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('msgPaymentMethodAdded', 'Möchten Sie diese Zahlungsart wirklich entfernen?', 'Do you really want to remove this payment method?');
+VALUES ('msgRemovePaymentMethod', 'Möchten Sie diese Zahlungsart wirklich entfernen?', 'Do you really want to remove this payment method?');
 
 
 SET FOREIGN_KEY_CHECKS = 1;
