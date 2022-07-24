@@ -78,7 +78,12 @@
                                     </div>
                                 </cfloop>
                             <cfelse>
-                                <p>#getTrans('txtNoPaymentMethod')#</p>
+                                <p>
+                                    <span class="text-red">#getTrans('txtNoPaymentMethod')# </span>
+                                    <a href="##?" onclick="sweetAlert('info', '#application.mainURL#/payment-settings?add=#session.customer_id#', '#getTrans('txtInformation')#', '#getTrans('msgWeDoNotCharge')#', '#getTrans('btnNoCancel')#', 'OK')">
+                                        #getTrans('btnAddPaymentMethod')#
+                                    </a>
+                                </p>
                             </cfif>
                         </div>
                     </div>

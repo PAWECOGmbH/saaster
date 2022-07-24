@@ -38,7 +38,51 @@
     // Get more plan infos
     planDetails = objPlans.getPlanDetail(variables.planID);
 
+    // First, get the booking details without a real booking
+    checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=variables.recurring, makeBooking=false);
 
+    // If the amount to pay is less or equal zero, book right now and save the plan into the session
+    if (structKeyExists(checkBooking, "amountToPay") and checkBooking.amountToPay lte 0) {
+
+        makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=variables.recurring, makeBooking=true);
+
+        if (makeBooking.success) {
+
+            <!--- Save the new plan into a session --->
+            newPlan = objPlans.getCurrentPlan(session.customer_id);
+            session.currentPlan = newPlan;
+
+            <!--- Save the included modules into the module session --->
+            checkModules = new com.modules(language=getAnyLanguage(variables.lngID).iso).getBookedModules(session.customer_id);
+            session.currentModules = checkModules;
+
+            getAlert('msgPlanActivated');
+            location url="#application.mainURL#/dashboard" addtoken=false;
+
+        } else {
+
+            getAlert(makeBooking.message, 'danger');
+            location url="#application.mainURL#/dashboard" addtoken=false;
+
+        }
+
+    }
+
+
+    //
+    makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=variables.recurring, makeBooking=true, makeInvoice=true);
+
+    if (makeBooking.success) {
+
+
+
+    }
+
+    dump(checkBooking);
+
+
+
+    abort;
 
 
 
@@ -118,11 +162,10 @@
     } else {
 
 
-        // First, get the booking data without a real booking
-        checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=variables.recurring, makeBooking=false);
+
 
         // Is it the first plan?
-        if (checkBooking.)
+        if (checkBooking.amountToPay)
 
         // If the amount to pay is less or equal zero, book right now and save the plan into the session
         if (structKeyExists(checkBooking, "amountToPay") and checkBooking.amountToPay lte 0) {

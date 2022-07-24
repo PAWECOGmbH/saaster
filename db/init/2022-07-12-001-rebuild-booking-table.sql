@@ -2,7 +2,7 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IS EXISTS customer_bookings_history;
+DROP TABLE IF EXISTS customer_bookings_history;
 
 ALTER TABLE `invoices`
 CHANGE COLUMN `intCustomerBookingID` `intBookingID` int(11) NULL DEFAULT 0 AFTER `strLanguageISO`;

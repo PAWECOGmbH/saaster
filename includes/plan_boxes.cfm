@@ -1,12 +1,8 @@
 
 <cfscript>
 
-    // If there is a customer session and no payment methods are defined, send him to the payment page
     if (structKeyExists(session, "customer_id") and session.customer_id gt 0 and session.superAdmin) {
         getWebhook = new com.payrexx().getWebhook(session.customer_id, 'authorized', 1);
-        if (!getWebhook.recordCount) {
-            location url="#application.mainURL#/account-settings/payment" addtoken="false";
-        }
     }
 
 </cfscript>
@@ -117,15 +113,26 @@
 
                                     <cfelse>
 
-                                        <!--- Button monthly --->
-                                        <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
-                                        </div>
+                                        <cfif getWebhook.recordCount>
 
-                                        <!--- Button yearly --->
-                                        <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
-                                        </div>
+                                            <!--- Button monthly --->
+                                            <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
+                                                <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                            </div>
+
+                                            <!--- Button yearly --->
+                                            <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
+                                                <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                            </div>
+
+                                        <cfelse>
+
+                                            <!--- To the payment page in order to add a payment method  --->
+                                            <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+                                                <a href="#application.mainURL#/account-settings/payment" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                            </div>
+
+                                        </cfif>
 
                                     </cfif>
 

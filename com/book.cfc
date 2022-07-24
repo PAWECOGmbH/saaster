@@ -50,15 +50,15 @@ component displayname="book" output="false" {
 
 
     // We prepare the booking requested by the customer and return the data. If required, an entry can be made in the DB immediately.
-    public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking) {
+    public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking, boolean makeInvoice) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
 
         local.getTrans = application.objGlobal.getTrans;
         local.bookingData = arguments.bookingData;
-        local.planID = 0;
-        local.moduleID = 0;
+        local.planID = "";
+        local.moduleID = "";
         local.startDate = "";
         local.endDate = "";
         local.recurring = arguments.recurring;
@@ -108,8 +108,6 @@ component displayname="book" output="false" {
             // Get the current plan of the customer
             local.objPlans = new com.plans(currencyID=local.currencyID);
             local.currentPlan = local.objPlans.getCurrentPlan(arguments.customerID);
-
-            //dump(local.currentPlan);
 
 
             // It's the first plan
@@ -373,8 +371,6 @@ component displayname="book" output="false" {
                 return local.argsReturnValue;
 
             }
-
-
 
 
             // If desired, we make an invoice and try to charge the amount via Payrexx
