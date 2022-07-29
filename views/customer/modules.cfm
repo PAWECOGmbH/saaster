@@ -206,22 +206,22 @@
                                                                 <cfif module.priceMonthly gt 0>
                                                                     <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
                                                                         <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                                            <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                         </a>
                                                                         <div class="dropdown-menu">
-                                                                            <a class="dropdown-item plan" href="#linkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")#)</a>
-                                                                            <a class="dropdown-item plan" href="#linkY#">#getTrans('txtYearly')# (#module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")#)</a>
+                                                                            <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")#)</a>
+                                                                            <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")#)</a>
                                                                         </div>
                                                                     </div>
                                                                 <cfelseif module.priceOnetime gt 0>
-                                                                    <a href="#linkO#" class="card-btn w-50 plan">
-                                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                    <a href="#linkO#" class="card-btn w-50 activate-module">
+                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                     </a>
                                                                 </cfif>
                                                             <cfelse>
                                                                 <cfif not arrayLen(module.includedInPlans)>
-                                                                    <a href="#module.bookingLinkO#" class="card-btn w-50">
-                                                                        <i class="fa-solid fa-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                    <a href="#module.bookingLinkO#" class="card-btn w-50 activate-module">
+                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                     </a>
                                                                 </cfif>
                                                             </cfif>
