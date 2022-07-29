@@ -1,8 +1,8 @@
 <cfscript>
     fileList = application.objGlobal.buildAllowedFileLists(variables.imageFileTypes);
-    
+
     allowedFileTypesList = fileList.allowedFileTypesList;
-    acceptFileTypesList = fileList.acceptFileTypesList; 
+    acceptFileTypesList = fileList.acceptFileTypesList;
 </cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
@@ -43,22 +43,21 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Table and folder prefix *</label>
-                    <input type="text" class="form-control" name="prefix" placeholder="e.g. mymod_" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
-                    <small class="form-hint">
-                        We will create a folder with the prefix name as well as the <i>navigation.cfm</i> file. Please also always name your tables with your prefix!
-                    </small>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Setting path (first file)</label>
-                    <div class="input-group">
-                        <span class="input-group-text">modules/<cfif len(trim(qModule.strTabPrefix))>#qModule.strTabPrefix#/<cfelse>{prefix}/</cfif></span>
-                        <input type="text" name="path" class="form-control" autocomplete="off" value="#HTMLEditFormat(qModule.strSettingPath)#" maxlength="255">
-                        <small class="form-hint">
-                            Specify the first file where your clients can make any settings (e.g. /settings). Make sure you add the <a href="#application.mainURL#/sysadmin/mappings">mapping</a> (under custom mappings).
-                            If you don't provide settings for your module, leave the filed empty.
-                        </small>
-                    </div>
+                    <label class="form-label">Module settings</label>
+                    <fieldset class="form-fieldset">
+                        <div class="mb-3">
+                            <small class="form-hint mb-3">So that your client can configure the created module, we will create the folder and the file after saving. In addition, the file <i>navigation.cfm</i> is created, with which you can build the navigation.</small>
+                            <label class="mb-1">Folder prefix *</label>
+                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
+                            <small class="form-hint">
+                                Please also always use the <b>same prefix</b> for your database tables as for your folder name!
+                            </small>
+                        </div>
+                        <cfif len(trim(qModule.strSettingPath))>
+                            Make your stuff in: /#qModule.strSettingPath# and navigation.cfm<br />
+                            Have a look here: <a href="#application.mainURL#/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/modules/#qModule.strTabPrefix#/settings</a>
+                        </cfif>
+                    </fieldset>
                 </div>
                 <div class="row mb-3">
                     <div class="col-lg-4">

@@ -129,7 +129,7 @@
                                                                 </a>
                                                             <cfelse>
                                                                 <cfif len(trim(module.moduleData.settingPath))>
-                                                                    <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                                    <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
                                                                         <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                     </a>
                                                                 </cfif>
@@ -139,7 +139,7 @@
                                                             </cfif>
                                                         <cfelse>
                                                             <cfif len(trim(module.moduleData.settingPath))>
-                                                                <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                                <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
                                                                     <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                 </a>
                                                             </cfif>
@@ -169,12 +169,12 @@
                                     <cfloop array="#getAllModules#" index="module">
                                         <cfif module.bookable or arrayLen(module.includedInPlans)>
                                             <div class="col-lg-3 mb-4">
-                                                <div class="card" style="min-height: 450px;">
+                                                <div class="card" style="min-height: 400px;">
                                                     <div class="card-body p-4 text-center">
                                                         <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
-                                                        <h3 class="m-0 mb-1">#module.name#</h3>
+                                                        <h3 class="m-0 mb-3">#module.name#</h3>
                                                         <div class="text-muted">#module.shortdescription#</div>
-                                                        <div class="mt-2">
+                                                        <div class="mt-3">
                                                             <cfif module.priceMonthly eq 0 and module.priceOnetime eq 0 and module.priceOnetime eq 0>
                                                                 <cfif arrayLen(module.includedInPlans)>
                                                                     <div class="small">#getTrans('txtIncludedInPlan')#</div>
@@ -182,9 +182,9 @@
                                                                     <div class="small">#getTrans('txtFree')#</div>
                                                                 </cfif>
                                                             <cfelseif module.priceOnetime gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsCurrencyFormat(module.priceOnetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
+                                                                <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceOnetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
                                                             <cfelseif module.priceMonthly gt 0>
-                                                                <div class="small text-muted">#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))#</div>
+                                                                <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))#</div>
                                                             </cfif>
                                                         </div>
                                                     </div>

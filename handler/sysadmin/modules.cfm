@@ -122,13 +122,58 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.test_days" default="0";
         param name="form.path" default="";
 
-        qNexPrio = queryExecute(
+        mapping = "modules/" & form.prefix & "/settings";
+        path =  "modules/" & form.prefix & "/settings.cfm";
+
+        // Is there already an entry in the custom mappings?
+        qMappings = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: form.edit_module}
+            },
             sql = "
-                SELECT COALESCE(MAX(intPrio),0)+1 as nextPrio
-                FROM modules
+                SELECT intModuleID
+                FROM custom_mappings
+                WHERE intModuleID = :moduleID
             "
         )
+
+        if (qMappings.recordCount) {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    mapping: {type: "varchar", value: mapping},
+                    thispath: {type: "varchar", value: path},
+                    moduleID: {type: "numeric", value: form.edit_module}
+                },
+                sql = "
+                    UPDATE custom_mappings
+                    SET strMapping = :mapping,
+                        strPath = :thispath
+                    WHERE intModuleID = :moduleID
+                "
+            )
+
+        } else {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    mapping: {type: "varchar", value: mapping},
+                    thispath: {type: "varchar", value: path},
+                    admin: {type: "boolean", value: 1},
+                    superadmin: {type: "boolean", value: 0},
+                    sysadmin: {type: "boolean", value: 0},
+                    moduleID: {type: "numeric", value: form.edit_module}
+                },
+                sql = "
+                    INSERT INTO custom_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, intModuleID)
+                    VALUES (:mapping, :thispath, :admin, :superadmin, :sysadmin, :moduleID)
+                "
+            )
+
+        }
 
         queryExecute(
             options = {datasource = application.datasource},
@@ -140,8 +185,8 @@ if (structKeyExists(form, "edit_module")) {
                 bookable: {type: "boolean", value: bookable},
                 test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
-                modulePath: {type: "varchar", value: form.path},
-                thisID: {type: "numeric", value: form.edit_module}
+                moduleID: {type: "numeric", value: form.edit_module},
+                modulePath: {type: "varchar", value: mapping}
             },
             sql = "
                 UPDATE modules
@@ -153,7 +198,7 @@ if (structKeyExists(form, "edit_module")) {
                     blnBookable = :bookable,
                     intNumTestDays = :test_days,
                     strSettingPath = :modulePath
-                WHERE intModuleID = :thisID
+                WHERE intModuleID = :moduleID
 
             "
         )
@@ -168,6 +213,7 @@ if (structKeyExists(form, "edit_module")) {
                 getAlert('Could not create the folder!');
             }
         }
+
 
         <!--- Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...) --->
         createFileSuccess = true;
@@ -188,7 +234,26 @@ writeOutput("
         }
 
 
-        if (picSuccess and createFolderSuccess) {
+        <!--- Create the file for settings --->
+        createSettingFileSuccess = true;
+        if (!fileExists(expandPath('/modules/#form.prefix#/settings.cfm'))) {
+savecontent variable="settingContent" {
+writeOutput("
+<cfscript>
+dump('Hello settings!');
+</cfscript>
+");
+}
+            try {
+                fileWrite(expandPath('/modules/#form.prefix#/settings.cfm'), settingContent);
+            } catch (any e) {
+                createSettingFileSuccess = false;
+                getAlert(e.message, 'danger');
+            }
+        }
+
+
+        if (picSuccess and createFolderSuccess and createSettingFileSuccess) {
             getAlert('Module saved.');
         }
 
