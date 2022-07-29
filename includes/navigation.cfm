@@ -72,7 +72,7 @@
                                         </cfif>
                                         <cfif len(trim(i.moduleData.settingPath))>
                                             <div class="dropdown-divider"></div>
-                                            <a href="#application.mainURL#/modules/#i.moduleData.table_prefix#/#i.moduleData.settingPath#" class="dropdown-item">#getTrans('txtSettings')#</a>
+                                            <a href="#application.mainURL#/#i.moduleData.settingPath#" class="dropdown-item">#getTrans('txtSettings')#</a>
                                         </cfif>
                                     </div>
                                 </li>
