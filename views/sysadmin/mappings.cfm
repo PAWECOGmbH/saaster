@@ -6,15 +6,14 @@
             FROM custom_mappings
             ORDER BY intCustomMappingID DESC
         "
-    );
-
+    )
     qSystemMappings = queryExecute (
         options = {datasource = application.datasource},
         sql = "
             SELECT *
             FROM system_mappings
         "
-    );
+    )
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -88,18 +87,23 @@
                                                 </tr>
                                             </form>
                                             <cfloop query="qCustomMappings">
+                                                <cfif qCustomMappings.intModuleID gt 0>
+                                                    <cfset disabled = "disabled">
+                                                <cfelse>
+                                                    <cfset disabled = "">
+                                                </cfif>
                                                 <form action="#application.mainURL#/sysadm/mappings" method="post">
                                                     <input type="hidden" name="edit_mapping" value="#qCustomMappings.intCustomMappingID#">
                                                     <tr>
                                                         <td></td>
-                                                        <td><input type="text" name="mapping" value="#qCustomMappings.strMapping#" class="form-control"></td>
-                                                        <td><input type="text" name="path" value="#qCustomMappings.strPath#" class="form-control"></td>
+                                                        <td><input type="text" name="mapping" value="#qCustomMappings.strMapping#" class="form-control" #disabled#></td>
+                                                        <td><input type="text" name="path" value="#qCustomMappings.strPath#" class="form-control" #disabled#></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="public" class="form-check-input" <cfif !qCustomMappings.blnOnlyAdmin and !qCustomMappings.blnOnlySuperAdmin and !qCustomMappings.blnOnlySysAdmin>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="admin" class="form-check-input" <cfif qCustomMappings.blnOnlyAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="superadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySuperAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySysAdmin eq 1>checked</cfif>></td>
-                                                        <td class="text-end"><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></td>
-                                                        <td class="text-left"><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon" style="font-size: 20px;"></td>
+                                                        <td class="text-end"><cfif not len(disabled)><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></cfif></td>
+                                                        <td class="text-left"><cfif not len(disabled)><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon" style="font-size: 20px;"></cfif></td>
                                                     </tr>
                                                 </form>
                                             </cfloop>
