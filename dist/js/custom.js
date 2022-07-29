@@ -256,14 +256,36 @@ $(document).ready(function(){
 	});
 
 
-	// Disable button when changing a plan
-	$('body').on('click', 'a.plan', function(){
+	// Disable button when changing a module
+	$('body').on('click', 'a.activate-module', function(e){
 
-		$(this).each(function(i, obj) {
-			$(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;' + obj.text);
-			$(this).addClass('disabled');
+		e.preventDefault();
+		var moduleUrl = $(this).attr('href');
+
+		$('a.activate-module').addClass('pe-none');
+		$('a.activate-module').attr('aria-disabled', true);
+
+		$('i.activate-lock').each(function(i, obj) {
+			$(obj).parent().addClass('pe-none');
+			$(obj).replaceWith('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;');
 		});
 
+		location.href = moduleUrl;
+	});
+		
+	
+	// Disable button when changing a plan
+	$('body').on('click', 'a.plan', function(e){
+
+		e.preventDefault();
+		var planUrl = $(this).attr('href');
+
+		$('a.plan').each(function(i, obj) {
+			$(obj).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;' + obj.text);
+			$(obj).addClass('disabled');
+		});
+
+		location.href = planUrl;
 	});
 
 	// Update the plan
