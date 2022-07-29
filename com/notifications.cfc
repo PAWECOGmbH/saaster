@@ -18,24 +18,28 @@ component displayname="notifications" output="false" {
         if (structKeyExists(arguments.notiStruct, "userID") and isNumeric(arguments.notiStruct.userID)) {
             local.userID = arguments.notiStruct.userID;
         } else {
-            local.argsReturnValue['message'] = "No userID found!";
-            return local.argsReturnValue;
+            local.userID = 0;
         }
 
-        if (structKeyExists(arguments.notiStruct, "title") and (len(trim(arguments.notiStruct.title)))) {
-            local.title = left((trim(arguments.notiStruct.title)), 100);
+        if (structKeyExists(arguments.notiStruct, "title_var") and (len(trim(arguments.notiStruct.title_var)))) {
+            local.title_var = left((trim(arguments.notiStruct.title_var)), 50);
         } else {
-            local.title = "no title";
+            local.title_var = "";
         }
-        if (structKeyExists(arguments.notiStruct, "description") and (len(trim(arguments.notiStruct.description)))) {
-            local.description = trim(arguments.notiStruct.description);
+        if (structKeyExists(arguments.notiStruct, "descr_var") and (len(trim(arguments.notiStruct.descr_var)))) {
+            local.descr_var = left((trim(arguments.notiStruct.descr_var)), 50);
         } else {
-            local.description = "no description";
+            local.descr_var = "";
         }
         if (structKeyExists(arguments.notiStruct, "link") and (len(trim(arguments.notiStruct.link)))) {
             local.link = left(trim(arguments.notiStruct.link), 255);
         } else {
             local.link = "";
+        }
+        if (structKeyExists(arguments.notiStruct, "linktext_var") and (len(trim(arguments.notiStruct.linktext_var)))) {
+            local.linktext_var = left((trim(arguments.notiStruct.linktext_var)), 50);
+        } else {
+            local.linktext_var = "";
         }
 
         try {
@@ -45,14 +49,15 @@ component displayname="notifications" output="false" {
                 params = {
                     customerID: {type: "numeric", value: local.customerID},
                     userID: {type: "numeric", value: local.userID},
-                    title: {type: "nvarchar", value: local.title},
-                    description: {type: "nvarchar", value: local.description},
+                    title_var: {type: "nvarchar", value: local.title_var},
+                    descr_var: {type: "nvarchar", value: local.descr_var},
                     link: {type: "nvarchar", value: local.link},
+                    linktext_var: {type: "nvarchar", value: local.linktext_var},
                     dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
-                    INSERT INTO notifications (intCustomerID, intUserID, dtmCreated, strTitle, strDescription, strLink, dtmRead)
-                    VALUES (:customerID, :userID, :dateNow, :title, :description, :link, NULL)
+                    INSERT INTO notifications (intCustomerID, intUserID, dtmCreated, strTitleVar, strDescrVar, strLink, strLinkTextVar)
+                    VALUES (:customerID, :userID, :dateNow, :title_var, :descr_var, :link, :linktext_var)
                 "
             )
 

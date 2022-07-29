@@ -2,9 +2,16 @@
 
     // Is the customer allowed to create more users?
     if (structKeyExists(session.currentPlan, "maxUsers") and !session.sysadmin) {
-        if (session.currentPlan.maxUsers gt 0) {
+        maxUsers = session.currentPlan.maxUsers;
+        // Does the client have a plan on the waiting list?
+        if (structKeyExists(session.currentPlan, "nextplan")) {
+            if (structKeyExists(session.currentPlan.nextplan, "maxUsers")) {
+                maxUsers = session.currentPlan.nextplan.maxUsers;
+            }
+        }
+        if (maxUsers gt 0) {
             numUsers = application.objUser.getAllUsers(session.customer_id).recordcount;
-            if (numUsers gte session.currentPlan.maxUsers) {
+            if (numUsers gte maxUsers) {
                 getAlert('msgMaxUsersReached', 'warning');
                 location url="#application.mainURL#/account-settings/users" addtoken="false";
             }

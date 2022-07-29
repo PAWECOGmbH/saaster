@@ -9,7 +9,7 @@ if (structKeyExists(url, "plan")) {
         // Revoke cancellation
         if (structKeyExists(url, "revoke")) {
 
-            revokePlan = new com.cancel(session.customer_id, url.plan, 'plan', session.lng).revoke();
+            revokePlan = new com.cancel(session.customer_id, url.plan, 'plan').revoke();
 
             if (!revokePlan.success) {
                 getAlert(revokePlan.message, 'danger');
@@ -20,17 +20,23 @@ if (structKeyExists(url, "plan")) {
 
         } else {
 
-            cancelPlan = new com.cancel(session.customer_id, url.plan, 'plan', session.lng).cancel();
+            cancelPlan = new com.cancel(session.customer_id, url.plan, 'plan').cancel();
 
             if (!cancelPlan.success) {
                 getAlert(cancelPlan.message, 'danger');
                 location url="#application.mainURL#/account-settings" addtoken="false";
             }
 
-            getAlert('msgCanceledSuccessful', 'success');
+            getAlert('msgCanceledSuccessful', 'info');
 
 
         }
+
+        <!--- Save current plan into a session --->
+        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
+
+        <!--- Save current module array into a session --->
+        session.currentModules = new com.modules().getBookedModules(session.customer_id);
 
         location url="#application.mainURL#/account-settings" addtoken="false";
 
@@ -47,7 +53,7 @@ if (structKeyExists(url, "module")) {
         // Revoke cancellation
         if (structKeyExists(url, "revoke")) {
 
-            revokeModule = new com.cancel(session.customer_id, url.module, 'module', session.lng).revoke();
+            revokeModule = new com.cancel(session.customer_id, url.module, 'module').revoke();
 
             if (!revokeModule.success) {
                 getAlert(revokeModule.message, 'danger');
@@ -59,7 +65,7 @@ if (structKeyExists(url, "module")) {
 
         } else {
 
-            cancelModule = new com.cancel(session.customer_id, url.module, 'module', session.lng).cancel();
+            cancelModule = new com.cancel(session.customer_id, url.module, 'module').cancel();
 
             if (!cancelModule.success) {
                 getAlert(cancelModule.message, 'danger');
@@ -70,11 +76,11 @@ if (structKeyExists(url, "module")) {
 
         }
 
+        <!--- Save current plan into a session --->
+        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
 
-        <!--- Save the modules into the module session --->
-        checkModules = new com.modules(language=getAnyLanguage(session.lng).iso).getBookedModules(session.customer_id);
-        session.currentModules = checkModules;
-
+        <!--- Save current module array into a session --->
+        session.currentModules = new com.modules().getBookedModules(session.customer_id);
 
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
 

@@ -30,7 +30,6 @@ component displayname="prices" output="false" {
     }
 
 
-
     public struct function getCurrency(any currency) {
 
         local.currStruct = structNew();

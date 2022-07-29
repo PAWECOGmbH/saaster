@@ -111,19 +111,31 @@
 
                                 <cfif session.superAdmin>
 
-                                    <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
-                                            <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
-                                        </div>
-                                        <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
-                                    </a>
+                                    <cfif session.currentPlan.status eq "canceled">
+
+                                        <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
+
+                                    <cfelse>
+
+                                        <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex justify-content-between">
+                                                <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
+                                            </div>
+                                            <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
+                                        </a>
+
+                                    </cfif>
 
                                 </cfif>
 
                             <cfelse>
 
-                                <p>#getTrans('msgNoPlanBooked')#</p>
-                                <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+                                <cfif session.superAdmin>
+
+                                    <p>#getTrans('msgNoPlanBooked')#</p>
+                                    <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
+                                </cfif>
 
                             </cfif>
 

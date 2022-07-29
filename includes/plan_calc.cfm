@@ -64,11 +64,11 @@
             }
         }
 
-        //dump(checkBooking);
-        //dump(planDetail);
-
-
-
+        // If there is no payment method and the amount to pay is greater than 0
+        getWebhook = new com.payrexx().getWebhook(session.customer_id, 'authorized');
+        if (amountToPay gt 0 and !getWebhook.recordCount) {
+            bookingLink = application.mainURL & "/account-settings/payment";
+        }
 
 
     } else {
@@ -86,9 +86,9 @@
 
     <cfif bookedPlan.status eq "expired">
         <cfif url.recurring eq "monthly">
-            <p class="mt-4"><a href="#planDetail.bookingLinkM#" class="btn btn-success plan w-100">#getTrans('txtBookNow')#</a></p>
+            <p class="mt-4"><a href="#planDetail.bookingLinkM#" class="btn btn-success w-100 plan">#getTrans('txtBookNow')#</a></p>
         <cfelse>
-            <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success plan w-100">#getTrans('txtBookNow')#</a></p>
+            <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success w-100 plan">#getTrans('txtBookNow')#</a></p>
         </cfif>
     </cfif>
 
@@ -108,8 +108,6 @@
 
     </cfif>
 
-
-
     <cfif amountToPay gt 0>
         <p>#getTrans('txtToPayToday')# <b>#planDetail.currencySign# #lsCurrencyFormat(amountToPay, "none")#</b></p>
     </cfif>
@@ -124,7 +122,7 @@
         <cfset bookingLink = message.link>
     </cfif>
 
-    <p class="mt-4"><a href="#bookingLink#" class="btn btn-success plan w-100">#bookingButton#</a></p>
+    <p class="mt-4"><a href="#bookingLink#" class="btn btn-success w-100 plan">#bookingButton#</a></p>
 
 
 </cfif>

@@ -56,7 +56,7 @@
                                             <div class="font-weight-medium">#getWebhook.strPaymentBrand#</div>
                                             <div class="text-muted">#getWebhook.strCardNumber#</div>
                                         </div>
-                                        <div class="col-lg-4 mb-3">
+                                        <div class="col-lg-3 mb-3">
                                             <label class="form-check form-switch">
                                                 <cfif getWebhook.blndefault eq 1>
                                                     <input class="form-check-input" type="checkbox" name="default" checked <cfif getWebhook.recordCount eq 1>disabled</cfif>>
@@ -66,15 +66,18 @@
                                                 <span class="form-check-label">#getTrans('btnSetStandard')#</span>
                                             </label>
                                         </div>
-                                        <div class="col-lg-4 mb-3">
+                                        <div class="col-lg-2 mb-3">
                                             <cfif getWebhook.recordCount gt 1>
-                                                <cfif getWebhook.blndefault eq 0>
-                                                    <a onclick="sweetAlert('warning', '#application.mainURL#/payment-settings?del=#getWebhook.intPayrexxID#', '#getTrans('btnRemovePaymentMethod')#', '#getTrans('msgRemovePaymentMethod')#', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
-                                                </cfif>
+                                                <a onclick="sweetAlert('warning', '#application.mainURL#/payment-settings?del=#getWebhook.intPayrexxID#', '#getTrans('btnRemovePaymentMethod')#', '#getTrans('msgRemovePaymentMethod')#', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
                                             <cfelse>
                                                 <a onclick="sweetAlert('info', '', '', '#getTrans('msgNeedOnePaymentType')#', 'OK')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
                                             </cfif>
                                         </div>
+                                        <cfif getWebhook.blnFailed eq 1>
+                                            <div class="col-lg-2 mb-2">
+                                                <i class="fas fa-exclamation-triangle text-yellow h1" data-bs-toggle="tooltip" data-bs-placement="top" title="#getTrans('titChargingNotPossible')#"></i>
+                                            </div>
+                                        </cfif>
                                     </div>
                                 </cfloop>
                             <cfelse>

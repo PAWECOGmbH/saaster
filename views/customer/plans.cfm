@@ -1,12 +1,21 @@
 
 <cfscript>
 
+    // Check whether the customer already has registered a valid payment method
+    objPayrexx = new com.payrexx();
+    getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+
     // Get the booked plan
     bookedPlan = session.currentPlan;
 
     // If no plan is booked send to plans in frontend
     if (bookedPlan.planID eq 0) {
         location url="#application.mainURL#/plans" addtoken="false";
+    }
+
+    // If the plan is canceled, send to account
+    if (bookedPlan.status eq "canceled") {
+        location url="#application.mainURL#/account-settings" addtoken="false";
     }
 
     // Get the currency of the last invoice
@@ -27,9 +36,6 @@
     // Get plan data using the booked plan
     planDetail = objPlans.getPlanDetail(bookedPlan.planID);
     planArray = objPlans.getPlans(planDetail.planGroupID);
-
-    //dump(planArray);
-
 
 
 </cfscript>
@@ -69,7 +75,7 @@
                             <h3 class="card-title">#getTrans('titEditPlan')#</h3>
                         </div>
                         <div class="card-body">
-                            <div class="row">
+                            <div class="row ps-4 pe-4">
 
                                 <div class="col-lg-5">
 
@@ -175,14 +181,18 @@
                                             <cfinclude template="/includes/plan_view.cfm">
 
                                             <cfif bookedPlan.status eq "expired">
-                                                <cfif bookedPlan.recurring eq "monthly">
-                                                    <p class="mt-4"><a href="#planDetail.bookingLinkM#" class="btn btn-success plan w-100">#getTrans('txtRenewNow')#</a></p>
+                                                <cfif getWebhook.recordCount>
+                                                    <cfif bookedPlan.recurring eq "monthly">
+                                                        <p class="mt-4"><a href="#planDetail.bookingLinkM#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
+                                                    <cfelse>
+                                                        <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
+                                                    </cfif>
                                                 <cfelse>
-                                                    <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success plan w-100">#getTrans('txtRenewNow')#</a></p>
+                                                    <p class="mt-4"><a href="#application.mainURL#/account-settings/payment" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                 </cfif>
                                             <cfelse>
                                                 <cfif not structKeyExists(url, "recurring")>
-                                                    <p><a class="btn" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
+                                                    <p><a class="btn plan" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
                                                 </cfif>
                                             </cfif>
 

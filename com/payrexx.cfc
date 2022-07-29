@@ -10,31 +10,6 @@ component displayname="payrexx" output="false" {
     }
 
 
-    // Charge the customer's credit card using the webhook's transactionID
-    public struct function chargeAmount(required struct payload, required numeric transactionID) {
-
-        local.returnValue = structNew();
-        local.returnValue['success'] = false;
-        local.returnValue['data'] = "";
-
-        local.charge = callPayrexx(arguments.payload, "POST", "Transaction", arguments.transactionID);
-
-        if (structKeyExists(local.charge, "status") and local.charge.status eq "success") {
-
-            local.returnValue['success'] = true;
-            local.returnValue['data'] = local.charge.data[1];
-
-
-
-
-        }
-
-        return local.returnValue;
-
-
-    }
-
-
     // Get the webhook data
     public query function getWebhook(required numeric customerID, required string status, boolean default) {
 
@@ -55,6 +30,7 @@ component displayname="payrexx" output="false" {
                 FROM payrexx
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
+                AND blnFailed = 0
                 #local.sql_query#
                 ORDER BY dtmTimeUTC DESC
             "

@@ -17,9 +17,36 @@ if (structKeyExists(url, "del")) {
             payload = structNew();
             deleteTransaction = objPayrexx.callPayrexx(payload, 'DEL', 'Transaction', getWebhook.intTransactionID);
 
-            if (deleteTransaction.status eq "success") {
+            // Delete the entry in the table payrexx
+            queryExecute(
+                options: {datasource = application.datasource},
+                params: {
+                    customerID: {type: "numeric", value: session.customer_id},
+                    id: {type: "numeric", value: url.del}
+                },
+                sql = "
+                    DELETE FROM payrexx
+                    WHERE intCustomerID = :customerID
+                    AND intPayrexxID = :id
+                "
+            )
 
-                // Delete the entry in the table payrexx
+            // Check for default entry
+            local.qCheckDefault = queryExecute(
+                options: {datasource = application.datasource},
+                params: {
+                    customerID: {type: "numeric", value: session.customer_id}
+                },
+                sql = "
+                    SELECT *
+                    FROM payrexx
+                    WHERE intCustomerID = :customerID
+                    AND blnDefault = 1
+                "
+            )
+
+            // If there is no other default entry, make one
+            if (!local.qCheckDefault.recordCount) {
                 queryExecute(
                     options: {datasource = application.datasource},
                     params: {
@@ -27,19 +54,16 @@ if (structKeyExists(url, "del")) {
                         id: {type: "numeric", value: url.del}
                     },
                     sql = "
-                        DELETE FROM payrexx
-                        WHERE intCustomerID = :customerID
-                        AND intPayrexxID = :id
+                       UPDATE payrexx
+                       SET blnDefault = 1
+                       WHERE intCustomerID = :customerID
+                       LIMIT 1
                     "
                 )
-
-                getAlert('msgPaymentMethodDeleted', 'success');
-
-            } else {
-
-                getAlert(deleteTransaction.message, 'warning');
-
             }
+
+
+            getAlert('msgPaymentMethodDeleted', 'success');
 
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 

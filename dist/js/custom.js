@@ -20,6 +20,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			if (willDelete) {
 				window.location.href = thisURL;
 			};
+			refreshButton();
 		});
 
 	} else {
@@ -29,13 +30,16 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			text: textTwo,
 			icon: type,
 			buttons: [buttonOne]
+			})
+			.then(function(){
+				refreshButton();
 		});
 
 	}
 
 };
 
-function refreshThings(){
+function refreshButton(){
 	$('a.plan').each(function(i, obj) {
 		$(this).text(obj.text);
 		$(this).removeClass('disabled');
@@ -252,15 +256,15 @@ $(document).ready(function(){
 	});
 
 
-	//Plans+Process overview, disable buttons when changing plan
-	/* $('a.plan').on('click', function(){
+	// Disable button when changing a plan
+	$('body').on('click', 'a.plan', function(){
 
-		$('a.plan').each(function(i, obj) {
+		$(this).each(function(i, obj) {
 			$(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;' + obj.text);
 			$(this).addClass('disabled');
 		});
 
-	}); */
+	});
 
 	// Update the plan
 	$('.plan_edit').on('click', function(){

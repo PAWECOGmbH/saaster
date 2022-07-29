@@ -573,8 +573,6 @@ component displayname="plans" output="false" {
 
     public struct function getCurrentPlan(required numeric customerID) {
 
-        local.utcDate = dateFormat(now(), "yyyy-mm-dd");
-
         local.planStruct = structNew();
         local.planStruct['planID'] = 0;
         local.planStruct['planName'] = "";
@@ -596,7 +594,7 @@ component displayname="plans" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID},
                     languageID: {type: "numeric", value: variables.lngID},
                     currencyID: {type: "numeric", value: variables.currencyID},
-                    utcDate: {type: "date", value: local.utcDate}
+                    utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
                 },
                 sql = "
                     SELECT  bookings.intBookingID, bookings.strRecurring, bookings.intPlanID, bookings.strStatus,
@@ -632,9 +630,9 @@ component displayname="plans" output="false" {
                     FROM bookings
                     INNER JOIN plans ON bookings.intPlanID = plans.intPlanID
                     WHERE bookings.intCustomerID = :customerID
-                    AND (DATE(bookings.dteStartDate) <= DATE(:utcDate)
+                    AND ((DATE(bookings.dteStartDate) <= DATE(:utcDate)
                     AND DATE(bookings.dteEndDate) >= DATE(:utcDate))
-                    OR bookings.strStatus = 'waiting'
+                    OR bookings.strStatus = 'waiting')
 
                 "
             )
@@ -816,19 +814,9 @@ component displayname="plans" output="false" {
                         local.planStatus['fontColor'] = "green";
                         break;
 
-                    case "free":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
-                        local.planStatus['fontColor'] = "green";
-                        break;
-
                     case "expired":
                         local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtExpired');
-                        if (isDate(arguments.thisPlan.endTestDate)) {
-                            local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestTimeExpired');
-                        } else {
-                            local.planStatus['statusText'] = application.objGlobal.getTrans('txtPlanExpired');
-                        }
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestTimeExpired');
                         local.planStatus['fontColor'] = "red";
                         break;
 
@@ -844,9 +832,9 @@ component displayname="plans" output="false" {
                         local.planStatus['fontColor'] = "orange";
                         break;
 
-                    case "onetime":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtOneTimePayment');
+                    case "free":
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtFree');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
                         local.planStatus['fontColor'] = "green";
                         break;
 
@@ -945,94 +933,6 @@ component displayname="plans" output="false" {
 
 
     }
-
-
-    /* public struct function updateCurrentPlan(required struct plan) {
-
-        local.returnArgs = structNew();
-        local.returnArgs['success']  = false;
-        local.returnArgs['message']  = "";
-
-        local.customerID = 0;
-        local.planID = 0;
-        local.dateStart = now();
-        local.dateEnd = now();
-        local.recurring = "monthly";
-        local.newPlanID = 0;
-
-        if (structKeyExists(arguments.plan, "customerID")) {
-            local.customerID = arguments.plan.customerID;
-        }
-        if (structKeyExists(arguments.plan, "planID")) {
-            local.planID = arguments.plan.planID;
-        }
-        if (structKeyExists(arguments.plan, "dateStart")) {
-            local.dateStart = arguments.plan.dateStart;
-        }
-        if (structKeyExists(arguments.plan, "dateEnd")) {
-            local.dateEnd = arguments.plan.dateEnd;
-        }
-        if (structKeyExists(arguments.plan, "recurring")) {
-            local.recurring = arguments.plan.recurring;
-        }
-        if (structKeyExists(arguments.plan, "newPlanID")) {
-            local.newPlanID = arguments.plan.newPlanID;
-        }
-
-
-        try {
-
-            queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: local.customerID},
-                    planID: {type: "numeric", value: local.planID},
-                    dateStart: {type: "datetime", value: local.dateStart},
-                    dateEnd: {type: "datetime", value: local.dateEnd},
-                    recurring: {type: "varchar", value: local.recurring},
-                    newPlanID: {type: "numeric", value: local.newPlanID}
-                },
-                sql = "
-
-                    UPDATE bookings
-                    SET dteStartDate = :dateStart,
-                        dteEndDate = :dateEnd,
-                        strRecurring = :recurring,
-                        intPlanID = :newPlanID
-                    WHERE intCustomerID = :customerID
-                    AND intPlanID = :planID
-
-                "
-            )
-
-        } catch (any e) {
-
-            local.returnArgs['message'] = e.message;
-            return local.returnArgs;
-
-        }
-
-        // return customerBookingID
-        local.qCustBooking = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: local.customerID},
-                newPlanID: {type: "numeric", value: local.newPlanID}
-            },
-            sql = "
-                SELECT intBookingID
-                FROM bookings
-                WHERE intCustomerID = :customerID
-                AND intPlanID = :newPlanID
-            "
-        )
-
-        local.returnArgs['customerBookingID'] = local.qCustBooking.intBookingID;
-        local.returnArgs['success'] = true;
-        return local.returnArgs;
-
-
-    } */
 
 
 }

@@ -2,40 +2,29 @@
 component displayname="cancel" output="false" {
 
 
-    public any function init(required numeric customerID, required numeric thisID, required string what, string language) {
+    public any function init(required numeric customerID, required numeric thisID, required string what) {
 
         variables.customerID = arguments.customerID;
         variables.thisID = arguments.thisID;
         variables.what = arguments.what;
 
-        if (structKeyExists(arguments, "language")) {
-            variables.language = arguments.language;
-        } else {
-            variables.language = application.objGlobal.getDefaultLanguage().iso;
-        }
-
-        variables.objPlans = new com.plans(language=variables.language);
-        variables.objModules = new com.modules(language=variables.language);
-
         if (variables.what eq "plan") {
-            variables.thisField = "intPlanID";
+            variables.sql_query = "AND intPlanID = " & variables.thisID;
         } else {
-            variables.thisField = "intModuleID";
-            variables.includedModules = "";
+            variables.sql_query = "AND intModuleID = " & variables.thisID;
         }
 
         // Security
         local.qCheck = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                customerID: {type: "numeric", value: variables.customerID},
-                thisID: {type: "numeric", value: variables.thisID}
+                customerID: {type: "numeric", value: variables.customerID}
             },
             sql = "
                 SELECT intCustomerID
                 FROM bookings
                 WHERE intCustomerID = :customerID
-                AND #variables.thisField# = :thisID
+                #variables.sql_query#
             "
         )
 
@@ -64,27 +53,24 @@ component displayname="cancel" output="false" {
                 options = {datasource = application.datasource},
                 params = {
                     customerID: {type: "numeric", value: variables.customerID},
-                    thisID: {type: "numeric", value: variables.thisID},
-                    recurring: {type: "varchar", value: "canceled"}
+                    status: {type: "varchar", value: "canceled"},
+                    dateNow: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
                 },
                 sql = "
 
                     UPDATE bookings
-                    SET strRecurring = :recurring
+                    SET strStatus = :status
                     WHERE intCustomerID = :customerID
-                    AND #variables.thisField# = :thisID;
+                    #variables.sql_query#;
 
-                    INSERT INTO bookings_history (intCustomerID, #variables.thisField#, strRecurring)
-                    VALUES (:customerID, :thisID, :recurring)
+                    /* Delete plans in the future */
+                    DELETE FROM bookings
+                    WHERE intCustomerID = :customerID
+                    AND dteStartDate > :dateNow
+
 
                 "
             )
-
-            <!--- Save current plan into a session --->
-            session.currentPlan = variables.objPlans.getCurrentPlan(variables.customerID);
-
-            <!--- Save current module array into a session --->
-            session.currentModules = variables.objModules.getBookedModules(variables.customerID);
 
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;
@@ -115,25 +101,22 @@ component displayname="cancel" output="false" {
             queryExecute (
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: variables.customerID},
-                    thisID: {type: "numeric", value: variables.thisID},
-                    recurring: {type: "varchar", value: "active"}
+                    customerID: {type: "numeric", value: variables.customerID}
                 },
                 sql = "
 
                     UPDATE bookings
-                    SET strRecurring = :recurring
+                    SET strStatus =
+                    IF(
+                        LENGTH(strRecurring),
+                        'active',
+                        'test'
+                    )
                     WHERE intCustomerID = :customerID
-                    AND #variables.thisField# = :thisID
+                    #variables.sql_query#
 
                 "
             )
-
-            <!--- Save current plan into a session --->
-            session.currentPlan = variables.objPlans.getCurrentPlan(variables.customerID);
-
-            <!--- Save current module array into a session --->
-            session.currentModules = variables.objModules.getBookedModules(variables.customerID);
 
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;

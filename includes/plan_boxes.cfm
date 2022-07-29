@@ -2,7 +2,7 @@
 <cfscript>
 
     if (structKeyExists(session, "customer_id") and session.customer_id gt 0 and session.superAdmin) {
-        getWebhook = new com.payrexx().getWebhook(session.customer_id, 'authorized', 1);
+        getWebhook = new com.payrexx().getWebhook(session.customer_id, 'authorized');
     }
 
 </cfscript>
@@ -99,7 +99,7 @@
                                 <cfif structKeyExists(session.currentPlan, "planID") and session.currentPlan.planID gt 0>
 
                                     <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                        <a href="#application.mainURL#/account-settings/plans" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                        <a href="#application.mainURL#/account-settings/plans" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                     </div>
 
                                 <cfelse>
@@ -108,12 +108,12 @@
 
                                         <!--- Button free --->
                                         <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
+                                            <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
                                         </div>
 
                                     <cfelse>
 
-                                        <cfif getWebhook.recordCount>
+                                        <cfif getWebhook.recordCount or i.testDays gt 0>
 
                                             <!--- Button monthly --->
                                             <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
