@@ -10,33 +10,14 @@ component displayname="payrexx" output="false" {
     }
 
 
-    // Charge the customer's credit card using the webhook's transactionID
-    public struct function chargeAmount(required struct payload, required numeric transactionID) {
-
-        local.returnValue = structNew();
-        local.returnValue['success'] = false;
-        local.returnValue['data'] = "";
-
-        local.charge = callPayrexx(arguments.payload, "POST", "Transaction", arguments.transactionID);
-
-        if (structKeyExists(local.charge, "status") and local.charge.status eq "success") {
-
-            local.returnValue['success'] = true;
-            local.returnValue['data'] = local.charge.data[1];
-
-
-
-
-        }
-
-        return local.returnValue;
-
-
-    }
-
-
     // Get the webhook data
-    public query function getWebhook(required numeric customerID, required string status) {
+    public query function getWebhook(required numeric customerID, required string status, boolean default) {
+
+        if (structKeyExists(arguments, "default") and isBoolean(arguments.default)) {
+            local.sql_query = "AND blnDefault = " & arguments.default;
+        } else {
+            local.sql_query = "";
+        }
 
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
@@ -49,27 +30,13 @@ component displayname="payrexx" output="false" {
                 FROM payrexx
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
+                AND blnFailed = 0
+                #local.sql_query#
                 ORDER BY dtmTimeUTC DESC
-                LIMIT 1
             "
         )
 
-        local.webhookData = local.qWebhook;
-
-        if (!local.webhookData.recordCount) {
-
-            // Let's have a look if there is an entry of the webhook. If not, we loop a coulpe of times
-            loop from="1" to="10" index="i" {
-                sleep(1000);
-                local.webhookData = getWebhook(arguments.customerID, 'authorized');
-                if (local.webhookData.recordCount) {
-                    break;
-                }
-            }
-
-        }
-
-        return local.webhookData;
+        return local.qWebhook;
 
     }
 
@@ -119,6 +86,25 @@ component displayname="payrexx" output="false" {
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
                 cfhttp( url=local.callingURL, result="httpRes", method="POST" ) {
+                    cfhttpparam( name="Content-Type", type="header", value="application/json" );
+                    cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
+                    cfhttpparam( type="body", value=local.bodyString );
+                }
+
+                break;
+
+
+            case "DEL":
+
+                if (isNumeric(local.thisID)) {
+                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
+                } else {
+                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                }
+
+                local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
+
+                cfhttp( url=local.callingURL, result="httpRes", method="DELETE" ) {
                     cfhttpparam( name="Content-Type", type="header", value="application/json" );
                     cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
                     cfhttpparam( type="body", value=local.bodyString );

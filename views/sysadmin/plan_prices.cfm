@@ -34,10 +34,10 @@
                             <tr>
                                 <td>#qPrices.strCurrencyEN# (#qPrices.strCurrencyISO#)</td>
                                 <td align="right">
-                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(decimalFormat(qPrices.decPriceMonthly))#" maxlength="10" required>
+                                    <input type="text" name="pricemonthly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceMonthly, '__.__'))#" maxlength="10" required>
                                 </td>
                                 <td align="right">
-                                    <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(decimalFormat(qPrices.decPriceYearly))#" maxlength="10">
+                                    <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceYearly, '__.__'))#" maxlength="10">
                                 </td>
                             </tr>
                         </cfloop>

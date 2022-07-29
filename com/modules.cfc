@@ -168,18 +168,18 @@ component displayname="modules" output="false" {
 
             local.moduleStruct['moduleID'] = local.qModule.intModuleID;
             local.moduleStruct['name'] = local.qModule.strModuleName;
-            local.moduleStruct['short_description'] = local.qModule.strShortDescription;
+            local.moduleStruct['shortdescription'] = local.qModule.strShortDescription;
             local.moduleStruct['description'] = local.qModule.strDescription;
             local.moduleStruct['table_prefix'] = local.qModule.strTabPrefix;
             local.moduleStruct['picture'] = local.qModule.strPicture;
             local.moduleStruct['bookable'] = local.qModule.blnBookable;
             local.moduleStruct['active'] = local.qModule.blnActive;
             local.moduleStruct['isNet'] = local.qModule.blnIsNet;
-            local.moduleStruct['price_monthly'] = local.qModule.decPriceMonthly;
-            local.moduleStruct['price_yearly'] = local.qModule.decPriceYearly;
-            local.moduleStruct['price_onetime'] = local.qModule.decPriceOneTime;
+            local.moduleStruct['priceMonthly'] = local.qModule.decPriceMonthly;
+            local.moduleStruct['priceYearly'] = local.qModule.decPriceYearly;
+            local.moduleStruct['priceOnetime'] = local.qModule.decPriceOneTime;
             local.moduleStruct['vat'] = local.qModule.decVat;
-            local.moduleStruct['vat_type'] = local.qModule.intVatType;
+            local.moduleStruct['vatType'] = local.qModule.intVatType;
             local.moduleStruct['currencyID'] = local.qModule.intCurrencyID;
             local.moduleStruct['currency'] = local.qModule.strCurrencyISO;
             local.moduleStruct['settingPath'] = local.qModule.strSettingPath;
@@ -258,7 +258,6 @@ component displayname="modules" output="false" {
             // bookingLinkM: monthly
             // bookingLinkY: yearly
             // bookingLinkO: onetime
-            // bookingLinkF: free
 
             local.objBook = new com.book();
             local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "monthly", "module");
@@ -267,8 +266,6 @@ component displayname="modules" output="false" {
             local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
             local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "onetime", "module");
             local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
-            local.bookingStringF = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "free", "module");
-            local.moduleStruct['bookingLinkF'] = application.mainURL & "/book?module=" & local.bookingStringF;
 
         }
 
@@ -289,13 +286,16 @@ component displayname="modules" output="false" {
             local.qCurrentModules = queryExecute (
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
+                    customerID: {type: "numeric", value: arguments.customerID},
+                    utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
                 },
                 sql = "
                     SELECT intModuleID
-                    FROM customer_bookings
+                    FROM bookings
                     WHERE intCustomerID = :customerID
                     AND intModuleID > 0
+                    AND (DATE(dteStartDate) <= DATE(:utcDate)
+                    AND DATE(dteEndDate) >= DATE(:utcDate))
                 "
             )
 
@@ -331,7 +331,6 @@ component displayname="modules" output="false" {
 
                     local.statusStruct = structNew();
                     local.statusStruct['endDate'] = local.bookedPlan.endDate;
-                    local.statusStruct['endTestDate'] = local.bookedPlan.endTestDate;
                     local.statusStruct['recurring'] = local.bookedPlan.recurring;
                     local.statusStruct['startDate'] = local.bookedPlan.startDate;
                     local.statusStruct['status'] = local.bookedPlan.status;
@@ -369,8 +368,8 @@ component displayname="modules" output="false" {
                     moduleID: {type: "numeric", value: arguments.moduleID}
                 },
                 sql = "
-                    SELECT intModuleID, blnPaused, strRecurring, dtmStartDate, dtmEndDate, dtmEndTestDate
-                    FROM customer_bookings
+                    SELECT strRecurring, dteStartDate, dteEndDate, strStatus
+                    FROM bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID
                 "
@@ -378,75 +377,10 @@ component displayname="modules" output="false" {
 
             if (local.qCurrentModules.recordCount) {
 
-                local.moduleStruct['startDate'] = local.qCurrentModules.dtmStartDate;
-                local.moduleStruct['endTestDate'] = local.qCurrentModules.dtmEndTestDate;
+                local.moduleStruct['startDate'] = local.qCurrentModules.dteStartDate;
+                local.moduleStruct['endDate'] = local.qCurrentModules.dteEndDate;
                 local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
-                local.moduleStruct['endDate'] = local.qCurrentModules.dtmEndDate;
-
-
-                // Is the plan paused?
-                if (local.qCurrentModules.blnPaused eq 1) {
-
-                    local.moduleStruct['status'] = 'paused';
-
-                // Is a module or plan canceled?
-                } else if (local.qCurrentModules.strRecurring eq "canceled") {
-
-                    local.moduleStruct['status'] = 'canceled';
-
-
-                } else {
-
-                    // Is a test phase running?
-                    if (isDate(local.qCurrentModules.dtmStartDate) and isDate(local.qCurrentModules.dtmEndTestDate)) {
-
-                        // Is the test phase still valid? | YES
-                        if (dateDiff("d", now(), local.qCurrentModules.dtmEndTestDate) gte 0) {
-
-                            local.moduleStruct['status'] = 'test';
-
-                        // NO
-                        } else {
-
-                            local.moduleStruct['status'] = 'expired';
-
-                        }
-
-                    } else {
-
-                        // See if there is a free module running
-                        if (!len(trim(local.qCurrentModules.dtmEndDate)) and !len(trim(local.qCurrentModules.dtmEndTestDate))) {
-
-                            // Get module data
-                            local.moduleData = getModuleData(arguments.moduleID);
-
-                            if (local.moduleData.price_onetime gt 0) {
-                                local.moduleStruct['status'] = 'onetime';
-                            } else {
-                                local.moduleStruct['status'] = 'free';
-                            }
-
-                        } else {
-
-                            // Is a module running?
-                            if (isDate(local.qCurrentModules.dtmEndDate)) {
-
-                                local.moduleStruct['status'] = 'active';
-
-                                // Still valid?
-                                if (dateDiff("d", now(), local.qCurrentModules.dtmEndDate) lt 0) {
-
-                                    local.moduleStruct['status'] = 'expired';
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
+                local.moduleStruct['status'] = local.qCurrentModules.strStatus;
 
                 local.objPlans = new com.plans(language=variables.language);
                 structAppend(local.moduleStruct, local.objPlans.getPlanStatusAsText(local.moduleStruct));
@@ -502,20 +436,17 @@ component displayname="modules" output="false" {
                 },
                 sql = "
 
-                    UPDATE customer_bookings
-                    SET dtmStartDate = :dateStart,
-                        dtmEndDate = :dateEnd,
+                    UPDATE bookings
+                    SET dteStartDate = :dateStart,
+                        dteEndDate = :dateEnd,
                         strRecurring = :recurring
                     WHERE intCustomerID = :customerID
-                    AND intModuleID = :moduleID;
-
-                    INSERT INTO customer_bookings_history (intCustomerID, intModuleID, dtmStartDate, dtmEndDate, strRecurring)
-                    VALUES (:customerID, :moduleID, :dateStart, :dateEnd, :recurring);
+                    AND intModuleID = :moduleID
 
                 "
             )
 
-        } catch (e any) {
+        } catch (any e) {
 
             local.returnArgs['message'] = e.message;
             return local.returnArgs;
@@ -530,14 +461,14 @@ component displayname="modules" output="false" {
                 moduleID: {type: "numeric", value: local.moduleID}
             },
             sql = "
-                SELECT intCustomerBookingID
-                FROM customer_bookings
+                SELECT intBookingID
+                FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
             "
         )
 
-        local.returnArgs['customerBookingID'] = local.qCustBooking.intCustomerBookingID;
+        local.returnArgs['customerBookingID'] = local.qCustBooking.intBookingID;
         local.returnArgs['success'] = true;
         return local.returnArgs;
 

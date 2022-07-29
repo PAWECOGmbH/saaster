@@ -46,10 +46,10 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
-        if (structKeyExists(invoiceData, "customerBookingID") and isNumeric(invoiceData.customerBookingID)) {
-            local.customerBookingID = invoiceData.customerBookingID;
+        if (structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID)) {
+            local.bookingID = invoiceData.bookingID;
         } else {
-            local.customerBookingID = 0;
+            local.bookingID = 0;
         }
         local.invoiceNumber = createInvoiceNumber(local.customerID);
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
@@ -126,11 +126,11 @@ component displayname="invoices" output="false" {
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
                     total_text: {type: "nvarchar", value: local.total_text},
-                    customerBookingID: {type: "numeric", value: local.customerBookingID},
+                    bookingID: {type: "numeric", value: local.bookingID},
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intCustomerBookingID)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :customerBookingID)
+                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
+                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
                 "
             )
 
@@ -868,8 +868,8 @@ component displayname="invoices" output="false" {
                 SELECT  invoices.intInvoiceID as invoiceID,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle as invoiceTitle,
-                        invoices.dtmInvoiceDate as invoiceDate,
-                        invoices.dtmDueDate as invoiceDueDate,
+                        DATE_FORMAT(invoices.dtmInvoiceDate, '%Y-%m-%e') as invoiceDate,
+                        DATE_FORMAT(invoices.dtmDueDate, '%Y-%m-%e') as invoiceDueDate,
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
                         invoices.strLanguageISO as invoiceLanguage,
@@ -1098,7 +1098,7 @@ component displayname="invoices" output="false" {
             return local.argsReturnValue;
         }
         if (!structKeyExists(arguments.paymentStruct, "amount") or !isNumeric(paymentStruct.amount)) {
-            local.argsReturnValue['message'] = "No valid payment date found!";
+            local.argsReturnValue['message'] = "No valid amount found!";
             return local.argsReturnValue;
         }
         if (structKeyExists(arguments.paymentStruct, "type")) {
@@ -1261,42 +1261,87 @@ component displayname="invoices" output="false" {
 
         local.returnValue = structNew();
         local.returnValue['success'] = false;
-        local.returnValue['message'] = "";
+        local.returnValue['message'] = "cannotcharge";
+
+        local.objPayrexx = new com.payrexx();
+        local.objInvoice = new com.invoices();
+        local.objNoti = new com.notifications();
 
         local.qOpenInvoices = queryExecute(
-
             options = {datasource = application.datasource},
             params = {
                 invoiceID: {type: "numeric", value: arguments.invoiceID}
             },
             sql = "
-                SELECT invoices.strPrefix, invoices.intInvoiceNumber, invoices.strInvoiceTitle,
-                        invoices.decTotalPrice, invoices.intCustomerID, payrexx.intTransactionID
+                SELECT invoices.strPrefix, invoices.intInvoiceNumber, invoices.strInvoiceTitle, invoices.decTotalPrice, invoices.intCustomerID,
+                        payrexx.intTransactionID, payrexx.intPayrexxID, payrexx.strPaymentBrand
                 FROM invoices INNER JOIN payrexx ON invoices.intCustomerID = payrexx.intCustomerID
                 WHERE invoices.intInvoiceID = :invoiceID
-
+                AND payrexx.blnFailed = 0
+                AND payrexx.strStatus = 'authorized'
+                ORDER BY payrexx.blnDefault DESC
             "
         )
 
-        if (local.qOpenInvoices.recordCount) {
+        // Loop over all registered cards until the amount could be charged (default first)
+        loop query="local.qOpenInvoices" {
 
             local.paymentStruct = structNew();
             local.paymentStruct['amount'] = local.qOpenInvoices.decTotalPrice * 100;
             local.paymentStruct['purpose'] = local.qOpenInvoices.strInvoiceTitle;
             local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID;
 
-            // Charge over Payrexx
-            local.charge = new com.payrexx().chargeAmount(local.paymentStruct, local.qOpenInvoices.intTransactionID);
+            // Try to charge over Payrexx
+            local.charge = local.objPayrexx.callPayrexx(local.paymentStruct, "POST", "Transaction", local.qOpenInvoices.intTransactionID);
 
-            if (local.charge.success) {
+            if (structKeyExists(local.charge, "status") and local.charge.status eq "success") {
+
+                // Insert payment
+                local.payment = structNew();
+                local.payment['invoiceID'] = arguments.invoiceID;
+                local.payment['customerID'] = local.qOpenInvoices.intCustomerID;
+                local.payment['date'] = now();
+                local.payment['amount'] = local.qOpenInvoices.decTotalPrice;
+                local.payment['payrexxID'] = local.qOpenInvoices.intPayrexxID;
+                local.payment['type'] = local.qOpenInvoices.strPaymentBrand;
+
+                local.insPayment = local.objInvoice.insertPayment(local.payment);
+
                 local.returnValue['success'] = true;
-                local.returnValue['message'] = local.charge.data;
-            }
 
+
+            } else {
+
+                // If not success, we have to disable the card and make a notification
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        payrexxID: {type: "numeric", value: local.qOpenInvoices.intPayrexxID}
+                    },
+                    sql = "
+                        UPDATE payrexx
+                        SET blnFailed = 1
+                        WHERE intPayrexxID = :payrexxID
+                    "
+                )
+
+                // Notification
+                local.notiStruct = structNew();
+                local.notiStruct['customerID'] = local.qOpenInvoices.intCustomerID;
+                local.notiStruct['title_var'] = 'titChargingNotPossible';
+                local.notiStruct['descr_var'] = 'txtChargingNotPossible';
+                local.notiStruct['linktext_var'] = 'titPaymentSettings';
+                local.notiStruct['link'] = '#application.mainURL#/account-settings/payment';
+                local.objNoti.insertNotification(local.notiStruct);
+
+            }
 
         }
 
+
+
         return local.returnValue;
+
 
     }
 

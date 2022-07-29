@@ -1,7 +1,7 @@
 
 <cfscript>
 
-// This file is called up by Payrexx as soon as a payment has been made.
+// This file is called up by Payrexx as soon as a payment (preAuthorization) has been made.
 // The webhook contains a JSON with information about the customer's payment.
 
 
@@ -91,6 +91,14 @@ if (structKeyExists(jsonData, "transaction")) {
         }
     }
 
+    // Is there already a default payment method?
+    getWebhook = new com.payrexx().getWebhook(customerID, 'authorized', 1);
+    if (getWebhook.recordCount) {
+        default = 0;
+    } else {
+        default = 1;
+    }
+
 
     try {
 
@@ -109,7 +117,8 @@ if (structKeyExists(jsonData, "transaction")) {
                 serviceProviderID: {type: "numeric", value: serviceProviderID},
                 payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
                 paymentBrand: {type: "nvarchar", value: paymentBrand},
-                cardNumber: {type: "varchar", value: cardNumber}
+                cardNumber: {type: "varchar", value: cardNumber},
+                default: {type: "boolean", value: default}
             },
             sql = "
                 INSERT INTO payrexx
@@ -125,7 +134,8 @@ if (structKeyExists(jsonData, "transaction")) {
                     decAmount,
                     decPayrexxFee,
                     strPaymentBrand,
-                    strCardNumber
+                    strCardNumber,
+                    blnDefault
                 )
                 VALUES (
                     :customerID,
@@ -139,7 +149,8 @@ if (structKeyExists(jsonData, "transaction")) {
                     :paymentAmount,
                     :payrexxFee,
                     :paymentBrand,
-                    :cardNumber
+                    :cardNumber,
+                    :default
                 )
 
             "

@@ -1,6 +1,6 @@
 <cfscript>
 
-    objPlan = new com.plans(language=session.lng);
+    objPlans = new com.plans(language=session.lng);
     moduleArray = new com.modules().getAllModules();
 
 </cfscript>
@@ -85,6 +85,14 @@
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtViewInvoices')#</p>
                                 </a>
+                                <cfif session.superadmin>
+                                    <a href="#application.mainURL#/account-settings/payment" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titPaymentSettings')#</b></h4>
+                                        </div>
+                                        <p class="mb-1 ">#getTrans('txtPaymentSettings')#</p>
+                                    </a>
+                                </cfif>
                             </div>
                         </div>
                     </div>
@@ -96,101 +104,51 @@
                         </div>
                         <div class="card-body">
 
-                            <cfif objPlan.prepareForGroupID(customerID=session.customer_id).groupID gt 0>
+                            <cfif session.currentPlan.planID gt 0>
 
-                                <cfif session.currentPlan.planID gt 0>
+                                <!--- Display the current plan --->
+                                <cfinclude template="/includes/plan_view.cfm">
 
-                                    <cfset getStatus = objPlan.getPlanStatusAsText(session.currentPlan)>
+                                <cfif session.superAdmin>
 
-                                    <dl class="row">
+                                    <cfif session.currentPlan.status eq "canceled">
 
-                                        <dt class="col-5">#getTrans('titYourPlan')#:</dt>
-                                        <dd class="col-7">#session.currentPlan.planName#</dd>
+                                        <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
 
-                                        <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
-                                        <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
+                                    <cfelse>
 
-                                        <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
-                                        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
-
-                                        <cfif session.currentPlan.status eq "active">
-
-                                            <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
-                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
-
-                                        <cfelseif session.currentPlan.status eq "canceled">
-
-                                            <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                            <cfif isDate(session.currentPlan.endDate)>
-                                                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
-                                            <cfelse>
-                                                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
-                                            </cfif>
-                                            <dt class="col-5">#getTrans('txtInformation')#:</dt>
-                                            <dd class="col-7">#getStatus.statusText#</dd>
-
-                                        <cfelseif session.currentPlan.status eq "test">
-
-                                            <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                                            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endTestDate))#</dd>
-                                            <dt class="col-5">#getTrans('txtInformation')#:</dt>
-                                            <dd class="col-7">#getStatus.statusText#</dd>
-
-                                        </cfif>
-
-                                    </dl>
-
-                                    <cfif session.superAdmin>
-
-                                        <cfif session.currentPlan.status eq "active" or session.currentPlan.status eq "test">
-                                            <div class="row mt-4">
-                                                <div class="button-group">
-                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtChangePlan')#</a>
-                                                    <a class="btn btn-outline-danger" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#session.currentPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a>
-                                                </div>
+                                        <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex justify-content-between">
+                                                <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
                                             </div>
-                                        <cfelseif session.currentPlan.status eq "canceled">
-                                            <div class="row mt-4">
-                                                <div class="button-group">
-                                                    <a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info me-3">#getTrans('btnRevokeCancellation')#</a>
-                                                </div>
-                                            </div>
-                                        <cfelseif session.currentPlan.status eq "free">
-                                            <div class="row mt-4">
-                                                <div class="button-group">
-                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtUpgradePlanNow')#</a>
-                                                </div>
-                                            </div>
-                                        <cfelseif session.currentPlan.status eq "expired">
-                                            <div class="row mt-4">
-                                                <div class="button-group">
-                                                    <a href="#application.mainURL#/plans" class="btn btn-outline-success me-3">#getTrans('txtBookNow')#</a>
-                                                </div>
-                                            </div>
-                                        </cfif>
+                                            <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
+                                        </a>
 
                                     </cfif>
 
-                                <cfelse>
-                                    <p>#getTrans('msgNoPlanBooked')# - <a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                                </cfif>
+
+                            <cfelse>
+
+                                <cfif session.superAdmin>
+
+                                    <p>#getTrans('msgNoPlanBooked')#</p>
+                                    <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
                                 </cfif>
 
                             </cfif>
 
                             <cfif arrayLen(moduleArray)>
 
-                                <div class="list-group mt-4">
-                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
-                                            <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
-                                        </div>
-                                        <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
-                                    </a>
-                                </div>
+                                <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex justify-content-between">
+                                        <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
+                                    </div>
+                                    <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
+                                </a>
 
                             </cfif>
-
-
 
                         </div>
                     </div>

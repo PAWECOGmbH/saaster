@@ -7,7 +7,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		dangerMode = false;
 	}
 
-	if (buttonOne != '' && buttonTwo != '') {
+	if (buttonTwo != '') {
 
 		swal({
 			title: textOne,
@@ -20,7 +20,7 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 			if (willDelete) {
 				window.location.href = thisURL;
 			};
-			refreshThings();
+			refreshButton();
 		});
 
 	} else {
@@ -28,16 +28,18 @@ function sweetAlert(type, thisURL, textOne, textTwo, buttonOne, buttonTwo) {
 		swal({
 			title: textOne,
 			text: textTwo,
-			icon: type
-		}).then(function(){
-			refreshThings();
+			icon: type,
+			buttons: [buttonOne]
+			})
+			.then(function(){
+				refreshButton();
 		});
 
 	}
 
 };
 
-function refreshThings(){
+function refreshButton(){
 	$('a.plan').each(function(i, obj) {
 		$(this).text(obj.text);
 		$(this).removeClass('disabled');
@@ -186,8 +188,9 @@ $(document).ready(function(){
 			]
 		});
 	});
-	$('.radio-toggle').toggleInput();
+
 	// Change plan prices
+	$('.radio-toggle').toggleInput();
 	$('.form-check-label').click(function() {
 		if ($(this).hasClass("yearly")) {
 			$(".price_box.yearly").show();
@@ -199,7 +202,7 @@ $(document).ready(function(){
 		}
 	});
 
-
+	// Picture upload field
 	$('.dropify').dropify();
 
 	$("#submit_form").submit(function () {
@@ -253,13 +256,51 @@ $(document).ready(function(){
 	});
 
 
-	//Plans+Process overview, disable buttons when changing plan
-	$('a.plan').on('click', function(){
+	// Disable button when changing a plan
+	$('body').on('click', 'a.plan', function(){
 
-		$('a.plan').each(function(i, obj) {
+		$(this).each(function(i, obj) {
 			$(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;' + obj.text);
 			$(this).addClass('disabled');
 		});
+
+	});
+
+	// Update the plan
+	$('.plan_edit').on('click', function(){
+
+		var plan_id = $(this).val();
+		var recurring = '';
+
+		$('.plan_recurring').each(function(){
+			if( $(this).prop('checked') ){
+				recurring = $(this).val();
+			}
+		});
+
+		if(recurring == ''){
+			$(".plan_recurring[value='monthly']").prop('checked', true);
+			recurring = 'monthly';
+		}
+
+		$('#change_plan').load('/includes/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
+
+	});
+
+	$('.plan_recurring').on('click', function(){
+
+		var plan_id;
+		var recurring = $(this).val();
+
+
+		$('.plan_edit').each(function(){
+			if( $(this).prop('checked') ){
+				plan_id = $(this).val();
+			}
+		});
+
+		$('#change_plan').load('/includes/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
+
 
 	});
 

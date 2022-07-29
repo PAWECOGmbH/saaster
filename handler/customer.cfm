@@ -77,16 +77,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     structDelete(session, "billing_info");
     structDelete(session, "filledData");
 
-    if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
-        if (find("?", session.redirect)) {
-            location url="#session.redirect#&del_redirect" addtoken="false";
-        } else {
-            location url="#session.redirect#?del_redirect" addtoken="false";
-        }
-
-    } else {
-        location url="#application.mainURL#/account-settings/company" addtoken="false";
-    }
+    location url="#application.mainURL#/account-settings/company" addtoken="false";
 
 
 }
