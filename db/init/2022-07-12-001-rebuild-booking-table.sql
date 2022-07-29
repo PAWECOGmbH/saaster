@@ -20,17 +20,9 @@ VALUES ('account-settings/payment', 'views/customer/payment.cfm', 0, 1, 0);
 INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin)
 VALUES ('payment-settings', 'handler/payment.cfm', 0, 1, 0);
 
-
-
 ALTER TABLE `payrexx`
 ADD COLUMN `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
 ADD COLUMN `blnFailed` tinyint(1) NOT NULL DEFAULT 0;
-
-ALTER TABLE `database`.`bookings`
-
-DROP PRIMARY KEY,
-ADD PRIMARY KEY (`intBookingID`, `blnFailed`) USING BTREE;
-
 
 -- ----------------------------
 -- Table structure for bookings
@@ -100,8 +92,6 @@ SET strStringDE = 'Sehen Sie Ihre Rechnungen ein und/oder bezahlen Sie sie',
 WHERE intSystTransID = 164;
 
 DELETE FROM system_translations WHERE intSystTransID = 244;
-
-ALTER TABLE `notifications` DROP FOREIGN KEY `frn_noti_user`;
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('titPlans', 'Pläne', 'Plans');
