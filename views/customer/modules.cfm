@@ -117,7 +117,7 @@
                                                 <div class="d-flex">
                                                     <cfif module.includedInCurrentPlan>
                                                         <cfif len(trim(module.moduleData.settingPath))>
-                                                            <a href="#application.mainURL#/modules/#module.moduleData.table_prefix#/#module.moduleData.settingPath#" class="card-btn">
+                                                            <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
                                                                 <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                             </a>
                                                         </cfif>

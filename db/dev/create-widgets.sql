@@ -19,6 +19,9 @@ CREATE TABLE `widgets`  (
 -- ----------------------------
 INSERT INTO `widgets` VALUES (1, 'Last Login', 'widgets/welcome.cfm', 1, 3);
 INSERT INTO `widgets` VALUES (2, 'Sales', 'widgets/sales.cfm', 1, 3);
+INSERT INTO `widgets` VALUES (3, 'Revenue', 'widgets/revenue.cfm', 1, 4);
+INSERT INTO `widgets` VALUES (4, 'New clients', 'widgets/new-clients.cfm', 1, 4);
+INSERT INTO `widgets` VALUES (5, 'Active users', 'widgets/active-users.cfm', 1, 4);
 
 
 SET FOREIGN_KEY_CHECKS = 1;

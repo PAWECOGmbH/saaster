@@ -15,6 +15,7 @@ if (structKeyExists(form, "new_module")) {
 
     try {
 
+        // Insert module
         queryExecute(
             options = {datasource = application.datasource, result="newID"},
             params = {
@@ -31,6 +32,39 @@ if (structKeyExists(form, "new_module")) {
         )
 
         newModuleID = newID.generatedkey;
+
+        // Get default values
+        standardVatType = application.objGlobal.getSetting('settingStandardVatType');
+        invoiceNet = application.objGlobal.getSetting('settingInvoiceNet');
+
+        // Get active currencies
+        qCurrencies = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT intCurrencyID
+                FROM currencies
+                WHERE blnActive = 1
+            "
+        )
+
+        // Looping all active currencies
+        loop query="qCurrencies" {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    moduleID: {type: "numeric", value: newModuleID},
+                    currencyID: {type: "numeric", value: qCurrencies.intCurrencyID},
+                    standardVatType: {type: "numeric", value: standardVatType},
+                    invoiceNet: {type: "boolean", value: invoiceNet},
+                },
+                sql = "
+                    INSERT INTO modules_prices (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType)
+                    VALUES (:moduleID, :currencyID, 0, 0, 0, 0, :invoiceNet, :standardVatType)
+                "
+            )
+
+        }
 
         getAlert('Module saved. Please complete your data now.');
         location url="#application.mainURL#/sysadmin/modules/edit/#newModuleID#" addtoken="false";
