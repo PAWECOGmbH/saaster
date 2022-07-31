@@ -47,15 +47,16 @@
                     <fieldset class="form-fieldset">
                         <div class="mb-3">
                             <small class="form-hint mb-3">So that your client can configure the created module, we will create the folder and the file after saving. In addition, the file <i>navigation.cfm</i> is created, with which you can build the navigation.</small>
-                            <label class="mb-1">Folder prefix *</label>
+                            <label class="mb-1">Folder and table prefix *</label>
                             <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
                             <small class="form-hint">
                                 Please also always use the <b>same prefix</b> for your database tables as for your folder name!
                             </small>
                         </div>
                         <cfif len(trim(qModule.strSettingPath))>
-                            Make your stuff in: /#qModule.strSettingPath# and navigation.cfm<br />
-                            Have a look here: <a href="#application.mainURL#/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/modules/#qModule.strTabPrefix#/settings</a>
+                            You can develop your module in this folder: /modules/#qModule.strTabPrefix#/<br />
+                            Code your settings in this file: /#qModule.strSettingPath#.cfm<br />
+                            Mapping is already set to: <a href="#application.mainURL#/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/modules/#qModule.strTabPrefix#/settings</a>
                         </cfif>
                     </fieldset>
                 </div>

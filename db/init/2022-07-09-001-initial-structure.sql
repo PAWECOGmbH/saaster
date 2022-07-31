@@ -318,9 +318,8 @@ CREATE TABLE `currencies`  (
 -- Records of currencies
 -- ----------------------------
 INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1);
-INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', 'EUR', 2, 0, 1);
+INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
 INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 'CHF', 3, 0, 0);
-INSERT INTO `currencies` VALUES (4, 'GBP', 'Pound sterling', 'Pound sterling', '£', 4, 0, 0);
 
 -- ----------------------------
 -- Table structure for custom_mappings
