@@ -120,7 +120,7 @@ component displayname="book" output="false" {
 
                     local.endDate = dateFormat(dateAdd("d", local.bookingData.testDays, local.startDate), "yyyy-mm-dd");
                     local.status = "test";
-                    local.recurring = "";
+                    local.recurring = "test";
 
                 } else {
 
@@ -164,7 +164,7 @@ component displayname="book" output="false" {
 
 
                 // If the user is in test time
-                if (local.currentPlan.status eq "test") {
+                if (local.currentPlan.recurring eq "test") {
 
                     // Define the start date
                     local.startDate = dateFormat(now(), "yyyy-mm-dd");
@@ -389,7 +389,7 @@ component displayname="book" output="false" {
                     FROM bookings
                     WHERE intCustomerID = :customerID
                     AND intModuleID = :moduleID
-                    AND strStatus = 'test'
+                    AND strRecurring = 'test'
                 "
             )
 
@@ -422,7 +422,7 @@ component displayname="book" output="false" {
 
                 local.endDate = dateFormat(dateAdd("d", local.bookingData.testDays, local.startDate), "yyyy-mm-dd");
                 local.status = "test";
-                local.recurring = "";
+                local.recurring = "test";
 
             } else {
 

@@ -108,9 +108,9 @@ component displayname="cancel" output="false" {
                     UPDATE bookings
                     SET strStatus =
                     IF(
-                        LENGTH(strRecurring),
-                        'active',
-                        'test'
+                        strRecurring = 'test',
+                        'test',
+                        'active'
                     )
                     WHERE intCustomerID = :customerID
                     #variables.sql_query#

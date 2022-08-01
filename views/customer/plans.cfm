@@ -191,7 +191,7 @@
                                                     <p class="mt-4"><a href="#application.mainURL#/account-settings/payment" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                 </cfif>
                                             <cfelse>
-                                                <cfif not structKeyExists(url, "recurring")>
+                                                <cfif not structKeyExists(url, "recurring") and planDetail.itsFree eq 0>
                                                     <p><a class="btn" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
                                                 </cfif>
                                             </cfif>

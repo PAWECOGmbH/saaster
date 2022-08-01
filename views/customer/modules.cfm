@@ -82,7 +82,7 @@
                                                             </tr>
                                                                 <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
                                                             </tr>
-                                                        <cfelseif module.moduleStatus.status eq "canceled">
+                                                        <cfelseif module.moduleStatus.status eq "canceled" or module.moduleStatus.status eq "expired">
                                                             <cfif isDate(module.moduleStatus.endDate)>
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
@@ -115,6 +115,7 @@
                                                     </table>
                                                 </div>
                                                 <div class="d-flex">
+                                                    <!--- <cfdump  var="#module#"> --->
                                                     <cfif module.includedInCurrentPlan>
                                                         <cfif len(trim(module.moduleData.settingPath))>
                                                             <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
@@ -129,13 +130,41 @@
                                                                 </a>
                                                             <cfelse>
                                                                 <cfif len(trim(module.moduleData.settingPath))>
-                                                                    <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
+                                                                    <a <cfif module.moduleStatus.status neq "expired">href="#application.mainURL#/#module.moduleData.settingPath#"</cfif> class="card-btn">
                                                                         <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                     </a>
                                                                 </cfif>
-                                                                <a href="##?" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                    <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
-                                                                </a>
+                                                                <cfif module.moduleStatus.recurring eq "test">
+                                                                    <cfif getWebhook.recordCount>
+                                                                        <cfset linkM = module.moduleData.bookingLinkM>
+                                                                        <cfset linkY = module.moduleData.bookingLinkY>
+                                                                        <cfset linkO = module.moduleData.bookingLinkO>
+                                                                    <cfelse>
+                                                                        <cfset linkM = application.mainURL & "/account-settings/payment">
+                                                                        <cfset linkY = application.mainURL & "/account-settings/payment">
+                                                                        <cfset linkO = application.mainURL & "/account-settings/payment">
+                                                                    </cfif>
+                                                                    <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
+                                                                        <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                        </a>
+                                                                        <div class="dropdown-menu">
+                                                                            <cfif module.moduleData.priceMonthly gt 0>
+                                                                                <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceMonthly, "none")#)</a>
+                                                                                <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceYearly, "none")#)</a>
+                                                                            <cfelse>
+                                                                                <a class="dropdown-item activate-module" href="#linkO#">#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
+                                                                            </cfif>
+                                                                            <cfif module.moduleStatus.status eq "expired">
+                                                                                <a style="cursor: pointer;" class="dropdown-item" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
+                                                                            </cfif>
+                                                                        </div>
+                                                                    </div>
+                                                                <cfelse>
+                                                                    <a style="cursor: pointer;" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
+                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                    </a>
+                                                                </cfif>
                                                             </cfif>
                                                         <cfelse>
                                                             <cfif len(trim(module.moduleData.settingPath))>
@@ -194,7 +223,15 @@
                                                         </a>
                                                         <cfif session.superAdmin>
                                                             <cfif module.priceMonthly gt 0 or module.priceOnetime gt 0>
-                                                                <cfif getWebhook.recordCount>
+                                                                <cfset directBook = 0>
+                                                                <cfif module.testDays gt 0>
+                                                                    <cfset directBook = 1>
+                                                                <cfelse>
+                                                                    <cfif getWebhook.recordCount>
+                                                                        <cfset directBook = 1>
+                                                                    </cfif>
+                                                                </cfif>
+                                                                <cfif directBook>
                                                                     <cfset linkM = module.bookingLinkM>
                                                                     <cfset linkY = module.bookingLinkY>
                                                                     <cfset linkO = module.bookingLinkO>
