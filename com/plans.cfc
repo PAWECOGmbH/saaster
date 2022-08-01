@@ -632,7 +632,8 @@ component displayname="plans" output="false" {
                     WHERE bookings.intCustomerID = :customerID
                     AND ((DATE(bookings.dteStartDate) <= DATE(:utcDate)
                     AND DATE(bookings.dteEndDate) >= DATE(:utcDate))
-                    OR bookings.strStatus = 'waiting')
+                    OR bookings.strStatus = 'waiting'
+                    OR bookings.strRecurring = 'test')
 
                 "
             )

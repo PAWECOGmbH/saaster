@@ -28,7 +28,7 @@
 </cfif>
 
 <!--- Test plan running? --->
-<cfif structKeyExists(session, "currentPlan") and session.currentPlan.status eq "test" and !findNoCase("frontend", thiscontent.thisPath)>
+<cfif structKeyExists(session, "currentPlan") and session.currentPlan.recurring eq "test" and !findNoCase("frontend", thiscontent.thisPath)>
     <cfoutput>
     <cfif dateformat(now(), 'yyyy-mm-dd') lte dateformat(session.currentPlan.endDate, 'yyyy-mm-dd')>
         <div class="text-center col-lg-12 bg-blue py-2">#getTrans('txtTestUntil')#: #lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</div>

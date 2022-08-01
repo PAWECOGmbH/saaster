@@ -294,8 +294,9 @@ component displayname="modules" output="false" {
                     FROM bookings
                     WHERE intCustomerID = :customerID
                     AND intModuleID > 0
-                    AND (DATE(dteStartDate) <= DATE(:utcDate)
+                    AND ((DATE(dteStartDate) <= DATE(:utcDate)
                     AND DATE(dteEndDate) >= DATE(:utcDate))
+                    OR bookings.strRecurring = 'test')
                 "
             )
 

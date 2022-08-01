@@ -9,6 +9,7 @@
 //  - Renewing modules
 //  - Delete after cancellation
 //  - Downgrade plans on waiting list
+//  - Set status for expired plans
 //  - Checking open invoices (overdue)
 //
 
@@ -31,10 +32,10 @@ if (url.pass eq variables.schedulePassword) {
             WHERE
 
             /* Expired */
-            (DATE(dteEndDate) <= DATE(:utcDate) AND (strRecurring = 'monthly' OR strRecurring = 'yearly')) OR
+            (DATE(dteEndDate) < DATE(:utcDate) AND (strRecurring = 'monthly' OR strRecurring = 'yearly' OR strRecurring = 'test') AND strStatus != 'canceled') OR
 
             /* Canceled */
-            (DATE(dteEndDate) <= DATE(:utcDate) AND (strStatus = 'canceled')) OR
+            (DATE(dteEndDate) < DATE(:utcDate) AND (strStatus = 'canceled')) OR
 
             /* Waiting for downgrade */
             (DATE(dteStartDate) <= DATE(:utcDate) AND (strStatus = 'waiting'))
@@ -44,6 +45,10 @@ if (url.pass eq variables.schedulePassword) {
 
         "
     )
+
+
+    /* dump(qRenewBookings);
+    abort; */
 
 
     if (qRenewBookings.recordCount) {
@@ -89,7 +94,7 @@ if (url.pass eq variables.schedulePassword) {
             } else if ((qRenewBookings.strRecurring eq "monthly" or qRenewBookings.strRecurring eq "yearly") and qRenewBookings.strStatus eq "active") {
 
                 // Get invoice data of the last invoice
-                invoiceArray = objInvoice.getInvoices(qRenewBookings.intCustomerID,1,1).arrayInvoices;
+                invoiceArray = objInvoice.getInvoices(qRenewBookings.intCustomerID).arrayInvoices;
                 lastInvoice = arrayLast(invoiceArray);
                 language = lastInvoice.invoiceLanguage;
                 currencyID = objPrices.getCurrency(lastInvoice.invoiceCurrency).id;
@@ -317,6 +322,16 @@ if (url.pass eq variables.schedulePassword) {
                     "
                 )
 
+
+            // Set expired plans or modules in test mode to "expired"
+            } else if (qRenewBookings.strRecurring eq "test") {
+
+                // Update booking table
+                updateStruct = structNew();
+                updateStruct['bookingID'] = qRenewBookings.intBookingID;
+                updateStruct['status'] = "expired";
+
+                updateBooking = objBook.updateBooking(updateStruct);
 
             }
 
