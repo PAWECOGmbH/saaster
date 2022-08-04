@@ -275,7 +275,7 @@ component displayname="book" output="false" {
                             local.status = "waiting";
 
                             local.messageStruct['title'] = local.getTrans('titCycleChange');
-                            local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(application.getTime.utc2local(utcDate=local.startDate));
+                            local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate));
                             local.messageStruct['button'] = local.getTrans('btnYesDowngrade');
 
 
@@ -357,7 +357,7 @@ component displayname="book" output="false" {
 
 
                                 local.messageStruct['title'] = local.getTrans('titDowngrade');
-                                local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(application.getTime.utc2local(utcDate=local.startDate));
+                                local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate));
                                 local.messageStruct['button'] = local.getTrans('btnYesDowngrade');
 
 

@@ -256,7 +256,7 @@
                                                                         <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
                                                                         <div>
                                                                             <div class="font-weight-medium">#module.name#</div>
-                                                                            <div class="text-muted">#module.short_description#</div>
+                                                                            <div class="text-muted">#module.shortdescription#</div>
                                                                         </div>
                                                                     </div>
                                                                 </div>

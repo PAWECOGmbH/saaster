@@ -2,9 +2,8 @@
 <cfscript>
 
     qCountries = application.objGlobal.getCountry(language=session.lng);
-    timeZones = application.getTime.getTimezones();
+    timeZones = getTime.getTimezones();
 
-    // getCustomerData you'll find in index.cfm
     custCompany = getCustomerData.strCompanyName;
     custContactPerson = getCustomerData.strContactPerson;
     custAddress = getCustomerData.strAddress;
@@ -82,9 +81,9 @@
     }
 
     fileList = application.objGlobal.buildAllowedFileLists(variables.imageFileTypes);
-    
+
     allowedFileTypesList = fileList.allowedFileTypesList;
-    acceptFileTypesList = fileList.acceptFileTypesList; 
+    acceptFileTypesList = fileList.acceptFileTypesList;
 
 </cfscript>
 

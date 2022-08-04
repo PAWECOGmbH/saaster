@@ -25,7 +25,7 @@
     </cfif>
 
     <dt class="col-5">#getTrans('txtBookedOn')#:</dt>
-    <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
+    <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.startDate))#</dd>
 
     <cfif structKeyExists(session.currentPlan, "nextPlan") and !structIsEmpty(session.currentPlan.nextPlan)>
 
@@ -46,20 +46,20 @@
         </cfif>
 
         <dt class="col-5">#getTrans('txtActivationOn')#:</dt>
-        <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.nextPlan.startDate))#</dd>
+        <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.nextPlan.startDate))#</dd>
 
     <cfelse>
 
         <cfif session.currentPlan.status eq "active" and  session.currentPlan.recurring neq "onetime">
 
             <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
-            <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
 
         <cfelseif session.currentPlan.status eq "canceled">
 
             <cfif session.currentPlan.recurring neq "onetime">
                 <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-                <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
             </cfif>
             <dt class="col-5">#getTrans('txtInformation')#:</dt>
             <dd class="col-7">#getStatus.statusText#</dd>
@@ -67,7 +67,7 @@
         <cfelseif session.currentPlan.status eq "test">
 
             <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
-            <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+            <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
             <dt class="col-5">#getTrans('txtInformation')#:</dt>
             <dd class="col-7">#getStatus.statusText#</dd>
 
@@ -75,9 +75,9 @@
 
             <dt class="col-5">#getTrans('txtExpiryDate')#:</dt>
             <cfif isDate(session.currentPlan.endDate)>
-                <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
             <cfelse>
-                <dd class="col-7">#lsDateFormat(application.getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
+                <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>
             </cfif>
 
         </cfif>

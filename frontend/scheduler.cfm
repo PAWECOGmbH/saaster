@@ -100,7 +100,7 @@ if (url.pass eq variables.schedulePassword) {
                 currencyID = objPrices.getCurrency(lastInvoice.invoiceCurrency).id;
                 getTime = new com.time(qRenewBookings.intCustomerID);
                 if (!len(trim(language))) {
-                    language = getDefaultLanguage().iso;
+                    language = application.objGlobal.getDefaultLanguage().iso;
                 }
                 if (!isNumeric(currencyID)) {
                     currencyID = objPrices.getCurrency().id;

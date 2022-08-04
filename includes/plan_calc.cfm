@@ -8,7 +8,7 @@
         bookedPlan = session.currentPlan;
 
         // Get the currency of the last invoice
-        currency = application.objCustomer.getCustomerData(session.customer_id).strCurrency;
+        currency = getCustomerData.strCurrency;
 
         // Init prices
         objPrices = new com.prices(language=session.lng, currency=currency);

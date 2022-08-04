@@ -23,7 +23,7 @@
         }
     }
 
-    getCustomerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
+    customerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
 
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
@@ -54,8 +54,8 @@
             </tr>
             <tr>
                 <td height="120" valign="top" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
-                    #getCustomerData.strBillingAccountName#<br />
-                    #replace(getCustomerData.strBillingAddress, chr(13), "<br />")#
+                    #customerData.strBillingAccountName#<br />
+                    #replace(customerData.strBillingAddress, chr(13), "<br />")#
                 </td>
             </tr>
             <tr>
@@ -81,7 +81,7 @@
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
                             </td>
                             <td width="50%" valign="top">
-                                #replace(getCustomerData.strBillingInfo, chr(13), "<br />")#
+                                #replace(customerData.strBillingInfo, chr(13), "<br />")#
                             </td>
                         </tr>
                     </table>
@@ -162,9 +162,9 @@
             <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
                 <tr>
                     <td align="center">
-                        <b>#application.appOwner#</b> #getCustomerData.strAddress#, #getCustomerData.strZip# #getCustomerData.strCity#<br>
-                        E-Mail : #getCustomerData.strEMail# |
-                        #getTrans('formPhone')#: #getCustomerData.strPhone# | Website: #getCustomerData.strWebsite#
+                        <b>#application.appOwner#</b> #customerData.strAddress#, #customerData.strZip# #customerData.strCity#<br>
+                        E-Mail : #customerData.strEMail# |
+                        #getTrans('formPhone')#: #customerData.strPhone# | Website: #customerData.strWebsite#
 
                     </td>
                 </tr>

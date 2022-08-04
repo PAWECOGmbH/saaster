@@ -164,8 +164,7 @@ component displayname="Application" output="false" hint="Handle the application.
         <!--- Global variables --->
         getTrans = application.objGlobal.getTrans;
         getAlert = application.objGlobal.getAlert;
-        getDefaultLanguage = application.objGlobal.getDefaultLanguage;
-        getAnyLanguage = application.objGlobal.getAnyLanguage;
+
 
         <!--- Is there a redirect coming in url? --->
         if (structKeyExists(url, "redirect")) {
@@ -188,10 +187,11 @@ component displayname="Application" output="false" hint="Handle the application.
 
 
         <!--- Check whether the user has access to corresponding sections --->
-        if (structKeyExists(session, "user_id")) {
+        if (structKeyExists(session, "customer_id")) {
 
-            // Init the time.cfc (its here because we need a user session)
-            application.getTime = new com.time(session.customer_id);
+            // More global variables (with customer session)
+            getTime = new com.time(session.customer_id);
+            getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
 
             local.no_access = false;
 

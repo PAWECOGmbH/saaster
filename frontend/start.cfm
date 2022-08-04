@@ -2,7 +2,7 @@ start
 
 <cfscript>
 
-dump(getDefaultLanguage());
+dump(application.objGlobal.getDefaultLanguage());
 
 </cfscript>
 
