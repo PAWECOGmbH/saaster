@@ -1,12 +1,4 @@
 
-<!--- If a session exists, we fetch the customer data in this file, because we need the data on almost every page. --->
-<cfscript>
-	if (structKeyExists(session, "customer_id")) {
-		getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
-		getTime = application.getTime;
-	}
-</cfscript>
-
 <!doctype html>
 <html lang="<cfoutput>#session.lng#</cfoutput>">
 

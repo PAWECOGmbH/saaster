@@ -2,13 +2,13 @@
   cfmailparam( name="charset", value="utf-8" );
   cfmailparam( name="MIME-Version", value=1.0 );
   cfmailparam( name="Content-Type", value="text/html; charset=utf-8" );
- 
+
   param name="variables.MailTitle" default="MailTitle";
   param name="variables.MailContent" default="MailContent";
   param name="variables.MailType" default="html";
   param name="variables.MailCustomID" default=0;
-  
-  //  general 
+
+  //  general
   MailMaxWidthContent = 660;
   FontFamily = "Arial, Helvetica, sans-serif";
   FontColorTitle = "464646";
@@ -19,19 +19,18 @@
   FontSizeText = 14;
   FontColorTextSmall = "b2b2b2";
   FontSizeTextSmall = 12;
-  //  view in browser 
+  //  view in browser
   HiddenOnLocalhost = 0;
   FontColorViewInBrowser = "b2b2b2";
   FontSizeViewInBrowser = 12;
-  //  header 
+  //  header
   HeaderBGColor = "f4f4f4";
   HeaderFontColor = "464646";
   HeaderFontSize = 14;
-  //  buttons 
+  //  buttons
   ButtonBGColor = "feda00";
   ButtonFontColor = "016aac";
   ButtonFontSize = 14;
-  getTrans = application.objGlobal.getTrans;
   MailCustomer= application.objCustomer.getCustomerData(variables.MailCustomID);
 </cfscript>
 
@@ -45,7 +44,7 @@
   <meta name="viewport" content="width=device-width">
 
   <style type="text/css">
-      
+
     #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" message */
     .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
     .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;} /* Force Hotmail to display normal line spacing */
@@ -143,7 +142,7 @@
           margin:0 auto;
           width:100% !important;
       }
-    }	
+    }
   </style>
 
 </head>
@@ -151,10 +150,10 @@
 <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
-      <cfoutput>		
+      <cfoutput>
         <td bgcolor="#HeaderBGColor#">
           <div align="center" style="padding: 0px 15px 0px 15px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="#MailMaxWidthContent#" class="wrapper">    
+            <table border="0" cellpadding="0" cellspacing="0" width="#MailMaxWidthContent#" class="wrapper">
               <tr>
                 <td colspan="3" style="padding: 20px 10px 30px 10px;" class="logo">
                   <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -187,26 +186,26 @@
               <tr>
                 <td width="9"></td>
                 <cfif variables.MailType eq "html">
-                  
+
                   <td align="center" valign="top" bgcolor="##FFFFFF" style="padding: 20px 20px 30px 20px; ">
-                    
+
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" class="wrapper" style="font-size: #HeaderFontSize#px; font-family: #FontFamily#; color: ###HeaderFontColor#;">
                       <tr>
                         <td style="padding: 0 0 20px 0; font-size: #HeaderFontSize#px; font-family: #FontFamily#; color: ###HeaderFontColor#; text-decoration: none;">
                           #variables.MailContent#
                         </td>
-                      </tr>							
+                      </tr>
                     </table>
-                    
+
                   </td>
-                    
+
                 </cfif>
                 <td width="9"></td>
               </tr>
             </table>
           </div>
         </td>
-      </cfoutput>	
+      </cfoutput>
     </tr>
   </table>
 
@@ -226,7 +225,7 @@
     </table>
 
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr> 		
+      <tr>
         <td bgcolor="###HeaderBGColor#">
           <div align="center" style="padding: 0 15px 0 15px;" bgcolor="##949399">
             <table border="0" cellpadding="0" cellspacing="0" width="640" class="wrapper">
@@ -239,7 +238,7 @@
                         <table cellpadding="0" cellspacing="0" border="0" align="left" width="47%" class="responsive-table">
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 22px; font-family: #FontFamily#; color: ##ffffff; border:none;">
-                              <span style="font-size: 21px;">#getTrans('txtContact')#</span><br><br>									
+                              <span style="font-size: 21px;">#getTrans('txtContact')#</span><br><br>
                               #MailCustomer.strCompanyName#<br>
                               #MailCustomer.strAddress#<br>
                               #MailCustomer.strZIP# / #MailCustomer.strCity#<br>
@@ -249,24 +248,24 @@
                               </cfif>
                             </td>
                             <!--- Reserved for later <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td> --->
-                          </tr>				
+                          </tr>
                         </table>
-                    
+
                         <!--- Reserved for later <table cellpadding="0" cellspacing="0" border="0" align="right" width="47%" class="responsive-table">
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 20px; font-family: #FontFamily#; color: ##ffffff; border:none;">
                               <span style="font-size: 21px;">#getTrans('txtNetwork')#</span><br>
                               <a href="" class="normal" target="_blank" title="Besuchen Sie uns auf Facebook"><img width="30" src="/img/social/facebook.png" alt="Besuchen Sie uns auf Facebook" border="0"/></a>
-                              <img src="/img/spacer.gif" width="2" />                 
+                              <img src="/img/spacer.gif" width="2" />
                             </td>
                           </tr>
-                        </table>  --->    
+                        </table>  --->
                       </td>
-                    </tr>								
+                    </tr>
                   </table>
                 </td>
-              </tr>					
-            </table>				
+              </tr>
+            </table>
           </div>
         </td>
       </tr>

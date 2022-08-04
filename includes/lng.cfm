@@ -7,11 +7,11 @@
                 <i class="fas fa-globe"></i>
             </span>
             <span class="nav-link-title">
-            #getAnyLanguage(session.lng).language#
+            #application.objGlobal.getAnyLanguage(session.lng).language#
             </span>
         </a>
         <div class="dropdown-menu">
-            <cfloop list="#application.allLanguages#" index="i">                
+            <cfloop list="#application.allLanguages#" index="i">
                 <cfset lngIso = listfirst(i,"|")>
                 <cfset lngName = listlast(i,"|")>
                 <cfif lngIso neq session.lng>

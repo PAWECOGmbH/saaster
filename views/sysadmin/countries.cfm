@@ -109,7 +109,7 @@
     }
 
     qLanguages = application.objGlobal.getAllLanguages();
-    timeZones = application.getTime.getTimezones();
+    timeZones = getTime.getTimezones();
     getModal = new com.translate();
 </cfscript>
 

@@ -3,7 +3,6 @@
 
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
-    getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
     custCompany = getCustomerData.strCompanyName;
     custContactPerson = getCustomerData.strContactPerson;
     custAddress = getCustomerData.strAddress;
@@ -25,7 +24,7 @@
         custEmail = session.user_email;
     }
 
-    timeZones = application.getTime.getTimezones();
+    timeZones = getTime.getTimezones();
 
 </cfscript>
 
