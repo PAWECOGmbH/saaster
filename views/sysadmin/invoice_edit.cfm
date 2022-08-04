@@ -105,13 +105,13 @@
                                 <div class="col-lg-6">
                                     <h3 class="card-title">Title: #qInvoice.title#</h3>
                                     <p>
-                                    <cfif len(trim(qCustomer.strCompanyName))>
-                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#qCustomer.strCompanyName#</a><cfif invoicePersonID gt 0> - </cfif>
-                                    <cfelseif len(trim(qCustomer.strContactPerson)) and invoicePersonID eq 0>
-                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#qCustomer.strContactPerson#</a></p>
+                                    <cfif len(trim(qCustomer.companyName))>
+                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.companyName#</a><cfif invoicePersonID gt 0> - </cfif>
+                                    <cfelseif len(trim(qCustomer.contactPerson)) and invoicePersonID eq 0>
+                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.contactPerson#</a></p>
                                     </cfif>
                                     <cfif invoicePersonID gt 0>
-                                        <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.intCustomerID#">#invoicePerson#</a>
+                                        <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#invoicePerson#</a>
                                     </cfif>
                                     </p>
                                 </div>

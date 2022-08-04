@@ -206,21 +206,21 @@ component displayname="customer" output="false" {
 
         local.getCustomerData = application.objCustomer.getCustomerData(arguments.customerID);
 
-        if (!len(trim(local.getCustomerData.strAddress))) {
+        if (!len(trim(local.getCustomerData.address))) {
             return false;
         }
-        if (!len(trim(local.getCustomerData.strZIP))) {
+        if (!len(trim(local.getCustomerData.zip))) {
             return false;
         }
-        if (!len(trim(local.getCustomerData.strCity))) {
+        if (!len(trim(local.getCustomerData.city))) {
             return false;
         }
         if (application.objGlobal.getCountry().recordCount) {
-            if (local.getCustomerData.intCountryID eq 0 or !len(trim(getCustomerData.intCountryID))) {
+            if (local.getCustomerData.countryID eq 0 or !len(trim(getCustomerData.countryID))) {
                 return false;
             }
         } else {
-            if (local.getCustomerData.intTimezoneID eq 0 or !len(trim(getCustomerData.intTimezoneID))) {
+            if (local.getCustomerData.timezoneID eq 0 or !len(trim(getCustomerData.timezoneID))) {
                 return false;
             }
         }

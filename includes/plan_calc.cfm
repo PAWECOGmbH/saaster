@@ -7,17 +7,12 @@
         // Get the booked plan
         bookedPlan = session.currentPlan;
 
-        // Get the currency of the last invoice
-        currency = getCustomerData.strCurrency;
+        // Get the currency
+        currency = getCustomerData.currencyStruct.iso;
+        currencyID = getCustomerData.currencyStruct.id;
 
         // Init prices
         objPrices = new com.prices(language=session.lng, currency=currency);
-
-        // Get the currency id of the last invoice
-        currencyID = objPrices.getCurrency(currency).id;
-        if (currencyID eq 0) {
-            currencyID = objPrices.getCurrency().id;
-        }
 
         // Init
         objPlans = new com.plans(language=session.lng, currencyID=currencyID);

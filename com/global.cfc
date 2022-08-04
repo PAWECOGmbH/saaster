@@ -432,7 +432,7 @@ component displayname="globalFunctions" {
                     lngID: {type: "numeric", value: qLngID.intLanguageID}
                 },
                 sql = "
-                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID,
+                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID, strCurrency,
                     IF(
                         LENGTH(
                             (
@@ -464,7 +464,7 @@ component displayname="globalFunctions" {
                     lngID: {type: "numeric", value: qLngID.intLanguageID}
                 },
                 sql = "
-                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID,
+                    SELECT intCountryID, strLocale, intLanguageID, blnDefault, intPrio, intTimezoneID, strCurrency,
                     IF(
                         LENGTH(
                             (
@@ -499,7 +499,7 @@ component displayname="globalFunctions" {
     public struct function buildAllowedFileLists(required array imageFileTypes) {
         local.allowedFileTypesList;
         local.acceptFileTypesList;
-    
+
         cfloop(array=arguments.imageFileTypes item="i" index="index") {
             if (index lt ArrayLen(arguments.imageFileTypes))
             {
@@ -512,7 +512,7 @@ component displayname="globalFunctions" {
         }
 
         local.output = {
-            "allowedFileTypesList": local.allowedFileTypesList, 
+            "allowedFileTypesList": local.allowedFileTypesList,
             "acceptFileTypesList": local.acceptFileTypesList
         }
 

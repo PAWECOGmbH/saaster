@@ -43,14 +43,10 @@ component displayname="plans" output="false" {
         local.thisGroupID = 0;
         local.thisCurrencyID = 0;
 
-        // do we have a session?
+        // Get the country of the customer, if exists
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
-            // Get the country of the customer, if exists
-            local.getCustomerData = application.objCustomer.getCustomerData(arguments.customerID);
-            if (local.getCustomerData.recordCount and local.getCustomerData.intCountryID gt 0) {
-                local.thisCountryID = local.getCustomerData.intCountryID;
-            }
+            local.thisCountryID = application.objCustomer.getCustomerData(arguments.customerID).countryID;
 
         }
 
