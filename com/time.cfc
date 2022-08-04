@@ -10,12 +10,12 @@ component displayname="time" output="false" {
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
             variables.customerID = arguments.customerID;
-            local.countryID = application.objCustomer.getCustomerData(arguments.customerID).intCountryID;
+            local.countryID = application.objCustomer.getCustomerData(arguments.customerID).countryID;
 
             if (local.countryID gt 0) {
                 variables.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
             } else {
-                variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).intTimezoneID;
+                variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).timezoneID;
             }
 
             if (!isNumeric(variables.timezoneID) or variables.timezoneID eq 0) {

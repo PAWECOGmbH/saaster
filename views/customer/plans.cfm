@@ -18,20 +18,8 @@
         location url="#application.mainURL#/account-settings" addtoken="false";
     }
 
-    // Get the currency of the last invoice
-    currency = getCustomerData(session.customer_id).strCurrency;
-
-    // Init prices
-    objPrices = new com.prices(language=session.lng, currency=currency);
-
-    // Get the currency id of the last invoice
-    currencyID = objPrices.getCurrency(currency).id;
-    if (currencyID eq 0) {
-        currencyID = objPrices.getCurrency().id;
-    }
-
     // Init plans
-    objPlans = new com.plans(language=session.lng, currencyID=currencyID);
+    objPlans = new com.plans(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
 
     // Get plan data using the booked plan
     planDetail = objPlans.getPlanDetail(bookedPlan.planID);

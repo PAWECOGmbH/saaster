@@ -1,7 +1,7 @@
 
 <cfscript>
     // Only main companies have access to this resource
-    if (getCustomerData.intCustParentID gt 0) {
+    if (getCustomerData.custParentID gt 0) {
         getAlert('msgNoAccess', 'danger');
         location url="#application.mainURL#/account-settings" addtoken="false";
     }

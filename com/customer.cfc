@@ -320,33 +320,96 @@ component displayname="customer" output="false" {
 
 
     <!--- Get customer data --->
-    public query function getCustomerData(required numeric customerID) {
+    public struct function getCustomerData(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
 
-            local.defLang = application.objGlobal.getDefaultLanguage().iso;
+            local.objPrices = new com.prices();
+            local.objInvoices = new com.invoices();
+            local.customerStruct = structNew();
 
             local.qCustomer = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: arguments.customerID},
-                    defLang: {type: "varchar", value: local.defLang}
+                    customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT *,
-                    (
-                        SELECT strCurrency
-                        FROM invoices
-                        WHERE intCustomerID = :customerID
-                        ORDER BY intInvoiceID DESC
-                        LIMIT 1
-                    ) as strCurrency
+                    SELECT *
                     FROM customers
                     WHERE intCustomerID = :customerID
                 "
             )
 
-            return local.qCustomer;
+            local.customerStruct['customerID'] = local.qCustomer.intCustomerID;
+            local.customerStruct['custParentID'] = local.qCustomer.intCustParentID;
+            local.customerStruct['insertDate'] = local.qCustomer.dtmInsertDate;
+            local.customerStruct['mutDate'] = local.qCustomer.dtmMutDate;
+            local.customerStruct['active'] = local.qCustomer.blnActive;
+            local.customerStruct['companyName'] = local.qCustomer.strCompanyName;
+            local.customerStruct['contactPerson'] = local.qCustomer.strContactPerson;
+            local.customerStruct['address'] = local.qCustomer.strAddress;
+            local.customerStruct['address2'] = local.qCustomer.strAddress2;
+            local.customerStruct['zip'] = local.qCustomer.strZIP;
+            local.customerStruct['city'] = local.qCustomer.strCity;
+            local.customerStruct['countryID'] = local.qCustomer.intCountryID;
+            local.customerStruct['timezoneID'] = local.qCustomer.intTimezoneID;
+            local.customerStruct['phone'] = local.qCustomer.strPhone;
+            local.customerStruct['email'] = local.qCustomer.strEmail;
+            local.customerStruct['website'] = local.qCustomer.strWebsite;
+            local.customerStruct['logo'] = local.qCustomer.strLogo;
+            local.customerStruct['billingAccountName'] = local.qCustomer.strBillingAccountName;
+            local.customerStruct['billingEmail'] = local.qCustomer.strBillingEmail;
+            local.customerStruct['billingAddress'] = local.qCustomer.strBillingAddress;
+            local.customerStruct['billingInfo'] = local.qCustomer.strBillingInfo;
+
+            local.customerStruct['currencyStruct'] = {};
+            local.language = "";
+            local.countryName = "";
+
+            // Check currency via country first
+            if (local.qCustomer.intCountryID gt 0) {
+                local.country = application.objGlobal.getCountry(local.qCustomer.intCountryID);
+                local.countryName = local.country.strCountryName;
+                if (len(trim(local.country.strCurrency))) {
+                    local.language = application.objGlobal.getAnyLanguage(local.country.intLanguageID).iso;
+                    local.currency = local.objPrices.getCurrency(local.country.strCurrency);
+                    if (isStruct(local.currency) and !structIsEmpty(local.currency)) {
+                        if (local.currency.active) {
+                            local.customerStruct['currencyStruct'] = local.currency;
+                        }
+                    }
+                }
+            }
+
+            // If the currency struct is empty, get the currency via the last invoice, if they have any
+            if (structIsEmpty(local.customerStruct.currencyStruct)) {
+                local.invoiceArray = objInvoices.getInvoices(arguments.customerID).arrayInvoices;
+                if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
+                    local.lastInvoice = arrayLast(invoiceArray);
+                    local.language = local.lastInvoice.invoiceLanguage;
+                    local.currency = objPrices.getCurrency(lastInvoice.invoiceCurrency);
+                    if (local.currency.active) {
+                        local.customerStruct['currencyStruct'] = local.currency;
+                    }
+                }
+            }
+
+            // If the currency is still empty, get default currency
+            if (structIsEmpty(local.customerStruct.currencyStruct)) {
+                local.currency = objPrices.getCurrency();
+                local.customerStruct['currencyStruct'] = local.currency;
+            }
+
+            // Default language
+            if (!len(trim(local.language))) {
+                local.language = application.objGlobal.getDefaultLanguage().iso;
+            }
+
+            local.customerStruct['language'] = local.language;
+            local.customerStruct['countryName'] = local.countryName;
+
+
+            return local.customerStruct;
 
         }
 

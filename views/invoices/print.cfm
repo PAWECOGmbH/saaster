@@ -54,8 +54,8 @@
             </tr>
             <tr>
                 <td height="120" valign="top" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
-                    #customerData.strBillingAccountName#<br />
-                    #replace(customerData.strBillingAddress, chr(13), "<br />")#
+                    #customerData.billingAccountName#<br />
+                    #replace(customerData.billingAddress, chr(13), "<br />")#
                 </td>
             </tr>
             <tr>
@@ -81,7 +81,7 @@
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
                             </td>
                             <td width="50%" valign="top">
-                                #replace(customerData.strBillingInfo, chr(13), "<br />")#
+                                #replace(customerData.billingInfo, chr(13), "<br />")#
                             </td>
                         </tr>
                     </table>
@@ -162,9 +162,9 @@
             <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
                 <tr>
                     <td align="center">
-                        <b>#application.appOwner#</b> #customerData.strAddress#, #customerData.strZip# #customerData.strCity#<br>
-                        E-Mail : #customerData.strEMail# |
-                        #getTrans('formPhone')#: #customerData.strPhone# | Website: #customerData.strWebsite#
+                        <b>#application.appOwner#</b> #customerData.address#, #customerData.zip# #customerData.city#<br>
+                        E-Mail : #customerData.email# |
+                        #getTrans('formPhone')#: #customerData.phone# | Website: #customerData.website#
 
                     </td>
                 </tr>

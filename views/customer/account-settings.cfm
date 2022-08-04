@@ -71,7 +71,7 @@
                                     </div>
                                     <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
                                 </a>
-                                <cfif getCustomerData.intCustParentID eq 0 and session.superadmin>
+                                <cfif getCustomerData.custParentID eq 0 and session.superadmin>
                                     <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex justify-content-between">
                                             <h4 class="mb-1"><b>#getTrans('titMandanten')#</b></h4>

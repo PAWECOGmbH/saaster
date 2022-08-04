@@ -1,16 +1,8 @@
 
 <cfscript>
 
-    custCountryID = getCustomerData.intCountryID;
-    custCountry = application.objGlobal.getCurrencyOfCountry(custCountryID);
-    if (custCountry.currencyID gt 0) {
-        currencyID = custCountry.currencyID;
-    } else {
-        currencyID = application.objGlobal.getDefaultCurrency().currencyID;
-    }
-
-    objModules = new com.modules(language=session.lng, currencyID=currencyID);
-    objPlan = new com.plans(language=session.lng, currencyID=currencyID);
+    objModules = new com.modules(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
+    objPlan = new com.plans(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
 
     getBookedModules = session.currentModules;
     getBookedModulesAsList = "";
@@ -63,121 +55,122 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getBookedModules#" index="module">
-                                        <div class="col-lg-3 mb-4">
-                                            <div class="card" style="min-height: 450px;">
-                                                <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>
-                                                <div class="card-body p-4 text-center">
-                                                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.moduleData.picture#)"></span>
-                                                    <h3 class="m-0 mb-1">#module.moduleData.name#</h3>
-                                                    <table class="table text-start mt-4" style="width: 90%;">
-                                                        <tr>
-                                                            <td width="60%">#getTrans('txtPlanStatus')#:</td>
-                                                            <td width="40%" class="text-#module.moduleStatus.fontColor#">#module.moduleStatus.statusTitle#</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>#getTrans('txtBookedOn')#:</td>
-                                                            <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.startDate))#</td>
-                                                        </tr>
-                                                        <cfif module.moduleStatus.status eq "free">
+                                        <cfif structKeyExists(module, "moduleData") and !structIsEmpty(module.moduleData)>
+                                            <div class="col-lg-3 mb-4">
+                                                <div class="card" style="min-height: 450px;">
+                                                    <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>
+                                                    <div class="card-body p-4 text-center">
+                                                        <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.moduleData.picture#)"></span>
+                                                        <h3 class="m-0 mb-1">#module.moduleData.name#</h3>
+                                                        <table class="table text-start mt-4" style="width: 90%;">
+                                                            <tr>
+                                                                <td width="60%">#getTrans('txtPlanStatus')#:</td>
+                                                                <td width="40%" class="text-#module.moduleStatus.fontColor#">#module.moduleStatus.statusTitle#</td>
                                                             </tr>
-                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
+                                                            <tr>
+                                                                <td>#getTrans('txtBookedOn')#:</td>
+                                                                <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.startDate))#</td>
                                                             </tr>
-                                                        <cfelseif module.moduleStatus.status eq "canceled" or module.moduleStatus.status eq "expired">
-                                                            <cfif isDate(module.moduleStatus.endDate)>
+                                                            <cfif module.moduleStatus.status eq "free">
+                                                                </tr>
+                                                                    <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
+                                                                </tr>
+                                                            <cfelseif module.moduleStatus.status eq "canceled" or module.moduleStatus.status eq "expired">
+                                                                <cfif isDate(module.moduleStatus.endDate)>
+                                                                    <tr>
+                                                                        <td>#getTrans('txtExpiryDate')#:</td>
+                                                                        <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
+                                                                    </tr>
+                                                                </cfif>
+                                                                </tr>
+                                                                    <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
+                                                                </tr>
+                                                            <cfelseif module.moduleStatus.status eq "test">
                                                                 <tr>
                                                                     <td>#getTrans('txtExpiryDate')#:</td>
                                                                     <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
                                                                 </tr>
-                                                            </cfif>
-                                                            </tr>
-                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
-                                                            </tr>
-                                                        <cfelseif module.moduleStatus.status eq "test">
-                                                            <tr>
-                                                                <td>#getTrans('txtExpiryDate')#:</td>
-                                                                <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
-                                                            </tr>
-                                                        <cfelseif module.moduleStatus.status eq "active">
-                                                            <cfif module.moduleStatus.recurring eq "onetime">
                                                                 <tr>
-                                                                    <td colspan="2" align="center">#getTrans('txtOneTimePayment')#</td>
+                                                                    <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
                                                                 </tr>
-                                                            <cfelse>
-                                                                <tr>
-                                                                    <td>#getTrans('txtRenewPlanOn')#:</td>
-                                                                    <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
-                                                                </tr>
-                                                            </cfif>
-                                                        </cfif>
-                                                    </table>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <!--- <cfdump  var="#module#"> --->
-                                                    <cfif module.includedInCurrentPlan>
-                                                        <cfif len(trim(module.moduleData.settingPath))>
-                                                            <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
-                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                            </a>
-                                                        </cfif>
-                                                    <cfelse>
-                                                        <cfif (module.moduleData.priceMonthly gt 0 or module.moduleData.priceOnetime gt 0 or module.moduleData.priceYearly gt 0) and module.moduleStatus.recurring neq "onetime" and session.superAdmin>
-                                                            <cfif module.moduleStatus.status eq "canceled">
-                                                                <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke" class="card-btn text-blue">
-                                                                    <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
-                                                                </a>
-                                                            <cfelse>
-                                                                <cfif len(trim(module.moduleData.settingPath))>
-                                                                    <a <cfif module.moduleStatus.status neq "expired">href="#application.mainURL#/#module.moduleData.settingPath#"</cfif> class="card-btn">
-                                                                        <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
-                                                                    </a>
-                                                                </cfif>
-                                                                <cfif module.moduleStatus.recurring eq "test">
-                                                                    <cfif getWebhook.recordCount>
-                                                                        <cfset linkM = module.moduleData.bookingLinkM>
-                                                                        <cfset linkY = module.moduleData.bookingLinkY>
-                                                                        <cfset linkO = module.moduleData.bookingLinkO>
-                                                                    <cfelse>
-                                                                        <cfset linkM = application.mainURL & "/account-settings/payment">
-                                                                        <cfset linkY = application.mainURL & "/account-settings/payment">
-                                                                        <cfset linkO = application.mainURL & "/account-settings/payment">
-                                                                    </cfif>
-                                                                    <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
-                                                                        <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
-                                                                        </a>
-                                                                        <div class="dropdown-menu">
-                                                                            <cfif module.moduleData.priceMonthly gt 0>
-                                                                                <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceMonthly, "none")#)</a>
-                                                                                <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceYearly, "none")#)</a>
-                                                                            <cfelse>
-                                                                                <a class="dropdown-item activate-module" href="#linkO#">#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
-                                                                            </cfif>
-                                                                            <cfif module.moduleStatus.status eq "expired">
-                                                                                <a style="cursor: pointer;" class="dropdown-item" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
-                                                                            </cfif>
-                                                                        </div>
-                                                                    </div>
+                                                            <cfelseif module.moduleStatus.status eq "active">
+                                                                <cfif module.moduleStatus.recurring eq "onetime">
+                                                                    <tr>
+                                                                        <td colspan="2" align="center">#getTrans('txtOneTimePayment')#</td>
+                                                                    </tr>
                                                                 <cfelse>
-                                                                    <a style="cursor: pointer;" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
-                                                                    </a>
+                                                                    <tr>
+                                                                        <td>#getTrans('txtRenewPlanOn')#:</td>
+                                                                        <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
+                                                                    </tr>
                                                                 </cfif>
                                                             </cfif>
-                                                        <cfelse>
+                                                        </table>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <cfif module.includedInCurrentPlan>
                                                             <cfif len(trim(module.moduleData.settingPath))>
                                                                 <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
                                                                     <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                 </a>
                                                             </cfif>
+                                                        <cfelse>
+                                                            <cfif (module.moduleData.priceMonthly gt 0 or module.moduleData.priceOnetime gt 0 or module.moduleData.priceYearly gt 0) and module.moduleStatus.recurring neq "onetime" and session.superAdmin>
+                                                                <cfif module.moduleStatus.status eq "canceled">
+                                                                    <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke" class="card-btn text-blue">
+                                                                        <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
+                                                                    </a>
+                                                                <cfelse>
+                                                                    <cfif len(trim(module.moduleData.settingPath))>
+                                                                        <a <cfif module.moduleStatus.status neq "expired">href="#application.mainURL#/#module.moduleData.settingPath#"</cfif> class="card-btn">
+                                                                            <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                        </a>
+                                                                    </cfif>
+                                                                    <cfif module.moduleStatus.recurring eq "test">
+                                                                        <cfif getWebhook.recordCount>
+                                                                            <cfset linkM = module.moduleData.bookingLinkM>
+                                                                            <cfset linkY = module.moduleData.bookingLinkY>
+                                                                            <cfset linkO = module.moduleData.bookingLinkO>
+                                                                        <cfelse>
+                                                                            <cfset linkM = application.mainURL & "/account-settings/payment">
+                                                                            <cfset linkY = application.mainURL & "/account-settings/payment">
+                                                                            <cfset linkO = application.mainURL & "/account-settings/payment">
+                                                                        </cfif>
+                                                                        <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
+                                                                            <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                                                <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                            </a>
+                                                                            <div class="dropdown-menu">
+                                                                                <cfif module.moduleData.priceMonthly gt 0>
+                                                                                    <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceMonthly, "none")#)</a>
+                                                                                    <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceYearly, "none")#)</a>
+                                                                                <cfelse>
+                                                                                    <a class="dropdown-item activate-module" href="#linkO#">#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
+                                                                                </cfif>
+                                                                                <cfif module.moduleStatus.status eq "expired">
+                                                                                    <a style="cursor: pointer;" class="dropdown-item" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
+                                                                                </cfif>
+                                                                            </div>
+                                                                        </div>
+                                                                    <cfelse>
+                                                                        <a style="cursor: pointer;" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
+                                                                            <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                        </a>
+                                                                    </cfif>
+                                                                </cfif>
+                                                            <cfelse>
+                                                                <cfif len(trim(module.moduleData.settingPath))>
+                                                                    <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
+                                                                        <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                    </a>
+                                                                </cfif>
+                                                            </cfif>
                                                         </cfif>
-                                                    </cfif>
 
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </cfif>
                                     </cfloop>
                                 </div>
                             </div>

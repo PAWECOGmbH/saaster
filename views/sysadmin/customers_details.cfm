@@ -11,7 +11,7 @@
     qCustomer = application.objCustomer.getCustomerData(thisCustomerID);
     qUsers = application.objUser.getAllUsers(thisCustomerID);
 
-    if (not qCustomer.recordCount) {
+    if (!isStruct(qCustomer) or structIsEmpty(qCustomer)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
 
@@ -41,11 +41,11 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
-                            <li class="breadcrumb-item active">#qCustomer.strCompanyName#</li>
+                            <li class="breadcrumb-item active">#qCustomer.companyName#</li>
                         </ol>
                     </div>
                     <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomer.intCustomerID#" class="btn btn-primary">
+                        <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomer.customerID#" class="btn btn-primary">
                             <i class="fas fa-edit pe-3"></i> Edit
                         </a>
                     </div>
@@ -61,17 +61,17 @@
                     <div class="card d-flex flex-row">
                         <div class="card-body">
                             <div class="d-flex">
-                                <cfif len(trim(qCustomer.strLogo))>
+                                <cfif len(trim(qCustomer.logo))>
                                     <div>
-                                        <img src="#application.mainURL#/userdata/images/logos/#qCustomer.strLogo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#qCustomer.strCompanyName#">
+                                        <img src="#application.mainURL#/userdata/images/logos/#qCustomer.logo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#qCustomer.companyName#">
                                     </div>
                                 <cfelse>
                                     <div class="avatar avatar-xl me-3 align-self-center">
-                                        #left(qCustomer.strCompanyName,2)#
+                                        #left(qCustomer.companyName,2)#
                                     </div>
                                 </cfif>
                                 <div class="align-self-center">
-                                    <h2>#qCustomer.strCompanyName#</h2>
+                                    <h2>#qCustomer.companyName#</h2>
                                 </div>
                             </div>
                             <div class="d-flex pt-4">
@@ -80,10 +80,10 @@
                                 </div>
                                 <div class="d-flex flex-column ps-3 pe-5">
                                     <div>
-                                        #qCustomer.strAddress#
+                                        #qCustomer.address#
                                     </div>
                                     <div>
-                                        #qCustomer.strZIP# #qCustomer.strCity#
+                                        #qCustomer.zip# #qCustomer.city#
                                     </div>
                                 </div>
                                 <div class="me-5 flex-column text-muted ps-3">
@@ -99,13 +99,13 @@
                                 </div>
                                 <div class="me-5 d-flex flex-column ps-3">
                                     <div>
-                                        #qCustomer.strContactPerson#
+                                        #qCustomer.contactPerson#
                                     </div>
                                     <div>
-                                        #qCustomer.strEmail#
+                                        #qCustomer.email#
                                     </div>
                                     <div>
-                                        #qCustomer.strPhone#
+                                        #qCustomer.phone#
                                     </div>
                                 </div>
                             </div>

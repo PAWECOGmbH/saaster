@@ -4,21 +4,21 @@
     qCountries = application.objGlobal.getCountry(language=session.lng);
     timeZones = getTime.getTimezones();
 
-    custCompany = getCustomerData.strCompanyName;
-    custContactPerson = getCustomerData.strContactPerson;
-    custAddress = getCustomerData.strAddress;
-    custAddress2 = getCustomerData.strAddress2;
-    custZIP = getCustomerData.strZIP;
-    custCity = getCustomerData.strCity;
-    countryID = getCustomerData.intCountryID;
-    timezoneID = getCustomerData.intTimezoneID;
-    custEmail = getCustomerData.strEmail;
-    custPhone = getCustomerData.strPhone;
-    custWebsite = getCustomerData.strWebsite;
-    custBillingAccountName = getCustomerData.strBillingAccountName;
-    custBillingEmail = getCustomerData.strBillingEmail;
-    custBillingAddress = getCustomerData.strBillingAddress;
-    custBillingInfo = getCustomerData.strBillingInfo;
+    custCompany = getCustomerData.companyName;
+    custContactPerson = getCustomerData.contactPerson;
+    custAddress = getCustomerData.address;
+    custAddress2 = getCustomerData.address2;
+    custZIP = getCustomerData.zip;
+    custCity = getCustomerData.city;
+    countryID = getCustomerData.countryID;
+    timezoneID = getCustomerData.timezoneID;
+    custEmail = getCustomerData.email;
+    custPhone = getCustomerData.phone;
+    custWebsite = getCustomerData.website;
+    custBillingAccountName = getCustomerData.billingAccountName;
+    custBillingEmail = getCustomerData.billingEmail;
+    custBillingAddress = getCustomerData.billingAddress;
+    custBillingInfo = getCustomerData.billingInfo;
 
     if(structKeyExists(session, "company") and len(trim(session.company))) {
         custCompany = session.company;
@@ -117,9 +117,9 @@
                     <div class="card-body">
                         <form action="#application.mainURL#/customer" method="post" enctype="multipart/form-data">
                             <div class="row mb-1">
-                                <cfif len(trim(getCustomerData.strLogo))>
+                                <cfif len(trim(getCustomerData.logo))>
                                     <div class="col-auto text-center">
-                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" alt="logo" style="max-height: 150px;">
+                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" alt="logo" style="max-height: 150px;">
                                         <div class="d-flex flex-row flex-start">
                                             <div class="mt-3">
                                                 <a href="#application.mainURL#/customer?del_logo" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>

@@ -7,12 +7,12 @@
 <ul class="navbar-nav">
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-            <cfif len(trim('#getCustomerData.strLogo#'))>
-                <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.strLogo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.strCompanyName#">
-                <span class="nav-link-title">#getCustomerData.strCompanyName#</span>
+            <cfif len(trim('#getCustomerData.logo#'))>
+                <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.companyName#">
+                <span class="nav-link-title">#getCustomerData.companyName#</span>
             <cfelse>
-                <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.strCompanyName,2)#</div>
-                <span class="nav-link-title">#getCustomerData.strCompanyName#</span>
+                <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.companyName,2)#</div>
+                <span class="nav-link-title">#getCustomerData.companyName#</span>
             </cfif>
 
         </a>

@@ -62,8 +62,8 @@
                         </div>
                         <div class="col-6">
                             <address class="mt-5">
-                                #getCustomerData.strBillingAccountName#<br />
-                                #replace(getCustomerData.strBillingAddress, chr(13), "<br />")#<br />
+                                #getCustomerData.billingAccountName#<br />
+                                #replace(getCustomerData.billingAddress, chr(13), "<br />")#<br />
                             </address>
                         </div>
                         <div class="col-12 mt-5">
@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                #replace(getCustomerData.strBillingInfo, chr(13), "<br />")#
+                                #replace(getCustomerData.billingInfo, chr(13), "<br />")#
                             </div>
                             <hr class="m-0">
                         </div>

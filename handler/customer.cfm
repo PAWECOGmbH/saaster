@@ -233,13 +233,13 @@ if (structKeyExists(url, "delete")) {
     <!--- User data of the user to be deleted --->
     getTenant = application.objCustomer.getCustomerData(url.delete);
 
-    if (!isQuery(getTenant) or !getTenant.recordCount) {
+    if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
     <!--- Check whether the user is allowed to delete --->
-    checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.intCustomerID);
+    checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.customerID);
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to delete this tenant!', 'danger');
@@ -247,9 +247,9 @@ if (structKeyExists(url, "delete")) {
     }
 
     <!--- Delete users photo --->
-    if (len(trim(getTenant.strLogo))) {
+    if (len(trim(getTenant.logo))) {
 
-        photoPath = expandPath('../userdata/images/logos/#getTenant.strLogo#');
+        photoPath = expandPath('../userdata/images/logos/#getTenant.logo#');
         objUserFileDelete = application.objGlobal.deleteFile(photoPath);
 
     }
@@ -258,7 +258,7 @@ if (structKeyExists(url, "delete")) {
     queryExecute(
         options = {datasource = application.datasource, result="getAnswer"},
         params = {
-            customerID: {type: "numeric", value: getTenant.intCustomerID},
+            customerID: {type: "numeric", value: getTenant.countryID},
             myCustomerID: {type: "numeric", value: session.customer_id}
         },
         sql = "
@@ -288,12 +288,12 @@ if (structKeyExists(url, "change_tenant")) {
     <!--- User data of the user to be deleted --->
     getTenant = application.objCustomer.getCustomerData(url.change_tenant);
 
-    if (!isQuery(getTenant) or !getTenant.recordCount) {
+    if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    thisCustomerID = getTenant.intCustomerID;
+    thisCustomerID = getTenant.customerID;
 
     <!--- Check whether the user is allowed to delete --->
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, thisCustomerID);

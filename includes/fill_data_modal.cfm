@@ -3,23 +3,23 @@
 
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
-    custCompany = getCustomerData.strCompanyName;
-    custContactPerson = getCustomerData.strContactPerson;
-    custAddress = getCustomerData.strAddress;
-    custAddress2 = getCustomerData.strAddress2;
-    custZIP = getCustomerData.strZIP;
-    custCity = getCustomerData.strCity;
-    countryID = getCustomerData.intCountryID;
-    timezoneID = getCustomerData.intTimezoneID;
-    custPhone = getCustomerData.strPhone;
-    custWebsite = getCustomerData.strWebsite;
-    custBillingAccountName = getCustomerData.strBillingAccountName;
-    custBillingEmail = getCustomerData.strBillingEmail;
-    custBillingAddress = getCustomerData.strBillingAddress;
-    custBillingInfo = getCustomerData.strBillingInfo;
+    custCompany = getCustomerData.companyName;
+    custContactPerson = getCustomerData.contactPerson;
+    custAddress = getCustomerData.address;
+    custAddress2 = getCustomerData.address2;
+    custZIP = getCustomerData.zip;
+    custCity = getCustomerData.city;
+    countryID = getCustomerData.countryID;
+    timezoneID = getCustomerData.timezoneID;
+    custPhone = getCustomerData.phone;
+    custWebsite = getCustomerData.website;
+    custBillingAccountName = getCustomerData.billingAccountName;
+    custBillingEmail = getCustomerData.billingEmail;
+    custBillingAddress = getCustomerData.billingAddress;
+    custBillingInfo = getCustomerData.billingInfo;
 
-    if (len(trim(getCustomerData.strEmail))) {
-        custEmail = getCustomerData.strEmail;
+    if (len(trim(getCustomerData.email))) {
+        custEmail = getCustomerData.email;
     } else {
         custEmail = session.user_email;
     }

@@ -10,27 +10,26 @@
     qCustomers = application.objCustomer.getCustomerData(thisCustomerID);
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
-
-    if(not qCustomers.recordCount){
+    if (!isStruct(qCustomer) or structIsEmpty(qCustomer)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
 
     // Set default values
-    custCompany = qCustomers.strCompanyName;
-    custContactPerson = qCustomers.strContactPerson;
-    custAddress = qCustomers.strAddress;
-    custAddress2 = qCustomers.strAddress2;
-    custZIP = qCustomers.strZIP;
-    custCity = qCustomers.strCity;
-    countryID = qCustomers.intCountryID;
-    timezoneID = qCustomers.intTimezoneID;
-    custEmail = qCustomers.strEmail;
-    custPhone = qCustomers.strPhone;
-    custWebsite = qCustomers.strWebsite;
-    custBillingAccountName = qCustomers.strBillingAccountName;
-    custBillingEmail = qCustomers.strBillingEmail;
-    custBillingAddress = qCustomers.strBillingAddress;
-    custBillingInfo = qCustomers.strBillingInfo;
+    custCompany = qCustomers.companyName;
+    custContactPerson = qCustomers.contactPerson;
+    custAddress = qCustomers.address;
+    custAddress2 = qCustomers.address2;
+    custZIP = qCustomers.zip;
+    custCity = qCustomers.city;
+    countryID = qCustomers.countryID;
+    timezoneID = qCustomers.timezoneID;
+    custEmail = qCustomers.email;
+    custPhone = qCustomers.phone;
+    custWebsite = qCustomers.website;
+    custBillingAccountName = qCustomers.billingAccountName;
+    custBillingEmail = qCustomers.billingEmail;
+    custBillingAddress = qCustomers.billingAddress;
+    custBillingInfo = qCustomers.billingInfo;
 
     if(structKeyExists(session, "company") and len(trim(session.company))) {
         custCompany = session.company;
@@ -107,7 +106,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
-                            <li class="breadcrumb-item active">#qCustomers.strCompanyName#</li>
+                            <li class="breadcrumb-item active">#qCustomers.companyName#</li>
                         </ol>
                     </div>
                     <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
@@ -126,7 +125,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Edit: #qCustomers.strCompanyName#</h3>
+                            <h3 class="card-title">Edit: #qCustomers.companyName#</h3>
                         </div>
                         <div class="card-body">
                             <div class="col-lg-12">
