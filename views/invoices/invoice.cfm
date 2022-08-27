@@ -1,9 +1,10 @@
 <cfscript>
+
     // Exception handling for sef and invoice id
     param name="thiscontent.thisID" default=0 type="numeric";
     thisInvoiceID = thiscontent.thisID
 
-    if(not isNumeric(thisInvoiceID) or thisInvoiceID lte 0) {
+    if (!isNumeric(thisInvoiceID) or thisInvoiceID lte 0) {
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }
 
@@ -14,12 +15,19 @@
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }
 
-    // Is the user allowed to see this invoice
+    // Is the user allowed to see this invoice?
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID)
     if (not checkTenantRange) {
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }
 
+    // Get customer data
+    getCustomerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
+
+    // Get invoice address block
+    addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
+
+    // Get existent payments
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
 </cfscript>
@@ -38,13 +46,14 @@
                         <h4 class="page-title">#getTrans('titInvoice')#</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings/invoices">#getTrans('titInvoices')#</a></li>
                             <li class="breadcrumb-item active">#getInvoiceData.title#</li>
                         </ol>
                     </div>
                     <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
-                            <i class="fas fa-print pe-3"></i> #getTrans('txtPrintInvoice')#
+                            <i class="fas fa-print pe-2"></i> #getTrans('txtPrintInvoice')#
                         </a>
                     </div>
                 </div>
@@ -56,14 +65,16 @@
         <div class="container-xl">
             <div class="card card-lg ps-5 pe-5">
                 <div class="card-body">
-                    <div class="row ps-5 pe-5">
+                    <div class="row ps-4 pe-4">
+                        <div class="w-10 h1">
+                            #objInvoices.getInvoiceStatusBadge(session.lng, getInvoiceData.paymentstatusColor, getInvoiceData.paymentstatusVar)#
+                        </div>
                         <div class="col-12 mt-5">
                             <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="260" style="display: block; width: 260px; font-size: 16px;float: right;" border="0">
                         </div>
                         <div class="col-6">
                             <address class="mt-5">
-                                #getCustomerData.billingAccountName#<br />
-                                #replace(getCustomerData.billingAddress, chr(13), "<br />")#<br />
+                                #addressBlock#
                             </address>
                         </div>
                         <div class="col-12 mt-5">
@@ -92,12 +103,12 @@
                         <table class="table table-transparent table-responsive">
                             <thead>
                                 <tr>
-                                    <th class="w-5 pl-0">#getTrans('titPos')#</th>
-                                    <th>#getTrans('titDescription')#</th>
-                                    <th class="text-end w-15">#getTrans('titQuantity')#</th>
-                                    <th class="text-end w-10">#getTrans('titSinglePrice')#</th>
-                                    <th class="text-center w-10">#getTrans('titDiscount')#</th>
-                                    <th class="text-end w-10 pr-0">#getTrans('titTotal')# #getInvoiceData.currency#</th>
+                                    <th width="5%" class="pl-0">#getTrans('titPos')#</th>
+                                    <th width="50%">#getTrans('titDescription')#</th>
+                                    <th width="15%" class="text-end">#getTrans('titQuantity')#</th>
+                                    <th width="15%" class="text-end">#getTrans('titSinglePrice')#</th>
+                                    <th width="5%" class="text-end">#getTrans('titDiscount')#</th>
+                                    <th width="10%" class="text-end pr-0">#getTrans('titTotal')# #getInvoiceData.currency#</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -115,10 +126,9 @@
                                                 <p class="text-muted small">(#pos.vat#%)</p>
                                             </cfif>
                                         </td>
-                                        <td valign="top" class="text-center"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
+                                        <td valign="top" class="text-end"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                         <td valign="top" class="text-end pr-0">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                                     </tr>
-
                                 </cfloop>
                                 <tr>
                                     <td></td>
@@ -165,6 +175,25 @@
                                 <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
                             </tbody>
                         </table>
+                        <cfif getInvoiceData.amountOpen gt 0>
+                            <div class="row pe-0">
+                                <div class="text-end pe-0">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-green dropdown-toggle" data-bs-toggle="dropdown">
+                                            <i class="fas fa-coins pe-2  activate-lock"></i> #getTrans('txtPayInvoice')#
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a href="#application.mainURL#/payment-settings?pay=#thisInvoiceID#" class="dropdown-item activate-module">
+                                                #getTrans('btnDepPayMethod')#
+                                            </a>
+                                            <a href="#application.mainURL#/payment-settings?pay=#thisInvoiceID#&other" class="dropdown-item activate-module">
+                                                #getTrans('btnOtherPayMethod')#
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </cfif>
                     </div>
                 </div>
             </div>

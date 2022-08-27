@@ -2,6 +2,55 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- ----------------------------
+-- Table structure for currencies
+-- ----------------------------
+DROP TABLE IF EXISTS `currencies`;
+CREATE TABLE `currencies`  (
+  `intCurrencyID` int(11) NOT NULL AUTO_INCREMENT,
+  `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `intPrio` int(11) NOT NULL,
+  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
+  `blnActive` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intCurrencyID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of currencies
+-- ----------------------------
+INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1);
+INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
+
+/* ########################################################################################## */
+
+-- ----------------------------
+-- Table structure for languages
+-- ----------------------------
+DROP TABLE IF EXISTS `languages`;
+CREATE TABLE `languages`  (
+  `intLanguageID` int(11) NOT NULL AUTO_INCREMENT,
+  `strLanguageISO` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strLanguageEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strLanguage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `intPrio` int(11) NOT NULL,
+  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
+  `blnChooseable` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intLanguageID`) USING BTREE,
+  UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of languages
+-- ----------------------------
+INSERT INTO `languages` VALUES (1, 'en', 'English', 'English', 1, 1, 1);
+INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
+
+
+/* ########################################################################################## */
+
 
 -- ----------------------------
 -- Table structure for modules
@@ -18,6 +67,7 @@ CREATE TABLE `modules`  (
   `blnBookable` tinyint(1) NOT NULL,
   `intNumTestDays` int(11) NOT NULL,
   `strSettingPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `blnFree` tinyint(1) NULL DEFAULT 0,
   `intPrio` int(11) NOT NULL,
   PRIMARY KEY (`intModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -25,9 +75,9 @@ CREATE TABLE `modules`  (
 -- ----------------------------
 -- Records of modules
 -- ----------------------------
-INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, '', 1);
-INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, '', 2);
-INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, '', 3);
+INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, 'modules/todo/settings', 1, 1);
+INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, 'modules/easyerp/settings', 0, 2);
+INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, 'modules/mailchimp/settings', 0, 3);
 
 
 -- ----------------------------
@@ -96,6 +146,30 @@ FROM currencies
 WHERE blnActive = 1;
 
 
+-- ----------------------------
+-- Table structure for custom_mappings
+-- ----------------------------
+DROP TABLE IF EXISTS `custom_mappings`;
+CREATE TABLE `custom_mappings`  (
+  `intCustomMappingID` int(11) NOT NULL AUTO_INCREMENT,
+  `strMapping` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `blnOnlyAdmin` tinyint(1) NOT NULL DEFAULT 0,
+  `blnOnlySuperAdmin` tinyint(1) NOT NULL DEFAULT 0,
+  `blnOnlySysAdmin` tinyint(1) NOT NULL DEFAULT 0,
+  `intModuleID` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`intCustomMappingID`) USING BTREE,
+  UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE,
+  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
+  CONSTRAINT `frn_cm_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of custom_mappings
+-- ----------------------------
+INSERT INTO `custom_mappings` VALUES (1, 'modules/todo/settings', 'modules/todo/settings.cfm', 1, 0, 0, 1);
+INSERT INTO `custom_mappings` VALUES (2, 'modules/easyerp/settings', 'modules/easyerp/settings.cfm', 1, 0, 0, 2);
+INSERT INTO `custom_mappings` VALUES (3, 'modules/mailchimp/settings', 'modules/mailchimp/settings.cfm', 1, 0, 0, 3);
 
 
 SET FOREIGN_KEY_CHECKS = 1;

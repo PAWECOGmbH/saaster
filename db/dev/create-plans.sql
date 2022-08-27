@@ -2,10 +2,175 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+
+-- ----------------------------
+-- Table structure for currencies
+-- ----------------------------
+DROP TABLE IF EXISTS `currencies`;
+CREATE TABLE `currencies`  (
+  `intCurrencyID` int(11) NOT NULL AUTO_INCREMENT,
+  `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `intPrio` int(11) NOT NULL,
+  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
+  `blnActive` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intCurrencyID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of currencies
+-- ----------------------------
+INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1);
+INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
+
+/* ########################################################################################## */
+
+-- ----------------------------
+-- Table structure for languages
+-- ----------------------------
+DROP TABLE IF EXISTS `languages`;
+CREATE TABLE `languages`  (
+  `intLanguageID` int(11) NOT NULL AUTO_INCREMENT,
+  `strLanguageISO` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strLanguageEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strLanguage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `intPrio` int(11) NOT NULL,
+  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
+  `blnChooseable` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intLanguageID`) USING BTREE,
+  UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of languages
+-- ----------------------------
+INSERT INTO `languages` VALUES (1, 'en', 'English', 'English', 1, 1, 1);
+INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
+
+
+/* ########################################################################################## */
+
+
+-- ----------------------------
+-- Table structure for plan_groups
+-- ----------------------------
+DROP TABLE IF EXISTS `plan_groups`;
+CREATE TABLE `plan_groups`  (
+  `intPlanGroupID` int(11) NOT NULL AUTO_INCREMENT,
+  `strGroupName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `intCountryID` int(11) NULL DEFAULT NULL,
+  `intPrio` int(11) NOT NULL,
+  PRIMARY KEY (`intPlanGroupID`) USING BTREE,
+  INDEX `_intCountryID`(`intCountryID`) USING BTREE,
+  CONSTRAINT `frn_pg_countries` FOREIGN KEY (`intCountryID`) REFERENCES `countries` (`intCountryID`) ON DELETE RESTRICT ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of plan_groups
+-- ----------------------------
+INSERT INTO `plan_groups` VALUES (1, 'Pricing worldwide', NULL, 1);
+
+-- ----------------------------
+-- Table structure for plan_groups_trans
+-- ----------------------------
+DROP TABLE IF EXISTS `plan_groups_trans`;
+CREATE TABLE `plan_groups_trans`  (
+  `intPlanGroupTransID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanGroupID` int(11) NOT NULL,
+  `intLanguageID` int(11) NOT NULL,
+  `strGroupName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`intPlanGroupTransID`) USING BTREE,
+  INDEX `_intPlanGroupID`(`intPlanGroupID`) USING BTREE,
+  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
+  CONSTRAINT `frn_pgt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_pgt_plangroups` FOREIGN KEY (`intPlanGroupID`) REFERENCES `plan_groups` (`intPlanGroupID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of plan_groups_trans
+-- ----------------------------
+INSERT INTO `plan_groups_trans` VALUES (1, 1, 2, 'Preise weltweit');
+
+
+-- ----------------------------
+-- Table structure for plans
+-- ----------------------------
+DROP TABLE IF EXISTS `plans`;
+CREATE TABLE `plans`  (
+  `intPlanID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanGroupID` int(11) NOT NULL,
+  `strPlanName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strShortDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `strButtonName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strBookingLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `blnRecommended` tinyint(1) NULL DEFAULT 0,
+  `intMaxUsers` int(11) NULL DEFAULT NULL,
+  `intNumTestDays` int(11) NULL DEFAULT 0,
+  `blnFree` tinyint(1) NULL DEFAULT 0,
+  `intPrio` int(11) NOT NULL,
+  PRIMARY KEY (`intPlanID`) USING BTREE,
+  INDEX `_intPlanGroupID`(`intPlanGroupID`) USING BTREE,
+  CONSTRAINT `frn_plans_plan_group` FOREIGN KEY (`intPlanGroupID`) REFERENCES `plan_groups` (`intPlanGroupID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of plans
+-- ----------------------------
+INSERT INTO `plans` VALUES (1, 1, 'Free', '3 users + 0 guests\r\nBest for small, personal projects', '<ul><li>1 project</li><li>3 users</li><li>60 task limit</li></ul>', 'Try free', '', 0, 3, 0, 1, 1);
+INSERT INTO `plans` VALUES (2, 1, 'Standard', 'Up to 10 users\r\nFor teams that need planning and collaboration features.', '<p><strong>Try free for 30 days. Cancel anytime.</strong></p><ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed</li><li>Collaboration and planning features</li></ul>', 'Try standard', '', 1, 10, 30, 0, 2);
+INSERT INTO `plans` VALUES (3, 1, 'Advanced', 'Up to 30 users\r\nFor teams that need planning and collaboration, + tracking workloads by hours, and advanced project reporting. ', '<p><strong>Including all from Basic plan and:</strong></p><ul><li>Advanced reporting</li><li>Track workloads by hours</li></ul><ul></ul>', 'Try advanced', '', 0, 30, 30, 0, 3);
+INSERT INTO `plans` VALUES (4, 1, 'Enterprise', 'Bis business for large companies.\r\nUp to 500 users or more - pleas ask for offer', '<ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed no limits</li><li>and much more<br></li></ul>', 'Contact', 'contact/enterprise', 0, 0, 30, 0, 4);
+
+-- ----------------------------
+-- Table structure for plans_trans
+-- ----------------------------
+DROP TABLE IF EXISTS `plans_trans`;
+CREATE TABLE `plans_trans`  (
+  `intPlanTransID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanID` int(11) NOT NULL,
+  `intLanguageID` int(11) NOT NULL,
+  `strPlanName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strShortDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `strButtonName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strBookingLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`intPlanTransID`) USING BTREE,
+  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
+  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
+  CONSTRAINT `frn_pt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_pt_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of plans_trans
+-- ----------------------------
+INSERT INTO `plans_trans` VALUES (1, 1, 2, 'Easy', '3 Benutzer + 0 Gäster\r\nAm besten für kleine, persönliche Projekte', '<ul><li>1 Projekt</li><li>3 Benutzer<br></li><li>Limit von 60 Aufgaben<br></li></ul>', 'Kostenlos testen', NULL);
+INSERT INTO `plans_trans` VALUES (2, 2, 2, 'Standard', 'Bis zu 10 Benutzer \r\nFür Teams, die Funktionen zur Planung und Zusammenarbeit benötigen.', '<p><strong>Testen Sie kostenlos für 30 Tage. Jederzeit kündbar.</strong></p><ul><li>Unbegrenzte Projekte</li><li>Unbegrenzte Aufgaben</li><li>Benutzer nach Bedarf hinzufügen</li><li>Funktionen für Zusammenarbeit und Planung<br></li></ul>', 'Standard testen', NULL);
+INSERT INTO `plans_trans` VALUES (3, 3, 2, 'Advanced', 'Bis zu 30 Benutzer\r\nFür Teams, die Planung und Zusammenarbeit benötigen, + Verfolgung des Arbeitsaufwands nach Stunden und erweiterte Projektberichte.', '<p>Alles aus Basic und:</p><ul><li>Erweitertes Reporting</li><li>Arbeitsauslastung nach Stunden<br></li></ul>', 'Advanced testen', NULL);
+INSERT INTO `plans_trans` VALUES (4, 4, 2, 'Enterprise', 'Großes Geschäft für große Unternehmen.\r\nBis zu 500 Benutzer oder mehr - bitte fragen Sie nach einem Angebot', '<ul><li>Unlimitiert Projekte<br></li><li>Unlimitiert Aufgaben</li><li>Hinzufügen von Benutzern ohne Einschränkung<br></li><li>und vieles mehr<br></li></ul>', 'Kontakt', NULL);
+
+
+/* ########################################################################################## */
+
+-- ----------------------------
+-- Table structure for plan_features
+-- ----------------------------
+DROP TABLE IF EXISTS `plan_features`;
+CREATE TABLE `plan_features`  (
+  `intPlanFeatureID` int(11) NOT NULL AUTO_INCREMENT,
+  `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `strDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `blnCategory` tinyint(1) NOT NULL DEFAULT 0,
+  `intPrio` int(5) NOT NULL,
+  PRIMARY KEY (`intPlanFeatureID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
 -- ----------------------------
 -- Records of plan_features
 -- ----------------------------
-DELETE FROM plan_features;
 INSERT INTO `plan_features` VALUES (1, 'Planning', '', 1, 1);
 INSERT INTO `plan_features` VALUES (2, 'Beautiful gantt charts', 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.', 0, 2);
 INSERT INTO `plan_features` VALUES (3, 'Tasks', 'The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs.', 0, 3);
@@ -21,9 +186,25 @@ INSERT INTO `plan_features` VALUES (12, 'Reporting', 'Joaquin Phoenix was gazed 
 INSERT INTO `plan_features` VALUES (13, 'Early detection of hours going over budget', 'Woven silk pyjamas exchanged for blue quartz. Brawny gods just ', 0, 13);
 
 -- ----------------------------
+-- Table structure for plan_features_trans
+-- ----------------------------
+DROP TABLE IF EXISTS `plan_features_trans`;
+CREATE TABLE `plan_features_trans`  (
+  `intPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanFeatureID` int(11) NOT NULL,
+  `intLanguageID` int(11) NOT NULL,
+  `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  PRIMARY KEY (`intPlanFeatTransID`) USING BTREE,
+  INDEX `_intPlanFeatureID`(`intPlanFeatureID`) USING BTREE,
+  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
+  CONSTRAINT `frn_pft_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_pft_plan_features` FOREIGN KEY (`intPlanFeatureID`) REFERENCES `plan_features` (`intPlanFeatureID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
 -- Records of plan_features_trans
 -- ----------------------------
-DELETE FROM plan_features_trans;
 INSERT INTO `plan_features_trans` VALUES (1, 1, 2, 'Planen', NULL);
 INSERT INTO `plan_features_trans` VALUES (2, 2, 2, 'Schöne Gantt Charts', 'Eine wunderbare Gelassenheit hat von meiner ganzen Seele Besitz ergriffen, wie diese süßen Frühlingsmorgen, die ich mit ganzem Herzen genieße.');
 INSERT INTO `plan_features_trans` VALUES (3, 3, 2, 'Aufgaben', 'Der schnelle, braune Fuchs springt über den faulen Hund. DJs strömen vorbei, wenn MTV ax quiz prog. Schrott-MTV-Quiz wird von Fuchs-Welpen beehrt. Bawds joggen, flicken Quarz, vex Nymphen.');
@@ -38,47 +219,27 @@ INSERT INTO `plan_features_trans` VALUES (11, 12, 2, 'Berichte erstellen', 'Joaq
 INSERT INTO `plan_features_trans` VALUES (12, 13, 2, 'Frühzeitige Erkennung von Stunden, die das Budget überschreiten', 'Pyjama aus gewebter Seide gegen blauen Quarz getauscht. Brawny Götter nur ');
 INSERT INTO `plan_features_trans` VALUES (13, 4, 2, 'Benutzer', 'Walzer, schlechte Nymphe, für schnelle Jigs vex! Fuchsnymphen schnappen sich den schnell gesprungenen Walzer. Brick Quiz whangs jumpy veldt fox. Helle Füchse springen; dösende Hühner quaken.');
 
--- ----------------------------
--- Records of plan_groups
--- ----------------------------
-DELETE FROM plan_groups;
-INSERT INTO `plan_groups` VALUES (1, 'Pricing worldwide', NULL, 1);
 
 -- ----------------------------
--- Records of plan_groups_trans
+-- Table structure for plans_plan_features
 -- ----------------------------
-DELETE FROM plan_groups_trans;
-INSERT INTO `plan_groups_trans` VALUES (1, 1, 2, 'Preise weltweit');
-
--- ----------------------------
--- Records of plan_prices
--- ----------------------------
-DELETE FROM plan_prices;
-INSERT INTO `plan_prices` VALUES (1, 2, 1, 0.00, 0.00, 7.70, 1, 3, 0);
-INSERT INTO `plan_prices` VALUES (2, 2, 3, 0.00, 0.00, 7.70, 1, 3, 0);
-INSERT INTO `plan_prices` VALUES (4, 3, 1, 89.00, 800.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (5, 3, 3, 89.00, 800.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (7, 4, 1, 129.00, 1100.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (8, 4, 3, 129.00, 1100.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (9, 5, 1, 0.00, 0.00, 0.00, 0, 3, 1);
-INSERT INTO `plan_prices` VALUES (10, 5, 3, 0.00, 0.00, 0.00, 0, 3, 1);
-INSERT INTO `plan_prices` VALUES (11, 4, 2, 139.00, 1390.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (12, 3, 2, 99.00, 900.00, 0.00, 0, 3, 0);
-INSERT INTO `plan_prices` VALUES (13, 5, 2, 0.00, 0.00, 0.00, 0, 3, 1);
-
--- ----------------------------
--- Records of plans
--- ----------------------------
-DELETE FROM plans;
-INSERT INTO `plans` VALUES (2, 1, 'Free', '3 users + 0 guests\r\nBest for small, personal projects', '<ul><li>1 project</li><li>3 users</li><li>60 task limit</li></ul>', 'Try free', '', 0, 3, 0, 1, 1);
-INSERT INTO `plans` VALUES (3, 1, 'Standard', 'Up to 10 users\r\nFor teams that need planning and collaboration features.', '<p><strong>Try free for 30 days. Cancel anytime.</strong></p><ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed</li><li>Collaboration and planning features</li></ul>', 'Try standard', '', 1, 10, 30, 0, 2);
-INSERT INTO `plans` VALUES (4, 1, 'Advanced', 'Up to 30 users\r\nFor teams that need planning and collaboration, + tracking workloads by hours, and advanced project reporting. ', '<p><strong>Including all from Basic plan and:</strong></p><ul><li>Advanced reporting</li><li>Track workloads by hours</li></ul><ul></ul>', 'Try advanced', '', 0, 30, 30, 0, 3);
-INSERT INTO `plans` VALUES (5, 1, 'Enterprise', 'Bis business for large companies.\r\nUp to 500 users or more - pleas ask for offer', '<ul><li>Unlimited projects</li><li>Unlimited tasks</li><li>Add users as needed no limits</li><li>and much more<br></li></ul>', 'Contact', 'contact/enterprise', 0, 0, 30, 0, 4);
+DROP TABLE IF EXISTS `plans_plan_features`;
+CREATE TABLE `plans_plan_features`  (
+  `intPlansPlanFeatID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanID` int(11) NOT NULL,
+  `intPlanFeatureID` int(11) NOT NULL,
+  `blnCheckmark` tinyint(1) NULL DEFAULT 0,
+  `strValue` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`intPlansPlanFeatID`) USING BTREE,
+  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
+  INDEX `_intPlanFeatureID`(`intPlanFeatureID`) USING BTREE,
+  CONSTRAINT `frn_ppf_plan_features` FOREIGN KEY (`intPlanFeatureID`) REFERENCES `plan_features` (`intPlanFeatureID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_ppf_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of plans_plan_features
 -- ----------------------------
-DELETE FROM plans_plan_features;
 INSERT INTO `plans_plan_features` VALUES (1, 2, 2, 0, '1');
 INSERT INTO `plans_plan_features` VALUES (2, 2, 3, 0, '60');
 INSERT INTO `plans_plan_features` VALUES (3, 2, 4, 0, '3');
@@ -121,23 +282,67 @@ INSERT INTO `plans_plan_features` VALUES (39, 5, 12, 1, '');
 INSERT INTO `plans_plan_features` VALUES (40, 5, 13, 1, '');
 
 -- ----------------------------
--- Records of plans_plan_features_trans
+-- Table structure for plans_plan_features_trans
 -- ----------------------------
-DELETE FROM plans_plan_features_trans;
-INSERT INTO `plans_plan_features_trans` VALUES (1, 31, 2, 'Unlimitiert');
-INSERT INTO `plans_plan_features_trans` VALUES (2, 32, 2, 'Unlimitiert');
-INSERT INTO `plans_plan_features_trans` VALUES (3, 33, 2, 'Unlimitiert');
-INSERT INTO `plans_plan_features_trans` VALUES (4, 21, 2, 'Unlimitiert');
-INSERT INTO `plans_plan_features_trans` VALUES (5, 22, 2, 'Unlimitiert');
-INSERT INTO `plans_plan_features_trans` VALUES (6, 23, 2, '30');
+DROP TABLE IF EXISTS `plans_plan_features_trans`;
+CREATE TABLE `plans_plan_features_trans`  (
+  `intPlansPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlansPlanFeatID` int(11) NOT NULL,
+  `intLanguageID` int(11) NOT NULL,
+  `strValue` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`intPlansPlanFeatTransID`) USING BTREE,
+  INDEX `_intPlansPlanFeatID`(`intPlansPlanFeatID`) USING BTREE,
+  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
+  CONSTRAINT `frn_ppft_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_ppft_plans_plan_features` FOREIGN KEY (`intPlansPlanFeatID`) REFERENCES `plans_plan_features` (`intPlansPlanFeatID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
--- Records of plans_trans
+-- Records of plans_plan_features_trans
 -- ----------------------------
-DELETE FROM plans_trans;
-INSERT INTO `plans_trans` VALUES (1, 2, 2, 'Easy', '3 Benutzer + 0 Gäster\r\nAm besten für kleine, persönliche Projekte', '<ul><li>1 Projekt</li><li>3 Benutzer<br></li><li>Limit von 60 Aufgaben<br></li></ul>', 'Kostenlos testen', NULL);
-INSERT INTO `plans_trans` VALUES (2, 4, 2, 'Advanced', 'Bis zu 30 Benutzer\r\nFür Teams, die Planung und Zusammenarbeit benötigen, + Verfolgung des Arbeitsaufwands nach Stunden und erweiterte Projektberichte.', '<p>Alles aus Basic und:</p><ul><li>Erweitertes Reporting</li><li>Arbeitsauslastung nach Stunden<br></li></ul>', 'Advanced testen', NULL);
-INSERT INTO `plans_trans` VALUES (3, 3, 2, 'Standard', 'Bis zu 10 Benutzer \r\nFür Teams, die Funktionen zur Planung und Zusammenarbeit benötigen.', '<p><strong>Testen Sie kostenlos für 30 Tage. Jederzeit kündbar.</strong></p><ul><li>Unbegrenzte Projekte</li><li>Unbegrenzte Aufgaben</li><li>Benutzer nach Bedarf hinzufügen</li><li>Funktionen für Zusammenarbeit und Planung<br></li></ul>', 'Standard testen', NULL);
-INSERT INTO `plans_trans` VALUES (4, 5, 2, 'Enterprise', 'Großes Geschäft für große Unternehmen.\r\nBis zu 500 Benutzer oder mehr - bitte fragen Sie nach einem Angebot', '<ul><li>Unlimitiert Projekte<br></li><li>Unlimitiert Aufgaben</li><li>Hinzufügen von Benutzern ohne Einschränkung<br></li><li>und vieles mehr<br></li></ul>', 'Kontakt', NULL);
+INSERT INTO `plans_plan_features_trans` VALUES (1, 11, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (2, 12, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (3, 21, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (4, 22, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (5, 31, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (6, 32, 2, 'Unlimitiert');
+INSERT INTO `plans_plan_features_trans` VALUES (7, 33, 2, 'Unlimitiert');
+
+
+/* ########################################################################################## */
+
+-- ----------------------------
+-- Table structure for plan_prices
+-- ----------------------------
+DROP TABLE IF EXISTS `plan_prices`;
+CREATE TABLE `plan_prices`  (
+  `intPlanPriceID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanID` int(11) NOT NULL,
+  `intCurrencyID` int(11) NOT NULL,
+  `decPriceMonthly` decimal(10, 2) NULL DEFAULT NULL,
+  `decPriceYearly` decimal(10, 2) NULL DEFAULT NULL,
+  `decVat` decimal(10, 2) NULL DEFAULT NULL,
+  `blnIsNet` tinyint(1) NOT NULL DEFAULT 1,
+  `intVatType` int(1) NOT NULL DEFAULT 1,
+  `blnOnRequest` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intPlanPriceID`) USING BTREE,
+  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
+  INDEX `_intCurrencyID`(`intCurrencyID`) USING BTREE,
+  CONSTRAINT `frn_pp_currency` FOREIGN KEY (`intCurrencyID`) REFERENCES `currencies` (`intCurrencyID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_pp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of plan_prices
+-- ----------------------------
+INSERT INTO `plan_prices` VALUES (1, 1, 1, 0.00, 0.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (2, 1, 2, 0.00, 0.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (3, 2, 1, 89.00, 800.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (4, 2, 2, 89.00, 800.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (5, 3, 1, 129.00, 1100.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (6, 3, 2, 129.00, 1100.00, 0.00, 0, 3, 0);
+INSERT INTO `plan_prices` VALUES (7, 4, 1, 250.00, 2500.00, 0.00, 0, 3, 1);
+INSERT INTO `plan_prices` VALUES (8, 4, 2, 250.00, 2500.00, 0.00, 0, 3, 1);
+
 
 SET FOREIGN_KEY_CHECKS = 1;

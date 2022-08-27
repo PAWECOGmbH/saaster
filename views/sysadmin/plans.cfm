@@ -40,11 +40,11 @@
             <div class="row">
                 <div class="col-lg-6 mb-3">
                     <div class="page-header">
-                        <h4 class="page-title">Plans & Prices</h4>
+                        <h4 class="page-title">Plans</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item active">Plans & Prices</li>
+                            <li class="breadcrumb-item active">Plans</li>
                         </ol>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                         <div class="card-header" style="display: block;">
                             <div class="row mt-2">
                                 <div class="col-lg-6">
-                                    <h3>Plans & Prices</h3>
+                                    <h3>Plans</h3>
                                 </div>
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">

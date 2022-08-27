@@ -258,7 +258,7 @@ if (structKeyExists(url, "delete")) {
     queryExecute(
         options = {datasource = application.datasource, result="getAnswer"},
         params = {
-            customerID: {type: "numeric", value: getTenant.countryID},
+            customerID: {type: "numeric", value: getTenant.customerID},
             myCustomerID: {type: "numeric", value: session.customer_id}
         },
         sql = "
@@ -285,7 +285,7 @@ if (structKeyExists(url, "change_tenant")) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    <!--- User data of the user to be deleted --->
+    <!--- User data of the user to be changed --->
     getTenant = application.objCustomer.getCustomerData(url.change_tenant);
 
     if (structIsEmpty(getTenant)) {
@@ -295,7 +295,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     thisCustomerID = getTenant.customerID;
 
-    <!--- Check whether the user is allowed to delete --->
+    <!--- Check whether the user is allowed to change --->
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, thisCustomerID);
 
     if (!checkTenantRange) {

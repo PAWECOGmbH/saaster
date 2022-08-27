@@ -160,8 +160,8 @@
                     <tr>
                       <td bgcolor="###HeaderBGColor#" width="100%" align="left">
                         <a target="_blank">
-                          <cfif len(trim(MailCustomer.strLogo))>
-                            <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#MailCustomer.strLogo#" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0">
+                          <cfif len(trim(MailCustomer.logo))>
+                            <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#MailCustomer.logo#" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0">
                           <cfelse>
                             <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="320" style="display: block; font-family: #FontFamily#; color: ###HeaderFontColor#; width: 320px; font-size: 16px;" border="0">
                           </cfif>
@@ -239,12 +239,12 @@
                           <tr>
                             <td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #FontSizeText#px; line-height: 22px; font-family: #FontFamily#; color: ##ffffff; border:none;">
                               <span style="font-size: 21px;">#getTrans('txtContact')#</span><br><br>
-                              #MailCustomer.strCompanyName#<br>
-                              #MailCustomer.strAddress#<br>
-                              #MailCustomer.strZIP# / #MailCustomer.strCity#<br>
-                              <a href="mailto:#MailCustomer.strEmail#" style="color: ##ffffff; text-decoration:none;">#MailCustomer.strEmail#</a><br>
-                              <cfif len(trim(MailCustomer.strPhone))>
-                                #MailCustomer.strPhone#
+                              #MailCustomer.companyName#<br>
+                              #MailCustomer.address#<br>
+                              #MailCustomer.zip# / #MailCustomer.city#<br>
+                              <a href="mailto:#MailCustomer.email#" style="color: ##ffffff; text-decoration:none;">#MailCustomer.email#</a><br>
+                              <cfif len(trim(MailCustomer.phone))>
+                                #MailCustomer.phone#
                               </cfif>
                             </td>
                             <!--- Reserved for later <td style="border-right: 1px solid ##ffffff;" class="mobile-hide"></td> --->

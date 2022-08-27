@@ -66,14 +66,14 @@ function sendPayment() {
 function deletePayment(paymentID) {
 
 	var paymentModal = $('#dyn_modal-content');
-	var formData = 'delete=' + paymentID;
+	var formData = 'delete_payment=' + paymentID;
 	var formAction = $("#sendPayment").attr("action");
 	var formReturn = $("#sendPayment").data("return");
 	$.ajax({
 		type: "POST",
 		url: formAction,
 		data: formData,
-		success: function(){
+		success: function(data){
 			paymentModal.load(formReturn);
 		}
 	});
@@ -179,6 +179,28 @@ $(document).ready(function(){
 		});
 	});
 
+	// load modal with dynamic content for sysadmin (edit module period)
+	$('.openPopupPeriod').on('click',function(){
+		var dataURL = $(this).attr('data-href');
+		$('#dyn_modal-content').load(dataURL,function(){
+			$('#dynModalPeriod').modal('show');
+			window.Litepicker && (new Litepicker({
+				element: document.getElementById('start_date'),
+				buttonText: {
+					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
+					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+				},
+			}));
+			window.Litepicker && (new Litepicker({
+				element: document.getElementById('end_date'),
+				buttonText: {
+					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
+					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+				},
+			}));
+		});
+	});
+
 	// Load trumbowyg editor
 	$('.editor').each(function(index, element){
 		var $this = $(element);
@@ -272,8 +294,8 @@ $(document).ready(function(){
 
 		location.href = moduleUrl;
 	});
-		
-	
+
+
 	// Disable button when changing a plan
 	$('body').on('click', 'a.plan', function(e){
 

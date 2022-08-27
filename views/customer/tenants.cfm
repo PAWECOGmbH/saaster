@@ -82,7 +82,7 @@
                                                         </cfif>
                                                             <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                         <cfif qTenants.intCustomerID neq session.customer_id>
-                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                         </cfif>
                                                     </div>
                                                 </cfif>
@@ -186,7 +186,7 @@
                                                     </cfif>
                                                         <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                     <cfif qTenants.intCustomerID neq session.customer_id>
-                                                        <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                     </cfif>
                                                 </div>
                                             </cfif>

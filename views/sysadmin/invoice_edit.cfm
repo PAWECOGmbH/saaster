@@ -53,45 +53,6 @@
                     </div>
                 </div>
             </div>
-
-
-            <!--- <div class="row mb-3">
-
-                <div class="col-lg-6 mb-3">
-                    <div class="page-header">
-                        <h4 class="page-title">Invoice #qInvoice.number#</h4>
-                        <ol class="breadcrumb breadcrumb-dots">
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
-                            <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
-                        </ol>
-                    </div>
-                </div> --->
-                <!--- <div class="col-lg-6 mb-3">
-                    <div class="row">
-                        <div class="col-lg-9">
-                            <div class="page-header text-end">
-                                <div>
-                                    <cfif qInvoice.paymentstatusID eq 1>
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-primary">
-                                            <i class="fas fa-plus pe-3"></i> Add position
-                                        </a>
-                                    </cfif>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="page-header">
-                                <div>
-                                    <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
-                                        <i class="fas fa-search pe-3"></i> Preview
-                                    </a>
-                                <div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> --->
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
@@ -153,9 +114,9 @@
                                             <div class="d-flex align-items-center">
                                                 #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
-                                                    <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
-                                                <cfelseif qInvoice.paymentstatusID eq 2>
-                                                    <a href="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#&draft" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
+                                                <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
+                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
                                                 </cfif>
                                             </div>
                                         </div>
@@ -468,8 +429,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('invoice_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-                nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
+                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
             },
         }));
     });
@@ -477,8 +438,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('due_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-                nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
+                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
             },
         }));
     });

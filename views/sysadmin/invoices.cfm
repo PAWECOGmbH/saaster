@@ -1,7 +1,7 @@
 
 <cfscript>
     param name="session.i_search" default="" type="string";
-    param name="session.i_sort" default="invoiceNumber" type="string";
+    param name="session.i_sort" default="invoiceNumber DESC" type="string";
     param name="session.status" default=0 type="numeric";
     param name="session.invoice_page" default=1 type="numeric";
     param name="session.status_sql" default="";
@@ -52,6 +52,7 @@
                         invoices.dtmDueDate,
                         invoices.strCurrency,
                         invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
                         IF(
@@ -126,6 +127,7 @@
                         invoices.dtmDueDate,
                         invoices.strCurrency,
                         invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
                         IF(
@@ -179,6 +181,7 @@
                         invoices.dtmDueDate,
                         invoices.strCurrency,
                         invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
                         IF(
@@ -347,6 +350,7 @@
                                                 <th>Number</th>
                                                 <th>Status</th>
                                                 <th>Due date (UTC)</th>
+                                                <th>Title</th>
                                                 <th>Customer</th>
                                                 <th>Currency</th>
                                                 <th class="text-end">Total</th>
@@ -360,7 +364,8 @@
                                                 <td>#qInvoices.invoiceNumber#</td>
                                                 <td>#objInvoice.getInvoiceStatusBadge('en', qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
-                                                <td>#qInvoices.customerName#</td>
+                                                <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#left(qInvoices.strInvoiceTitle, 25)# ...<cfelse>#qInvoices.strInvoiceTitle#</cfif></td>
+                                                <td><cfif len(qInvoices.customerName) gt 25>#left(qInvoices.customerName, 25)# ...<cfelse>#qInvoices.customerName#</cfif></td>
                                                 <td>#qInvoices.strCurrency#</td>
                                                 <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
                                                 <td class="text-end">
@@ -370,7 +375,10 @@
                                                         </button>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.intInvoiceID#">Edit invoice</a>
-                                                            <a class="dropdown-item" style="cursor: pointer;" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?delete=#qInvoices.intInvoiceID#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                            <cfif qInvoices.intPaymentStatusID eq 1 or qInvoices.intPaymentStatusID eq 2>
+                                                                <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
+                                                            </cfif>
+                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
                                                         </div>
                                                     </div>
                                                 </td>

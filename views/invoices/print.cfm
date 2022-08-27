@@ -15,7 +15,7 @@
         abort;
     }
 
-    // Is the user allowed to see this invoice (sysadmin excluded)
+    // Is the user allowed to see this invoice
     if (!session.sysadmin) {
         checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID);
         if(not checkTenantRange) {
@@ -24,6 +24,9 @@
     }
 
     customerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
+
+    // Get invoice address block
+    addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
 
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
@@ -53,23 +56,22 @@
                 </td>
             </tr>
             <tr>
-                <td height="120" valign="top" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
-                    #customerData.billingAccountName#<br />
-                    #replace(customerData.billingAddress, chr(13), "<br />")#
+                <td height="150" valign="top" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                    #addressBlock#
                 </td>
             </tr>
             <tr>
-                <td style="border-bottom: 1px solid gray; padding-bottom: 5px;">
+                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
                     <b>#getTrans('titInvoice')# #getInvoiceData.number#</b>
                 </td>
             </tr>
             <tr>
-                <td style="border-bottom: 1px solid gray; padding-bottom: 5px; font-size: 12px;">
+                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px; font-size: 12px;">
                     <b>#getInvoiceData.title#</b>
                 </td>
             </tr>
             <tr>
-                <td style="border-bottom: 1px solid gray; padding-bottom: 5px;">
+                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
                     <table width="100%" border="0">
                         <tr>
                             <td width="20%">
@@ -92,27 +94,30 @@
                 <td>
                     <table width="100%" border="0" style="border-collapse: collapse;">
                         <tr>
-                            <td width="5%" style="border-bottom: 1px solid gray;">#getTrans('titPos')#</td>
-                            <td width="50%" style="border-bottom: 1px solid gray;">#getTrans('titDescription')#</td>
-                            <td width="10%" style="border-bottom: 1px solid gray;" align="right">#getTrans('titQuantity')#</td>
-                            <td width="15%" style="border-bottom: 1px solid gray;" align="right">#getTrans('titSinglePrice')#</td>
-                            <td width="10%" style="border-bottom: 1px solid gray;" align="center">#getTrans('titDiscount')#</td>
-                            <td width="10%" style="border-bottom: 1px solid gray;" align="right">#getTrans('titTotal')# #getInvoiceData.currency#</td>
+                            <td width="5%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos')#</td>
+                            <td width="45%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription')#</td>
+                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity')#</td>
+                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice')#</td>
+                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount')#</td>
+                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal')# #getInvoiceData.currency#</td>
                         </tr>
                         <cfloop array="#getInvoiceData.positions#" index="pos">
                             <tr>
-                                <td valign="top" style="border-bottom: 1px solid gray;">#pos.posNumber#</td>
-                                <td valign="top" style="border-bottom: 1px solid gray;">
+                                <td valign="top" style="border-bottom: 1px solid ##ccc;">#pos.posNumber#</td>
+                                <td valign="top" style="border-bottom: 1px solid ##ccc;">
                                     <b>#pos.title#</b><br />
                                     #pos.description#
                                 </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.quantity, "none")# #pos.unit#</td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">
-                                    #lsCurrencyFormat(pos.singlePrice, "none")#<br />
-                                    <span style="font-size: 9px; color: gray;">(#pos.vat#%)</span>
+                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">#lsCurrencyFormat(pos.quantity, "none")# #pos.unit#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">
+                                    #lsCurrencyFormat(pos.singlePrice, "none")#
+                                    <cfif pos.vat gt 0>
+                                        <br />
+                                        <span style="font-size: 9px; color: ##ccc;">(#pos.vat#%)</span>
+                                    </cfif>
                                 </td>
-                                <td valign="top" align="center" style="border-bottom: 1px solid gray;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid gray;">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
+                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                             </tr>
                         </cfloop>
                         <tr>
@@ -132,9 +137,9 @@
                             <tr><td colspan="100%"></td></tr>
                         </cfif>
                         <tr>
-                            <td style="border-top: 1px solid gray; padding: 5px 0;"></td>
-                            <td style="border-top: 1px solid gray; padding: 5px 0;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
-                            <td style="border-top: 1px solid gray; padding: 5px 0;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
+                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;"></td>
+                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
+                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                         </tr>
 
                         <cfif qPayments.recordCount>
@@ -147,13 +152,12 @@
                             </cfloop>
 
                             <tr>
-                                <td style="border-top: 1px solid gray;"></td>
-                                <td style="border-top: 1px solid gray;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
-                                <td style="border-top: 1px solid gray;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
+                                <td style="border-top: 1px solid ##ccc;"></td>
+                                <td style="border-top: 1px solid ##ccc;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                <td style="border-top: 1px solid ##ccc;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                             </tr>
                         </cfif>
-                        <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin-bottom: 2px;"></td></tr>
-                        <tr><td colspan="6"><hr style="height: 1px; border: 0; background-color: gray; margin: 0;"></td></tr>
+                        <tr><td colspan="6" style="border-top: 1px solid ##ccc;"><!--- <hr style="height: 1px; border: 0; background-color: ##ccc; margin-bottom: 2px;"> ---></td></tr>
                     </table>
                 </td>
             </tr>

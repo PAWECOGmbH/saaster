@@ -2,27 +2,52 @@
 <cfscript>
 
     // Here we process the payment via Payrexx
-    // It's used for onetime paid modules or for new recurring plans/modules
+    // It's used for onetime paid modules or for invoices
     // Hint: For recurring payments we charge the amount directly via transaction id
 
     objPayrexx = new com.payrexx();
     paymentStruct = structNew();
 
+    // For modules
     if (structKeyExists(url, "module")) {
 
-        redirectString = "#application.mainURL#/book?module=#url.module#&psp_response=";
-        failLink = "#application.mainURL#/account-settings/modules";
+        successLink = "#application.mainURL#/book?module=#url.module#";
+        cancelLink = "#application.mainURL#/account-settings/modules?psp_response=cancel";
+        failLink = "#application.mainURL#/account-settings/modules?psp_response=failed";
+        thisStruct = moduleDetails;
+        recurring = thisStruct.recurring;
         paymentStruct['purpose'] = thisStruct.name;
 
+
+    // For plans
+    } else if (structKeyExists(url, "plan")) {
+
+        successLink = "#application.mainURL#/book?plan=#url.plan#";
+        cancelLink = "#application.mainURL#/plans?psp_response=cancel";
+        failLink = "#application.mainURL#/plans?psp_response=failed";
+        thisStruct = planDetails;
+        recurring = thisStruct.recurring;
+        paymentStruct['purpose'] = thisStruct.planName;
+
+
+    // For other payments (eg. invoices)
     } else {
 
-        redirectString = "#application.mainURL#/book?plan=#url.plan#&psp_response=";
-        failLink = "#application.mainURL#/plans";
-        paymentStruct['purpose'] = thisStruct.planName;
+        param name="successLink" default="";
+        param name="cancelLink" default="";
+        param name="failLink" default="";
+        param name="purpose" default="";
+        param name="amountToPay" default="0";
+        param name="currency" default="USD";
+
+        recurring = "onetime";
+        paymentStruct['purpose'] = purpose;
+        thisStruct.priceOneTimeAfterVAT = amountToPay;
+        thisStruct.currency = currency;
 
     }
 
-    // If it's a onetime paid module, charge the amount immediately
+    // Charge the amount immediately
     if (structKeyExists(thisStruct, "priceOneTimeAfterVAT") and thisStruct.priceOneTimeAfterVAT gt 0) {
 
         thisAmount = thisStruct.priceOneTimeAfterVAT * 100;
@@ -47,9 +72,9 @@
     paymentStruct['skipResultPage'] = true;
     paymentStruct['referenceId'] = session.customer_id;
     paymentStruct['currency'] = thisStruct.currency;
-    paymentStruct['successRedirectUrl'] = redirectString & "success";
-    paymentStruct['failedRedirectUrl'] = redirectString & "failed";
-    paymentStruct['cancelRedirectUrl'] = redirectString & "cancel";
+    paymentStruct['successRedirectUrl'] = successLink;
+    paymentStruct['failedRedirectUrl'] = failLink;
+    paymentStruct['cancelRedirectUrl'] = cancelLink;
     paymentStruct['lookAndFeelProfile'] = variables.payrexxDesignID; // config.cfm
 
 

@@ -1,6 +1,13 @@
 
 <cfscript>
 
+    // Is there coming a redirect from the PSP?
+    if (structKeyExists(url, "psp_response")) {
+        if (url.psp_response eq "failed") {
+            getAlert('alertErrorOccured', 'warning');
+        }
+    }
+
     objModules = new com.modules(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
     objPlan = new com.plans(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
 
@@ -55,7 +62,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getBookedModules#" index="module">
-                                        <cfif structKeyExists(module, "moduleData") and !structIsEmpty(module.moduleData)>
+                                        <cfif structKeyExists(module, "moduleData") and !structIsEmpty(module.moduleData) and module.moduleStatus.status neq "payment">
                                             <div class="col-lg-3 mb-4">
                                                 <div class="card" style="min-height: 450px;">
                                                     <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>
@@ -71,7 +78,7 @@
                                                                 <td>#getTrans('txtBookedOn')#:</td>
                                                                 <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.startDate))#</td>
                                                             </tr>
-                                                            <cfif module.moduleStatus.status eq "free">
+                                                            <cfif module.moduleStatus.status eq "free" or module.moduleStatus.status eq "payment">
                                                                 </tr>
                                                                     <td colspan="2" align="center">#module.moduleStatus.statusText#</td>
                                                                 </tr>
@@ -100,9 +107,20 @@
                                                                     </tr>
                                                                 <cfelse>
                                                                     <tr>
-                                                                        <td>#getTrans('txtRenewPlanOn')#:</td>
+                                                                        <td>#getTrans('titRenewal')#:</td>
                                                                         <td>#lsDateFormat(getTime.utc2local(utcDate=module.moduleStatus.endDate))#</td>
                                                                     </tr>
+                                                                    <cfif structKeyExists(module.moduleStatus, "nextModule")>
+                                                                        <tr>
+                                                                            <td colspan="2" align="right" class="small text-muted">
+                                                                                <cfif module.moduleStatus.recurring eq "yearly">
+                                                                                    (#getTrans('txtAfterwards')#: #lcase(getTrans('txtMonthly'))#)
+                                                                                <cfelse>
+                                                                                    (#getTrans('txtAfterwards')#: #lcase(getTrans('txtYearly'))#)
+                                                                                </cfif>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </cfif>
                                                                 </cfif>
                                                             </cfif>
                                                         </table>
@@ -115,14 +133,14 @@
                                                                 </a>
                                                             </cfif>
                                                         <cfelse>
-                                                            <cfif (module.moduleData.priceMonthly gt 0 or module.moduleData.priceOnetime gt 0 or module.moduleData.priceYearly gt 0) and module.moduleStatus.recurring neq "onetime" and session.superAdmin>
+                                                            <cfif ((module.moduleData.itsFree and module.moduleStatus.recurring neq "onetime") or module.moduleStatus.status eq "expired" or module.moduleStatus.status eq "test") and session.superAdmin>
                                                                 <cfif module.moduleStatus.status eq "canceled">
                                                                     <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke" class="card-btn text-blue">
                                                                         <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
                                                                     </a>
                                                                 <cfelse>
                                                                     <cfif len(trim(module.moduleData.settingPath))>
-                                                                        <a <cfif module.moduleStatus.status neq "expired">href="#application.mainURL#/#module.moduleData.settingPath#"</cfif> class="card-btn">
+                                                                        <a <cfif module.moduleStatus.status neq "expired">href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn"<cfelse> class="card-btn cursor-not-allowed"</cfif>>
                                                                             <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
                                                                         </a>
                                                                     </cfif>
@@ -148,21 +166,27 @@
                                                                                     <a class="dropdown-item activate-module" href="#linkO#">#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
                                                                                 </cfif>
                                                                                 <cfif module.moduleStatus.status eq "expired">
-                                                                                    <a style="cursor: pointer;" class="dropdown-item" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
+                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
                                                                                 </cfif>
                                                                             </div>
                                                                         </div>
                                                                     <cfelse>
-                                                                        <a style="cursor: pointer;" class="card-btn text-red" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
+                                                                        <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
                                                                             <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                         </a>
                                                                     </cfif>
                                                                 </cfif>
                                                             <cfelse>
-                                                                <cfif len(trim(module.moduleData.settingPath))>
-                                                                    <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
-                                                                        <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                <cfif module.moduleStatus.status eq "payment" and module.invoiceID gt 0 and session.superAdmin>
+                                                                    <a href="#application.mainURL#/account-settings/invoice/#module.invoiceID#" class="card-btn">
+                                                                        <i class="fas fa-coins pe-2"></i> #getTrans('txtViewInvoice')#
                                                                     </a>
+                                                                <cfelse>
+                                                                    <cfif len(trim(module.moduleData.settingPath))>
+                                                                        <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
+                                                                            <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                        </a>
+                                                                    </cfif>
                                                                 </cfif>
                                                             </cfif>
                                                         </cfif>
@@ -191,22 +215,24 @@
                                     <cfloop array="#getAllModules#" index="module">
                                         <cfif module.bookable or arrayLen(module.includedInPlans)>
                                             <div class="col-lg-3 mb-4">
-                                                <div class="card" style="min-height: 400px;">
+                                                <div class="card" style="min-height: 450px;">
                                                     <div class="card-body p-4 text-center">
                                                         <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
                                                         <h3 class="m-0 mb-3">#module.name#</h3>
                                                         <div class="text-muted">#module.shortdescription#</div>
                                                         <div class="mt-3">
-                                                            <cfif module.priceMonthly eq 0 and module.priceOnetime eq 0 and module.priceOnetime eq 0>
-                                                                <cfif arrayLen(module.includedInPlans)>
-                                                                    <div class="small">#getTrans('txtIncludedInPlan')#</div>
-                                                                <cfelse>
-                                                                    <div class="small">#getTrans('txtFree')#</div>
-                                                                </cfif>
+                                                            <cfif module.itsFree>
+                                                                <div class="text-muted">#getTrans('txtFree')#</div>
                                                             <cfelseif module.priceOnetime gt 0>
                                                                 <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceOnetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
                                                             <cfelseif module.priceMonthly gt 0>
-                                                                <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))#</div>
+                                                                <div class="text-muted">
+                                                                    #module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))# #getTrans('txtOr')#<br />
+                                                                    #module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")# #lcase(getTrans('txtYearly'))#
+                                                                </div>
+                                                            </cfif>
+                                                            <cfif arrayLen(module.includedInPlans)>
+                                                                <div class="text-muted small"><br />(#getTrans('txtIncludedInPlan')#)</div>
                                                             </cfif>
                                                         </div>
                                                     </div>
@@ -273,7 +299,7 @@
                                                             </div>
                                                             <div class="mb-3">
 
-                                                                <cfif module.priceMonthly eq 0 and module.priceOnetime eq 0>
+                                                                <cfif module.itsFree>
                                                                     <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
                                                                 <cfelseif module.priceOnetime gt 0>
                                                                     <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceOnetime, "none")#</div>
@@ -306,7 +332,9 @@
                                                                                 <li class="my-0 py-0">#i.name#</li>
                                                                             </ul>
                                                                         </cfloop>
-                                                                        <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                                                                        <cfif session.superadmin>
+                                                                            <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                                                                        </cfif>
                                                                     </div>
                                                                 </cfif>
                                                             </div>

@@ -32,7 +32,7 @@
                                 <span class="dropdown-header">Sales</span>
                                 <a href="#application.mainURL#/sysadmin/customers" class="dropdown-item">Customers</a>
                                 <a href="#application.mainURL#/sysadmin/invoices" class="dropdown-item">Invoices</a>
-                                <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans & Prices</a>
+                                <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans</a>
                                 <a href="#application.mainURL#/sysadmin/modules" class="dropdown-item">Modules</a>
                                 <div class="dropdown-divider"></div>
 
@@ -56,7 +56,7 @@
                         <cfoutput>
                         <cfset moduleList = "">
                         <cfloop array="#session.currentModules#" index="i">
-                            <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and not listFind(moduleList, i.moduleID)>
+                            <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and i.moduleStatus.status neq "payment" and not listFind(moduleList, i.moduleID)>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                                         <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">

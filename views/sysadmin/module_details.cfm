@@ -62,11 +62,26 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-lg-4">
-                        <label class="form-label">Number of test days *</label>
-                        <input type="text" class="form-control text-end w-75" name="test_days" autocomplete="off" maxlength="10" value="#qModule.intNumTestDays#" placeholder="30" required>
-                        <small class="form-hint">
-                            Enter 0 if you don't want to provide any test days.
-                        </small>
+                        <div class="mb-3">
+                            <label class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="free" <cfif qModule.blnFree>checked</cfif>>
+                                <span class="form-check-label">Free module</span>
+                            </label>
+                            <small class="form-hint">
+                                Activate this module as "Free". All settings in the "Prices" tab then become ineffective.
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of test days *</label>
+                            <cfif qModule.blnFree>
+                                <input type="text" class="form-control text-end" value="#qModule.intNumTestDays#" disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free module">
+                            <cfelse>
+                                <input type="text" class="form-control text-end" name="test_days" autocomplete="off" maxlength="10" value="#qModule.intNumTestDays#" placeholder="30" required>
+                            </cfif>
+                            <small class="form-hint">
+                                Enter 0 if you don't want to provide any test days.
+                            </small>
+                        </div>
                     </div>
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">

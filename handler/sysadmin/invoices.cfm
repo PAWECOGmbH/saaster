@@ -49,26 +49,6 @@ if (structKeyExists(form, "new_invoice")) {
 
 }
 
-
-
-<!--- Delete invoice --->
-if (structKeyExists(url, "delete")) {
-
-    param name="url.delete" default="0";
-
-    if (!isNumeric(url.delete) or url.delete lte 0) {
-        getAlert('No invoice found!', 'danger');
-        location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
-    }
-
-    objInvoice.deleteInvoice(url.delete);
-
-    getAlert('The invoice has been successfully deleted.', 'success');
-    location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
-
-}
-
-
 <!--- Insert position --->
 if (structKeyExists(form, "new_position")) {
 
@@ -205,7 +185,6 @@ if (structKeyExists(url, "delete_pos")) {
 }
 
 
-
 <!--- Update invoice (settings) --->
 if (structKeyExists(form, "settings")) {
 
@@ -263,47 +242,6 @@ if (structKeyExists(form, "settings")) {
 }
 
 
-<!--- Open the invoice --->
-if (structKeyExists(url, "open")) {
-
-    if (isNumeric(url.invoiceID)) {
-
-        // Update invoice status
-        objInvoice.setInvoiceStatus(url.invoiceID);
-
-        location url="#application.mainURL#/sysadmin/invoice/edit/#url.invoiceID#" addtoken="false";
-
-    }
-
-}
-
-
-<!--- Draft the invoice --->
-if (structKeyExists(url, "draft")) {
-
-    if (isNumeric(url.invoiceID)) {
-
-        <!--- Update position --->
-        qNextPosNumber = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                invoiceID: {type: "numeric", value: url.invoiceID},
-                statusID: {type: "numeric", value: 1}
-            },
-            sql = "
-                UPDATE invoices
-                SET intPaymentStatusID = :statusID
-                WHERE intInvoiceID = :invoiceID
-            "
-        )
-
-        location url="#application.mainURL#/sysadmin/invoice/edit/#url.invoiceID#" addtoken="false";
-
-    }
-
-}
-
-
 <!--- Insert payment --->
 if (structKeyExists(form, "payments")) {
 
@@ -311,43 +249,34 @@ if (structKeyExists(form, "payments")) {
 
         invoiceID = form.payments;
 
-        if (structKeyExists(form, "delete")) {
+        param name="form.payment_date" default="#now()#";
+        param name="form.payment_type" default="";
+        param name="form.amount" default="0";
 
-            param name="form.delete" default="0";
-            objInvoice.deletePayment(form.delete);
-
-
+        if (isDate(form.payment_date)) {
+            paymentDate = form.payment_date;
         } else {
+            paymentDate = now();
+        }
+        if (isNumeric(amount)) {
+            paymentAmount = form.amount;
+        } else {
+            paymentAmount = 0;
+        }
+        paymentType = form.payment_type;
 
-            param name="form.payment_date" default="#now()#";
-            param name="form.payment_type" default="";
-            param name="form.amount" default="0";
+        if (paymentAmount gt 0) {
 
-            if (isDate(form.payment_date)) {
-                paymentDate = form.payment_date;
-            } else {
-                paymentDate = now();
-            }
-            if (isNumeric(amount)) {
-                paymentAmount = form.amount;
-            } else {
-                paymentAmount = 0;
-            }
-            paymentType = form.payment_type;
+            payment = structNew();
+            payment['invoiceID'] = invoiceID;
+            payment['date'] = paymentDate;
+            payment['amount'] = paymentAmount;
+            payment['type'] = paymentType;
 
-            if (paymentAmount gt 0) {
-
-                payment = structNew();
-                payment['invoiceID'] = invoiceID;
-                payment['date'] = paymentDate;
-                payment['amount'] = paymentAmount;
-                payment['type'] = paymentType;
-
-                objInvoice.insertPayment(payment);
-
-            }
+            objInvoice.insertPayment(payment);
 
         }
+
 
     }
 
@@ -355,16 +284,58 @@ if (structKeyExists(form, "payments")) {
 }
 
 
+<!--- Open the invoice --->
+if (structKeyExists(url, "open")) {
 
-<!--- Delete payment --->
-if (structKeyExists(form, "delete")) {
+    if (isNumeric(url.i)) {
 
-    param name="form.delete" default="0";
-    objInvoice.deletePayment(form.delete);
+        // Update invoice status
+        objInvoice.setInvoiceStatus(url.i);
+        location url="#application.mainURL#/sysadmin/invoice/edit/#url.i#" addtoken="false";
+
+    }
 
 }
 
 
+// Delete or set another status
+if (structKeyExists(url, "status")) {
+
+    param name="url.i" default="0";
+
+    if (!isNumeric(url.i) or url.i lte 0) {
+        getAlert('No invoice found!', 'danger');
+        location url="#session.redirect#" addtoken="false";
+    }
+
+    <!--- Delete invoice --->
+    if (url.status eq "delete") {
+
+        objInvoice.deleteInvoice(url.i);
+        getAlert('The invoice has been successfully deleted.', 'success');
+
+    } else {
+
+        // Update invoice status
+        objInvoice.setInvoiceStatus(url.i, url.status);
+
+    }
+
+    location url="#session.redirect#" addtoken="false";
+
+
+}
+
+
+<!--- Delete payment (Ajax) --->
+if (structKeyExists(form, "delete_payment")) {
+
+     objInvoice.deletePayment(form.delete_payment);
+
+}
+
+
+location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
 
 
 </cfscript>
