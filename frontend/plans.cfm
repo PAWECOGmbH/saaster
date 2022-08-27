@@ -1,5 +1,12 @@
 <cfscript>
 
+    // Is there coming a redirect from the PSP?
+    if (structKeyExists(url, "psp_response")) {
+        if (url.psp_response eq "failed") {
+            getAlert('alertErrorOccured', 'warning');
+        }
+    }
+
     objPlans = new com.plans();
 
     if (structKeyExists(session, "customer_id")) {

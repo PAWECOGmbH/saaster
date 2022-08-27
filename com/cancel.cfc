@@ -9,26 +9,27 @@ component displayname="cancel" output="false" {
         variables.what = arguments.what;
 
         if (variables.what eq "plan") {
-            variables.sql_query = "AND intPlanID = " & variables.thisID;
+            variables.sqlField = "intPlanID";
         } else {
-            variables.sql_query = "AND intModuleID = " & variables.thisID;
+            variables.sqlField = "intModuleID";
         }
 
         // Security
         local.qCheck = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                customerID: {type: "numeric", value: variables.customerID}
+                customerID: {type: "numeric", value: variables.customerID},
+                thisID: {type: "numeric", value: variables.thisID}
             },
             sql = "
                 SELECT intCustomerID
                 FROM bookings
                 WHERE intCustomerID = :customerID
-                #variables.sql_query#
+                AND #variables.sqlField# = :thisID
             "
         )
 
-        if (local.qCheck.recordCount) {
+        if (local.qCheck.recordCount or session.sysadmin) {
             variables.isAllowed = true;
         } else {
             variables.isAllowed = false;
@@ -48,29 +49,45 @@ component displayname="cancel" output="false" {
 
         if (variables.isAllowed) {
 
-            // Cancel plan
+            // Cancellation at expiry date
             queryExecute (
                 options = {datasource = application.datasource},
                 params = {
                     customerID: {type: "numeric", value: variables.customerID},
                     status: {type: "varchar", value: "canceled"},
-                    dateNow: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
+                    thisID: {type: "numeric", value: variables.thisID}
                 },
                 sql = "
-
                     UPDATE bookings
                     SET strStatus = :status
                     WHERE intCustomerID = :customerID
-                    #variables.sql_query#;
+                    AND #variables.sqlField# = :thisID
+                "
+            )
 
-                    /* Delete plans in the future */
+
+            // Delete plans/modules in the future
+            queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: variables.customerID},
+                    dateNow: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")},
+                    thisID: {type: "numeric", value: variables.thisID}
+                },
+                sql = "
                     DELETE FROM bookings
                     WHERE intCustomerID = :customerID
                     AND dteStartDate > :dateNow
-
-
+                    AND
+                    IF (
+                        '#variables.what#' = 'plan',
+                        intPlanID > 0 AND strStatus = 'waiting',
+                        #variables.sqlField# = :thisID
+                    )
                 "
             )
+
+
 
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;
@@ -101,7 +118,8 @@ component displayname="cancel" output="false" {
             queryExecute (
                 options = {datasource = application.datasource},
                 params = {
-                    customerID: {type: "numeric", value: variables.customerID}
+                    customerID: {type: "numeric", value: variables.customerID},
+                    thisID: {type: "numeric", value: variables.thisID}
                 },
                 sql = "
 
@@ -113,7 +131,7 @@ component displayname="cancel" output="false" {
                         'active'
                     )
                     WHERE intCustomerID = :customerID
-                    #variables.sql_query#
+                    AND #variables.sqlField# = :thisID
 
                 "
             )

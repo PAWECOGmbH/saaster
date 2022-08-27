@@ -209,6 +209,35 @@ if (structKeyExists(form, "edit_module")) {
 
         }
 
+        if (structKeyExists(form, "free")) {
+
+            form.free = 1;
+            form.test_days = 0;
+
+            // Set all prices to 0
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    moduleID: {type: "numeric", value: form.edit_module}
+                },
+                sql = "
+                    UPDATE modules_prices
+                    SET decPriceMonthly = 0,
+                        decPriceYearly = 0,
+                        decPriceOneTime = 0,
+                        decVat = 0,
+                        intVatType = 1,
+                        blnIsNet = 1
+                    WHERE intModuleID = :moduleID
+                "
+            )
+
+        } else {
+
+            form.free = 0;
+
+        }
+
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -220,7 +249,8 @@ if (structKeyExists(form, "edit_module")) {
                 test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
                 moduleID: {type: "numeric", value: form.edit_module},
-                modulePath: {type: "varchar", value: mapping}
+                modulePath: {type: "varchar", value: mapping},
+                free: {type: "boolean", value: form.free},
             },
             sql = "
                 UPDATE modules
@@ -231,7 +261,8 @@ if (structKeyExists(form, "edit_module")) {
                     strTabPrefix = :prefix,
                     blnBookable = :bookable,
                     intNumTestDays = :test_days,
-                    strSettingPath = :modulePath
+                    strSettingPath = :modulePath,
+                    blnFree = :free
                 WHERE intModuleID = :moduleID
 
             "
@@ -565,6 +596,228 @@ if (structKeyExists(form, "edit_prices")) {
 
 }
 
+
+
+
+
+
+// ---- Edit booked modules or book via sysadmin
+
+if (structKeyExists(url, "booking")) {
+
+    param name="url.b" default=0;
+    param name="url.c" default=0;
+    param name="url.m" default=0;
+    param name="url.r" default="";
+
+    // Get some customer data
+    customerData = application.objCustomer.getCustomerData(url.c);
+    custLanguage = customerData.language;
+    custCurrency = customerData.currencyStruct.iso;
+    custCurrencyID = customerData.currencyStruct.id;
+
+
+    // Edit a booked period
+    if (structKeyExists(url, "period")) {
+
+        bookingStruct = structNew();
+        bookingStruct['bookingID'] = url.b;
+
+        if (structKeyExists(form, "start_date") and dateFormat(form.start_date, "yyyy-mm-dd") <= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateStart'] = form.start_date;
+        }
+        if (structKeyExists(form, "end_date") and dateFormat(form.end_date, "yyyy-mm-dd") >= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateEnd'] = form.end_date;
+        }
+
+        updateBooking = new com.book('module', custLanguage).updateBooking(bookingStruct);
+
+        getAlert('Module period saved.');
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+    }
+
+
+    // Cancel a booked module
+    if (structKeyExists(url, "cancel")) {
+
+        // Cancel module
+        cancelModule = new com.cancel(customerID=url.c, thisID=url.m, what='module').cancel();
+
+        if (cancelModule.success) {
+            getAlert('Module canceled. The schedule task will do the rest.');
+        } else {
+            getAlert(cancelModule.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+    }
+
+
+    // Revoke cancellation
+    if (structKeyExists(url, "revoke")) {
+
+        // Cancel module
+        revoke = new com.cancel(customerID=url.c, thisID=url.m, what='module').revoke();
+
+        if (revoke.success) {
+            getAlert('Cancellation revoked. Please do not forget to reset the expiry date!', 'info');
+        } else {
+            getAlert(revoke.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+    }
+
+
+    // Book module right now (for free)
+    if (structKeyExists(url, "free")) {
+
+        // Get module infos of the module to be booked
+        moduleDetails = new com.modules(language=custLanguage, currencyID=custCurrencyID).getModuleData(url.m);
+
+        structUpdate(moduleDetails, "priceMonthly", 0);
+        structUpdate(moduleDetails, "priceMonthlyAfterVAT", 0);
+        structUpdate(moduleDetails, "priceYearly", 0);
+        structUpdate(moduleDetails, "priceYearlyAfterVAT", 0);
+        structUpdate(moduleDetails, "priceOnetime", 0);
+        structUpdate(moduleDetails, "priceOneTimeAfterVAT", 0);
+        structUpdate(moduleDetails, "testDays", 0);
+
+        // Make booking right now
+        makeBooking = new com.book('module', custLanguage).checkBooking(customerID=url.c, bookingData=moduleDetails, recurring='onetime', makeBooking=true);
+
+        if (makeBooking.success) {
+            getAlert('Module activated for free.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+    }
+
+
+    // Make invoice which the client can then pay to activate the module
+    if (structKeyExists(url, "invoice")) {
+
+        // Get module infos of the module to be booked
+        moduleDetails = new com.modules(language=custLanguage, currencyID=custCurrencyID).getModuleData(url.m);
+
+        // Set the test days to 0 in order to make the invoice immediately
+        structUpdate(moduleDetails, "testDays", 0);
+
+        // Make booking and invoice right now
+        makeBooking = new com.book('module', custLanguage).checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The invoice was successfully created and the customer was informed by e-mail to pay the invoice.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+
+    }
+
+
+    // Activate the test time
+    if (structKeyExists(url, "test")) {
+
+        // Get module infos of the module to be booked
+        moduleDetails = new com.modules(language=custLanguage, currencyID=custCurrencyID).getModuleData(url.m);
+
+        // Make booking with test phase
+        makeBooking = new com.book('module', custLanguage).checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The module has been successfully activated.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+
+    }
+
+
+    // Change the cycle of a module
+    if (structKeyExists(url, "change")) {
+
+        // Get module infos of the module to be booked
+        moduleDetails = new com.modules(language=custLanguage, currencyID=custCurrencyID).getModuleData(url.m);
+
+        objBooking = new com.book('module', custLanguage);
+
+        // Check booking
+        checkBooking = objBooking.checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=false);
+
+
+        // If the amount to pay is greater than 0, make invoice
+        if (checkBooking.amountToPay gt 0) {
+
+            // Make booking and invoice right now
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+        } else {
+
+            // Save the new module
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+        }
+
+        if (makeBooking.success) {
+            getAlert('The cycle was changed.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+
+    }
+
+
+    // Delete the module (the booking)
+    if (structKeyExists(url, "delete")) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: url.b},
+                moduleID: {type: "numeric", value: url.m},
+                customerID: {type: "numeric", value: url.c}
+            },
+            sql = "
+
+                DELETE FROM bookings
+                WHERE intCustomerID = :customerID
+                AND intModuleID = :moduleID;
+
+                DELETE FROM invoices
+                WHERE intBookingID = :bookingID;
+
+            "
+        )
+
+        getAlert('The module was withdrawn from the customer.');
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
+
+
+    }
+
+
+
+
+}
+
+
+location url="#application.mainURL#/dashboard" addtoken="false";
 
 
 </cfscript>

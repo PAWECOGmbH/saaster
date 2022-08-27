@@ -645,8 +645,6 @@ if (structKeyExists(form, "edit_features")) {
                 if (thisField eq "checkmark") {
                     checkmark = evaluate("checkmark_#thisFeatureID#");
 
-                    dump(checkmark);
-
                     if (checkmark eq "on") {
                         checkmark = 1;
                     }
@@ -733,6 +731,235 @@ if (structKeyExists(form, "plan_modules")) {
         location url="#application.mainURL#/sysadmin/plan/edit/#form.plan_modules#?tab=modules" addtoken="false";
 
     }
+
+}
+
+
+
+
+// ---- Edit booked plan or book via sysadmin
+
+if (structKeyExists(url, "booking")) {
+
+    param name="url.b" default=0;
+    param name="url.c" default=0;
+    param name="url.p" default=0;
+    param name="url.r" default="";
+
+    // Get some customer data
+    customerData = application.objCustomer.getCustomerData(url.c);
+    custLanguage = customerData.language;
+    custCurrency = customerData.currencyStruct.iso;
+    custCurrencyID = customerData.currencyStruct.id;
+
+
+    // Edit the booked period
+    if (structKeyExists(url, "period")) {
+
+        bookingStruct = structNew();
+        bookingStruct['bookingID'] = url.b;
+
+        if (structKeyExists(form, "start_date") and dateFormat(form.start_date, "yyyy-mm-dd") <= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateStart'] = form.start_date;
+        }
+        if (structKeyExists(form, "end_date") and dateFormat(form.end_date, "yyyy-mm-dd") >= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateEnd'] = form.end_date;
+        }
+
+        updateBooking = new com.book('plan', custLanguage).updateBooking(bookingStruct);
+
+        getAlert('Plan period saved.');
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Cancel a booked plan
+    if (structKeyExists(url, "cancel")) {
+
+        // Cancel plan
+        cancelPlan = new com.cancel(customerID=url.c, thisID=url.p, what='plan').cancel();
+
+        if (cancelPlan.success) {
+            getAlert('Plan canceled. The schedule task will do the rest.');
+        } else {
+            getAlert(cancelPlan.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Revoke cancellation
+    if (structKeyExists(url, "revoke")) {
+
+        // Cancel module
+        revoke = new com.cancel(customerID=url.c, thisID=url.p, what='plan').revoke();
+
+        if (revoke.success) {
+            getAlert('Cancellation revoked');
+        } else {
+            getAlert(revoke.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Book plan right now (for free)
+    if (structKeyExists(url, "free")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        structUpdate(planDetails, "priceMonthly", 0);
+        structUpdate(planDetails, "priceMonthlyAfterVAT", 0);
+        structUpdate(planDetails, "priceYearly", 0);
+        structUpdate(planDetails, "priceYearlyAfterVAT", 0);
+        structUpdate(planDetails, "testDays", 0);
+
+        structInsert(planDetails, "priceOnetime", 0);
+        structInsert(planDetails, "priceOneTimeAfterVAT", 0);
+
+        // Make booking right now
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring='onetime', makeBooking=true);
+
+        if (makeBooking.success) {
+            getAlert('Plan activated for free.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Make invoice which the client can then pay to activate the plan
+    if (structKeyExists(url, "invoice")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        // Set the test days to 0 in order to make the invoice immediately
+        structUpdate(planDetails, "testDays", 0);
+
+        // Make booking and invoice right now
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The invoice was successfully created, check it out!');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
+
+
+    }
+
+
+    // Activate the test time
+    if (structKeyExists(url, "test")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        // Make booking with test phase
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring="test", makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The plan has been successfully activated.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+
+    }
+
+
+    // Change the cycle of a module
+    if (structKeyExists(url, "change")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        objBooking = new com.book('plan', custLanguage);
+
+        // Check booking
+        checkBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=false);
+
+
+        // If the amount to pay is greater than 0, make invoice
+        if (checkBooking.amountToPay gt 0) {
+
+            // Make booking and invoice right now
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+            if (makeBooking.success) {
+                getAlert('The invoice was successfully created, check it out!');
+            } else {
+                getAlert(makeBooking.message, 'danger');
+            }
+
+            location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
+
+        } else {
+
+            // Save the new plan
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+            if (makeBooking.success) {
+                getAlert('The cycle was changed.');
+            } else {
+                getAlert(makeBooking.message, 'danger');
+            }
+
+            location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+        }
+
+
+    }
+
+
+    // Delete the plan (the booking)
+    if (structKeyExists(url, "delete")) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: url.b},
+                planID: {type: "numeric", value: url.p},
+                customerID: {type: "numeric", value: url.c}
+            },
+            sql = "
+
+                DELETE FROM bookings
+                WHERE intCustomerID = :customerID
+                AND intPlanID = :planID;
+
+                DELETE FROM invoices
+                WHERE intBookingID = :bookingID
+                AND intPaymentStatusID != 3
+                AND intPaymentStatusID != 4;
+
+            "
+        )
+
+        getAlert('The plan was withdrawn from the customer.');
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+
+    }
+
+
+
 
 }
 

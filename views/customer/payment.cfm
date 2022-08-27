@@ -2,7 +2,7 @@
 <cfscript>
 
     objPayrexx = new com.payrexx();
-    getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+    getWebhook = objPayrexx.getWebhook(customerID=session.customer_id, status='authorized', default='', includingFailed='yes');
 
 </cfscript>
 
@@ -58,7 +58,7 @@
                                         </div>
                                         <div class="col-lg-3 mb-3">
                                             <label class="form-check form-switch">
-                                                <cfif getWebhook.blndefault eq 1>
+                                                <cfif getWebhook.blndefault eq 1 and getWebhook.blnFailed eq 0>
                                                     <input class="form-check-input" type="checkbox" name="default" checked <cfif getWebhook.recordCount eq 1>disabled</cfif>>
                                                 <cfelse>
                                                     <input onclick="window.location.href='#application.mainURL#/payment-settings?default=#getWebhook.intPayrexxID#'" class="form-check-input" type="checkbox" name="default">

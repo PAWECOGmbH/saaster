@@ -40,12 +40,12 @@
     planDetails = objPlans.getPlanDetail(planID);
 
     // First, get the booking details without a real booking
-    checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=false);
+    checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=false, chargeInvoice=false);
 
     // If the amount to pay is less or equal zero, book right now and save the plan into the session
     if (structKeyExists(checkBooking, "amountToPay") and checkBooking.amountToPay lte 0) {
 
-        makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=true);
+        makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=true, chargeInvoice=false);
 
         if (makeBooking.success) {
 
@@ -71,7 +71,7 @@
 
 
     // Let's save the booking now and charge the amount ('makeInvoice' also charges the customers credit card)
-    makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=true, makeInvoice=true);
+    makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=true, makeInvoice=true, chargeInvoice=true);
 
     if (makeBooking.success) {
 

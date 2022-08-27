@@ -11,7 +11,7 @@ if (structKeyExists(url, "del")) {
         // Get the entries
         getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
 
-        if (getWebhook.recordCount gt 1) {
+        if (getWebhook.recordCount) {
 
             // Delete reserved transaction on Payrexx
             payload = structNew();
@@ -202,6 +202,112 @@ if (structKeyExists(url, "default")) {
     }
 
 }
+
+
+// Delete payment method
+if (structKeyExists(url, "pay")) {
+
+    if (isNumeric(url.pay) and url.pay gt 0) {
+
+        if (structKeyExists(url, "other")) {
+
+            // Coming from PSP
+            if (structKeyExists(url, "psp_response")) {
+
+                // If we are in dev mode, call the JSON data from the given server
+                if (application.environment eq "dev") {
+                    include template="/frontend/payrexx_webhook.cfm";
+                }
+
+                // Get the webhook data
+                objPayrexx = new com.payrexx();
+                getWebhook = objPayrexx.getWebhook(session.customer_id, 'confirmed');
+
+                // If there is no data from the webhook, send the customer back and try again
+                if (getWebhook.recordCount) {
+
+                    // Insert payment
+                    payment = structNew();
+                    payment['invoiceID'] = url.pay;
+                    payment['customerID'] = session.customer_id;
+                    payment['date'] = now();
+                    payment['amount'] = getWebhook.decAmount;
+                    payment['payrexxID'] = getWebhook.intPayrexxID;
+                    payment['type'] = getWebhook.strPaymentBrand;
+
+                    objInvoice = new com.invoices();
+                    insPayment = objInvoice.insertPayment(payment);
+                    anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
+
+                    // Overwrite the product structs
+                    newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
+                    session.currentPlan = newPlan;
+                    checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
+                    session.currentModules = checkModules;
+
+                    getAlert('msgInvoicePaid', 'success');
+
+                } else {
+
+                    getAlert('alertErrorOccured', 'warning');
+
+                }
+
+            } else {
+
+                // Get the invoice number
+                objInvoices = new com.invoices();
+                incoiceData = objInvoices.getInvoiceData(url.pay);
+
+                successLink = "#application.mainURL#/payment-settings?pay=#url.pay#&other&psp_response=success";
+                cancelLink = "#application.mainURL#/account-settings/invoice/#url.pay#?psp_response=failed";
+                failLink = "#application.mainURL#/account-settings/invoice/#url.pay#?psp_response=failed";
+                purpose = getTrans('titInvoiceNumber') & " " & incoiceData.number;
+                amountToPay = incoiceData.amountOpen;
+                currency = incoiceData.currency;
+
+                include template="/includes/payment.cfm";
+
+            }
+
+        } else {
+
+            // Get webhook data
+            objPayrexx = new com.payrexx();
+            getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+            anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
+
+            if (!getWebhook.recordCount) {
+                location url="#application.mainURL#/account-settings/payment" addtoken="false";
+            }
+
+            // Charge the amount now (Payrexx)
+            chargeNow = new com.invoices().payInvoice(url.pay);
+            if (chargeNow.success) {
+
+                // Overwrite the product structs
+                newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
+                session.currentPlan = newPlan;
+                checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
+                session.currentModules = checkModules;
+
+                getAlert('msgInvoicePaid');
+
+
+            } else {
+
+                getAlert('txtChargingNotPossible', 'warning');
+
+            }
+
+        }
+
+        location url="#application.mainURL#/account-settings/invoice/#url.pay#" addtoken="false";
+
+    }
+
+}
+
 
 
 location url="#application.mainURL#/dashboard" addtoken="false";

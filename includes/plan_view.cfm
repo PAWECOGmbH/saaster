@@ -9,9 +9,21 @@
     <dd class="col-7">#session.currentPlan.planName#</dd>
 
     <dt class="col-5">#getTrans('txtPlanStatus')#:</dt>
-    <dd class="col-7 text-#getStatus.fontColor#">#getStatus.statusTitle#</dd>
+    <dd class="col-7 text-#getStatus.fontColor#">
+        <cfif session.currentPlan.status eq "payment">
+            #getStatus.statusText#
+            <cfif session.currentPlan.invoiceID gt 0>
+                <span class="small">
+                    <br />
+                    <a href="#application.mainURL#/account-settings/invoice/#session.currentPlan.invoiceID#">#getTrans('txtViewInvoice')#</a>
+                </span>
+            </cfif>
+        <cfelse>
+            #getStatus.statusTitle#
+        </cfif>
+    </dd>
 
-    <cfif session.currentPlan.recurring neq "onetime" and session.currentPlan.status eq "active">
+    <cfif session.currentPlan.status eq "active" and session.currentPlan.recurring neq "onetime">
 
         <dt class="col-5">#getTrans('titCycle')#:</dt>
         <dd class="col-7">
@@ -50,7 +62,7 @@
 
     <cfelse>
 
-        <cfif session.currentPlan.status eq "active" and  session.currentPlan.recurring neq "onetime">
+        <cfif session.currentPlan.status eq "active" and session.currentPlan.recurring neq "onetime">
 
             <dt class="col-5">#getTrans('txtRenewPlanOn')#:</dt>
             <dd class="col-7">#lsDateFormat(getTime.utc2local(utcDate=session.currentPlan.endDate))#</dd>

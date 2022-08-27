@@ -22,7 +22,7 @@
         invoice_start = invoice_start + valueToAdd;
     }
 
-    qInvoices = objInvoice.getInvoices(session.customer_id,invoice_start,getEntries);
+    qInvoices = objInvoice.getInvoices(session.customer_id, invoice_start, getEntries, 'intInvoiceNumber DESC');
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -63,7 +63,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <cfloop index="i" array="#qInvoices.arrayInvoices#">
+                                    <cfloop array="#qInvoices.arrayInvoices#" index="i">
                                         <tr>
                                             <td>#i.invoiceNumber#</td>
                                             <td>#lsDateFormat(getTime.utc2local(utcDate=i.invoiceDate))#</td>
@@ -114,7 +114,7 @@
                             <cfelse>
                                 <cfset blockPage = session.invoice_c_page + 4>
                             </cfif>
-                            
+
                             <cfif blockPage neq pages>
                                 <cfloop index="j" from="#session.invoice_c_page#" to="#blockPage#">
                                     <cfif not blockPage gt pages>

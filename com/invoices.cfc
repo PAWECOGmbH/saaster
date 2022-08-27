@@ -46,6 +46,11 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
+        if (structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID)) {
+            local.userID = invoiceData.userID;
+        } else {
+            local.userID = "";
+        }
         if (structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID)) {
             local.bookingID = invoiceData.bookingID;
         } else {
@@ -75,7 +80,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
         } else {
-            local.currency = IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
+            local.currency = application.objGlobal.getDefaultCurrency().iso;
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
@@ -115,6 +120,7 @@ component displayname="invoices" output="false" {
                 options = {datasource = application.datasource, result="getNewID"},
                 params = {
                     customerID: {type: "numeric", value: local.customerID},
+                    userID: {type: "numeric", value: local.userID},
                     invoiceNumber: {type: "numeric", value: local.invoiceNumber},
                     prefix: {type: "nvarchar", value: local.prefix},
                     title: {type: "nvarchar", value: local.title},
@@ -129,8 +135,8 @@ component displayname="invoices" output="false" {
                     bookingID: {type: "numeric", value: local.bookingID},
                 },
                 sql = "
-                    INSERT INTO invoices (intCustomerID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
-                    VALUES (:customerID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
+                    INSERT INTO invoices (intCustomerID, intUserID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
+                    VALUES (:customerID, :userID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
                 "
             )
 
@@ -834,12 +840,17 @@ component displayname="invoices" output="false" {
     }
 
     <!--- Get customers invoices --->
-    public struct function getInvoices(required numeric customerID, numeric start, numeric count) {
+    public struct function getInvoices(required numeric customerID, numeric start, numeric count, string order) {
 
         local.queryLimit;
+        local.queryOrder;
 
         if (structKeyExists(arguments, "start") and structKeyExists(arguments, "count")){
             local.queryLimit = "LIMIT #arguments.start#, #arguments.count#"
+        }
+
+        if (structKeyExists(arguments, "order") and structKeyExists(arguments, "order")){
+            local.queryOrder = "ORDER BY " & arguments.order;
         }
 
         local.qTotalCount = queryExecute(
@@ -873,6 +884,7 @@ component displayname="invoices" output="false" {
                         invoices.strCurrency as invoiceCurrency,
                         invoices.decTotalPrice as invoiceTotal,
                         invoices.strLanguageISO as invoiceLanguage,
+                        invoices.intPaymentStatusID as invoiceStatusID,
                         (
                             SELECT strColor
                             FROM invoice_status
@@ -886,6 +898,7 @@ component displayname="invoices" output="false" {
                 FROM invoices
                 WHERE invoices.intPaymentStatusID > 1
                 AND invoices.intCustomerID = :customerID
+                #local.queryOrder#
                 #local.queryLimit#
             "
         )
@@ -903,6 +916,7 @@ component displayname="invoices" output="false" {
             local.invoiceStruct['invoiceDueDate'] = local.qInvoice.invoiceDueDate;
             local.invoiceStruct['invoiceCurrency'] = local.qInvoice.invoiceCurrency;
             local.invoiceStruct['invoiceTotal'] = local.qInvoice.invoiceTotal;
+            local.invoiceStruct['invoiceStatusID'] = local.qInvoice.invoiceStatusID;
             local.invoiceStruct['invoiceStatusVariable'] = local.qInvoice.invoiceStatusVariable;
             local.invoiceStruct['invoiceStatusColor'] = local.qInvoice.invoiceStatusColor;
             local.invoiceStruct['invoiceLanguage'] = local.qInvoice.invoiceLanguage;
@@ -1198,7 +1212,7 @@ component displayname="invoices" output="false" {
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    invoiceID: {type: "numeric", value: local.invoiceID},
+                    invoiceID: {type: "numeric", value: arguments.invoiceID},
                     status: {type: "numeric", value: arguments.status}
                 },
                 sql = "
@@ -1226,8 +1240,8 @@ component displayname="invoices" output="false" {
             local.dueDate = objInvoice.dueDate;
             if (local.paid eq 0) {
                 local.status = 2; // open
-                if (local.dueDate < now()) {
-                    local.status = 6; // open
+                if (local.dueDate < dateFormat(now(), "yyyy-mm-dd")) {
+                    local.status = 6; // overdue
                 }
             } else if (local.paid lt local.invoiceAmount) {
                 local.status = 4; // part paid
@@ -1248,6 +1262,30 @@ component displayname="invoices" output="false" {
                     WHERE intInvoiceID = :invoiceID
                 "
             )
+
+            // Update bookings if needed and paid
+            if (local.status eq 3) {
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        invoiceID: {type: "numeric", value: arguments.invoiceID}
+                    },
+                    sql = "
+                        UPDATE bookings
+                        SET strStatus = 'active'
+                        WHERE strStatus = 'payment'
+                        AND intBookingID =
+                        COALESCE(
+                            (
+                                SELECT intBookingID
+                                FROM invoices
+                                WHERE intInvoiceID = :invoiceID
+                            ), 0
+                        )
+                    "
+                )
+            }
+
 
         }
 
@@ -1341,6 +1379,59 @@ component displayname="invoices" output="false" {
 
 
         return local.returnValue;
+
+
+    }
+
+
+    // Get invoice address block
+    public string function getInvoiceAddress(required numeric invoiceID) {
+
+        local.customerID = new com.invoices().getInvoiceData(arguments.invoiceID).customerID;
+
+        // Get customer data
+        local.customerData = application.objCustomer.getCustomerData(local.customerID);
+
+        local.addressBlock = "";
+        if (len(trim(local.customerData.billingAccountName)) and len(trim(local.customerData.billingAddress))) {
+
+            cfsavecontent(variable="local.addressBlock") {
+                echo(
+                    "
+                        #local.customerData.billingAccountName#<br />
+                        #replace(local.customerData.billingAddress, chr(13), "<br />")#<br />
+                    "
+                )
+            }
+
+        } else {
+
+            local.invoicePerson = "";
+            if (structKeyExists(getInvoiceData, "userID") and (getInvoiceData.userID) gt 0) {
+                userData = application.objCustomer.getUserDataByID(getInvoiceData.userID);
+                if (len(trim(userData.strSalutation))) {
+                    invoicePerson = userData.strSalutation & " " & userData.strFirstName & " " & userData.strLastName;
+                } else {
+                    invoicePerson = userData.strFirstName & " " & userData.strLastName;
+                }
+            }
+
+            cfsavecontent(variable="local.addressBlock") {
+                echo(
+                    "
+                        #local.customerData.companyName#<br />
+                        #len(local.invoicePerson) ? local.invoicePerson & "<br />" : ""#
+                        #len(local.customerData.address) ? local.customerData.address & "<br />" : ""#
+                        #len(local.customerData.address2) ? local.customerData.address2 & "<br />" : ""#
+                        #len(local.customerData.zip) ? local.customerData.zip & " " : ""# #len(local.customerData.city) ? local.customerData.city & "<br />" : ""#
+                        #len(local.customerData.countryName) ? local.customerData.countryName & "<br />" : ""#
+                    "
+                )
+            }
+        }
+
+
+        return local.addressBlock;
 
 
     }

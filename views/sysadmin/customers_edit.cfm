@@ -1,4 +1,5 @@
 <cfscript>
+
     // Exception handling for sef and customer id
     param name="thiscontent.thisID" default=0 type="numeric";
     thisCustomerID = thiscontent.thisID;
@@ -10,7 +11,7 @@
     qCustomers = application.objCustomer.getCustomerData(thisCustomerID);
     qCountries = application.objGlobal.getCountry(language=session.lng);
 
-    if (!isStruct(qCustomer) or structIsEmpty(qCustomer)) {
+    if (!isStruct(qCustomers) or structIsEmpty(qCustomers)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
 

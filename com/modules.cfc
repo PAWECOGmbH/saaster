@@ -87,7 +87,7 @@ component displayname="modules" output="false" {
             },
             sql = "
                 SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture, modules.intNumTestDays,
-                modules.blnBookable, modules.intPrio, modules.blnActive, modules.strSettingPath,
+                modules.blnBookable, modules.intPrio, modules.blnActive, modules.strSettingPath, modules.blnFree,
                 currencies.strCurrencyISO, currencies.strCurrencySign, currencies.intCurrencyID,
                 COALESCE(modules_prices.blnIsNet,0) as blnIsNet,
                 COALESCE(modules_prices.decPriceMonthly,0) as decPriceMonthly,
@@ -171,6 +171,7 @@ component displayname="modules" output="false" {
             local.moduleStruct['shortdescription'] = local.qModule.strShortDescription;
             local.moduleStruct['description'] = local.qModule.strDescription;
             local.moduleStruct['table_prefix'] = local.qModule.strTabPrefix;
+            local.moduleStruct['itsFree'] = local.qModule.blnFree;
             local.moduleStruct['picture'] = local.qModule.strPicture;
             local.moduleStruct['bookable'] = local.qModule.blnBookable;
             local.moduleStruct['active'] = local.qModule.blnActive;
@@ -236,12 +237,13 @@ component displayname="modules" output="false" {
                     ) as strPlanName
                     FROM plans_modules INNER JOIN plans ON plans_modules.intPlanID = plans.intPlanID
                     WHERE plans_modules.intModuleID = :moduleID
+                    ORDER BY plans.intPrio
                 "
             )
 
             local.planArray = arrayNew(1);
 
-            if (local.qCheckPlans.recordCount) {
+            loop query="local.qCheckPlans" {
 
                 local.planStruct = structNew();
                 local.planStruct['planID'] = local.qCheckPlans.intPlanID;
@@ -253,7 +255,9 @@ component displayname="modules" output="false" {
             local.moduleStruct['includedInPlans'] = local.planArray;
 
 
+
             // Build the booking link
+            // **********************
 
             // bookingLinkM: monthly
             // bookingLinkY: yearly
@@ -290,13 +294,21 @@ component displayname="modules" output="false" {
                     utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
                 },
                 sql = "
-                    SELECT intModuleID
+                    SELECT intModuleID,
+                    (
+                        SELECT intInvoiceID
+                        FROM invoices
+                        WHERE intBookingID = bookings.intBookingID
+                        ORDER BY intInvoiceID DESC
+                        LIMIT 1
+                    ) as invoiceID
                     FROM bookings
-                    WHERE intCustomerID = :customerID
-                    AND intModuleID > 0
-                    AND ((DATE(dteStartDate) <= DATE(:utcDate)
-                    AND DATE(dteEndDate) >= DATE(:utcDate))
+                    WHERE bookings.intCustomerID = :customerID
+                    AND bookings.intModuleID > 0
+                    AND ((DATE(bookings.dteStartDate) <= DATE(:utcDate)
+                    AND DATE(bookings.dteEndDate) >= DATE(:utcDate))
                     OR bookings.strRecurring = 'test')
+                    ORDER BY bookings.dteStartDate
                 "
             )
 
@@ -306,6 +318,7 @@ component displayname="modules" output="false" {
 
                     local.moduleStruct = structNew();
                     local.moduleStruct['moduleID'] = local.qCurrentModules.intModuleID;
+                    local.moduleStruct['invoiceID'] = local.qCurrentModules.invoiceID;
                     local.moduleStruct['moduleStatus'] = getModuleStatus(arguments.customerID, local.qCurrentModules.intModuleID);
                     local.moduleStruct['moduleData'] = getModuleData(local.qCurrentModules.intModuleID);
                     local.moduleStruct['includedInCurrentPlan'] = false;
@@ -325,25 +338,46 @@ component displayname="modules" output="false" {
 
                 loop array=local.includedModules.modulesIncluded index="i" {
 
-                    local.moduleStruct = structNew();
-                    local.moduleStruct['moduleID'] = i.moduleID;
-                    local.moduleStruct['moduleData'] = getModuleData(i.moduleID);
-                    local.moduleStruct['includedInCurrentPlan'] = true;
+                    // Only insert module that are not already booked by the customer
+                    local.qHasModule = queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: arguments.customerID},
+                            moduleID: {type: "numeric", value: i.moduleID}
+                        },
+                        sql = "
+                            SELECT intModuleID
+                            FROM bookings
+                            WHERE intCustomerID = :customerID
+                            AND intModuleID = :moduleID
+                            AND (strStatus = 'active'
+                            OR strStatus = 'test')
+                        "
+                    )
 
-                    local.statusStruct = structNew();
-                    local.statusStruct['endDate'] = local.bookedPlan.endDate;
-                    local.statusStruct['recurring'] = local.bookedPlan.recurring;
-                    local.statusStruct['startDate'] = local.bookedPlan.startDate;
-                    local.statusStruct['status'] = local.bookedPlan.status;
+                    if (!qHasModule.recordCount) {
 
-                    local.statusText = local.objPlans.getPlanStatusAsText(local.bookedPlan);
-                    local.statusStruct['statusText'] = local.statusText.statusText;
-                    local.statusStruct['statusTitle'] = local.statusText.statusTitle;
-                    local.statusStruct['fontColor'] = local.statusText.fontColor;
+                        local.moduleStruct = structNew();
+                        local.moduleStruct['moduleID'] = i.moduleID;
+                        local.moduleStruct['moduleData'] = getModuleData(i.moduleID);
+                        local.moduleStruct['includedInCurrentPlan'] = true;
 
-                    local.moduleStruct['moduleStatus'] = local.statusStruct;
+                        local.statusStruct = structNew();
+                        local.statusStruct['endDate'] = local.bookedPlan.endDate;
+                        local.statusStruct['recurring'] = local.bookedPlan.recurring;
+                        local.statusStruct['startDate'] = local.bookedPlan.startDate;
+                        local.statusStruct['status'] = local.bookedPlan.status;
 
-                    arrayAppend(local.moduleArray, local.moduleStruct);
+                        local.statusText = local.objPlans.getPlanStatusAsText(local.bookedPlan);
+                        local.statusStruct['statusText'] = local.statusText.statusText;
+                        local.statusStruct['statusTitle'] = local.statusText.statusTitle;
+                        local.statusStruct['fontColor'] = local.statusText.fontColor;
+
+                        local.moduleStruct['moduleStatus'] = local.statusStruct;
+
+                        arrayAppend(local.moduleArray, local.moduleStruct);
+
+                    }
 
                 }
 
@@ -369,22 +403,42 @@ component displayname="modules" output="false" {
                     moduleID: {type: "numeric", value: arguments.moduleID}
                 },
                 sql = "
-                    SELECT strRecurring, dteStartDate, dteEndDate, strStatus
+                    SELECT intBookingID, strRecurring, dteStartDate, dteEndDate, strStatus, intModuleID
                     FROM bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID
                 "
             )
 
-            if (local.qCurrentModules.recordCount) {
 
-                local.moduleStruct['startDate'] = local.qCurrentModules.dteStartDate;
-                local.moduleStruct['endDate'] = local.qCurrentModules.dteEndDate;
-                local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
-                local.moduleStruct['status'] = local.qCurrentModules.strStatus;
+            // We must loop because there could be more than only one entry, but max. two (waiting)
+            loop query=local.qCurrentModules {
 
-                local.objPlans = new com.plans(language=variables.language);
-                structAppend(local.moduleStruct, local.objPlans.getPlanStatusAsText(local.moduleStruct));
+                // The first entry is the current module
+                if (local.qCurrentModules.currentrow eq 1) {
+
+                    local.moduleStruct['bookingID'] = local.qCurrentModules.intBookingID;
+                    local.moduleStruct['startDate'] = local.qCurrentModules.dteStartDate;
+                    local.moduleStruct['endDate'] = local.qCurrentModules.dteEndDate;
+                    local.moduleStruct['recurring'] = local.qCurrentModules.strRecurring;
+                    local.moduleStruct['status'] = local.qCurrentModules.strStatus;
+
+                    local.objPlans = new com.plans(language=variables.language);
+                    structAppend(local.moduleStruct, local.objPlans.getPlanStatusAsText(local.moduleStruct));
+
+                }
+
+                // If we get more than one entry, there must be another module after the expiration
+                if (local.qCurrentModules.currentrow eq 2) {
+
+                    local.nextModule = structNew();
+                    local.nextModule['startDate'] = dateFormat(local.qCurrentModules.dteStartDate, 'yyyy-mm-dd');
+                    local.nextModule['endDate'] = dateFormat(local.qCurrentModules.dteEndDate, 'yyyy-mm-dd');
+                    local.nextModule['recurring'] = local.qCurrentModules.strRecurring;
+                    local.nextModule['status'] = local.qCurrentModules.strStatus;
+                    local.moduleStruct['nextModule'] = local.nextModule;
+
+                }
 
             }
 
@@ -393,90 +447,6 @@ component displayname="modules" output="false" {
         return local.moduleStruct;
 
     }
-
-
-    public struct function updateCurrentModule(required struct module) {
-
-        local.returnArgs = structNew();
-        local.returnArgs['success']  = false;
-        local.returnArgs['message']  = "";
-
-        local.customerID = 0;
-        local.moduleID = 0;
-        local.dateStart = now();
-        local.dateEnd = now();
-        local.recurring = "monthly";
-
-        if (structKeyExists(arguments.module, "customerID")) {
-            local.customerID = arguments.module.customerID;
-        }
-        if (structKeyExists(arguments.module, "moduleID")) {
-            local.moduleID = arguments.module.moduleID;
-        }
-        if (structKeyExists(arguments.module, "dateStart")) {
-            local.dateStart = arguments.module.dateStart;
-        }
-        if (structKeyExists(arguments.module, "dateEnd")) {
-            local.dateEnd = arguments.module.dateEnd;
-        }
-        if (structKeyExists(arguments.module, "recurring")) {
-            local.recurring = arguments.module.recurring;
-        }
-
-
-        try {
-
-            queryExecute (
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: local.customerID},
-                    moduleID: {type: "numeric", value: local.moduleID},
-                    dateStart: {type: "datetime", value: local.dateStart},
-                    dateEnd: {type: "datetime", value: local.dateEnd},
-                    recurring: {type: "varchar", value: local.recurring}
-                },
-                sql = "
-
-                    UPDATE bookings
-                    SET dteStartDate = :dateStart,
-                        dteEndDate = :dateEnd,
-                        strRecurring = :recurring
-                    WHERE intCustomerID = :customerID
-                    AND intModuleID = :moduleID
-
-                "
-            )
-
-        } catch (any e) {
-
-            local.returnArgs['message'] = e.message;
-            return local.returnArgs;
-
-        }
-
-        // return customerBookingID
-        local.qCustBooking = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: local.customerID},
-                moduleID: {type: "numeric", value: local.moduleID}
-            },
-            sql = "
-                SELECT intBookingID
-                FROM bookings
-                WHERE intCustomerID = :customerID
-                AND intModuleID = :moduleID
-            "
-        )
-
-        local.returnArgs['customerBookingID'] = local.qCustBooking.intBookingID;
-        local.returnArgs['success'] = true;
-        return local.returnArgs;
-
-
-    }
-
-
 
 
 }

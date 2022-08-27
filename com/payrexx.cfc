@@ -11,12 +11,18 @@ component displayname="payrexx" output="false" {
 
 
     // Get the webhook data
-    public query function getWebhook(required numeric customerID, required string status, boolean default) {
+    public query function getWebhook(required numeric customerID, required string status, any default, string includingFailed) {
 
         if (structKeyExists(arguments, "default") and isBoolean(arguments.default)) {
-            local.sql_query = "AND blnDefault = " & arguments.default;
+            local.sql_default = "AND blnDefault = " & arguments.default;
         } else {
-            local.sql_query = "";
+            local.sql_default = "";
+        }
+
+        if (structKeyExists(arguments, "includingFailed") and arguments.includingFailed eq "yes") {
+            local.sql_failed = "";
+        } else {
+            local.sql_failed = "AND blnFailed = 0";
         }
 
         local.qWebhook = queryExecute(
@@ -30,8 +36,8 @@ component displayname="payrexx" output="false" {
                 FROM payrexx
                 WHERE intCustomerID = :customerID
                 AND strStatus = :status
-                AND blnFailed = 0
-                #local.sql_query#
+                #local.sql_default#
+                #local.sql_failed#
                 ORDER BY dtmTimeUTC DESC
             "
         )

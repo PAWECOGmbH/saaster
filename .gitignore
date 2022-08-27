@@ -12,3 +12,4 @@ config.cfm
 .cfconfig.json
 .env
 server.json
+test.json

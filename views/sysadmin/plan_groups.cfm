@@ -38,7 +38,7 @@
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans & Prices</a></li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans</a></li>
                             <li class="breadcrumb-item active">Plan groups</li>
                         </ol>
                     </div>

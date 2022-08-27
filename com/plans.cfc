@@ -622,14 +622,22 @@ component displayname="plans" output="false" {
                                 FROM plan_prices
                                 WHERE intPlanID = plans.intPlanID
                                 AND intCurrencyID = :currencyID
-                            ) as decPriceMonthly
+                            ) as decPriceMonthly,
+                            (
+                                SELECT intInvoiceID
+                                FROM invoices
+                                WHERE intBookingID = bookings.intBookingID
+                                LIMIT 1
+                            ) as intInvoiceID
                     FROM bookings
                     INNER JOIN plans ON bookings.intPlanID = plans.intPlanID
                     WHERE bookings.intCustomerID = :customerID
                     AND ((DATE(bookings.dteStartDate) <= DATE(:utcDate)
                     AND DATE(bookings.dteEndDate) >= DATE(:utcDate))
                     OR bookings.strStatus = 'waiting'
+                    OR bookings.strStatus = 'payment'
                     OR bookings.strRecurring = 'test')
+                    ORDER BY bookings.dteStartDate
 
                 "
             )
@@ -652,6 +660,7 @@ component displayname="plans" output="false" {
                         local.planStruct['recurring'] = local.qCurrentPlan.strRecurring;
                         local.planStruct['priceMonthly'] = local.qCurrentPlan.decPriceMonthly;
                         local.planStruct['bookingID'] = local.qCurrentPlan.intBookingID;
+                        local.planStruct['invoiceID'] = local.qCurrentPlan.intInvoiceID;
 
                     }
 
@@ -807,7 +816,7 @@ component displayname="plans" output="false" {
 
                     case "active":
                         local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtRenewPlanOn');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('titRenewal');
                         local.planStatus['fontColor'] = "green";
                         break;
 
@@ -826,13 +835,19 @@ component displayname="plans" output="false" {
                     case "canceled":
                         local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtCanceled');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtSubscriptionCanceled');
-                        local.planStatus['fontColor'] = "orange";
+                        local.planStatus['fontColor'] = "purple";
                         break;
 
                     case "free":
                         local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtFree');
                         local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
                         local.planStatus['fontColor'] = "green";
+                        break;
+
+                    case "payment":
+                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titWaiting');
+                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtWaitingForPayment');
+                        local.planStatus['fontColor'] = "orange";
                         break;
 
                     default:
@@ -847,87 +862,6 @@ component displayname="plans" output="false" {
         }
 
         return local.planStatus;
-
-    }
-
-
-    public struct function calculateUpgrade(required numeric customerID, required numeric newPlanID, required string recurring) {
-
-        // Get the already paid amount
-        local.qPaidAmount = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: arguments.customerID}
-            },
-            sql = "
-                SELECT  bookings.intPlanID, bookings.dteStartDate, bookings.dteEndDate,
-                        bookings.strRecurring, bookings.intPlanID,
-                        invoices.decSubTotalPrice, invoices.intVatType, invoices.strCurrency
-                FROM bookings
-                INNER JOIN invoices ON 1=1
-                AND bookings.intBookingID = invoices.intBookingID
-                AND bookings.intCustomerID = :customerID
-                AND invoices.intPaymentStatusID = 3
-                ORDER BY invoices.intInvoiceID DESC
-                LIMIT 1
-            "
-        )
-
-        local.upgradeStruct = structNew();
-        local.paidAmount = 0;
-
-        if (local.qPaidAmount.recordCount) {
-
-            // The amount the customer has paid (without vat)
-            local.paidAmount = local.qPaidAmount.decSubTotalPrice;
-
-            // Get the recurring of the current plan
-            local.currentRecurring = getCurrentPlan(arguments.customerID).recurring;
-
-            // Price per day
-            if (local.currentRecurring eq "yearly") {
-                local.pricePerDay = local.paidAmount/365;
-            } else {
-                local.pricePerDay = local.paidAmount/30;
-            }
-
-            // How many days has the current subscription been running?
-            local.daysRunning = dateDiff("d", local.qPaidAmount.dteStartDate, now());
-
-            // Cost of the number of running days
-            local.costRunningDays = local.daysRunning*local.pricePerDay;
-
-            // Credit for not used days
-            local.credit = local.paidAmount - local.costRunningDays;
-
-
-            // Get the data of the new plan ////////////////////
-            local.planData = getPlanDetail(arguments.newPlanID);
-
-            // Get the price of the new plan
-            if (arguments.recurring eq "yearly") {
-                local.newPrice = local.planData.priceYearly;
-            } else {
-                local.newPrice = local.planData.priceMonthly;
-            }
-
-            // The price to be charged for the new subscription (now)
-            local.priceToChargeNow = numberFormat(local.newPrice - local.credit, "__.__");
-
-
-            local.upgradeStruct['oldPlanID'] = local.qPaidAmount.intPlanID;
-            local.upgradeStruct['newPlanID'] = arguments.newPlanID;
-            local.upgradeStruct['paidAmount'] = local.paidAmount;
-            local.upgradeStruct['toPayNow'] = local.priceToChargeNow;
-            local.upgradeStruct['currency'] = local.qPaidAmount.strCurrency;
-            local.upgradeStruct['recurring'] = arguments.recurring;
-
-
-        }
-
-
-        return local.upgradeStruct;
-
 
     }
 
