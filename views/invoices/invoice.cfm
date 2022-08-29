@@ -30,6 +30,9 @@
     // Get existent payments
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
+    // Get sysadmin data
+    sysAdminData = new com.sysadmin().getSysAdminData();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -63,17 +66,21 @@
             </cfif>
         </div>
         <div class="container-xl">
-            <div class="card card-lg ps-5 pe-5">
+            <div class="card card-lg" style="padding: 0 12%;">
                 <div class="card-body">
-                    <div class="row ps-4 pe-4">
+                    <div class="row">
                         <div class="w-10 h1">
                             #objInvoices.getInvoiceStatusBadge(session.lng, getInvoiceData.paymentstatusColor, getInvoiceData.paymentstatusVar)#
                         </div>
                         <div class="col-12 mt-5">
-                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="260" style="display: block; width: 260px; font-size: 16px;float: right;" border="0">
+                            <cfif len(trim(sysAdminData.logo))>
+                                <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#sysAdminData.logo#" style="display: block; max-width: 250px; float: right;" border="0">
+                            <cfelse>
+                                <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" style="display: block; max-width: 250px; float: right;" border="0">
+                            </cfif>
                         </div>
                         <div class="col-6">
-                            <address class="mt-5">
+                            <address class="mt-2">
                                 #addressBlock#
                             </address>
                         </div>

@@ -178,6 +178,7 @@ component displayname="Application" output="false" hint="Handle the application.
             and !findNoCase("frontend", thiscontent.thisPath)
             and !findNoCase("register", thiscontent.thisPath)
             and !findNoCase("ajax", thiscontent.thisPath)
+            and !findNoCase("print", thiscontent.thisPath)
             and !structKeyExists(url, "u") and !structKeyExists(url, "p")) {
             if (!structKeyExists(session, "user_id")) {
                 getAlert('alertSessionExpired', 'warning');

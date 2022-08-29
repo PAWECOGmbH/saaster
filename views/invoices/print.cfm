@@ -1,10 +1,35 @@
 <cfscript>
-    // Exception handling for set and invoice id
-    param name="thiscontent.thisID" default=0 type="numeric";
 
+    // If the download is called up by e-mail
+    if (structKeyExists(url, "pdf")) {
+
+        // Get the invoiceID
+        qInvoice = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                uuid: {type: "varchar", value: url.pdf}
+            },
+            sql = "
+                SELECT intInvoiceID
+                FROM invoices
+                WHERE strUUID = :uuid
+            "
+        )
+
+        if (qInvoice.recordCount) {
+            thiscontent.thisID = qInvoice.intInvoiceID;
+        } else {
+            getAlert('alertNotValidAnymore', 'warning');
+            location url="#application.mainURL#/login" addtoken="false";
+        }
+
+    }
+
+    // Exception handling for the invoice id
+    param name="thiscontent.thisID" default=0 type="numeric";
     thisInvoiceID = thiscontent.thisID;
-    if(not isNumeric(thisInvoiceID) or thisInvoiceID lte 0){
-        abort;
+    if(not isNumeric(thisInvoiceID) or thisInvoiceID lte 0) {
+        location url="#application.mainURL#/login" addtoken="false";
     }
 
     objInvoices = new com.invoices();
@@ -12,23 +37,28 @@
     // Get the invoice data
     getInvoiceData = objInvoices.getInvoiceData(thisInvoiceID);
     if(not isStruct(getInvoiceData) or !structKeyExists(getInvoiceData, "customerID") or getInvoiceData.customerID eq 0) {
-        abort;
+        location url="#application.mainURL#/login" addtoken="false";
     }
 
     // Is the user allowed to see this invoice
-    if (!session.sysadmin) {
-        checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID);
-        if(not checkTenantRange) {
-            abort;
+    if (structKeyExists(session, "customer_id")) {
+        if (!session.sysadmin) {
+            checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID);
+            if(not checkTenantRange) {
+                location url="#application.mainURL#/dashboard" addtoken="false";
+            }
         }
     }
 
+    getTime = new com.time(getInvoiceData.customerID);
+    addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
+    qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
+
+    // Get customer data
     customerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
 
-    // Get invoice address block
-    addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
-
-    qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
+    // Get sysadmin data
+    sysAdminData = new com.sysadmin().getSysAdminData();
 
 </cfscript>
 
@@ -52,7 +82,11 @@
         <table width="100%" border="0">
             <tr>
                 <td align="right" height="100" valign="top">
-                    <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="180" style="display: block; width: 180px; font-size: 16px;" border="0">
+                    <cfif len(trim(sysAdminData.logo))>
+                        <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#sysAdminData.logo#" style="display: block; max-width: 180px; font-size: 16px;" border="0">
+                    <cfelse>
+                        <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" style="display: block; max-width: 180px; font-size: 16px;" border="0">
+                    </cfif>
                 </td>
             </tr>
             <tr>
@@ -83,7 +117,7 @@
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
                             </td>
                             <td width="50%" valign="top">
-                                #replace(customerData.billingInfo, chr(13), "<br />")#
+                                #replace(customerData.billingInfo, chr(13), "<br />", "all")#
                             </td>
                         </tr>
                     </table>
@@ -166,9 +200,10 @@
             <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
                 <tr>
                     <td align="center">
-                        <b>#application.appOwner#</b> #customerData.address#, #customerData.zip# #customerData.city#<br>
-                        E-Mail : #customerData.email# |
-                        #getTrans('formPhone')#: #customerData.phone# | Website: #customerData.website#
+                        <b>#sysAdminData.companyName#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
+                        #getTrans('formEmailAddress')#: #sysAdminData.email# |
+                        #getTrans('formPhone')#: #sysAdminData.phone# |
+                        #getTrans('formWebsite')#: #sysAdminData.website#
 
                     </td>
                 </tr>

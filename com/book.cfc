@@ -707,7 +707,6 @@ component displayname="book" output="false" {
                 }
 
 
-
                 // If desired, charge the amount now (Payrexx)
                 if (local.chargeInvoice) {
 
@@ -715,6 +714,14 @@ component displayname="book" output="false" {
                     if (!local.chargeNow.success) {
                         local.objInvoice.deleteInvoice(local.invoiceID);
                         local.argsReturnValue['message'] = local.chargeNow.message;
+                        local.argsReturnValue['success'] = false;
+                        return local.argsReturnValue;
+                    }
+
+                    // Send invoice by email
+                    local.sendInvoice = local.objInvoice.sendInvoice(local.invoiceID);
+                    if (!local.sendInvoice.success) {
+                        local.argsReturnValue['message'] = local.sendInvoice.message;
                         local.argsReturnValue['success'] = false;
                         return local.argsReturnValue;
                     }
