@@ -1399,7 +1399,7 @@ component displayname="invoices" output="false" {
                 echo(
                     "
                         #local.customerData.billingAccountName#<br />
-                        #replace(local.customerData.billingAddress, chr(13), "<br />")#<br />
+                        #replace(local.customerData.billingAddress, chr(13), '<br />', 'all')#<br />
                     "
                 )
             }
@@ -1437,6 +1437,179 @@ component displayname="invoices" output="false" {
     }
 
 
+    // Send invoice by e-mail
+    public struct function sendInvoice(required numeric invoiceID) {
+
+        local.returnValue = structNew();
+        local.returnValue['success'] = false;
+        local.returnValue['message'] = "";
+
+        getTrans = application.objGlobal.getTrans;
+
+        local.invoiceID = arguments.invoiceID;
+
+        // Get invoice data
+        local.invoiceData = getInvoiceData(local.invoiceID);
+
+        if (!structIsEmpty(local.invoiceData)) {
+            local.customerID = local.invoiceData.customerID;
+        } else {
+            return local.returnValue['message'] = "No invoice found!";
+        }
+
+        try {
+
+            // Create UUID and save into table
+            local.uuid = application.objGlobal.getUUID();
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    invoiceID: {type: "numeric", value: local.invoiceID},
+                    uuid: {type: "varchar", value: local.uuid}
+                },
+                sql = "
+                    UPDATE invoices
+                    SET strUUID = :uuid
+                    WHERE intInvoiceID = :invoiceID
+                "
+            )
+
+            // Build the link in order to download the pdf without login
+            local.dl_link = application.mainURL & "/account-settings/invoice/print?pdf=" & local.uuid;
+
+            // Get the invoicing email address
+            local.customerData = application.objCustomer.getCustomerData(local.customerID);
+            if (len(trim(local.customerData.billingEmail))) {
+                local.toEmail = local.customerData.billingEmail;
+            } else {
+                local.toEmail = local.customerData.email;
+            }
+
+            local.invoicePerson = "";
+            if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
+                local.userData = application.objCustomer.getUserDataByID(local.invoiceData.userID);
+                if (len(trim(userData.strSalutation))) {
+                    local.invoicePerson = local.userData.strSalutation & " " & local.userData.strFirstName & " " & local.userData.strLastName;
+                } else {
+                    local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
+                }
+            }
+
+            variables.mailTitle = getTrans('titInvoiceReady', local.customerData.language);
+            variables.mailType = "html";
+            variables.mailCustomerID = local.customerID;
+
+            cfsavecontent (variable = "variables.mailContent") {
+
+                echo("
+                    #getTrans('titHello', local.customerData.language)#  #local.invoicePerson#<br><br>
+                    #getTrans('msgThanksForPurchaseFindInvoice', local.customerData.language)#<br><br>
+                    #getTrans('txtDownloadInvoice', local.customerData.language)#<br><br>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
+                    <br><br>
+                    #getTrans('txtRegards', local.customerData.language)#<br>
+                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #application.appOwner#
+                ");
+            }
+
+            <!--- Send activation link --->
+            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady')#" type="html" {
+                include "/includes/mail_design.cfm";
+            }
+
+
+        } catch (any e) {
+
+            local.returnValue['message'] = e.message;
+            return local.returnValue;
+
+        }
+
+        local.returnValue['success'] = true;
+        return local.returnValue;
+
+
+    }
+
+
+    // Send email with payment request
+    public struct function sendPaymentRequest(required numeric invoiceID) {
+
+        local.returnValue = structNew();
+        local.returnValue['success'] = false;
+        local.returnValue['message'] = "";
+
+        getTrans = application.objGlobal.getTrans;
+
+        local.invoiceID = arguments.invoiceID;
+
+        // Get invoice data
+        local.invoiceData = getInvoiceData(local.invoiceID);
+
+        if (!structIsEmpty(local.invoiceData)) {
+            local.customerID = local.invoiceData.customerID;
+        } else {
+            return local.returnValue['message'] = "No invoice found!";
+        }
+
+        try {
+
+            // Get the invoicing email address
+            local.customerData = application.objCustomer.getCustomerData(local.customerID);
+            if (len(trim(local.customerData.billingEmail))) {
+                local.toEmail = local.customerData.billingEmail;
+            } else {
+                local.toEmail = local.customerData.email;
+            }
+
+            local.invoicePerson = "";
+            if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
+                local.userData = application.objCustomer.getUserDataByID(local.invoiceData.userID);
+                if (len(trim(userData.strSalutation))) {
+                    local.invoicePerson = local.userData.strSalutation & " " & local.userData.strFirstName & " " & local.userData.strLastName;
+                } else {
+                    local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
+                }
+            }
+
+            // Build the link to the invoice (incl. redirect)
+            local.dl_link = application.mainURL & "/account-settings/invoice/" & local.invoiceID & "?redirect=" & urlEncodedFormat("account-settings/invoice/#local.invoiceID#?del_redirect");
+
+            variables.mailTitle = getTrans('titInvoice', local.customerData.language) & " | " & local.invoiceData.title;
+            variables.mailType = "html";
+            variables.mailCustomerID = local.customerID;
+
+            cfsavecontent (variable = "variables.mailContent") {
+                echo("
+                    #getTrans('titHello', local.customerData.language)# #local.invoicePerson#<br><br>
+                    #getTrans('txtPleasePayInvoice', local.customerData.language)#<br><br>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
+                    <br><br>
+                    #getTrans('txtRegards', local.customerData.language)#<br>
+                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #application.appOwner#
+                ");
+            }
+
+            <!--- Send activation link --->
+            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
+                include "/includes/mail_design.cfm";
+            }
+
+
+        } catch (any e) {
+
+            local.returnValue['message'] = e.message;
+            return local.returnValue;
+
+        }
+
+        local.returnValue['success'] = true;
+        return local.returnValue;
+
+
+    }
 
 
 }

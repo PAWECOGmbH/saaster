@@ -262,6 +262,16 @@ if (url.pass eq variables.schedulePassword) {
 
                     updateBooking = objBook.updateBooking(updateStruct);
 
+                    // Send invoice by email
+                    sendInvoice = objInvoice.sendPaymentRequest(invoiceID);
+                    if (!sendInvoice.success) {
+
+                        // todo: make log and error mail
+                        dump(sendInvoice);
+                        break;
+
+                    }
+
 
                 } else {
 
@@ -275,6 +285,16 @@ if (url.pass eq variables.schedulePassword) {
                     updateStruct['status'] = qRenewBookings.strStatus;
 
                     updateBooking = objBook.updateBooking(updateStruct);
+
+                    // Send invoice by email
+                    sendInvoice = objInvoice.sendInvoice(invoiceID);
+                    if (!sendInvoice.success) {
+
+                        // todo: make log and error mail
+                        dump(sendInvoice);
+                        break;
+
+                    }
 
                 }
 
@@ -368,6 +388,19 @@ if (url.pass eq variables.schedulePassword) {
                     updateStruct['recurring'] = qRenewBookings.strRecurring;
                     updateStruct['status'] = "payment";
 
+                    updateBooking = objBook.updateBooking(updateStruct);
+
+                    // Send invoice by email
+                    sendInvoice = objInvoice.sendPaymentRequest(invoiceID);
+                    if (!sendInvoice.success) {
+
+                        // todo: make log and error mail
+                        dump(sendInvoice);
+                        break;
+
+                    }
+
+
                 } else {
 
 
@@ -380,6 +413,16 @@ if (url.pass eq variables.schedulePassword) {
                     updateStruct['status'] = qRenewBookings.strStatus;
 
                     updateBooking = objBook.updateBooking(updateStruct);
+
+                    // Send invoice by email
+                    sendInvoice = objInvoice.sendInvoice(invoiceID);
+                    if (!sendInvoice.success) {
+
+                        // todo: make log and error mail
+                        dump(sendInvoice);
+                        break;
+
+                    }
 
                 }
 

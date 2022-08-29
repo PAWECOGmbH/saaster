@@ -204,7 +204,7 @@ if (structKeyExists(url, "default")) {
 }
 
 
-// Delete payment method
+// Pay open invoice
 if (structKeyExists(url, "pay")) {
 
     if (isNumeric(url.pay) and url.pay gt 0) {

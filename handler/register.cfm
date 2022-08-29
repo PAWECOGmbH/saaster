@@ -55,22 +55,25 @@ if (structKeyExists(form, 'register_btn')) {
 
         if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
 
-            MailTitle = "#getTrans('subjectConfirmEmail')#";
-            MailType = "html";
-            MailCustomID = 1;
-            cfsavecontent (variable = "MailContent") {
+            mailTitle = "#getTrans('subjectConfirmEmail')#";
+            mailType = "html";
+            mailCustomerID = 1;
 
-                echo("#getTrans('titHello')# #form.first_name# #form.name#<br><br>
-                            #getTrans('txtPleaseConfirmEmail')#<br><br>
-                            <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
-                            <br><br>
-                            #getTrans('txtRegards')#<br>
-                            #getTrans('txtYourTeam')#<br>
-                            #application.appOwner#");
+            cfsavecontent (variable = "mailContent") {
+
+                echo("
+                    #getTrans('titHello')# #form.first_name# #form.name#<br><br>
+                    #getTrans('txtPleaseConfirmEmail')#<br><br>
+                    <a href='#application.mainURL#/registration?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
+                    <br><br>
+                    #getTrans('txtRegards')#<br>
+                    #getTrans('txtYourTeam')#<br>
+                    #application.appOwner#
+                ");
             }
 
             <!--- Send double opt-in mail --->
-            mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
+            mail to="#form.email#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
                 include "/includes/mail_design.cfm";
             }
 
@@ -389,21 +392,23 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
         );
 
 
-        MailTitle = "#getTrans('titResetPassword')#";
-        MailType = "html";
-        MailUserdata = application.objCustomer.getUserDataByID(qCheckUser.intUserID);
-        MailCustomID = MailUserdata.intCustomerID;
-        cfsavecontent (variable = "MailContent") {
+        variables.mailTitle = getTrans('titResetPassword');
+        variables.mailType = "html";
+        variables.mailCustomerID = application.objCustomer.getUserDataByID(qCheckUser.intUserID).intCustomerID;
 
-            echo("#getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
-                        #getTrans('txtResetPassword')#
-                        <br><br>
-                        <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formPassword2')#</a>
+        cfsavecontent (variable = "variables.mailContent") {
 
-                        <br><br>
-                        #getTrans('txtRegards')#<br>
-                        #getTrans('txtYourTeam')#<br>
-                        #application.appOwner#");
+            echo("
+                #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
+                #getTrans('txtResetPassword')#
+                <br><br>
+                <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('formPassword2')#</a>
+
+                <br><br>
+                #getTrans('txtRegards')#<br>
+                #getTrans('txtYourTeam')#<br>
+                #application.appOwner#
+            ");
         }
 
         <!--- Send email to reset the password --->

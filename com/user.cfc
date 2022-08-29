@@ -205,6 +205,7 @@ component displayname="user" output="false" {
         }
 
         try {
+
             <!--- update the user --->
             queryExecute(
 
@@ -533,25 +534,25 @@ component displayname="user" output="false" {
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
+                variables.mailTitle = getTrans('txtInvitationFrom') & " " & qUser.fromName;
+                variables.mailType = "html";
+                variables.mailCustomerID = application.objCustomer.getUserDataByID(arguments.toUserID).intCustomerID;
 
-                MailTitle = "#getTrans('txtInvitationFrom')# #qUser.fromName#";
-                MailType = "html";
-                MailUserdata = application.objCustomer.getUserDataByID(arguments.toUserID);
-                MailCustomID = MailUserdata.intCustomerID;
+                cfsavecontent (variable = "variables.mailContent") {
 
-                cfsavecontent (variable = "MailContent") {
+                    echo("
+                        #getTrans('titHello')# #qUser.toName#<br><br>
+                        #local.invitationMail#<br><br>
+                        <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('formSignIn')#</a><br><br>
 
-                    echo("#getTrans('titHello')# #qUser.toName#<br><br>
-                                #local.invitationMail#<br><br>
-                                <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('formSignIn')#</a><br><br>
-
-                                #getTrans('txtRegards')#<br>
-                                #getTrans('txtYourTeam')#<br>
-                                #application.appOwner#");
+                        #getTrans('txtRegards')#<br>
+                        #getTrans('txtYourTeam')#<br>
+                        #application.appOwner#
+                    ");
                 }
 
                 <!--- Send activation link --->
-                mail from="#application.fromEmail#" to="#qUser.toEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
+                mail to="#qUser.toEmail#" from="#application.fromEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
                     include "/includes/mail_design.cfm";
                 }
 
@@ -624,7 +625,7 @@ component displayname="user" output="false" {
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    intUserID: {type: "numeric", value: arguments.MailuserID},
+                    intUserID: {type: "numeric", value: arguments.mailuserID},
                     strUUID: {type: "nvarchar", value: newUUID}
                 },
                 sql = "
@@ -634,33 +635,38 @@ component displayname="user" output="false" {
                 "
             )
 
-            MailTitle = "#getTrans('subjectConfirmEmail')#";
-            MailType = "html";
-            MailUserdata = application.objCustomer.getUserDataByID(arguments.MailuserID);
-            MailCustomID = MailUserdata.intCustomerID;
-            toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
+            variables.mailTitle = getTrans('subjectConfirmEmail');
+            variables.mailType = "html";
+            variables.mailCustomerID = application.objCustomer.getUserDataByID(arguments.mailuserID).intCustomerID;
+            local.toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
 
-            cfsavecontent (variable = "MailContent") {
+            cfsavecontent (variable = "local.mailContent") {
 
-                echo("#getTrans('titHello')# #toName#<br><br>
-                        #getTrans('txtComfirmEmailChange')#<br><br>
-                        <a href='#application.mainURL#/account-settings/my-profile?c=#MailUserdata.strUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;'>#getTrans('btnActivate')#</a>
-                        <br><br>
-                        #getTrans('txtRegards')#<br>
-                        #getTrans('txtYourTeam')#<br>
-                        #application.appOwner#");
+                echo("
+                    #getTrans('titHello')# #local.toName#<br><br>
+                    #getTrans('txtComfirmEmailChange')#<br><br>
+                    <a href='#application.mainURL#/account-settings/my-profile?c=#MailUserdata.strUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
+                    <br><br>
+                    #getTrans('txtRegards')#<br>
+                    #getTrans('txtYourTeam')#<br>
+                    #application.appOwner#
+                ");
             }
 
             <!--- Send activation link --->
-            mail from="#application.fromEmail#" to="#qUsersMailCheck.stremail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
+            mail to="#qUsersMailCheck.stremail#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
                 include "/includes/mail_design.cfm";
             }
-            MailChanged = true;
+
+            mailChanged = true;
+
         }else{
-            MailChanged = false;
+
+            mailChanged = false;
+
         }
 
-        return MailChanged;
+        return mailChanged;
 
     }
 

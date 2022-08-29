@@ -298,6 +298,26 @@ if (structKeyExists(url, "open")) {
 }
 
 
+// Send invoice by email
+if (structKeyExists(url, "email")) {
+
+    if (isNumeric(url.i)) {
+
+        // Update invoice status
+        sendEmail = objInvoice.sendInvoice(url.i);
+        if (sendEmail.success) {
+            getAlert('The invoice has been sent by email successfully.');
+        } else {
+            getAlert(sendEmail.message, 'danger');
+        }
+        location url="#session.redirect#" addtoken="false";
+
+    }
+
+
+}
+
+
 // Delete or set another status
 if (structKeyExists(url, "status")) {
 

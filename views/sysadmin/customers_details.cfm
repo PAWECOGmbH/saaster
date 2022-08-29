@@ -258,6 +258,7 @@
                                                                                     <div class="dropdown-menu dropdown-menu-end">
                                                                                         <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#invoice.invoiceID#">Edit invoice</a>
                                                                                         <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#invoice.invoiceID#" target="_blank">Print invoice</a>
+                                                                                        <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#invoice.invoiceID#&email&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Send invoice by e-mail</a>
                                                                                         <cfif invoice.invoiceStatusID eq 1 or invoice.invoiceStatusID eq 2>
                                                                                             <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#invoice.invoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Cancel invoice</a>
                                                                                         </cfif>
@@ -451,117 +452,140 @@
 
                                                 <cfloop array="#arrModules#" item="module">
                                                     <cfset moduleStatus = objModules.getModuleStatus(thisCustomerID, module.moduleID)>
-                                                    <div class="col-lg-4 mb-3 mt-3">
-                                                        <div class="card">
-                                                            <div class="card-header">
-                                                                <ul class="nav nav-pills card-header-pills">
-                                                                    <li class="nav-item">
-                                                                        <cfif listFind(currentModuleList, module.moduleID)>
-                                                                            <a class="btn btn-outline-#moduleStatus.fontColor# disabled">Status: #moduleStatus.status#</a>
-                                                                        <cfelse>
-                                                                            <a class="btn btn-outline-info disabled">Not booked yet</a>
-                                                                        </cfif>
-                                                                    </li>
-                                                                    <li class="nav-item ms-auto">
-                                                                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Action</a>
-                                                                        <div class="dropdown-menu">
-                                                                            <cfif listFind(currentModuleList, module.moduleID) and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
-                                                                                <cfif moduleStatus.status eq "canceled">
-                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&revoke" class="dropdown-item">
-                                                                                        Revoke cancellation
-                                                                                    </a>
-                                                                                <cfelse>
-                                                                                    <a href="##" class="openPopupPeriod dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
-                                                                                        Edit period
-                                                                                    </a>
-                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
-                                                                                        Cancel at expiry date
-                                                                                    </a>
-                                                                                </cfif>
-                                                                                <cfif moduleStatus.recurring neq "onetime" and moduleStatus.status neq "payment" and moduleStatus.status neq "canceled">
-                                                                                    <cfif moduleStatus.recurring eq "monthly">
-                                                                                        <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='yearly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
-                                                                                        <cfif amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
-                                                                                                Make invoice for change to yearly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
-                                                                                            </a>
-                                                                                        <cfelse>
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
-                                                                                                Change to yearly cycle (Changed after exiry date)
-                                                                                            </a>
-                                                                                        </cfif>
-                                                                                    <cfelseif moduleStatus.recurring eq "yearly">
-                                                                                        <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='monthly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
-                                                                                        <cfif amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
-                                                                                                Make invoice for change to monthly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
-                                                                                            </a>
-                                                                                        <cfelse>
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
-                                                                                                Change to monthly cycle (Changed after exiry date)
-                                                                                            </a>
-                                                                                        </cfif>
-                                                                                    </cfif>
-                                                                                </cfif>
-                                                                            <cfelse>
-                                                                                <cfif module.priceOnetime gt 0 or module.priceMonthly or module.priceYearly gt 0>
-                                                                                    <cfif module.testDays gt 0 and structKeyExists(moduleStatus, "status") and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
-                                                                                            Activate the test time (#module.testDays# days)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                    <cfif module.priceMonthly gt 0 and module.priceYearly gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
-                                                                                            Make invoice monthly cycle (#custCurrency# #lsCurrencyFormat(module.priceMonthlyAfterVAT, "none")#)
-                                                                                        </a>
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
-                                                                                            Make invoice yearly cycle (#custCurrency# #lsCurrencyFormat(module.priceYearlyAfterVAT, "none")#)
-                                                                                        </a>
-                                                                                    <cfelseif module.priceOnetime gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
-                                                                                            Make invoice onetime billing (#custCurrency# #lsCurrencyFormat(module.priceOneTimeAfterVAT, "none")#)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                </cfif>
-                                                                                <a href="#application.mainURL#/sysadm/modules?booking&c=#thisCustomerID#&m=#module.moduleID#&free" class="dropdown-item">
-                                                                                    Activate now (free)
-                                                                                </a>
-                                                                            </cfif>
-                                                                            <cfif listFind(currentModuleList, module.moduleID)>
-                                                                                <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
-                                                                                    Withdraw module
-                                                                                </a>
-                                                                            </cfif>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                            <cfif listFind(currentModuleList, module.moduleID)>
-                                                                <div class="card-header small">
-                                                                    <cfif moduleStatus.status eq "canceled">
-                                                                        Data deletion: #dateFormat(moduleStatus.endDate, "yyyy-mm-dd")#
-                                                                    <cfelse>
-                                                                        Period: #dateFormat(moduleStatus.startDate, "yyyy-mm-dd")# - #dateFormat(moduleStatus.endDate, "yyyy-mm-dd")# (#moduleStatus.recurring#)
-                                                                    </cfif>
-                                                                    <cfif structKeyExists(moduleStatus, "nextModule")>
-                                                                        <br />
-                                                                        New module period: #dateFormat(moduleStatus.nextModule.startDate, "yyyy-mm-dd")# - #dateFormat(moduleStatus.nextModule.endDate, "yyyy-mm-dd")# (#moduleStatus.nextModule.recurring#)
-                                                                    </cfif>
+                                                    <cfif arrayLen(module.includedInPlans)>
+                                                        <div class="col-lg-4 mb-3 mt-3">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <ul class="nav nav-pills card-header-pills">
+                                                                        <a class="btn btn-outline-info disabled">Included in a plan</a>
+                                                                    </ul>
                                                                 </div>
-                                                            </cfif>
-                                                            <div class="card-body">
-                                                                <div class="d-flex align-items-center p-3">
-                                                                    <div class="d-flex align-items-center">
-                                                                        <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
-                                                                        <div>
-                                                                            <div class="font-weight-medium">#module.name#</div>
-                                                                            <div class="text-muted">#left(module.shortdescription, 30)# <cfif len(module.shortdescription) gt 30>...</cfif></div>
+                                                                <div class="card-body">
+                                                                    <div class="d-flex align-items-center p-3">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
+                                                                            <div>
+                                                                                <div class="font-weight-medium">#module.name#</div>
+                                                                                <div class="text-muted">#left(module.shortdescription, 30)# <cfif len(module.shortdescription) gt 30>...</cfif></div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    <cfelse>
+                                                        <div class="col-lg-4 mb-3 mt-3">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <ul class="nav nav-pills card-header-pills">
+                                                                        <li class="nav-item">
+                                                                            <cfif listFind(currentModuleList, module.moduleID)>
+                                                                                <a class="btn btn-outline-#moduleStatus.fontColor# disabled">Status: #moduleStatus.status#</a>
+                                                                            <cfelse>
+                                                                                <a class="btn btn-outline-info disabled">Not booked yet</a>
+                                                                            </cfif>
+                                                                        </li>
+                                                                        <li class="nav-item ms-auto">
+                                                                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Action</a>
+                                                                            <div class="dropdown-menu">
+                                                                                <cfif listFind(currentModuleList, module.moduleID) and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
+                                                                                    <cfif moduleStatus.status eq "canceled">
+                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&revoke" class="dropdown-item">
+                                                                                            Revoke cancellation
+                                                                                        </a>
+                                                                                    <cfelse>
+                                                                                        <a href="##" class="openPopupPeriod dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
+                                                                                            Edit period
+                                                                                        </a>
+                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
+                                                                                            Cancel at expiry date
+                                                                                        </a>
+                                                                                    </cfif>
+                                                                                    <cfif moduleStatus.recurring neq "onetime" and moduleStatus.status neq "payment" and moduleStatus.status neq "canceled">
+                                                                                        <cfif moduleStatus.recurring eq "monthly">
+                                                                                            <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='yearly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
+                                                                                            <cfif amountToPay gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                    Make invoice for change to yearly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
+                                                                                                </a>
+                                                                                            <cfelse>
+                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                    Change to yearly cycle (Changed after exiry date)
+                                                                                                </a>
+                                                                                            </cfif>
+                                                                                        <cfelseif moduleStatus.recurring eq "yearly">
+                                                                                            <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='monthly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
+                                                                                            <cfif amountToPay gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                    Make invoice for change to monthly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
+                                                                                                </a>
+                                                                                            <cfelse>
+                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                    Change to monthly cycle (Changed after exiry date)
+                                                                                                </a>
+                                                                                            </cfif>
+                                                                                        </cfif>
+                                                                                    </cfif>
+                                                                                <cfelse>
+                                                                                    <cfif module.priceOnetime gt 0 or module.priceMonthly or module.priceYearly gt 0>
+                                                                                        <cfif module.testDays gt 0 and structKeyExists(moduleStatus, "status") and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
+                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
+                                                                                                Activate the test time (#module.testDays# days)
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                        <cfif module.priceMonthly gt 0 and module.priceYearly gt 0>
+                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                Make invoice monthly cycle (#custCurrency# #lsCurrencyFormat(module.priceMonthlyAfterVAT, "none")#)
+                                                                                            </a>
+                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                Make invoice yearly cycle (#custCurrency# #lsCurrencyFormat(module.priceYearlyAfterVAT, "none")#)
+                                                                                            </a>
+                                                                                        <cfelseif module.priceOnetime gt 0>
+                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
+                                                                                                Make invoice onetime billing (#custCurrency# #lsCurrencyFormat(module.priceOneTimeAfterVAT, "none")#)
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                    </cfif>
+                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&c=#thisCustomerID#&m=#module.moduleID#&free" class="dropdown-item">
+                                                                                        Activate now (free)
+                                                                                    </a>
+                                                                                </cfif>
+                                                                                <cfif listFind(currentModuleList, module.moduleID)>
+                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                                                                        Withdraw module
+                                                                                    </a>
+                                                                                </cfif>
+                                                                            </div>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                                <cfif listFind(currentModuleList, module.moduleID)>
+                                                                    <div class="card-header small">
+                                                                        <cfif moduleStatus.status eq "canceled">
+                                                                            Data deletion: #dateFormat(moduleStatus.endDate, "yyyy-mm-dd")#
+                                                                        <cfelse>
+                                                                            Period: #dateFormat(moduleStatus.startDate, "yyyy-mm-dd")# - #dateFormat(moduleStatus.endDate, "yyyy-mm-dd")# (#moduleStatus.recurring#)
+                                                                        </cfif>
+                                                                        <cfif structKeyExists(moduleStatus, "nextModule")>
+                                                                            <br />
+                                                                            New module period: #dateFormat(moduleStatus.nextModule.startDate, "yyyy-mm-dd")# - #dateFormat(moduleStatus.nextModule.endDate, "yyyy-mm-dd")# (#moduleStatus.nextModule.recurring#)
+                                                                        </cfif>
+                                                                    </div>
+                                                                </cfif>
+                                                                <div class="card-body">
+                                                                    <div class="d-flex align-items-center p-3">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
+                                                                            <div>
+                                                                                <div class="font-weight-medium">#module.name#</div>
+                                                                                <div class="text-muted">#left(module.shortdescription, 30)# <cfif len(module.shortdescription) gt 30>...</cfif></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </cfif>
                                                 </cfloop>
 
                                             </div>

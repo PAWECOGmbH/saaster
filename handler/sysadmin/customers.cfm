@@ -87,7 +87,7 @@
                 intUserID: {type: "numeric", value: form.user_id}
             },
             sql = "
-                SELECT strPhone, strMobile, strLanguage, blnAdmin, blnActive
+                SELECT strPhone, strMobile, strLanguage, blnSuperAdmin, blnAdmin, blnActive
                 FROM users
                 WHERE intUserID = :intUserID
             "
@@ -98,6 +98,7 @@
         allData.mobile = qGetData.strMobile
         allData.language = qGetData.strLanguage
         allData.admin = qGetData.blnAdmin
+        allData.superadmin = qGetData.blnSuperAdmin
         allData.active = qGetData.blnActive
         allData.email = form.email
         allData.first_name = form.first_name
