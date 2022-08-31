@@ -98,11 +98,17 @@
                                                                         <textarea class="form-control" name="description" rows="3">#qPlanFeatures.strDescription#</textarea>
                                                                     </div>
                                                                     <div class="mb-3">
-                                                                        <label class="form-label">Default</label>
+                                                                        <label class="form-label">Category</label>
                                                                         <label class="form-check form-switch">
                                                                             <input class="form-check-input" type="checkbox" name="category" <cfif qPlanFeatures.blnCategory eq 1>checked</cfif>>
                                                                             <span class="form-check-label">It's a category</span>
                                                                         </label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">Variable
+                                                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                                        </label>
+                                                                        <input type="text" name="feature_variable" class="form-control" autocomplete="off" value="#HTMLEditFormat(qPlanFeatures.strVariable)#" maxlength="100">
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
@@ -181,6 +187,12 @@
                                                         <input class="form-check-input" type="checkbox" name="category">
                                                         <span class="form-check-label">It's a category</span>
                                                     </label>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Variable
+                                                        <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                    </label>
+                                                    <input type="text" name="feature_variable" class="form-control" autocomplete="off" maxlength="100">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">

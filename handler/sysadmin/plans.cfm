@@ -467,36 +467,70 @@ if (structKeyExists(form, "new_feature")) {
     )
 
     param name="form.feature_name" default="";
+    param name="form.feature_variable" default="";
     param name="form.description" default="";
     param name="category" default=0;
+
     if (structKeyExists(form, "category")) {
         category = 1;
+        form.feature_variable = "";
     }
 
-    try {
+    variableExists = false;
 
-        queryExecute(
-            options = {datasource = application.datasource},
+    if( len(trim(form.feature_variable))){
+
+        chkName = queryExecute(
+            options = {
+                datasource = application.datasource
+            },
             params = {
-                feature_name: {type: "nvarchar", value: form.feature_name},
-                description: {type: "nvarchar", value: form.description},
-                category: {type: "boolean", value: category},
-                nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
+                customvariable: {type: "varchar", value: form.feature_variable}
             },
             sql = "
-                INSERT INTO plan_features (strFeatureName, strDescription, blnCategory, intPrio)
-                VALUES (:feature_name, :description, :category, :nextPrio)
+                SELECT intPlanFeatureID FROM plan_features
+                WHERE strVariable = :customvariable
             "
-        )
+        );
 
-        getAlert('Feature saved.');
-
-    } catch (any e) {
-
-        getAlert(e.message, 'danger');
+        if(chkName.recordCount){
+            variableExists = true;
+        }
 
     }
 
+
+    if( !variableExists ){
+
+        try {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    feature_name: {type: "nvarchar", value: form.feature_name},
+                    feature_variable: {type: "varchar", value: trim(form.feature_variable)},
+                    description: {type: "nvarchar", value: form.description},
+                    category: {type: "boolean", value: category},
+                    nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
+                },
+                sql = "
+                    INSERT INTO plan_features (strFeatureName, strDescription, strVariable, blnCategory, intPrio)
+                    VALUES (:feature_name, :description, :feature_variable, :category, :nextPrio)
+                "
+            )
+
+            getAlert('Feature saved.');
+
+        } catch (any e) {
+
+            getAlert(e.message, 'danger');
+
+        }
+
+    }else{
+        getAlert('Variable name already exists. Please choose another name.', 'danger');
+    }
+    
     location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
 
 }
@@ -507,30 +541,76 @@ if (structKeyExists(form, "edit_feature")) {
     if (isNumeric(form.edit_feature)) {
 
         param name="form.feature_name" default="";
+        param name="form.feature_variable" default="";
         param name="form.description" default="";
         param name="category" default=0;
+
         if (structKeyExists(form, "category")) {
             category = 1;
+            form.feature_variable = "";
         }
 
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                featureID: {type: "numeric", value: form.edit_feature},
-                feature_name: {type: "nvarchar", value: form.feature_name},
-                description: {type: "nvarchar", value: form.description},
-                category: {type: "boolean", value: category}
-            },
-            sql = "
-                UPDATE plan_features
-                SET strFeatureName = :feature_name,
-                    strDescription = :description,
-                    blnCategory = :category
-                WHERE intPlanFeatureID = :featureID
-            "
-        )
+        variableExists = false;
 
-        getAlert('Feature saved.');
+        if( len(trim(form.feature_variable))){
+
+            chkName = queryExecute(
+                options = {
+                    datasource = application.datasource
+                },
+                params = {
+                    featureID: {type: "numeric", value: form.edit_feature},
+                    customvariable: {type: "varchar", value: form.feature_variable}
+                },
+                sql = "
+                    SELECT intPlanFeatureID FROM plan_features
+                    WHERE strVariable = :customvariable
+                    AND intPlanFeatureID != :featureID
+                "
+            );
+
+            if(chkName.recordCount){
+                variableExists = true;
+            }
+    
+        }
+
+
+        if( !variableExists ){
+
+            try {
+
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        featureID: {type: "numeric", value: form.edit_feature},
+                        feature_name: {type: "nvarchar", value: trim(form.feature_name)},
+                        feature_variable: {type: "varchar", value: trim(form.feature_variable)},
+                        description: {type: "nvarchar", value: form.description},
+                        category: {type: "boolean", value: category}
+                    },
+                    sql = "
+                        UPDATE plan_features
+                        SET strFeatureName = :feature_name,
+                            strDescription = :description,
+                            blnCategory = :category,
+                            strVariable = :feature_variable
+                        WHERE intPlanFeatureID = :featureID
+                    "
+                )
+
+                getAlert('Feature updated.');
+
+            } catch (any e) {
+        
+                getAlert(e.message, 'danger');
+        
+            }
+    
+        }else{
+            getAlert('Variable name already exists. Please choose another name.', 'danger');
+        }
+        
         location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
 
     }
