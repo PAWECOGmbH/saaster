@@ -241,14 +241,16 @@ component displayname="globalFunctions" {
 
             if(local.qPlanValue.recordcount){
 
-                if(local.qPlanValue.blnCheckmark){
-                    local.valueString = 1;
-                }else{
+                if (len(trim(local.qPlanValue.strValue))) {
                     local.valueString = local.qPlanValue.strValue;
-                }
+                } else {
+                    local.valueString = trueFalseFormat(local.qPlanValue.blnCheckmark);
+                }                
 
             }else{
+
                 local.valueString = "";
+
             }
 
 
