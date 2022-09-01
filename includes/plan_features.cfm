@@ -28,11 +28,11 @@
                             <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID, session.lng)>
 
                             <td class="content-td-body">
-                                <cfif featureContent.checkmark>
-                                    <i class="fas fa-check"></i>
-                                <cfelse>
+                                <cfif len(trim(featureContent.value))>
                                     #replace(featureContent.value, chr(13), "<br />")#
-                                </cfif>
+                                <cfelse>
+                                    <i class="fas fa-check"></i>
+                                </cfif>                                
                             </td>
                         </cfloop>
                     </tr>

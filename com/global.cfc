@@ -203,7 +203,7 @@ component displayname="globalFunctions" {
 
 
     <!--- Get setting (system settings as well as custom settings) --->
-    public string function getSetting(required string settingVariable, numeric customerID) {
+    public string function getSetting(required string settingVariable, numeric customerID, numeric planID) {
 
         if (structKeyExists(arguments, "customerID") and isNumeric(arguments.customerID)) {
 
@@ -212,6 +212,47 @@ component displayname="globalFunctions" {
             } else {
                 local.valueString = "";
             }
+
+        } else if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
+
+            local.qPlanValue = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    planID: {type: "numeric", value: arguments.planID},
+                    variable_name: {type: "string", value: arguments.settingVariable}
+                },
+                sql = "
+                    SELECT
+                        plan_features.strVariable, 
+                        plans_plan_features.strValue, 
+                        plans_plan_features.intPlanID,
+                        plans_plan_features.blnCheckmark
+                    FROM
+                        plan_features
+                        INNER JOIN
+                        plans_plan_features
+                        ON 
+                            plan_features.intPlanFeatureID = plans_plan_features.intPlanFeatureID
+                    WHERE
+                        plans_plan_features.intPlanID = :planID AND 
+                        plan_features.strVariable = :variable_name
+                "
+            );
+
+            if(local.qPlanValue.recordcount){
+
+                if (len(trim(local.qPlanValue.strValue))) {
+                    local.valueString = local.qPlanValue.strValue;
+                } else {
+                    local.valueString = trueFalseFormat(local.qPlanValue.blnCheckmark);
+                }                
+
+            }else{
+
+                local.valueString = "";
+
+            }
+
 
         } else {
 
