@@ -1,13 +1,51 @@
 <cfscript>
 
+    // Get all the booked modules as a list
+    moduleList = "";
+    if (!arrayIsEmpty(session.currentModules)) {
+        loop array=session.currentModules index="i" {
+            moduleList = listAppend(moduleList, i.moduleID);
+        }
+    }
+
+    // Get all widgets which are connected to plans and modules (or displayed permanent)
     qWidgets = queryExecute(
         options = {datasource = application.datasource},
+        params = {
+            planID: {type: "numeric", value: session.currentPlan.planID},
+            moduleList: {type: "varchar", value: listLen(moduleList) ? moduleList : 0}
+        },
         sql = "
             SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
-            FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
-            WHERE widgets.blnActive = 1
+
+            FROM widgets_plans
+            RIGHT JOIN widgets ON 1=1
+            AND widgets_plans.intWidgetID = widgets.intWidgetID
+
+            RIGHT JOIN widget_ratio ON 1=1
+            AND widgets.intRatioID = widget_ratio.intRatioID
+
+            WHERE (widgets_plans.intPlanID = :planID OR widgets.blnPermDisplay = 1)
+
+            AND widgets.blnActive = 1
+
+            UNION
+
+            SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
+
+            FROM widgets_modules
+            RIGHT JOIN widgets ON 1=1
+            AND widgets_modules.intWidgetID = widgets.intWidgetID
+
+            RIGHT JOIN widget_ratio ON 1=1
+            AND widgets.intRatioID = widget_ratio.intRatioID
+
+            WHERE (widgets_modules.intModuleID IN (:moduleList) OR widgets.blnPermDisplay = 1)
+
+            AND widgets.blnActive = 1
+
         "
-    );
+    )
 
     allWidgets = valueList(qWidgets.intWidgetID);
 
@@ -25,7 +63,7 @@
                 WHERE intUserID = :user_id
                 AND intWidgetID NOT IN(:allWidgets)
             "
-        );
+        )
 
     }else{
 
@@ -38,7 +76,7 @@
                 DELETE FROM user_widgets
                 WHERE intUserID = :user_id
             "
-        );
+        )
 
     }
 
@@ -53,7 +91,7 @@
             FROM user_widgets
             WHERE intUserID = :user_id
         "
-    );
+    )
 
     oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
     lastUserWidgetPrio = qOldUserWidgets.recordCount;
@@ -106,7 +144,7 @@
             ORDER BY user_widgets.intPrio
 
         "
-    );
+    )
 
 
 
