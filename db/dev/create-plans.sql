@@ -164,6 +164,7 @@ CREATE TABLE `plan_features`  (
   `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `blnCategory` tinyint(1) NOT NULL DEFAULT 0,
+  `strVariable` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `intPrio` int(5) NOT NULL,
   PRIMARY KEY (`intPlanFeatureID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -171,19 +172,19 @@ CREATE TABLE `plan_features`  (
 -- ----------------------------
 -- Records of plan_features
 -- ----------------------------
-INSERT INTO `plan_features` VALUES (1, 'Planning', '', 1, 1);
-INSERT INTO `plan_features` VALUES (2, 'Beautiful gantt charts', 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.', 0, 2);
-INSERT INTO `plan_features` VALUES (3, 'Tasks', 'The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs.', 0, 3);
-INSERT INTO `plan_features` VALUES (4, 'Users', 'Waltz, bad nymph, for quick jigs vex! Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack.', 0, 4);
-INSERT INTO `plan_features` VALUES (5, 'Dependencies', 'Quick wafting zephyrs vex bold Jim. Quick zephyrs blow, vexing daft Jim.', 0, 5);
-INSERT INTO `plan_features` VALUES (6, 'Management', '', 1, 6);
-INSERT INTO `plan_features` VALUES (7, 'Your team can update their progress', 'Sex-charged fop blew my junk TV quiz. How quickly daft jumping zebras vex. Two driven jocks help fax my big quiz. Quick, Baz, get my woven flax jodhpurs!', 0, 7);
-INSERT INTO `plan_features` VALUES (8, 'Daily email reminders', '\"Now fax quiz Jack!\" my brave ghost pled. Five quacking zephyrs jolt my wax bed. Flummoxed by job, kvetching W. zaps Iraq. Cozy sphinx waves quart jug of bad milk.', 0, 8);
-INSERT INTO `plan_features` VALUES (9, 'Simple task list views', 'A very bad quack might jinx zippy fowls. Few quips galvanized the mock jury box. Quick brown dogs jump over the lazy fox.', 0, 9);
-INSERT INTO `plan_features` VALUES (10, 'Time Tracking', '', 1, 10);
-INSERT INTO `plan_features` VALUES (11, 'Manual time entry', 'The jay, pig, fox, zebra, and my wolves quack! Blowzy red vixens fight for a quick jump.', 0, 11);
-INSERT INTO `plan_features` VALUES (12, 'Reporting', 'Joaquin Phoenix was gazed by MTV for luck. A wizard’s job is to vex chumps quickly in fog. Watch \"Jeopardy!\", Alex Trebeks fun TV quiz game.', 0, 12);
-INSERT INTO `plan_features` VALUES (13, 'Early detection of hours going over budget', 'Woven silk pyjamas exchanged for blue quartz. Brawny gods just ', 0, 13);
+INSERT INTO `plan_features` VALUES (1, 'Planning', '', 1, '', 1);
+INSERT INTO `plan_features` VALUES (2, 'Beautiful gantt charts', 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart.', 0, '', 2);
+INSERT INTO `plan_features` VALUES (3, 'Tasks', 'The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs.', 0, '', 3);
+INSERT INTO `plan_features` VALUES (4, 'Users', 'Waltz, bad nymph, for quick jigs vex! Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack.', 0, '', 4);
+INSERT INTO `plan_features` VALUES (5, 'Dependencies', 'Quick wafting zephyrs vex bold Jim. Quick zephyrs blow, vexing daft Jim.', 0, '', 5);
+INSERT INTO `plan_features` VALUES (6, 'Management', '', 1, '', 6);
+INSERT INTO `plan_features` VALUES (7, 'Your team can update their progress', 'Sex-charged fop blew my junk TV quiz. How quickly daft jumping zebras vex. Two driven jocks help fax my big quiz. Quick, Baz, get my woven flax jodhpurs!', 0, '', 7);
+INSERT INTO `plan_features` VALUES (8, 'Daily email reminders', '\"Now fax quiz Jack!\" my brave ghost pled. Five quacking zephyrs jolt my wax bed. Flummoxed by job, kvetching W. zaps Iraq. Cozy sphinx waves quart jug of bad milk.', 0, '', 8);
+INSERT INTO `plan_features` VALUES (9, 'Simple task list views', 'A very bad quack might jinx zippy fowls. Few quips galvanized the mock jury box. Quick brown dogs jump over the lazy fox.', 0, '', 9);
+INSERT INTO `plan_features` VALUES (10, 'Time Tracking', '', 1, '', 10);
+INSERT INTO `plan_features` VALUES (11, 'Manual time entry', 'The jay, pig, fox, zebra, and my wolves quack! Blowzy red vixens fight for a quick jump.', 0, '', 11);
+INSERT INTO `plan_features` VALUES (12, 'Reporting', 'Joaquin Phoenix was gazed by MTV for luck. A wizard’s job is to vex chumps quickly in fog. Watch \"Jeopardy!\", Alex Trebeks fun TV quiz game.', 0, '', 12);
+INSERT INTO `plan_features` VALUES (13, 'Early detection of hours going over budget', 'Woven silk pyjamas exchanged for blue quartz. Brawny gods just ', 0, '', 13);
 
 -- ----------------------------
 -- Table structure for plan_features_trans

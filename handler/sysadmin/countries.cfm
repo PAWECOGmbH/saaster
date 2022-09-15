@@ -140,7 +140,7 @@ if (structKeyExists(form, "new_country")) {
     qNewPrio = queryExecute(
         options = {datasource = application.datasource},
         sql = "
-            SELECT MAX(intPrio)+1 as newPrio
+            SELECT COALESCE(MAX(intPrio), 0)+1 as newPrio
             FROM countries
             WHERE blnActive = 1
         "

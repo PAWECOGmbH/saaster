@@ -172,40 +172,49 @@ if (structKeyExists(form, "edit_module")) {
             "
         )
 
-        if (qMappings.recordCount) {
+        try {
 
-            queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    mapping: {type: "varchar", value: mapping},
-                    thispath: {type: "varchar", value: path},
-                    moduleID: {type: "numeric", value: form.edit_module}
-                },
-                sql = "
-                    UPDATE custom_mappings
-                    SET strMapping = :mapping,
-                        strPath = :thispath
-                    WHERE intModuleID = :moduleID
-                "
-            )
+            if (qMappings.recordCount) {
 
-        } else {
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        mapping: {type: "varchar", value: mapping},
+                        thispath: {type: "varchar", value: path},
+                        moduleID: {type: "numeric", value: form.edit_module}
+                    },
+                    sql = "
+                        UPDATE custom_mappings
+                        SET strMapping = :mapping,
+                            strPath = :thispath
+                        WHERE intModuleID = :moduleID
+                    "
+                )
 
-            queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    mapping: {type: "varchar", value: mapping},
-                    thispath: {type: "varchar", value: path},
-                    admin: {type: "boolean", value: 1},
-                    superadmin: {type: "boolean", value: 0},
-                    sysadmin: {type: "boolean", value: 0},
-                    moduleID: {type: "numeric", value: form.edit_module}
-                },
-                sql = "
-                    INSERT INTO custom_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, intModuleID)
-                    VALUES (:mapping, :thispath, :admin, :superadmin, :sysadmin, :moduleID)
-                "
-            )
+            } else {
+
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        mapping: {type: "varchar", value: mapping},
+                        thispath: {type: "varchar", value: path},
+                        admin: {type: "boolean", value: 1},
+                        superadmin: {type: "boolean", value: 0},
+                        sysadmin: {type: "boolean", value: 0},
+                        moduleID: {type: "numeric", value: form.edit_module}
+                    },
+                    sql = "
+                        INSERT INTO custom_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, intModuleID)
+                        VALUES (:mapping, :thispath, :admin, :superadmin, :sysadmin, :moduleID)
+                    "
+                )
+
+            }
+
+        } catch (any e) {
+
+            getAlert(e.message, 'danger');
+            location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
 
         }
 

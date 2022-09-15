@@ -31,7 +31,7 @@ try {
         <cfoutput>#session.alert#</cfoutput>
     </cfif>
     <div class="form-footer">
-        <a href="step1.cfm" class="btn btn-primary w-100">Start setup</a>
+        <a href="step1.cfm?reinit=4" class="btn btn-primary w-100">Start setup</a>
     </div>
 
 </div>
