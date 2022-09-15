@@ -302,7 +302,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Position</label>
-                                <input type="number" name="pos" class="form-control" value="#pos.posNumber#">
+                                <input type="number" name="pos" class="form-control" value="#pos.posNumber#" min="1" max="#arrayLen(qInvoice.positions)#">
                             </div>
                         </div>
                     </div>

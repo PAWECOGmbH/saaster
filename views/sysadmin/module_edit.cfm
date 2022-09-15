@@ -85,15 +85,19 @@
                                                 </a>
                                             </li>
                                             <cfif qModule.blnFree>
-                                                <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free module">
-                                                    <i class="fas fa-coins pe-3"></i>
-                                                    Prices
-                                                </a>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free module">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                </li>
                                             <cfelse>
-                                                <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
-                                                    <i class="fas fa-coins pe-3"></i>
-                                                    Prices
-                                                </a>
+                                                <li class="nav-item">
+                                                    <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                </li>
                                             </cfif>
                                         </ul>
                                         <div class="card-body">

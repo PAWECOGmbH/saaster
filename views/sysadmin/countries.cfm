@@ -19,7 +19,7 @@
         session.c_sort = form.sort;
     }
 
-    // Filter out unsupport search characters
+    // Filter out unsupported search characters
     searchTerm = ReplaceList(trim(session.c_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
     searchTerm = replace(searchTerm,' - ', "-", "all");
 
@@ -248,7 +248,7 @@
                                                     <div class="modal-body">
                                                         <div class="row">
                                                             <div class="col-lg-6 mb-3">
-                                                                <label class="form-label">Country name (english)</label>
+                                                                <label class="form-label">Country name (english) *</label>
                                                                 <input type="text" name="country" class="form-control" autocomplete="off" maxlength="100" required>
                                                             </div>
                                                             <div class="col-lg-6 mb-3">
@@ -313,11 +313,11 @@
                                                             <div class="col-lg-1 mb-3 pt-4">
                                                             </div>
                                                             <div class="col-lg-6 mb-3">
-                                                                <label class="form-label">Timezone</label>
-                                                                <select name="timezone" class="form-select">
+                                                                <label class="form-label">Timezone *</label>
+                                                                <select name="timezoneID" class="form-select" required>
                                                                     <option value=""></option>
                                                                     <cfloop array="#timeZones#" index="i">
-                                                                        <option value="#i.utc#">#i.timezone# - #i.city# (#i.utc#)</option>
+                                                                        <option value="#i.id#">#i.timezone# - #i.city# (#i.utc#)</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>
@@ -325,7 +325,6 @@
                                                         <div class="row">
                                                             <div class="col-lg-6 mb-3">
                                                                 <label class="form-label"></label>
-
                                                             </div>
                                                             <div class="col-lg-6 mb-3">
                                                                 <label class="form-label">Default</label>
