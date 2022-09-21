@@ -2,6 +2,14 @@
 
 Opensource saas solution written in CFML.
 
+## Used open source software:
+- https://github.com/tabler/tabler/blob/main/LICENSE
+- https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md
+- https://github.com/Alex-D/Trumbowyg/blob/develop/LICENSE
+- https://github.com/twbs/bootstrap/blob/main/LICENSE
+- https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE
+- https://fontawesome.com/v4/license/
+
 ## Requirements for development environment
 
 Windows:
