@@ -88,7 +88,7 @@
                         <div class="card-body">
                             <p>
                                 <cfif qPlanGroups.recordCount>
-                                    Here you can compile and configure your plans and prices.
+                                    Here you can configure your plans and prices. The <b>default plan</b> indicates that it will be activated immediately when a new registration is made.
                                 <cfelse>
                                     <span class="text-red">You need at least one plan group before you can create plans. <a href="#application.mainURL#/sysadmin/plangroups"><i class="fas fa-long-arrow-alt-right"></i> Manage plan groups</a></span>
                                 </cfif>
@@ -100,24 +100,36 @@
                                             <tr>
                                                 <th width="5%"></th>
                                                 <th width="5%" class="text-center">Prio</th>
-                                                <th width="35%">Plan name</th>
-                                                <th width="35%">Group name</th>
+                                                <th width="30%">Plan name</th>
+                                                <th width="30%">Group name</th>
                                                 <th width="10%" class="text-center">Recommended</th>
+                                                <th width="10%">Default plan</th>
                                                 <th width="5%"></th>
                                                 <th width="5%"></th>
                                             </tr>
                                         </thead>
                                         <tbody <cfif qPlans.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qPlans">
-                                                <tr <cfif qPlans.recordCount gt 1>id="sort_#qPlans.intPlanID#" data-id="#qPlans.intPlanID#" data-group="#qPlans.intPlanGroupID#" data-extend="#urlencodedformat('AND intPlanGroupID=' & qPlans.intPlanGroupID)#"</cfif>>
-                                                    <td class="move text-center"><cfif qPlans.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
-                                                    <td class="text-center">#qPlans.intPrio#</td>
-                                                    <td>#qPlans.strPlanName#</td>
-                                                    <td>#qPlans.strGroupName#</td>
-                                                    <td class="text-center">#yesNoFormat(qPlans.blnRecommended)#</td>
-                                                    <td><a href="#application.mainURL#/sysadmin/plan/edit/#qPlans.intPlanID#" class="btn">Edit</a></td>
-                                                    <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_plan=#qPlans.intPlanID#', 'Delete plan', 'Do you really want to delete this plan irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
-                                                </tr>
+                                                <form action="#application.mainURL#/sysadm/plans?default" method="post">
+                                                    <input type="hidden" name="planID" value="#qPlans.intPlanID#">
+                                                    <input type="hidden" name="groupID" value="#qPlans.intPlanGroupID#">
+                                                    <tr <cfif qPlans.recordCount gt 1>id="sort_#qPlans.intPlanID#" data-id="#qPlans.intPlanID#" data-group="#qPlans.intPlanGroupID#" data-extend="#urlencodedformat('AND intPlanGroupID=' & qPlans.intPlanGroupID)#"</cfif>>
+                                                        <td class="move text-center"><cfif qPlans.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
+                                                        <td class="text-center">#qPlans.intPrio#</td>
+                                                        <td>#qPlans.strPlanName#</td>
+                                                        <td>#qPlans.strGroupName#</td>
+                                                        <td class="text-center">#yesNoFormat(qPlans.blnRecommended)#</td>
+                                                        <td class="text-center">
+                                                            <cfif qPlans.blnFree eq 1 or qPlans.intNumTestDays gt 0>
+                                                                <label class="form-check form-switch">
+                                                                    <input onclick="this.form.submit()" class="form-check-input" type="checkbox" name="default" <cfif qPlans.blnDefaultPlan eq 1>checked</cfif>>
+                                                                </label>
+                                                            </cfif>
+                                                        </td>
+                                                        <td><a href="#application.mainURL#/sysadmin/plan/edit/#qPlans.intPlanID#" class="btn">Edit</a></td>
+                                                        <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_plan=#qPlans.intPlanID#', 'Delete plan', 'Do you really want to delete this plan irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    </tr>
+                                                </form>
                                             </cfloop>
                                         </tbody>
                                     </table>

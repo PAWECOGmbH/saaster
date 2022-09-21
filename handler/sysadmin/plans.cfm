@@ -309,6 +309,40 @@ if (structKeyExists(url, "delete_plan")) {
 
 }
 
+// Set plan as default
+if (structKeyExists(url, "default")) {
+
+    if (structKeyExists(form, "default")) {
+        setDefault = 1;
+    } else {
+        setDefault = 0;
+    }
+
+    queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+            planID: {type: "numeric", value: form.planID},
+            groupID: {type: "numeric", value: form.groupID},
+            default: {type: "boolean", value: setDefault}
+        },
+        sql = "
+
+            UPDATE plans
+            SET blnDefaultPlan = 0
+            WHERE intPlanGroupID = :groupID;
+
+            UPDATE plans
+            SET blnDefaultPlan = :default
+            WHERE intPlanGroupID = :groupID
+            AND intPlanID = :planID;
+
+        "
+    )
+
+    location url="#application.mainURL#/sysadmin/plans" addtoken="false";
+
+}
+
 
 if (structKeyExists(form, "edit_prices")) {
 
@@ -530,7 +564,7 @@ if (structKeyExists(form, "new_feature")) {
     }else{
         getAlert('Variable name already exists. Please choose another name.', 'danger');
     }
-    
+
     location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
 
 }
@@ -572,7 +606,7 @@ if (structKeyExists(form, "edit_feature")) {
             if(chkName.recordCount){
                 variableExists = true;
             }
-    
+
         }
 
 
@@ -602,15 +636,15 @@ if (structKeyExists(form, "edit_feature")) {
                 getAlert('Feature updated.');
 
             } catch (any e) {
-        
+
                 getAlert(e.message, 'danger');
-        
+
             }
-    
+
         }else{
             getAlert('Variable name already exists. Please choose another name.', 'danger');
         }
-        
+
         location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
 
     }
@@ -1037,8 +1071,6 @@ if (structKeyExists(url, "booking")) {
 
 
     }
-
-
 
 
 }
