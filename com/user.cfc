@@ -71,6 +71,15 @@ component displayname="user" output="false" {
 
                     local.returnStruct['loginCorrect'] = true;
 
+                    // Init plan object
+                    local.objPlans = new com.plans();
+
+                    // Get plan group
+                    local.planGroup = local.objPlans.prepareForGroupID(qCheckLogin.intCustomerID, application.usersIP);
+
+                    // Set the default plan, if defined
+                    local.objPlans.setDefaultPlan(qCheckLogin.intCustomerID, local.planGroup.groupID);
+
                     if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
                         local.returnStruct['redirect'] = session.redirect;
                     } else {

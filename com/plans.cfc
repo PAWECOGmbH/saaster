@@ -422,6 +422,33 @@ component displayname="plans" output="false" {
     }
 
 
+    // Get the default plan (id), if defined, using the group id
+    public numeric function getDefaultPlan(required numeric groupID) {
+
+        local.defaultPlanID = 0;
+
+        local.qDefPlan = queryExecute (
+            options = {datasource = application.datasource},
+             params = {
+                groupID: {type: "numeric", value: arguments.groupID}
+            },
+            sql = "
+                SELECT intPlanID
+                FROM plans
+                WHERE intPlanGroupID = :groupID
+                AND blnDefaultPlan = 1
+            "
+        )
+
+        if (local.qDefPlan.recordCount) {
+            local.defaultPlanID = local.qDefPlan.intPlanID;
+        }
+
+        return local.defaultPlanID;
+
+    }
+
+
     public array function getPlanFeatures() {
 
         local.arrFeatures = arrayNew(1);
@@ -862,6 +889,39 @@ component displayname="plans" output="false" {
         }
 
         return local.planStatus;
+
+    }
+
+
+    // For first registered customers: set the default plan, if defined
+    public void function setDefaultPlan(required numeric customerID, required numeric groupID) {
+
+        if (arguments.customerID gt 0 and arguments.groupID gt 0) {
+
+            // Check whether we have already a booked plan
+            local.checkBooking = getCurrentPlan(arguments.customerID);
+            if (local.checkBooking.planID eq 0) {
+
+                // Check whether we have a default plan defined
+                local.defaultPlanID = getDefaultPlan(arguments.groupID);
+                if (local.defaultPlanID gt 0) {
+
+                    // Get plan details
+                    local.planDetails = getPlanDetail(local.defaultPlanID);
+
+                    local.recurring = "onetime";
+                    if (local.planDetails.testDays gt 0) {
+                        local.recurring = "test";
+                    }
+
+                    // Set the plan now
+                    local.makeBooking = new com.book('plan', variables.language).checkBooking(customerID=arguments.customerID, bookingData=local.planDetails, recurring=local.recurring, makeBooking=true);
+
+                }
+
+            }
+
+        }
 
     }
 
