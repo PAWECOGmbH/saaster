@@ -1347,6 +1347,8 @@ component displayname="invoices" output="false" {
 
                 local.returnValue['success'] = true;
 
+                break;
+
 
             } else {
 
@@ -1387,7 +1389,8 @@ component displayname="invoices" output="false" {
     // Get invoice address block
     public string function getInvoiceAddress(required numeric invoiceID) {
 
-        local.customerID = new com.invoices().getInvoiceData(arguments.invoiceID).customerID;
+        local.invoiceData = new com.invoices().getInvoiceData(arguments.invoiceID);
+        local.customerID = local.invoiceData.customerID;
 
         // Get customer data
         local.customerData = application.objCustomer.getCustomerData(local.customerID);
@@ -1407,13 +1410,15 @@ component displayname="invoices" output="false" {
         } else {
 
             local.invoicePerson = "";
-            if (structKeyExists(getInvoiceData, "userID") and (getInvoiceData.userID) gt 0) {
-                userData = application.objCustomer.getUserDataByID(getInvoiceData.userID);
-                if (len(trim(userData.strSalutation))) {
-                    invoicePerson = userData.strSalutation & " " & userData.strFirstName & " " & userData.strLastName;
+            if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
+                local.userData = application.objCustomer.getUserDataByID(local.invoiceData.userID);
+                if (len(trim(local.userData.strSalutation))) {
+                    local.invoicePerson = local.userData.strSalutation & " " & local.userData.strFirstName & " " & local.userData.strLastName;
                 } else {
-                    invoicePerson = userData.strFirstName & " " & userData.strLastName;
+                    local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
                 }
+            } else {
+
             }
 
             cfsavecontent(variable="local.addressBlock") {

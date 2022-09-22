@@ -62,7 +62,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getBookedModules#" index="module">
-                                        <cfif structKeyExists(module, "moduleData") and !structIsEmpty(module.moduleData) and module.moduleStatus.status neq "payment">
+                                        <cfif structKeyExists(module, "moduleData") and !structIsEmpty(module.moduleData)>
                                             <div class="col-lg-3 mb-4">
                                                 <div class="card" style="min-height: 450px;">
                                                     <div class="card-status-top text-#module.moduleStatus.fontColor#"></div>

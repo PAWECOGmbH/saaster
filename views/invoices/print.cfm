@@ -191,7 +191,7 @@
                                 <td style="border-top: 1px solid ##ccc;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                             </tr>
                         </cfif>
-                        <tr><td colspan="6" style="border-top: 1px solid ##ccc;"><!--- <hr style="height: 1px; border: 0; background-color: ##ccc; margin-bottom: 2px;"> ---></td></tr>
+                        <tr><td colspan="6" style="border-top: 1px solid ##ccc;"></td></tr>
                     </table>
                 </td>
             </tr>

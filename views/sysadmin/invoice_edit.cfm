@@ -7,7 +7,6 @@
         location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
     }
 
-
     objInvoice = new com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
 
@@ -187,9 +186,18 @@
                                 </table>
                             </div>
                         </div>
-                        <!--- <div class="card-footer">
-                            footer
-                        </div> --->
+                        <div class="card-footer">
+                            <div class="row ms-1 me-1">
+                                <div class="col-lg-6">
+                                    <cfif structKeyExists(session, "comingfrom")>
+                                        <a href="#application.mainURL#/sysadmin/customers/details/#qInvoice.customerID####listLast(session.comingfrom, '_')#" class="btn bg-lime-lt"><i class="fas fa-angle-left pe-2"></i></i> Back to #listLast(session.comingfrom, '_')#</a>
+                                    </cfif>
+                                </div>
+                                <div class="col-lg-6 text-end">
+                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

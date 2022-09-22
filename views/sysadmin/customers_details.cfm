@@ -60,7 +60,6 @@
     currentPlan = objPlans.getCurrentPlan(thisCustomerID);
     planStatusText = objPlans.getPlanStatusAsText(currentPlan);
 
-
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -349,7 +348,13 @@
 
                                                                             <cfelse>
 
-                                                                                <cfif currentPlan.status neq "payment">
+                                                                                <cfif currentPlan.status eq "payment">
+
+                                                                                    <a class="dropdown-item">
+                                                                                        No action available (waiting for payment)
+                                                                                    </a>
+
+                                                                                <cfelse>
 
                                                                                     <cfif plan.itsFree>
                                                                                         <a href="#application.mainURL#/sysadm/plans?booking&c=#thisCustomerID#&p=#plan.planID#&free" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="There is no automatic refund if it is a downgrade!">
@@ -497,9 +502,11 @@
                                                                                         <a href="##" class="openPopupPeriod dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
                                                                                             Edit period
                                                                                         </a>
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
-                                                                                            Cancel at expiry date
-                                                                                        </a>
+                                                                                        <cfif moduleStatus.status neq "payment">
+                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
+                                                                                                Cancel at expiry date
+                                                                                            </a>
+                                                                                        </cfif>
                                                                                     </cfif>
                                                                                     <cfif moduleStatus.recurring neq "onetime" and moduleStatus.status neq "payment" and moduleStatus.status neq "canceled">
                                                                                         <cfif moduleStatus.recurring eq "monthly">
@@ -527,11 +534,14 @@
                                                                                         </cfif>
                                                                                     </cfif>
                                                                                 <cfelse>
-                                                                                    <cfif module.priceOnetime gt 0 or module.priceMonthly or module.priceYearly gt 0>
-                                                                                        <cfif module.testDays gt 0 and structKeyExists(moduleStatus, "status") and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
-                                                                                                Activate the test time (#module.testDays# days)
-                                                                                            </a>
+                                                                                    <cfif module.priceOnetime gt 0 or module.priceMonthly gt 0 or module.priceYearly gt 0>
+                                                                                        <cfif module.testDays gt 0>
+                                                                                            <cfif structKeyExists(moduleStatus, "status") and (moduleStatus.status eq "expired" or moduleStatus.status eq "test")>
+                                                                                            <cfelse>
+                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
+                                                                                                    Activate the test time (#module.testDays# days)
+                                                                                                </a>
+                                                                                            </cfif>
                                                                                         </cfif>
                                                                                         <cfif module.priceMonthly gt 0 and module.priceYearly gt 0>
                                                                                             <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
@@ -640,3 +650,5 @@
     </div>
 </div>
 
+<!--- Delete the session, if there is one --->
+<cfset structDelete(session, "comingfrom")>

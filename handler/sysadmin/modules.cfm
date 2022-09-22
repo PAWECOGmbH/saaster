@@ -722,23 +722,13 @@ if (structKeyExists(url, "booking")) {
         makeBooking = new com.book('module', custLanguage).checkBooking(customerID=url.c, bookingData=moduleDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
 
         if (makeBooking.success) {
-
-            // Send email with payment request
-            sendInvoice = new com.invoices().sendPaymentRequest(makeBooking.invoiceID);
-            if (sendInvoice.success) {
-                getAlert('The invoice was successfully created and the customer was informed by e-mail to pay the invoice.');
-            } else {
-                getAlert(sendInvoice.message, 'danger');
-            }
-
+            getAlert('The invoice was successfully created. You can now make changes if you wish. If all is well, you can send it to the customer by clicking on the email button.');
+            session.comingfrom = "sysadmin_modules";
+            location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
         } else {
-
             getAlert(makeBooking.message, 'danger');
-
+            location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
         }
-
-        location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
-
 
     }
 

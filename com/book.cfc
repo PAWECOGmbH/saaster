@@ -172,11 +172,8 @@ component displayname="book" output="false" {
         }
 
         /* dump(local.itsFirstProduct);
-        dump(local.newProductID);
+        dump(local.currentProduct);
         abort; */
-
-
-
 
 
         // It's the first time the customer book this product
@@ -287,7 +284,11 @@ component displayname="book" output="false" {
                     } else if (local.recurring eq "onetime") {
                         // Set the end time to a date that will probably never be reached
                         local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
-                        local.priceBeforeVat = local.bookingData.priceOnetime;
+                        if (structKeyExists(local.bookingData, "priceOnetime")) {
+                            local.priceBeforeVat = local.bookingData.priceOnetime;
+                        } else {
+                            local.priceBeforeVat = 0;
+                        }
                     }
 
                     local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
@@ -315,6 +316,10 @@ component displayname="book" output="false" {
                         } else {
                             local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
                         }
+
+                    } else {
+
+                        local.status = "active";
 
                     }
 

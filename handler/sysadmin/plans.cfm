@@ -964,12 +964,15 @@ if (structKeyExists(url, "booking")) {
         makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
 
         if (makeBooking.success) {
-            getAlert('The invoice was successfully created, check it out!');
+            getAlert('The invoice was successfully created. You can now make changes if you wish. If all is well, you can send it to the customer by clicking on the email button.');
+            session.comingfrom = "sysadmin_plans";
+            location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
         } else {
             getAlert(makeBooking.message, 'danger');
+            location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
         }
 
-        location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
+
 
 
     }
