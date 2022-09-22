@@ -94,5 +94,12 @@ variables.payrexxDesignID = "";
 // Webhook directory for developing environment
 variables.payrexxWebhookDev = "";
 
+// ####################################
+//  Open source software mark
+// ####################################
+
+// Text to define open source software
+variables.opensourceText = "Open source software running under the";
+
 
 </cfscript>
