@@ -95,11 +95,11 @@ variables.payrexxDesignID = "";
 variables.payrexxWebhookDev = "";
 
 // ####################################
-//  Open source software mark
+//  Copyright Text
 // ####################################
 
 // Text to define open source software
-variables.opensourceText = "Open source software running under the";
+variables.footerText = 'Open source software running under the <a href="https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt" target="_blank">MIT license</a> - ';
 
 
 </cfscript>
