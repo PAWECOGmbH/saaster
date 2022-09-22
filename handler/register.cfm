@@ -57,7 +57,6 @@ if (structKeyExists(form, 'register_btn')) {
 
             mailTitle = "#getTrans('subjectConfirmEmail')#";
             mailType = "html";
-            mailCustomerID = 1;
 
             cfsavecontent (variable = "mailContent") {
 
@@ -394,7 +393,6 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 
         variables.mailTitle = getTrans('titResetPassword');
         variables.mailType = "html";
-        variables.mailCustomerID = application.objCustomer.getUserDataByID(qCheckUser.intUserID).intCustomerID;
 
         cfsavecontent (variable = "variables.mailContent") {
 

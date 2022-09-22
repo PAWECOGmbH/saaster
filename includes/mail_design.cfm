@@ -9,7 +9,6 @@
   param name="variables.mailTitle" default="Title";
   param name="variables.mailContent" default="Content";
   param name="variables.mailType" default="html";
-  param name="variables.mailCustomerID" default=0;
 
   //  generel
   mailMaxWidthContent = 660;
@@ -34,7 +33,7 @@
   buttonFontSize = 14;
 
   // Get customer data
-  customerData = application.objCustomer.getCustomerData(variables.mailCustomerID);
+  customerData = new com.sysadmin().getSysAdminData();
 </cfscript>
 
 <!DOCTYPE html>
