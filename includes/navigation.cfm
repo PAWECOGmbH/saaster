@@ -51,6 +51,9 @@
                         </li>
                     </cfif>
 
+                    <!--- Main navigation --->
+                    <cfinclude template="/myapp/navigation.cfm">
+
                     <!--- Modules --->
                     <cfif isArray(session.currentModules) and arrayLen(session.currentModules)>
                         <cfoutput>
