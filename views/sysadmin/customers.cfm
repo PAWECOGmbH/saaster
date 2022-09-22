@@ -212,7 +212,11 @@
                                                             </cfif>
                                                             <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
-                                                                    <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
+                                                                    <cfif len(trim(qCustomers.strCompanyName))>
+                                                                        <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
+                                                                    <cfelse>
+                                                                        <div class="font-weight-medium">Private person</div>
+                                                                    </cfif>
                                                                 </div>
                                                             </a>
                                                         </div>

@@ -164,8 +164,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">#getTrans('formCompanyName')# *</label>
-                                    <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100" required>
+                                    <label class="form-label">#getTrans('formCompanyName')#</label>
+                                    <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100">
                                 </div>
                             </div>
                             <div class="col-md-6">

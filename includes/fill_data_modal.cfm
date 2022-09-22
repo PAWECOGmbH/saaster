@@ -41,8 +41,8 @@
                     <div class="col-md-4">
                         <h5 class="modal-title h4 text-blue mb-4">#getTrans('txtUpdateInformation')#:</h5>
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formCompanyName')# *</label>
-                            <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100" required>
+                            <label class="form-label">#getTrans('formCompanyName')#</label>
+                            <input type="text" name="company" class="form-control" value="#HTMLEditFormat(custCompany)#" minlength="3" maxlength="100" >
                         </div>
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formContactName')# *</label>
