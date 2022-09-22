@@ -215,7 +215,7 @@
                                                                     <cfif len(trim(qCustomers.strCompanyName))>
                                                                         <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
                                                                     <cfelse>
-                                                                        <div class="font-weight-medium">Private person</div>
+                                                                        <div class="font-weight-medium">#qCustomers.strContactPerson# (Private)</div>
                                                                     </cfif>
                                                                 </div>
                                                             </a>

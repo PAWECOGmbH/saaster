@@ -192,7 +192,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
     param name="form.company_name" default="";
     param name="form.contact_person" default="";
 
-    if (!len(trim(company_name)) or !len(trim(contact_person))) {
+    if (!len(trim(contact_person))) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
