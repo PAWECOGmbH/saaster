@@ -66,7 +66,14 @@
                                                 <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                             </cfif>
                                         </td>
-                                        <td>#qTenants.strCompanyName#</td>
+                                        <td>
+                                            <cfif len(trim(qTenants.strCompanyName))>
+                                                #qTenants.strCompanyName#
+                                            <cfelse>
+                                                #qTenants.strContactPerson# (#getTrans('formContactName')#)
+                                            </cfif>
+                                            <!--- #qTenants.strCompanyName# --->
+                                        </td>
                                         <td>#qTenants.strContactPerson#</td>
                                         <td class="text-center"><cfif qTenants.blnStandard><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                         <td class="text-center"><cfif qTenants.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
