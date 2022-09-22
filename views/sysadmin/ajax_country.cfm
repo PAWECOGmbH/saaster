@@ -44,7 +44,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-lg-6 mb-3">
-                        <label class="form-label">Country name (english)</label>
+                        <label class="form-label">Country name *</label>
                         <input type="text" name="country" class="form-control" autocomplete="off" value="#HTMLEditFormat(qCountry.strCountryName)#" maxlength="100" required>
                     </div>
                     <div class="col-lg-6 mb-3">

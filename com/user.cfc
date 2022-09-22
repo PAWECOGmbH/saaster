@@ -545,7 +545,6 @@ component displayname="user" output="false" {
 
                 variables.mailTitle = getTrans('txtInvitationFrom') & " " & qUser.fromName;
                 variables.mailType = "html";
-                variables.mailCustomerID = application.objCustomer.getUserDataByID(arguments.toUserID).intCustomerID;
 
                 cfsavecontent (variable = "variables.mailContent") {
 
@@ -646,7 +645,6 @@ component displayname="user" output="false" {
 
             variables.mailTitle = getTrans('subjectConfirmEmail');
             variables.mailType = "html";
-            variables.mailCustomerID = application.objCustomer.getUserDataByID(arguments.mailuserID).intCustomerID;
             local.toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
 
             cfsavecontent (variable = "local.mailContent") {

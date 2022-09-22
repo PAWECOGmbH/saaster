@@ -1502,7 +1502,6 @@ component displayname="invoices" output="false" {
 
             variables.mailTitle = getTrans('titInvoiceReady', local.customerData.language);
             variables.mailType = "html";
-            variables.mailCustomerID = local.customerID;
 
             cfsavecontent (variable = "variables.mailContent") {
 
@@ -1583,7 +1582,6 @@ component displayname="invoices" output="false" {
 
             variables.mailTitle = getTrans('titInvoice', local.customerData.language) & " | " & local.invoiceData.title;
             variables.mailType = "html";
-            variables.mailCustomerID = local.customerID;
 
             cfsavecontent (variable = "variables.mailContent") {
                 echo("
