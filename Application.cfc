@@ -4,7 +4,7 @@ component displayname="Application" output="false" hint="Handle the application.
     // Datasource and custom variables
     include template="config.cfm";
 
-    // Dynamic values (table)
+    // Dynamic values
     this.name = variables.applicationname;
     this.sessiontimeout = variables.sessiontimeout;
     this.pdf.type = variables.pdf_type;
