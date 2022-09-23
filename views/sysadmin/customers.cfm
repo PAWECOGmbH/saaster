@@ -208,14 +208,18 @@
                                                             <cfif len(trim(qCustomers.strLogo))>
                                                                 <img src="#application.mainURL#/userdata/images/logos/#qCustomers.strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#qCustomers.strCompanyName#">
                                                             <cfelse>
-                                                                <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
+                                                                <cfif len(trim(qCustomers.strCompanyName))>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
+                                                                <cfelse>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strContactPerson,2)#</div>
+                                                                </cfif>
                                                             </cfif>
                                                             <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
                                                                     <cfif len(trim(qCustomers.strCompanyName))>
                                                                         <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
                                                                     <cfelse>
-                                                                        <div class="font-weight-medium">Private person</div>
+                                                                        <div class="font-weight-medium">#qCustomers.strContactPerson# (Private)</div>
                                                                     </cfif>
                                                                 </div>
                                                             </a>

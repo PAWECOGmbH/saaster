@@ -107,7 +107,13 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
-                            <li class="breadcrumb-item active">#qCustomers.companyName#</li>
+                            <li class="breadcrumb-item active">
+                                <cfif len(trim(qCustomers.companyName))>
+                                    #qCustomers.companyName#
+                                <cfelse>
+                                    #qCustomers.contactPerson# (Private)
+                                </cfif>
+                            </li>
                         </ol>
                     </div>
                     <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
@@ -126,7 +132,13 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Edit: #qCustomers.companyName#</h3>
+                            <h3 class="card-title">Edit: 
+                                <cfif len(trim(qCustomers.companyName))>
+                                    #qCustomers.companyName#
+                                <cfelse>
+                                    #qCustomers.contactPerson# (Private)
+                                </cfif>
+                            </h3>
                         </div>
                         <div class="card-body">
                             <div class="col-lg-12">

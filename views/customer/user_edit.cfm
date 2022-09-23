@@ -181,10 +181,18 @@
                                                             <cfif len(trim(qTenants.strLogo))>
                                                                 <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar me-3" alt="#qTenants.strCompanyName#">
                                                             <cfelse>
-                                                                <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strCompanyName,2)#</div>
+                                                                <cfif len(trim(qTenants.strCompanyName))>
+                                                                    <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strCompanyName,2)#</div>
+                                                                <cfelse>
+                                                                    <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strContactPerson,2)#</div>
+                                                                </cfif>
                                                             </cfif>
                                                             <div>
-                                                                <div class="font-weight-medium">#qTenants.strCompanyName#</div>
+                                                                <cfif len(trim(qTenants.strCompanyName))>
+                                                                    <div class="font-weight-medium">#qTenants.strCompanyName#</div>
+                                                                <cfelse>
+                                                                    <div class="font-weight-medium">#qTenants.strContactPerson# (#getTrans('formContactName')#)</div>
+                                                                </cfif>
                                                             </div>
                                                         </div>
                                                     </div>
