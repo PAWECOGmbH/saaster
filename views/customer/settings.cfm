@@ -24,12 +24,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
                             <li class="breadcrumb-item active">#getTrans('titSystemSettings')#</li>
                         </ol>
-                    </div>
-                    <!--- <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a href="##" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Button
-                        </a>
-                    </div> --->
+                    </div>                    
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -70,7 +65,8 @@
             <div class="ps-3 pe-3">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <div class="modal-status bg-danger"></div>
-                <div class="modal-body text-center">
+                <div class="modal-body text-center">      Cancel changes
+
                     <i class="fas fa-exclamation-triangle display-1 text-danger"></i>
                     <h3 class="mt-3">#getTrans('titDeleteAccount')#</h3>
                     <p>#getTrans('txtDeleteAccount')#</p>
