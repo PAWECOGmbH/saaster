@@ -61,7 +61,11 @@
                                     <tr>
                                         <td>
                                             <cfif not len(trim(qTenants.strLogo))>
-                                                <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strCompanyName,2)#</div>
+                                                <cfif len(trim(qTenants.strCompanyName))>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strCompanyName,2)#</div>
+                                                <cfelse>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strContactPerson,2)#</div>
+                                                </cfif>
                                             <cfelse>
                                                 <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                             </cfif>
