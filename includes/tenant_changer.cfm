@@ -8,7 +8,7 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
             <cfif len(trim(getCustomerData.companyName))>
-                <cfif len(trim('#getCustomerData.logo#'))>
+                <cfif len(trim(getCustomerData.logo))>
                     <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.companyName#">
                     <span class="nav-link-title">#getCustomerData.companyName#</span>
                 <cfelse>
@@ -16,7 +16,7 @@
                     <span class="nav-link-title">#getCustomerData.companyName#</span>
                 </cfif>
             <cfelse>
-                <cfif len(trim('#getCustomerData.logo#'))>
+                <cfif len(trim(getCustomerData.logo))>
                     <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.companyName#">
                     <span class="nav-link-title">#getCustomerData.contactPerson#</span>
                 <cfelse>
