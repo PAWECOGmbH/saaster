@@ -88,6 +88,42 @@ if (structKeyExists(url, "module")) {
 
 }
 
+
+<!--- Delete the account right now --->
+if (structKeyExists(form, "delete")) {
+
+    if (form.delete eq session.customer_id) {
+
+        param name="form.email" default="";
+        param name="form.password" default="";
+
+        objUserLogin = application.objUser.checkLogin(argumentCollection = form);
+
+        if (isStruct(objUserLogin)) {
+
+            if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
+
+                deleteAccount = application.objCustomer.deleteAccount(session.customer_id);
+                if (deleteAccount) {
+                    structClear(SESSION);
+                    onSessionStart();
+                    location url="#application.mainURL#?logout" addtoken="false";
+                }
+
+            }
+
+        }
+
+        location url="#application.mainURL#/account-settings/settings" addtoken="false";
+
+    }
+
+}
+
+
+
+
+
 location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>
