@@ -415,4 +415,61 @@ component displayname="customer" output="false" {
 
     }
 
+
+    <!--- Get the users data using an ID --->
+    public boolean function deleteAccount(required numeric customerID) {
+
+        if (arguments.customerID gt 0) {
+
+            // Get all users of the customer
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT users.strPhoto, customers.strLogo
+                    FROM users
+                    INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
+                    WHERE users.intCustomerID = :customerID
+                "
+            )
+
+            // Loop over the users and delete pictures
+            loop query="local.qCustomer" {
+                if (fileExists(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"))) {
+                    fileDelete(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"));
+                }
+            }
+
+            // Delete the customers logo
+            if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
+                fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
+            }
+
+
+            // Delete the customer (the foreign key does the rest)
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    DELETE FROM customers
+                    WHERE intCustomerID = :customerID
+                "
+            )
+
+
+            return true;
+
+        }
+
+        return false;
+
+
+    }
+
+
+
 }
