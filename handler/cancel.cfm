@@ -32,11 +32,8 @@ if (structKeyExists(url, "plan")) {
 
         }
 
-        <!--- Save current plan into a session --->
-        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
-
-        <!--- Save current module array into a session --->
-        session.currentModules = new com.modules().getBookedModules(session.customer_id);
+        <!--- Set plans and modules as well as the custom settings into a session --->
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings" addtoken="false";
 
@@ -76,11 +73,8 @@ if (structKeyExists(url, "module")) {
 
         }
 
-        <!--- Save current plan into a session --->
-        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
-
-        <!--- Save current module array into a session --->
-        session.currentModules = new com.modules().getBookedModules(session.customer_id);
+        <!--- Set plans and modules as well as the custom settings into a session --->
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
 

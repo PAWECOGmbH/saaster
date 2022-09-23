@@ -239,11 +239,8 @@ if (structKeyExists(url, "pay")) {
                     insPayment = objInvoice.insertPayment(payment);
                     anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
 
-                    // Overwrite the product structs
-                    newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
-                    session.currentPlan = newPlan;
-                    checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
-                    session.currentModules = checkModules;
+                    <!--- Set plans and modules as well as the custom settings into a session --->
+                    application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                     getAlert('msgInvoicePaid', 'success');
 
@@ -285,11 +282,8 @@ if (structKeyExists(url, "pay")) {
             chargeNow = new com.invoices().payInvoice(url.pay);
             if (chargeNow.success) {
 
-                // Overwrite the product structs
-                newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
-                session.currentPlan = newPlan;
-                checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
-                session.currentModules = checkModules;
+                <!--- Set plans and modules as well as the custom settings into a session --->
+                application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                 getAlert('msgInvoicePaid');
 

@@ -156,6 +156,9 @@ component displayname="Application" output="false" hint="Handle the application.
             if (qCheckLanguage.cnt gt 0) {
                 session.lng = url.l;
                 application.langStruct = application.objGlobal.initLanguages();
+                if (structKeyExists(session, "customer_id")) {
+                    application.objCustomer.setProductSessions(session.customer_id, session.lng);
+                }
             }
 
         }
