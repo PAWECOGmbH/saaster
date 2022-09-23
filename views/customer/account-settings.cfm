@@ -31,10 +31,18 @@
             <div class="col-lg-4 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">#getTrans('txtMyProfile')#</h3>
+                        <h3 class="card-title">#getTrans('titCompanyUser')#</h3>
                     </div>
                     <div class="card-body">
                         <div class="list-group">
+                            <cfif session.admin>
+                                <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex justify-content-between">
+                                        <h4 class="mb-1"><b>#getTrans('titMyCompany')#</b></h4>
+                                    </div>
+                                    <p class="mb-1 ">#getTrans('txtMyCompanyDescription')#</p>
+                                </a>
+                            </cfif>
                             <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
                                 <div class="d-flex justify-content-between">
                                     <h4 class="mb-1"><b>#getTrans('txtEditProfile')#</b></h4>
@@ -59,12 +67,6 @@
                         </div>
                         <div class="card-body">
                             <div class="list-group">
-                                <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titMyCompany')#</b></h4>
-                                    </div>
-                                    <p class="mb-1 ">#getTrans('txtMyCompanyDescription')#</p>
-                                </a>
                                 <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">
                                         <h4 class="mb-1"><b>#getTrans('titUser')#</b></h4>
@@ -93,6 +95,12 @@
                                         <p class="mb-1 ">#getTrans('txtPaymentSettings')#</p>
                                     </a>
                                 </cfif>
+                                <a href="#application.mainURL#/account-settings/settings" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex justify-content-between">
+                                        <h4 class="mb-1"><b>#getTrans('titSystemSettings')#</b></h4>
+                                    </div>
+                                    <p class="mb-1 ">#getTrans('txtSystemSettings')#</p>
+                                </a>
                             </div>
                         </div>
                     </div>
