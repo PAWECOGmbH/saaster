@@ -415,8 +415,23 @@ component displayname="customer" output="false" {
 
     }
 
+    <!--- Save the current plan, the current modules and also the custom settings into a session --->
+    public void function setProductSessions(required numeric customerID, required string language) {
 
-    <!--- Get the users data using an ID --->
+        <!--- Save current plan into a session --->
+        checkPlan = new com.plans(language=arguments.language).getCurrentPlan(arguments.customerID);
+        session.currentPlan = checkPlan;
+
+        <!--- Save current modules into a session --->
+        checkModules = new com.modules(language=arguments.language).getBookedModules(arguments.customerID);
+        session.currentModules = checkModules;
+
+        <!--- Save custom settings struct into a session --->
+        session.customSettings = application.objGlobal.getCustomSettings(arguments.customerID);
+        
+    }
+    
+    <!--- Delete account right now --->
     public boolean function deleteAccount(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
@@ -466,7 +481,6 @@ component displayname="customer" output="false" {
         }
 
         return false;
-
 
     }
 

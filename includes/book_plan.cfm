@@ -49,13 +49,8 @@
 
         if (makeBooking.success) {
 
-            <!--- Save the new plan into a session --->
-            newPlan = objPlans.getCurrentPlan(session.customer_id);
-            session.currentPlan = newPlan;
-
-            <!--- Save the included modules into the module session --->
-            checkModules = new com.modules(language=getAnyLanguage(lngID).iso).getBookedModules(session.customer_id);
-            session.currentModules = checkModules;
+            <!--- Set plans and modules as well as the custom settings into a session --->
+            application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
             getAlert('msgPlanActivated');
             location url="#application.mainURL#/account-settings" addtoken=false;
@@ -75,13 +70,8 @@
 
     if (makeBooking.success) {
 
-        <!--- Save the new plan into a session --->
-        newPlan = objPlans.getCurrentPlan(session.customer_id);
-        session.currentPlan = newPlan;
-
-        <!--- Save the included modules into the module session --->
-        checkModules = new com.modules(language=getAnyLanguage(lngID).iso).getBookedModules(session.customer_id);
-        session.currentModules = checkModules;
+        <!--- Set plans and modules as well as the custom settings into a session --->
+        application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
         getAlert('msgThanksForPurchaseFindInvoice');
         location url="#application.mainURL#/account-settings" addtoken=false;

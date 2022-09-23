@@ -33,13 +33,8 @@ if (structKeyExists(url, "switch")) {
 
             session.customer_id = qTenant.intCustomerID;
 
-            <!--- Save current plan into a session --->
-            checkPlan = new com.plans(language=session.lng).getCurrentPlan(session.customer_id);
-            session.currentPlan = checkPlan;
-
-            <!--- Save current modules into a session --->
-            checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
-            session.currentModules = checkModules;
+            <!--- Set plans and modules as well as the custom settings into a session --->
+            application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
             <!--- Is the needed data of the cutomer already filled out? --->
             dataFilledIn = new com.register().checkFilledData(session.customer_id);
