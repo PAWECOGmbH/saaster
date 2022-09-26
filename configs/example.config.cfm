@@ -61,7 +61,8 @@ variables.fromEmail = "SaaSTER Company <info@saaster.io>";
 // Enter the email address of the administrator
 variables.toEmail = "info@saaster.io";
 
-
+// Enter an email address for error messages
+variables.errorEmail = "error@saaster.io";
 
 // ####################################
 //  CUSTOMER SETTINGS
