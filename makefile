@@ -14,6 +14,7 @@ help:
 .PHONY: dev reinit seed clean build url
 
 dev:
+	@cd .
 	@echo Creating local development environment
 	@echo ------------------------------------------------------
 	@docker-compose up -d cfml mysql mailslurper
@@ -30,6 +31,7 @@ dev:
 	@echo
 
 reinit:
+	@cd .
 	@echo Rebuilding MySQL container
 	@echo ------------------------------------------------------
 	@docker-compose rm -svf mysql
@@ -37,6 +39,7 @@ reinit:
 	@echo ------------------------------------------------------
 
 seed:
+	@cd .
 	@n=0; \
 	for file in $(notdir $(wildcard db/dev/*.sql)); do \
 		let "n+=1" ; \
@@ -57,6 +60,7 @@ seed:
 	@echo Done!
 
 clean:
+	@cd .
 	@echo Removing all containers
 	@echo ------------------------------------------------------
 	@docker-compose down -v
@@ -64,6 +68,7 @@ clean:
 	@echo Done!
 
 build:
+	@cd .
 	@echo Starting application in production...
 	@echo ------------------------------------------------------
 	@docker-compose up -d cfml mysql
@@ -71,6 +76,7 @@ build:
 	@echo Done!
 
 url:
+	@cd .
 	@echo 	
 	@echo ------------------------------------------------------
 	@echo Saaster:		http://localhost/login
