@@ -95,4 +95,13 @@ variables.payrexxDesignID = "";
 variables.payrexxWebhookDev = "";
 
 
+// ####################################
+//  Footer text variable
+// ####################################
+
+cfsavecontent (variable="variables.footerText"){
+    echo("<p><div>Open source software running under the <a href='https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt' target='_blank'>MIT license</a> - #dateFormat(now(), 'yyyy')# by #variables.appOwner#</p></div>");
+}
+
+
 </cfscript>
