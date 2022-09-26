@@ -6,4 +6,3 @@
         </cfoutput>
     </div>
 </footer>
-

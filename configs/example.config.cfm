@@ -95,7 +95,7 @@ variables.payrexxDesignID = "";
 variables.payrexxWebhookDev = "";
 
 // ####################################
-//  Footer text
+//  Footer text variable
 // ####################################
 
 cfsavecontent (variable="variables.footerText"){
