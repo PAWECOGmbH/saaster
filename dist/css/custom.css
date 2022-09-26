@@ -242,3 +242,26 @@ div.dashboard div.card-header label.form-check {
 .avatar {
     object-fit: cover;
 }
+@media (max-width: 768px){
+    .dropdown-toggle:after{
+        display: none;
+    }
+    .nav-link-icon, .nav-link-icon span{
+        font-size: 25px;
+    }
+    .navbar-expand-md .navbar-collapse .navbar-nav .nav-link{
+        padding-top: 1.0rem;
+        padding-bottom: 1.0rem;
+    }
+    .dropdown-header{
+        padding-left: 2rem;
+    }
+    .dropdown-menu[data-bs-popper]{
+        left: auto;
+        right: 0;
+    }
+    .lng-dropdown{
+        margin-top: 15px !important;
+    }
+}
+

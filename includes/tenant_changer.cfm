@@ -10,18 +10,18 @@
             <cfif len(trim(getCustomerData.companyName))>
                 <cfif len(trim(getCustomerData.logo))>
                     <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.companyName#">
-                    <span class="nav-link-title">#getCustomerData.companyName#</span>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.companyName#</span>
                 <cfelse>
                     <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.companyName,2)#</div>
-                    <span class="nav-link-title">#getCustomerData.companyName#</span>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.companyName#</span>
                 </cfif>
             <cfelse>
                 <cfif len(trim(getCustomerData.logo))>
                     <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center" alt="#getCustomerData.companyName#">
-                    <span class="nav-link-title">#getCustomerData.contactPerson#</span>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.contactPerson#</span>
                 <cfelse>
                     <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.contactPerson,2)#</div>
-                    <span class="nav-link-title">#getCustomerData.contactPerson#</span>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.contactPerson#</span>
                 </cfif>
             </cfif>
         </a>
