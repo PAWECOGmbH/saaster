@@ -140,19 +140,6 @@
                         </form>
                     </div>
                 </div>
-                <!--- <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Account löschen</h3>
-                    </div>
-                    <div class="card-body">
-                        <form>
-                            <p>Möchten Sie Ihren Account löschen?</p>
-                            <div class="form-footer">
-                                <button class="btn btn-danger btn-block" id="click2" onclick="return confirm('?')">Account löschen</button>
-                            </div>
-                        </form>
-                    </div>
-                </div> --->
             </div>
             <div class="col-lg-8">
                 <form class="card" id="submit_form" method="post" action="#application.mainURL#/customer">
@@ -274,8 +261,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer text-right">
-                        <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
+                    <div class="card-footer">
+                        <div class="button-group">
+                            <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
+                            <cfif session.superadmin>
+                                <a href="##" data-bs-toggle="modal" data-bs-target="##delete_account" class="btn btn-outline-danger float-end">#getTrans('titDeleteAccount')#</a>
+                            </cfif>
+                        </div>
                     </div>
                 </form>
 
@@ -286,3 +278,49 @@
     <cfinclude template="/includes/footer.cfm">
 
 </div>
+
+
+<!--- Modal for cancelation --->
+<cfif session.superadmin>
+<cfoutput>
+<form action="#application.mainURL#/cancel" method="post">
+<input type="hidden" name="delete" value="#session.customer_id#">
+<div id="delete_account" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="ps-3 pe-3">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-status bg-danger"></div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-exclamation-triangle display-1 text-danger"></i>
+                    <h3 class="mt-3">#getTrans('titDeleteAccount')#</h3>
+                    <p>#getTrans('txtDeleteAccount')#</p>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formEmailAddress')#</label>
+                        <input type="email" name="email" class="form-control" autocomplete="off" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">#getTrans('formPassword')#</label>
+                        <div class="input-group input-group-flat">
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer ps-3 pe-3">
+                    <a href="##" class="btn bg-green" data-bs-dismiss="modal">#getTrans('txtCancel')#</a>
+                    <button type="submit" class="btn bg-danger ms-auto">
+                        #getTrans('btnDeleteDefinitely')#
+                    </button>
+                    <!--- <a onclick="sweetAlert('warning', '#application.mainURL#/cancel?delete', '#getTrans('titDeleteAccount')#?', '', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" type="submit" class="btn bg-danger ms-auto">
+                        #getTrans('btnDeleteDefinitely')#
+                    </a> --->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+</cfoutput>
+</cfif>
