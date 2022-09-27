@@ -239,7 +239,7 @@ if (structKeyExists(url, "pay")) {
                     insPayment = objInvoice.insertPayment(payment);
                     anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
 
-                    <!--- Set plans and modules as well as the custom settings into a session --->
+                    // Set plans and modules as well as the custom settings into a session
                     application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                     getAlert('msgInvoicePaid', 'success');
@@ -282,7 +282,7 @@ if (structKeyExists(url, "pay")) {
             chargeNow = new com.invoices().payInvoice(url.pay);
             if (chargeNow.success) {
 
-                <!--- Set plans and modules as well as the custom settings into a session --->
+                // Set plans and modules as well as the custom settings into a session
                 application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                 getAlert('msgInvoicePaid');

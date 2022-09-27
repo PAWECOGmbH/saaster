@@ -49,14 +49,14 @@ if (structKeyExists(form, "new_invoice")) {
 
 }
 
-<!--- Insert position --->
+// Insert position
 if (structKeyExists(form, "new_position")) {
 
     if (isNumeric(form.new_position)) {
 
         posInfo = structNew();
         posInfo['invoiceID'] = form.new_position;
-        posInfo['append'] = true;<!--- false, if we have to delete all the positions first --->
+        posInfo['append'] = true;// false, if we have to delete all the positions first
 
         param name="form.position_title" default="";
         param name="form.position_desc" default="";
@@ -107,7 +107,7 @@ if (structKeyExists(form, "new_position")) {
 }
 
 
-<!--- Edit position --->
+// Edit position
 if (structKeyExists(form, "edit_position")) {
 
     param name="form.edit_position" default="0";
@@ -163,7 +163,7 @@ if (structKeyExists(form, "edit_position")) {
 }
 
 
-<!--- Delete position --->
+// Delete position
 if (structKeyExists(url, "delete_pos")) {
 
     param name="url.delete_pos" default="0";
@@ -185,7 +185,7 @@ if (structKeyExists(url, "delete_pos")) {
 }
 
 
-<!--- Update invoice (settings) --->
+// Update invoice (settings)
 if (structKeyExists(form, "settings")) {
 
     if (isNumeric(form.settings)) {
@@ -200,21 +200,9 @@ if (structKeyExists(form, "settings")) {
         param name="form.type" default="1";
         param name="form.language" default=getLanguage().iso;
 
-        if (isDate(form.invoice_date)) {
-            invoice_date = form.invoice_date;
-        } else {
-            invoice_date = objInvoice.getInvoiceData(invoiceID).date;
-        }
-        if (isDate(form.due_date) and form.due_date gte invoice_date) {
-            due_date = form.due_date;
-        } else {
-            due_date = objInvoice.getInvoiceData(invoiceID).dueDate;
-        }
-        if (structKeyExists(form, 'netto')) {
-            netto = 1;
-        } else {
-            netto = 0;
-        }
+        invoice_date = (isDate(form.invoice_date) ? form.invoice_date : objInvoice.getInvoiceData(invoiceID).date);
+        due_date = (isDate(form.due_date) and form.due_date gte invoice_date ? form.due_date : objInvoice.getInvoiceData(invoiceID).dueDate);
+        netto = (structKeyExists(form, 'netto') ? 1 : 0);
 
         invoiceStruct = structNew();
         invoiceStruct['invoiceID'] = invoiceID;
@@ -242,7 +230,7 @@ if (structKeyExists(form, "settings")) {
 }
 
 
-<!--- Insert payment --->
+// Insert payment
 if (structKeyExists(form, "payments")) {
 
     if (isNumeric(form.payments)) {
@@ -253,16 +241,9 @@ if (structKeyExists(form, "payments")) {
         param name="form.payment_type" default="";
         param name="form.amount" default="0";
 
-        if (isDate(form.payment_date)) {
-            paymentDate = form.payment_date;
-        } else {
-            paymentDate = now();
-        }
-        if (isNumeric(amount)) {
-            paymentAmount = form.amount;
-        } else {
-            paymentAmount = 0;
-        }
+        paymentDate = (isDate(form.payment_date) ? form.payment_date : now());
+        paymentAmount = (isNumeric(amount) ? form.amount : 0);
+
         paymentType = form.payment_type;
 
         if (paymentAmount gt 0) {
@@ -284,7 +265,7 @@ if (structKeyExists(form, "payments")) {
 }
 
 
-<!--- Open the invoice --->
+// Open the invoice
 if (structKeyExists(url, "open")) {
 
     if (isNumeric(url.i)) {
@@ -328,7 +309,7 @@ if (structKeyExists(url, "status")) {
         location url="#session.redirect#" addtoken="false";
     }
 
-    <!--- Delete invoice --->
+    // Delete invoice
     if (url.status eq "delete") {
 
         objInvoice.deleteInvoice(url.i);
@@ -347,7 +328,7 @@ if (structKeyExists(url, "status")) {
 }
 
 
-<!--- Delete payment (Ajax) --->
+// Delete payment (Ajax)
 if (structKeyExists(form, "delete_payment")) {
 
      objInvoice.deletePayment(form.delete_payment);

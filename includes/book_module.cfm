@@ -49,7 +49,7 @@
 
         if (makeBooking.success) {
 
-            <!--- Save module array into a session --->
+            // Save module array into a session
             session.currentModules = objModules.getBookedModules(session.customer_id);
             getAlert('msgModuleActivated');
             location url="#application.mainURL#/account-settings/modules" addtoken=false;
@@ -70,7 +70,7 @@
 
     if (makeBooking.success) {
 
-        <!--- Save module array into a session --->
+        // Save module array into a session
         session.currentModules = objModules.getBookedModules(session.customer_id);
 
         getAlert('msgThanksForPurchaseFindInvoice');

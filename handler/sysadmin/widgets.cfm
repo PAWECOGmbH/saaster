@@ -8,17 +8,8 @@ if (structKeyExists(form, "new_widget")) {
     param name="form.planList" default="";
     param name="form.moduleList" default="";
 
-    if (structKeyExists(form, "active")) {
-        itsActive = 1;
-    } else {
-        itsActive = 0;
-    }
-
-    if (structKeyExists(form, "perm")) {
-        permanently = 1;
-    } else {
-        permanently = 0;
-    }
+    itsActive = (structKeyExists(form, "active") ? 1 : 0);
+    permanently = (structKeyExists(form, "perm") ? 1 : 0);
 
     queryExecute(
         options = {datasource = application.datasource, result="newWidgetID"},
@@ -87,17 +78,8 @@ if (structKeyExists(form, "edit_widget")) {
         param name="form.planList" default="";
         param name="form.moduleList" default="";
 
-        if (structKeyExists(form, "active")) {
-            itsActive = 1;
-        } else {
-            itsActive = 0;
-        }
-
-        if (structKeyExists(form, "perm")) {
-            permanently = 1;
-        } else {
-            permanently = 0;
-        }
+        itsActive = (structKeyExists(form, "active") ? 1 : 0);
+        permanently = (structKeyExists(form, "perm") ? 1 : 0);
 
         queryExecute(
             options = {datasource = application.datasource},

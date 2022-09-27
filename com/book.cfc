@@ -87,7 +87,7 @@ component displayname="book" output="false" {
         local.currencyID = (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID) ? local.bookingData.currencyID : getCurrency().id);
 
 
-        // ---- Special settings for plans
+        // Special settings for plans
         if (variables.type eq "plan") {
 
             variables.object = new com.plans(currencyID=local.currencyID);
@@ -111,7 +111,7 @@ component displayname="book" output="false" {
             local.moduleID = "";
 
 
-        // ---- Special settings for modules
+        // Special settings for modules
         } else if (variables.type eq "module") {
 
             variables.object = new com.modules(currencyID=local.currencyID);
@@ -141,17 +141,13 @@ component displayname="book" output="false" {
 
 
 
-        // ---- Neither plan nor module
+        // Neither plan nor module
         } else {
 
             local.argsReturnValue['message'] = "Neither plan nor module found!";
             return local.argsReturnValue;
 
         }
-
-        /* dump(local.itsFirstProduct);
-        dump(local.currentProduct);
-        abort; */
 
 
         // It's the first time the customer book this product
@@ -750,8 +746,8 @@ component displayname="book" output="false" {
                 WHERE intBookingID = :bookingID
             "
         )
-        local.planID = (structKeyExists(arguments.bookingData, "planID") and !isNull(arguments.bookingData.planID) ? arguments.bookingData.planID : local.qBooking.intPlanID);
-        local.moduleID = (structKeyExists(arguments.bookingData, "moduleID") and !isNull(arguments.bookingData.moduleID) ? arguments.bookingData.moduleID : local.qBooking.intModuleID);
+        local.planID = (structKeyExists(arguments.bookingData, "planID") and arguments.bookingData.planID gt 0 ? arguments.bookingData.planID : local.qBooking.intPlanID);
+        local.moduleID = (structKeyExists(arguments.bookingData, "moduleID") and arguments.bookingData.moduleID gt 0 ? arguments.bookingData.moduleID : local.qBooking.intModuleID);
         local.dateStart = arguments.bookingData.dateStart ?: local.qBooking.dteStartDate;
         local.dateEnd = arguments.bookingData.dateEnd ?: local.qBooking.dteEndDate;
         local.recurring = arguments.bookingData.recurring ?: local.qBooking.strRecurring;

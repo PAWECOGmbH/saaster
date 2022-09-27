@@ -110,7 +110,7 @@ if (structKeyExists(form, "edit_module")) {
                 location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
             }
 
-            <!--- Sending the data into a function --->
+            // Sending the data into a function
             fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
             if (fileUpload.success) {
@@ -137,16 +137,8 @@ if (structKeyExists(form, "edit_module")) {
 
         }
 
-        if (structKeyExists(form, "bookable")) {
-            bookable = 1;
-        } else {
-            bookable = 0;
-        }
-        if (structKeyExists(form, "active")) {
-            active = 1;
-        } else {
-            active = 0;
-        }
+        bookable = (structKeyExists(form, "bookable") ? 1 : 0);
+        active = (structKeyExists(form, "active") ? 1 : 0);
 
         param name="form.module_name" default="";
         param name="form.short_desc" default="";
@@ -277,7 +269,7 @@ if (structKeyExists(form, "edit_module")) {
             "
         )
 
-        <!--- Create the folder specified --->
+        // Create the folder specified 
         createFolderSuccess = true;
         if (!directoryExists(expandPath('/modules/#form.prefix#'))) {
             try {
@@ -289,7 +281,7 @@ if (structKeyExists(form, "edit_module")) {
         }
 
 
-        <!--- Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...) --->
+        // Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...)
         createFileSuccess = true;
         if (!fileExists(expandPath('/modules/#form.prefix#/navigation.cfm'))) {
 savecontent variable="naviContent" {
@@ -308,7 +300,7 @@ writeOutput("
         }
 
 
-        <!--- Create the file for settings --->
+        // Create the file for settings
         createSettingFileSuccess = true;
         if (!fileExists(expandPath('/modules/#form.prefix#/settings.cfm'))) {
 savecontent variable="settingContent" {
@@ -331,7 +323,7 @@ dump('Hello settings!');
             getAlert('Module saved.');
         }
 
-        <!--- Refresh the session in order to see the changes --->
+        // Refresh the session in order to see the changes
         checkModules = new com.modules(language=session.lng).getBookedModules(session.customer_id);
         session.currentModules = checkModules;
 
@@ -361,7 +353,7 @@ if (structKeyExists(url, "delete_pic")) {
 
         if (qPicture.recordCount and len(trim(qPicture.strPicture))) {
 
-            <!--- Delete picture using a function --->
+            // Delete picture using a function
             application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qPicture.strPicture#"));
 
             queryExecute(
@@ -405,7 +397,7 @@ if (structKeyExists(url, "delete_module")) {
 
         if (qPicture.recordCount and len(trim(qPicture.strPicture))) {
 
-            <!--- Delete picture using a function --->
+            // Delete picture using a function
             application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qPicture.strPicture#"));
 
         }

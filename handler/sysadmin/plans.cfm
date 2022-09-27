@@ -191,11 +191,8 @@ if (structKeyExists(form, "edit_plan")) {
         max_users = form.max_users;
         desc = form.desc;
 
-        if (structKeyExists(form, "recommended")) {
-            recommended = 1;
-        } else {
-            recommended = 0;
-        }
+        recommended = (structKeyExists(form, "recommended") ? 1 : 0);
+        
         if (structKeyExists(form, "free")) {
 
             free = 1;
@@ -312,11 +309,7 @@ if (structKeyExists(url, "delete_plan")) {
 // Set plan as default
 if (structKeyExists(url, "default")) {
 
-    if (structKeyExists(form, "default")) {
-        setDefault = 1;
-    } else {
-        setDefault = 0;
-    }
+    setDefault = (structKeyExists(form, "default") ? 1 : 0);
 
     queryExecute(
         options = {datasource = application.datasource},
