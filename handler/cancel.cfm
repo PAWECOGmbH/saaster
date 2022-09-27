@@ -108,7 +108,8 @@ if (structKeyExists(form, "delete")) {
 
         }
 
-        location url="#application.mainURL#/account-settings/settings" addtoken="false";
+        getAlert('alertWrongLogin', 'danger');
+        location url="#application.mainURL#/account-settings/company" addtoken="false";
 
     }
 
