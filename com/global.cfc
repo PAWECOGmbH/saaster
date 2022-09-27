@@ -1,6 +1,6 @@
 component displayname="globalFunctions" {
 
-    <!--- SEF building --->
+    // SEF building
     public struct function getSEF(string sef_string) {
 
         local.returnStruct = structNew();
@@ -15,14 +15,14 @@ component displayname="globalFunctions" {
 
             local.sefString = arguments.sef_string;
 
-            <!--- If the last part of the sef string is a number, remove it --->
+            // If the last part of the sef string is a number, remove it
             if (isNumeric(listLast(local.sefString, "/"))) {
                 local.thisID = listLast(local.sefString, "/");
                 local.returnStruct['thisID'] = thisID;
                 local.sefString = replace(local.sefString, "/#local.thisID#", "", "one");
             }
 
-            <!--- look for db entry --->
+            // look for db entry
             local.qCheckSEF = queryExecute(
 
                 options = {datasource = application.datasource},
@@ -50,10 +50,10 @@ component displayname="globalFunctions" {
 
         } else {
 
-            <!--- Check if someone is trying to access a cfm file manually --->
+            // Check if someone is trying to access a cfm file manually
             local.thisPath = replace(replace(cgi.request_url, application.mainURL, ""), "/", "", "one");
 
-            <!--- look for db entry --->
+            // look for db entry
             local.qCheckSEF = queryExecute(
 
                 options = {datasource = application.datasource},
@@ -88,7 +88,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Initialising the language variables --->
+    // Initialising the language variables
     public struct function initLanguages() {
 
         // Get all languages in the database
@@ -124,11 +124,11 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Translations --->
+    // Translations
     public string function getTrans(required string stringToTrans, string thisLanguage) {
 
         local.translatedString = "--undefined--";
-
+        
         if (structKeyExists(arguments, "thisLanguage") and len(trim(arguments.thisLanguage))) {
             local.thisLang = arguments.thisLanguage;
         } else if (structKeyExists(session, "lng")) {
@@ -136,12 +136,8 @@ component displayname="globalFunctions" {
         } else {
             local.thisLang = application.getLanguage.iso;
         }
-
-        if (structKeyExists(application.langStruct, local.thisLang)) {
-            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
-        } else {
-            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
-        }
+        
+        local.searchString = (structKeyExists(application.langStruct, local.thisLang) ? structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one") : structFindKey(application.langStruct.en, arguments.stringToTrans, "one"));
 
         if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
             local.translatedString = local.searchString[1].value;
@@ -153,7 +149,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Initialising the system setting variables --->
+    // Initialising the system setting variables
     public struct function initSystemSettings() {
 
         local.settingStruct = structNew();
@@ -175,7 +171,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Get the custom setting variables --->
+    // Get the custom setting variables
     public struct function getCustomSettings(required numeric customerID) {
 
         local.settingStruct = structNew();
@@ -202,16 +198,12 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Get setting (system settings as well as custom settings) --->
+    // Get setting (system settings as well as custom settings)
     public string function getSetting(required string settingVariable, numeric customerID, numeric planID) {
 
         if (structKeyExists(arguments, "customerID") and isNumeric(arguments.customerID)) {
 
-            if (structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable)) {
-                local.valueString = structFindKey(session.customSettings, arguments.settingVariable, "one");
-            } else {
-                local.valueString = "";
-            }
+            local.valueString = (structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable) ? structFindKey(session.customSettings, arguments.settingVariable, "one") : "");
 
         } else if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
 
@@ -255,13 +247,8 @@ component displayname="globalFunctions" {
 
 
         } else {
-
-            if (structKeyExists(application.systemSettingStruct, arguments.settingVariable)) {
-                local.valueString = structFindKey(application.systemSettingStruct, arguments.settingVariable, "one");
-            } else {
-                local.valueString = "";
-            }
-
+            local.valueString = (structKeyExists(application.systemSettingStruct, arguments.settingVariable) ? structFindKey(application.systemSettingStruct, arguments.settingVariable, "one") : "");
+            
         }
 
         if (isArray(local.valueString) and arrayLen(local.valueString) gte 1) {
@@ -273,7 +260,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Get the default language as struct --->
+    // Get the default language as struct
     public struct function getDefaultLanguage() {
 
         local.defaultLanguage = structNew();
@@ -305,7 +292,7 @@ component displayname="globalFunctions" {
 
     }
 
-    //Get language from iso or id
+    // Get language from iso or id
     public struct function getAnyLanguage(any reqLng) {
 
         if (structKeyExists(arguments, "reqLng")) {
@@ -359,13 +346,13 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Create a uuid without dash, all lowercase and two ids combined  --->
+    // Create a uuid without dash, all lowercase and two ids combined
     public string function getUUID() {
         return lcase(replace(createUUID(), "-", "", "all")) & lcase(replace(createUUID(), "-", "", "all"));
     }
 
 
-    <!--- Alerts in diffrent colors (returns a session) --->
+    // Alerts in diffrent colors (returns a session)
     public string function getAlert(required string alertVariable, string alertType) {
 
         param name="arguments.alertType" default="success";
@@ -374,10 +361,10 @@ component displayname="globalFunctions" {
 
         if (len(trim(arguments.alertVariable))) {
 
-            <!--- Text to translate --->
+            // Text to translate
             local.thismessage = getTrans(arguments.alertVariable);
 
-            <!--- If there is no variable in the db, it must be an system error message --->
+            // If there is no variable in the db, it must be an system error message
             if (local.thismessage eq "--undefined--") {
                 local.thismessage = arguments.alertVariable;
             }
@@ -414,7 +401,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Hashing and salting passwords --->
+    // Hashing and salting passwords
     public struct function generateHash(required string thisString) {
 
         local.returnStruct = structNew();
@@ -427,7 +414,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Email validating --->
+    // Email validating
     public boolean function checkEmail(thisEmail) {
 
         local.response = true;
@@ -447,7 +434,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Get all countries or a country by id --->
+    // Get all countries or a country by id
     public query function getCountry(numeric countryID, string language) {
 
         param name="arguments.language" default=getDefaultLanguage().iso;
@@ -561,7 +548,7 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Uploading a file such as a pdf or an image --->
+    // Uploading a file such as a pdf or an image
     public struct function uploadFile(required struct uploadArgs, required array allowedFileTypes) {
 
         local.allowedFileTypesList;
@@ -571,7 +558,7 @@ component displayname="globalFunctions" {
             local.allowedFileTypesList = local.allowedFileTypesList & i & ",";
         }
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -580,50 +567,22 @@ component displayname="globalFunctions" {
         if (isStruct(arguments.uploadArgs)) {
 
 
-            <!--- Set a default for all possible arguments --->
-            if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
-                local.filePath = trim(arguments.uploadArgs.filePath);
-            } else {
-                local.filePath = expandPath('/userdata');
-            }
-            if (structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize))) {
-                local.maxSize = trim(arguments.uploadArgs.maxSize);
-            } else {
-                local.maxSize = '';
-            }
-            if (structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth))) {
-                local.maxWidth = trim(arguments.uploadArgs.maxWidth);
-            } else {
-                local.maxWidth = '';
-            }
-            if (structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight))) {
-                local.maxHeight = trim(arguments.uploadArgs.maxHeight);
-            } else {
-                local.maxHeight = '';
-            }
-            if (structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique)) {
-                local.makeUnique = arguments.uploadArgs.makeUnique;
-            } else {
-                local.makeUnique = true;
-            }
-            if (structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName))) {
-                local.fileName = trim(arguments.uploadArgs.fileName);
-            } else {
-                local.fileName = '';
-            }
-            if (structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig))) {
-                local.fileNameOrig = trim(arguments.uploadArgs.fileNameOrig);
-            } else {
-                local.fileNameOrig = '';
-            }
+            // Set a default for all possible arguments
+            local.filePath = (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath)) ? trim(arguments.uploadArgs.filePath) : expandPath('/userdata'));
+            local.maxSize = (structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize)) ? trim(arguments.uploadArgs.maxSize) : '');
+            local.maxWidth = (structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth)) ? trim(arguments.uploadArgs.maxWidth) : '');
+            local.maxHeight = (structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight)) ? trim(arguments.uploadArgs.maxHeight) : '');
+            local.makeUnique = (structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique) ? arguments.uploadArgs.makeUnique : true);
+            local.fileName = (structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName)) ? trim(arguments.uploadArgs.fileName) : '');
+            local.fileNameOrig = (structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig)) ? trim(arguments.uploadArgs.fileNameOrig) : '');
 
-            <!--- Is there a file to upload? --->
+            // Is there a file to upload?
             if (!len(trim(local.fileNameOrig))) {
                 local.argsReturnValue['message'] = 'Where is the file?';
                 return local.argsReturnValue;
             }
 
-            <!--- Is the given path valid or do we have to create it? --->
+            // Is the given path valid or do we have to create it?
             if (!directoryExists(local.filePath)) {
 
                 try {
@@ -634,14 +593,14 @@ component displayname="globalFunctions" {
                 }
             }
 
-            <!--- Overwrite or not? --->
+            // Overwrite or not?
             if (local.makeUnique) {
                 local.nameConflict = "makeunique";
             } else {
                 local.nameConflict = "overwrite";
             }
 
-            <!--- Upload the file now --->
+            // Upload the file now
             try {
                 uploadTheFile = FileUpload(
                     fileField = arguments.uploadArgs.fileNameOrig,
@@ -663,7 +622,7 @@ component displayname="globalFunctions" {
             local.uploadedFileNameOrig = uploadTheFile.serverfile;
             local.uploadedFilePathOrig = uploadTheFile.serverdirectory & '\' & local.uploadedFileNameOrig;
 
-            <!--- File too large? If yes, delete it and send message --->
+            // File too large? If yes, delete it and send message
             if (len(trim(local.maxSize)) and local.maxSize lt local.fileSizeInKB) {
 
                 FileDelete(local.uploadedFilePathOrig);
@@ -672,7 +631,7 @@ component displayname="globalFunctions" {
 
             }
 
-            <!--- Do we have to rename the file? If not, we will beautify it by ourself --->
+            // Do we have to rename the file? If not, we will beautify it by ourself
             if (len(trim(local.fileName))) {
 
                 local.newFileName = local.fileName  & '.' & uploadTheFile.serverfileext;
@@ -682,7 +641,7 @@ component displayname="globalFunctions" {
 
             } else {
 
-                <!--- Beautify the file name (using sql function) --->
+                // Beautify the file name (using sql function)
                 getBeautyName = queryExecute(
                     options = {datasource = application.datasource},
                     params = {
@@ -704,12 +663,12 @@ component displayname="globalFunctions" {
 
             }
 
-            <!--- If image, do we have to resize it? --->
+            // If image, do we have to resize it?
             if (IsImageFile(local.newFilePath)) {
 
                 if (len(trim(local.maxWidth)) or len(trim(local.maxHeight))) {
 
-                    <!--- Reading the image size --->
+                    // Reading the image size
                     cfimage(action="info", source=local.newFilePath, structname="imageInfo");
 
                     local.imageWidth = imageInfo.width;
@@ -718,7 +677,7 @@ component displayname="globalFunctions" {
                     local.newImageWidth = '';
                     local.newImageHeight = '';
 
-                    <!--- Do we have to resize the image width? --->
+                    // Do we have to resize the image width?
                     if (isNumeric(local.maxWidth) and local.maxWidth gt 0) {
 
                         if (local.imageWidth gt local.maxWidth) {
@@ -726,7 +685,7 @@ component displayname="globalFunctions" {
                         }
                     }
 
-                    <!--- Do we have to resize the image height? --->
+                    // Do we have to resize the image height?
                     if (isNumeric(local.maxHeight) and local.maxHeight gt 0) {
 
                         if (local.imageHeight gt local.maxHeight) {
@@ -734,7 +693,7 @@ component displayname="globalFunctions" {
                         }
                     }
 
-                    <!--- Resize the image --->
+                    // Resize the image
                     if (isNumeric(local.newImageWidth) or isNumeric(local.newImageHeight)) {
 
                         cfimage(action="resize", source=local.newFilePath, overwrite="true", height=local.newImageHeight, width=local.newImageWidth, name="myNewFile");
@@ -760,10 +719,10 @@ component displayname="globalFunctions" {
     }
 
 
-    <!--- Delete a file --->
+    // Delete a file
     public struct function deleteFile(required string path) {
 
-        <!--- Default variables --->
+        //Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -784,10 +743,9 @@ component displayname="globalFunctions" {
 
 
 
-    <!--- Check whether the user is in the range of the current tenant.
+    /* Check whether the user is in the range of the current tenant.
         doingUserID: The users id which is doing things like deleting or editing.
-        customerID: The customerID from whom something must be done
-    --->
+        customerID: The customerID from whom something must be done */
     public boolean function checkTenantRange(required numeric doingUserID, required numeric customerID) {
 
         local.isAllowed = false;

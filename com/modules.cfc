@@ -35,14 +35,10 @@ component displayname="modules" output="false" {
     }
 
 
-    <!--- Get all modules --->
+    // Get all modules
     public array function getAllModules(string except) {
 
-        if (structKeyExists(arguments, "except") and listLen(arguments.except)) {
-            local.exceptList = "AND intModuleID NOT IN (#arguments.except#)";
-        } else {
-            local.exceptList = "";
-        }
+        local.exceptList = (structKeyExists(arguments, "except") and listLen(arguments.except) ? "AND intModuleID NOT IN (#arguments.except#)" : "");
 
         local.qModule = queryExecute(
             options = {datasource = application.datasource},
@@ -75,7 +71,7 @@ component displayname="modules" output="false" {
     }
 
 
-    <!--- Get data of a module --->
+    // Get data of a module
     public struct function getModuleData(required numeric moduleID) {
 
         local.qModule = queryExecute(

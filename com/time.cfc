@@ -12,11 +12,7 @@ component displayname="time" output="false" {
             variables.customerID = arguments.customerID;
             local.countryID = application.objCustomer.getCustomerData(arguments.customerID).countryID;
 
-            if (local.countryID gt 0) {
-                variables.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
-            } else {
-                variables.timezoneID = application.objCustomer.getCustomerData(arguments.customerID).timezoneID;
-            }
+            variables.timezoneID = (local.countryID gt 0 ? application.objGlobal.getCountry(local.countryID).intTimezoneID : application.objCustomer.getCustomerData(arguments.customerID).timezoneID);
 
             if (!isNumeric(variables.timezoneID) or variables.timezoneID eq 0) {
                 variables.timezoneID = 31;
@@ -26,11 +22,7 @@ component displayname="time" output="false" {
 
         local.timezoneStruct = getTimezoneByID(variables.timezoneID);
 
-        if (structKeyExists(local.timezoneStruct, "timezone")) {
-            variables.timezone = local.timezoneStruct.timezone;
-        } else {
-            variables.timezone = "Etc/GMT";
-        }
+        variables.timezone = local.timezoneStruct.timezone ?: "Etc/GMT";
 
         return this;
 
@@ -41,11 +33,7 @@ component displayname="time" output="false" {
 
         local.structTimezone = structNew();
 
-        if (structKeyExists(arguments, "timezoneID") and isNumeric(arguments.timezoneID)) {
-            local.timezoneID = arguments.timezoneID;
-        } else {
-            local.timezoneID = variables.timezoneID;
-        }
+        local.timezoneID = (structKeyExists(arguments, "timezoneID") and isNumeric(arguments.timezoneID) ? arguments.timezoneID : variables.timezoneID);
 
         if (local.timezoneID eq 0) {
             local.timezoneID = 31;
@@ -107,12 +95,8 @@ component displayname="time" output="false" {
 
 
     public date function utc2local(date utcDate) {
-
-        if (structKeyExists(arguments, "utcDate")) {
-            local.utcDate = arguments.utcDate;
-        } else {
-            local.utcDate = now();
-        }
+        
+        local.utcDate = arguments.utcDate ?: now();
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
@@ -140,12 +124,8 @@ component displayname="time" output="false" {
 
     // Convert a given date with the timezone to utc
     public date function local2utc(required date givenDate, required string timezone) {
-
-        if (isDate(arguments.givenDate)) {
-            local.givenDate = arguments.givenDate;
-        } else {
-            local.givenDate = now();
-        }
+        
+        local.givenDate = (isDate(arguments.givenDate) ? arguments.givenDate : now());
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );

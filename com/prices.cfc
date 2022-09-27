@@ -120,20 +120,16 @@ component displayname="prices" output="false" {
         local.priceData['isNet'] = variables.isNet;
         local.priceData['currency'] = variables.currency;
 
-        <!--- Calc prices --->
+        // Calc prices
         local.objInvoice = new com.invoices();
 
         local.vat_amount = local.objInvoice.calcVat(arguments.price, variables.isNet, variables.vat);
         local.subtotal_price = arguments.price;
 
-        <!--- Add up subtotal and vat --->
-        if (variables.isNet eq 1) {
-            local.total_price = local.subtotal_price + local.vat_amount;
-        } else {
-            local.total_price = local.subtotal_price;
-        }
+        // Add up subtotal and vat
+        local.total_price = (variables.isNet eq 1 ? local.subtotal_price + local.vat_amount : local.subtotal_price);
 
-        <!--- Define vat text and sum --->
+        // Define vat text and sum
         if (variables.isNet eq 1) {
             if (variables.vat_type eq 1) {
                 local.priceData['vat_text']  = application.objGlobal.getTrans('txtPlusVat', variables.language) & ' ' & variables.vat & '%: ' & variables.currency & ' ' & lsCurrencyFormat(local.vat_amount, "none");
@@ -156,7 +152,7 @@ component displayname="prices" output="false" {
             }
         }
 
-        <!--- Round total according customers setting --->
+        // Round total according customers setting
         local.total_price = objInvoice.roundAmount(local.total_price, application.objGlobal.getSetting('settingRoundFactor'));
 
         local.priceData['priceAfterVAT'] = local.total_price;

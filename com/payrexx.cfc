@@ -13,17 +13,9 @@ component displayname="payrexx" output="false" {
     // Get the webhook data
     public query function getWebhook(required numeric customerID, required string status, any default, string includingFailed) {
 
-        if (structKeyExists(arguments, "default") and isBoolean(arguments.default)) {
-            local.sql_default = "AND blnDefault = " & arguments.default;
-        } else {
-            local.sql_default = "";
-        }
+        local.sql_default = (structKeyExists(arguments, "default") and isBoolean(arguments.default) ? "AND blnDefault = " & arguments.default : "");
+        local.sql_failed = (structKeyExists(arguments, "includingFailed") and arguments.includingFailed eq "yes" ? "" : "AND blnFailed = 0");    
 
-        if (structKeyExists(arguments, "includingFailed") and arguments.includingFailed eq "yes") {
-            local.sql_failed = "";
-        } else {
-            local.sql_failed = "AND blnFailed = 0";
-        }
 
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
@@ -70,11 +62,7 @@ component displayname="payrexx" output="false" {
 
             case "GET":
 
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
-                }
+                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature);
 
                 cfhttp( url=local.callingURL, result="httpRes", method="GET" ) {};
 
@@ -83,11 +71,7 @@ component displayname="payrexx" output="false" {
 
             case "POST":
 
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
-                }
+                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance);
 
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
@@ -102,11 +86,7 @@ component displayname="payrexx" output="false" {
 
             case "DEL":
 
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
-                }
+                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance);
 
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
@@ -122,13 +102,8 @@ component displayname="payrexx" output="false" {
 
 
 
-
-        if (httpRes.status_text eq "OK" and isJSON(httpRes.filecontent)) {
-            local.respond = deserializeJSON(httpRes.filecontent);
-        } else {
-            local.respond = httpRes.errordetail;
-        }
-
+        local.respond = (httpRes.status_text eq "OK" and isJSON(httpRes.filecontent) ? deserializeJSON(httpRes.filecontent) : httpRes.errordetail);
+    
         return local.respond;
 
     }

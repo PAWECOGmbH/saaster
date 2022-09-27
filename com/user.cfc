@@ -1,7 +1,7 @@
 
 component displayname="user" output="false" {
 
-    <!--- Login --->
+    // Login
     public struct function checkLogin() {
 
         param name="arguments.email" default="" type="string";
@@ -79,13 +79,8 @@ component displayname="user" output="false" {
 
                     // Set the default plan, if defined
                     local.objPlans.setDefaultPlan(qCheckLogin.intCustomerID, local.planGroup.groupID);
-
-                    if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
-                        local.returnStruct['redirect'] = session.redirect;
-                    } else {
-                        local.returnStruct['redirect'] = "#application.mainURL#/dashboard";
-                    }
-
+                    
+                    local.returnStruct['redirect'] = (structKeyExists(session, "redirect") and len(trim(session.redirect)) ? session.redirect : "#application.mainURL#/dashboard");
 
                 } else {
 
@@ -107,15 +102,15 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Change users password --->
+    // Change users password
     public struct function changePassword(required string newPassword, required string resetUUID) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
-        <!--- Hash and salt the password --->
+        // Hash and salt the password
         local.hashedStruct = application.objGlobal.generateHash(arguments.newPassword);
 
         try {
@@ -149,73 +144,30 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Update user --->
+    // Update user
     public struct function updateUser(required struct userStruct, required numeric userID, boolean comfirmMailChange) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
-        if (structKeyExists(arguments.userStruct, "salutation")) {
-            local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
-        } else {
-            local.salutation = '';
-        }
-        if (structKeyExists(arguments.userStruct, "first_name")) {
-            local.first_name = application.objGlobal.cleanUpText(arguments.userStruct.first_name, 100);
-        } else {
-            local.first_name = '';
-        }
-        if (structKeyExists(arguments.userStruct, "last_name")) {
-            local.last_name = application.objGlobal.cleanUpText(arguments.userStruct.last_name, 100);
-        } else {
-            local.last_name = '';
-        }
-        if (structKeyExists(arguments.userStruct, "email")) {
-            local.email = application.objGlobal.cleanUpText(arguments.userStruct.email, 100);
-        } else {
-            local.email = '';
-        }
-        if (structKeyExists(arguments.userStruct, "phone")) {
-            local.phone = application.objGlobal.cleanUpText(arguments.userStruct.phone, 100);
-        } else {
-            local.phone = '';
-        }
-        if (structKeyExists(arguments.userStruct, "mobile")) {
-            local.mobile = application.objGlobal.cleanUpText(arguments.userStruct.mobile, 100);
-        } else {
-            local.mobile = '';
-        }
-        if (structKeyExists(arguments.userStruct, "language")) {
-            local.language = arguments.userStruct.language;
-        } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
-        }
-        if (structKeyExists(arguments.userStruct, "superadmin")) {
-            local.superadmin = arguments.userStruct.superadmin;
-        } else {
-            local.superadmin = 0;
-        }
-        if (structKeyExists(arguments.userStruct, "admin")) {
-            local.admin = arguments.userStruct.admin;
-        } else {
-            local.admin = 0;
-        }
-        if (structKeyExists(arguments.userStruct, "active")) {
-            local.active = arguments.userStruct.active;
-        } else {
-            local.active = 0;
-        }
-        if (structKeyExists(arguments.userStruct, "tenantID")) {
-            local.tenantID = arguments.userStruct.tenantID;
-        } else {
-            local.tenantID = '';
-        }
+
+            local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20) ?: '';
+            local.first_name = application.objGlobal.cleanUpText(arguments.userStruct.first_name, 100) ?: '';
+            local.last_name = application.objGlobal.cleanUpText(arguments.userStruct.last_name, 100) ?: '';
+            local.email = application.objGlobal.cleanUpText(arguments.userStruct.email, 100) ?: '';
+            local.phone = application.objGlobal.cleanUpText(arguments.userStruct.phone, 100) ?: '';
+            local.mobile = application.objGlobal.cleanUpText(arguments.userStruct.mobile, 100) ?: '';
+            local.language = arguments.userStruct.language ?: application.objGlobal.getDefaultLanguage().iso;
+            local.superadmin = arguments.userStruct.superadmin ?: 0;
+            local.admin = arguments.userStruct.admin ?: 0;
+            local.active = arguments.userStruct.active ?: 0;
+            local.tenantID = arguments.userStruct.tenantID ?: '';
 
         try {
 
-            <!--- update the user --->
+            // update the user
             queryExecute(
 
                 options = {datasource = application.datasource, result="check"},
@@ -251,7 +203,7 @@ component displayname="user" output="false" {
 
             if (listLen(local.tenantID)) {
 
-                <!--- Delete tenants to which the user has no access  --->
+                // Delete tenants to which the user has no access
                 queryExecute(
 
                     options = {datasource = application.datasource, result="check"},
@@ -265,7 +217,7 @@ component displayname="user" output="false" {
 
                 )
 
-                <!--- Insert tenants to which the user has access  --->
+                // Insert tenants to which the user has access
                 cfloop( list = local.tenantID, index = "local.t" ) {
 
                     queryExecute(
@@ -293,7 +245,7 @@ component displayname="user" output="false" {
 
                 }
 
-                <!--- At least one tenant must be defined as standard --->
+                // At least one tenant must be defined as standard
                 qCheckStandard = queryExecute(
 
                     options = {datasource = application.datasource},
@@ -353,55 +305,25 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Insert user --->
+    // Insert user
     public struct function insertUser(required struct userStruct, required numeric customerID) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
         local.argsReturnValue['newUUID'] = application.objGlobal.getUUID();
 
-        if (structKeyExists(arguments.userStruct, "salutation")) {
-            local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
-        } else {
-            local.salutation = '';
-        }
-        if (structKeyExists(arguments.userStruct, "first_name")) {
-            local.first_name = application.objGlobal.cleanUpText(arguments.userStruct.first_name, 100);
-        } else {
-            local.first_name = '';
-        }
-        if (structKeyExists(arguments.userStruct, "last_name")) {
-            local.last_name = application.objGlobal.cleanUpText(arguments.userStruct.last_name, 100);
-        } else {
-            local.last_name = '';
-        }
-        if (structKeyExists(arguments.userStruct, "email")) {
-            local.email = application.objGlobal.cleanUpText(arguments.userStruct.email, 100);
-        } else {
-            local.email = '';
-        }
-        if (structKeyExists(arguments.userStruct, "phone")) {
-            local.phone = application.objGlobal.cleanUpText(arguments.userStruct.phone, 100);
-        } else {
-            local.phone = '';
-        }
-        if (structKeyExists(arguments.userStruct, "mobile")) {
-            local.mobile = application.objGlobal.cleanUpText(arguments.userStruct.mobile, 100);
-        } else {
-            local.mobile = '';
-        }
-        if (structKeyExists(arguments.userStruct, "language")) {
-            local.language = arguments.userStruct.language;
-        } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
-        }
-        if (structKeyExists(arguments.userStruct, "admin")) {
-            local.admin = arguments.userStruct.admin;
-        } else {
-            local.admin = 0;
-        }
+
+            local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20) ?: '';
+            local.first_name = application.objGlobal.cleanUpText(arguments.userStruct.first_name, 100) ?: '';
+            local.last_name = application.objGlobal.cleanUpText(arguments.userStruct.last_name, 100) ?: '';
+            local.email = application.objGlobal.cleanUpText(arguments.userStruct.email, 100) ?: '';
+            local.phone = application.objGlobal.cleanUpText(arguments.userStruct.phone, 100) ?: '';
+            local.mobile = application.objGlobal.cleanUpText(arguments.userStruct.mobile, 100) ?: '';
+            local.language = arguments.userStruct.language ?: application.objGlobal.getDefaultLanguage().iso;
+            local.admin = arguments.userStruct.admin ?: 0;
+
         if (structKeyExists(arguments.userStruct, "superadmin")) {
             local.superadmin = arguments.userStruct.superadmin;
             if (local.superadmin eq 1) {
@@ -410,11 +332,7 @@ component displayname="user" output="false" {
         } else {
             local.superadmin = 0;
         }
-        if (structKeyExists(arguments.userStruct, "active")) {
-            local.active = arguments.userStruct.active;
-        } else {
-            local.active = 0;
-        }
+        local.active = arguments.userStruct.active ?: 0;
 
 
         try {
@@ -459,7 +377,7 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Get all users --->
+    // Get all users
     public query function getAllUsers(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
@@ -484,17 +402,17 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Send invitation link --->
+    // Send invitation link
     public struct function sendInvitation(required numeric toUserID, required numeric fromUserID) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
         if (arguments.toUserID gt 0 and arguments.fromUserID gt 0) {
 
-            <!--- Get user --->
+            // Get user
             qUser = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -516,7 +434,7 @@ component displayname="user" output="false" {
 
             if (qUser.recordCount) {
 
-                <!--- UUID already set? --->
+                // UUID already set?
                 if (!len(trim(qUser.strUUID))) {
 
                     local.thisUUID = application.objGlobal.getUUID();
@@ -539,7 +457,7 @@ component displayname="user" output="false" {
                 getTrans = application.objGlobal.getTrans;
 
 
-                <!--- Replacing variables --->
+                // Replacing variables
                 local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
@@ -559,7 +477,7 @@ component displayname="user" output="false" {
                     ");
                 }
 
-                <!--- Send activation link --->
+                // Send activation link
                 mail to="#qUser.toEmail#" from="#application.fromEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
                     include "/includes/mail_design.cfm";
                 }
@@ -585,7 +503,7 @@ component displayname="user" output="false" {
     }
 
 
-    <!--- Get users image --->
+    // Get users image
     public struct function getUserImage(required numeric userID) {
 
         local.userData = application.objCustomer.getUserDataByID(arguments.userID);
@@ -599,7 +517,7 @@ component displayname="user" output="false" {
 
         } else {
 
-            <!--- Look for a gravatar.com picture or use the default picture (application) --->
+            // Look for a gravatar.com picture or use the default picture (application)
             local.encodedPath = urlEncode(application.userTempImg);
             local.myImgStruct['userImage'] = "https://www.gravatar.com/avatar/#lcase(Hash(lcase(local.userData.strEmail)))#?d=#local.encodedPath#&s=300";
             local.myImgStruct['itsLocal'] = false;
@@ -660,7 +578,7 @@ component displayname="user" output="false" {
                 ");
             }
 
-            <!--- Send activation link --->
+            // Send activation link
             mail to="#qUsersMailCheck.stremail#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
                 include "/includes/mail_design.cfm";
             }

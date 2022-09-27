@@ -97,22 +97,14 @@ component displayname="plans" output="false" {
                 "
             )
 
-            if (local.qDefPlanGroup.recordCount) {
-                local.thisGroupID = local.qDefPlanGroup.intPlanGroupID;
-            } else {
-                local.thisGroupID = 0;
-            }
+            local.thisGroupID = (local.qDefPlanGroup.recordCount ? local.qDefPlanGroup.intPlanGroupID : 0);
 
         }
 
         // get the currency of the country
         if (local.thisCountryID gt 0) {
             local.currID = application.objGlobal.getCurrencyOfCountry(local.thisCountryID).currencyID;
-            if (local.currID gt 0) {
-                local.thisCurrencyID = local.currID;
-            } else {
-                local.thisCurrencyID = application.objGlobal.getDefaultCurrency().currencyID;
-            }
+            local.thisCurrencyID = (local.currID gt 0 ? local.currID : application.objGlobal.getDefaultCurrency().currencyID);
         }
 
         local.prepareStruct['countryID'] = local.thisCountryID;
