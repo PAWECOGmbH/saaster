@@ -1,7 +1,7 @@
 
 <cfscript>
 
-<!--- Cancel plan or revoke cancellation --->
+// Cancel plan or revoke cancellation
 if (structKeyExists(url, "plan")) {
 
     if (isNumeric(url.plan) and url.plan gt 0) {
