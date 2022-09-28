@@ -67,8 +67,8 @@ component displayname="Application" output="false" hint="Handle the application.
         // Load language struct and save it into the application scope
         application.langStruct = application.objGlobal.initLanguages();
 
-        // Load system setting struct and save it into the application scope
-        (hint: the custom variables we save into a session while login) --->
+        /* Load system setting struct and save it into the application scope
+        (hint: the custom variables we save into a session while login) */
         application.systemSettingStruct = application.objGlobal.initSystemSettings();
 
         return true;
