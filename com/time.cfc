@@ -12,7 +12,11 @@ component displayname="time" output="false" {
             variables.customerID = arguments.customerID;
             local.countryID = application.objCustomer.getCustomerData(arguments.customerID).countryID;
 
-            variables.timezoneID = (local.countryID gt 0 ? application.objGlobal.getCountry(local.countryID).intTimezoneID : application.objCustomer.getCustomerData(arguments.customerID).timezoneID);
+            variables.timezoneID = (
+                local.countryID gt 0 
+                ? application.objGlobal.getCountry(local.countryID).intTimezoneID 
+                : application.objCustomer.getCustomerData(arguments.customerID).timezoneID
+            );
 
             if (!isNumeric(variables.timezoneID) or variables.timezoneID eq 0) {
                 variables.timezoneID = 31;

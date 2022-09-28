@@ -62,7 +62,11 @@ component displayname="payrexx" output="false" {
 
             case "GET":
 
-                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature);
+                local.callingURL = (
+                    isNumeric(local.thisID) 
+                    ? variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature 
+                    : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature
+                );
 
                 cfhttp( url=local.callingURL, result="httpRes", method="GET" ) {};
 
@@ -71,7 +75,11 @@ component displayname="payrexx" output="false" {
 
             case "POST":
 
-                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance);
+                local.callingURL = (
+                    isNumeric(local.thisID) 
+                    ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance 
+                    : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance
+                );
 
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
@@ -86,7 +94,11 @@ component displayname="payrexx" output="false" {
 
             case "DEL":
 
-                local.callingURL = (isNumeric(local.thisID) ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance);
+                local.callingURL = (
+                    isNumeric(local.thisID) 
+                    ? variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance 
+                    : variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance
+                );
 
                 local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 

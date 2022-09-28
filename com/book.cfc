@@ -84,7 +84,11 @@ component displayname="book" output="false" {
         local.objPrices = new com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
 
 
-        local.currencyID = (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID) ? local.bookingData.currencyID : getCurrency().id);
+        local.currencyID = (
+            structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID) 
+            ? local.bookingData.currencyID 
+            : getCurrency().id
+        );
 
 
         // Special settings for plans

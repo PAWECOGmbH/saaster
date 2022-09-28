@@ -47,18 +47,62 @@ component displayname="invoices" output="false" {
             return local.argsReturnValue;
         }
 
-        local.userID = (structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID) ? invoiceData.userID : "");
-        local.bookingID = (structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID) ? invoiceData.bookingID : 0);
+        local.userID = (
+            structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID) 
+            ? invoiceData.userID 
+            : ""
+        );
+        local.bookingID = (
+            structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID) 
+            ? invoiceData.bookingID 
+            : 0
+        );
         local.invoiceNumber = createInvoiceNumber(local.customerID);
-        local.prefix = (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix)) ? left(invoiceData.prefix, 20) : application.objGlobal.getSetting('settingInvoicePrefix'));
-        local.title = (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title)) ? left(invoiceData.title, 50) : "");
-        local.invoiceDate = (structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate) ? invoiceData.invoiceDate : createODBCDate(now()));
-        local.dueDate = (structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate) ? invoiceData.dueDate : createODBCDate(now()+30));
-        local.currency = (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency)) ? left(invoiceData.currency, 3) : application.objGlobal.getDefaultCurrency().iso);
-        local.isNet = (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet) ? invoiceData.isNet : application.objGlobal.getSetting('settingInvoiceNet'));
-        local.paymentStatusID = (structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0 ? invoiceData.paymentStatusID : 1);
-        local.vatType = (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0 ? invoiceData.vatType : application.objGlobal.getSetting('settingStandardVatType'));
-        local.language = (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language)) ? invoiceData.language : application.objGlobal.getDefaultLanguage().iso);
+        local.prefix = (
+            structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix)) 
+            ? left(invoiceData.prefix, 20) 
+            : application.objGlobal.getSetting('settingInvoicePrefix')
+        );
+        local.title = (
+            structKeyExists(invoiceData, "title") and len(trim(invoiceData.title)) 
+            ? left(invoiceData.title, 50) 
+            : ""
+        );
+        local.invoiceDate = (
+            structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate) 
+            ? invoiceData.invoiceDate 
+            : createODBCDate(now())
+        );
+        local.dueDate = (
+            structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate) 
+            ? invoiceData.dueDate 
+            : createODBCDate(now()+30)
+        );
+        local.currency = (
+            structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency)) 
+            ? left(invoiceData.currency, 3) 
+            : application.objGlobal.getDefaultCurrency().iso
+        );
+        local.isNet = (
+            structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet) 
+            ? invoiceData.isNet 
+            : application.objGlobal.getSetting('settingInvoiceNet')
+        );
+        local.paymentStatusID = (
+            structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0 
+            ? invoiceData.paymentStatusID 
+            : 1
+        );
+        local.vatType = (
+            structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0 
+            ? invoiceData.vatType 
+            : application.objGlobal.getSetting('settingStandardVatType')
+        );
+        local.language = (
+            structKeyExists(invoiceData, "language") and len(trim(invoiceData.language)) 
+            ? invoiceData.language 
+            : application.objGlobal.getDefaultLanguage().iso
+        );
         
         if (local.vatType eq 1) {
             local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
@@ -127,14 +171,46 @@ component displayname="invoices" output="false" {
         }
 
         local.customerID = new com.invoices().getInvoiceData(local.invoiceID).customerID;
-        local.userID = (structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID) ? invoiceData.userID : "");
-        local.title = (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title)) ? left(invoiceData.title, 50) : "");
-        local.invoiceDate = (structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate) ? invoiceData.invoiceDate : createODBCDate(now()));
-        local.dueDate = (structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate) ? invoiceData.dueDate : createODBCDate(now()+30));
-        local.currency = (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency)) ? left(invoiceData.currency, 3) : IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD'));
-        local.isNet = (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet) ? invoiceData.isNet : application.objGlobal.getSetting('settingStandardNet'));
-        local.vatType = (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0 ? invoiceData.vatType : application.objGlobal.getSetting('settingStandardVatType'));
-        local.language = (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language)) ? invoiceData.language : application.objGlobal.getDefaultLanguage().iso);
+        local.userID = (
+            structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID) 
+            ? invoiceData.userID 
+            : ""
+        );
+        local.title = (
+            structKeyExists(invoiceData, "title") and len(trim(invoiceData.title)) 
+            ? left(invoiceData.title, 50) 
+            : ""
+        );
+        local.invoiceDate = (
+            structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate) 
+            ? invoiceData.invoiceDate 
+            : createODBCDate(now())
+        );
+        local.dueDate = (
+            structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate) 
+            ? invoiceData.dueDate 
+            : createODBCDate(now()+30)
+        );
+        local.currency = (
+            structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency)) 
+            ? left(invoiceData.currency, 3) 
+            : IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD')
+        );
+        local.isNet = (
+            structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet) 
+            ? invoiceData.isNet 
+            : application.objGlobal.getSetting('settingStandardNet')
+        );
+        local.vatType = (
+            structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0 
+            ? invoiceData.vatType 
+            : application.objGlobal.getSetting('settingStandardVatType')
+        );
+        local.language = (
+            structKeyExists(invoiceData, "language") and len(trim(invoiceData.language)) 
+            ? invoiceData.language 
+            : application.objGlobal.getDefaultLanguage().iso
+        );
 
         
         // Total text
@@ -296,13 +372,41 @@ component displayname="invoices" output="false" {
 
                 local.thisPosition++;
 
-                local.title = (structKeyExists(pos, "title") and len(trim(pos.title)) ? left(pos.title, 255) : "");
-                local.description = (structKeyExists(pos, "description") and len(trim(pos.description)) ? left(pos.description, 1000) : "");
-                local.single_price = (structKeyExists(pos, "price") and isNumeric(pos.price) ? pos.price : 0);
-                local.quantity = (structKeyExists(pos, "quantity") and isNumeric(pos.quantity) ? pos.quantity : 1);
-                local.unit = (structKeyExists(pos, "unit") and len(trim(pos.unit)) ? left(pos.unit, 20) : "");
-                local.discountPercent = (structKeyExists(pos, "discountPercent") and isNumeric(pos.discountPercent) ? pos.discountPercent : 0);
-                local.vat = (structKeyExists(pos, "vat") and isNumeric(pos.vat) ? pos.vat : 0);
+                local.title = (
+                    structKeyExists(pos, "title") and len(trim(pos.title)) 
+                    ? left(pos.title, 255) 
+                    : ""
+                );
+                local.description = (
+                    structKeyExists(pos, "description") and len(trim(pos.description)) 
+                    ? left(pos.description, 1000) 
+                    : ""
+                );
+                local.single_price = (
+                    structKeyExists(pos, "price") and isNumeric(pos.price) 
+                    ? pos.price 
+                    : 0
+                );
+                local.quantity = (
+                    structKeyExists(pos, "quantity") and isNumeric(pos.quantity) 
+                    ? pos.quantity 
+                    : 1
+                );
+                local.unit = (
+                    structKeyExists(pos, "unit") and len(trim(pos.unit)) 
+                    ? left(pos.unit, 20) 
+                    : ""
+                );
+                local.discountPercent = (
+                    structKeyExists(pos, "discountPercent") and isNumeric(pos.discountPercent) 
+                    ? pos.discountPercent 
+                    : 0
+                );
+                local.vat = (
+                    structKeyExists(pos, "vat") and isNumeric(pos.vat) 
+                    ? pos.vat 
+                    : 0
+                );
 
                 // Calculate discount (percent)
                 if (local.discountPercent gt 0) {
@@ -410,14 +514,46 @@ component displayname="invoices" output="false" {
             return local.argsReturnValue;
         }
 
-        local.title = (structKeyExists(arguments.invoicePosData, "title") and len(trim(arguments.invoicePosData.title)) ? left(arguments.invoicePosData.title, 255) : "");
-        local.description = (structKeyExists(arguments.invoicePosData, "description") and len(trim(arguments.invoicePosData.description)) ? left(arguments.invoicePosData.description, 1000) : "");
-        local.single_price = (structKeyExists(arguments.invoicePosData, "price") and isNumeric(arguments.invoicePosData.price) ? arguments.invoicePosData.price : 0);
-        local.quantity = (structKeyExists(arguments.invoicePosData, "quantity") and isNumeric(arguments.invoicePosData.quantity) ? arguments.invoicePosData.quantity : 1);
-        local.unit = (structKeyExists(arguments.invoicePosData, "unit") and len(trim(arguments.invoicePosData.unit)) ? left(arguments.invoicePosData.unit, 20) : "");
-        local.discountPercent = (structKeyExists(arguments.invoicePosData, "discountPercent") and isNumeric(arguments.invoicePosData.discountPercent) ? arguments.invoicePosData.discountPercent : 0);
-        local.vat = (structKeyExists(arguments.invoicePosData, "vat") and isNumeric(arguments.invoicePosData.vat) ? arguments.invoicePosData.vat : 0);
-        local.pos = (structKeyExists(arguments.invoicePosData, "pos") and isNumeric(arguments.invoicePosData.pos) ? arguments.invoicePosData.pos : 0);
+        local.title = (
+            structKeyExists(arguments.invoicePosData, "title") and len(trim(arguments.invoicePosData.title)) 
+            ? left(arguments.invoicePosData.title, 255) 
+            : ""
+        );
+        local.description = (
+            structKeyExists(arguments.invoicePosData, "description") and len(trim(arguments.invoicePosData.description)) 
+            ? left(arguments.invoicePosData.description, 1000) 
+            : ""
+        );
+        local.single_price = (
+            structKeyExists(arguments.invoicePosData, "price") and isNumeric(arguments.invoicePosData.price) 
+            ? arguments.invoicePosData.price 
+            : 0
+        );
+        local.quantity = (
+            structKeyExists(arguments.invoicePosData, "quantity") and isNumeric(arguments.invoicePosData.quantity) 
+            ? arguments.invoicePosData.quantity 
+            : 1
+        );
+        local.unit = (
+            structKeyExists(arguments.invoicePosData, "unit") and len(trim(arguments.invoicePosData.unit)) 
+            ? left(arguments.invoicePosData.unit, 20) 
+            : ""
+        );
+        local.discountPercent = (
+            structKeyExists(arguments.invoicePosData, "discountPercent") and isNumeric(arguments.invoicePosData.discountPercent) 
+            ? arguments.invoicePosData.discountPercent 
+            : 0
+        );
+        local.vat = (
+            structKeyExists(arguments.invoicePosData, "vat") and isNumeric(arguments.invoicePosData.vat) 
+            ? arguments.invoicePosData.vat 
+            : 0
+        );
+        local.pos = (
+            structKeyExists(arguments.invoicePosData, "pos") and isNumeric(arguments.invoicePosData.pos) 
+            ? arguments.invoicePosData.pos 
+            : 0
+        );
         
 
         // Calculate discount (percent)

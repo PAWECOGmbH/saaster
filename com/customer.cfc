@@ -79,8 +79,16 @@ component displayname="customer" output="false" {
         local.address2 = application.objGlobal.cleanUpText(arguments.customerStruct.address2, 100) ?: '';
         local.zip = application.objGlobal.cleanUpText(arguments.customerStruct.zip, 10) ?: '';
         local.city = application.objGlobal.cleanUpText(arguments.customerStruct.city, 100) ?: '';
-        local.countryID = (structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID) ? arguments.customerStruct.countryID : 0);
-        local.timezoneID = (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0 ? arguments.customerStruct.timezoneID : application.objGlobal.getCountry(local.countryID).intTimezoneID);
+        local.countryID = (
+            structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID) 
+            ? arguments.customerStruct.countryID 
+            : 0
+        );
+        local.timezoneID = (
+            structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0 
+            ? arguments.customerStruct.timezoneID 
+            : application.objGlobal.getCountry(local.countryID).intTimezoneID
+        );
         local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100) ?: '';
         local.phone = application.objGlobal.cleanUpText(arguments.customerStruct.phone, 100) ?: '';
         local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100) ?: '';
