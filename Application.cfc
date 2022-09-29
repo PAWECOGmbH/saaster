@@ -27,6 +27,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.appOwner = variables.appOwner;
         application.fromEmail = variables.fromEmail;
         application.toEmail = variables.toEmail;
+        application.errorMail = variables.errorEmail;
         application.userTempImg = variables.userTempImg;
         if (variables.devDomain eq cgi.server_name) {
             application.environment = "dev";
@@ -51,6 +52,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
         application.objLanguage = new com.language();
+        application.objLog = new com.log();
         application.objSettings = new com.settings();
 
         // Save all choosable languages into a list

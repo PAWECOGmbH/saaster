@@ -1,5 +1,5 @@
 ### Test files ###
-test.cfm
+test.*
 
 ### Userdata folder ###
 userdata/**
@@ -12,4 +12,6 @@ config.cfm
 .cfconfig.json
 .env
 server.json
-test.json
+
+### Log files ###
+*.log
