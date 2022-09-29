@@ -86,6 +86,7 @@ if (structKeyExists(url, "add")) {
 
         objPayrexx = new com.payrexx();
         objPrices = new com.prices();
+        objCurrency = new com.currency();
 
         // Returning from Payrexx
         if (structKeyExists(url, "psp")) {
@@ -119,7 +120,7 @@ if (structKeyExists(url, "add")) {
             paymentStruct = structNew();
             paymentStruct['skipResultPage'] = true;
             paymentStruct['referenceId'] = session.customer_id;
-            paymentStruct['currency'] = objPrices.getCurrency().iso;
+            paymentStruct['currency'] = objCurrency.getCurrency().iso;
             paymentStruct['successRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=success";
             paymentStruct['failedRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=failed";
             paymentStruct['cancelRedirectUrl'] = "#application.mainURL#/account-settings/payment";
@@ -237,13 +238,10 @@ if (structKeyExists(url, "pay")) {
 
                     objInvoice = new com.invoices();
                     insPayment = objInvoice.insertPayment(payment);
-                    anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
+                    anyLanguage = application.objLanguage.getAnyLanguage(session.lng).iso;
 
-                    // Overwrite the product structs
-                    newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
-                    session.currentPlan = newPlan;
-                    checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
-                    session.currentModules = checkModules;
+                    // Set plans and modules as well as the custom settings into a session
+                    application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                     getAlert('msgInvoicePaid', 'success');
 
@@ -275,7 +273,7 @@ if (structKeyExists(url, "pay")) {
             // Get webhook data
             objPayrexx = new com.payrexx();
             getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
-            anyLanguage = application.objGlobal.getAnyLanguage(session.lng).iso;
+            anyLanguage = application.objLanguage.getAnyLanguage(session.lng).iso;
 
             if (!getWebhook.recordCount) {
                 location url="#application.mainURL#/account-settings/payment" addtoken="false";
@@ -285,11 +283,8 @@ if (structKeyExists(url, "pay")) {
             chargeNow = new com.invoices().payInvoice(url.pay);
             if (chargeNow.success) {
 
-                // Overwrite the product structs
-                newPlan = new com.plans(language=anyLanguage).getCurrentPlan(session.customer_id);
-                session.currentPlan = newPlan;
-                checkModules = new com.modules(language=anyLanguage).getBookedModules(session.customer_id);
-                session.currentModules = checkModules;
+                // Set plans and modules as well as the custom settings into a session
+                application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                 getAlert('msgInvoicePaid');
 

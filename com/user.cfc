@@ -190,7 +190,7 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "language")) {
             local.language = arguments.userStruct.language;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.userStruct, "superadmin")) {
             local.superadmin = arguments.userStruct.superadmin;
@@ -395,7 +395,7 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "language")) {
             local.language = arguments.userStruct.language;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.userStruct, "admin")) {
             local.admin = arguments.userStruct.admin;
@@ -536,7 +536,7 @@ component displayname="user" output="false" {
 
                 }
 
-                getTrans = application.objGlobal.getTrans;
+                getTrans = application.objLanguage.getTrans;
 
 
                 <!--- Replacing variables --->
@@ -612,7 +612,7 @@ component displayname="user" output="false" {
 
     public boolean function MailChangeConfirm(required string useremail, required numeric mailuserID){
 
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
 
         qUsersMailCheck = queryExecute(
             options = {datasource = application.datasource},

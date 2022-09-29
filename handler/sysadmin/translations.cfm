@@ -1,7 +1,7 @@
 
 <cfscript>
 
-qAllLanguages = application.objGlobal.getAllLanguages();
+qAllLanguages = application.objLanguage.getAllLanguages();
 
 
 if (structKeyExists(form, "new_variable")) {
@@ -133,9 +133,6 @@ if (structKeyExists(form, "edit_syst_variable")) {
 
 
 if (structKeyExists(form, "bulk_translate")) {
-/*     dump("Bulk transate!");
-    dump(form);
-    abort; */
 
     param name="form.apiKey" default=0;
     param name="form.apiType" default=0;
@@ -144,16 +141,12 @@ if (structKeyExists(form, "bulk_translate")) {
 
     // Translate
     if (form.apiKey neq 0 and form.fromLang neq 0 and form.toLang neq 0) {
-        /* try { */
+
             // Set "Pro" or "Free" API-URL
             deepLPro = "https://api.deepl.com/v2/translate?auth_key=";
             deepLFree = "https://api-free.deepl.com/v2/translate?auth_key=";
 
-            if(form.apiType eq 0){
-                deeplURL = deepLFree;
-            }else{
-                deeplURL = deepLPro;
-            }
+            deeplURL = form.apiType eq 0 ? deepLFree : deepLPro;
 
             // Test if key is valid
             deeplTest = deeplURL & form.apiKey;
@@ -211,12 +204,6 @@ if (structKeyExists(form, "bulk_translate")) {
 
             getAlert('The translation finished successfully!');
             location url="#application.mainURL#/sysadmin/translations?tr=bulk" addtoken="false";
-
-/*         } catch(any e){
-
-            getAlert('Something went wrong...', 'danger');
-            location url="#application.mainURL#/sysadmin/translations?tr=bulk" addtoken="false";
-        } */
     }
 }
 

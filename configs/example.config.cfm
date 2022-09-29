@@ -45,6 +45,7 @@ variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will no
 variables.documentsFileTypes = ["pdf"];
 
 
+
 // ####################################
 //  OPERATOR SETTINGS
 // ####################################
@@ -94,6 +95,16 @@ variables.payrexxDesignID = "";
 
 // Webhook directory for developing environment
 variables.payrexxWebhookDev = "";
+
+
+
+// ####################################
+//  Footer text variable
+// ####################################
+
+cfsavecontent (variable="variables.footerText") {
+    echo("<div><p>Open source software running under the <a href='https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt' target='_blank'>MIT license</a> - #dateFormat(now(), 'yyyy')# by #variables.appOwner#</p></div>");
+}
 
 
 </cfscript>

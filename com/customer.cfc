@@ -1,7 +1,7 @@
 
 component displayname="customer" output="false" {
 
-    <!--- Get the users data using an ID --->
+    // Get the users data using an ID
     public query function getUserDataByID(required numeric userID) {
 
         local.userQuery = queryNew('');
@@ -65,10 +65,10 @@ component displayname="customer" output="false" {
 
 
 
-    <!--- Update customer --->
+    // Update customer
     public struct function updateCustomer(required struct customerStruct, required numeric customerID) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -214,7 +214,7 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Insert tenant (only the most important data) --->
+    // Insert tenant (only the most important data)
     public struct function insertTenant(required struct tenantStruct) {
 
         <!--- Default variables --->
@@ -225,7 +225,7 @@ component displayname="customer" output="false" {
         param name="local.company_name" default="";
         param name="local.contact_person" default="";
 
-        <!--- Needed values --->
+        // Needed values
         if (!structKeyExists(tenantStruct, "customerID") or !isNumeric(tenantStruct.customerID)) {
             local.argsReturnValue['message'] = "customerID not valid!";
             return local.argsReturnValue;
@@ -291,7 +291,7 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Get all tenants --->
+    // Get all tenants
     public query function getAllTenants(required numeric userID) {
 
         if (arguments.userID gt 0) {
@@ -319,13 +319,14 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Get customer data --->
+    // Get customer data
     public struct function getCustomerData(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
 
             local.objPrices = new com.prices();
             local.objInvoices = new com.invoices();
+            local.objCurrency = new com.currency();
             local.customerStruct = structNew();
 
             local.qCustomer = queryExecute(
@@ -371,8 +372,8 @@ component displayname="customer" output="false" {
                 local.country = application.objGlobal.getCountry(local.qCustomer.intCountryID);
                 local.countryName = local.country.strCountryName;
                 if (len(trim(local.country.strCurrency))) {
-                    local.language = application.objGlobal.getAnyLanguage(local.country.intLanguageID).iso;
-                    local.currency = local.objPrices.getCurrency(local.country.strCurrency);
+                    local.language = application.objLanguage.getAnyLanguage(local.country.intLanguageID).iso;
+                    local.currency = local.objCurrency.getCurrency(local.country.strCurrency);
                     if (isStruct(local.currency) and !structIsEmpty(local.currency)) {
                         if (local.currency.active) {
                             local.customerStruct['currencyStruct'] = local.currency;
@@ -387,7 +388,7 @@ component displayname="customer" output="false" {
                 if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
                     local.lastInvoice = arrayLast(invoiceArray);
                     local.language = local.lastInvoice.invoiceLanguage;
-                    local.currency = objPrices.getCurrency(lastInvoice.invoiceCurrency);
+                    local.currency = local.objCurrency.getCurrency(lastInvoice.invoiceCurrency);
                     if (local.currency.active) {
                         local.customerStruct['currencyStruct'] = local.currency;
                     }
@@ -396,13 +397,13 @@ component displayname="customer" output="false" {
 
             // If the currency is still empty, get default currency
             if (structIsEmpty(local.customerStruct.currencyStruct)) {
-                local.currency = objPrices.getCurrency();
+                local.currency = local.objCurrency.getCurrency();
                 local.customerStruct['currencyStruct'] = local.currency;
             }
 
             // Default language
             if (!len(trim(local.language))) {
-                local.language = application.objGlobal.getDefaultLanguage().iso;
+                local.language = application.objLanguage.getDefaultLanguage().iso;
             }
 
             local.customerStruct['language'] = local.language;
@@ -414,5 +415,78 @@ component displayname="customer" output="false" {
         }
 
     }
+
+
+    // Save the current plan, the current modules and also the custom settings into a session
+    public void function setProductSessions(required numeric customerID, required string language) {
+
+        // Save current plan into a session
+        checkPlan = new com.plans(language=arguments.language).getCurrentPlan(arguments.customerID);
+        session.currentPlan = checkPlan;
+
+        // Save current modules into a session
+        checkModules = new com.modules(language=arguments.language).getBookedModules(arguments.customerID);
+        session.currentModules = checkModules;
+
+        // Save custom settings struct into a session
+        session.customSettings = application.objSettings.getCustomSettings(arguments.customerID);
+
+    }
+
+
+    // Delete account right now
+    public boolean function deleteAccount(required numeric customerID) {
+
+        if (arguments.customerID gt 0) {
+
+            // Get all users of the customer
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT users.strPhoto, customers.strLogo
+                    FROM users
+                    INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
+                    WHERE users.intCustomerID = :customerID
+                "
+            )
+
+            // Loop over the users and delete pictures
+            loop query="local.qCustomer" {
+                if (fileExists(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"))) {
+                    fileDelete(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"));
+                }
+            }
+
+            // Delete the customers logo
+            if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
+                fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
+            }
+
+
+            // Delete the customer (the foreign key does the rest)
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    DELETE FROM customers
+                    WHERE intCustomerID = :customerID
+                "
+            )
+
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+
 
 }

@@ -44,7 +44,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <p>Here you can create your own settings. These settings are made available to an admin to set up his system and are not affected by any system updates.</p>
+                            <p>Here you can create your own settings. Note that there is currently no way for the customer to add value to these settings. You still have to design the settings page yourself. But you can use the existing tables of the database. Please read the documentation for more information.</p>
                             <div class="table-responsive">
                                 <table class="table table-vcenter card-table">
                                     <thead>

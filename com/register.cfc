@@ -31,7 +31,7 @@ component displayname="customer" output="false" {
         if (structKeyExists(arguments.optinValues, "language")) {
             local.language = arguments.optinValues.language;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.optinValues, "newUUID")) {
             local.newUUID = arguments.optinValues.newUUID;
@@ -123,7 +123,7 @@ component displayname="customer" output="false" {
         if (structKeyExists(arguments.customerStruct, "strLanguage")) {
             local.language = arguments.customerStruct.strLanguage;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.customerStruct, "hash")) {
             local.hash = trim(arguments.customerStruct.hash);

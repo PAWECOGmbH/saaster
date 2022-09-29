@@ -1,6 +1,6 @@
 <cfscript>
 
-    <!--- Company edit --->
+    // Company edit
     if (structKeyExists(form, "edit_company_btn")) {
         param name="form.company" default="";
         param name="form.contact" default="";
@@ -17,7 +17,7 @@
         param name="form.billing_address" default="";
         param name="form.billing_info" default="";
 
-        <!--- Check whether the email is valid --->
+        // Check whether the email is valid 
         checkEmail = application.objGlobal.checkEmail(form.email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
@@ -32,7 +32,7 @@
             }
         }
 
-        <!--- Save the customer using a function --->
+        // Save the customer using a function
         objCustomerEdit = application.objCustomer.updateCustomer(form, form.edit_company_btn);
 
         if (objCustomerEdit.success) {
@@ -50,7 +50,7 @@
         param name="form.user_id " default="";
         param name="form.email" default="";
 
-        <!--- Check whether the email is valid --->
+        // Check whether the email is valid
         checkEmail = application.objGlobal.checkEmail(form.email);
 
         if (!checkEmail) {
@@ -58,7 +58,7 @@
             location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
         }
 
-        <!--- Check for already registered email --->
+        // Check for already registered email
         qCheckDouble = queryExecute(
             options = {datasource = application.datasource},
             params = {

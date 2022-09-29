@@ -1,7 +1,7 @@
 
 <cfscript>
 
-<!--- Cancel plan or revoke cancellation --->
+// Cancel plan or revoke cancellation
 if (structKeyExists(url, "plan")) {
 
     if (isNumeric(url.plan) and url.plan gt 0) {
@@ -32,11 +32,8 @@ if (structKeyExists(url, "plan")) {
 
         }
 
-        <!--- Save current plan into a session --->
-        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
-
-        <!--- Save current module array into a session --->
-        session.currentModules = new com.modules().getBookedModules(session.customer_id);
+        // Set plans and modules as well as the custom settings into a session
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings" addtoken="false";
 
@@ -45,7 +42,7 @@ if (structKeyExists(url, "plan")) {
 }
 
 
-<!--- Cancel module or revoke cancellation --->
+// Cancel module or revoke cancellation
 if (structKeyExists(url, "module")) {
 
     if (isNumeric(url.module) and url.module gt 0) {
@@ -76,17 +73,51 @@ if (structKeyExists(url, "module")) {
 
         }
 
-        <!--- Save current plan into a session --->
-        session.currentPlan = new com.plans().getCurrentPlan(session.customer_id);
-
-        <!--- Save current module array into a session --->
-        session.currentModules = new com.modules().getBookedModules(session.customer_id);
+        // Set plans and modules as well as the custom settings into a session
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
 
     }
 
 }
+
+
+// Delete the account right now
+if (structKeyExists(form, "delete")) {
+
+    if (form.delete eq session.customer_id) {
+
+        param name="form.email" default="";
+        param name="form.password" default="";
+
+        objUserLogin = application.objUser.checkLogin(argumentCollection = form);
+
+        if (isStruct(objUserLogin)) {
+
+            if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
+
+                deleteAccount = application.objCustomer.deleteAccount(session.customer_id);
+                if (deleteAccount) {
+                    structClear(SESSION);
+                    onSessionStart();
+                    location url="#application.mainURL#?logout" addtoken="false";
+                }
+
+            }
+
+        }
+
+        getAlert('alertWrongLogin', 'danger');
+        location url="#application.mainURL#/account-settings/company" addtoken="false";
+
+    }
+
+}
+
+
+
+
 
 location url="#application.mainURL#/dashboard" addtoken="false";
 

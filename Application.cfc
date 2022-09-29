@@ -39,7 +39,7 @@ component displayname="Application" output="false" hint="Handle the application.
             application.mainURL = variables.mainURL;
         }
 
-        <!--- Payrexx initialising --->
+        // Payrexx initialising
         local.payrexxStruct = structNew();
         local.payrexxStruct['payrexxAPIurl'] = variables.payrexxAPIurl;
         local.payrexxStruct['payrexxAPIinstance'] = variables.payrexxAPIinstance;
@@ -47,14 +47,15 @@ component displayname="Application" output="false" hint="Handle the application.
         application.payrexxStruct = local.payrexxStruct;
 
 
-        <!--- Object initialising --->
+        // Object initialising
         application.objGlobal = new com.global();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
         application.objLanguage = new com.language();
         application.objLog = new com.log();
+        application.objSettings = new com.settings();
 
-        <!--- Save all choosable languages into a list --->
+        // Save all choosable languages into a list
         local.qLanguages = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -66,12 +67,12 @@ component displayname="Application" output="false" hint="Handle the application.
         )
         application.allLanguages = ValueList(local.qLanguages.lang);
 
-        <!--- Load language struct and save it into the application scope --->
-        application.langStruct = application.objGlobal.initLanguages();
+        // Load language struct and save it into the application scope
+        application.langStruct = application.objLanguage.initLanguages();
 
-        <!--- Load system setting struct and save it into the application scope
-        (hint: the custom variables we save into a session while login) --->
-        application.systemSettingStruct = application.objGlobal.initSystemSettings();
+        // Load system setting struct and save it into the application scope
+        // (hint: the custom variables we save into a session while login)
+        application.systemSettingStruct = application.objSettings.initSystemSettings();
 
         return true;
 
@@ -80,14 +81,14 @@ component displayname="Application" output="false" hint="Handle the application.
 
     public void function onSessionStart() {
 
-        <!--- Check browser language --->
+        // Check browser language
         local.browserLng = application.objLanguage.getBrowserLng(cgi.http_accept_language).lng;
 
-        <!--- Check whether the language is active in project --->
+        // Check whether the language is active in project
         local.checkLng = findNoCase(local.browserLng, application.allLanguages);
 
-        <!--- Save the language into the session --->
-        session.lng = local.checkLng ? local.browserLng : application.objGlobal.getDefaultLanguage().iso;
+        // Save the language into the session
+        session.lng = local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso;
 
         return;
 
@@ -97,39 +98,39 @@ component displayname="Application" output="false" hint="Handle the application.
 
     public boolean function onRequestStart(required string TargetPage) {
 
-        <!--- Reinit Application --->
+        // Reinit Application
         if (structKeyExists(url, "reinit") and url.reinit eq 1) {
             structClear(APPLICATION);
             onApplicationStart();
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
-        <!--- Reinit Session --->
+        // Reinit Session
         if (structKeyExists(url, "reinit") and url.reinit eq 2) {
             structClear(SESSION);
             onSessionStart();
         }
 
-        <!--- Reinit languages --->
+        // Reinit languages
         if (structKeyExists(url, "reinit") and url.reinit eq 3) {
             structDelete(session, "langStruct");
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
-        <!--- Reinit Session AND Application AND languages --->
+        // Reinit Session AND Application AND languages
         if (structKeyExists(url, "reinit") and url.reinit eq 4) {
             structClear(SESSION);
             structClear(APPLICATION);
             onApplicationStart();
             onSessionStart();
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
 
-        <!--- Set the locale of the browser --->
+        // Set the locale of the browser
         local.browserLocale = application.objLanguage.getBrowserLng(cgi.http_accept_language).code;
 
-        <!--- Set customers locale using his browser --->
+        // Set customers locale using his browser
         setLocale(application.objLanguage.toLocale(language=local.browserLocale));
 
         return true;
@@ -139,10 +140,10 @@ component displayname="Application" output="false" hint="Handle the application.
 
     public boolean function onRequest(required string TargetPage) {
 
-        <!--- Create SEF URL --->
+        // Create SEF URL
         thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
 
-        <!--- Change language --->
+        // Change language
         if (structKeyExists(url, "l")) {
             qCheckLanguage = queryExecute(
                 options = {datasource = application.datasource},
@@ -157,25 +158,28 @@ component displayname="Application" output="false" hint="Handle the application.
             )
             if (qCheckLanguage.cnt gt 0) {
                 session.lng = url.l;
-                application.langStruct = application.objGlobal.initLanguages();
+                application.langStruct = application.objLanguage.initLanguages();
+                if (structKeyExists(session, "customer_id")) {
+                    application.objCustomer.setProductSessions(session.customer_id, session.lng);
+                }
             }
 
         }
 
 
-        <!--- Global variables --->
-        getTrans = application.objGlobal.getTrans;
+        // Global variables
+        getTrans = application.objLanguage.getTrans;
         getAlert = application.objGlobal.getAlert;
 
 
-        <!--- Is there a redirect coming in url? --->
+        // Is there a redirect coming in url?
         if (structKeyExists(url, "redirect")) {
             session.redirect = application.mainURL & "/" & url.redirect;
         } else if (structKeyExists(url, "del_redirect")) {
             structDelete(session, "redirect");
         }
 
-        <!--- If there is no session, send to login --->
+        // If there is no session, send to login
         if (!findNoCase("setup", cgi.script_name)
             and !findNoCase("frontend", thiscontent.thisPath)
             and !findNoCase("register", thiscontent.thisPath)
@@ -189,7 +193,7 @@ component displayname="Application" output="false" hint="Handle the application.
         }
 
 
-        <!--- Check whether the user has access to corresponding sections --->
+        // Check whether the user has access to corresponding sections
         if (structKeyExists(session, "customer_id")) {
 
             // More global variables (with customer session)

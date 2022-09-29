@@ -1,13 +1,19 @@
 
 component displayname="notifications" output="false" {
 
-    <!--- Create a notification entry --->
+    // Create a notification entry
     public struct function insertNotification(required struct notiStruct) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
+
+        local.userID = 0;
+        local.title_var = "";
+        local.descr_var = "";
+        local.link = "";
+        local.linktext_var = "";
 
         if (structKeyExists(arguments.notiStruct, "customerID") and isNumeric(arguments.notiStruct.customerID)) {
             local.customerID = arguments.notiStruct.customerID;
@@ -17,29 +23,18 @@ component displayname="notifications" output="false" {
         }
         if (structKeyExists(arguments.notiStruct, "userID") and isNumeric(arguments.notiStruct.userID)) {
             local.userID = arguments.notiStruct.userID;
-        } else {
-            local.userID = 0;
         }
-
         if (structKeyExists(arguments.notiStruct, "title_var") and (len(trim(arguments.notiStruct.title_var)))) {
             local.title_var = left((trim(arguments.notiStruct.title_var)), 50);
-        } else {
-            local.title_var = "";
         }
         if (structKeyExists(arguments.notiStruct, "descr_var") and (len(trim(arguments.notiStruct.descr_var)))) {
             local.descr_var = left((trim(arguments.notiStruct.descr_var)), 50);
-        } else {
-            local.descr_var = "";
         }
         if (structKeyExists(arguments.notiStruct, "link") and (len(trim(arguments.notiStruct.link)))) {
             local.link = left(trim(arguments.notiStruct.link), 255);
-        } else {
-            local.link = "";
         }
         if (structKeyExists(arguments.notiStruct, "linktext_var") and (len(trim(arguments.notiStruct.linktext_var)))) {
             local.linktext_var = left((trim(arguments.notiStruct.linktext_var)), 50);
-        } else {
-            local.linktext_var = "";
         }
 
         try {

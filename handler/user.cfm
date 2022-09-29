@@ -2,7 +2,7 @@
 
 iniUserObj = application.objUser;
 
-<!--- User edit --->
+// User edit
 if (structKeyExists(form, "edit_profile_btn")) {
 
     param name="form.salutation" default="";
@@ -46,7 +46,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
     }
     
 
-    <!--- Check whether the email is valid --->
+    // Check whether the email is valid
     checkEmail = application.objGlobal.checkEmail(form.email);
 
     if (!checkEmail) {
@@ -54,7 +54,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
 
-    <!--- Check for already registered email --->
+    // Check for already registered email
     qCheckDouble = queryExecute(
         options = {datasource = application.datasource},
         params = {
@@ -77,14 +77,14 @@ if (structKeyExists(form, "edit_profile_btn")) {
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
 
-    <!--- Check if the email is changed --->
+    // Check if the email is changed
     if(thisReferer eq 'my-profile'){
         mailconfirm = iniUserObj.MailChangeConfirm(form.email, thisUserID);
     }else{
         mailconfirm = false
     }
 
-    <!--- Save the user using a function --->
+    // Save the user using a function
     objUserEdit = iniUserObj.updateUser(form, thisUserID, mailconfirm);
     
     if (objUserEdit.success) {
@@ -106,7 +106,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
 
 
-<!--- User new --->
+// User new
 if (structKeyExists(form, "user_new_btn")) {
 
     param name="form.salutation" default="";
@@ -143,7 +143,7 @@ if (structKeyExists(form, "user_new_btn")) {
     session.phone = form.phone;
     session.mobile = form.mobile;
 
-    <!--- Check whether the email is valid --->
+    // Check whether the email is valid
     checkEmail = application.objGlobal.checkEmail(form.email);
 
     if (!checkEmail) {
@@ -151,7 +151,7 @@ if (structKeyExists(form, "user_new_btn")) {
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
-    <!--- Email address already used? --->
+    // Email address already used?
     qCheckEmail = queryExecute(
         options = {datasource = application.datasource},
         params = {
@@ -169,18 +169,18 @@ if (structKeyExists(form, "user_new_btn")) {
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
-    <!--- Save the user using a function --->
+    // Save the user using a function
     objUserInsert = application.objUser.insertUser(form, session.customer_id);
 
 
     if (objUserInsert.success) {
 
 
-        <!--- Send the invitation link using a function --->
+        // Send the invitation link using a function
         objInvitation = application.objUser.sendInvitation(objUserInsert.newUserID, session.user_id);
 
 
-        <!--- Clear sessions --->
+        // Clear sessions
         structDelete(session, "salutation");
         structDelete(session, "first_name");
         structDelete(session, "last_name");
@@ -201,7 +201,7 @@ if (structKeyExists(form, "user_new_btn")) {
 }
 
 
-<!--- Photo upload --->
+// Photo upload
 if (structKeyExists(form, "photo_upload_btn")) {
 
     fileStruct = structNew();
@@ -229,7 +229,7 @@ if (structKeyExists(form, "photo_upload_btn")) {
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
-        <!--- Sending the data into a function --->
+        // Sending the data into a function
         fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
         if (fileUpload.success) {
@@ -266,7 +266,7 @@ if (structKeyExists(form, "photo_upload_btn")) {
 }
 
 
-<!--- Delete photo --->
+// Delete photo
 if (structKeyExists(url, "del_photo")) {
 
     qPhoto = queryExecute(
@@ -283,7 +283,7 @@ if (structKeyExists(url, "del_photo")) {
 
     if (qPhoto.recordCount and len(trim(qPhoto.strPhoto))) {
 
-        <!--- Delete photo using a function --->
+        // Delete photo using a function
         application.objGlobal.deleteFile(expandPath("/userdata/images/users/#qPhoto.strPhoto#"));
 
         queryExecute(
@@ -304,13 +304,13 @@ if (structKeyExists(url, "del_photo")) {
 
 }
 
-<!--- Change password --->
+// Change password
 if (structKeyExists(form, "change_pw_btn")) {
 
     param name="form.password" default="";
     param name="form.password2" default="";
 
-    <!--- Check passwords first --->
+    // Check passwords first
     if (len(trim(form.password)) and len(trim(form.password2))) {
         if (not trim(form.password) eq trim(form.password2)) {
             getAlert('alertPasswordsNotSame', 'warning');
@@ -336,7 +336,7 @@ if (structKeyExists(form, "change_pw_btn")) {
         "
     )
 
-    <!--- Change it now --->
+    // Change it now
     changePW = application.objUser.changePassword(form.password, newUUID);
     if (changePW.success) {
         getAlert('alertPasswordResetSuccessfully', 'success');
@@ -349,7 +349,7 @@ if (structKeyExists(form, "change_pw_btn")) {
 }
 
 
-<!--- Delete user --->
+// Delete user
 if (structKeyExists(url, "delete")) {
 
     param name="url.delete" default="0";
@@ -359,7 +359,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
-    <!--- User data of the user to be deleted --->
+    // User data of the user to be deleted
     getUserData = application.objCustomer.getUserDataByID(url.delete);
 
     if (!isQuery(getUserData) or !getUserData.recordCount) {
@@ -367,7 +367,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
-    <!--- Check whether the user is allowed to delete --->
+    // Check whether the user is allowed to delete
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getUserData.intCustomerID);
 
     if (!checkTenantRange) {
@@ -375,7 +375,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
-    <!--- Delete users photo --->
+    // Delete users photo
     if (len(trim(getUserData.strPhoto))) {
 
         photoPath = expandPath('../userdata/images/users/#getUserData.strPhoto#');
@@ -383,7 +383,7 @@ if (structKeyExists(url, "delete")) {
 
     }
 
-    <!--- Delete user --->
+    // Delete user
     queryExecute(
         options = {datasource = application.datasource, result="getAnswer"},
         params = {
@@ -406,10 +406,10 @@ if (structKeyExists(url, "delete")) {
 }
 
 
-<!--- Send invitation link --->
+// Send invitation link
 if (structKeyExists(url, "invit")) {
 
-    <!--- User data of the user to be edited --->
+    // User data of the user to be edited
     getUserData = application.objCustomer.getUserDataByID(url.invit);
 
     if (!isQuery(getUserData) or !getUserData.recordCount) {
@@ -417,7 +417,7 @@ if (structKeyExists(url, "invit")) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
-    <!--- Check whether the user is allowed to edit --->
+    // Check whether the user is allowed to edit
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getUserData.intCustomerID);
     if (!checkTenantRange) {
         getAlert('You are not allowed to edit this user!', 'danger');

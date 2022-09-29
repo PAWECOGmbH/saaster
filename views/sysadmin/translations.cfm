@@ -2,7 +2,7 @@
     param name="session.search" default="" type="string";
     param name="url.tr" default="custom" type="string";
     param name="session.visTrans" default="0" type="numeric";
-    param name="session.displayLanguage" default="#application.objGlobal.getDefaultLanguage().iso#" type="string";
+    param name="session.displayLanguage" default="#application.objLanguage.getDefaultLanguage().iso#" type="string";
 
     s_badge_custom = "";
     s_badge_system = "";

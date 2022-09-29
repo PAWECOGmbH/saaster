@@ -18,12 +18,12 @@ component displayname="payrexx" output="false" {
         } else {
             local.sql_default = "";
         }
-
         if (structKeyExists(arguments, "includingFailed") and arguments.includingFailed eq "yes") {
             local.sql_failed = "";
         } else {
             local.sql_failed = "AND blnFailed = 0";
-        }
+        }  
+
 
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
@@ -120,15 +120,12 @@ component displayname="payrexx" output="false" {
 
         }
 
-
-
-
         if (httpRes.status_text eq "OK" and isJSON(httpRes.filecontent)) {
             local.respond = deserializeJSON(httpRes.filecontent);
         } else {
             local.respond = httpRes.errordetail;
         }
-
+    
         return local.respond;
 
     }

@@ -1,7 +1,7 @@
 
 <cfscript>
 
-<!--- Company edit --->
+// Company edit 
 if (structKeyExists(form, "edit_company_btn")) {
 
     param name="form.company" default="";
@@ -36,7 +36,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     session.billing_address = form.billing_address;
     session.billing_info = form.billing_info;
 
-    <!--- Check whether the email is valid --->
+    // Check whether the email is valid
     checkEmail = application.objGlobal.checkEmail(form.email);
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
@@ -51,7 +51,7 @@ if (structKeyExists(form, "edit_company_btn")) {
         }
     }
 
-    <!--- Save the customer using a function --->
+    // Save the customer using a function
     objCustomerEdit = application.objCustomer.updateCustomer(form, session.customer_id);
 
     if (objCustomerEdit.success) {
@@ -60,7 +60,7 @@ if (structKeyExists(form, "edit_company_btn")) {
         getAlert(objCustomerEdit.message, 'danger');
     }
 
-    <!--- Clear sessions --->
+    // Clear sessions
     structDelete(session, "company");
     structDelete(session, "contact");
     structDelete(session, "address");
@@ -83,7 +83,7 @@ if (structKeyExists(form, "edit_company_btn")) {
 }
 
 
-<!--- Logo upload --->
+// Logo upload
 if (structKeyExists(form, "logo_upload_btn")) {
 
     fileStruct = structNew();
@@ -111,7 +111,7 @@ if (structKeyExists(form, "logo_upload_btn")) {
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
-        <!--- Sending the data into a function --->
+        // Sending the data into a function
         fileUpload = application.objGlobal.uploadFile(fileStruct, variables.imageFileTypes);
 
         if (fileUpload.success) {
@@ -148,7 +148,7 @@ if (structKeyExists(form, "logo_upload_btn")) {
 }
 
 
-<!--- Delete logo --->
+// Delete logo
 if (structKeyExists(url, "del_logo")) {
 
     qLogo = queryExecute(
@@ -186,13 +186,13 @@ if (structKeyExists(url, "del_logo")) {
 }
 
 
-<!--- New tenant --->
+// New tenant
 if (structKeyExists(form, "new_tenant_btn")) {
 
     param name="form.company_name" default="";
     param name="form.contact_person" default="";
 
-    if (!len(trim(company_name)) or !len(trim(contact_person))) {
+    if (!len(trim(contact_person))) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -202,7 +202,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
     tenantStruct.customerID = session.customer_id;
     tenantStruct.userID = session.user_id;
 
-    <!--- Insert the tenant using a function --->
+    // Insert the tenant using a function
     insertTenant = application.objCustomer.insertTenant(tenantStruct);
 
     if (insertTenant.success) {
@@ -220,7 +220,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
 }
 
 
-<!--- Delete tenant --->
+// Delete tenant
 if (structKeyExists(url, "delete")) {
 
     param name="url.delete" default="0";
@@ -230,7 +230,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    <!--- User data of the user to be deleted --->
+    // User data of the user to be deleted
     getTenant = application.objCustomer.getCustomerData(url.delete);
 
     if (structIsEmpty(getTenant)) {
@@ -238,7 +238,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    <!--- Check whether the user is allowed to delete --->
+    // Check whether the user is allowed to delete
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.customerID);
 
     if (!checkTenantRange) {
@@ -246,7 +246,7 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    <!--- Delete users photo --->
+    // Delete users photo
     if (len(trim(getTenant.logo))) {
 
         photoPath = expandPath('../userdata/images/logos/#getTenant.logo#');
@@ -254,7 +254,7 @@ if (structKeyExists(url, "delete")) {
 
     }
 
-    <!--- Delete tenant --->
+    // Delete tenant
     queryExecute(
         options = {datasource = application.datasource, result="getAnswer"},
         params = {
@@ -277,7 +277,7 @@ if (structKeyExists(url, "delete")) {
 }
 
 
-<!--- Activate or deactivate tenant --->
+// Activate or deactivate tenant
 if (structKeyExists(url, "change_tenant")) {
 
     if (!isNumeric(url.change_tenant)) {
@@ -285,7 +285,7 @@ if (structKeyExists(url, "change_tenant")) {
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
-    <!--- User data of the user to be changed --->
+    // User data of the user to be changed
     getTenant = application.objCustomer.getCustomerData(url.change_tenant);
 
     if (structIsEmpty(getTenant)) {
@@ -295,7 +295,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     thisCustomerID = getTenant.customerID;
 
-    <!--- Check whether the user is allowed to change --->
+    // Check whether the user is allowed to change
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, thisCustomerID);
 
     if (!checkTenantRange) {

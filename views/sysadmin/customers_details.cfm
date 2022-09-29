@@ -13,7 +13,7 @@
 
     // Customers currency
     custCurrency = getCustomer.currencyStruct.iso;
-    custCurrencyID = new com.prices().getCurrency(custCurrency).id;
+    custCurrencyID = new com.currency().getCurrency(custCurrency).id;
 
     if (!isStruct(getCustomer) or structIsEmpty(getCustomer)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
@@ -77,7 +77,13 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
-                            <li class="breadcrumb-item active">#getCustomer.companyName#</li>
+                            <li class="breadcrumb-item active">
+                                <cfif len(trim(getCustomer.companyName))>
+                                    #getCustomer.companyName#
+                                <cfelse>
+                                    #getCustomer.contactPerson# (Private)
+                                </cfif>
+                            </li>
                         </ol>
                     </div>
                     <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
@@ -102,13 +108,25 @@
                                         <img src="#application.mainURL#/userdata/images/logos/#getCustomer.logo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#getCustomer.companyName#">
                                     </div>
                                 <cfelse>
-                                    <div class="avatar avatar-xl me-3 align-self-center">
-                                        #left(getCustomer.companyName,2)#
+                                    <cfif len(trim(getCustomer.companyName))>
+                                        <div class="avatar avatar-xl me-3 align-self-center">
+                                            #left(getCustomer.companyName,2)#
+                                        </div>
+                                    <cfelse>
+                                        <div class="avatar avatar-xl me-3 align-self-center">
+                                            #left(getCustomer.contactPerson,2)#
+                                        </div>
+                                    </cfif>
+                                </cfif>
+                                <cfif len(trim(getCustomer.companyName))>
+                                    <div class="align-self-center">
+                                        <h2>#getCustomer.companyName#</h2>
+                                    </div>
+                                <cfelse>
+                                    <div class="align-self-center">
+                                        <h2>#getCustomer.contactPerson# (Private)</h2>
                                     </div>
                                 </cfif>
-                                <div class="align-self-center">
-                                    <h2>#getCustomer.companyName#</h2>
-                                </div>
                             </div>
                             <div class="d-flex pt-4">
                                 <div class="me-5 text-muted">
