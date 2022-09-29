@@ -200,9 +200,9 @@ if (structKeyExists(form, "settings")) {
         param name="form.type" default="1";
         param name="form.language" default=getLanguage().iso;
 
-        invoice_date = (isDate(form.invoice_date) ? form.invoice_date : objInvoice.getInvoiceData(invoiceID).date);
-        due_date = (isDate(form.due_date) and form.due_date gte invoice_date ? form.due_date : objInvoice.getInvoiceData(invoiceID).dueDate);
-        netto = (structKeyExists(form, 'netto') ? 1 : 0);
+        invoice_date = isDate(form.invoice_date) ? form.invoice_date : objInvoice.getInvoiceData(invoiceID).date;
+        due_date = isDate(form.due_date) and form.due_date gte invoice_date ? form.due_date : objInvoice.getInvoiceData(invoiceID).dueDate;
+        netto = structKeyExists(form, 'netto') ? 1 : 0;
 
         invoiceStruct = structNew();
         invoiceStruct['invoiceID'] = invoiceID;
@@ -241,8 +241,8 @@ if (structKeyExists(form, "payments")) {
         param name="form.payment_type" default="";
         param name="form.amount" default="0";
 
-        paymentDate = (isDate(form.payment_date) ? form.payment_date : now());
-        paymentAmount = (isNumeric(amount) ? form.amount : 0);
+        paymentDate = isDate(form.payment_date) ? form.payment_date : now();
+        paymentAmount = isNumeric(amount) ? form.amount : 0;
 
         paymentType = form.payment_type;
 

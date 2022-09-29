@@ -146,7 +146,7 @@ if (structKeyExists(form, "bulk_translate")) {
             deepLPro = "https://api.deepl.com/v2/translate?auth_key=";
             deepLFree = "https://api-free.deepl.com/v2/translate?auth_key=";
 
-            deeplURL = (form.apiType eq 0 ? deepLFree : deepLPro);
+            deeplURL = form.apiType eq 0 ? deepLFree : deepLPro;
 
             // Test if key is valid
             deeplTest = deeplURL & form.apiKey;

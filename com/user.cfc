@@ -80,7 +80,11 @@ component displayname="user" output="false" {
                     // Set the default plan, if defined
                     local.objPlans.setDefaultPlan(qCheckLogin.intCustomerID, local.planGroup.groupID);
                     
-                    local.returnStruct['redirect'] = (structKeyExists(session, "redirect") and len(trim(session.redirect)) ? session.redirect : "#application.mainURL#/dashboard");
+                    if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
+                        local.returnStruct['redirect'] = session.redirect;
+                    } else {
+                        local.returnStruct['redirect'] = "#application.mainURL#/dashboard";
+                    }
 
                 } else {
 

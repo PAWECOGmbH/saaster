@@ -127,7 +127,7 @@ component displayname="prices" output="false" {
         local.subtotal_price = arguments.price;
 
         // Add up subtotal and vat
-        local.total_price = (variables.isNet eq 1 ? local.subtotal_price + local.vat_amount : local.subtotal_price);
+        local.total_price = variables.isNet eq 1 ? local.subtotal_price + local.vat_amount : local.subtotal_price;
 
         // Define vat text and sum
         if (variables.isNet eq 1) {

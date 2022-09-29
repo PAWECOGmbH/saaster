@@ -137,11 +137,11 @@ component displayname="globalFunctions" {
             local.thisLang = application.getLanguage.iso;
         }
         
-        local.searchString = (
-            structKeyExists(application.langStruct, local.thisLang) 
-            ? structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one") 
-            : structFindKey(application.langStruct.en, arguments.stringToTrans, "one")
-        );
+        if (structKeyExists(application.langStruct, local.thisLang)) {
+            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
+        } else {
+            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
+        }
 
         if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
             local.translatedString = local.searchString[1].value;
@@ -206,12 +206,11 @@ component displayname="globalFunctions" {
     public string function getSetting(required string settingVariable, numeric customerID, numeric planID) {
 
         if (structKeyExists(arguments, "customerID") and isNumeric(arguments.customerID)) {
-
-            local.valueString = (
-                structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable) 
-                ? structFindKey(session.customSettings, arguments.settingVariable, "one") 
-                : ""
-            );
+            
+            local.valueString = "";
+            if (structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable)) {
+                local.valueString = structFindKey(session.customSettings, arguments.settingVariable, "one");
+            }
 
         } else if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
 
@@ -255,11 +254,10 @@ component displayname="globalFunctions" {
 
 
         } else {
-            local.valueString = (
-                structKeyExists(application.systemSettingStruct, arguments.settingVariable) 
-                ? structFindKey(application.systemSettingStruct, arguments.settingVariable, "one") 
-                : ""
-            );
+            local.valueString = "";
+            if (structKeyExists(application.systemSettingStruct, arguments.settingVariable)) {
+                local.valueString = structFindKey(application.systemSettingStruct, arguments.settingVariable, "one");
+            }
             
         }
 
@@ -580,41 +578,36 @@ component displayname="globalFunctions" {
 
 
             // Set a default for all possible arguments
-            local.filePath = (
-                structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath)) 
-                ? trim(arguments.uploadArgs.filePath) 
-                : expandPath('/userdata')
-            );
-            local.maxSize = (
-                structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize)) 
-                ? trim(arguments.uploadArgs.maxSize) 
-                : ''
-            );
-            local.maxWidth = (
-                structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth)) 
-                ? trim(arguments.uploadArgs.maxWidth) 
-                : ''
-            );
-            local.maxHeight = (
-                structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight)) 
-                ? trim(arguments.uploadArgs.maxHeight) 
-                : ''
-            );
-            local.makeUnique = (
-                structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique) 
-                ? arguments.uploadArgs.makeUnique 
-                : true
-            );
-            local.fileName = (
-                structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName)) 
-                ? trim(arguments.uploadArgs.fileName) 
-                : ''
-            );
-            local.fileNameOrig = (
-                structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig)) 
-                ? trim(arguments.uploadArgs.fileNameOrig) 
-                : ''
-            );
+            
+            local.filePath = expandPath('/userdata');
+            local.maxSize = '';
+            local.maxWidth = '';
+            local.maxHeight = '';
+            local.makeUnique = true;
+            local.fileName = '';
+            local.fileNameOrig = '';
+            
+            if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
+                local.filePath = trim(arguments.uploadArgs.filePath);
+            }
+            if (structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize))) {
+                local.maxSize = trim(arguments.uploadArgs.maxSize);
+            }
+            if (structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth))) {
+                local.maxWidth = trim(arguments.uploadArgs.maxWidth);
+            }
+            if (structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight))) {
+                local.maxHeight = trim(arguments.uploadArgs.maxHeight);
+            }
+            if (structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique)) {
+                local.makeUnique = arguments.uploadArgs.makeUnique;
+            }
+            if (structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName))) {
+                local.fileName = trim(arguments.uploadArgs.fileName);
+            }
+            if (structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig))) {
+                local.fileNameOrig = trim(arguments.uploadArgs.fileNameOrig);
+            }
 
             // Is there a file to upload?
             if (!len(trim(local.fileNameOrig))) {

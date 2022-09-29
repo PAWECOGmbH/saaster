@@ -38,7 +38,7 @@ component displayname="modules" output="false" {
     // Get all modules
     public array function getAllModules(string except) {
 
-        local.exceptList = (structKeyExists(arguments, "except") and listLen(arguments.except) ? "AND intModuleID NOT IN (#arguments.except#)" : "");
+        local.exceptList = structKeyExists(arguments, "except") and listLen(arguments.except) ? "AND intModuleID NOT IN (#arguments.except#)" : "";
 
         local.qModule = queryExecute(
             options = {datasource = application.datasource},

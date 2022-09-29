@@ -137,8 +137,8 @@ if (structKeyExists(form, "edit_module")) {
 
         }
 
-        bookable = (structKeyExists(form, "bookable") ? 1 : 0);
-        active = (structKeyExists(form, "active") ? 1 : 0);
+        bookable = structKeyExists(form, "bookable") ? 1 : 0;
+        active = structKeyExists(form, "active") ? 1 : 0;
 
         param name="form.module_name" default="";
         param name="form.short_desc" default="";

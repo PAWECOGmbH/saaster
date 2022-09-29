@@ -73,22 +73,15 @@ component displayname="customer" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
+        local.countryID = 0;
+        local.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
+
         local.company = application.objGlobal.cleanUpText(arguments.customerStruct.company, 100) ?: '';
         local.contact = application.objGlobal.cleanUpText(arguments.customerStruct.contact, 100) ?: '';
         local.address = application.objGlobal.cleanUpText(arguments.customerStruct.address, 100) ?: '';
         local.address2 = application.objGlobal.cleanUpText(arguments.customerStruct.address2, 100) ?: '';
         local.zip = application.objGlobal.cleanUpText(arguments.customerStruct.zip, 10) ?: '';
         local.city = application.objGlobal.cleanUpText(arguments.customerStruct.city, 100) ?: '';
-        local.countryID = (
-            structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID) 
-            ? arguments.customerStruct.countryID 
-            : 0
-        );
-        local.timezoneID = (
-            structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0 
-            ? arguments.customerStruct.timezoneID 
-            : application.objGlobal.getCountry(local.countryID).intTimezoneID
-        );
         local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100) ?: '';
         local.phone = application.objGlobal.cleanUpText(arguments.customerStruct.phone, 100) ?: '';
         local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100) ?: '';
@@ -96,7 +89,12 @@ component displayname="customer" output="false" {
         local.billing_email = application.objGlobal.cleanUpText(arguments.customerStruct.billing_email, 100) ?: '';
         local.billing_address = application.objGlobal.cleanUpText(arguments.customerStruct.billing_address) ?: '';
         local.billing_info = application.objGlobal.cleanUpText(arguments.customerStruct.billing_info) ?: '';
-
+        if (structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID)) {
+            local.countryID = arguments.customerStruct.countryID;
+        }
+        if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0) {
+            local.timezoneID = arguments.customerStruct.timezoneID;
+        }
 
         try {
 

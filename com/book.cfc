@@ -83,12 +83,10 @@ component displayname="book" output="false" {
 
         local.objPrices = new com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
 
-
-        local.currencyID = (
-            structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID) 
-            ? local.bookingData.currencyID 
-            : getCurrency().id
-        );
+        local.currencyID = getCurrency().id;
+        if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
+            local.currencyID = local.bookingData.currencyID;
+        }
 
 
         // Special settings for plans
@@ -750,8 +748,8 @@ component displayname="book" output="false" {
                 WHERE intBookingID = :bookingID
             "
         )
-        local.planID = (structKeyExists(arguments.bookingData, "planID") and arguments.bookingData.planID gt 0 ? arguments.bookingData.planID : local.qBooking.intPlanID);
-        local.moduleID = (structKeyExists(arguments.bookingData, "moduleID") and arguments.bookingData.moduleID gt 0 ? arguments.bookingData.moduleID : local.qBooking.intModuleID);
+        local.planID = structKeyExists(arguments.bookingData, "planID") and arguments.bookingData.planID gt 0 ? arguments.bookingData.planID : local.qBooking.intPlanID;
+        local.moduleID = structKeyExists(arguments.bookingData, "moduleID") and arguments.bookingData.moduleID gt 0 ? arguments.bookingData.moduleID : local.qBooking.intModuleID;
         local.dateStart = arguments.bookingData.dateStart ?: local.qBooking.dteStartDate;
         local.dateEnd = arguments.bookingData.dateEnd ?: local.qBooking.dteEndDate;
         local.recurring = arguments.bookingData.recurring ?: local.qBooking.strRecurring;

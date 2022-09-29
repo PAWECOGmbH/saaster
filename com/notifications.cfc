@@ -9,18 +9,33 @@ component displayname="notifications" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
+        local.userID = 0;
+        local.title_var = "";
+        local.descr_var = "";
+        local.link = "";
+        local.linktext_var = "";
+
         if (structKeyExists(arguments.notiStruct, "customerID") and isNumeric(arguments.notiStruct.customerID)) {
             local.customerID = arguments.notiStruct.customerID;
         } else {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
         }
-
-        local.userID = (structKeyExists(arguments.notiStruct, "userID") and isNumeric(arguments.notiStruct.userID) ? arguments.notiStruct.userID : 0);
-        local.title_var = (structKeyExists(arguments.notiStruct, "title_var") and (len(trim(arguments.notiStruct.title_var))) ? left((trim(arguments.notiStruct.title_var)), 50) : "");
-        local.descr_var = (structKeyExists(arguments.notiStruct, "descr_var") and (len(trim(arguments.notiStruct.descr_var))) ? left((trim(arguments.notiStruct.descr_var)), 50) : "");
-        local.link = (structKeyExists(arguments.notiStruct, "link") and (len(trim(arguments.notiStruct.link))) ? left(trim(arguments.notiStruct.link), 255) : "");
-        local.linktext_var = (structKeyExists(arguments.notiStruct, "linktext_var") and (len(trim(arguments.notiStruct.linktext_var))) ? left((trim(arguments.notiStruct.linktext_var)), 50) : "");
+        if (structKeyExists(arguments.notiStruct, "userID") and isNumeric(arguments.notiStruct.userID)) {
+            local.userID = arguments.notiStruct.userID;
+        }
+        if (structKeyExists(arguments.notiStruct, "title_var") and (len(trim(arguments.notiStruct.title_var)))) {
+            local.title_var = left((trim(arguments.notiStruct.title_var)), 50);
+        }
+        if (structKeyExists(arguments.notiStruct, "descr_var") and (len(trim(arguments.notiStruct.descr_var)))) {
+            local.descr_var = left((trim(arguments.notiStruct.descr_var)), 50);
+        }
+        if (structKeyExists(arguments.notiStruct, "link") and (len(trim(arguments.notiStruct.link)))) {
+            local.link = left(trim(arguments.notiStruct.link), 255);
+        }
+        if (structKeyExists(arguments.notiStruct, "linktext_var") and (len(trim(arguments.notiStruct.linktext_var)))) {
+            local.linktext_var = left((trim(arguments.notiStruct.linktext_var)), 50);
+        }
 
         try {
 
