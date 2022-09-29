@@ -130,12 +130,8 @@ if (structKeyExists(form, "edit_language")) {
         param name="form.lng_en" default="";
         param name="form.lng_own" default="";
         param name="form.iso" default="";
-
-        if (structKeyExists(form, "chooseable")) {
-            chooseable = 1;
-        } else {
-            chooseable = 0;
-        }
+        
+        chooseable = structKeyExists(form, "chooseable") ? 1 : 0;
 
         queryExecute(
             options = {datasource = application.datasource},
@@ -169,11 +165,7 @@ if (structKeyExists(form, "new_language")) {
     param name="form.lng_own" default="";
     param name="form.iso" default="";
 
-    if (structKeyExists(form, "chooseable")) {
-        chooseable = 1;
-    } else {
-        chooseable = 0;
-    }
+    chooseable = structKeyExists(form, "chooseable") ? 1 : 0;
 
     try {
 

@@ -1,6 +1,6 @@
 <cfscript>
 
-<!--- Logout and delete all sessions--->
+// Logout and delete all sessions
 if (structKeyExists(url, "logout")) {
 
     structClear(SESSION);
@@ -10,7 +10,7 @@ if (structKeyExists(url, "logout")) {
 }
 
 
-<!--- Switch the company/tenant --->
+// Switch the company/tenant
 if (structKeyExists(url, "switch")) {
 
     if (isNumeric(url.switch)) {
@@ -33,10 +33,10 @@ if (structKeyExists(url, "switch")) {
 
             session.customer_id = qTenant.intCustomerID;
 
-            <!--- Set plans and modules as well as the custom settings into a session --->
+            // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            <!--- Is the needed data of the cutomer already filled out? --->
+            // Is the needed data of the cutomer already filled out?
             dataFilledIn = new com.register().checkFilledData(session.customer_id);
 
             if (!dataFilledIn) {

@@ -49,7 +49,7 @@
 
         if (makeBooking.success) {
 
-            <!--- Set plans and modules as well as the custom settings into a session --->
+            // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
             getAlert('msgPlanActivated');
@@ -70,7 +70,7 @@
 
     if (makeBooking.success) {
 
-        <!--- Set plans and modules as well as the custom settings into a session --->
+        // Set plans and modules as well as the custom settings into a session
         application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
         getAlert('msgThanksForPurchaseFindInvoice');

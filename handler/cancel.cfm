@@ -1,7 +1,7 @@
 
 <cfscript>
 
-<!--- Cancel plan or revoke cancellation --->
+// Cancel plan or revoke cancellation
 if (structKeyExists(url, "plan")) {
 
     if (isNumeric(url.plan) and url.plan gt 0) {
@@ -32,7 +32,7 @@ if (structKeyExists(url, "plan")) {
 
         }
 
-        <!--- Set plans and modules as well as the custom settings into a session --->
+        // Set plans and modules as well as the custom settings into a session
         application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings" addtoken="false";
@@ -42,7 +42,7 @@ if (structKeyExists(url, "plan")) {
 }
 
 
-<!--- Cancel module or revoke cancellation --->
+// Cancel module or revoke cancellation
 if (structKeyExists(url, "module")) {
 
     if (isNumeric(url.module) and url.module gt 0) {
@@ -73,7 +73,7 @@ if (structKeyExists(url, "module")) {
 
         }
 
-        <!--- Set plans and modules as well as the custom settings into a session --->
+        // Set plans and modules as well as the custom settings into a session
         application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
@@ -83,7 +83,7 @@ if (structKeyExists(url, "module")) {
 }
 
 
-<!--- Delete the account right now --->
+// Delete the account right now
 if (structKeyExists(form, "delete")) {
 
     if (form.delete eq session.customer_id) {

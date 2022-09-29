@@ -3,7 +3,7 @@
 
 objRegister = new com.register();
 
-<!--- Register new user step 1 --->
+// Register new user step 1
 if (structKeyExists(form, 'register_btn')) {
 
     param name="form.first_name" default="";
@@ -22,7 +22,7 @@ if (structKeyExists(form, 'register_btn')) {
 
     if (checkEmail) {
 
-        <!--- Check for already registered email --->
+        // Check for already registered email
         qCheckDouble = queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -50,7 +50,7 @@ if (structKeyExists(form, 'register_btn')) {
         optinValues.language = form.language;
         optinValues.newUUID = newUUID;
 
-        <!--- Save the customer into the temporary table optin --->
+        // Save the customer into the temporary table optin
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
         if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
@@ -71,7 +71,7 @@ if (structKeyExists(form, 'register_btn')) {
                 ");
             }
 
-            <!--- Send double opt-in mail --->
+            // Send double opt-in mail
             mail to="#form.email#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
                 include "/includes/mail_design.cfm";
             }
@@ -101,7 +101,7 @@ if (structKeyExists(form, 'register_btn')) {
 }
 
 
-<!--- Coming from double opt-in mail (also for new users added by the admin) --->
+// Coming from double opt-in mail (also for new users added by the admin)
 if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
     qCheckOptin = queryExecute(
@@ -125,7 +125,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
     } else {
 
-        <!--- Check whether its added by admin --->
+        // Check whether its added by admin
         qCheckUser = queryExecute(
 
             options = {datasource = application.datasource},
@@ -159,13 +159,13 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 }
 
 
-<!--- Register new user step 3 (create account) --->
+// Register new user step 3 (create account)
 if (structKeyExists(form, 'create_account')) {
 
     param name="form.password" default="";
     param name="form.password2" default="";
 
-    <!--- Check passwords first --->
+    // Check passwords first
     if (len(trim(form.password)) and len(trim(form.password2))) {
         if (not trim(form.password) eq trim(form.password2)) {
             session.step = 2;
@@ -178,10 +178,10 @@ if (structKeyExists(form, 'create_account')) {
         location url="#application.mainURL#/register" addtoken="false";
     }
 
-    <!--- Is there a valid uuid? --->
+    // Is there a valid uuid?
     if (structKeyExists(session, "uuid")) {
 
-        <!--- Is there a valid registration? --->
+        // Is there a valid registration?
         qCheckOptin = queryExecute(
 
             options = {datasource = application.datasource},
@@ -199,12 +199,12 @@ if (structKeyExists(form, 'create_account')) {
 
             customerStruct = QueryRowData(qCheckOptin, 1);
 
-            <!--- Hash and salt the password --->
+            // Hash and salt the password
             hashedStruct = application.objGlobal.generateHash(form.password);
             StructInsert(customerStruct, "hash", hashedStruct.thisHash);
             StructInsert(customerStruct, "salt", hashedStruct.thisSalt);
 
-            <!--- Save the customer into the db --->
+            // Save the customer into the db
             insertCustomer = new com.register().insertCustomer(customerStruct);
 
             if (insertCustomer.success) {
@@ -229,7 +229,7 @@ if (structKeyExists(form, 'create_account')) {
         } else {
 
 
-            <!--- Check whether its added by admin --->
+            // Check whether its added by admin
             qCheckUser = queryExecute(
 
                 options = {datasource = application.datasource},
@@ -245,7 +245,7 @@ if (structKeyExists(form, 'create_account')) {
 
             if (qCheckUser.recordCount) {
 
-                <!--- Update password and send to login --->
+                // Update password and send to login
                 setNewPassword = application.objUser.changePassword(form.password, qCheckUser.strUUID);
 
                 if (setNewPassword.success) {
@@ -280,7 +280,7 @@ if (structKeyExists(form, 'create_account')) {
 
 }
 
-<!--- Check login --->
+// Check login
 if (structKeyExists(form, 'login_btn')) {
 
     param name="form.email" default="";
@@ -302,7 +302,7 @@ if (structKeyExists(form, 'login_btn')) {
             session.superadmin = trueFalseFormat(objUserLogin.superadmin);
             session.sysadmin = trueFalseFormat(objUserLogin.sysadmin);
 
-            <!--- Inheritance --->
+            // Inheritance
             if (session.sysadmin) {
                 session.admin = true;
                 session.superadmin = true;
@@ -310,10 +310,10 @@ if (structKeyExists(form, 'login_btn')) {
                 session.admin = true;
             }
 
-            <!--- Set plans and modules as well as the custom settings into a session --->
+            // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            <!--- Is the needed data of the cutomer already filled out? --->
+            // Is the needed data of the cutomer already filled out?
             dataFilledIn = objRegister.checkFilledData(session.customer_id);
 
             if (!dataFilledIn) {
@@ -325,7 +325,7 @@ if (structKeyExists(form, 'login_btn')) {
 
         } else {
 
-            <!--- Is the user active? --->
+            // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
                 getAlert('msgAccountDisabledByAdmin', 'warning');
                 location url="#application.mainURL#/login" addtoken="false";
@@ -348,7 +348,7 @@ if (structKeyExists(form, 'login_btn')) {
 
 
 
-<!--- Reset the password step 1 --->
+// Reset the password step 1
 if (structKeyExists(form, "reset_pw_btn_1")) {
 
     param name="form.email" default="";
@@ -401,7 +401,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             ");
         }
 
-        <!--- Send email to reset the password --->
+        // Send email to reset the password
         mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
             include "/includes/mail_design.cfm";
         }
@@ -414,10 +414,10 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 }
 
 
-<!--- Confirm the password reset --->
+// Confirm the password reset
 if (structKeyExists(url, "p")) {
 
-    <!--- Is the link valid? --->
+    // Is the link valid?
     qCheckUUID = queryExecute(
         options = {datasource = application.datasource},
         params = {
@@ -447,7 +447,7 @@ if (structKeyExists(url, "p")) {
 }
 
 
-<!--- Reset password now --->
+// Reset password now
 if (structKeyExists(form, "reset_pw_btn_2")) {
 
     param name="form.password" default="";
@@ -455,7 +455,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
     param name="thisResetUUID" default="0";
 
 
-    <!--- Check the uuid session --->
+    // Check the uuid session
     if (structKeyExists(session, "uuid") and len(trim(session.uuid))) {
         thisResetUUID = session.uuid;
     } else {
@@ -463,7 +463,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         location url="#application.mainURL#/password" addtoken="false";
     }
 
-    <!--- Check passwords first --->
+    // Check passwords first
     if (len(trim(form.password)) and len(trim(form.password2))) {
 
         if (not form.password eq form.password2) {
@@ -479,14 +479,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
     }
 
 
-    <!--- save password using a function --->
+    // save password using a function
     changePassword = application.objUser.changePassword(form.password, thisResetUUID);
 
     if (changePassword.success) {
 
         structDelete(session, "step");
 
-        <!--- delete the uuid of the user --->
+        // delete the uuid of the user
         queryExecute(
             options = {datasource = application.datasource},
             params = {
