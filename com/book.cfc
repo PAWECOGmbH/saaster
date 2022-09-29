@@ -83,9 +83,11 @@ component displayname="book" output="false" {
 
         local.objPrices = new com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
 
-        local.currencyID = getCurrency().id;
+        
         if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
             local.currencyID = local.bookingData.currencyID;
+        } else{
+            local.currencyID = getCurrency().id;
         }
 
 
