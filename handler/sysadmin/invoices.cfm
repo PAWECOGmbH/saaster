@@ -10,12 +10,14 @@ if (structKeyExists(form, "new_invoice")) {
         invoiceData = structNew();
 
         param name="form.title" default="";
-        setting = application.objGlobal;
+        setting = application.objSettings;
+
+        local.objCurrency = new com.currency();
 
         invoiceData['customerID'] = form.new_invoice;
         invoiceData['prefix'] = setting.getSetting('settingInvoicePrefix');
         invoiceData['title'] = form.title;
-        invoiceData['currency'] = setting.getDefaultCurrency().iso;
+        invoiceData['currency'] = local.objCurrency.getCurrency().iso;
         invoiceData['isNet'] = setting.getSetting('settingInvoiceNet');
         invoiceData['vatType'] = setting.getSetting('settingStandardVatType');
 

@@ -95,12 +95,6 @@
                                         <p class="mb-1 ">#getTrans('txtPaymentSettings')#</p>
                                     </a>
                                 </cfif>
-                                <a href="#application.mainURL#/account-settings/settings" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titSystemSettings')#</b></h4>
-                                    </div>
-                                    <p class="mb-1 ">#getTrans('txtSystemSettings')#</p>
-                                </a>
                             </div>
                         </div>
                     </div>

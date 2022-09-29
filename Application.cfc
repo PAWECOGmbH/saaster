@@ -51,6 +51,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
         application.objLanguage = new com.language();
+        application.objSettings = new com.settings();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -65,11 +66,11 @@ component displayname="Application" output="false" hint="Handle the application.
         application.allLanguages = ValueList(local.qLanguages.lang);
 
         // Load language struct and save it into the application scope
-        application.langStruct = application.objGlobal.initLanguages();
+        application.langStruct = application.objLanguage.initLanguages();
 
-        /* Load system setting struct and save it into the application scope
-        (hint: the custom variables we save into a session while login) */
-        application.systemSettingStruct = application.objGlobal.initSystemSettings();
+        // Load system setting struct and save it into the application scope
+        // (hint: the custom variables we save into a session while login)
+        application.systemSettingStruct = application.objSettings.initSystemSettings();
 
         return true;
 
@@ -85,7 +86,7 @@ component displayname="Application" output="false" hint="Handle the application.
         local.checkLng = findNoCase(local.browserLng, application.allLanguages);
 
         // Save the language into the session
-        session.lng = local.checkLng ? local.browserLng : application.objGlobal.getDefaultLanguage().iso;
+        session.lng = local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso;
 
         return;
 
@@ -99,7 +100,7 @@ component displayname="Application" output="false" hint="Handle the application.
         if (structKeyExists(url, "reinit") and url.reinit eq 1) {
             structClear(APPLICATION);
             onApplicationStart();
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
         // Reinit Session
@@ -111,7 +112,7 @@ component displayname="Application" output="false" hint="Handle the application.
         // Reinit languages
         if (structKeyExists(url, "reinit") and url.reinit eq 3) {
             structDelete(session, "langStruct");
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
         // Reinit Session AND Application AND languages
@@ -120,7 +121,7 @@ component displayname="Application" output="false" hint="Handle the application.
             structClear(APPLICATION);
             onApplicationStart();
             onSessionStart();
-            application.langStruct = application.objGlobal.initLanguages();
+            application.langStruct = application.objLanguage.initLanguages();
         }
 
 
@@ -155,7 +156,7 @@ component displayname="Application" output="false" hint="Handle the application.
             )
             if (qCheckLanguage.cnt gt 0) {
                 session.lng = url.l;
-                application.langStruct = application.objGlobal.initLanguages();
+                application.langStruct = application.objLanguage.initLanguages();
                 if (structKeyExists(session, "customer_id")) {
                     application.objCustomer.setProductSessions(session.customer_id, session.lng);
                 }
@@ -165,7 +166,7 @@ component displayname="Application" output="false" hint="Handle the application.
 
 
         // Global variables
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
         getAlert = application.objGlobal.getAlert;
 
 

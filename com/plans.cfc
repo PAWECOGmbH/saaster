@@ -7,13 +7,15 @@ component displayname="plans" output="false" {
         param name="variables.language" default="";
         param name="variables.currencyID" default=0;
 
+        local.objCurrency = new com.currency();
+
         // Set variables by arguments
         if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
             variables.lngID = arguments.lngID;
-            variables.language = application.objGlobal.getAnyLanguage(variables.lngID).iso;
+            variables.language = application.objLanguage.getAnyLanguage(variables.lngID).iso;
         } else if (structKeyExists(arguments, "language")) {
             variables.language = arguments.language;
-            variables.lngID = application.objGlobal.getAnyLanguage(variables.language).lngID;
+            variables.lngID = application.objLanguage.getAnyLanguage(variables.language).lngID;
         }
         if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             variables.currencyID = arguments.currencyID;
@@ -21,13 +23,13 @@ component displayname="plans" output="false" {
 
         // Set variables by default settings
         if (!len(variables.language)) {
-            variables.language = application.objGlobal.getDefaultLanguage().iso;
+            variables.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (variables.lngID eq 0) {
-            variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
+            variables.lngID = application.objLanguage.getDefaultLanguage().lngID;
         }
         if (variables.currencyID eq 0) {
-            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+            variables.currencyID = local.objCurrency.getCurrency().id;
         }
 
         return this;
@@ -42,6 +44,8 @@ component displayname="plans" output="false" {
         local.thisCountryID = 0;
         local.thisGroupID = 0;
         local.thisCurrencyID = 0;
+
+        local.objCurrency = new com.currency();
 
         // Get the country of the customer, if exists
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
@@ -97,14 +101,22 @@ component displayname="plans" output="false" {
                 "
             )
 
-            local.thisGroupID = local.qDefPlanGroup.recordCount ? local.qDefPlanGroup.intPlanGroupID : 0;
+            if (local.qDefPlanGroup.recordCount) {
+                local.thisGroupID = local.qDefPlanGroup.intPlanGroupID;
+            } else {
+                local.thisGroupID = 0;
+            }
 
         }
 
-        // get the currency of the country
+        // Get the currency of the country
         if (local.thisCountryID gt 0) {
-            local.currID = application.objGlobal.getCurrencyOfCountry(local.thisCountryID).currencyID;
-            local.thisCurrencyID = local.currID gt 0 ? local.currID : application.objGlobal.getDefaultCurrency().currencyID;
+            local.currID = local.objCurrency.getCurrencyOfCountry(local.thisCountryID).currencyID;
+            if (local.currID gt 0) {
+                local.thisCurrencyID = local.currID;
+            } else {
+                local.thisCurrencyID = local.objCurrency.getCurrency().id;
+            }
         }
 
         local.prepareStruct['countryID'] = local.thisCountryID;
@@ -834,38 +846,38 @@ component displayname="plans" output="false" {
                 switch(arguments.thisPlan.status) {
 
                     case "active":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titActive');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('titRenewal');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('titActive');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('titRenewal');
                         local.planStatus['fontColor'] = "green";
                         break;
 
                     case "expired":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtExpired');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestTimeExpired');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('txtExpired');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('txtTestTimeExpired');
                         local.planStatus['fontColor'] = "red";
                         break;
 
                     case "test":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtTest');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtTestUntil');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('txtTest');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('txtTestUntil');
                         local.planStatus['fontColor'] = "blue";
                         break;
 
                     case "canceled":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtCanceled');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtSubscriptionCanceled');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('txtCanceled');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('txtSubscriptionCanceled');
                         local.planStatus['fontColor'] = "purple";
                         break;
 
                     case "free":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('txtFree');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtFreeForever');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('txtFree');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('txtFreeForever');
                         local.planStatus['fontColor'] = "green";
                         break;
 
                     case "payment":
-                        local.planStatus['statusTitle'] = application.objGlobal.getTrans('titWaiting');
-                        local.planStatus['statusText'] = application.objGlobal.getTrans('txtWaitingForPayment');
+                        local.planStatus['statusTitle'] = application.objLanguage.getTrans('titWaiting');
+                        local.planStatus['statusText'] = application.objLanguage.getTrans('txtWaitingForPayment');
                         local.planStatus['fontColor'] = "orange";
                         break;
 

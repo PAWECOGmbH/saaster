@@ -1,7 +1,7 @@
 
 <cfscript>
 
-qAllLanguages = application.objGlobal.getAllLanguages();
+qAllLanguages = application.objLanguage.getAllLanguages();
 
 
 if (structKeyExists(form, "new_variable")) {

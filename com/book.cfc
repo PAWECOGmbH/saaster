@@ -23,7 +23,11 @@ component displayname="book" output="false" {
         } else {
             local.argsJSon['planID'] = arguments.thisID;
         }
-        local.argsJSon['recurring'] = arguments.recurring ?: "monthly";
+        if (structKeyExists(arguments, "recurring")) {
+            local.argsJSon['recurring'] = arguments.recurring;
+        } else {
+            local.argsJSon['recurring'] = "monthly";
+        }
         local.argsJSon['lngID'] = arguments.lngID;
         local.argsJSon['currencyID'] = arguments.currencyID;
         local.urlEncoded = URLEncodedFormat(serializeJSON(local.argsJSon));
@@ -51,11 +55,25 @@ component displayname="book" output="false" {
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
 
-        local.makeBooking = arguments.makeBooking ?: false;
-        local.makeInvoice = arguments.makeInvoice ?: false;
-        local.chargeInvoice = arguments.chargeInvoice ?: false;
+        if (structKeyExists(arguments, "makeBooking")) {
+            local.makeBooking = arguments.makeBooking;
+        } else {
+            local.makeBooking = false;
+        }
 
-        local.getTrans = application.objGlobal.getTrans;
+        if (structKeyExists(arguments, "makeInvoice")) {
+            local.makeInvoice = arguments.makeInvoice;
+        } else {
+            local.makeInvoice = false;
+        }
+
+        if (structKeyExists(arguments, "chargeInvoice")) {
+            local.chargeInvoice = arguments.chargeInvoice;
+        } else {
+            local.chargeInvoice = false;
+        }
+
+        local.getTrans = application.objLanguage.getTrans;
         local.bookingData = arguments.bookingData;
         local.startDate = "";
         local.endDate = "";
@@ -83,15 +101,15 @@ component displayname="book" output="false" {
 
         local.objPrices = new com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
 
-        
+
         if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
             local.currencyID = local.bookingData.currencyID;
-        } else{
-            local.currencyID = getCurrency().id;
+        } else {
+            local.currencyID = new com.currency().getCurrency().id;
         }
 
 
-        // Special settings for plans
+        // ---- Special settings for plans
         if (variables.type eq "plan") {
 
             variables.object = new com.plans(currencyID=local.currencyID);
@@ -115,7 +133,7 @@ component displayname="book" output="false" {
             local.moduleID = "";
 
 
-        // Special settings for modules
+        // ---- Special settings for modules
         } else if (variables.type eq "module") {
 
             variables.object = new com.modules(currencyID=local.currencyID);
@@ -145,13 +163,17 @@ component displayname="book" output="false" {
 
 
 
-        // Neither plan nor module
+        // ---- Neither plan nor module
         } else {
 
             local.argsReturnValue['message'] = "Neither plan nor module found!";
             return local.argsReturnValue;
 
         }
+
+        /* dump(local.itsFirstProduct);
+        dump(local.currentProduct);
+        abort; */
 
 
         // It's the first time the customer book this product
@@ -262,7 +284,11 @@ component displayname="book" output="false" {
                     } else if (local.recurring eq "onetime") {
                         // Set the end time to a date that will probably never be reached
                         local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
-                        local.priceBeforeVat = local.bookingData.priceOnetime ?: 0;
+                        if (structKeyExists(local.bookingData, "priceOnetime")) {
+                            local.priceBeforeVat = local.bookingData.priceOnetime;
+                        } else {
+                            local.priceBeforeVat = 0;
+                        }
                     }
 
                     local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
@@ -318,7 +344,11 @@ component displayname="book" output="false" {
 
                         // Get the diffrence to pay today
                         local.calculateUpgrade = calculateUpgrade(arguments.customerID, local.newProductID, local.recurring);
-                        local.priceBeforeVat = local.calculateUpgrade.toPayNow ?: local.productPrice;
+                        if (structKeyExists(local.calculateUpgrade, "toPayNow")) {
+                            local.priceBeforeVat = local.calculateUpgrade.toPayNow;
+                        } else {
+                            local.priceBeforeVat = local.productPrice;
+                        }
 
                         local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
 
@@ -392,7 +422,11 @@ component displayname="book" output="false" {
 
                         // Get the amount to pay
                         local.calculateUpgrade = calculateUpgrade(arguments.customerID, local.newProductID, local.recurring);
-                        local.priceBeforeVat = local.calculateUpgrade.toPayNow ?: local.planPrice;
+                        if (structKeyExists(local.calculateUpgrade, "toPayNow")) {
+                            local.priceBeforeVat = local.calculateUpgrade.toPayNow;
+                        } else {
+                            local.priceBeforeVat = local.planPrice;
+                        }
 
                         local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
 
@@ -750,12 +784,37 @@ component displayname="book" output="false" {
                 WHERE intBookingID = :bookingID
             "
         )
-        local.planID = structKeyExists(arguments.bookingData, "planID") and arguments.bookingData.planID gt 0 ? arguments.bookingData.planID : local.qBooking.intPlanID;
-        local.moduleID = structKeyExists(arguments.bookingData, "moduleID") and arguments.bookingData.moduleID gt 0 ? arguments.bookingData.moduleID : local.qBooking.intModuleID;
-        local.dateStart = arguments.bookingData.dateStart ?: local.qBooking.dteStartDate;
-        local.dateEnd = arguments.bookingData.dateEnd ?: local.qBooking.dteEndDate;
-        local.recurring = arguments.bookingData.recurring ?: local.qBooking.strRecurring;
-        local.status = arguments.bookingData.status ?: local.qBooking.strStatus;
+
+        if (structKeyExists(arguments.bookingData, "planID") and arguments.bookingData.planID gt 0) {
+            local.planID = arguments.bookingData.planID;
+        } else {
+            local.planID = local.qBooking.intPlanID;
+        }
+        if (structKeyExists(arguments.bookingData, "moduleID") and arguments.bookingData.moduleID gt 0) {
+            local.moduleID = arguments.bookingData.moduleID;
+        } else {
+            local.moduleID = local.qBooking.intModuleID;
+        }
+        if (structKeyExists(arguments.bookingData, "dateStart")) {
+            local.dateStart = arguments.bookingData.dateStart;
+        } else {
+            local.dateStart = local.qBooking.dteStartDate;
+        }
+        if (structKeyExists(arguments.bookingData, "dateEnd")) {
+            local.dateEnd = arguments.bookingData.dateEnd;
+        } else {
+            local.dateEnd = local.qBooking.dteEndDate;
+        }
+        if (structKeyExists(arguments.bookingData, "recurring")) {
+            local.recurring = arguments.bookingData.recurring;
+        } else {
+            local.recurring = local.qBooking.strRecurring;
+        }
+        if (structKeyExists(arguments.bookingData, "status")) {
+            local.status = arguments.bookingData.status;
+        } else {
+            local.status = local.qBooking.strStatus;
+        }
 
         queryExecute (
             options = {datasource = application.datasource},

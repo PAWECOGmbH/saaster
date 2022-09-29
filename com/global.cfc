@@ -1,4 +1,4 @@
-component displayname="globalFunctions" {
+component displayname="globalFunctions" output="false" {
 
     // SEF building
     public struct function getSEF(string sef_string) {
@@ -84,274 +84,6 @@ component displayname="globalFunctions" {
         }
 
         return local.returnStruct;
-
-    }
-
-
-    // Initialising the language variables
-    public struct function initLanguages() {
-
-        // Get all languages in the database
-        local.qLanguages = getAllLanguages();
-
-        loop query="local.qLanguages" {
-
-            local.langIso = local.qLanguages.strLanguageISO
-            local.language[local.langIso] = structNew();
-
-            // Get translations of the language
-            local.qTranslations = queryExecute(
-                options = {datasource = application.datasource},
-                sql = "
-                    SELECT strVariable, strString#local.langIso#
-                    FROM system_translations
-                "
-            )
-
-            local.translations = structNew();
-            loop query="local.qTranslations" {
-                local.translations[qTranslations.strVariable] = qTranslations['strString' & local.langIso];
-            }
-
-            local.language[local.langIso] = local.translations;
-
-        }
-
-
-        return local.language;
-
-
-    }
-
-
-    // Translations
-    public string function getTrans(required string stringToTrans, string thisLanguage) {
-
-        local.translatedString = "--undefined--";
-        
-        if (structKeyExists(arguments, "thisLanguage") and len(trim(arguments.thisLanguage))) {
-            local.thisLang = arguments.thisLanguage;
-        } else if (structKeyExists(session, "lng")) {
-            local.thisLang = session.lng;
-        } else {
-            local.thisLang = application.getLanguage.iso;
-        }
-        
-        if (structKeyExists(application.langStruct, local.thisLang)) {
-            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
-        } else {
-            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
-        }
-
-        if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
-            local.translatedString = local.searchString[1].value;
-        }
-
-        return local.translatedString;
-
-
-    }
-
-
-    // Initialising the system setting variables
-    public struct function initSystemSettings() {
-
-        local.settingStruct = structNew();
-
-        local.qSettings = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT strSettingVariable, strDefaultValue
-                FROM system_settings
-            "
-        )
-
-        loop query="local.qSettings" {
-            local.settingStruct[local.qSettings.strSettingVariable] = local.qSettings.strDefaultValue;
-        }
-
-        return local.settingStruct;
-
-    }
-
-
-    // Get the custom setting variables
-    public struct function getCustomSettings(required numeric customerID) {
-
-        local.settingStruct = structNew();
-
-        local.qSettings = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: arguments.customerID}
-            },
-            sql = "
-                SELECT customer_custom_settings.strSettingValue, custom_settings.strSettingVariable
-                FROM customer_custom_settings
-                INNER JOIN custom_settings ON customer_custom_settings.intCustomSettingID = custom_settings.intCustomSettingID
-                WHERE customer_custom_settings.intCustomerID = :customerID
-            "
-        )
-
-        loop query="local.qSettings" {
-            local.settingStruct[local.qSettings.strSettingVariable] = local.qSettings.strSettingValue;
-        }
-
-        return local.settingStruct;
-
-    }
-
-
-    // Get setting (system settings as well as custom settings)
-    public string function getSetting(required string settingVariable, numeric customerID, numeric planID) {
-
-        if (structKeyExists(arguments, "customerID") and isNumeric(arguments.customerID)) {
-            
-            local.valueString = "";
-            if (structKeyExists(session, "customSettings") and structKeyExists(session.customSettings, arguments.settingVariable)) {
-                local.valueString = structFindKey(session.customSettings, arguments.settingVariable, "one");
-            }
-
-        } else if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
-
-            local.qPlanValue = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    planID: {type: "numeric", value: arguments.planID},
-                    variable_name: {type: "string", value: arguments.settingVariable}
-                },
-                sql = "
-                    SELECT
-                        plan_features.strVariable, 
-                        plans_plan_features.strValue, 
-                        plans_plan_features.intPlanID,
-                        plans_plan_features.blnCheckmark
-                    FROM
-                        plan_features
-                        INNER JOIN
-                        plans_plan_features
-                        ON 
-                            plan_features.intPlanFeatureID = plans_plan_features.intPlanFeatureID
-                    WHERE
-                        plans_plan_features.intPlanID = :planID AND 
-                        plan_features.strVariable = :variable_name
-                "
-            );
-
-            if(local.qPlanValue.recordcount){
-
-                if (len(trim(local.qPlanValue.strValue))) {
-                    local.valueString = local.qPlanValue.strValue;
-                } else {
-                    local.valueString = trueFalseFormat(local.qPlanValue.blnCheckmark);
-                }                
-
-            }else{
-
-                local.valueString = "";
-
-            }
-
-
-        } else {
-            local.valueString = "";
-            if (structKeyExists(application.systemSettingStruct, arguments.settingVariable)) {
-                local.valueString = structFindKey(application.systemSettingStruct, arguments.settingVariable, "one");
-            }
-            
-        }
-
-        if (isArray(local.valueString) and arrayLen(local.valueString) gte 1) {
-            local.valueString = local.valueString[1].value;
-        }
-
-        return local.valueString;
-
-    }
-
-
-    // Get the default language as struct
-    public struct function getDefaultLanguage() {
-
-        local.defaultLanguage = structNew();
-        local.defaultLanguage['lngID'] = "1";
-        local.defaultLanguage['iso'] = "en";
-        local.defaultLanguage['lngEN'] = "English";
-        local.defaultLanguage['language'] = "English";
-
-        qDefLng = queryExecute(
-
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
-                FROM languages
-                WHERE blnDefault = 1
-            "
-        )
-
-        if (qDefLng.recordCount) {
-
-            local.defaultLanguage['lngID'] = qDefLng.intLanguageID;
-            local.defaultLanguage['iso'] = qDefLng.strLanguageISO;
-            local.defaultLanguage['lngEN'] = qDefLng.strLanguageEN;
-            local.defaultLanguage['language'] = qDefLng.strLanguage;
-
-        }
-
-        return local.defaultLanguage;
-
-    }
-
-    // Get language from iso or id
-    public struct function getAnyLanguage(any reqLng) {
-
-        if (structKeyExists(arguments, "reqLng")) {
-
-            if ( isNumeric(arguments.reqLng) ) {
-
-                local.qGetLanguage = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        lngID: {type: "numeric", value: arguments.reqLng}
-                    },
-                    sql = "
-                        SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
-                        FROM languages
-                        WHERE intLanguageID = :lngID
-                    "
-                )
-
-            } else {
-
-                local.qGetLanguage = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        lngIso: {type: "varchar", value: arguments.reqLng}
-                    },
-                    sql = "
-                        SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
-                        FROM languages
-                        WHERE strLanguageISO = :lngIso
-                    "
-                )
-
-            }
-
-            if (qGetLanguage.recordCount) {
-
-                local.language['lngID'] = local.qGetLanguage.intLanguageID;
-                local.language['iso'] = local.qGetLanguage.strLanguageISO;
-                local.language['lngEN'] = local.qGetLanguage.strLanguageEN;
-                local.language['language'] = local.qGetLanguage.strLanguage;
-
-                return local.language;
-
-            }
-
-
-        }
-
-        return getDefaultLanguage();
 
     }
 
@@ -447,7 +179,7 @@ component displayname="globalFunctions" {
     // Get all countries or a country by id
     public query function getCountry(numeric countryID, string language) {
 
-        param name="arguments.language" default=getDefaultLanguage().iso;
+        param name="arguments.language" default=application.objLanguage.getDefaultLanguage().iso;
 
         qLngID = queryExecute(
             options = {datasource = application.datasource},
@@ -578,35 +310,40 @@ component displayname="globalFunctions" {
 
 
             // Set a default for all possible arguments
-            
-            local.filePath = expandPath('/userdata');
-            local.maxSize = '';
-            local.maxWidth = '';
-            local.maxHeight = '';
-            local.makeUnique = true;
-            local.fileName = '';
-            local.fileNameOrig = '';
-            
             if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
                 local.filePath = trim(arguments.uploadArgs.filePath);
+            } else {
+                local.filePath = expandPath('/userdata');
             }
             if (structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize))) {
                 local.maxSize = trim(arguments.uploadArgs.maxSize);
+            } else {
+                local.maxSize = '';
             }
             if (structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth))) {
                 local.maxWidth = trim(arguments.uploadArgs.maxWidth);
+            } else {
+                local.maxWidth = '';
             }
             if (structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight))) {
                 local.maxHeight = trim(arguments.uploadArgs.maxHeight);
+            } else {
+                local.maxHeight = '';
             }
             if (structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique)) {
                 local.makeUnique = arguments.uploadArgs.makeUnique;
+            } else {
+                local.makeUnique = true;
             }
             if (structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName))) {
                 local.fileName = trim(arguments.uploadArgs.fileName);
+            } else {
+                local.fileName = '';
             }
             if (structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig))) {
                 local.fileNameOrig = trim(arguments.uploadArgs.fileNameOrig);
+            } else {
+                local.fileNameOrig = '';
             }
 
             // Is there a file to upload?
@@ -640,7 +377,7 @@ component displayname="globalFunctions" {
                     destination = arguments.uploadArgs.filepath,
                     nameConflict = local.nameConflict/* ,
                     accept = local.acceptFileTypesList */
-                );
+                )
                 // Second check of uploaded file. Mimetype could be spoofed.
                 if (not listFindNoCase(local.allowedFileTypesList, uploadTheFile.serverFileExt)) {
                     local.argsReturnValue['message'] = 'msgFileUploadError';
@@ -755,7 +492,7 @@ component displayname="globalFunctions" {
     // Delete a file
     public struct function deleteFile(required string path) {
 
-        //Default variables
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -775,10 +512,9 @@ component displayname="globalFunctions" {
     }
 
 
-
-    /* Check whether the user is in the range of the current tenant.
-        doingUserID: The users id which is doing things like deleting or editing.
-        customerID: The customerID from whom something must be done */
+    // Check whether the user is in the range of the current tenant.
+    // doingUserID: The users id which is doing things like deleting or editing.
+    // customerID: The customerID from whom something must be done
     public boolean function checkTenantRange(required numeric doingUserID, required numeric customerID) {
 
         local.isAllowed = false;
@@ -807,6 +543,7 @@ component displayname="globalFunctions" {
     }
 
 
+    // Clean up text (length, special chars)
     public string function cleanUpText(required string inputText, numeric maxLenght) {
 
         local.changedText = rereplace(arguments.inputText, "<|>", "", "all");
@@ -926,167 +663,6 @@ component displayname="globalFunctions" {
 
 
     }
-
-    // Get all languages
-    public query function getAllLanguages(string whereFilter) {
-
-        param name="arguments.whereFilter" default="";
-
-        local.qAllLanguages = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM languages
-                #arguments.whereFilter#
-                ORDER BY intPrio
-            "
-        )
-
-        return local.qAllLanguages;
-
-    }
-
-
-    // Get the default currency
-    public struct function getDefaultCurrency() {
-
-        local.currStruct = {};
-
-        local.qDefCurrency = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM currencies
-                WHERE blnDefault = 1
-            "
-        )
-        if (local.qDefCurrency.recordCount) {
-
-            local.currStruct['currencyID'] = local.qDefCurrency.intCurrencyID;
-            local.currStruct['iso'] = local.qDefCurrency.strCurrencyISO;
-            local.currStruct['currency_en'] = local.qDefCurrency.strCurrencyEN;
-            local.currStruct['currency'] = local.qDefCurrency.strCurrency;
-            local.currStruct['prio'] = local.qDefCurrency.intPrio;
-
-        } else {
-
-            local.currStruct['currencyID'] = 0;
-            local.currStruct['iso'] = '';
-            local.currStruct['currency_en'] = '';
-            local.currStruct['currency'] = '';
-            local.currStruct['prio'] = 0;
-
-        }
-
-
-        return local.currStruct;
-
-
-    }
-
-
-    // Get all active currencies
-    public array function getActiveCurrencies() {
-
-        local.qCurrencies = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM currencies
-                WHERE blnActive = 1
-                ORDER BY intPrio
-            "
-        )
-
-        local.currArray = arrayNew(1);
-        local.currStruct = structNew();
-
-        if (local.qCurrencies.recordCount) {
-
-            loop query= local.qCurrencies {
-
-                local.currStruct[local.qCurrencies.currentRow]['currencyID'] = local.qCurrencies.intCurrencyID;
-                local.currStruct[local.qCurrencies.currentRow]['iso'] = local.qCurrencies.strCurrencyISO;
-                local.currStruct[local.qCurrencies.currentRow]['currency_en'] = local.qCurrencies.strCurrencyEN;
-                local.currStruct[local.qCurrencies.currentRow]['currency'] = local.qCurrencies.strCurrency;
-                local.currStruct[local.qCurrencies.currentRow]['prio'] = local.qCurrencies.intPrio;
-                arrayAppend(local.currArray, local.currStruct[local.qCurrencies.currentRow]);
-
-            }
-
-        }
-
-        return local.currArray;
-
-    }
-
-
-    // Get currency of a given country
-    public struct function getCurrencyOfCountry(required any country) {
-
-        local.currencyStruct = structNew();
-
-        if (isNumeric(arguments.country)) {
-
-            local.qCurrOfCountry = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    countryID: {type: "numeric", value: arguments.country}
-                },
-                sql = "
-                    SELECT intCurrencyID, strCurrencyISO
-                    FROM currencies
-                    WHERE blnActive = 1
-                    AND strCurrencyISO =
-                    (
-                        SELECT strCurrency
-                        FROM countries
-                        WHERE intCountryID = :countryID
-                    )
-                "
-            )
-
-        } else {
-
-            local.qCurrOfCountry = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    country: {type: "varchar", value: arguments.country}
-                },
-                sql = "
-                    SELECT intCurrencyID, strCurrencyISO
-                    FROM currencies
-                    WHERE blnActive = 1
-                    AND strCurrencyISO =
-                    (
-                        SELECT strCurrency
-                        FROM countries
-                        WHERE strISO1 = :country
-                        OR strISO2 = :country
-                        OR strLocale = :country
-                        LIMIT 1
-                    )
-                "
-            )
-        }
-
-        if (local.qCurrOfCountry.recordCount) {
-
-            local.currencyStruct['currencyID'] = local.qCurrOfCountry.intCurrencyID;
-            local.currencyStruct['currency'] = local.qCurrOfCountry.strCurrencyISO;
-
-        } else {
-
-            local.currencyStruct['currencyID'] = 0;
-            local.currencyStruct['currency'] = "";
-
-        }
-
-        return local.currencyStruct;
-
-    }
-
-
 
 
     // Get the country from IP address (Yes, the user may have a VPN, but we'll ignore that for now)

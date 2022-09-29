@@ -73,27 +73,80 @@ component displayname="customer" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
-        local.countryID = 0;
-        local.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
-
-        local.company = application.objGlobal.cleanUpText(arguments.customerStruct.company, 100) ?: '';
-        local.contact = application.objGlobal.cleanUpText(arguments.customerStruct.contact, 100) ?: '';
-        local.address = application.objGlobal.cleanUpText(arguments.customerStruct.address, 100) ?: '';
-        local.address2 = application.objGlobal.cleanUpText(arguments.customerStruct.address2, 100) ?: '';
-        local.zip = application.objGlobal.cleanUpText(arguments.customerStruct.zip, 10) ?: '';
-        local.city = application.objGlobal.cleanUpText(arguments.customerStruct.city, 100) ?: '';
-        local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100) ?: '';
-        local.phone = application.objGlobal.cleanUpText(arguments.customerStruct.phone, 100) ?: '';
-        local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100) ?: '';
-        local.billing_name = application.objGlobal.cleanUpText(arguments.customerStruct.billing_name, 100) ?: '';
-        local.billing_email = application.objGlobal.cleanUpText(arguments.customerStruct.billing_email, 100) ?: '';
-        local.billing_address = application.objGlobal.cleanUpText(arguments.customerStruct.billing_address) ?: '';
-        local.billing_info = application.objGlobal.cleanUpText(arguments.customerStruct.billing_info) ?: '';
+        if (structKeyExists(arguments.customerStruct, "company")) {
+            local.company = application.objGlobal.cleanUpText(arguments.customerStruct.company, 100);
+        } else {
+            local.company = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "contact")) {
+            local.contact = application.objGlobal.cleanUpText(arguments.customerStruct.contact, 100);
+        } else {
+            local.contact = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "address")) {
+            local.address = application.objGlobal.cleanUpText(arguments.customerStruct.address, 100);
+        } else {
+            local.address = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "address2")) {
+            local.address2 = application.objGlobal.cleanUpText(arguments.customerStruct.address2, 100);
+        } else {
+            local.address2 = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "zip")) {
+            local.zip = application.objGlobal.cleanUpText(arguments.customerStruct.zip, 10);
+        } else {
+            local.zip = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "city")) {
+            local.city = application.objGlobal.cleanUpText(arguments.customerStruct.city, 100);
+        } else {
+            local.city = '';
+        }
         if (structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID)) {
             local.countryID = arguments.customerStruct.countryID;
+        } else {
+            local.countryID = 0;
         }
         if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0) {
             local.timezoneID = arguments.customerStruct.timezoneID;
+        } else {
+            local.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
+        }
+        if (structKeyExists(arguments.customerStruct, "email")) {
+            local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100);
+        } else {
+            local.email = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "phone")) {
+            local.phone = application.objGlobal.cleanUpText(arguments.customerStruct.phone, 100);
+        } else {
+            local.phone = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "website")) {
+            local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100);
+        } else {
+            local.website = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "billing_name")) {
+            local.billing_name = application.objGlobal.cleanUpText(arguments.customerStruct.billing_name, 100);
+        } else {
+            local.billing_name = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "billing_email")) {
+            local.billing_email = application.objGlobal.cleanUpText(arguments.customerStruct.billing_email, 100);
+        } else {
+            local.billing_email = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "billing_address")) {
+            local.billing_address = application.objGlobal.cleanUpText(arguments.customerStruct.billing_address);
+        } else {
+            local.billing_address = '';
+        }
+        if (structKeyExists(arguments.customerStruct, "billing_info")) {
+            local.billing_info = application.objGlobal.cleanUpText(arguments.customerStruct.billing_info);
+        } else {
+            local.billing_info = '';
         }
 
         try {
@@ -164,7 +217,7 @@ component displayname="customer" output="false" {
     // Insert tenant (only the most important data)
     public struct function insertTenant(required struct tenantStruct) {
 
-        // Default variables
+        <!--- Default variables --->
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -172,7 +225,7 @@ component displayname="customer" output="false" {
         param name="local.company_name" default="";
         param name="local.contact_person" default="";
 
-       // Needed values
+        // Needed values
         if (!structKeyExists(tenantStruct, "customerID") or !isNumeric(tenantStruct.customerID)) {
             local.argsReturnValue['message'] = "customerID not valid!";
             return local.argsReturnValue;
@@ -185,8 +238,17 @@ component displayname="customer" output="false" {
         local.customerID = tenantStruct.customerID;
         local.userID = tenantStruct.userID;
 
-        local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100) ?: '';
-        local.contact_person = application.objGlobal.cleanUpText(tenantStruct.contact_person, 100) ?: 'untitled company';
+        if (structKeyExists(arguments.tenantStruct, "company_name")) {
+            local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100);
+        } else {
+            local.company_name = '';
+        }
+
+        if (structKeyExists(arguments.tenantStruct, "contact_person")) {
+            local.contact_person = application.objGlobal.cleanUpText(tenantStruct.contact_person, 100);
+        } else {
+            local.contact_person = 'untitled company';
+        }
 
         try {
 
@@ -264,6 +326,7 @@ component displayname="customer" output="false" {
 
             local.objPrices = new com.prices();
             local.objInvoices = new com.invoices();
+            local.objCurrency = new com.currency();
             local.customerStruct = structNew();
 
             local.qCustomer = queryExecute(
@@ -309,8 +372,8 @@ component displayname="customer" output="false" {
                 local.country = application.objGlobal.getCountry(local.qCustomer.intCountryID);
                 local.countryName = local.country.strCountryName;
                 if (len(trim(local.country.strCurrency))) {
-                    local.language = application.objGlobal.getAnyLanguage(local.country.intLanguageID).iso;
-                    local.currency = local.objPrices.getCurrency(local.country.strCurrency);
+                    local.language = application.objLanguage.getAnyLanguage(local.country.intLanguageID).iso;
+                    local.currency = local.objCurrency.getCurrency(local.country.strCurrency);
                     if (isStruct(local.currency) and !structIsEmpty(local.currency)) {
                         if (local.currency.active) {
                             local.customerStruct['currencyStruct'] = local.currency;
@@ -325,7 +388,7 @@ component displayname="customer" output="false" {
                 if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
                     local.lastInvoice = arrayLast(invoiceArray);
                     local.language = local.lastInvoice.invoiceLanguage;
-                    local.currency = objPrices.getCurrency(lastInvoice.invoiceCurrency);
+                    local.currency = local.objCurrency.getCurrency(lastInvoice.invoiceCurrency);
                     if (local.currency.active) {
                         local.customerStruct['currencyStruct'] = local.currency;
                     }
@@ -334,13 +397,13 @@ component displayname="customer" output="false" {
 
             // If the currency is still empty, get default currency
             if (structIsEmpty(local.customerStruct.currencyStruct)) {
-                local.currency = objPrices.getCurrency();
+                local.currency = local.objCurrency.getCurrency();
                 local.customerStruct['currencyStruct'] = local.currency;
             }
 
             // Default language
             if (!len(trim(local.language))) {
-                local.language = application.objGlobal.getDefaultLanguage().iso;
+                local.language = application.objLanguage.getDefaultLanguage().iso;
             }
 
             local.customerStruct['language'] = local.language;
@@ -352,6 +415,7 @@ component displayname="customer" output="false" {
         }
 
     }
+
 
     // Save the current plan, the current modules and also the custom settings into a session
     public void function setProductSessions(required numeric customerID, required string language) {
@@ -365,10 +429,11 @@ component displayname="customer" output="false" {
         session.currentModules = checkModules;
 
         // Save custom settings struct into a session
-        session.customSettings = application.objGlobal.getCustomSettings(arguments.customerID);
-        
+        session.customSettings = application.objSettings.getCustomSettings(arguments.customerID);
+
     }
-    
+
+
     // Delete account right now
     public boolean function deleteAccount(required numeric customerID) {
 

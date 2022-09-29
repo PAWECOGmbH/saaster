@@ -1,10 +1,10 @@
 component displayname="invoices" output="false" {
 
-    // Create invoice number
+    <!--- Create invoice number --->
     private numeric function createInvoiceNumber(required numeric customerID) {
 
-        // Check start number
-        local.startNumber = application.objGlobal.getSetting('settingInvoiceNumberStart');
+        <!--- Check start number --->
+        local.startNumber = application.objSettings.getSetting('settingInvoiceNumberStart');
         local.nextNumber = local.startNumber;
 
         if (!isNumeric(trim(local.startNumber))) {
@@ -33,26 +33,15 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Create invoice
+    <!--- Create invoice --->
     public struct function createInvoice(required struct invoiceData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
-        
-        local.userID = "";
-        local.bookingID = 0;
-        local.prefix = application.objGlobal.getSetting('settingInvoicePrefix');
-        local.title = "";
-        local.invoiceDate = createODBCDate(now());
-        local.dueDate = createODBCDate(now()+30);
-        local.currency = application.objGlobal.getDefaultCurrency().iso;
-        local.isNet = application.objGlobal.getSetting('settingInvoiceNet');
-        local.paymentStatusID = 1;
-        local.vatType = application.objGlobal.getSetting('settingStandardVatType');
-        local.language = application.objGlobal.getDefaultLanguage().iso;
-        local.invoiceNumber = createInvoiceNumber(local.customerID);
-        
+
+        local.objCurrency = new com.currency();
+
         if (structKeyExists(invoiceData, "customerID") and isNumeric(invoiceData.customerID)) {
             local.customerID = invoiceData.customerID;
         } else {
@@ -61,44 +50,67 @@ component displayname="invoices" output="false" {
         }
         if (structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID)) {
             local.userID = invoiceData.userID;
+        } else {
+            local.userID = "";
         }
         if (structKeyExists(invoiceData, "bookingID") and isNumeric(invoiceData.bookingID)) {
             local.bookingID = invoiceData.bookingID;
+        } else {
+            local.bookingID = 0;
         }
+        local.invoiceNumber = createInvoiceNumber(local.customerID);
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
+        } else {
+            local.prefix = application.objSettings.getSetting('settingInvoicePrefix');
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
+        } else {
+            local.title = "";
         }
         if (structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate)) {
             local.invoiceDate = invoiceData.invoiceDate;
+        } else {
+            local.invoiceDate = createODBCDate(now());
         }
         if (structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate)) {
             local.dueDate = invoiceData.dueDate;
+        } else {
+            local.dueDate = createODBCDate(now()+30);
         }
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
+        } else {
+            local.currency = local.objCurrency.get().iso;
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
+        } else {
+            local.isNet = application.objSettings.getSetting('settingInvoiceNet');
         }
         if (structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0) {
             local.paymentStatusID = invoiceData.paymentStatusID;
+        } else {
+            local.paymentStatusID = 1;
         }
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
+        } else {
+            local.vatType = application.objSettings.getSetting('settingStandardVatType');
         }
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
             local.language = invoiceData.language;
+        } else {
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
-        
+
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -145,12 +157,14 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Update invoice
+    <!--- Update invoice --->
     public struct function updateInvoice(required struct invoiceData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
+
+        local.objCurrency = new com.currency();
 
         if (structKeyExists(invoiceData, "invoiceID") and isNumeric(invoiceData.invoiceID)) {
             local.invoiceID = invoiceData.invoiceID;
@@ -158,50 +172,55 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No invoiceID found!";
             return local.argsReturnValue;
         }
-
         local.customerID = new com.invoices().getInvoiceData(local.invoiceID).customerID;
-        local.userID = "";
-        local.title = "";
-        local.invoiceDate = createODBCDate(now());
-        local.dueDate = createODBCDate(now()+30);
-        local.currency = IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
-        local.isNet = application.objGlobal.getSetting('settingStandardNet');
-        local.vatType = application.objGlobal.getSetting('settingStandardVatType');
-        local.language = application.objGlobal.getDefaultLanguage().iso;
-
         if (structKeyExists(invoiceData, "userID") and isNumeric(invoiceData.userID)) {
             local.userID = invoiceData.userID;
+        } else {
+           local.userID = "";
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
+        } else {
+            local.title = "";
         }
         if (structKeyExists(invoiceData, "invoiceDate") and isDate(invoiceData.invoiceDate)) {
             local.invoiceDate = invoiceData.invoiceDate;
+        } else {
+            local.invoiceDate = createODBCDate(now());
         }
         if (structKeyExists(invoiceData, "dueDate") and isDate(invoiceData.dueDate)) {
             local.dueDate = invoiceData.dueDate;
+        } else {
+            local.dueDate = createODBCDate(now()+30);
         }
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
+        } else {
+            local.currency = IIF(len(trim(local.objCurrency.getCurrency().iso)), local.objCurrency.getCurrency().iso, 'USD');
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
+        } else {
+            local.isNet = application.objSettings.getSetting('settingStandardNet');
         }
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
+        } else {
+            local.vatType = application.objSettings.getSetting('settingStandardVatType');
         }
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
             local.language = invoiceData.language;
+        } else {
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
 
-        
-        // Total text
+        <!--- Total text --->
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -245,7 +264,7 @@ component displayname="invoices" output="false" {
 
         }
 
-        // Recalculating
+        <!--- Recalculating --->
         local.recalc = recalculateInvoice(local.invoiceID);
 
 
@@ -281,7 +300,7 @@ component displayname="invoices" output="false" {
 
 
 
-    // Insert invoice positions
+    <!--- Insert invoice positions --->
     public struct function insertInvoicePositions(required struct invoicePosData) {
 
         local.argsReturnValue = structNew();
@@ -310,7 +329,7 @@ component displayname="invoices" output="false" {
             local.append = arguments.invoicePosData.append;
         }
 
-        // Do we have to delete all positions first?
+        <!--- Do we have to delete all positions first? --->
         if (!local.append) {
 
             queryExecute(
@@ -328,7 +347,7 @@ component displayname="invoices" output="false" {
 
         } else {
 
-            // Get the last position of this invoice
+            <!--- Get the last position of this invoice --->
             qNextPosNumber = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -340,9 +359,12 @@ component displayname="invoices" output="false" {
                     WHERE intInvoiceID = :invoiceID
                 "
             )
-            
-            local.thisPosition = qNextPosNumber.recordCount and isNumeric(qNextPosNumber.posNumber) ? qNextPosNumber.posNumber : 0;
-            
+
+            if (qNextPosNumber.recordCount and isNumeric(qNextPosNumber.posNumber)) {
+                local.thisPosition = qNextPosNumber.posNumber;
+            } else {
+                local.thisPosition = 0;
+            }
 
         }
 
@@ -354,15 +376,43 @@ component displayname="invoices" output="false" {
 
                 local.thisPosition++;
 
-                local.title = structKeyExists(pos, "title") and len(trim(pos.title)) ? left(pos.title, 255) : "";
-                local.description = structKeyExists(pos, "description") and len(trim(pos.description)) ? left(pos.description, 1000) : "";
-                local.single_price = structKeyExists(pos, "price") and isNumeric(pos.price) ? pos.price : 0;
-                local.quantity = structKeyExists(pos, "quantity") and isNumeric(pos.quantity) ? pos.quantity : 1;
-                local.unit = structKeyExists(pos, "unit") and len(trim(pos.unit)) ? left(pos.unit, 20) : "";
-                local.discountPercent = structKeyExists(pos, "discountPercent") and isNumeric(pos.discountPercent) ? pos.discountPercent : 0;
-                local.vat = structKeyExists(pos, "vat") and isNumeric(pos.vat) ? pos.vat : 0;
+                if (structKeyExists(pos, "title") and len(trim(pos.title))) {
+                    local.title = left(pos.title, 255);
+                } else {
+                    local.title = "";
+                }
+                if (structKeyExists(pos, "description") and len(trim(pos.description))) {
+                    local.description = left(pos.description, 1000);
+                } else {
+                    local.description = "";
+                }
+                if (structKeyExists(pos, "price") and isNumeric(pos.price)) {
+                    local.single_price = pos.price;
+                } else {
+                    local.single_price = 0;
+                }
+                if (structKeyExists(pos, "quantity") and isNumeric(pos.quantity)) {
+                    local.quantity = pos.quantity;
+                } else {
+                    local.quantity = 1;
+                }
+                if (structKeyExists(pos, "unit") and len(trim(pos.unit))) {
+                    local.unit = left(pos.unit, 20);
+                } else {
+                    local.unit = "";
+                }
+                if (structKeyExists(pos, "discountPercent") and isNumeric(pos.discountPercent)) {
+                    local.discountPercent = pos.discountPercent;
+                } else {
+                    local.discountPercent = 0;
+                }
+                if (structKeyExists(pos, "vat") and isNumeric(pos.vat)) {
+                    local.vat = pos.vat;
+                } else {
+                    local.vat = 0;
+                }
 
-                // Calculate discount (percent)
+                <!--- Calculate discount (percent) --->
                 if (local.discountPercent gt 0) {
 
                     local.discount = local.single_price*local.discountPercent/100;
@@ -370,7 +420,7 @@ component displayname="invoices" output="false" {
 
                     local.price = round((local.new_price*local.quantity), 2);
 
-                // No discount
+                <!--- No discount --->
                 } else {
 
                     local.price = round((local.single_price*local.quantity), 2);
@@ -379,7 +429,7 @@ component displayname="invoices" output="false" {
 
                 try {
 
-                    // Insert position
+                    <!--- Insert position --->
                     qNextPosNumber = queryExecute(
                         options = {datasource = application.datasource},
                         params = {
@@ -412,7 +462,7 @@ component displayname="invoices" output="false" {
 
             }
 
-            // Recalculating
+            <!--- Recalculating --->
             local.recalc = recalculateInvoice(local.invoiceID);
 
             if (local.recalc.success) {
@@ -434,7 +484,7 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Update position
+    <!--- Update position --->
     public struct function updatePosition(required struct invoicePosData) {
 
         local.argsReturnValue = structNew();
@@ -468,42 +518,48 @@ component displayname="invoices" output="false" {
             return local.argsReturnValue;
         }
 
-        local.title = "";
-        local.description = "";
-        local.single_price = 0;
-        local.quantity = 1;
-        local.unit = "";
-        local.discountPercent = 0;
-        local.vat = 0;
-        local.pos = 0;
-
         if (structKeyExists(arguments.invoicePosData, "title") and len(trim(arguments.invoicePosData.title))) {
             local.title = left(arguments.invoicePosData.title, 255);
+        } else {
+            local.title = "";
         }
         if (structKeyExists(arguments.invoicePosData, "description") and len(trim(arguments.invoicePosData.description))) {
             local.description = left(arguments.invoicePosData.description, 1000);
+        } else {
+            local.description = "";
         }
         if (structKeyExists(arguments.invoicePosData, "price") and isNumeric(arguments.invoicePosData.price)) {
             local.single_price = arguments.invoicePosData.price;
+        } else {
+            local.single_price = 0;
         }
         if (structKeyExists(arguments.invoicePosData, "quantity") and isNumeric(arguments.invoicePosData.quantity)) {
             local.quantity = arguments.invoicePosData.quantity;
+        } else {
+            local.quantity = 1;
         }
         if (structKeyExists(arguments.invoicePosData, "unit") and len(trim(arguments.invoicePosData.unit))) {
             local.unit = left(arguments.invoicePosData.unit, 20);
+        } else {
+            local.unit = "";
         }
         if (structKeyExists(arguments.invoicePosData, "discountPercent") and isNumeric(arguments.invoicePosData.discountPercent)) {
             local.discountPercent = arguments.invoicePosData.discountPercent;
+        } else {
+            local.discountPercent = 0;
         }
         if (structKeyExists(arguments.invoicePosData, "vat") and isNumeric(arguments.invoicePosData.vat)) {
             local.vat = arguments.invoicePosData.vat;
+        } else {
+            local.vat = 0;
         }
         if (structKeyExists(arguments.invoicePosData, "pos") and isNumeric(arguments.invoicePosData.pos)) {
             local.pos = arguments.invoicePosData.pos;
+        } else {
+            local.pos = 0;
         }
-        
 
-        // Calculate discount (percent)
+        <!--- Calculate discount (percent) --->
         if (local.discountPercent gt 0) {
 
             local.discount = local.single_price*local.discountPercent/100;
@@ -511,14 +567,14 @@ component displayname="invoices" output="false" {
 
             local.price = round((local.new_price*local.quantity), 2);
 
-        // No discount
+        <!--- No discount --->
         } else {
 
             local.price = round((local.single_price*local.quantity), 2);
 
         }
 
-        // Update position
+        <!--- Update position --->
         qNextPosNumber = queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -549,7 +605,7 @@ component displayname="invoices" output="false" {
         )
 
 
-        // Recalculating
+        <!--- Recalculating --->
         local.recalc = recalculateInvoice(local.invoiceID);
 
         if (local.recalc.success) {
@@ -563,7 +619,7 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Delete position
+    <!--- Delete position --->
     public struct function deletePosition(required numeric posID) {
 
         local.argsReturnValue = structNew();
@@ -608,7 +664,7 @@ component displayname="invoices" output="false" {
                 )
 
 
-                // Recalculating
+                <!--- Recalculating --->
                 local.recalc = recalculateInvoice(local.qInvoice.intInvoiceID);
 
                 if (local.recalc.success) {
@@ -633,7 +689,7 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Recalculate the invoice
+    <!--- Recalculate the invoice --->
     public struct function recalculateInvoice(required numeric invoiceID) {
 
         local.argsReturnValue = structNew();
@@ -653,11 +709,11 @@ component displayname="invoices" output="false" {
             "
         )
 
-        // Get language from the first entry in positions
+        <!--- Get language from the first entry in positions --->
         local.customerLng = qInvoicePositions.strLanguageISO;
 
 
-        // Delete vat table
+        <!--- Delete vat table --->
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -674,21 +730,21 @@ component displayname="invoices" output="false" {
 
         if (qInvoicePositions.recordcount and len(trim(qInvoicePositions.decTotalPrice))) {
 
-            // Loop over all positions
+            <!--- Loop over all positions --->
             cfloop(query="qInvoicePositions") {
 
-                // Calc prices
+                <!--- Calc prices --->
                 local.vat_amount = calcVat(qInvoicePositions.decTotalPrice, qInvoicePositions.blnIsNet, qInvoicePositions.decVat);
                 local.vat_total = local.vat_total + local.vat_amount;
                 local.subtotal_price = local.subtotal_price + qInvoicePositions.decTotalPrice;
 
-                // Define vat text and sum
+                <!--- Define vat text and sum --->
                 if (qInvoicePositions.blnIsNet eq 1) {
-                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
+                    local.vat_text = application.objLanguage.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 } else {
-                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
+                    local.vat_text = application.objLanguage.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 }
-                
+
                 if (qInvoicePositions.intVatType eq 1) {
 
                     queryExecute(
@@ -711,32 +767,32 @@ component displayname="invoices" output="false" {
 
         }
 
-        // Round subtotal according to the setting
-        local.subtotal_price = roundAmount(local.subtotal_price, application.objGlobal.getSetting('settingRoundFactor'));
+        <!--- Round subtotal according to the setting --->
+        local.subtotal_price = roundAmount(local.subtotal_price, application.objSettings.getSetting('settingRoundFactor'));
 
-        // Add up subtotal and vat
+        <!--- Add up subtotal and vat --->
         if (qInvoicePositions.blnIsNet eq 1) {
             local.total_price = local.subtotal_price + local.vat_total;
         } else {
             local.total_price = local.subtotal_price;
         }
 
-        // Round total according to the setting
-        local.total_price = roundAmount(local.total_price, application.objGlobal.getSetting('settingRoundFactor'));
+        <!--- Round total according to the setting --->
+        local.total_price = roundAmount(local.total_price, application.objSettings.getSetting('settingRoundFactor'));
 
-        // Define total text
+        <!--- Define total text --->
         if (qInvoicePositions.intVatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.customerLng);
         } else if (qInvoicePositions.intVatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.customerLng);
             local.total_price = local.subtotal_price;
         } else {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.customerLng);
             local.total_price = local.subtotal_price;
         }
 
 
-        // Update invoice
+        <!--- Update invoice --->
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -760,7 +816,7 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Calculating vat
+    <!--- Calculating vat --->
     public numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
 
         if (arguments.isNet eq 0) {
@@ -774,21 +830,25 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Round prices depending on settings
+    <!--- Round prices depending on settings --->
     public numeric function roundAmount(required numeric amount, required numeric factor) {
 
-        local.rounded_price = arguments.factor eq 5 ? round(arguments.amount*20)/20 : numberFormat(arguments.amount, "__.__");
+        if (arguments.factor eq 5) {
+            local.rounded_price = round(arguments.amount*20)/20;
+        } else {
+            local.rounded_price = numberFormat(arguments.amount, "__.__");
+        }
 
         return local.rounded_price;
 
     }
 
-    // Get customers invoices
+    <!--- Get customers invoices --->
     public struct function getInvoices(required numeric customerID, numeric start, numeric count, string order) {
 
         local.queryLimit;
         local.queryOrder;
-        
+
         if (structKeyExists(arguments, "start") and structKeyExists(arguments, "count")){
             local.queryLimit = "LIMIT #arguments.start#, #arguments.count#"
         }
@@ -874,7 +934,7 @@ component displayname="invoices" output="false" {
         return local.structInvoices;
     }
 
-    // Get invoice data
+    <!--- Get invoice data --->
     public struct function getInvoiceData(required numeric invoiceID) {
 
         local.invoiceInfo = structNew();
@@ -910,7 +970,7 @@ component displayname="invoices" output="false" {
                 local.invoiceInfo['total'] = qInvoice.decTotalPrice;
                 local.invoiceInfo['totaltext'] = qInvoice.strTotalText;
                 local.invoiceInfo['language'] = qInvoice.strLanguageISO;
-                local.invoiceInfo['paymentstatus'] = application.objGlobal.getTrans(qInvoice.strInvoiceStatusVariable);
+                local.invoiceInfo['paymentstatus'] = application.objLanguage.getTrans(qInvoice.strInvoiceStatusVariable);
                 local.invoiceInfo['paymentstatusVar'] = qInvoice.strInvoiceStatusVariable;
                 local.invoiceInfo['paymentstatusID'] = qInvoice.intPaymentStatusID;
                 local.invoiceInfo['paymentstatusColor'] = qInvoice.strColor;
@@ -1003,7 +1063,7 @@ component displayname="invoices" output="false" {
 
     }
 
-    // Get invoice payments
+    <!--- Get invoice payments --->
     public query function getInvoicePayments(required numeric invoiceID) {
 
         if (arguments.invoiceID gt 0) {
@@ -1028,11 +1088,11 @@ component displayname="invoices" output="false" {
     }
 
 
-    // Get the colored invoice status badge
+    <!--- Get the colored invoice status badge --->
     public string function getInvoiceStatusBadge(required string language, required string color, required string variable) {
 
         cfsavecontent (variable="local.htmlForBadge") {
-            echo("<span class='badge bg-#arguments.color#'>#application.objGlobal.getTrans(arguments.variable, arguments.language)#</span>")
+            echo("<span class='badge bg-#arguments.color#'>#application.objLanguage.getTrans(arguments.variable, arguments.language)#</span>")
         }
 
         return local.htmlForBadge;
@@ -1040,7 +1100,7 @@ component displayname="invoices" output="false" {
     }
 
 
-    // Insert payment
+    <!--- Insert payment --->
     public struct function insertPayment(required struct paymentStruct) {
 
         local.argsReturnValue = structNew();
@@ -1059,13 +1119,25 @@ component displayname="invoices" output="false" {
             local.argsReturnValue['message'] = "No valid amount found!";
             return local.argsReturnValue;
         }
+        if (structKeyExists(arguments.paymentStruct, "type")) {
+            local.type = paymentStruct.type;
+        } else {
+            local.type = "";
+        }
+        if (structKeyExists(arguments.paymentStruct, "customerID")) {
+            local.customerID = paymentStruct.customerID;
+        } else {
+            local.customerID = 0;
+        }
+        if (structKeyExists(arguments.paymentStruct, "payrexxID")) {
+            local.payrexxID = paymentStruct.payrexxID;
+        } else {
+            local.payrexxID = 0;
+        }
 
-        local.type = arguments.paymentStruct.type ?: "";
-        local.customerID = arguments.paymentStruct.customerID ?: 0;
-        local.payrexxID = arguments.paymentStruct.payrexxID ?: 0;
-        local.invoiceID = arguments.paymentStruct.invoiceID;
-        local.date = arguments.paymentStruct.date;
-        local.amount = arguments.paymentStruct.amount;
+        local.invoiceID = paymentStruct.invoiceID;
+        local.date = paymentStruct.date;
+        local.amount = paymentStruct.amount;
 
         try {
 
@@ -1103,7 +1175,7 @@ component displayname="invoices" output="false" {
     }
 
 
-    // Delete payment
+    <!--- Delete payment --->
     public any function deletePayment(required numeric paymentID) {
 
         local.qInvoice = queryExecute(
@@ -1381,7 +1453,7 @@ component displayname="invoices" output="false" {
         local.returnValue['success'] = false;
         local.returnValue['message'] = "";
 
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
 
         local.invoiceID = arguments.invoiceID;
 
@@ -1416,7 +1488,11 @@ component displayname="invoices" output="false" {
 
             // Get the invoicing email address
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
-            local.toEmail = len(trim(local.customerData.billingEmail)) ? local.customerData.billingEmail : local.customerData.email;
+            if (len(trim(local.customerData.billingEmail))) {
+                local.toEmail = local.customerData.billingEmail;
+            } else {
+                local.toEmail = local.customerData.email;
+            }
 
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
@@ -1445,7 +1521,7 @@ component displayname="invoices" output="false" {
                 ");
             }
 
-            // Send activation link
+            <!--- Send activation link --->
             mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady')#" type="html" {
                 include "/includes/mail_design.cfm";
             }
@@ -1472,7 +1548,7 @@ component displayname="invoices" output="false" {
         local.returnValue['success'] = false;
         local.returnValue['message'] = "";
 
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
 
         local.invoiceID = arguments.invoiceID;
 
@@ -1489,7 +1565,11 @@ component displayname="invoices" output="false" {
 
             // Get the invoicing email address
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
-            local.toEmail = len(trim(local.customerData.billingEmail)) ? local.customerData.billingEmail : local.customerData.email;
+            if (len(trim(local.customerData.billingEmail))) {
+                local.toEmail = local.customerData.billingEmail;
+            } else {
+                local.toEmail = local.customerData.email;
+            }
 
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
@@ -1519,7 +1599,7 @@ component displayname="invoices" output="false" {
                 ");
             }
 
-            // Send activation link
+            <!--- Send activation link --->
             mail to="#local.toEmail#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
                 include "/includes/mail_design.cfm";
             }
