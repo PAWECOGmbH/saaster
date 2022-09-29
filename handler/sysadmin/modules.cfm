@@ -34,8 +34,8 @@ if (structKeyExists(form, "new_module")) {
         newModuleID = newID.generatedkey;
 
         // Get default values
-        standardVatType = application.objGlobal.getSetting('settingStandardVatType');
-        invoiceNet = application.objGlobal.getSetting('settingInvoiceNet');
+        standardVatType = application.objSettings.getSetting('settingStandardVatType');
+        invoiceNet = application.objSettings.getSetting('settingInvoiceNet');
 
         // Get active currencies
         qCurrencies = queryExecute(

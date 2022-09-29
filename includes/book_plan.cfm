@@ -28,7 +28,7 @@
 
     objPlans = new com.plans(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
     objPayrexx = new com.payrexx();
-    getAnyLanguage = application.objGlobal.getAnyLanguage;
+    getAnyLanguage = application.objLanguage.getAnyLanguage;
 
     // As we have all the infos, save it into variables
     planID = planStruct.planID;

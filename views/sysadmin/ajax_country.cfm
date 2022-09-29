@@ -31,7 +31,7 @@
         WHERE blnActive = 1
     </cfquery>
 
-    <cfset qLanguages = application.objGlobal.getAllLanguages()>
+    <cfset qLanguages = application.objLanguage.getAllLanguages()>
     <cfset timeZones = new com.time(session.customer_id).getTimezones()>
 
     <cfoutput>

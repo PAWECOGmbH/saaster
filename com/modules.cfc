@@ -7,13 +7,15 @@ component displayname="modules" output="false" {
         param name="variables.language" default="";
         param name="variables.currencyID" default=0;
 
+        local.objCurrency = new com.currency();
+
         // Set variables by arguments
         if (structKeyExists(arguments, "lngID") and arguments.lngID gt 0) {
             variables.lngID = arguments.lngID;
-            variables.language = application.objGlobal.getAnyLanguage(variables.lngID).iso;
+            variables.language = application.objLanguage.getAnyLanguage(variables.lngID).iso;
         } else if (structKeyExists(arguments, "language")) {
             variables.language = arguments.language;
-            variables.lngID = application.objGlobal.getAnyLanguage(variables.language).lngID;
+            variables.lngID = application.objLanguage.getAnyLanguage(variables.language).lngID;
         }
         if (structKeyExists(arguments, "currencyID") and arguments.currencyID gt 0) {
             variables.currencyID = arguments.currencyID;
@@ -21,13 +23,13 @@ component displayname="modules" output="false" {
 
         // Set variables by default settings
         if (!len(variables.language)) {
-            variables.language = application.objGlobal.getDefaultLanguage().iso;
+            variables.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (variables.lngID eq 0) {
-            variables.lngID = application.objGlobal.getDefaultLanguage().lngID;
+            variables.lngID = application.objLanguage.getDefaultLanguage().lngID;
         }
         if (variables.currencyID eq 0) {
-            variables.currencyID = application.objGlobal.getDefaultCurrency().currencyID;
+            variables.currencyID = local.objCurrency.getCurrency().id;
         }
 
         return this;

@@ -1,5 +1,5 @@
 <cfscript>
-    qLanguages = application.objGlobal.getAllLanguages();
+    qLanguages = application.objLanguage.getAllLanguages();
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -118,7 +118,7 @@
                                                 </form>
                                             </div>
                                         </div>
-                                        
+
                                     </cfloop>
                                     </tbody>
                                     <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>

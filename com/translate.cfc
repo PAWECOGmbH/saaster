@@ -72,7 +72,7 @@ component displayname="translate" accessors="true" {
         local.transTable = variables.thisTable & "_trans";
 
         // Loop over existing languages exept the default language
-        local.getLng = application.objGlobal.getAllLanguages('WHERE blnDefault = 0');
+        local.getLng = application.objLanguage.getAllLanguages('WHERE blnDefault = 0');
 
 
         loop query = local.getLng {

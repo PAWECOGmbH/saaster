@@ -4,7 +4,7 @@ component displayname="invoices" output="false" {
     private numeric function createInvoiceNumber(required numeric customerID) {
 
         <!--- Check start number --->
-        local.startNumber = application.objGlobal.getSetting('settingInvoiceNumberStart');
+        local.startNumber = application.objSettings.getSetting('settingInvoiceNumberStart');
         local.nextNumber = local.startNumber;
 
         if (!isNumeric(trim(local.startNumber))) {
@@ -40,6 +40,8 @@ component displayname="invoices" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
+        local.objCurrency = new com.currency();
+
         if (structKeyExists(invoiceData, "customerID") and isNumeric(invoiceData.customerID)) {
             local.customerID = invoiceData.customerID;
         } else {
@@ -60,7 +62,7 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "prefix") and len(trim(invoiceData.prefix))) {
             local.prefix = left(invoiceData.prefix, 20);
         } else {
-            local.prefix = application.objGlobal.getSetting('settingInvoicePrefix');
+            local.prefix = application.objSettings.getSetting('settingInvoicePrefix');
         }
         if (structKeyExists(invoiceData, "title") and len(trim(invoiceData.title))) {
             local.title = left(invoiceData.title, 50);
@@ -80,12 +82,12 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
         } else {
-            local.currency = application.objGlobal.getDefaultCurrency().iso;
+            local.currency = local.objCurrency.get().iso;
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = application.objGlobal.getSetting('settingInvoiceNet');
+            local.isNet = application.objSettings.getSetting('settingInvoiceNet');
         }
         if (structKeyExists(invoiceData, "paymentStatusID") and isNumeric(invoiceData.paymentStatusID) and invoiceData.paymentStatusID <= 5 and invoiceData.paymentStatusID > 0) {
             local.paymentStatusID = invoiceData.paymentStatusID;
@@ -95,20 +97,20 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = application.objGlobal.getSetting('settingStandardVatType');
+            local.vatType = application.objSettings.getSetting('settingStandardVatType');
         }
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
             local.language = invoiceData.language;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
 
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -162,6 +164,8 @@ component displayname="invoices" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
+        local.objCurrency = new com.currency();
+
         if (structKeyExists(invoiceData, "invoiceID") and isNumeric(invoiceData.invoiceID)) {
             local.invoiceID = invoiceData.invoiceID;
         } else {
@@ -192,31 +196,31 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "currency") and len(trim(invoiceData.currency))) {
             local.currency = left(invoiceData.currency, 3);
         } else {
-            local.currency = IIF(len(trim(application.objGlobal.getDefaultCurrency().iso)), application.objGlobal.getDefaultCurrency().iso, 'USD');
+            local.currency = IIF(len(trim(local.objCurrency.getCurrency().iso)), local.objCurrency.getCurrency().iso, 'USD');
         }
         if (structKeyExists(invoiceData, "isNet") and isBoolean(invoiceData.isNet)) {
             local.isNet = invoiceData.isNet;
         } else {
-            local.isNet = application.objGlobal.getSetting('settingStandardNet');
+            local.isNet = application.objSettings.getSetting('settingStandardNet');
         }
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         } else {
-            local.vatType = application.objGlobal.getSetting('settingStandardVatType');
+            local.vatType = application.objSettings.getSetting('settingStandardVatType');
         }
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
             local.language = invoiceData.language;
         } else {
-            local.language = application.objGlobal.getDefaultLanguage().iso;;
+            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
 
         <!--- Total text --->
         if (local.vatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
         } else if (local.vatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.language);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
         } else if (local.vatType eq 3) {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.language);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
         } else {
             local.total_text = "Total";
         }
@@ -736,9 +740,9 @@ component displayname="invoices" output="false" {
 
                 <!--- Define vat text and sum --->
                 if (qInvoicePositions.blnIsNet eq 1) {
-                    local.vat_text = application.objGlobal.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
+                    local.vat_text = application.objLanguage.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 } else {
-                    local.vat_text = application.objGlobal.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
+                    local.vat_text = application.objLanguage.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
                 }
 
                 if (qInvoicePositions.intVatType eq 1) {
@@ -764,7 +768,7 @@ component displayname="invoices" output="false" {
         }
 
         <!--- Round subtotal according to the setting --->
-        local.subtotal_price = roundAmount(local.subtotal_price, application.objGlobal.getSetting('settingRoundFactor'));
+        local.subtotal_price = roundAmount(local.subtotal_price, application.objSettings.getSetting('settingRoundFactor'));
 
         <!--- Add up subtotal and vat --->
         if (qInvoicePositions.blnIsNet eq 1) {
@@ -774,16 +778,16 @@ component displayname="invoices" output="false" {
         }
 
         <!--- Round total according to the setting --->
-        local.total_price = roundAmount(local.total_price, application.objGlobal.getSetting('settingRoundFactor'));
+        local.total_price = roundAmount(local.total_price, application.objSettings.getSetting('settingRoundFactor'));
 
         <!--- Define total text --->
         if (qInvoicePositions.intVatType eq 1) {
-            local.total_text = application.objGlobal.getTrans('txtTotalIncl', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.customerLng);
         } else if (qInvoicePositions.intVatType eq 2) {
-            local.total_text = application.objGlobal.getTrans('txtTotalExcl', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.customerLng);
             local.total_price = local.subtotal_price;
         } else {
-            local.total_text = application.objGlobal.getTrans('txtExemptTax', local.customerLng);
+            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.customerLng);
             local.total_price = local.subtotal_price;
         }
 
@@ -966,7 +970,7 @@ component displayname="invoices" output="false" {
                 local.invoiceInfo['total'] = qInvoice.decTotalPrice;
                 local.invoiceInfo['totaltext'] = qInvoice.strTotalText;
                 local.invoiceInfo['language'] = qInvoice.strLanguageISO;
-                local.invoiceInfo['paymentstatus'] = application.objGlobal.getTrans(qInvoice.strInvoiceStatusVariable);
+                local.invoiceInfo['paymentstatus'] = application.objLanguage.getTrans(qInvoice.strInvoiceStatusVariable);
                 local.invoiceInfo['paymentstatusVar'] = qInvoice.strInvoiceStatusVariable;
                 local.invoiceInfo['paymentstatusID'] = qInvoice.intPaymentStatusID;
                 local.invoiceInfo['paymentstatusColor'] = qInvoice.strColor;
@@ -1088,7 +1092,7 @@ component displayname="invoices" output="false" {
     public string function getInvoiceStatusBadge(required string language, required string color, required string variable) {
 
         cfsavecontent (variable="local.htmlForBadge") {
-            echo("<span class='badge bg-#arguments.color#'>#application.objGlobal.getTrans(arguments.variable, arguments.language)#</span>")
+            echo("<span class='badge bg-#arguments.color#'>#application.objLanguage.getTrans(arguments.variable, arguments.language)#</span>")
         }
 
         return local.htmlForBadge;
@@ -1449,7 +1453,7 @@ component displayname="invoices" output="false" {
         local.returnValue['success'] = false;
         local.returnValue['message'] = "";
 
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
 
         local.invoiceID = arguments.invoiceID;
 
@@ -1544,7 +1548,7 @@ component displayname="invoices" output="false" {
         local.returnValue['success'] = false;
         local.returnValue['message'] = "";
 
-        getTrans = application.objGlobal.getTrans;
+        getTrans = application.objLanguage.getTrans;
 
         local.invoiceID = arguments.invoiceID;
 

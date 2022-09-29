@@ -13,7 +13,7 @@
 
     // Customers currency
     custCurrency = getCustomer.currencyStruct.iso;
-    custCurrencyID = new com.prices().getCurrency(custCurrency).id;
+    custCurrencyID = new com.currency().getCurrency(custCurrency).id;
 
     if (!isStruct(getCustomer) or structIsEmpty(getCustomer)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
@@ -116,7 +116,7 @@
                                         <div class="avatar avatar-xl me-3 align-self-center">
                                             #left(getCustomer.contactPerson,2)#
                                         </div>
-                                    </cfif>  
+                                    </cfif>
                                 </cfif>
                                 <cfif len(trim(getCustomer.companyName))>
                                     <div class="align-self-center">
@@ -124,7 +124,7 @@
                                     </div>
                                 <cfelse>
                                     <div class="align-self-center">
-                                        <h2>#getCustomer.contactPerson# (Private)</h2> 
+                                        <h2>#getCustomer.contactPerson# (Private)</h2>
                                     </div>
                                 </cfif>
                             </div>

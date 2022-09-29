@@ -73,7 +73,7 @@ component displayname="book" output="false" {
             local.chargeInvoice = false;
         }
 
-        local.getTrans = application.objGlobal.getTrans;
+        local.getTrans = application.objLanguage.getTrans;
         local.bookingData = arguments.bookingData;
         local.startDate = "";
         local.endDate = "";
@@ -105,7 +105,7 @@ component displayname="book" output="false" {
         if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
             local.currencyID = local.bookingData.currencyID;
         } else {
-            local.currencyID = getCurrency().id;
+            local.currencyID = new com.currency().getCurrency().id;
         }
 
 

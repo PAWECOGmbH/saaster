@@ -7,7 +7,7 @@
                 <i class="fas fa-globe"></i>
             </span>
             <span class="nav-link-title d-none d-sm-none d-md-block">
-                #application.objGlobal.getAnyLanguage(session.lng).language#
+                #application.objLanguage.getAnyLanguage(session.lng).language#
             </span>
         </a>
         <div class="dropdown-menu lng-dropdown">

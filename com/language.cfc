@@ -2,6 +2,91 @@
 component displayname="language" output="false" {
 
 
+    // Initialising the language variables
+    public struct function initLanguages() {
+
+        // Get all languages in the database
+        local.qLanguages = getAllLanguages();
+
+        loop query="local.qLanguages" {
+
+            local.langIso = local.qLanguages.strLanguageISO
+            local.language[local.langIso] = structNew();
+
+            // Get translations of the language
+            local.qTranslations = queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT strVariable, strString#local.langIso#
+                    FROM system_translations
+                "
+            )
+
+            local.translations = structNew();
+            loop query="local.qTranslations" {
+                local.translations[qTranslations.strVariable] = qTranslations['strString' & local.langIso];
+            }
+
+            local.language[local.langIso] = local.translations;
+
+        }
+
+
+        return local.language;
+
+
+    }
+
+
+    // Get all languages
+    public query function getAllLanguages(string whereFilter) {
+
+        param name="arguments.whereFilter" default="";
+
+        local.qAllLanguages = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM languages
+                #arguments.whereFilter#
+                ORDER BY intPrio
+            "
+        )
+
+        return local.qAllLanguages;
+
+    }
+
+
+    // Translations
+    public string function getTrans(required string stringToTrans, string thisLanguage) {
+
+        local.translatedString = "--undefined--";
+
+        if (structKeyExists(arguments, "thisLanguage") and len(trim(arguments.thisLanguage))) {
+            local.thisLang = arguments.thisLanguage;
+        } else if (structKeyExists(session, "lng")) {
+            local.thisLang = session.lng;
+        } else {
+            local.thisLang = application.getLanguage.iso;
+        }
+
+        if (structKeyExists(application.langStruct, local.thisLang)) {
+            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
+        } else {
+            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
+        }
+
+        if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
+            local.translatedString = local.searchString[1].value;
+        }
+
+        return local.translatedString;
+
+
+    }
+
+
     // Get the language of the browser and return language and code
     public struct function getBrowserLng(required string browserInfo) {
 
@@ -25,6 +110,91 @@ component displayname="language" output="false" {
     }
 
 
+    // Get the default language as struct
+    public struct function getDefaultLanguage() {
+
+        local.defaultLanguage = structNew();
+        local.defaultLanguage['lngID'] = "1";
+        local.defaultLanguage['iso'] = "en";
+        local.defaultLanguage['lngEN'] = "English";
+        local.defaultLanguage['language'] = "English";
+
+        qDefLng = queryExecute(
+
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
+                FROM languages
+                WHERE blnDefault = 1
+            "
+        )
+
+        if (qDefLng.recordCount) {
+
+            local.defaultLanguage['lngID'] = qDefLng.intLanguageID;
+            local.defaultLanguage['iso'] = qDefLng.strLanguageISO;
+            local.defaultLanguage['lngEN'] = qDefLng.strLanguageEN;
+            local.defaultLanguage['language'] = qDefLng.strLanguage;
+
+        }
+
+        return local.defaultLanguage;
+
+    }
+
+
+    // Get language from iso or id
+    public struct function getAnyLanguage(any reqLng) {
+
+        if (structKeyExists(arguments, "reqLng")) {
+
+            if ( isNumeric(arguments.reqLng) ) {
+
+                local.qGetLanguage = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        lngID: {type: "numeric", value: arguments.reqLng}
+                    },
+                    sql = "
+                        SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
+                        FROM languages
+                        WHERE intLanguageID = :lngID
+                    "
+                )
+
+            } else {
+
+                local.qGetLanguage = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        lngIso: {type: "varchar", value: arguments.reqLng}
+                    },
+                    sql = "
+                        SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage
+                        FROM languages
+                        WHERE strLanguageISO = :lngIso
+                    "
+                )
+
+            }
+
+            if (qGetLanguage.recordCount) {
+
+                local.language['lngID'] = local.qGetLanguage.intLanguageID;
+                local.language['iso'] = local.qGetLanguage.strLanguageISO;
+                local.language['lngEN'] = local.qGetLanguage.strLanguageEN;
+                local.language['language'] = local.qGetLanguage.strLanguage;
+
+                return local.language;
+
+            }
+
+
+        }
+
+        return getDefaultLanguage();
+
+    }
 
 
 
