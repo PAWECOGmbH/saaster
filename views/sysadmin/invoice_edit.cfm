@@ -23,7 +23,7 @@
         invoicePersonID = 0;
     }
 
-    activeCurrencies = application.objGlobal.getActiveCurrencies();
+    activeCurrencies = new com.currency().getActiveCurrencies();
 
 </cfscript>
 

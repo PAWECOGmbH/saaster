@@ -255,13 +255,13 @@ if (structKeyExists(url, "delete_language")) {
             )
 
             // Set all customers who have the language that is being deleted, to the default language.
-            getLngCount = application.objGlobal.getAllLanguages();
+            getLngCount = application.objLanguage.getAllLanguages();
             if (getLngCount.recordCount eq 1) {
                 queryExecute(
                     options = {datasource = application.datasource},
                     params = {
                         oldlng: {type: "varchar", value: qLanguage.strLanguageISO},
-                        newlng: {type: "varchar", value: application.objGlobal.getDefaultLanguage().iso}
+                        newlng: {type: "varchar", value: application.objLanguage.getDefaultLanguage().iso}
                     },
                     sql = "
                         UPDATE users
@@ -272,7 +272,7 @@ if (structKeyExists(url, "delete_language")) {
             }
 
             // If there is only one language, make sure that it's choosable
-            getLngCount = application.objGlobal.getAllLanguages();
+            getLngCount = application.objLanguage.getAllLanguages();
             if (getLngCount.recordCount eq 1) {
                 queryExecute(
                     options = {datasource = application.datasource},

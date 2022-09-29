@@ -21,6 +21,7 @@ if (url.pass eq variables.schedulePassword) {
 
     objInvoice = new com.invoices();
     objPrices = new com.prices();
+    objCurrency = new com.currency();
     objBook = new com.book();
 
 
@@ -158,13 +159,13 @@ if (url.pass eq variables.schedulePassword) {
             invoiceArray = objInvoice.getInvoices(qRenewBookings.intCustomerID).arrayInvoices;
             lastInvoice = arrayLast(invoiceArray);
             language = lastInvoice.invoiceLanguage;
-            currencyID = objPrices.getCurrency(lastInvoice.invoiceCurrency).id;
+            currencyID = objCurrency.getCurrency(lastInvoice.invoiceCurrency).id;
             getTime = new com.time(qRenewBookings.intCustomerID);
             if (!len(trim(language))) {
-                language = application.objGlobal.getDefaultLanguage().iso;
+                language = application.objLanguage.getDefaultLanguage().iso;
             }
             if (!isNumeric(currencyID)) {
-                currencyID = objPrices.getCurrency().id;
+                currencyID = objCurrency.getCurrency().id;
             }
             startDate = dateFormat(now(), "yyyy-mm-dd");
             if (qRenewBookings.strRecurring eq "monthly") {

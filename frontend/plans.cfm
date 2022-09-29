@@ -15,6 +15,8 @@
         groupStruct = objPlans.prepareForGroupID(ipAddress=application.usersIP);
     }
 
+    dump(groupStruct);
+
     hasPlans = true;
 
     if (groupStruct.groupID gt 0) {

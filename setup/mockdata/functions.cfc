@@ -83,7 +83,9 @@ component name="mockdata-functions" {
 
         objInvoice = new com.invoices();
         invoiceData = structNew();
-        setting = application.objGlobal;
+        setting = application.objSettings;
+
+        local.objCurrency = new com.currency();
 
         qCustomers = queryExecute(
             options = {datasource = application.datasource},
@@ -113,7 +115,7 @@ component name="mockdata-functions" {
             invoiceData['customerID'] = invoice.cust_ID;
             invoiceData['prefix'] = setting.getSetting('settingInvoicePrefix');
             invoiceData['title'] = invoice.title;
-            invoiceData['currency'] = setting.getDefaultCurrency().iso;
+            invoiceData['currency'] = local.objCurrency.getCurrency().iso;
             invoiceData['isNet'] = setting.getSetting('settingInvoiceNet');
             invoiceData['vatType'] = setting.getSetting('settingStandardVatType');
             invoiceData['paymentStatusID'] = invoice.status;

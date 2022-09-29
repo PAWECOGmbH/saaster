@@ -95,7 +95,7 @@ component displayname="cancel" output="false" {
 
         } else {
 
-            local.argsReturnValue['message'] = application.objGlobal.getTrans('msgNoAccess');
+            local.argsReturnValue['message'] = application.objLanguage.getTrans('msgNoAccess');
 
         }
 
@@ -141,7 +141,7 @@ component displayname="cancel" output="false" {
 
         } else {
 
-            local.argsReturnValue['message'] = application.objGlobal.getTrans('msgNoAccess');
+            local.argsReturnValue['message'] = application.objLanguage.getTrans('msgNoAccess');
 
         }
 
