@@ -1,0 +1,7 @@
+makefile
+README.md
+rewrite.xml
+db*
+docker-compose.yml
+.gitignore
+configs*

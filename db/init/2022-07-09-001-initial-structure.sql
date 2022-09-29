@@ -1,9 +1,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- Table structure for countries
--- ----------------------------
 DROP TABLE IF EXISTS `countries`;
 CREATE TABLE `countries`  (
   `intCountryID` int(11) NOT NULL AUTO_INCREMENT,
@@ -27,9 +24,7 @@ CREATE TABLE `countries`  (
   FULLTEXT INDEX `FulltextStrings`(`strCountryName`, `strLocale`, `strISO1`, `strISO2`, `strCurrency`, `strRegion`, `strSubRegion`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 251 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of countries
--- ----------------------------
+
 INSERT INTO `countries` VALUES (1, 'Montenegro', 1, 'sr_ME', 'ME', 'MNE', 'EUR', 'Europe', 'Southeast Europe', 38, 'https://flagcdn.com/me.svg', 0, 0, 0);
 INSERT INTO `countries` VALUES (2, 'Tokelau', 1, '	en_TK', 'TK', 'TKL', 'NZD', 'Oceania', 'Polynesia', 83, 'https://flagcdn.com/tk.svg', 0, 0, 0);
 INSERT INTO `countries` VALUES (3, 'Cuba', 1, 'es_CU', 'CU', 'CUB', 'CUC', 'Americas', 'Caribbean', 11, 'https://flagcdn.com/cu.svg', 0, 0, 0);
@@ -281,9 +276,6 @@ INSERT INTO `countries` VALUES (248, 'Guyana', 1, '	en_GY', 'GY', 'GUY', 'GYD', 
 INSERT INTO `countries` VALUES (249, 'Saudi Arabia', 1, 'ar_SA', 'SA', 'SAU', 'SAR', 'Asia', 'Western Asia', 48, 'https://flagcdn.com/sa.svg', 0, 0, 0);
 INSERT INTO `countries` VALUES (250, 'Trinidad and Tobago', 1, 'en_TT', 'TT', 'TTO', 'TTD', 'Americas', 'Caribbean', 15, 'https://flagcdn.com/tt.svg', 0, 0, 0);
 
--- ----------------------------
--- Table structure for countries_trans
--- ----------------------------
 DROP TABLE IF EXISTS `countries_trans`;
 CREATE TABLE `countries_trans`  (
   `intCountryTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -298,9 +290,6 @@ CREATE TABLE `countries_trans`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 
--- ----------------------------
--- Table structure for currencies
--- ----------------------------
 DROP TABLE IF EXISTS `currencies`;
 CREATE TABLE `currencies`  (
   `intCurrencyID` int(11) NOT NULL AUTO_INCREMENT,
@@ -314,16 +303,10 @@ CREATE TABLE `currencies`  (
   PRIMARY KEY (`intCurrencyID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of currencies
--- ----------------------------
 INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1);
 INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
 INSERT INTO `currencies` VALUES (3, 'CHF', 'Swiss Francs', 'Schweizer Franken', 'CHF', 3, 0, 0);
 
--- ----------------------------
--- Table structure for custom_mappings
--- ----------------------------
 DROP TABLE IF EXISTS `custom_mappings`;
 CREATE TABLE `custom_mappings`  (
   `intCustomMappingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -336,10 +319,6 @@ CREATE TABLE `custom_mappings`  (
   UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
-
--- ----------------------------
--- Table structure for custom_settings
--- ----------------------------
 DROP TABLE IF EXISTS `custom_settings`;
 CREATE TABLE `custom_settings`  (
   `intCustomSettingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -350,9 +329,6 @@ CREATE TABLE `custom_settings`  (
   UNIQUE INDEX `_intCustomSettingID`(`intCustomSettingID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for custom_settings_trans
--- ----------------------------
 DROP TABLE IF EXISTS `custom_settings_trans`;
 CREATE TABLE `custom_settings_trans`  (
   `intCustSetTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -367,9 +343,6 @@ CREATE TABLE `custom_settings_trans`  (
   CONSTRAINT `frn_cst_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for custom_translations
--- ----------------------------
 DROP TABLE IF EXISTS `custom_translations`;
 CREATE TABLE `custom_translations`  (
   `intCustTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -380,9 +353,6 @@ CREATE TABLE `custom_translations`  (
   UNIQUE INDEX `_strVariable`(`strVariable`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for customer_bookings
--- ----------------------------
 DROP TABLE IF EXISTS `customer_bookings`;
 CREATE TABLE `customer_bookings`  (
   `intCustomerBookingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -403,9 +373,6 @@ CREATE TABLE `customer_bookings`  (
   CONSTRAINT `frn_cp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for customer_bookings_history
--- ----------------------------
 DROP TABLE IF EXISTS `customer_bookings_history`;
 CREATE TABLE `customer_bookings_history`  (
   `intHistoryID` int(11) NOT NULL AUTO_INCREMENT,
@@ -426,9 +393,6 @@ CREATE TABLE `customer_bookings_history`  (
   CONSTRAINT `frn_cbh_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Table structure for customer_custom_settings
--- ----------------------------
 DROP TABLE IF EXISTS `customer_custom_settings`;
 CREATE TABLE `customer_custom_settings`  (
   `intCustCustomSettingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -442,9 +406,7 @@ CREATE TABLE `customer_custom_settings`  (
   CONSTRAINT `frn_ccs_customers` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for customer_user
--- ----------------------------
+
 DROP TABLE IF EXISTS `customer_user`;
 CREATE TABLE `customer_user`  (
   `intCustUserID` int(11) NOT NULL AUTO_INCREMENT,
@@ -458,9 +420,6 @@ CREATE TABLE `customer_user`  (
   CONSTRAINT `frn_cu_users` FOREIGN KEY (`intUserID`) REFERENCES `users` (`intUserID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for customers
--- ----------------------------
 DROP TABLE IF EXISTS `customers`;
 CREATE TABLE `customers`  (
   `intCustomerID` int(11) NOT NULL AUTO_INCREMENT,
@@ -490,9 +449,6 @@ CREATE TABLE `customers`  (
   FULLTEXT INDEX `FulltextStrings`(`strCompanyName`, `strContactPerson`, `strAddress`, `strZIP`, `strCity`, `strEmail`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for invoice_positions
--- ----------------------------
 DROP TABLE IF EXISTS `invoice_positions`;
 CREATE TABLE `invoice_positions`  (
   `intInvoicePosID` int(11) NOT NULL AUTO_INCREMENT,
@@ -511,9 +467,6 @@ CREATE TABLE `invoice_positions`  (
   CONSTRAINT `frn_pos_invoice` FOREIGN KEY (`intInvoiceID`) REFERENCES `invoices` (`intInvoiceID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for invoice_status
--- ----------------------------
 DROP TABLE IF EXISTS `invoice_status`;
 CREATE TABLE `invoice_status`  (
   `intPaymentStatusID` int(11) NOT NULL AUTO_INCREMENT,
@@ -523,9 +476,6 @@ CREATE TABLE `invoice_status`  (
   UNIQUE INDEX `_intPaymentStatusID`(`intPaymentStatusID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of invoice_status
--- ----------------------------
 INSERT INTO `invoice_status` VALUES (1, 'statInvoiceDraft', 'muted');
 INSERT INTO `invoice_status` VALUES (2, 'statInvoiceOpen', 'blue');
 INSERT INTO `invoice_status` VALUES (3, 'statInvoicePaid', 'green');
@@ -533,9 +483,6 @@ INSERT INTO `invoice_status` VALUES (4, 'statInvoicePartPaid', 'orange');
 INSERT INTO `invoice_status` VALUES (5, 'statInvoiceCanceled', 'purple');
 INSERT INTO `invoice_status` VALUES (6, 'statInvoiceOverDue', 'red');
 
--- ----------------------------
--- Table structure for invoice_vat
--- ----------------------------
 DROP TABLE IF EXISTS `invoice_vat`;
 CREATE TABLE `invoice_vat`  (
   `intInvoiceVatID` int(11) NOT NULL AUTO_INCREMENT,
@@ -548,9 +495,6 @@ CREATE TABLE `invoice_vat`  (
   CONSTRAINT `frn_invoice_vat` FOREIGN KEY (`intInvoiceID`) REFERENCES `invoices` (`intInvoiceID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for invoices
--- ----------------------------
 DROP TABLE IF EXISTS `invoices`;
 CREATE TABLE `invoices`  (
   `intInvoiceID` int(11) NOT NULL AUTO_INCREMENT,
@@ -580,9 +524,6 @@ CREATE TABLE `invoices`  (
   CONSTRAINT `frn_inv_invstat` FOREIGN KEY (`intPaymentStatusID`) REFERENCES `invoice_status` (`intPaymentStatusID`) ON DELETE RESTRICT ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for languages
--- ----------------------------
 DROP TABLE IF EXISTS `languages`;
 CREATE TABLE `languages`  (
   `intLanguageID` int(11) NOT NULL AUTO_INCREMENT,
@@ -596,15 +537,9 @@ CREATE TABLE `languages`  (
   UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of languages
--- ----------------------------
 INSERT INTO `languages` VALUES (1, 'en', 'English', 'English', 1, 1, 1);
 INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
 
--- ----------------------------
--- Table structure for modules
--- ----------------------------
 DROP TABLE IF EXISTS `modules`;
 CREATE TABLE `modules`  (
   `intModuleID` int(11) NOT NULL AUTO_INCREMENT,
@@ -621,9 +556,6 @@ CREATE TABLE `modules`  (
   PRIMARY KEY (`intModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for modules_prices
--- ----------------------------
 DROP TABLE IF EXISTS `modules_prices`;
 CREATE TABLE `modules_prices`  (
   `intModulePriceID` int(11) NOT NULL AUTO_INCREMENT,
@@ -642,9 +574,6 @@ CREATE TABLE `modules_prices`  (
   CONSTRAINT `frn_mp_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for modules_trans
--- ----------------------------
 DROP TABLE IF EXISTS `modules_trans`;
 CREATE TABLE `modules_trans`  (
   `intModulTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -660,9 +589,6 @@ CREATE TABLE `modules_trans`  (
   CONSTRAINT `frn_mt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for notifications
--- ----------------------------
 DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE `notifications`  (
   `intNotificationID` int(11) NOT NULL AUTO_INCREMENT,
@@ -680,9 +606,6 @@ CREATE TABLE `notifications`  (
   CONSTRAINT `frn_noti_user` FOREIGN KEY (`intUserID`) REFERENCES `users` (`intUserID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for notifications_trans
--- ----------------------------
 DROP TABLE IF EXISTS `notifications_trans`;
 CREATE TABLE `notifications_trans`  (
   `intNotTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -698,9 +621,6 @@ CREATE TABLE `notifications_trans`  (
   CONSTRAINT `frn_nt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for optin
--- ----------------------------
 DROP TABLE IF EXISTS `optin`;
 CREATE TABLE `optin`  (
   `intOptinID` int(11) NOT NULL AUTO_INCREMENT,
@@ -713,9 +633,6 @@ CREATE TABLE `optin`  (
   PRIMARY KEY (`intOptinID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for payments
--- ----------------------------
 DROP TABLE IF EXISTS `payments`;
 CREATE TABLE `payments`  (
   `intPaymentID` int(11) NOT NULL AUTO_INCREMENT,
@@ -731,9 +648,6 @@ CREATE TABLE `payments`  (
   CONSTRAINT `frn_pay_invoice` FOREIGN KEY (`intInvoiceID`) REFERENCES `invoices` (`intInvoiceID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for payrexx
--- ----------------------------
 DROP TABLE IF EXISTS `payrexx`;
 CREATE TABLE `payrexx`  (
   `intPayrexxID` int(11) NOT NULL AUTO_INCREMENT,
@@ -755,9 +669,6 @@ CREATE TABLE `payrexx`  (
   CONSTRAINT `frn_payrexx_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plan_features
--- ----------------------------
 DROP TABLE IF EXISTS `plan_features`;
 CREATE TABLE `plan_features`  (
   `intPlanFeatureID` int(11) NOT NULL AUTO_INCREMENT,
@@ -768,9 +679,6 @@ CREATE TABLE `plan_features`  (
   PRIMARY KEY (`intPlanFeatureID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plan_features_trans
--- ----------------------------
 DROP TABLE IF EXISTS `plan_features_trans`;
 CREATE TABLE `plan_features_trans`  (
   `intPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -785,9 +693,7 @@ CREATE TABLE `plan_features_trans`  (
   CONSTRAINT `frn_pft_plan_features` FOREIGN KEY (`intPlanFeatureID`) REFERENCES `plan_features` (`intPlanFeatureID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plan_groups
--- ----------------------------
+
 DROP TABLE IF EXISTS `plan_groups`;
 CREATE TABLE `plan_groups`  (
   `intPlanGroupID` int(11) NOT NULL AUTO_INCREMENT,
@@ -799,9 +705,6 @@ CREATE TABLE `plan_groups`  (
   CONSTRAINT `frn_pg_countries` FOREIGN KEY (`intCountryID`) REFERENCES `countries` (`intCountryID`) ON DELETE RESTRICT ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plan_groups_trans
--- ----------------------------
 DROP TABLE IF EXISTS `plan_groups_trans`;
 CREATE TABLE `plan_groups_trans`  (
   `intPlanGroupTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -815,9 +718,6 @@ CREATE TABLE `plan_groups_trans`  (
   CONSTRAINT `frn_pgt_plangroups` FOREIGN KEY (`intPlanGroupID`) REFERENCES `plan_groups` (`intPlanGroupID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plan_prices
--- ----------------------------
 DROP TABLE IF EXISTS `plan_prices`;
 CREATE TABLE `plan_prices`  (
   `intPlanPriceID` int(11) NOT NULL AUTO_INCREMENT,
@@ -836,9 +736,6 @@ CREATE TABLE `plan_prices`  (
   CONSTRAINT `frn_pp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plans
--- ----------------------------
 DROP TABLE IF EXISTS `plans`;
 CREATE TABLE `plans`  (
   `intPlanID` int(11) NOT NULL AUTO_INCREMENT,
@@ -858,9 +755,6 @@ CREATE TABLE `plans`  (
   CONSTRAINT `frn_plans_plan_group` FOREIGN KEY (`intPlanGroupID`) REFERENCES `plan_groups` (`intPlanGroupID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plans_modules
--- ----------------------------
 DROP TABLE IF EXISTS `plans_modules`;
 CREATE TABLE `plans_modules`  (
   `intPlanModuleID` int(11) NOT NULL AUTO_INCREMENT,
@@ -869,9 +763,6 @@ CREATE TABLE `plans_modules`  (
   PRIMARY KEY (`intPlanModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plans_plan_features
--- ----------------------------
 DROP TABLE IF EXISTS `plans_plan_features`;
 CREATE TABLE `plans_plan_features`  (
   `intPlansPlanFeatID` int(11) NOT NULL AUTO_INCREMENT,
@@ -886,9 +777,6 @@ CREATE TABLE `plans_plan_features`  (
   CONSTRAINT `frn_ppf_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plans_plan_features_trans
--- ----------------------------
 DROP TABLE IF EXISTS `plans_plan_features_trans`;
 CREATE TABLE `plans_plan_features_trans`  (
   `intPlansPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -902,9 +790,6 @@ CREATE TABLE `plans_plan_features_trans`  (
   CONSTRAINT `frn_ppft_plans_plan_features` FOREIGN KEY (`intPlansPlanFeatID`) REFERENCES `plans_plan_features` (`intPlansPlanFeatID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for plans_trans
--- ----------------------------
 DROP TABLE IF EXISTS `plans_trans`;
 CREATE TABLE `plans_trans`  (
   `intPlanTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -922,9 +807,6 @@ CREATE TABLE `plans_trans`  (
   CONSTRAINT `frn_pt_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for system_mappings
--- ----------------------------
 DROP TABLE IF EXISTS `system_mappings`;
 CREATE TABLE `system_mappings`  (
   `intSystemMappingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -937,9 +819,6 @@ CREATE TABLE `system_mappings`  (
   UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 70 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of system_mappings
--- ----------------------------
 INSERT INTO `system_mappings` VALUES (1, 'login', 'frontend/login.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (2, 'register', 'frontend/register.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (3, 'password', 'frontend/password.cfm', 0, 0, 0);
@@ -998,9 +877,6 @@ INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/book.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (68, 'cancel', 'handler/cancel.cfm', 0, 1, 0);
 INSERT INTO `system_mappings` VALUES (69, 'dashboard-settings', 'handler/dashboard.cfm', 0, 0, 0);
 
--- ----------------------------
--- Table structure for system_settings
--- ----------------------------
 DROP TABLE IF EXISTS `system_settings`;
 CREATE TABLE `system_settings`  (
   `intSystSettingID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1011,18 +887,12 @@ CREATE TABLE `system_settings`  (
   UNIQUE INDEX `_intSystSettingID`(`intSystSettingID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of system_settings
--- ----------------------------
 INSERT INTO `system_settings` VALUES (1, 'settingInvoiceNumberStart', '1000', 'New invoice: At which invoice number should the system start?');
 INSERT INTO `system_settings` VALUES (2, 'settingRoundFactor', '1', 'The rounding factor for invoice amounts. Note: Currently only 5 (0.05 Switzerland) or 1 (0.01 rest of the world) are available.');
 INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '3', 'Which vat type should be set by default?');
 INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.');
 INSERT INTO `system_settings` VALUES (5, 'settingInvoiceNet', '1', 'Decide whether the invoices are issued \"net\" by default.');
 
--- ----------------------------
--- Table structure for system_translations
--- ----------------------------
 DROP TABLE IF EXISTS `system_translations`;
 CREATE TABLE `system_translations`  (
   `intSystTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1033,9 +903,6 @@ CREATE TABLE `system_translations`  (
   UNIQUE INDEX `_strVariable`(`strVariable`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 255 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of system_translations
--- ----------------------------
 INSERT INTO `system_translations` VALUES (1, 'alertAccountCreatedLogin', 'Ihr Account wurde erfolgreich erstellt. Bitte loggen Sie sich nun ein.', 'Your account has been successfully created. Please log in now.');
 INSERT INTO `system_translations` VALUES (2, 'alertChoosePassword', 'Bitte vergeben Sie sich ein starkes Passwort mit mindestens 8 Zeichen.', 'Please assign yourself a strong password with at least 8 characters.');
 INSERT INTO `system_translations` VALUES (3, 'alertEmailAlreadyUsed', 'Diese E-Mail-Adresse wurde bereits benutzt!', 'This email address has already been used!');
@@ -1290,9 +1157,6 @@ INSERT INTO `system_translations` VALUES (252, 'titlePrivacyPolicy', 'Datenschut
 INSERT INTO `system_translations` VALUES (253, 'msgFileUploadError', 'Fehler beim hochladen der Datei!', 'An error occurred while uploading the file!');
 INSERT INTO `system_translations` VALUES (254, 'titRenewal', 'Verlängerung', 'Renewal');
 
--- ----------------------------
--- Table structure for timezones
--- ----------------------------
 DROP TABLE IF EXISTS `timezones`;
 CREATE TABLE `timezones`  (
   `intTimeZoneID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1304,9 +1168,6 @@ CREATE TABLE `timezones`  (
   INDEX `_strTimezone`(`strTimezone`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 85 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of timezones
--- ----------------------------
 INSERT INTO `timezones` VALUES (1, 'UTC-10:00', 'Hawaii', 'Pacific/Honolulu');
 INSERT INTO `timezones` VALUES (2, 'UTC-09:00', 'Alaska', 'America/Anchorage');
 INSERT INTO `timezones` VALUES (3, 'UTC-08:00', 'Baja California', 'America/Santa_Isabel');
@@ -1392,9 +1253,6 @@ INSERT INTO `timezones` VALUES (82, 'UTC+12:00', 'Auckland, Wellington', 'Pacifi
 INSERT INTO `timezones` VALUES (83, 'UTC+13:00', 'Nuku`alofa', 'Pacific/Tongatapu');
 INSERT INTO `timezones` VALUES (84, 'UTC+13:00', 'Samoa', 'Pacific/Apia');
 
--- ----------------------------
--- Table structure for user_widgets
--- ----------------------------
 DROP TABLE IF EXISTS `user_widgets`;
 CREATE TABLE `user_widgets`  (
   `intUserWidgetID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1409,9 +1267,6 @@ CREATE TABLE `user_widgets`  (
   CONSTRAINT `frn_uw_widgets` FOREIGN KEY (`intWidgetID`) REFERENCES `widgets` (`intWidgetID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for users
--- ----------------------------
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`  (
   `intUserID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1440,9 +1295,6 @@ CREATE TABLE `users`  (
   CONSTRAINT `frn_user_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for widget_ratio
--- ----------------------------
 DROP TABLE IF EXISTS `widget_ratio`;
 CREATE TABLE `widget_ratio`  (
   `intRatioID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1451,18 +1303,12 @@ CREATE TABLE `widget_ratio`  (
   PRIMARY KEY (`intRatioID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Records of widget_ratio
--- ----------------------------
 INSERT INTO `widget_ratio` VALUES (1, 12, 'Full width (1/1)');
 INSERT INTO `widget_ratio` VALUES (2, 9, 'Three quarter width (3/4)');
 INSERT INTO `widget_ratio` VALUES (3, 6, 'Half width (1/2)');
 INSERT INTO `widget_ratio` VALUES (4, 4, 'Third width (1/3)');
 INSERT INTO `widget_ratio` VALUES (5, 3, 'Quarter width (1/4)');
 
--- ----------------------------
--- Table structure for widgets
--- ----------------------------
 DROP TABLE IF EXISTS `widgets`;
 CREATE TABLE `widgets`  (
   `intWidgetID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1473,9 +1319,6 @@ CREATE TABLE `widgets`  (
   PRIMARY KEY (`intWidgetID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for widgets_trans
--- ----------------------------
 DROP TABLE IF EXISTS `widgets_trans`;
 CREATE TABLE `widgets_trans`  (
   `intWidgetTransID` int(11) NOT NULL AUTO_INCREMENT,
@@ -1489,11 +1332,7 @@ CREATE TABLE `widgets_trans`  (
   CONSTRAINT `frn_wt_widgets` FOREIGN KEY (`intWidgetID`) REFERENCES `widgets` (`intWidgetID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Function structure for func beautify
--- ----------------------------
 DROP FUNCTION IF EXISTS `beautify`;
-delimiter ;;
 CREATE FUNCTION `beautify`(s NVARCHAR(500))
  RETURNS varchar(500) CHARSET utf8
   DETERMINISTIC
@@ -1618,50 +1457,24 @@ LOWER(TRIM(s)),
 '---', '-'),
 '----', '-')
 
-;;
-delimiter ;
+;
 
-
--- ----------------------------
--- Triggers structure for table customers
--- ----------------------------
 DROP TRIGGER IF EXISTS `insertCustomSettings`;
-delimiter ;;
 CREATE TRIGGER `insertCustomSettings` AFTER INSERT ON `customers` FOR EACH ROW INSERT INTO customer_custom_settings (intCustomerID, intCustomSettingID, strSettingValue)
 SELECT NEW.intCustomerID, intCustomSettingID, strDefaultValue
-FROM custom_settings
-;;
-delimiter ;
+FROM custom_settings;
 
--- ----------------------------
--- Triggers structure for table customers
--- ----------------------------
 DROP TRIGGER IF EXISTS `deleteCustomSettings`;
-delimiter ;;
 CREATE TRIGGER `deleteCustomSettings` BEFORE DELETE ON `customers` FOR EACH ROW DELETE FROM customer_custom_settings
-WHERE intCustomerID = OLD.intCustomerID
-;;
-delimiter ;
+WHERE intCustomerID = OLD.intCustomerID;
 
--- ----------------------------
--- Triggers structure for table payments
--- ----------------------------
 DROP TRIGGER IF EXISTS `updPaymStatInsert`;
-delimiter ;;
 CREATE TRIGGER `updPaymStatInsert` AFTER INSERT ON `payments` FOR EACH ROW UPDATE invoices
 SET intPaymentStatusID = IF(NEW.decAmount >= decTotalPrice, 3, 4)
-WHERE intInvoiceID = NEW.intInvoiceID
-;;
-delimiter ;
+WHERE intInvoiceID = NEW.intInvoiceID;
 
--- ----------------------------
--- Triggers structure for table users
--- ----------------------------
 DROP TRIGGER IF EXISTS `insertConnect`;
-delimiter ;;
 CREATE TRIGGER `insertConnect` AFTER INSERT ON `users` FOR EACH ROW INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
-VALUES (NEW.intCustomerID, NEW.intUserID, 1)
-;;
-delimiter ;
+VALUES (NEW.intCustomerID, NEW.intUserID, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
