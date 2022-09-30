@@ -111,7 +111,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
            strUUID: {type: "nvarchar", value: url.u}
         },
         sql = "
-            SELECT strUUID
+            SELECT strUUID, strLanguage
             FROM optin
             WHERE strUUID = :strUUID
         "
@@ -121,6 +121,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
         session.step = 2;
         session.uuid = qCheckOptin.strUUID;
+        session.lng = qCheckOptin.strLanguage;
         getAlert('alertChoosePassword', 'info');
 
     } else {
@@ -133,7 +134,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
                 strUUID: {type: "nvarchar", value: url.u}
             },
             sql = "
-                SELECT strUUID
+                SELECT strUUID, strLanguage
                 FROM users
                 WHERE strUUID = :strUUID
             "
@@ -143,6 +144,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
             session.step = 2;
             session.uuid = qCheckUser.strUUID;
+            session.lng = qCheckUser.strLanguage;
             getAlert('alertChoosePassword', 'info');
 
         } else {
