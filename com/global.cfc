@@ -308,42 +308,35 @@ component displayname="globalFunctions" output="false" {
 
         if (isStruct(arguments.uploadArgs)) {
 
+            local.filePath = expandPath('/userdata');
+            local.maxSize = '';
+            local.maxWidth = '';
+            local.maxHeight = '';
+            local.makeUnique = true;
+            local.fileName = '';
+            local.fileNameOrig = '';
 
             // Set a default for all possible arguments
             if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
                 local.filePath = trim(arguments.uploadArgs.filePath);
-            } else {
-                local.filePath = expandPath('/userdata');
             }
             if (structKeyExists(arguments.uploadArgs, "maxSize") and len(trim(arguments.uploadArgs.maxSize))) {
                 local.maxSize = trim(arguments.uploadArgs.maxSize);
-            } else {
-                local.maxSize = '';
             }
             if (structKeyExists(arguments.uploadArgs, "maxWidth") and len(trim(arguments.uploadArgs.maxWidth))) {
                 local.maxWidth = trim(arguments.uploadArgs.maxWidth);
-            } else {
-                local.maxWidth = '';
             }
             if (structKeyExists(arguments.uploadArgs, "maxHeight") and len(trim(arguments.uploadArgs.maxHeight))) {
                 local.maxHeight = trim(arguments.uploadArgs.maxHeight);
-            } else {
-                local.maxHeight = '';
             }
             if (structKeyExists(arguments.uploadArgs, "makeUnique") and isBoolean(arguments.uploadArgs.makeUnique)) {
                 local.makeUnique = arguments.uploadArgs.makeUnique;
-            } else {
-                local.makeUnique = true;
             }
             if (structKeyExists(arguments.uploadArgs, "fileName") and len(trim(arguments.uploadArgs.fileName))) {
                 local.fileName = trim(arguments.uploadArgs.fileName);
-            } else {
-                local.fileName = '';
             }
             if (structKeyExists(arguments.uploadArgs, "fileNameOrig") and len(trim(arguments.uploadArgs.fileNameOrig))) {
                 local.fileNameOrig = trim(arguments.uploadArgs.fileNameOrig);
-            } else {
-                local.fileNameOrig = '';
             }
 
             // Is there a file to upload?
