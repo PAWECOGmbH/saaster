@@ -5,38 +5,33 @@ component displayname="customer" output="false" {
     variables.argsReturnValue['message'] = "";
     variables.argsReturnValue['success'] = false;
 
-    <!--- Insert optin --->
+    // Insert optin
     public numeric function insertOptin(required struct optinValues) {
+
+        local.first_name = '';
+        local.name = '';
+        local.company = '';
+        local.email = '';
+        local.language = application.objLanguage.getDefaultLanguage().iso;
+        local.newUUID = application.objGlobal.getUUID();
 
         if (structKeyExists(arguments.optinValues, "first_name")) {
             local.first_name = application.objGlobal.cleanUpText(arguments.optinValues.first_name, 100);
-        } else {
-            local.first_name = '';
         }
         if (structKeyExists(arguments.optinValues, "name")) {
             local.name = application.objGlobal.cleanUpText(arguments.optinValues.name, 100);
-        } else {
-            local.name = '';
         }
         if (structKeyExists(arguments.optinValues, "company")) {
             local.company = application.objGlobal.cleanUpText(arguments.optinValues.company, 100);
-        } else {
-            local.company = '';
         }
         if (structKeyExists(arguments.optinValues, "email")) {
             local.email = application.objGlobal.cleanUpText(arguments.optinValues.email, 100);
-        } else {
-            local.email = '';
         }
         if (structKeyExists(arguments.optinValues, "language")) {
             local.language = arguments.optinValues.language;
-        } else {
-            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.optinValues, "newUUID")) {
             local.newUUID = arguments.optinValues.newUUID;
-        } else {
-            local.newUUID = application.objGlobal.getUUID();
         }
 
         // Delete already existing records in optin table
@@ -84,10 +79,10 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Insert customer: used for register --->
+    // Insert customer: used for register
     public struct function insertCustomer(required struct customerStruct) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
@@ -100,45 +95,38 @@ component displayname="customer" output="false" {
         param name="local.password" default=""; //(the password must be hashed already!)
         param name="local.uuid" default="";
 
+        local.company_name = '';
+        local.first_name = '';
+        local.last_name = '';
+        local.email = '';
+        local.language = application.objLanguage.getDefaultLanguage().iso;
+        local.hash = '';
+        local.salt = '';
+        local.uuid = '';
+
         if (structKeyExists(arguments.customerStruct, "strCompanyName")) {
             local.company_name = application.objGlobal.cleanUpText(arguments.customerStruct.strCompanyName, 100);
-        } else {
-            local.company_name = '';
         }
         if (structKeyExists(arguments.customerStruct, "strFirstName")) {
             local.first_name = application.objGlobal.cleanUpText(arguments.customerStruct.strFirstName, 100);
-        } else {
-            local.first_name = '';
         }
         if (structKeyExists(arguments.customerStruct, "strLastName")) {
             local.last_name = application.objGlobal.cleanUpText(arguments.customerStruct.strLastName, 100);
-        } else {
-            local.last_name = '';
         }
         if (structKeyExists(arguments.customerStruct, "strEmail")) {
             local.email = application.objGlobal.cleanUpText(arguments.customerStruct.strEmail, 100);
-        } else {
-            local.email = '';
         }
         if (structKeyExists(arguments.customerStruct, "strLanguage")) {
             local.language = arguments.customerStruct.strLanguage;
-        } else {
-            local.language = application.objLanguage.getDefaultLanguage().iso;
         }
         if (structKeyExists(arguments.customerStruct, "hash")) {
             local.hash = trim(arguments.customerStruct.hash);
-        } else {
-            local.hash = '';
         }
         if (structKeyExists(arguments.customerStruct, "salt")) {
             local.salt = trim(arguments.customerStruct.salt);
-        } else {
-            local.salt = '';
         }
         if (structKeyExists(arguments.customerStruct, "strUUID")) {
             local.uuid = trim(arguments.customerStruct.strUUID);
-        } else {
-            local.uuid = '';
         }
 
 
@@ -201,7 +189,7 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Check whether the required data of a client has already been filled in --->
+    // Check whether the required data of a client has already been filled in
     public boolean function checkFilledData(required numeric customerID) {
 
         local.getCustomerData = application.objCustomer.getCustomerData(arguments.customerID);
