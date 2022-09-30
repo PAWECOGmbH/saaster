@@ -48,7 +48,7 @@ component displayname="invoices" output="false" {
         local.title = "";
         local.invoiceDate = createODBCDate(now());
         local.dueDate = createODBCDate(now()+30);
-        local.currency = local.objCurrency.get().iso;
+        local.currency = local.objCurrency.getCurrency().iso;
         local.isNet = application.objSettings.getSetting('settingInvoiceNet');
         local.paymentStatusID = 1;
         local.vatType = application.objSettings.getSetting('settingStandardVatType');
