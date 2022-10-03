@@ -581,7 +581,7 @@ component displayname="user" output="false" {
 
         } else {
 
-            // Look for a gravatar.com picture or use the default picture (application)
+            // Use the default picture (application)
             local.myImgStruct['userImage'] = application.userTempImg;
             local.myImgStruct['itsLocal'] = false;
 
