@@ -822,7 +822,7 @@ component displayname="invoices" output="false" {
             local.queryLimit = "LIMIT #arguments.start#, #arguments.count#"
         }
 
-        if (structKeyExists(arguments, "order") and structKeyExists(arguments, "order")){
+        if (structKeyExists(arguments, "order")){
             local.queryOrder = "ORDER BY " & arguments.order;
         }
 
