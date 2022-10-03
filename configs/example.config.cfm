@@ -73,7 +73,7 @@ variables.errorEmail = "error@saaster.io";
 variables.usersIP = "62.171.127.255";
 
 // This is a placeholder for the user image. Please only enter an absolute path that can be called up online.
-variables.userTempImg = "http://www.clker.com/cliparts/A/Y/O/m/o/N/placeholder-md.png";
+variables.userTempImg = "../dist/img/user-solid.svg";
 
 
 
