@@ -582,7 +582,7 @@ component displayname="user" output="false" {
         } else {
 
             // Look for a gravatar.com picture or use the default picture (application)
-            local.encodedPath = urlEncode(application.userTempImg);
+            local.encodedPath = urlEncode("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png");
             local.myImgStruct['userImage'] = "https://www.gravatar.com/avatar/#lcase(Hash(lcase(local.userData.strEmail)))#?d=#local.encodedPath#&s=300";
             local.myImgStruct['itsLocal'] = false;
 

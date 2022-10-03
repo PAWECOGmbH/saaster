@@ -72,10 +72,6 @@ variables.errorEmail = "error@saaster.io";
 // To simulate a customer in local environment, enter a public IP address here.
 variables.usersIP = "62.171.127.255";
 
-// This is a placeholder for the user image. Please only enter an absolute path that can be called up online.
-variables.userTempImg = "http://www.clker.com/cliparts/A/Y/O/m/o/N/placeholder-md.png";
-
-
 
 // ####################################
 //  PAYREXX SETTINGS
