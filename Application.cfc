@@ -28,7 +28,6 @@ component displayname="Application" output="false" hint="Handle the application.
         application.fromEmail = variables.fromEmail;
         application.toEmail = variables.toEmail;
         application.errorMail = variables.errorEmail;
-        application.userTempImg = variables.userTempImg;
         if (variables.devDomain eq cgi.server_name) {
             application.environment = "dev";
             application.usersIP = variables.usersIP;
