@@ -1,6 +1,8 @@
 
 component displayname="user" output="false" {
 
+    variables.getTrans = application.objLanguage.getTrans;
+
     // Login
     public struct function checkLogin() {
 
@@ -222,7 +224,6 @@ component displayname="user" output="false" {
                     active: {type: "numeric", value: local.active}
                 },
                 sql = "
-
                     UPDATE users
                     SET strSalutation = :salutation,
                         strFirstName = :first_name,
@@ -234,7 +235,6 @@ component displayname="user" output="false" {
                         blnSuperAdmin = :superadmin,
                         blnActive = :active
                     WHERE intUserID = :intUserID
-
                 "
 
             )
@@ -250,7 +250,8 @@ component displayname="user" output="false" {
                     },
                     sql = "
                         DELETE FROM customer_user
-                        WHERE intUserID = :userID AND NOT intCustomerID IN (#local.tenantID#)
+                        WHERE intUserID = :userID
+                        AND NOT intCustomerID IN (#local.tenantID#)
                     "
 
                 )
@@ -319,9 +320,9 @@ component displayname="user" output="false" {
             }
 
 
-            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange){
+            if (structKeyExists(arguments, 'comfirmMailChange') and !arguments.comfirmMailChange) {
 
-                updateMail = UpdateEmail(local.email, arguments.userID);
+                updateEmail(local.email, arguments.userID);
 
                 local.argsReturnValue['message'] = "OK";
                 local.argsReturnValue['success'] = true;
@@ -332,7 +333,7 @@ component displayname="user" output="false" {
                 application.objGlobal.getAlert('alertOptinSent', 'info');
             }
 
-        } catch(any){
+        } catch (any) {
 
             local.argsReturnValue['message'] = cfcatch.message;
 
@@ -518,35 +519,37 @@ component displayname="user" output="false" {
 
                 }
 
-                getTrans = application.objLanguage.getTrans;
+
 
 
                 // Replacing variables
-                local.invitationMail = replaceNoCase(getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
+                local.invitationMail = replaceNoCase(variables.getTrans('txtInvitationMail'), '@sender_name@', '#qUser.fromName#', 'all');
                 local.invitationMail = replaceNoCase(local.invitationMail, '@project_name@', '#application.projectName#', 'all');
 
-                variables.mailTitle = getTrans('txtInvitationFrom') & " " & qUser.fromName;
+                variables.mailTitle = variables.getTrans('txtInvitationFrom') & " " & qUser.fromName;
                 variables.mailType = "html";
 
+
+
+
                 cfsavecontent (variable = "variables.mailContent") {
-
                     echo("
-                        #getTrans('titHello')# #qUser.toName#<br><br>
+                        #variables.getTrans('titHello')# #qUser.toName#<br><br>
                         #local.invitationMail#<br><br>
-                        <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('formSignIn')#</a><br><br>
+                        <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#variables.getTrans('formSignIn')#</a><br><br>
 
-                        #getTrans('txtRegards')#<br>
-                        #getTrans('txtYourTeam')#<br>
+                        #variables.getTrans('txtRegards')#<br>
+                        #variables.getTrans('txtYourTeam')#<br>
                         #application.appOwner#
                     ");
                 }
 
                 // Send activation link
-                mail to="#qUser.toEmail#" from="#application.fromEmail#" subject="#getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
-                    include "/includes/mail_design.cfm";
+                mail to="#qUser.toEmail#" from="#application.fromEmail#" subject="#variables.getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
+                    include template="/includes/mail_design.cfm";
                 }
 
-                local.argsReturnValue['message'] = getTrans('msgUserGotInvitation');
+                local.argsReturnValue['message'] = variables.getTrans('msgUserGotInvitation');
                 local.argsReturnValue['success'] = true;
 
             } else {
@@ -591,11 +594,11 @@ component displayname="user" output="false" {
 
     }
 
-    public boolean function MailChangeConfirm(required string useremail, required numeric mailuserID){
 
-        getTrans = application.objLanguage.getTrans;
+    // If an e-mail address was changed, we need to send a confirmation e-mail
+    public boolean function mailChangeConfirm(required string useremail, required numeric mailuserID){
 
-        qUsersMailCheck = queryExecute(
+        local.qUsersMailCheck = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 userID: {type: "numeric", value: arguments.mailuserID}
@@ -607,58 +610,60 @@ component displayname="user" output="false" {
             "
         )
 
-        if(qUsersMailCheck.stremail neq arguments.useremail){
+        if (local.qUsersMailCheck.strEmail neq arguments.useremail) {
 
-            newUUID = application.objGlobal.getUUID();
+            local.newUUID = application.objGlobal.getUUID();
 
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    intUserID: {type: "numeric", value: arguments.mailuserID},
-                    strUUID: {type: "nvarchar", value: newUUID}
+                    userID: {type: "numeric", value: arguments.mailuserID},
+                    uuID: {type: "nvarchar", value: local.newUUID}
                 },
                 sql = "
                     UPDATE users
-                    SET strUUID = :strUUID
-                    WHERE intUserID = :intUserID
+                    SET strUUID = :uuID
+                    WHERE intUserID = :userID
                 "
             )
 
-            variables.mailTitle = getTrans('subjectConfirmEmail');
+            variables.mailTitle = variables.getTrans('subjectConfirmEmail');
             variables.mailType = "html";
-            local.toName = qUsersMailCheck.strFirstName & ' ' & qUsersMailCheck.strLastName;
+            local.toName = local.qUsersMailCheck.strFirstName & ' ' & local.qUsersMailCheck.strLastName;
 
-            cfsavecontent (variable = "local.mailContent") {
+            cfsavecontent (variable = "variables.mailContent") {
 
                 echo("
-                    #getTrans('titHello')# #local.toName#<br><br>
-                    #getTrans('txtComfirmEmailChange')#<br><br>
-                    <a href='#application.mainURL#/account-settings/my-profile?c=#MailUserdata.strUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
+                    #variables.getTrans('titHello')# #local.toName#<br><br>
+                    #variables.getTrans('txtComfirmEmailChange')#<br><br>
+                    <a href='#application.mainURL#/account-settings/my-profile?c=#local.newUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#variables.getTrans('btnActivate')#</a>
                     <br><br>
-                    #getTrans('txtRegards')#<br>
-                    #getTrans('txtYourTeam')#<br>
+                    #variables.getTrans('txtRegards')#<br>
+                    #variables.getTrans('txtYourTeam')#<br>
                     #application.appOwner#
                 ");
             }
 
             // Send activation link
-            mail to="#qUsersMailCheck.stremail#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
-                include "/includes/mail_design.cfm";
+            mail to="#local.qUsersMailCheck.strEmail#" from="#application.fromEmail#" subject="#variables.getTrans('subjectConfirmEmail')#" type="html" {
+                include template="/includes/mail_design.cfm";
             }
 
-            mailChanged = true;
+            local.mailChanged = true;
 
-        }else{
+        } else {
 
-            mailChanged = false;
+            local.mailChanged = false;
 
         }
 
-        return mailChanged;
+        return local.mailChanged;
 
     }
 
-    public struct function UpdateEmail(required string newUserMail, required numeric ConUserID){
+
+    // After the customer has clicked the confirmation e-mail, we update the database
+    public struct function updateEmail(required string newUserMail, required numeric confUserID){
 
         local.argsReturnValue = structNew();
 
@@ -666,16 +671,16 @@ component displayname="user" output="false" {
 
              queryExecute(
 
-                options = {datasource = application.datasource, result="MailUpdate"},
+                options = {datasource = application.datasource},
                 params = {
-                    intUserID: {type: "numeric", value: arguments.ConUserID},
+                    userID: {type: "numeric", value: arguments.confUserID},
                     email: {type: "nvarchar", value: arguments.newUserMail}
                 },
                 sql = "
 
                     UPDATE users
                     SET strEmail = :email
-                    WHERE intUserID = :intUserID
+                    WHERE intUserID = :userID
 
                 "
             )
@@ -693,4 +698,5 @@ component displayname="user" output="false" {
         return local.argsReturnValue;
 
     }
+
 }
