@@ -45,14 +45,13 @@ component displayname="Application" output="false" hint="Handle the application.
         local.payrexxStruct['payrexxAPIkey'] = variables.payrexxAPIkey;
         application.payrexxStruct = local.payrexxStruct;
 
-
         // Object initialising
+        application.objLog = new com.log();
         application.objGlobal = new com.global();
+        application.objLanguage = new com.language();
+        application.objSettings = new com.settings();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
-        application.objLanguage = new com.language();
-        application.objLog = new com.log();
-        application.objSettings = new com.settings();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(

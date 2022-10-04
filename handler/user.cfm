@@ -1,7 +1,5 @@
 <cfscript>
 
-iniUserObj = application.objUser;
-
 // User edit
 if (structKeyExists(form, "edit_profile_btn")) {
 
@@ -44,7 +42,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
     } else {
         form.active = 0;
     }
-    
+
 
     // Check whether the email is valid
     checkEmail = application.objGlobal.checkEmail(form.email);
@@ -78,15 +76,15 @@ if (structKeyExists(form, "edit_profile_btn")) {
     }
 
     // Check if the email is changed
-    if(thisReferer eq 'my-profile'){
-        mailconfirm = iniUserObj.MailChangeConfirm(form.email, thisUserID);
-    }else{
+    if (thisReferer eq 'my-profile') {
+        mailconfirm = application.objUser.mailChangeConfirm(form.email, thisUserID);
+    } else {
         mailconfirm = false
     }
 
     // Save the user using a function
-    objUserEdit = iniUserObj.updateUser(form, thisUserID, mailconfirm);
-    
+    objUserEdit = application.objUser.updateUser(form, thisUserID, mailconfirm);
+
     if (objUserEdit.success) {
         getAlert('msgChangesSaved', 'success');
         if (thisReferer eq "my-profile"){
@@ -223,7 +221,7 @@ if (structKeyExists(form, "photo_upload_btn")) {
         catch("java.io.IOException" e){
             getAlert( "msgFileUploadError", 'danger');
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
-        } 
+        }
         catch(any e){
             getAlert( e.message, 'danger');
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";

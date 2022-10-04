@@ -104,7 +104,7 @@ component displayname="globalFunctions" output="false" {
         if (len(trim(arguments.alertVariable))) {
 
             // Text to translate
-            local.thismessage = getTrans(arguments.alertVariable);
+            local.thismessage = application.objLanguage.getTrans(arguments.alertVariable);
 
             // If there is no variable in the db, it must be an system error message
             if (local.thismessage eq "--undefined--") {

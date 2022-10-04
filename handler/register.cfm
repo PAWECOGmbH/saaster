@@ -73,7 +73,7 @@ if (structKeyExists(form, 'register_btn')) {
 
             // Send double opt-in mail
             mail to="#form.email#" from="#application.fromEmail#" subject="#getTrans('subjectConfirmEmail')#" type="html" {
-                include "/includes/mail_design.cfm";
+                include template="/includes/mail_design.cfm";
             }
 
             structDelete(session, "first_name");
@@ -394,7 +394,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                 #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
                 #getTrans('txtResetPassword')#
                 <br><br>
-                <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('formPassword2')#</a>
+                <a href='#application.mainURL#/registration?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('titResetPassword')#</a>
 
                 <br><br>
                 #getTrans('txtRegards')#<br>
@@ -405,7 +405,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 
         // Send email to reset the password
         mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
-            include "/includes/mail_design.cfm";
+            include template="/includes/mail_design.cfm";
         }
 
     }
