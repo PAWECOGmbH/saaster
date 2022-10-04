@@ -65,12 +65,15 @@ variables.toEmail = "info@saaster.io";
 // Enter an email address for error messages
 variables.errorEmail = "error@saaster.io";
 
+
+
 // ####################################
 //  CUSTOMER SETTINGS
 // ####################################
 
 // To simulate a customer in local environment, enter a public IP address here.
 variables.usersIP = "62.171.127.255";
+
 
 
 // ####################################
