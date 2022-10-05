@@ -447,21 +447,24 @@
                                     A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
                                 <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                    
                                     <div class="col-lg-5">
                                         <label for="fromLang">From:</label>
-                                        <select name="fromLang" class="form-select" required>
+                                        <select onchange="checkIfSame()" id="fromLang" name="fromLang" class="form-select" required>
                                             <option value="">Select Language</option>
                                             <cfoutput query="qLanguages">
                                                 <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
                                             </cfoutput>
                                         </select>
                                     </div>
+
                                     <div class="col-lg-2 trans-arrow-box">
                                         <i class="fa fa-long-arrow-right trans-arrow" aria-hidden="true"></i>
                                     </div>
+
                                     <div class="col-lg-5">
                                         <label for="toLang">To:</label>
-                                        <select name="toLang" class="form-select" required>
+                                        <select onchange="checkIfSame()" id="toLang" name="toLang" class="form-select" required>
                                             <option value="">Select Language</option>
                                             <cfoutput query="qLanguages">
                                                 <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
@@ -491,19 +494,49 @@
                                             </span>
                                         </label>
                                     </div>
+                                    <div> 
+                                        <br>
+                                        <p>Choose what you would like to translate:</p>
+                                        <label class="form-check">
+                                            <input name="transCus" value="1" class="form-check-input" type="checkbox" checked>
+                                            <span class="form-check-label">Custom translations</span>
+                                        </label>
+                                        <label class="form-check">
+                                            <input name="transSys" value="1" class="form-check-input" type="checkbox" checked>
+                                            <span class="form-check-label">System translations</span>
+                                        </label>
+                                    </div>
                                     <div class="mt-2 trans-submit-btn">
-                                        <button id="submit_button" class="btn btn-primary btn-block">
+                                        <button id="submit_button" class="btn btn-primary btn-block" disabled>
                                             Translate
                                         </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
+
                         <script>
+                            function checkIfSame() {
+                                const TranslateButton = document.getElementById('submit_button');
+
+                                var fromLang = document.getElementById("fromLang");
+                                var toLang = document.getElementById("toLang");
+
+                                var textFromLang = fromLang.options[fromLang.selectedIndex].text;
+                                var texttoLang = toLang.options[toLang.selectedIndex].text;
+
+                                if (textFromLang === texttoLang || textFromLang == "Select Language" || texttoLang == "Select Language") {
+                                    TranslateButton.setAttribute('disabled', '');
+                                }else {
+                                    TranslateButton.removeAttribute('disabled', '')
+                                }
+                            }
+
                             function loading() {
                                 document.getElementById('loadingAlert').style.display='';
                             }
                         </script>
+
                     </div>
                 </div>
             </div>
