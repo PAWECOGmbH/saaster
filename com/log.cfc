@@ -1,7 +1,7 @@
 component displayname="log" {
 
     // Logging function
-    public void function writeLog(required string name, required numeric severity, required string message, required boolean sendMail) {
+    public void function logWrite(required string name, required numeric severity, required string message, required boolean sendMail) {
             
         local.severityTypes = ["INFORMATION", "WARNING", "ERROR", "FATAL"];
         local.getSysadmin = new com.sysadmin().getSysAdminData();
