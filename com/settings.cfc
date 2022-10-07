@@ -30,7 +30,7 @@ component displayname="settings" output="false" {
         if (structKeyExists(arguments, "language")) {
             local.lngID = application.objLanguage.getAnyLanguage(arguments.language).lngID;
         } else {
-            local.lngID = application.objLanguage.getAnyLanguage(variables.language).lngID;
+            local.lngID = application.objLanguage.getDefaultLanguage().lngID;
         }
 
         if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
