@@ -16,7 +16,8 @@ component displayname="log" {
 
         if (arguments.severity lte 4 and arguments.severity gte 1) {
             local.logMsg = local.curTime & " - " & local.severityTypes[arguments.severity] & ": " & arguments.name & " - " &  arguments.message & Chr(13) & Chr(10);
-            fileAppend("../logs/#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
+            
+            fileAppend("../logs/#DateTimeFormat(local.curTime, "yyyy-mm-dd")#_#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
             if (sendMail){
                 cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.toEmail#" ) {
                     writeOutput("<h3>#local.severityTypes[arguments.severity]# - #arguments.name#</h3><p>#local.curTime#</p><hr>#arguments.message#");
