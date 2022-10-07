@@ -1,22 +1,8 @@
 
 component displayname="settings" output="false" {
 
-    // Init for the requested language
-    public any function init(string language) {
 
-        variables.language = application.objLanguage.getDefaultLanguage().iso;
-        if (structKeyExists(arguments, "language")) {
-            variables.language = arguments.language;
-        }
-
-        variables.lngID = application.objLanguage.getAnyLanguage(variables.language).lngID;
-
-        return this;
-
-    }
-
-
-    // Initialising the system setting variables
+    // Initialising the system setting variables in order to save it into the application scope
     public struct function initSystemSettings() {
 
         local.settingStruct = structNew();
@@ -38,74 +24,14 @@ component displayname="settings" output="false" {
     }
 
 
-    // Get all the custom setting variables
-    public array function getCustomSettings() {
-
-        local.settingArray = arrayNew(1);
-        local.settingStruct = structNew();
-
-        local.qSettings = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                lngID: {type: "numeric", value: variables.lngID}
-            },
-            sql = "
-                SELECT strSettingVariable,
-                IF(
-                    LENGTH(
-                        (
-                            SELECT strDefaultValue
-                            FROM custom_settings_trans
-                            WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                            AND intLanguageID = :lngID
-                        )
-                    ),
-                    (
-                        SELECT strDefaultValue
-                        FROM custom_settings_trans
-                        WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                        AND intLanguageID = :lngID
-                    ),
-                    custom_settings.strDefaultValue
-                ) as strDefaultValue,
-                IF(
-                    LENGTH(
-                        (
-                            SELECT strDescription
-                            FROM custom_settings_trans
-                            WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                            AND intLanguageID = :lngID
-                        )
-                    ),
-                    (
-                        SELECT strDescription
-                        FROM custom_settings_trans
-                        WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                        AND intLanguageID = :lngID
-                    ),
-                    custom_settings.strDescription
-                ) as strDescription
-                FROM custom_settings
-
-            "
-        )
-
-        loop query="local.qSettings" {
-
-            local.settingStruct['variable'] = local.qSettings.strSettingVariable;
-            local.settingStruct['defaultValue'] = local.qSettings.strDefaultValue;
-            local.settingStruct['description'] = local.qSettings.strDescription;
-            arrayAppend(local.settingArray, local.settingStruct);
-
-        }
-
-        return local.settingArray;
-
-    }
-
-
     // Get the value of a system setting as well as of a plan setting using a variable (and planID if desired)
-    public string function getSetting(required string settingVariable, numeric planID) {
+    public string function getSetting(required string settingVariable, numeric planID, string language) {
+
+        if (structKeyExists(arguments, "language")) {
+            local.lngID = application.objLanguage.getAnyLanguage(arguments.language).lngID;
+        } else {
+            local.lngID = application.objLanguage.getAnyLanguage(variables.language).lngID;
+        }
 
         if (structKeyExists(arguments, "planID") and isNumeric(arguments.planID)) {
 
@@ -114,7 +40,7 @@ component displayname="settings" output="false" {
                 params = {
                     planID: {type: "numeric", value: arguments.planID},
                     variable_name: {type: "string", value: arguments.settingVariable},
-                    lngID: {type: "numeric", value: variables.lngID}
+                    lngID: {type: "numeric", value: local.lngID}
                 },
                 sql = "
                     SELECT plans_plan_features.blnCheckmark,
@@ -175,52 +101,5 @@ component displayname="settings" output="false" {
         return local.valueString;
 
     }
-
-
-    // Get the setting of a customer using a variable
-    public string function getCustomerSetting(required string settingVariable, required numeric customerID) {
-
-        local.custSetting;
-
-        local.qSettings = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                customerID: {type: "numeric", value: arguments.customerID},
-                variable_name: {type: "string", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT
-                IF(
-                    LENGTH(
-                        (
-                            SELECT strSettingValue
-                            FROM customer_custom_settings
-                            WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                            AND intCustomerID = :customerID
-                        )
-                    ),
-                    (
-                        SELECT strSettingValue
-                        FROM customer_custom_settings
-                        WHERE intCustomSettingID = custom_settings.intCustomSettingID
-                        AND intCustomerID = :customerID
-                    ),
-                    custom_settings.strDefaultValue
-                ) as strSettingValue
-                FROM custom_settings
-                WHERE strSettingVariable = :variable_name
-            "
-        )
-
-        if (local.qSettings.recordCount) {
-            local.custSetting = local.qSettings.strSettingValue;
-        }
-
-        return local.custSetting;
-
-    }
-
-
-
 
 }
