@@ -309,13 +309,10 @@
                     </div>
                 </div>
                 <div class="modal-footer ps-3 pe-3">
-                    <a href="##" class="btn bg-green" data-bs-dismiss="modal">#getTrans('txtCancel')#</a>
+                    <a href="##" class="btn bg-green" data-bs-dismiss="modal">#getTrans('btnNoCancel')#</a>
                     <button type="submit" class="btn bg-danger ms-auto">
                         #getTrans('btnDeleteDefinitely')#
                     </button>
-                    <!--- <a onclick="sweetAlert('warning', '#application.mainURL#/cancel?delete', '#getTrans('titDeleteAccount')#?', '', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" type="submit" class="btn bg-danger ms-auto">
-                        #getTrans('btnDeleteDefinitely')#
-                    </a> --->
                 </div>
             </div>
         </div>
