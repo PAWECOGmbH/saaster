@@ -176,6 +176,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         // Global variables
         getTrans = application.objLanguage.getTrans;
         getAlert = application.objGlobal.getAlert;
+        logWrite = application.objLog.logWrite;
 
 
         // Is there a redirect coming in url?

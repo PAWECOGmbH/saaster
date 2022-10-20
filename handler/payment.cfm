@@ -64,12 +64,13 @@ if (structKeyExists(url, "del")) {
 
 
             getAlert('msgPaymentMethodDeleted', 'success');
-
+            logWrite("Delete payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Sucessfully delete the payment method!", false)
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
         } else {
 
             getAlert('msgNeedOnePaymentType', 'info');
+            logWrite("Delete payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Can't delete the only payment method!", false)
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
         }
@@ -105,12 +106,15 @@ if (structKeyExists(url, "add")) {
                 // If there is no data from the webhook, send the customer back and try again
                 if (getWebhook.recordCount) {
                     getAlert('msgPaymentMethodAdded', 'success');
+                    logWrite("Add payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Sucessfully added payment method!", false)
                 } else {
                     getAlert('alertErrorOccured', 'warning');
+                    logWrite("Add payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false)
                 }
 
             } else {
                 getAlert('alertErrorOccured', 'warning');
+                logWrite("Add payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false)
             }
 
             location url="#application.mainURL#/account-settings/payment" addtoken=false;
@@ -145,15 +149,14 @@ if (structKeyExists(url, "add")) {
                     } else {
                         payrexxURL = gatewayData.link;
                     }
-
+                    
                     location url=payrexxURL addtoken="false";
 
 
                 } catch (any e) {
 
-                    // todo: send error mail
-
                     getAlert(e.message);
+                    logWrite("Add payment method", 4, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, #e.message#", true)
                     location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
                 }
@@ -162,6 +165,7 @@ if (structKeyExists(url, "add")) {
             } else {
 
                 getAlert(payrexxRespond.message, 'danger');
+                logWrite("Add payment method", 3, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false)
                 location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
             }
@@ -198,6 +202,7 @@ if (structKeyExists(url, "default")) {
             "
         )
 
+        logWrite("Update payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Updated payment method!", false)
         location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
     }
@@ -243,10 +248,12 @@ if (structKeyExists(url, "pay")) {
                     // Set plans and modules as well as the custom settings into a session
                     application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
+                    logWrite("Pay invoice", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Successfully paid invoice: #url.pay#", false)
                     getAlert('msgInvoicePaid', 'success');
 
                 } else {
 
+                    logWrite("Pay invoice", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error on paying invoice: #url.pay#", false)
                     getAlert('alertErrorOccured', 'warning');
 
                 }
@@ -287,11 +294,12 @@ if (structKeyExists(url, "pay")) {
                 application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                 getAlert('msgInvoicePaid');
-
+                logWrite("Pay invoice", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Successfully paid invoice: #url.pay#", false)
 
             } else {
 
                 getAlert('txtChargingNotPossible', 'warning');
+                logWrite("Pay invoice", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Charging is not possible for invoice: #url.pay#", false)
 
             }
 
