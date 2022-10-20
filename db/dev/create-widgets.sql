@@ -18,11 +18,6 @@ CREATE TABLE `widgets`  (
 -- ----------------------------
 -- Records of widgets
 -- ----------------------------
-INSERT INTO `widgets` VALUES (1, 'Last Login', 'widgets/welcome.cfm', 1, 3, 1);
-INSERT INTO `widgets` VALUES (2, 'Sales', 'widgets/sales.cfm', 1, 3, 1);
-INSERT INTO `widgets` VALUES (3, 'Revenue', 'widgets/revenue.cfm', 1, 4, 1);
-INSERT INTO `widgets` VALUES (4, 'New clients', 'widgets/new-clients.cfm', 1, 4, 1);
-INSERT INTO `widgets` VALUES (5, 'Active users', 'widgets/active-users.cfm', 1, 4, 1);
-
+INSERT INTO `widgets` VALUES (1, 'Last Login', 'myapp/widgets/welcome.cfm', 1, 3, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
