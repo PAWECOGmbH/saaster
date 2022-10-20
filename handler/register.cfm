@@ -331,12 +331,20 @@ if (structKeyExists(form, 'login_btn')) {
 
             // Is the needed data of the cutomer already filled out?
             dataFilledIn = objRegister.checkFilledData(session.customer_id);
-
             if (!dataFilledIn) {
                 session.filledData = false;
             }
 
-            logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false)
+            logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false);
+
+            // Let's check whether there is a file we have to include coming from modules
+            filesToInlude = new com.modules().getModuleLoginIncludes(session.customer_id);
+            if (!arrayIsEmpty(filesToInlude)) {
+                loop array=filesToInlude item="path" {
+                    include template=path;
+                }
+            }
+
             location url="#objUserLogin.redirect#" addtoken="false";
 
 

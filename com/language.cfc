@@ -19,6 +19,9 @@ component displayname="language" output="false" {
                 sql = "
                     SELECT strVariable, strString#local.langIso#
                     FROM system_translations
+                    UNION
+                    SELECT strVariable, strString#local.langIso#
+                    FROM custom_translations
                 "
             )
 

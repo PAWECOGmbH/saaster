@@ -226,7 +226,7 @@ component displayname="customer" output="false" {
 
         local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100) ?: '';
         local.contact_person = application.objGlobal.cleanUpText(tenantStruct.contact_person, 100) ?: 'untitled company';
-        
+
         try {
 
             queryExecute(
@@ -404,9 +404,6 @@ component displayname="customer" output="false" {
         // Save current modules into a session
         checkModules = new com.modules(language=arguments.language).getBookedModules(arguments.customerID);
         session.currentModules = checkModules;
-
-        // Save custom settings struct into a session
-        session.customSettings = application.objSettings.getCustomSettings(arguments.customerID);
 
     }
 
