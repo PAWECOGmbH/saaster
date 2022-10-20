@@ -685,7 +685,7 @@ component displayname="user" output="false" {
                 "
             )
 
-            local.argsReturnValue['message'] = "email updated";
+            local.argsReturnValue['message'] = getTrans('txtEmailUpdated');
             local.argsReturnValue['success'] = true;
 
         }
