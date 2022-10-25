@@ -77,6 +77,11 @@
     paymentStruct['cancelRedirectUrl'] = cancelLink;
     paymentStruct['lookAndFeelProfile'] = variables.payrexxDesignID; // config.cfm
 
+    // Are there any specific PSPs defined?
+    if (len(trim(variables.payrexxPSPs))) {
+        paymentStruct['psp'] = variables.payrexxPSPs; // config.cfm
+    }
+
 
     // Call Payrexx and create a gateway
     payrexxRespond = objPayrexx.callPayrexx(paymentStruct, "POST", "Gateway");
