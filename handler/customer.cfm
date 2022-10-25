@@ -40,6 +40,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     checkEmail = application.objGlobal.checkEmail(form.email);
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
+        logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Provided email is not valid!", false);
         location url="#application.mainURL#/account-settings/company" addtoken="false";
     }
 
@@ -47,6 +48,7 @@ if (structKeyExists(form, "edit_company_btn")) {
         checkEmail = application.objGlobal.checkEmail(form.billing_email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
+            logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Provided email is not valid!", false);
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
     }
@@ -56,8 +58,10 @@ if (structKeyExists(form, "edit_company_btn")) {
 
     if (objCustomerEdit.success) {
         getAlert('msgChangesSaved', 'success');
+        logWrite("Edit company", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Company info successfully saved!", false);
     } else {
         getAlert(objCustomerEdit.message, 'danger');
+        logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Company info could not be saved!", false);
     }
 
     // Clear sessions
@@ -104,10 +108,12 @@ if (structKeyExists(form, "logo_upload_btn")) {
         }
         catch("java.io.IOException" e){
             getAlert( "msgFileUploadError", 'danger');
+            logWrite("Logo upload", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
         catch(any e){
             getAlert( e.message, 'danger');
+            logWrite("Logo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
@@ -130,10 +136,12 @@ if (structKeyExists(form, "logo_upload_btn")) {
             )
 
             getAlert('msgFileUploadedSuccessfully', 'success');
-
+            logWrite("Logo upload", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload was successful!", false);
+            
         } else {
 
             getAlert(fileUpload.message, 'danger');
+            logWrite("Logo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
 
         }
 
@@ -178,7 +186,7 @@ if (structKeyExists(url, "del_logo")) {
                 WHERE intCustomerID = :customerID
             "
         )
-
+        
         location url="#application.mainURL#/account-settings/company" addtoken="false";
 
     }
@@ -193,6 +201,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
     param name="form.contact_person" default="";
 
     if (!len(trim(contact_person))) {
+        logWrite("Create new tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Contact person is not provided!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -208,10 +217,12 @@ if (structKeyExists(form, "new_tenant_btn")) {
     if (insertTenant.success) {
 
         getAlert('alertTenantAdded', 'success');
+        logWrite("Create new tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully created new tenant!", false);
 
     } else {
 
         getAlert(insertTenant.message, 'danger');
+        logWrite("Create new tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, New tenant could not be created!", false);
 
     }
 
@@ -227,6 +238,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!isNumeric(url.delete) or url.delete lte 0) {
         getAlert('No tenant found!', 'danger');
+        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant not found!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -235,6 +247,7 @@ if (structKeyExists(url, "delete")) {
 
     if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
+        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant not found!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -243,6 +256,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to delete this tenant!', 'danger');
+        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, User is not allowed to delete this tenant!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -268,8 +282,10 @@ if (structKeyExists(url, "delete")) {
 
     if (getAnswer.recordCount) {
         getAlert('alertTenantDeleted', 'success');
+        logWrite("Delete tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant got successfully deleted!", false);
     } else {
         getAlert('No user found!', 'danger');
+        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant could not be deleted!", false);
     }
 
     location url="#application.mainURL#/account-settings/tenants" addtoken="false";
@@ -282,6 +298,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (!isNumeric(url.change_tenant)) {
         getAlert('The customerID is not of type numeric!', 'danger');
+        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant url value is not numeric!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -290,6 +307,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
+        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, No tenant found!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -300,6 +318,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to edit this tenant!', 'danger');
+        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, User not allowed to edit this tenant!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
