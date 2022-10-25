@@ -26,13 +26,12 @@
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
+<cfoutput>
 <div class="page-wrapper">
-    <div class="container-xl">
-        <cfoutput>
+    <div class="#application.layoutStruct.layoutPage#">
             <div class="row">
-                <div class="page-header mb-3">
+                <div class="#application.layoutStruct.layoutPageHeader# mb-3">
                     <h4 class="page-title">#getTrans('titInvoices')#</h4>
                     <ol class="breadcrumb breadcrumb-dots">
                         <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -158,11 +157,9 @@
                     #getTrans('txtNoInvoices')#
                 </div>
             </cfif>
-        </cfoutput>
 
     </div>
+    <cfinclude template="/includes/footer.cfm">
+
 </div>
-
-<cfinclude template="/includes/footer.cfm">
-
-
+</cfoutput>

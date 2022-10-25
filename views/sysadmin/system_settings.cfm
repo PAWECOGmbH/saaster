@@ -1,4 +1,20 @@
 <cfscript>
+    cfparam(name="application.layoutStruct.horizontal" default="");
+    cfparam(name="application.layoutStruct.horizontalDark" default="");
+    cfparam(name="application.layoutStruct.vertical" default="");
+    cfparam(name="application.layoutStruct.verticalTransparent" default="");
+    cfparam(name="application.layoutStruct.rightVertical" default="");
+    cfparam(name="application.layoutStruct.condensed" default="");
+    cfparam(name="application.layoutStruct.combined" default="");
+    cfparam(name="application.layoutStruct.navbarDark" default="");
+    cfparam(name="application.layoutStruct.navbarSticky" default="");
+    cfparam(name="application.layoutStruct.navbarOverlap" default="");
+    cfparam(name="application.layoutStruct.fluid" default="");
+    cfparam(name="application.layoutStruct.fluidVertical" default="");
+
+
+
+    // Function query execute system settings
     function systemSetting(required string settingVariable) {
 
         qSystemSettings = queryExecute (
@@ -16,24 +32,27 @@
         return qSystemSettings;
 
     }
+
+
     qInvoiceNumberStart = systemSetting('settingInvoiceNumberStart');
     qRoundFactor = systemSetting('settingRoundFactor');
     qInvoicePrefix = systemSetting('settingInvoicePrefix');
     qStandardVatType = systemSetting('settingStandardVatType');
     qInvoiceNet = systemSetting('settingInvoiceNet');
+    qLayout = systemSetting('settingLayout');
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#application.layoutStruct.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Settings</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -49,7 +68,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#application.layoutStruct.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -109,8 +128,111 @@
                                         </div>
                                     </div>
                                 </div>
-
-
+                            </div>
+                            <div class="card-body">
+                                <h3>Layout settings</h3>
+                                <div class="border align-baseline p-3">
+                                    <div class="col-12">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="horizontal" class="form-imagecheck-input" #application.layoutStruct.horizontal#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal</p>
+                                                    <img src="../dist/img/layout/horizontal.png" alt="Horizontal" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="horizontalDark" class="form-imagecheck-input" #application.layoutStruct.horizontalDark#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal dark</p>
+                                                    <img src="../dist/img/layout/horizontalDark.png" alt="Horizontal dark" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="navbarSticky" class="form-imagecheck-input" #application.layoutStruct.navbarSticky#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar sticky</p>
+                                                    <img src="../dist/img/layout/navbarSticky.png" alt="Navbar sticky" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="condensed" class="form-imagecheck-input" #application.layoutStruct.condensed#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Condensed</p>
+                                                    <img src="../dist/img/layout/condensed.png" alt="Condensed" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="navbarDark" class="form-imagecheck-input" #application.layoutStruct.navbarDark#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar dark</p>
+                                                    <img src="../dist/img/layout/navbarDark.png" alt="Navbar dark" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="navbarOverlap" class="form-imagecheck-input" #application.layoutStruct.navbarOverlap#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar overlap</p>
+                                                    <img src="../dist/img/layout/navbarOverlap.png" alt="Navbar overlap" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="verticalTransparent" class="form-imagecheck-input" #application.layoutStruct.verticalTransparent#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical</p>
+                                                    <img src="../dist/img/layout/verticalTransparent.png" alt="Vertical transparent" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="vertical" class="form-imagecheck-input" #application.layoutStruct.vertical#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical dark</p>
+                                                    <img src="../dist/img/layout/vertical.png" alt="Vertical" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="rightVertical" class="form-imagecheck-input" #application.layoutStruct.rightVertical#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Right vertical</p>
+                                                    <img src="../dist/img/layout/rightVertical.png" alt="Right vertical" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="combined" class="form-imagecheck-input" #application.layoutStruct.combined#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Combined</p>
+                                                    <img src="../dist/img/layout/combined.png" alt="Combined" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="fluid" class="form-imagecheck-input" #application.layoutStruct.fluid#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid</p>
+                                                    <img src="../dist/img/layout/fluid.png" alt="Fluid" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-imagecheck mb-2">
+                                                    <input name="settingLayout" type="radio" value="fluidVertical" class="form-imagecheck-input" #application.layoutStruct.fluidVertical#/>
+                                                    <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid vertical</p>
+                                                    <img src="../dist/img/layout/fluidVertical.png" alt="Fluid vertical" class="form-imagecheck-image">
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-footer">
                                 <button id="submit_button" type="submit" class="btn btn-primary">#getTrans('btnSave')#</button>
@@ -122,6 +244,5 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>
-
-

@@ -6,13 +6,13 @@
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
+<cfoutput>
 <div class="page-wrapper">
-    <div class="container-xl">
+    <div class="#application.layoutStruct.layoutPage#">
 
-        <cfoutput>
-        <div class="page-header mb-3">
+        
+        <div class="#application.layoutStruct.layoutPageHeader# mb-3">
             <h2 class="page-title">#getTrans('txtAccountSettings')#</h2>
 
             <ol class="breadcrumb breadcrumb-dots" aria-label="breadcrumbs">
@@ -162,7 +162,9 @@
             </cfif>
 
         </div>
-        </cfoutput>
     </div>
+    <cfinclude template="/includes/footer.cfm">
+
 </div>
-<cfinclude template="/includes/footer.cfm">
+</cfoutput>
+

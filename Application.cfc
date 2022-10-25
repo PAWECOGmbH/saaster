@@ -52,6 +52,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objSettings = new com.settings();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
+        application.objLayout = new com.layout();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -70,6 +71,9 @@ component displayname="Application" output="false" hint="Handle the application.
 
         // Load system setting struct and save it into the application scope
         application.systemSettingStruct = application.objSettings.initSystemSettings();
+
+        // Load layout setting struct and save it into the application scope
+        application.layoutStruct = application.objLayout.layoutSetting(application.systemSettingStruct.settingLayout);
 
         return true;
 

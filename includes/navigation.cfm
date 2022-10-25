@@ -1,7 +1,9 @@
 <div class="navbar-expand-md">
     <div class="collapse navbar-collapse" id="navbar-menu">
-        <div class="navbar navbar-light">
-            <div class="container-xl">
+        <cfoutput>
+        <div class="#application.layoutStruct.layoutNav#">
+            <div class="#application.layoutStruct.layoutPage#">
+            </cfoutput>
                 <ul class="navbar-nav">
                     <li class="nav-item <cfif listlast(cgi.path_info, '/') eq 'dashboard'>active</cfif>">
                         <cfoutput>

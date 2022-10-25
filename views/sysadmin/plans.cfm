@@ -32,14 +32,13 @@
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#application.layoutStruct.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="page-header">
+                    <div class="#application.layoutStruct.layoutPageHeader#">
                         <h4 class="page-title">Plans</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -48,7 +47,7 @@
                         </ol>
                     </div>
                 </div>
-                <div class="col-lg-6 mb-3 page-header text-end align-text-top">
+                <div class="#application.layoutStruct.layoutPageHeader# col-lg-6 mb-3 text-end align-text-top">
                     <div class="button-group">
                         <cfif qPlanGroups.recordCount>
                             <button href="##" data-bs-toggle="modal" data-bs-target="##plan_new" class="btn btn-primary">
@@ -69,7 +68,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#application.layoutStruct.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -179,7 +178,10 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>
+
+
 
 <cfif qPlans.recordCount gt 1>
     <cfoutput>

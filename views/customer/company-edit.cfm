@@ -89,11 +89,11 @@
 
 <cfinclude template="/includes/header.cfm">
 
-<cfinclude template="/includes/navigation.cfm">
+<cfoutput>
 <div class="page-wrapper">
-    <div class="container-xl">
-        <cfoutput>
-        <div class="page-header mb-3">
+    <div class="#application.layoutStruct.layoutPage#">
+        
+        <div class="#application.layoutStruct.layoutPageHeader# mb-3">
             <h4 class="page-title"><cfoutput>#getTrans('titEditCompany')#</cfoutput></h4>
 
             <ol class="breadcrumb breadcrumb-dots">
@@ -273,11 +273,12 @@
 
             </div>
         </div>
-        </cfoutput>
     </div>
     <cfinclude template="/includes/footer.cfm">
 
 </div>
+</cfoutput>
+
 
 
 <!--- Modal for cancelation --->

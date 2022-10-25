@@ -41,14 +41,13 @@
 
 <cfinclude template="/includes/header.cfm">
 
-<cfinclude template="/includes/navigation.cfm">
 
+<cfoutput>
 <div class="page-wrapper">
-    <div class="container-xl">
+    <div class="#application.layoutStruct.layoutPage#">
         <div class="row mb-3">
             <div class="col-md-12 col-lg-12">
-                <cfoutput>
-                <div class="page-header mb-3">
+                <div class="#application.layoutStruct.layoutPageHeader# mb-3">
                     <h4 class="page-title">#getTrans('txtMyProfile')#</h4>
                     <ol class="breadcrumb breadcrumb-dots">
                         <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -170,7 +169,9 @@
                 </div>
             </div>
         </div>
-        </cfoutput>
     </div>
+    <cfinclude template="/includes/footer.cfm">
+
 </div>
-<cfinclude template="/includes/footer.cfm">
+</cfoutput>
+

@@ -1,9 +1,10 @@
-
+<cfoutput>
 <!doctype html>
-<html lang="<cfoutput>#session.lng#</cfoutput>">
+<html lang="#session.lng#">
 
 <cfinclude template="includes/head.cfm">
-<body>
+<body #application.layoutStruct.layoutBody#>
+</cfoutput>
 	<div class="page">
 		<cfif fileExists(thiscontent.thisPath)>
 			<cfinclude template="#thiscontent.thisPath#">
