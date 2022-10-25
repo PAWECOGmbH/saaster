@@ -133,6 +133,11 @@ if (structKeyExists(url, "add")) {
             paymentStruct['amount'] = 100;
             paymentStruct['preAuthorization'] = true;
 
+            // Are there any specific PSPs defined?
+            if (len(trim(variables.payrexxPSPs))) {
+                paymentStruct['psp'] = variables.payrexxPSPs; // config.cfm
+            }
+
 
             // Call Payrexx and create a gateway
             payrexxRespond = objPayrexx.callPayrexx(paymentStruct, "POST", "Gateway");
@@ -149,7 +154,7 @@ if (structKeyExists(url, "add")) {
                     } else {
                         payrexxURL = gatewayData.link;
                     }
-                    
+
                     location url=payrexxURL addtoken="false";
 
 
