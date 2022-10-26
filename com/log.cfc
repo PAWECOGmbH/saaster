@@ -22,7 +22,7 @@ component displayname="log" {
             fileAppend("logs/#local.subFolder#/#DateTimeFormat(local.curTime, "yyyy-mm-dd")#_#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
             
             if (sendMail){
-                cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.toEmail#" ) {
+                cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.fromEmail#" ) {
                     writeOutput("<h3>#local.severityTypes[arguments.severity]# - #arguments.name#</h3><p>#local.curTime#</p><hr>#arguments.message#");
                 }
             }
