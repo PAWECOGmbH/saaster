@@ -26,7 +26,7 @@
                             <li class="breadcrumb-item active">Modules</li>
                         </ol>
                     </div>
-                    <div class="#getLayout.layoutStruct.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##module_new" class="btn btn-primary">
                             <i class="fas fa-plus pe-3"></i> Add module
                         </a>
@@ -72,7 +72,7 @@
                                                     <td><a href="#application.mainURL#/sysadmin/modules/edit/#qModules.intModuleID#" class="btn">Edit</a></td>
                                                     <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_module=#qModules.intModuleID#', 'Delete module', 'Are you sure you want to delete this module?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
-                                                
+
                                             </cfloop>
                                         </tbody>
                                     <cfelse>
