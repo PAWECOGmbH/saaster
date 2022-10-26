@@ -16,10 +16,10 @@ component displayname="log" {
 
         if (arguments.severity lte 4 and arguments.severity gte 1) {
             local.logMsg = local.curTime & " - " & local.severityTypes[arguments.severity] & ": " & arguments.name & " - " &  arguments.message & Chr(13) & Chr(10);
-            local.subFolder = lcase(local.severityTypes[arguments.severity]);
+            local.subFolderMonth = dateformat(local.curTime,'yyyy-mm');
             
-            directoryCreate( expandPath('logs/#local.subFolder#'), true, true);
-            fileAppend("logs/#local.subFolder#/#DateTimeFormat(local.curTime, "yyyy-mm-dd")#_#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
+            directoryCreate( expandPath('logs/#local.subFolderMonth#'), true, true);
+            fileAppend("../logs/#local.subFolderMonth#/saaster_#DateTimeFormat(local.curTime, "yyyy-mm-dd")#.log", local.logMsg)
             
             if (sendMail){
                 cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.fromEmail#" ) {
