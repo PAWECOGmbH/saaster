@@ -52,6 +52,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.objSettings = new com.settings();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
+        application.objLayout = new com.layout();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -71,7 +72,9 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         // Load system setting struct and save it into the application scope
         application.systemSettingStruct = application.objSettings.initSystemSettings();
 
-        // Custom code
+        // Load layout setting struct and save it into the application scope
+        application.layoutStruct = application.objLayout.layoutSetting(application.systemSettingStruct.settingLayout);
+
         ownApplicationStart();
 
         return true;
@@ -176,6 +179,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         // Global variables
         getTrans = application.objLanguage.getTrans;
         getAlert = application.objGlobal.getAlert;
+        getLayout = application.layoutStruct;
         logWrite = application.objLog.logWrite;
 
 

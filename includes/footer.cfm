@@ -1,8 +1,7 @@
-
-<footer class="footer footer-transparent d-print-none">
-    <div class="container-xl d-flex ">
-        <cfoutput>
+<cfoutput>
+    <footer class="footer footer-transparent d-print-none">
+        <div class="#getLayout.layoutPageFooter# d-flex ">
             #variables.footerText#
-        </cfoutput>
-    </div>
-</footer>
+        </div>
+    </footer>
+</cfoutput>

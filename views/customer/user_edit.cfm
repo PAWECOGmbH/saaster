@@ -49,13 +49,12 @@
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
+<cfoutput>
 <div class="page-wrapper">
-    <div class="container-xl">
+    <div class="#getLayout.layoutPage#">
         <div class="row">
-            <cfoutput>
-            <div class="page-header mb-3">
+            <div class="#getLayout.layoutPageHeader# mb-3">
                 <h4 class="page-title">#getTrans('btnEditUser')#</h4>
 
                 <ol class="breadcrumb breadcrumb-dots">
@@ -210,7 +209,8 @@
                 </form>
             </div>
         </div>
-        </cfoutput>
     </div>
+    <cfinclude template="/includes/footer.cfm">
+
 </div>
-<cfinclude template="/includes/footer.cfm">
+</cfoutput>
