@@ -478,7 +478,7 @@ component displayname="user" output="false" {
         if (arguments.toUserID gt 0 and arguments.fromUserID gt 0) {
 
             // Get user
-            qUser = queryExecute(
+            local.qUser = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
                     toUserID: {type: "numeric", value: arguments.toUserID},
@@ -495,12 +495,12 @@ component displayname="user" output="false" {
                 "
             )
 
-            local.thisUUID = qUser.strUUID;
+            local.thisUUID = local.qUser.strUUID;
 
-            if (qUser.recordCount) {
+            if (local.qUser.recordCount) {
 
                 // UUID already set?
-                if (!len(trim(qUser.strUUID))) {
+                if (!len(trim(local.qUser.strUUID))) {
 
                     local.thisUUID = application.objGlobal.getUUID();
 
@@ -534,7 +534,7 @@ component displayname="user" output="false" {
 
                 cfsavecontent (variable = "variables.mailContent") {
                     echo("
-                        #variables.getTrans('titHello')# #qUser.toName#<br><br>
+                        #variables.getTrans('titHello')# #local.qUser.toName#<br><br>
                         #local.invitationMail#<br><br>
                         <a href='#application.mainURL#/registration?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#variables.getTrans('formSignIn')#</a><br><br>
 
@@ -545,7 +545,8 @@ component displayname="user" output="false" {
                 }
 
                 // Send activation link
-                mail to="#qUser.toEmail#" from="#application.fromEmail#" subject="#variables.getTrans('txtInvitationFrom')# #qUser.fromName#" type="html" {
+                mail to="#local.qUser.toEmail#" from="#application.fromEmail#" subject="#variables.getTrans('txtInvitationFrom')# #local.qUser.fromName#" type="html" {
+                    include template="/config.cfm";
                     include template="/includes/mail_design.cfm";
                 }
 
@@ -646,6 +647,7 @@ component displayname="user" output="false" {
 
             // Send activation link
             mail to="#local.qUsersMailCheck.strEmail#" from="#application.fromEmail#" subject="#variables.getTrans('subjectConfirmEmail')#" type="html" {
+                include template="/config.cfm";
                 include template="/includes/mail_design.cfm";
             }
 

@@ -1,39 +1,16 @@
 <cfscript>
 
-  // Mailparams
   cfmailparam( name="charset", value="utf-8" );
   cfmailparam( name="MIME-Version", value=1.0 );
   cfmailparam( name="Content-Type", value="text/html; charset=utf-8" );
 
-  // Params
   param name="variables.mailTitle" default="Title";
   param name="variables.mailContent" default="Content";
   param name="variables.mailType" default="html";
 
-  //  generel
-  mailMaxWidthContent = 660;
-  fontFamily = "Arial, Helvetica, sans-serif";
-  fontColorTitle = "464646";
-  fontColorSubtitle = "464646";
-  fontSizeTitle = 21;
-  fontSizeSubtitle = 16;
-  fontColorText = "464646";
-  fontSizeText = 14;
-  fontColorTextSmall = "b2b2b2";
-  fontSizeTextSmall = 12;
-
-  //  header
-  headerBGColor = "f4f4f4";
-  headerFontColor = "464646";
-  headerFontSize = 14;
-
-  //  buttons
-  buttonBGColor = "feda00";
-  buttonFontColor = "016aac";
-  buttonFontSize = 14;
-
   // Get customer data
   customerData = new com.sysadmin().getSysAdminData();
+
 </cfscript>
 
 <!DOCTYPE html>
@@ -153,14 +130,14 @@
   <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
       <cfoutput>
-        <td bgcolor="#headerBGColor#">
+        <td bgcolor="#variables.headerBGColor#">
           <div align="center" style="padding: 0px 15px 0px 15px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="#mailMaxWidthContent#" class="wrapper">
+            <table border="0" cellpadding="0" cellspacing="0" width="#variables.mailMaxWidthContent#" class="wrapper">
               <tr>
                 <td colspan="3" style="padding: 20px 10px 30px 10px;" class="logo">
                   <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
-                      <td bgcolor="###headerBGColor#" width="100%" align="left">
+                      <td bgcolor="###variables.headerBGColor#" width="100%" align="left">
                         <a target="_blank">
                           <cfif len(trim(customerData.logo))>
                             <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#customerData.logo#" height="150" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; height: 150px; font-size: 16px;" border="0">
