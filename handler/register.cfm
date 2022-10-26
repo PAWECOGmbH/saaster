@@ -37,6 +37,7 @@ if (structKeyExists(form, 'register_btn')) {
 
         if (qCheckDouble.recordCount) {
             getAlert('alertHasAccountAlready', 'warning');
+            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Mail is already registered!", false);
             location url="#application.mainURL#/login" addtoken="false";
         }
 
@@ -82,11 +83,13 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "email");
 
             getAlert('alertOptinSent', 'info');
+            logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Registration was successful!", false);
             location url="#application.mainURL#/login" addtoken="false";
 
         } else {
 
             getAlert('alertErrorOccured', 'danger');
+            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Registration failed!", false);
             location url="#application.mainURL#/register" addtoken="false";
 
         }
@@ -94,6 +97,7 @@ if (structKeyExists(form, 'register_btn')) {
     } else {
 
         getAlert('alertEnterEmail', 'warning');
+        logWrite("Register", 3, "File: #callStackGet("string", 0 , 1)#, Registration failed!", false);
         location url="#application.mainURL#/register" addtoken="false";
 
     }
@@ -150,12 +154,14 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
         } else {
 
             session.step = 1;
+            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
             getAlert('alertNotValidAnymore', 'warning');
 
         }
 
     }
 
+    logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Opt in successfully validated!", false);
     location url="#application.mainURL#/register" addtoken="false";
 
 }
@@ -172,11 +178,13 @@ if (structKeyExists(form, 'create_account')) {
         if (not trim(form.password) eq trim(form.password2)) {
             session.step = 2;
             getAlert('alertPasswordsNotSame', 'warning');
+            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Passwords don't match!", false);
             location url="#application.mainURL#/register" addtoken="false";
         }
     } else {
         session.step = 2;
         getAlert('alertChoosePassword', 'warning');
+        logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Choosen passwords match and are valid!", false);
         location url="#application.mainURL#/register" addtoken="false";
     }
 
@@ -218,12 +226,14 @@ if (structKeyExists(form, 'create_account')) {
                 structDelete(session, "uuid");
 
                 getAlert('alertAccountCreatedLogin', 'success');
+                logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Data of customer successfully inserted!", false);
                 location url="#application.mainURL#/login" addtoken="false";
 
             } else {
 
                 session.step = 1;
                 getAlert(insertCustomer.message, 'danger');
+                logWrite("Register", 3, "File: #callStackGet("string", 0 , 1)#, #insertCustomer.message#", false);
                 location url="#application.mainURL#/register" addtoken="false";
 
             }
@@ -253,12 +263,14 @@ if (structKeyExists(form, 'create_account')) {
                 if (setNewPassword.success) {
 
                     getAlert('alertAccountCreatedLogin', 'success');
+                    logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Password got successfully set!", false);
                     location url="#application.mainURL#/login" addtoken="false";
 
                 } else {
 
                     session.step = 1;
                     getAlert('alertNotValidAnymore', 'warning');
+                    logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
                     location url="#application.mainURL#/register" addtoken="false";
 
                 }
@@ -268,6 +280,7 @@ if (structKeyExists(form, 'create_account')) {
 
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
+            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
             location url="#application.mainURL#/register" addtoken="false";
 
         }
@@ -276,6 +289,7 @@ if (structKeyExists(form, 'create_account')) {
 
         session.step = 1;
         getAlert('alertNotValidAnymore', 'warning');
+        logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
         location url="#application.mainURL#/register" addtoken="false";
 
     }
@@ -317,9 +331,18 @@ if (structKeyExists(form, 'login_btn')) {
 
             // Is the needed data of the cutomer already filled out?
             dataFilledIn = objRegister.checkFilledData(session.customer_id);
-
             if (!dataFilledIn) {
                 session.filledData = false;
+            }
+
+            logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false);
+
+            // Let's check whether there is a file we have to include coming from modules
+            filesToInlude = new com.modules().getModuleLoginIncludes(session.customer_id);
+            if (!arrayIsEmpty(filesToInlude)) {
+                loop array=filesToInlude item="path" {
+                    include template=path;
+                }
             }
 
             location url="#objUserLogin.redirect#" addtoken="false";
@@ -330,9 +353,11 @@ if (structKeyExists(form, 'login_btn')) {
             // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
                 getAlert('msgAccountDisabledByAdmin', 'warning');
+                logWrite("Login", 2, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User tried to log in but account is not active!", false);
                 location url="#application.mainURL#/login" addtoken="false";
             } else {
                 getAlert('alertWrongLogin', 'warning');
+                logWrite("Login", 2, "File: #callStackGet("string", 0 , 1)#, Unsuccessful login try!", false);
                 location url="#application.mainURL#/login" addtoken="false";
             }
 
@@ -341,6 +366,7 @@ if (structKeyExists(form, 'login_btn')) {
     } else {
 
         getAlert('alertErrorOccured', 'danger');
+        logWrite("Login", 3, "File: #callStackGet("string", 0 , 1)#, Error on login try!", false);
         location url="#application.mainURL#/login" addtoken="false";
 
     }
@@ -411,6 +437,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
     }
 
     getAlert('alertIfAccountFoundEmail', 'info');
+    logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUser.intUserID#, Password reset started and mail sent!", false);
     location url="#application.mainURL#/login" addtoken="false";
 
 }
@@ -435,6 +462,7 @@ if (structKeyExists(url, "p")) {
     if (qCheckUUID.recordCount) {
 
         getAlert('alertChoosePassword', 'info');
+        logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUUID.intUserID#, Requested link for password reset is valid!", false);
         session.step = 2;
         session.uuid = url.p;
         location url="#application.mainURL#/password" addtoken="false";
@@ -442,6 +470,7 @@ if (structKeyExists(url, "p")) {
     } else {
 
         getAlert('alertNotValidAnymore', 'warning');
+        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUUID.intUserID#, Requested link for password reset is not valid!", false);
         location url="#application.mainURL#/password" addtoken="false";
 
     }
@@ -462,6 +491,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         thisResetUUID = session.uuid;
     } else {
         getAlert('alertNotValidAnymore', 'warning');
+        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, Requested link for password reset is not valid!", false);
         location url="#application.mainURL#/password" addtoken="false";
     }
 
@@ -470,12 +500,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
         if (not form.password eq form.password2) {
             getAlert('alertPasswordsNotSame', 'warning');
+            logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Passwords don't match!", false);
             location url="#application.mainURL#/password" addtoken="false";
         }
 
     } else {
 
         getAlert('alertChoosePassword', 'warning');
+        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Passwords are not valid!", false);
         location url="#application.mainURL#/password" addtoken="false";
 
     }
@@ -502,10 +534,12 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         );
 
         getAlert('alertPasswordResetSuccess', 'success');
+        logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Password reset was successful!", false);
         location url="#application.mainURL#/login" addtoken="false";
 
     } else {
         getAlert(changePassword.message, 'danger');
+        logWrite("Password reset", 3, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, #changePassword.message#", false);
         location url="#application.mainURL#/password" addtoken="false";
     }
 

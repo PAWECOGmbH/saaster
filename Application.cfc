@@ -1,5 +1,5 @@
 
-component displayname="Application" output="false" hint="Handle the application." {
+component displayname="Application" output="false" extends="myapp.myApplication" {
 
     // Datasource and custom variables
     include template="config.cfm";
@@ -75,6 +75,8 @@ component displayname="Application" output="false" hint="Handle the application.
         // Load layout setting struct and save it into the application scope
         application.layoutStruct = application.objLayout.layoutSetting(application.systemSettingStruct.settingLayout);
 
+        ownApplicationStart();
+
         return true;
 
     }
@@ -90,6 +92,9 @@ component displayname="Application" output="false" hint="Handle the application.
 
         // Save the language into the session
         session.lng = local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso;
+
+        // Custom code
+        ownSessionStart();
 
         return;
 
@@ -134,6 +139,9 @@ component displayname="Application" output="false" hint="Handle the application.
         // Set customers locale using his browser
         setLocale(application.objLanguage.toLocale(language=local.browserLocale));
 
+        // Custom code
+        ownRequestStart();
+
         return true;
 
     }
@@ -172,6 +180,7 @@ component displayname="Application" output="false" hint="Handle the application.
         getTrans = application.objLanguage.getTrans;
         getAlert = application.objGlobal.getAlert;
         getLayout = application.layoutStruct;
+        logWrite = application.objLog.logWrite;
 
 
         // Is there a redirect coming in url?
@@ -236,6 +245,9 @@ component displayname="Application" output="false" hint="Handle the application.
             }
 
         }
+
+        // Custom code
+        ownRequest();
 
 
         include template="\#ARGUMENTS.TargetPage#";

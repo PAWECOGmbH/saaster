@@ -1,7 +1,7 @@
 component displayname="log" {
 
     // Logging function
-    public void function writeLog(required string name, required numeric severity, required string message, required boolean sendMail) {
+    public void function logWrite(required string name, required numeric severity, required string message, required boolean sendMail) {
             
         local.severityTypes = ["INFORMATION", "WARNING", "ERROR", "FATAL"];
         local.getSysadmin = new com.sysadmin().getSysAdminData();
@@ -16,9 +16,13 @@ component displayname="log" {
 
         if (arguments.severity lte 4 and arguments.severity gte 1) {
             local.logMsg = local.curTime & " - " & local.severityTypes[arguments.severity] & ": " & arguments.name & " - " &  arguments.message & Chr(13) & Chr(10);
-            fileAppend("../logs/#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
+            local.subFolder = lcase(local.severityTypes[arguments.severity]);
+            
+            directoryCreate( expandPath('logs/#local.subFolder#'), true, true);
+            fileAppend("logs/#local.subFolder#/#DateTimeFormat(local.curTime, "yyyy-mm-dd")#_#lCase(local.severityTypes[arguments.severity])#.log", local.logMsg)
+            
             if (sendMail){
-                cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.toEmail#" ) {
+                cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.fromEmail#" ) {
                     writeOutput("<h3>#local.severityTypes[arguments.severity]# - #arguments.name#</h3><p>#local.curTime#</p><hr>#arguments.message#");
                 }
             }

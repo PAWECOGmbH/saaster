@@ -155,35 +155,18 @@ if (structKeyExists(form, "edit_module")) {
         qMappings = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                moduleID: {type: "numeric", value: form.edit_module}
+                mapping: {type: "varchar", value: mapping}
             },
             sql = "
                 SELECT intModuleID
                 FROM custom_mappings
-                WHERE intModuleID = :moduleID
+                WHERE strMapping = :mapping
             "
         )
 
         try {
 
-            if (qMappings.recordCount) {
-
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        mapping: {type: "varchar", value: mapping},
-                        thispath: {type: "varchar", value: path},
-                        moduleID: {type: "numeric", value: form.edit_module}
-                    },
-                    sql = "
-                        UPDATE custom_mappings
-                        SET strMapping = :mapping,
-                            strPath = :thispath
-                        WHERE intModuleID = :moduleID
-                    "
-                )
-
-            } else {
+            if (!qMappings.recordCount) {
 
                 queryExecute(
                     options = {datasource = application.datasource},
@@ -269,7 +252,7 @@ if (structKeyExists(form, "edit_module")) {
             "
         )
 
-        // Create the folder specified 
+        // Create the folder specified
         createFolderSuccess = true;
         if (!directoryExists(expandPath('/modules/#form.prefix#'))) {
             try {
@@ -318,8 +301,21 @@ dump('Hello settings!');
             }
         }
 
+        // Create the file for the login inlude
+        createLoginFileSuccess = true;
+        if (!fileExists(expandPath('/modules/#form.prefix#/login_include.cfm'))) {
+savecontent variable="loginContent" {
+writeOutput("<!--- This file will be included while users login --->");
+}
+            try {
+                fileWrite(expandPath('/modules/#form.prefix#/login_include.cfm'), loginContent);
+            } catch (any e) {
+                createLoginFileSuccess = false;
+                getAlert(e.message, 'danger');
+            }
+        }
 
-        if (picSuccess and createFolderSuccess and createSettingFileSuccess) {
+        if (picSuccess and createFolderSuccess and createSettingFileSuccess and createLoginFileSuccess) {
             getAlert('Module saved.');
         }
 

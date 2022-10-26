@@ -5,7 +5,7 @@ if (structKeyExists(url, "logout")) {
 
     structClear(SESSION);
     onSessionStart();
-
+    
     location url="#application.mainURL#/login?logout" addtoken="no";
 }
 
@@ -43,6 +43,7 @@ if (structKeyExists(url, "switch")) {
                 session.filledData = false;
             }
 
+            logWrite("Switch tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully changed tenant!", false);
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {

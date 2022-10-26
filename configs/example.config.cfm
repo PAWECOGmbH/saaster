@@ -95,6 +95,9 @@ variables.payrexxDesignID = "";
 // Webhook directory for developing environment
 variables.payrexxWebhookDev = "";
 
+// PSP IDs (comma separated list without spaces)
+variables.payrexxPSPs = "";
+
 
 
 // ####################################

@@ -25,7 +25,7 @@
         objMailUpdate = iniUserObj.UpdateEmail(url.nMail, local.userID);
 
         if (objMailUpdate.success) {
-            getAlert('email updated', 'success');
+            getAlert('txtEmailUpdated', 'success');
         } else {
             getAlert('No user found!', 'danger');
         }
