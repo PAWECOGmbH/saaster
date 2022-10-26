@@ -1490,7 +1490,8 @@ component displayname="invoices" output="false" {
 
             // Send activation link
             mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady')#" type="html" {
-                include "/includes/mail_design.cfm";
+                include template="/config.cfm";
+                include template="/includes/mail_design.cfm";
             }
 
 
@@ -1568,7 +1569,8 @@ component displayname="invoices" output="false" {
 
             // Send activation link
             mail to="#local.toEmail#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
-                include "/includes/mail_design.cfm";
+                include template="/config.cfm";
+                include template="/includes/mail_design.cfm";
             }
 
 
