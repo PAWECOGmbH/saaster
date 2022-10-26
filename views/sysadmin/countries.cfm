@@ -117,10 +117,10 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="#application.layoutStruct.layoutPageHeader#">
+                    <div class="#getLayout.layoutPageHeader#">
                         <h4 class="page-title">Countries</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -132,7 +132,7 @@
                 <div class="col-lg-6 mb-3">
                     <div class="row">
                         <div class="col-lg-9">
-                            <div class="#application.layoutStruct.layoutPageHeader# text-end">
+                            <div class="#getLayout.layoutPageHeader# text-end">
                                 <div>
                                     <a href="#application.mainURL#/sysadmin/countries/import?delete" class="btn btn-primary">
                                         <i class="fas fa-file-import pe-3"></i> Import countries
@@ -141,7 +141,7 @@
                             </div>
                         </div>
                         <div class="col-lg-3">
-                            <div class="#application.layoutStruct.layoutPageHeader#">
+                            <div class="#getLayout.layoutPageHeader#">
                                 <div>
                                     <a href="##" data-bs-toggle="modal" data-bs-target="##country_new" class="btn btn-primary">
                                         <i class="fas fa-plus pe-3"></i> New country
@@ -156,7 +156,7 @@
         <cfif structKeyExists(session, "alert")>
             #session.alert#
         </cfif>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="card">

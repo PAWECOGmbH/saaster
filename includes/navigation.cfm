@@ -1,8 +1,8 @@
 <div class="navbar-expand-md">
     <div class="collapse navbar-collapse" id="navbar-menu">
         <cfoutput>
-        <div class="#application.layoutStruct.layoutNav#">
-            <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutNav#">
+            <div class="#getLayout.layoutPage#">
             </cfoutput>
                 <ul class="navbar-nav">
                     <li class="nav-item <cfif listlast(cgi.path_info, '/') eq 'dashboard'>active</cfif>">

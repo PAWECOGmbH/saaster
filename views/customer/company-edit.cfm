@@ -91,9 +91,9 @@
 
 <cfoutput>
 <div class="page-wrapper">
-    <div class="#application.layoutStruct.layoutPage#">
+    <div class="#getLayout.layoutPage#">
         
-        <div class="#application.layoutStruct.layoutPageHeader# mb-3">
+        <div class="#getLayout.layoutPageHeader# mb-3">
             <h4 class="page-title"><cfoutput>#getTrans('titEditCompany')#</cfoutput></h4>
 
             <ol class="breadcrumb breadcrumb-dots">

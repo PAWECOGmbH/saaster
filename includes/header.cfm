@@ -4,37 +4,37 @@
 
 <cfoutput>
 
-<cfif application.layoutStruct.layoutString eq "combined">
+<cfif getLayout.layoutString eq "combined">
     <cfinclude template="navigationCombined.cfm">
 <cfelse>
-    #application.layoutStruct.layoutDivStart#
+    #getLayout.layoutDivStart#
 
-    #application.layoutStruct.layoutHeader#
+    #getLayout.layoutHeader#
 
-        <div class="#application.layoutStruct.layoutContainer#">
+        <div class="#getLayout.layoutContainer#">
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" >
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <h1 class="#application.layoutStruct.layoutTitel#">
+            <h1 class="#getLayout.layoutTitel#">
                 <a href="#application.mainURL#/dashboard">
-                    <img src="#application.layoutStruct.layoutLogo#" alt="logo" class="navbar-brand-image">
+                    <img src="#getLayout.layoutLogo#" alt="logo" class="navbar-brand-image">
                 </a>
             </h1>
             
 
-            <div class="#application.layoutStruct.layoutDiv#">
+            <div class="#getLayout.layoutDiv#">
                 
                 <!--- Language changer --->
-                <div #application.layoutStruct.layoutClass#>
+                <div #getLayout.layoutClass#>
                     <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
                         <cfinclude template="lng.cfm">
                     </cfif>
                 </div>
 
                 <!--- Tenant changer --->
-                <div #application.layoutStruct.layoutClass#>
+                <div #getLayout.layoutClass#>
                     <cfinclude template="tenant_changer.cfm">
                 </div>
 
@@ -66,7 +66,7 @@
                 </div>
             </div>
 
-            <cfswitch expression="#application.layoutStruct.layoutString#">
+            <cfswitch expression="#getLayout.layoutString#">
                 <cfcase value="verticalTransparent"><cfinclude template="navigationVertical.cfm"></cfcase>
                 <cfcase value="vertical"><cfinclude template="navigationVertical.cfm"></cfcase>
                 <cfcase value="rightVertical"><cfinclude template="navigationVertical.cfm"></cfcase>
@@ -77,10 +77,10 @@
 
         </div>
 
-    #application.layoutStruct.layoutHeaderEnd#
+    #getLayout.layoutHeaderEnd#
 
     
-    <cfswitch expression="#application.layoutStruct.layoutString#">
+    <cfswitch expression="#getLayout.layoutString#">
         <cfcase value="horizontal"><cfinclude template="navigation.cfm"></cfcase>
         <cfcase value="horizontalDark"><cfinclude template="navigation.cfm"></cfcase>
         <cfcase value="navbarDark"><cfinclude template="navigation.cfm"></cfcase>
@@ -88,7 +88,7 @@
         <cfcase value="fluid"><cfinclude template="navigation.cfm"></cfcase>
     </cfswitch>
 
-    #application.layoutStruct.layoutDivEnd#
+    #getLayout.layoutDivEnd#
 
 </cfif>
 

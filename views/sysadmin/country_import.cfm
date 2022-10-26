@@ -69,11 +69,11 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Countries</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -82,7 +82,7 @@
                             <li class="breadcrumb-item active">Import</li>
                         </ol>
                     </div>
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/sysadmin/countries?delete" class="btn btn-primary">
                             <i class="fas fa-angle-double-left pe-3"></i> Back to overview
                         </a>
@@ -93,7 +93,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="card">

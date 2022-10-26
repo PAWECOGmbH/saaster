@@ -35,10 +35,10 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="#application.layoutStruct.layoutPageHeader#">
+                    <div class="#getLayout.layoutPageHeader#">
                         <h4 class="page-title">Plans</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -47,7 +47,7 @@
                         </ol>
                     </div>
                 </div>
-                <div class="#application.layoutStruct.layoutPageHeader# col-lg-6 mb-3 text-end align-text-top">
+                <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end align-text-top">
                     <div class="button-group">
                         <cfif qPlanGroups.recordCount>
                             <button href="##" data-bs-toggle="modal" data-bs-target="##plan_new" class="btn btn-primary">
@@ -68,7 +68,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">

@@ -3,7 +3,7 @@
 <html lang="#session.lng#">
 
 <cfinclude template="includes/head.cfm">
-<body #application.layoutStruct.layoutBody#>
+<body #getLayout.layoutBody#>
 </cfoutput>
 	<div class="page">
 		<cfif fileExists(thiscontent.thisPath)>

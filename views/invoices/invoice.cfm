@@ -39,12 +39,12 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">#getTrans('titInvoice')#</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -53,7 +53,7 @@
                             <li class="breadcrumb-item active">#getInvoiceData.title#</li>
                         </ol>
                     </div>
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
                             <i class="fas fa-print pe-2"></i> #getTrans('txtPrintInvoice')#
                         </a>
@@ -64,7 +64,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="card card-lg" style="padding: 0 12%;">
                 <div class="card-body">
                     <div class="row">

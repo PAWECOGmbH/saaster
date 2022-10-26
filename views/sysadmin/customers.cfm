@@ -132,12 +132,12 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Customers</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -151,7 +151,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <form action="#application.mainURL#/sysadmin/customers?page=1" method="post">

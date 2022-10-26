@@ -18,10 +18,10 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="#application.layoutStruct.layoutPageHeader#">
+                    <div class="#getLayout.layoutPageHeader#">
                         <h4 class="page-title">Plan features</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -31,7 +31,7 @@
                         </ol>
                     </div>
                 </div>
-                <div class="#application.layoutStruct.layoutPageHeader# col-lg-6 mb-3 text-end">
+                <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
                             <i class="fas fa-angle-double-left pe-3"></i> Back to plans
@@ -46,7 +46,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">

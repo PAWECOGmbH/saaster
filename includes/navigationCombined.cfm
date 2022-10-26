@@ -6,34 +6,34 @@
 
     <cfoutput>
 
-        #application.layoutStruct.layoutDivStart#
+        #getLayout.layoutDivStart#
 
-        #application.layoutStruct.layoutHeader#
+        #getLayout.layoutHeader#
 
-            <div class="#application.layoutStruct.layoutContainer#">
+            <div class="#getLayout.layoutContainer#">
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" >
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
-                <h1 class="#application.layoutStruct.layoutTitel#">
+                <h1 class="#getLayout.layoutTitel#">
                     <a href="#application.mainURL#/dashboard">
-                        <img src="#application.layoutStruct.layoutLogo#" alt="logo" class="navbar-brand-image">
+                        <img src="#getLayout.layoutLogo#" alt="logo" class="navbar-brand-image">
                     </a>
                 </h1>
                 
 
-                <div class="#application.layoutStruct.layoutDiv#">
+                <div class="#getLayout.layoutDiv#">
                     
                     <!--- Language changer --->
-                    <div #application.layoutStruct.layoutClass#>
+                    <div #getLayout.layoutClass#>
                         <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
                             <cfinclude template="lng.cfm">
                         </cfif>
                     </div>
 
                     <!--- Tenant changer --->
-                    <div #application.layoutStruct.layoutClass#>
+                    <div #getLayout.layoutClass#>
                         <cfinclude template="tenant_changer.cfm">
                     </div>
 
@@ -163,7 +163,7 @@
                                                     <i class="fas fa-users"></i>
                                                 </span>
                                                 <span class="nav-link-title">
-                                                    Tenant
+                                                    #getTrans('titMandanten')#
                                                 </span>
                                             </a>
                                             <div class="dropdown-menu">
@@ -247,10 +247,10 @@
             </div>
         <cfoutput>
 
-        #application.layoutStruct.layoutHeaderEnd#
+        #getLayout.layoutHeaderEnd#
 
 
-        #application.layoutStruct.layoutDivEnd#
+        #getLayout.layoutDivEnd#
         
         </cfoutput>
 

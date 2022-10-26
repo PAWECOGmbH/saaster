@@ -2,8 +2,8 @@
 
 <cfoutput>
 <div class="page-wrapper" >
-    <div class="#application.layoutStruct.layoutPage#">    
-        <div class="#application.layoutStruct.layoutPageHeader# mb-3">
+    <div class="#getLayout.layoutPage#">    
+        <div class="#getLayout.layoutPageHeader# mb-3">
             <h4 class="page-title">#getTrans('titResetPassword')#</h4>                        
             <ol class="breadcrumb breadcrumb-dots">
                 <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>

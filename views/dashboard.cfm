@@ -154,12 +154,12 @@
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="#application.layoutStruct.layoutPage#">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="#application.layoutStruct.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Dashboard by #getCustomerData.companyName#</h4>
 
                     </div>
@@ -172,7 +172,7 @@
             </cfif>
         </div>
         <div class="page-body">
-            <div class="#application.layoutStruct.layoutPage#">
+            <div class="#getLayout.layoutPage#">
 
                 <div class="row row-deck row-cards dashboard">
 

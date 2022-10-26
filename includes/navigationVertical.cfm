@@ -99,7 +99,7 @@
                                     <i class="fas fa-users"></i>
                                 </span>
                                 <span class="nav-link-title d-none d-sm-none d-md-block">
-                                    Tenant
+                                    #getTrans('titMandanten')#
                                 </span>
                             </a>
                             <div class="dropdown-menu">

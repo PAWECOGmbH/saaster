@@ -9,10 +9,10 @@
 
 <cfoutput>
 <div class="page-wrapper">
-    <div class="#application.layoutStruct.layoutPage#">
+    <div class="#getLayout.layoutPage#">
 
         
-        <div class="#application.layoutStruct.layoutPageHeader# mb-3">
+        <div class="#getLayout.layoutPageHeader# mb-3">
             <h2 class="page-title">#getTrans('txtAccountSettings')#</h2>
 
             <ol class="breadcrumb breadcrumb-dots" aria-label="breadcrumbs">
