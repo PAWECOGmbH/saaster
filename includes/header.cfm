@@ -22,6 +22,9 @@
             <!--- Tenant changer --->
             <cfinclude template="tenant_changer.cfm">
 
+            <!--- Messages dropdown --->
+            <cfinclude template="notifications.cfm">
+
             <!--- Language changer --->
             <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
                 <cfinclude template="lng.cfm">

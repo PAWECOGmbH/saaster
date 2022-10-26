@@ -264,4 +264,23 @@ div.dashboard div.card-header label.form-check {
         margin-top: 15px !important;
     }
 }
+.border-t-0{
+    border-top: none!important;
+    border-top-color: none!important;
+    border-top-style: none!important;
+    border-top-width: none!important;
+}
 
+.border-b-0{
+    border-top: none!important;
+    border-top-color: none!important;
+    border-top-style: none!important;
+    border-top-width: none!important;
+}
+.custom-w{
+    max-width: 80%;
+}
+.w-break{
+    word-break: break-all!important;
+    white-space: normal!important;
+}
