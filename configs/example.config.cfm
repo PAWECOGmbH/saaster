@@ -109,4 +109,32 @@ cfsavecontent (variable="variables.footerText") {
 }
 
 
+
+// ####################################
+//  Email settings
+// ####################################
+
+//  Generel
+variables.mailMaxWidthContent = 660;
+variables.fontFamily = "Arial, Helvetica, sans-serif";
+variables.fontColorTitle = "464646";
+variables.fontColorSubtitle = "464646";
+variables.fontSizeTitle = 21;
+variables.fontSizeSubtitle = 16;
+variables.fontColorText = "464646";
+variables.fontSizeText = 14;
+variables.fontColorTextSmall = "b2b2b2";
+variables.fontSizeTextSmall = 12;
+
+//  Header
+variables.headerBGColor = "f4f4f4";
+variables.headerFontColor = "464646";
+variables.headerFontSize = 14;
+
+//  Buttons
+variables.buttonBGColor = "feda00";
+variables.buttonFontColor = "016aac";
+variables.buttonFontSize = 14;
+
+
 </cfscript>
