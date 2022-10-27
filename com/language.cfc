@@ -74,13 +74,9 @@ component displayname="language" output="false" {
             local.thisLang = application.getLanguage.iso;
         }
 
-        if (structKeyExists(application.langStruct, local.thisLang)) {
-            local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
-        } else {
-            local.searchString = structFindKey(application.langStruct.en, arguments.stringToTrans, "one");
-        }
+        local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
 
-        if (isArray(local.searchString) and arrayLen(local.searchString) gte 1) {
+        if (isArray(local.searchString) and !arrayIsEmpty(local.searchString)) {
             local.translatedString = local.searchString[1].value;
         }
 

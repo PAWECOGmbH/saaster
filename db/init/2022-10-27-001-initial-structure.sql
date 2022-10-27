@@ -1,6 +1,26 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `bookings`;
+CREATE TABLE `bookings`  (
+  `intBookingID` int(11) NOT NULL AUTO_INCREMENT,
+  `intCustomerID` int(11) NOT NULL,
+  `intPlanID` int(11) NULL DEFAULT NULL,
+  `intModuleID` int(11) NULL DEFAULT NULL,
+  `dteStartDate` date NULL DEFAULT NULL,
+  `dteEndDate` date NULL DEFAULT NULL,
+  `strRecurring` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strStatus` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`intBookingID`) USING BTREE,
+  INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
+  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
+  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
+  CONSTRAINT `frn_cb_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_cb_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_cb_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+
 DROP TABLE IF EXISTS `countries`;
 CREATE TABLE `countries`  (
   `intCountryID` int(11) NOT NULL AUTO_INCREMENT,
@@ -315,32 +335,11 @@ CREATE TABLE `custom_mappings`  (
   `blnOnlyAdmin` tinyint(1) NOT NULL DEFAULT 0,
   `blnOnlySuperAdmin` tinyint(1) NOT NULL DEFAULT 0,
   `blnOnlySysAdmin` tinyint(1) NOT NULL DEFAULT 0,
+  `intModuleID` int(11) NULL,
   PRIMARY KEY (`intCustomMappingID`) USING BTREE,
-  UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
-DROP TABLE IF EXISTS `custom_settings`;
-CREATE TABLE `custom_settings`  (
-  `intCustomSettingID` int(11) NOT NULL AUTO_INCREMENT,
-  `strSettingVariable` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDefaultValue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDescription` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intCustomSettingID`) USING BTREE,
-  UNIQUE INDEX `_intCustomSettingID`(`intCustomSettingID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
-DROP TABLE IF EXISTS `custom_settings_trans`;
-CREATE TABLE `custom_settings_trans`  (
-  `intCustSetTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intCustomSettingID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
-  `strDefaultValue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDescription` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intCustSetTransID`) USING BTREE,
-  INDEX `_intCustomSettingID`(`intCustomSettingID`) USING BTREE,
-  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
-  CONSTRAINT `frn_cst_cust_settings` FOREIGN KEY (`intCustomSettingID`) REFERENCES `custom_settings` (`intCustomSettingID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_cst_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
+  UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE,
+  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
+  CONSTRAINT `frn_cm_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 DROP TABLE IF EXISTS `custom_translations`;
@@ -352,60 +351,6 @@ CREATE TABLE `custom_translations`  (
   PRIMARY KEY (`intCustTransID`) USING BTREE,
   UNIQUE INDEX `_strVariable`(`strVariable`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
-DROP TABLE IF EXISTS `customer_bookings`;
-CREATE TABLE `customer_bookings`  (
-  `intCustomerBookingID` int(11) NOT NULL AUTO_INCREMENT,
-  `intCustomerID` int(11) NOT NULL,
-  `intPlanID` int(11) NULL DEFAULT NULL,
-  `intModuleID` int(11) NULL DEFAULT NULL,
-  `dtmStartDate` datetime NULL DEFAULT NULL,
-  `dtmEndDate` datetime NULL DEFAULT NULL,
-  `dtmEndTestDate` datetime NULL DEFAULT NULL,
-  `blnPaused` tinyint(1) NOT NULL DEFAULT 0,
-  `strRecurring` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intCustomerBookingID`) USING BTREE,
-  INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
-  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
-  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
-  CONSTRAINT `frn_cp_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_cp_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_cp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
-DROP TABLE IF EXISTS `customer_bookings_history`;
-CREATE TABLE `customer_bookings_history`  (
-  `intHistoryID` int(11) NOT NULL AUTO_INCREMENT,
-  `intCustomerID` int(11) NOT NULL,
-  `intPlanID` int(11) NULL DEFAULT NULL,
-  `intModuleID` int(11) NULL DEFAULT NULL,
-  `dtmStartDate` datetime NULL DEFAULT NULL,
-  `dtmEndDate` datetime NULL DEFAULT NULL,
-  `dtmEndTestDate` datetime NULL DEFAULT NULL,
-  `blnPaused` tinyint(1) NOT NULL DEFAULT 0,
-  `strRecurring` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intHistoryID`) USING BTREE,
-  INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
-  INDEX `_intPlanID`(`intPlanID`) USING BTREE,
-  INDEX `_intModuleID`(`intModuleID`) USING BTREE,
-  CONSTRAINT `frn_cbh_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_cbh_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_cbh_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-DROP TABLE IF EXISTS `customer_custom_settings`;
-CREATE TABLE `customer_custom_settings`  (
-  `intCustCustomSettingID` int(11) NOT NULL AUTO_INCREMENT,
-  `intCustomerID` int(11) NOT NULL,
-  `intCustomSettingID` int(11) NOT NULL,
-  `strSettingValue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intCustCustomSettingID`) USING BTREE,
-  INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
-  INDEX `_intCustomSettingID`(`intCustomSettingID`) USING BTREE,
-  CONSTRAINT `frn_ccs_custom_settings` FOREIGN KEY (`intCustomSettingID`) REFERENCES `custom_settings` (`intCustomSettingID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_ccs_customers` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
 
 DROP TABLE IF EXISTS `customer_user`;
 CREATE TABLE `customer_user`  (
@@ -513,7 +458,8 @@ CREATE TABLE `invoices`  (
   `strTotalText` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `intPaymentStatusID` int(11) NOT NULL DEFAULT 1,
   `strLanguageISO` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `intCustomerBookingID` int(11) NULL DEFAULT 0,
+  `intBookingID` int(11) NULL DEFAULT 0,
+  `strUUID` varchar(100) NULL,
   PRIMARY KEY (`intInvoiceID`) USING BTREE,
   UNIQUE INDEX `_intInvoiceID`(`intInvoiceID`) USING BTREE,
   UNIQUE INDEX `_intInvoiceNumber`(`intInvoiceNumber`) USING BTREE,
@@ -552,6 +498,7 @@ CREATE TABLE `modules`  (
   `blnBookable` tinyint(1) NOT NULL,
   `intNumTestDays` int(11) NOT NULL,
   `strSettingPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `blnFree` tinyint(1) NULL DEFAULT 0,
   `intPrio` int(11) NOT NULL,
   PRIMARY KEY (`intModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -593,33 +540,17 @@ DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE `notifications`  (
   `intNotificationID` int(11) NOT NULL AUTO_INCREMENT,
   `intCustomerID` int(11) NOT NULL,
-  `intUserID` int(11) NOT NULL,
+  `intUserID` int(11) NULL DEFAULT NULL,
   `dtmCreated` datetime NULL DEFAULT NULL,
-  `strTitle` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDescription` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `strTitleVar` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strDescrVar` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `strLinkTextVar` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `dtmRead` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`intNotificationID`) USING BTREE,
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
-  INDEX `_intUserID`(`intUserID`) USING BTREE,
-  CONSTRAINT `frn_noti_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_noti_user` FOREIGN KEY (`intUserID`) REFERENCES `users` (`intUserID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
-DROP TABLE IF EXISTS `notifications_trans`;
-CREATE TABLE `notifications_trans`  (
-  `intNotTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intNotificationID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
-  `strTitle` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `strDescription` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `strLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`intNotTransID`) USING BTREE,
-  INDEX `_intNotificationID`(`intNotificationID`) USING BTREE,
-  INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
-  CONSTRAINT `frn_noti_trans` FOREIGN KEY (`intNotificationID`) REFERENCES `notifications` (`intNotificationID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `frn_nt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+  CONSTRAINT `frn_noti_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 DROP TABLE IF EXISTS `optin`;
 CREATE TABLE `optin`  (
@@ -663,6 +594,8 @@ CREATE TABLE `payrexx`  (
   `decPayrexxFee` decimal(10, 2) NULL DEFAULT NULL,
   `strPaymentBrand` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strCardNumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
+  `blnFailed` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`intPayrexxID`) USING BTREE,
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
   INDEX `_intTransactionID`(`intTransactionID`) USING BTREE,
@@ -675,6 +608,7 @@ CREATE TABLE `plan_features`  (
   `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `blnCategory` tinyint(1) NOT NULL DEFAULT 0,
+  `strVariable` varchar(100) NULL,
   `intPrio` int(5) NOT NULL,
   PRIMARY KEY (`intPlanFeatureID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -749,6 +683,7 @@ CREATE TABLE `plans`  (
   `intMaxUsers` int(11) NULL DEFAULT NULL,
   `intNumTestDays` int(11) NULL DEFAULT 0,
   `blnFree` tinyint(1) NULL DEFAULT 0,
+  `blnDefaultPlan` tinyint(1) NULL DEFAULT 0,
   `intPrio` int(11) NOT NULL,
   PRIMARY KEY (`intPlanID`) USING BTREE,
   INDEX `_intPlanGroupID`(`intPlanGroupID`) USING BTREE,
@@ -876,6 +811,12 @@ INSERT INTO `system_mappings` VALUES (66, 'sysadmin/system-settings', 'views/sys
 INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/book.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (68, 'cancel', 'handler/cancel.cfm', 0, 1, 0);
 INSERT INTO `system_mappings` VALUES (69, 'dashboard-settings', 'handler/dashboard.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (70, 'account-settings/plans', 'views/customer/plans.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (71, 'plan-settings', 'handler/plans.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (72, 'account-settings/payment', 'views/customer/payment.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (73, 'payment-settings', 'handler/payment.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (74, 'account-settings/settings', 'views/customer/settings.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (75, 'notifications', 'views/customer/notifications.cfm', 0, 0, 0);
 
 DROP TABLE IF EXISTS `system_settings`;
 CREATE TABLE `system_settings`  (
@@ -892,6 +833,7 @@ INSERT INTO `system_settings` VALUES (2, 'settingRoundFactor', '1', 'The roundin
 INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '3', 'Which vat type should be set by default?');
 INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.');
 INSERT INTO `system_settings` VALUES (5, 'settingInvoiceNet', '1', 'Decide whether the invoices are issued \"net\" by default.');
+INSERT INTO `system_settings` VALUES (6, 'settingLayout', 'horizontal', 'Choose a layout you want to use');
 
 DROP TABLE IF EXISTS `system_translations`;
 CREATE TABLE `system_translations`  (
@@ -1065,7 +1007,7 @@ INSERT INTO `system_translations` VALUES (160, 'txtTotalIncl', 'Betrag inkl. Ste
 INSERT INTO `system_translations` VALUES (161, 'txtVatIncluded', 'Im Preis enthaltene Steuer', 'Tax included in the price');
 INSERT INTO `system_translations` VALUES (162, 'txtView', 'Anzeigen', 'View');
 INSERT INTO `system_translations` VALUES (163, 'txtViewInvoice', 'Rechnung anzeigen', 'View invoice');
-INSERT INTO `system_translations` VALUES (164, 'txtViewInvoices', 'Sehen Sie Ihre Rechnungen ein und verwalten Sie Ihre Zahlungseinstellungen', 'View your invoices and manage your payment settings');
+INSERT INTO `system_translations` VALUES (164, 'txtViewInvoices', 'Sehen Sie Ihre Rechnungen ein und/oder bezahlen Sie sie', 'View and/or pay your invoices');
 INSERT INTO `system_translations` VALUES (165, 'txtWhichTenants', 'Auf welche Mandanten hat der Benutzer Zugriff?', 'Which tenants does the user have access to?');
 INSERT INTO `system_translations` VALUES (166, 'txtYourTeam', 'Ihr Team vom Kundendienst', 'Your Customer Service Team');
 INSERT INTO `system_translations` VALUES (167, 'btnDeleteInvoice', 'Rechnung löschen', 'Delete invoice');
@@ -1081,7 +1023,7 @@ INSERT INTO `system_translations` VALUES (176, 'txtYearly', 'Jährlich', 'Yearly
 INSERT INTO `system_translations` VALUES (177, 'statInvoiceDraft', 'Entwurf', 'Draft');
 INSERT INTO `system_translations` VALUES (178, 'statInvoiceOverDue', 'Überfällig', 'Overdue');
 INSERT INTO `system_translations` VALUES (179, 'titSuperAdmin', 'Superadmin', 'Superadmin');
-INSERT INTO `system_translations` VALUES (180, 'txtSetUserAsSuperAdmin', 'Dieses Benutzer als Superadmin festlegen', 'Set this user as Superadmin');
+INSERT INTO `system_translations` VALUES (180, 'txtSetUserAsSuperAdmin', 'Diesen Benutzer als Superadmin festlegen', 'Set this user as Superadmin');
 INSERT INTO `system_translations` VALUES (181, 'msgMaxUsersReached', 'Sie haben die maximal zulässige Anzahl Benutzer mit Ihrem gebuchten Plan erreicht. Bitte führen Sie ein Upgrade durch.', 'You have reached the maximum number of users allowed with your booked plan. Please upgrade.');
 INSERT INTO `system_translations` VALUES (182, 'titPayment', 'Zahlung', 'Payment');
 INSERT INTO `system_translations` VALUES (183, 'txtMonthlyPayment', 'Bei monatlicher Zahlung', 'On monthly payment');
@@ -1090,7 +1032,7 @@ INSERT INTO `system_translations` VALUES (185, 'TitYear', 'Jahr', 'Year');
 INSERT INTO `system_translations` VALUES (186, 'TitMonth', 'Monat', 'Month');
 INSERT INTO `system_translations` VALUES (187, 'txtOneTime', 'Einmalig', 'One time');
 INSERT INTO `system_translations` VALUES (188, 'titPlansAndModules', 'Pläne und Module', 'Plans and modules');
-INSERT INTO `system_translations` VALUES (189, 'titYourPlan', 'Plan', 'Plan');
+INSERT INTO `system_translations` VALUES (189, 'titYourPlan', 'Ihr Plan', 'Your Plan');
 INSERT INTO `system_translations` VALUES (190, 'txtChangePlan', 'Plan ändern', 'Change plan');
 INSERT INTO `system_translations` VALUES (191, 'msgNoPlanBooked', 'Sie haben noch keinen Plan gebucht', 'You have not booked a plan yet');
 INSERT INTO `system_translations` VALUES (192, 'txtBookNow', 'Jetzt buchen', 'Book now');
@@ -1136,16 +1078,15 @@ INSERT INTO `system_translations` VALUES (231, 'txtIncoPayments', 'Zahlungseinga
 INSERT INTO `system_translations` VALUES (232, 'txtRemainingAmount', 'Restbetrag', 'Remaining amount');
 INSERT INTO `system_translations` VALUES (233, 'txtComfirmEmailChange', 'Bitte aktivieren Sie die neue E-Mail Adresse!', 'Please activate the new email address!');
 INSERT INTO `system_translations` VALUES (234, 'titDowngrade', 'Downgrade', 'Downgrade');
-INSERT INTO `system_translations` VALUES (235, 'txtYouAreDowngrading', 'Sie sind im Begriff, Ihren Plan zu downgraden. Bitte bedenken Sie, dass die Restlaufzeit Ihres aktuellen Plans nicht erstattet wird und der neue Plan sofort aktiviert wird. Sie Sie sicher, dass Sie Ihren Plan downgraden möchten?', 'You are about to downgrade your plan. Please note that the remaining period of your current plan will not be refunded and the new plan will be activated immediately. Are you sure you want to downgrade your plan?');
+INSERT INTO `system_translations` VALUES (235, 'txtYouAreDowngrading', 'Wenn Sie downgraden, wird der neue Plan erst nach Ablauf des aktuellen Plans aktiviert. Der Plan wird aktiviert am:', 'If you downgrade, the new plan will only be activated after the current plan expires. The plan will be activated on:');
 INSERT INTO `system_translations` VALUES (236, 'btnYesDowngrade', 'Ja, jetzt downgraden!', 'Yes, downgrade now!');
 INSERT INTO `system_translations` VALUES (237, 'btnWantWait', 'Nein, ich will warten!', 'No, I want to wait!');
 INSERT INTO `system_translations` VALUES (238, 'titDowngradeNotPossible', 'Downgrade nicht möglich!', 'Downgrade not possible!');
 INSERT INTO `system_translations` VALUES (239, 'txtDowngradeNotPossibleText', 'Um Ihren aktuellen Plan downgraden zu können, müssen Sie einige Ihrer Benutzer löschen. Anzahl zu löschende Benutzer:', 'To downgrade your current plan, you need to delete some of your users. Number of users to delete:');
 INSERT INTO `system_translations` VALUES (240, 'btnToTheUsers', 'Zu den Benutzern', 'To the users');
 INSERT INTO `system_translations` VALUES (241, 'titUpgrade', 'Upgrade', 'Upgrade');
-INSERT INTO `system_translations` VALUES (242, 'txtYouAreUpgrading', 'Sie sind im Begriff, Ihren aktuellen Plan zu upgraden.', 'You are about to upgrade your current plan.');
+INSERT INTO `system_translations` VALUES (242, 'txtYouAreUpgrading', 'Möchten Sie auf den gewählten Plan upgraden?', 'Would you like to upgrade to the selected plan?');
 INSERT INTO `system_translations` VALUES (243, 'txtToPayToday', 'Der heute zu bezahlende Betrag:', 'The amount to pay today:');
-INSERT INTO `system_translations` VALUES (244, 'txtYouCantUpgrade', 'Der von Ihnen gewünschte Plan kann noch nicht geändert werden, das der Betrag kleiner ist, als Sie bereits bezahlt haben. Bitte warten Sie, bis die aktuelle Laufzeit kurz vor dem Ende steht.', 'The plan you have requested cannot yet be changed because the amount is less than you have already paid. Please wait until the current period is about to end.');
 INSERT INTO `system_translations` VALUES (245, 'btnYesUpgrade', 'Ja, jetzt upgraden!', 'Yes, upgrade now!');
 INSERT INTO `system_translations` VALUES (246, 'bnEditDashboard', 'Dashboard bearbeiten', 'Edit dashboard');
 INSERT INTO `system_translations` VALUES (247, 'bnEndEditDashboard', 'Fertig', 'Finished');
@@ -1156,6 +1097,63 @@ INSERT INTO `system_translations` VALUES (251, 'txtPrivacyPolicy', 'Beispiel Tex
 INSERT INTO `system_translations` VALUES (252, 'titlePrivacyPolicy', 'Datenschutzerklärung', 'Privacy policy');
 INSERT INTO `system_translations` VALUES (253, 'msgFileUploadError', 'Fehler beim hochladen der Datei!', 'An error occurred while uploading the file!');
 INSERT INTO `system_translations` VALUES (254, 'titRenewal', 'Verlängerung', 'Renewal');
+INSERT INTO `system_translations` VALUES (255,'titPlans', 'Pläne', 'Plans');
+INSERT INTO `system_translations` VALUES (256,'titEditPlan', 'Bearbeiten Sie Ihren Plan', 'Edit your plan');
+INSERT INTO `system_translations` VALUES (257,'titBillingCycle', 'Abrechnungszeitraum', 'Billing cycle');
+INSERT INTO `system_translations` VALUES (258,'titOrderSummary', 'Zusammenfassung der Bestellung', 'Order summary');
+INSERT INTO `system_translations` VALUES (259,'txtUpdatePlan', 'Bearbeiten Sie Ihren aktuellen Plan', 'Edit your current plan');
+INSERT INTO `system_translations` VALUES (260,'txtNewPlanName', 'Neuer Plan', 'New plan');
+INSERT INTO `system_translations` VALUES (261,'txtActivationOn', 'Aktivierung am', 'Activation on');
+INSERT INTO `system_translations` VALUES (262,'titYourCurrentPlan', 'Ihr aktueller Plan', 'Your current plan');
+INSERT INTO `system_translations` VALUES (263,'titCycleChange', 'Zykluswechsel', 'Cycle change');
+INSERT INTO `system_translations` VALUES (264,'titPaymentSettings', 'Zahlungseinstellungen', 'Payment settings');
+INSERT INTO `system_translations` VALUES (265,'txtPaymentSettings', 'Bearbeiten Sie Ihre Zahlungseinstellungen', 'Edit your payment settings');
+INSERT INTO `system_translations` VALUES (266,'txtNoPaymentMethod', 'Sie haben noch keine Zahlungsart erfasst.', 'You have not added a payment method yet.');
+INSERT INTO `system_translations` VALUES (267,'btnAddPaymentMethod', 'Zahlungsart erfassen', 'Add payment method');
+INSERT INTO `system_translations` VALUES (268,'btnRemovePaymentMethod', 'Zahlungsart entfernen', 'Remove payment method');
+INSERT INTO `system_translations` VALUES (269,'msgNeedOnePaymentType', 'Sie benötigen mindestens eine Zahlungsart. Erfassen Sie eine andere Zahlungsart, wenn Sie diese löschen möchten.', 'You need at least one payment method. Add another payment method if you want to delete it.');
+INSERT INTO `system_translations` VALUES (270,'msgPaymentMethodDeleted', 'Die Zahlungsart wurde erfolgreich gelöscht', 'The payment method has been deleted successfully');
+INSERT INTO `system_translations` VALUES (271,'msgWeDoNotCharge', 'Bitte beachten Sie, dass beim Hinzufügen einer neuen Zahlungsart der Betrag von 1.- in Ihrer Währung angezeigt wird. Dies dient lediglich zur Validierung Ihrer Zahlungsart und wird NICHT belastet.', 'Please note that when you add a new payment method, the amount of 1.- will be displayed in your currency. This is only to validate your payment method and will NOT be charged.');
+INSERT INTO `system_translations` VALUES (272,'msgPaymentMethodAdded', 'Die neue Zahlungsart wurde erfolgreich erfasst.', 'The new payment method has been added successfully.');
+INSERT INTO `system_translations` VALUES (273,'msgRemovePaymentMethod', 'Möchten Sie diese Zahlungsart wirklich entfernen?', 'Do you really want to remove this payment method?');
+INSERT INTO `system_translations` VALUES (274,'msgCannotCharge', 'Leider konnten wir die von Ihnen hinterlegte Standard-Zahlungsart nicht abbuchen. Bitte erfassen Sie eine neue Zahlungsart und entfernen Sie die nicht funktionierende Zahlungsart.', 'Unfortunately, we were unable to charge the default payment method you registered. Please enter a new payment method and remove the one that does not work.');
+INSERT INTO `system_translations` VALUES (275,'titChargingNotPossible', 'Belastung nicht möglich', 'Charging not possible');
+INSERT INTO `system_translations` VALUES (276,'txtChargingNotPossible', 'Leider konnten wir keine Ihrer registrierten Zahlungsmethoden belasten. Bitte prüfen Sie die Zahlungsarten.', 'Unfortunately, we could not charge any of your registered payment methods. Please check the payment methods.');
+INSERT INTO `system_translations` VALUES (278,'titModule', 'Modul', 'Module');
+INSERT INTO `system_translations` VALUES (279,'txtRemove', 'Entfernen', 'Remove');
+INSERT INTO `system_translations` VALUES (280,'titWaiting', 'Wartet', 'Waiting');
+INSERT INTO `system_translations` VALUES (281,'txtWaitingForPayment', 'Wartet auf Bezahlung', 'Waiting for payment');
+INSERT INTO `system_translations` VALUES (282,'txtRenewModuleOn', 'Ihr Modul wird verlängert am', 'Your module will be renewed on');
+INSERT INTO `system_translations` VALUES (283,'txtAfterwards', 'Danach', 'Afterwards');
+INSERT INTO `system_translations` VALUES (284,'txtOr', 'oder', 'or');
+INSERT INTO `system_translations` VALUES (285,'btnDepPayMethod', 'Mit hinterlegter Zahlungsart bezahlen', 'Pay with deposited payment method');
+INSERT INTO `system_translations` VALUES (286,'btnOtherPayMethod', 'Andere Zahlungsart wählen', 'Choose other payment method');
+INSERT INTO `system_translations` VALUES (287,'msgInvoicePaid', 'Die Rechnung wurde erfolgreich bezahlt. Vielen Dank!', 'The invoice has been paid successfully. Thank you very much!');
+INSERT INTO `system_translations` VALUES (288,'titInvoiceReady', 'Ihre Rechnung/Quittung steht zum Download bereit', 'Your invoice/receipt is ready to download');
+INSERT INTO `system_translations` VALUES (289,'txtDownloadInvoice', 'Mit dem folgendem Button können Sie Ihre Rechnung/Quittung einsehen und downloaden:', 'With the following button you can view and download your invoice/receipt:');
+INSERT INTO `system_translations` VALUES (290,'btnDownloadInvoice', 'Rechnung downloaden', 'Download invoice');
+INSERT INTO `system_translations` VALUES (291,'txtPleasePayInvoice', 'Vielen Dank für Ihre Bestellung. Gerne schalten wir Ihr Produkt nach Zahlung der Rechnung frei. Klicken Sie auf den Button, um direkt zur Rechnung zu gelangen (Login benötigt):', 'Thank you for your order. We will be happy to activate your product after payment of the invoice. Click on the button to go directly to the invoice (login required):');
+INSERT INTO `system_translations` VALUES (292,'titCompanyUser', 'Firma und Benutzer', 'Company and user');
+INSERT INTO `system_translations` VALUES (293,'titDeleteAccount', 'Konto löschen', 'Delete account');
+INSERT INTO `system_translations` VALUES (294,'txtDeleteAccount', 'Bitte bedenken Sie, dass beim Löschen des Kontos Ihre Daten per sofort gelöscht werden. Allfälliges Guthaben wird NICHT erstattet! Sind Sie sicher, dass Sie Ihren Account unwiederruflich löschen möchten? Wenn ja, geben Sie bitte Ihre Login-Daten ein und klicken Sie auf "Definitiv löschen".', 'Please note that when you delete your account, your data will be deleted immediately. Any credit balance will NOT be refunded! Are you sure you want to delete your account irrevocably? If so, please enter your login data and click on "Delete definitely".');
+INSERT INTO `system_translations` VALUES (295,'btnDeleteDefinitely', 'Definitiv löschen', 'Delete definitely');
+INSERT INTO `system_translations` VALUES (296,'btnTestNow', 'Jetzt testen', 'Test now');
+INSERT INTO `system_translations` VALUES (297,'txtEmailUpdated', 'Die E-Mail wurde aktualisiert!', 'The e-mail has been updated!');
+INSERT INTO `system_translations` VALUES (298,'txtNotificationStatus', 'Status(gelesen)', 'Status(read)');
+INSERT INTO `system_translations` VALUES (299,'txtNotificationTitle', 'Benachrichtigungs Titel', 'Notification title');
+INSERT INTO `system_translations` VALUES (300,'txtNotificationCreated', 'erstellt am', 'created');
+INSERT INTO `system_translations` VALUES (301,'titNotifications', 'Benachrichtigungen', 'Notifications');
+INSERT INTO `system_translations` VALUES (302,'txtShowAllNotifications', 'Alle Benachrichtigungen Anzeigen', 'Show all notifications');
+INSERT INTO `system_translations` VALUES (303,'txtNotificationDelete', 'Wollen Sie diese Benachrichtigung löschen?', 'Do you want to delete this notification?');
+INSERT INTO `system_translations` VALUES (304,'titDeleteNotification', 'Benachrichtigung löschen', 'Delete notification');
+INSERT INTO `system_translations` VALUES (305,'txtMultipleNotificationDelete', 'Wollen Sie die ausgewählten Benachrichtigungen löschen?', 'Do you want to delete the selected notifications?');
+INSERT INTO `system_translations` VALUES (306,'titMultipleNotificationDelete', 'Benachrichtigungen löschen', 'Delete notifications');
+INSERT INTO `system_translations` VALUES (307,'alertNotificationDeleted', 'Die Benachrichtigung wurde gelöscht.', 'The notification have been deleted.');
+INSERT INTO `system_translations` VALUES (308,'alertMultipleNotificationDeleted', 'Die Benachrichtigungen wurden gelöscht.', 'The notifications have been deleted.');
+INSERT INTO `system_translations` VALUES (309,'txtTechInform', 'Es tut uns leid, aber auf unserem Server ist ein interner Fehler aufgetreten. Der Techniker wurde informiert...', 'We are sorry, but our server encountered an internal error. The technician got informed...');
+INSERT INTO `system_translations` VALUES (310,'txtTakeBack', 'Bring mich zurück', 'Take me back');
+INSERT INTO `system_translations` VALUES (311,'titCycle', 'Zyklus', 'Cycle');
+INSERT INTO `system_translations` VALUES (312,'titPlan', 'Plan', 'Plan');
 
 DROP TABLE IF EXISTS `timezones`;
 CREATE TABLE `timezones`  (
@@ -1316,6 +1314,7 @@ CREATE TABLE `widgets`  (
   `strFilePath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `blnActive` tinyint(1) NOT NULL DEFAULT 1,
   `intRatioID` int(2) NULL DEFAULT 1,
+  `blnPermDisplay` tinyint(1) NULL DEFAULT 1,
   PRIMARY KEY (`intWidgetID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
@@ -1331,6 +1330,27 @@ CREATE TABLE `widgets_trans`  (
   CONSTRAINT `frn_wt_languages` FOREIGN KEY (`intLanguageID`) REFERENCES `languages` (`intLanguageID`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `frn_wt_widgets` FOREIGN KEY (`intWidgetID`) REFERENCES `widgets` (`intWidgetID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+DROP TABLE IF EXISTS `widgets_plans`;
+CREATE TABLE `widgets_plans`  (
+  `intWidgetPlanID` int(11) NOT NULL AUTO_INCREMENT,
+  `intWidgetID` int(11) NOT NULL,
+  `intPlanID` int(11) NOT NULL,
+  CONSTRAINT `frn_wp_widgets` FOREIGN KEY (`intWidgetID`) REFERENCES `widgets` (`intWidgetID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_wp_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  PRIMARY KEY (`intWidgetPlanID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+DROP TABLE IF EXISTS `widgets_modules`;
+CREATE TABLE `widgets_modules`  (
+  `intWidgetModuleID` int(11) NOT NULL AUTO_INCREMENT,
+  `intWidgetID` int(11) NOT NULL,
+  `intModuleID` int(11) NOT NULL,
+  CONSTRAINT `frn_wm_widgets` FOREIGN KEY (`intWidgetID`) REFERENCES `widgets` (`intWidgetID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_wm_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  PRIMARY KEY (`intWidgetModuleID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
 
 DROP FUNCTION IF EXISTS `beautify`;
 CREATE FUNCTION `beautify`(s NVARCHAR(500))
@@ -1456,17 +1476,7 @@ LOWER(TRIM(s)),
 '--', '-'),
 '---', '-'),
 '----', '-')
-
 ;
-
-DROP TRIGGER IF EXISTS `insertCustomSettings`;
-CREATE TRIGGER `insertCustomSettings` AFTER INSERT ON `customers` FOR EACH ROW INSERT INTO customer_custom_settings (intCustomerID, intCustomSettingID, strSettingValue)
-SELECT NEW.intCustomerID, intCustomSettingID, strDefaultValue
-FROM custom_settings;
-
-DROP TRIGGER IF EXISTS `deleteCustomSettings`;
-CREATE TRIGGER `deleteCustomSettings` BEFORE DELETE ON `customers` FOR EACH ROW DELETE FROM customer_custom_settings
-WHERE intCustomerID = OLD.intCustomerID;
 
 DROP TRIGGER IF EXISTS `updPaymStatInsert`;
 CREATE TRIGGER `updPaymStatInsert` AFTER INSERT ON `payments` FOR EACH ROW UPDATE invoices

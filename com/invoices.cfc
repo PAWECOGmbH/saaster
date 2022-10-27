@@ -155,13 +155,12 @@ component displayname="invoices" output="false" {
         local.argsReturnValue['success'] = false;
 
         local.objCurrency = new com.currency();
-        local.customerID = new com.invoices().getInvoiceData(local.invoiceID).customerID;
 
         local.userID = "";
         local.title = "";
         local.invoiceDate = createODBCDate(now());
         local.dueDate = createODBCDate(now()+30);
-        local.currency = IIF(len(trim(local.objCurrency.getCurrency().iso)), local.objCurrency.getCurrency().iso, 'USD');
+        local.currency = local.objCurrency.getCurrency().iso;
         local.isNet = application.objSettings.getSetting('settingStandardNet');
         local.vatType = application.objSettings.getSetting('settingStandardVatType');
         local.language = application.objLanguage.getDefaultLanguage().iso;
@@ -196,6 +195,8 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
             local.language = invoiceData.language;
         }
+
+        local.customerID = new com.invoices().getInvoiceData(local.invoiceID).customerID;
 
         // Total text
         if (local.vatType eq 1) {

@@ -110,7 +110,7 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
+                                                #objInvoice.getInvoiceStatusBadge(session.lng, qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
                                                     <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>

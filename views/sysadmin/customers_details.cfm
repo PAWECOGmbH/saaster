@@ -261,7 +261,7 @@
                                                                         <tr>
                                                                             <td>#lsDateFormat(invoice.invoiceDate)#</td>
                                                                             <td>#invoice.invoiceNumber#</td>
-                                                                            <td>#objInvoice.getInvoiceStatusBadge('en', invoice.invoiceStatusColor, invoice.invoiceStatusVariable)#</td>
+                                                                            <td>#objInvoice.getInvoiceStatusBadge(session.lng, invoice.invoiceStatusColor, invoice.invoiceStatusVariable)#</td>
                                                                             <td>#lsDateFormat(invoice.invoiceDueDate)#</td>
                                                                             <td><cfif len(invoice.invoiceTitle) gt 25>#left(invoice.invoiceTitle, 25)# ...<cfelse>#invoice.invoiceTitle#</cfif></td>
                                                                             <td>#invoice.invoiceCurrency#</td>
