@@ -1,17 +1,16 @@
 SHELL := bash
 
 help:
-	@echo Makefile commands:
-	@echo dev
-	@echo reinit
-	@echo seed
-	@echo clean
-	@echo build
-	@echo url
+	@echo Available targets:
+	@echo dev 		-> Creates a local development environment
+	@echo reinit 	-> Reinits the database
+	@echo seed 		-> Ability to seed test data
+	@echo clean 	-> Remove all containers and volumes
+	@echo url 		-> List of all urls
 
 .DEFAULT_GOAL := help
 
-.PHONY: dev reinit seed clean build url
+.PHONY: dev reinit seed clean url
 
 dev:
 	@cd .
@@ -64,14 +63,6 @@ clean:
 	@echo Removing all containers
 	@echo ------------------------------------------------------
 	@docker-compose down -v
-	@echo ------------------------------------------------------
-	@echo Done!
-
-build:
-	@cd .
-	@echo Starting application in production...
-	@echo ------------------------------------------------------
-	@docker-compose up -d cfml mysql
 	@echo ------------------------------------------------------
 	@echo Done!
 
