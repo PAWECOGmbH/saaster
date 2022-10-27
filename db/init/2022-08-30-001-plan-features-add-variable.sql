@@ -1,8 +1,0 @@
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
-ALTER TABLE plan_features 
-ADD COLUMN strVariable varchar(100) NULL AFTER blnCategory;
-
-
-SET FOREIGN_KEY_CHECKS = 1;

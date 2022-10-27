@@ -1,9 +1,0 @@
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
-ALTER TABLE `plans`
-ADD COLUMN `blnDefaultPlan` tinyint(1) NULL DEFAULT 0 AFTER `blnFree`;
-
-
-
-SET FOREIGN_KEY_CHECKS = 1;
