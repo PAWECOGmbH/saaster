@@ -251,28 +251,6 @@ component displayname="Application" output="false" extends="myapp.myApplication"
 
     }
 
-    /* public void function onError(struct exception, string eventName) {
-
-        if (arguments.exception.type == "missinginclude") {
-            location(url="/login", addtoken=false);
-        }
-        
-        if (application.environment == "dev") {
-            writeOutput(arguments.exception);
-        } 
-
-        else {
-          // Send mail with error
-            cfmail(subject="ERROR - #application.projectName#", to="#application.toEmail#", from="#application.errorMail#" type="html") {
-                writeOutput("<h2>An error occured!</h2>");
-                writeOutput(arguments.exception);
-            }
-
-            location(url="error.cfm", addtoken=false);
-        }
-    } */
-
-
     public void function onError(struct exception, string eventName) {
        
         if (application.environment eq "dev") {
@@ -287,14 +265,11 @@ component displayname="Application" output="false" extends="myapp.myApplication"
                 writeOutput(arguments.exception);
             }
 
-            location url="error.cfm" addtoken="false";
+            location url="/error.cfm" addtoken="false";
 
         }
 
     }
-
-
-
 
     setting enablecfoutputonly = false;
 
