@@ -24,6 +24,9 @@
                 
 
                 <div class="#getLayout.layoutDiv#">
+
+                    <!--- Messages dropdown --->
+                    <cfinclude template="notifications.cfm">
                     
                     <!--- Language changer --->
                     <div #getLayout.layoutClass#>
@@ -129,9 +132,6 @@
                                     <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and i.moduleStatus.status neq "payment" and not listFind(moduleList, i.moduleID)>
                                         <li class="nav-item dropdown">
                                             <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
-                                                <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                                    <i class="fas fa-user-cog"></i>
-                                                </span> --->
                                                 <span class="nav-link-title">
                                                     #i.moduleData.name#
                                                 </span>
@@ -271,6 +271,9 @@
             </h1>
 
             <div class="navbar-nav flex-row order-md-last">
+
+                <!--- Messages dropdown --->
+                <cfinclude template="notifications.cfm">
     
                 <!--- Language changer --->
                 <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>

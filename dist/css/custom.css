@@ -272,3 +272,24 @@ div.dashboard div.card-header label.form-check {
     .list-group-item-action:hover, .list-group-item-action:focus {
         color: #000;
     }
+
+    .border-t-0{
+        border-top: none!important;
+        border-top-color: none!important;
+        border-top-style: none!important;
+        border-top-width: none!important;
+    }
+    
+    .border-b-0{
+        border-top: none!important;
+        border-top-color: none!important;
+        border-top-style: none!important;
+        border-top-width: none!important;
+    }
+    .custom-w{
+        max-width: 80%;
+    }
+    .w-break{
+        word-break: break-all!important;
+        white-space: normal!important;
+    }

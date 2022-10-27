@@ -350,3 +350,194 @@ $(document).ready(function(){
 
 
 });
+
+
+
+/* Select all Notifications */
+$(document).on('click','.allCheck', function(event) {
+	if($('.allCheck').is(':checked')){	
+		$('.notificationCheckBox').prop('checked', true);
+		$('#deleteAllSelected').show(50);
+	}else if(!$('.allCheck').is(':checked')){
+		$('.notificationCheckBox').prop('checked', false);
+		$('#deleteAllSelected').hide(50);
+	}else{
+		$('#deleteAllSelected').hide(50);
+	}
+});
+
+/* select single notification */
+$(document).on('click','.notificationCheckBox', function(event) {
+	var checkBoxes = $('.notificationCheckBox:input:checkbox').length;
+	var checkedCheckboxes = $('.notificationCheckBox:input:checkbox:checked').length;
+
+	if($('.notificationCheckBox').is(':checked')){	
+		$('#deleteAllSelected').show(50);
+		if(checkBoxes == checkedCheckboxes){
+			$('.allCheck').prop('checked', true);
+			$('#deleteAllSelected').show(50);
+		}else{
+			$('.allCheck').prop('checked', false);
+
+		}
+	}else if(!$('.notificationCheckBox').is(':checked')){	
+		$('#deleteAllSelected').hide(50);
+		$('.allCheck').prop('checked', false);
+	}else{
+		$('#deleteAllSelected').hide(50);
+	}
+});
+
+/* Update Notifications "Read" && animation */
+$(document).on('click','.notificationText', function(event) {
+	event.preventDefault(); 
+	/* var aElement = $(this); */
+	var dataLocation = $(this).data('location');
+	var notificationID = $(this).attr('id');
+
+	var notificationTextTR = $(this).parents().find("tr");
+	var currentChildTR = notificationTextTR.filter("[id|="+notificationID+"]");
+	var animatedDiv = currentChildTR.children().find('div');
+	if((animatedDiv).hasClass('notificationiAnimation')){
+		$(animatedDiv).show(500);
+		$(animatedDiv).removeClass('notificationiAnimation');
+		$.ajax({
+			type: "POST",
+			url: dataLocation + '&' + new Date().getTime(),
+			success:function(checkicon){$('#readMsges').html(checkicon);
+			}
+		});
+		$('#msgReadIcon'+notificationID).html('<i class="fas fa-check"></i>') 
+	}else{
+		$(animatedDiv).hide(500);
+		$(animatedDiv).addClass('notificationiAnimation');
+	}
+});
+
+$( document ).ready(function() {
+	if( window.location.href.indexOf("Nid") > -1) {
+		/* Read a page's GET URL variables and return them as an associative array. */
+		function getUrlVars()
+		{
+			var vars = [], hash;
+			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+			for(var i = 0; i < hashes.length; i++)
+			{
+				hash = hashes[i].split('=');
+				vars.push(hash[0]);
+				vars[hash[0]] = hash[1];
+			}
+			return vars;
+		}
+		var notificationID = getUrlVars()["Nid"];
+
+		$('a[id="'+notificationID+'"]').trigger( "click" );
+
+	}
+});
+
+
+/* Delete Notification */
+$(document).on('click','#deleteNotification', function(event){
+	event.preventDefault(); 
+	var trashButton = $(this);
+	var dataLocation = $(this).data('location');
+	var elementID = '#' + $(this).data('id') + '-';
+	
+
+	btnone = $('#sweetAlertTransSingle').data('btnone');
+	btntwo = $('#sweetAlertTransSingle').data('btntwo');
+	txtone = $('#sweetAlertTransSingle').data('txtone');
+	txttwo = $('#sweetAlertTransSingle').data('txttwo');
+
+
+	swal({
+		title: txtone,
+		text: txttwo,
+		icon: 'success',
+		buttons: [btnone, btntwo],
+		dangerMode: true,
+	})
+	.then((willDelete) => {
+		if (willDelete) {
+
+			$.ajax({
+				type: "POST",
+				url: dataLocation + '&' + new Date().getTime(),
+				success:function(data){$('#readMsges').html(data);
+			}});
+			trashButton.parent().parent().addClass('d-none');
+			$(elementID).addClass('d-none');
+		};
+
+	});
+
+});
+
+
+
+
+/* Delete all chosen checkboxes */
+$(document).on('click','#deleteAllSelected', function(){
+		btnone = $('#sweetAlertTrans').data('btnone');
+		btntwo = $('#sweetAlertTrans').data('btntwo');
+		txtone = $('#sweetAlertTrans').data('txtone');
+		txttwo = $('#sweetAlertTrans').data('txttwo');
+
+
+	swal({
+		title: txtone,
+		text: txttwo,
+		icon: 'success',
+		buttons: [btnone, btntwo],
+		dangerMode: true,
+	})
+	.then((willDelete) => {
+		if (willDelete) {
+			var allBoxes = $('.notificationCheckBox');
+			var dataLocation = $(this).data('location');
+			arr = [];
+			check = "0";
+			allBoxes.each(function(index){
+				checkboxdata = $(this).attr('id') + $(this).is(':checked'); 
+				if (checkboxdata.indexOf("true") >= 0){
+					var checkBoxids =$(this).attr('id');
+					arr.push(checkBoxids);
+					check = "1";
+					$(this).parent().parent().hide();
+					$('#deleteAllSelected').hide();
+				}
+			});
+			stringArr = arr + ""; 
+			if(check == "1"){					
+				$.ajax({
+					type: "GET",
+					data: {arrCheckBoxID:stringArr},
+					url: dataLocation + '&' + new Date().getTime(),
+					success:function(data){$('#readMsges').html(data);
+					if( window.location.href.indexOf("page") > -1) {
+						/* Read a page's GET URL variables and return them as an associative array. */
+						function getUrlVars()
+						{
+							var vars = [], hash;
+							var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+							for(var i = 0; i < hashes.length; i++)
+							{
+								hash = hashes[i].split('=');
+								vars.push(hash[0]);
+								vars[hash[0]] = hash[1];
+							}
+							return vars;
+						}
+						var currentDeletedPage = getUrlVars()["page"];
+						newLocation = currentDeletedPage -1; 
+						window.location.href = '/notifications?page='+newLocation;
+
+					}
+				}});
+
+			}
+		};
+
+	});
+});

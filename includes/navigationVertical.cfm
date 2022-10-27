@@ -1,3 +1,8 @@
+    <cfscript>
+        notificationObj = new com.notifications();
+        notificationEntrys = notificationObj.getNotifications(session.customer_id, session.user_id);           
+    </cfscript>
+    
     <cfset qTenants = application.objCustomer.getAllTenants(session.user_id)>
 
     <cfoutput>
@@ -64,9 +69,6 @@
                     <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and i.moduleStatus.status neq "payment" and not listFind(moduleList, i.moduleID)>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
-                                <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                    <i class="fas fa-user-cog"></i>
-                                </span> --->
                                 <span class="nav-link-title">
                                     #i.moduleData.name#
                                 </span>
@@ -175,13 +177,58 @@
                     </cfoutput>
                 </cfif>
             </li>
+            
+            <li class="nav-item dropdown d-none d-lg-inline-block">
+                <div class"me-3" id="readMsges">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
+                        <span class="nav-link-icon d-inline-block">
+                            <i class="far fa-bell"></i>
+                            <cfif not ArrayIsEmpty(notificationEntrys)>
+                                <span class="badge bg-red" style="right:initial;"></span>
+                            </cfif>
+                        </span>
+                        <span class="nav-link-title d-block">
+                            <cfoutput>
+                                #getTrans('titNotifications')#
+                            </cfoutput>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-card">
+                        <cfoutput>
+                            <cfif not ArrayIsEmpty(notificationEntrys)>
+                                <cfloop array="#notificationEntrys#" index="i" item="notificationitem">
+                                    <cfif i gt 5 >
+                                        <cfbreak>
+                                    <cfelse>
+                                        <cfif (len(getTrans(notificationitem.strTitleVar)) gt 11)>
+                                            <a href="#application.mainURL#/notifications?Nid=#notificationitem.intNotificationID#" class="dropdown-item">
+                                                #getTrans(notificationitem.strTitleVar).left(11)#..
+                                                #DateFormat(notificationitem.dtmCreated, "dd.mm.yyyy")#
+                                            </a>    
+                                        <cfelse>
+                                            <a href="#application.mainURL#/notifications?Nid=#notificationitem.intNotificationID#" class="dropdown-item">    
+                                                #getTrans(notificationitem.strTitleVar)#
+                                                #DateFormat(notificationitem.dtmCreated, "dd.mm.yyyy")#
+                                            </a>
+                                        </cfif>
+                
+                                    </cfif>
+                                </cfloop>
+                            </cfif>  
+                            <a href="#application.mainURL#/notifications" class="dropdown-item">    
+                                Alle Nachrichten anzeigen 
+                            </a>
+                        </cfoutput>        
+                    </div>
+                </div>
+            </li>
         </ul>
 
         <!--- User menu --->
             <div class="nav-item dropdown d-none d-sm-none d-md-none d-lg-inline-block">
 
             <cfoutput>
-                <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
+                <a class="nav-link dropdown-toggle px-0" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                     <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
                     <div class="d-none d-lg-block d-xl-block ps-2 newclass">
                         <div>#session.user_name#</div>

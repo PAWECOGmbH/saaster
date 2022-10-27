@@ -25,7 +25,10 @@
             
 
             <div class="#getLayout.layoutDiv#">
-                
+
+                <!--- Messages dropdown --->
+                <cfinclude template="notifications.cfm">
+
                 <!--- Language changer --->
                 <div #getLayout.layoutClass#>
                     <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
