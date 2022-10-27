@@ -255,6 +255,25 @@ component displayname="Application" output="false" extends="myapp.myApplication"
 
     }
 
+    public void function onError(struct exception, string eventName) {
+       
+        if (application.environment eq "dev") {
+
+            writeOutput(arguments.exception);
+
+        } else {
+
+            // Send email with error
+            mail to="#application.errorMail#" from="#application.fromEmail#" subject="ERROR - #application.projectName#" type="html" {
+                writeOutput("<h2>An error occured!</h2>");
+                writeOutput(arguments.exception);
+            }
+
+            location url="/error.cfm" addtoken="false";
+
+        }
+
+    }
 
     setting enablecfoutputonly = false;
 
