@@ -3,10 +3,10 @@ SHELL := bash
 help:
 	@echo Available targets:
 	@echo dev 		-> Creates a local development environment
-	@echo reinit 	-> Reinits the database
+	@echo reinit 	-> Rebuilds the database
 	@echo seed 		-> Ability to seed test data
 	@echo clean 	-> Remove all containers and volumes
-	@echo url 		-> List of all urls
+	@echo url 		-> List of all URLs
 
 .DEFAULT_GOAL := help
 
