@@ -9,7 +9,13 @@
     </head>
 
     <cfoutput>
-        <body  class="d-flex flex-column">
+        <cfparam  name="darkTheme" default="">
+        
+        <cfif getLayout.layoutBody neq "">
+            <cfset darkTheme = "theme-dark">
+        </cfif>
+
+        <body  class="d-flex flex-column #darkTheme#">
             <div class="page page-center">
                 <div class="container-tight py-4">
                     <div class="empty">
