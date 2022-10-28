@@ -14,7 +14,7 @@ variables.datasource = "database";
 // ####################################
 
 // Environment
-variables.environment = "dev"
+variables.environment = "dev" // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
 // Is only used when the environment is set to prod
