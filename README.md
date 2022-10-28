@@ -95,9 +95,9 @@ Lucee Admin: http://localhost/lucee/admin/server.cfm
 
 ### Seeding MySQL files
 
-In the directory `db/dev` you find some SQL files. This files provide you with testdata or basic configuration of saaster.
+In the directory `db/dev` you find some SQL files. These files provide you with example data and or basic configuration for saaster.
 
-To execute this files, use following make command:
+To execute these files, use the following make command:
 
 ```bash
 make seed
@@ -115,7 +115,7 @@ Choose a number: 3
 
 ### Rebuild database
 
-To completly rebuild the database, you can use the make target `reinit`. These command rebuild the complete MySQL container and executes all the scripts in the `db/init` directory.
+To completly rebuild the database, you can use the make target `reinit`. This command rebuilds the complete MySQL container and executes all the scripts in the `db/init` directory.
 
 ```bash
 make reinit
