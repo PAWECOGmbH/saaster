@@ -13,11 +13,12 @@ variables.datasource = "database";
 //  SERVER SETTINGS
 // ####################################
 
-// The domain of your local environment
-variables.devDomain = "localhost";
+// Environment
+variables.environment = "dev" // "dev" or "prod"
 
-// Enter the URL of your project (incl. http:// or https://)
-variables.mainURL = "http://localhost";
+// Enter the URL of your live project (incl. http:// or https://)
+// Is only used when the environment is set to prod
+variables.mainURL = "https://www.saaster.io";
 
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "saaster2022";

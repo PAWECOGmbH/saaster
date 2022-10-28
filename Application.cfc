@@ -28,10 +28,15 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.fromEmail = variables.fromEmail;
         application.toEmail = variables.toEmail;
         application.errorMail = variables.errorEmail;
-        if (variables.devDomain eq cgi.server_name) {
+        
+        if (variables.environment eq "dev") {
             application.environment = "dev";
             application.usersIP = variables.usersIP;
-            application.mainURL = "http://" & variables.devDomain;
+            if (cgi.https eq "on") {
+                application.mainURL = "https://" & cgi.server_name;
+            } else {
+                application.mainURL = "http://" & cgi.server_name;
+            }
         } else {
             application.environment = "prod";
             application.usersIP = cgi.remote_addr;
