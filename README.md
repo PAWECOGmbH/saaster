@@ -1,16 +1,26 @@
 # Saaster
 
-Opensource saas solution written in CFML.
+Saaster is a web application written in CFML that offers all the basic functionality that you need for a SaaS project.
 
-## Used open source software:
+#### Used open source software:
 - https://github.com/tabler/tabler/blob/main/LICENSE
 - https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md
 - https://github.com/Alex-D/Trumbowyg/blob/develop/LICENSE
 - https://github.com/twbs/bootstrap/blob/main/LICENSE
 - https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE
 - https://fontawesome.com/v4/license/
+- https://github.com/jquery/jquery
 
-## Requirements for development environment
+## Requirements
+
+To run saaster we recommend your host supports:
+
+- MySQL 5.7 or greater.
+- Lucee 5.3 or greater.
+
+That's pretty much it. We recommend to use IIS, Apache or NGINX as a web server for running saaster. Example configurations for the above stated web servers, you can find in our documentation.
+
+## Local development environment
 
 Windows:
 
@@ -45,15 +55,16 @@ You can find some example config files in the "configs" folder of the repository
 config/example.cfconfig.json   ->   /.cfconfig.json
 config/example.env             ->   /.env
 config/example.server.json     ->   /server.json
+config/example.config.cfm      ->   /config.cfm
 ```
 
 These files should work out of the box. You can obviously change the values of these configs to your liking.
 
 ### 3. Start the application
 
-Now you can start the application. Open any console* in the root application directory and execute following commands:
+Now you can start the application. Open any console* in the root application directory and execute the following commands:
 
-> *On Windows you need to use the WSL distro to use make. The filesystem of Windows ist mounted unter /mnt on your WSL system.
+> *On Windows you need to use the WSL distro to use make. The filesystem of Windows is normally mounted under /mnt on your WSL system.
 
 ```bash
 make
@@ -67,7 +78,6 @@ dev                     -> creates the local development environment
 reinit                  -> reinites the database
 seed                    -> seeds certain sql files
 clean                   -> removes full application with all containers
-build                   -> starts the application in production mode (not wokrking yet.)
 url                     -> outputs all importent URL's of the application
 ```
 
@@ -82,11 +92,10 @@ Lucee Admin: http://localhost/lucee/admin/server.cfm
 ------------------------------------------------------
 ```
 
-</br>
 
-## Seeding MySQL files
+### Seeding MySQL files
 
-In the directory db/dev/ you find some SQL files. This files provide you with testdata or basic configuration of saaster.
+In the directory `db/dev` you find some SQL files. This files provide you with testdata or basic configuration of saaster.
 
 To execute this files, use following make command:
 
@@ -103,3 +112,17 @@ Then enter the number of the sql file you would like to seed.
 [4] create-modules.sql 
 Choose a number: 3
 ```
+
+### Rebuild database
+
+To completly rebuild the database, you can use the make target `reinit`. These command rebuild the complete MySQL container and executes all the scripts in the `db/init` directory.
+
+```bash
+make reinit
+```
+
+### Mockdata
+
+If you need some customers or invoices while developing, you can make use of the mockdata generator we implementet.
+
+You can access it under `/setup/mockdata/index.cfm`
