@@ -1,11 +1,13 @@
 <cfscript>
+
     notificationObj = new com.notifications();
-    notificationEntrys = notificationObj.getNotifications(session.customer_id, session.user_id);           
+    notificationEntrys = notificationObj.getNotifications(session.customer_id, session.user_id); 
+
 </cfscript>
+
 <div class="nav-item dropdown d-flex me-2" id="readMsges">
     <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
         <i class="far fa-bell"></i>
-
         <cfif not ArrayIsEmpty(notificationEntrys)>
             <span class="badge bg-red"></span>
         </cfif>
@@ -17,12 +19,10 @@
                     <cfif i gt 5 >
                         <cfbreak>
                     <cfelse>  
-
-                        <a href="#application.mainURL#/notifications?Nid=#notificationitem.intNotificationID#" class="dropdown-item">    
+                        <a href="#application.mainURL#/notifications?nid=#notificationitem.intNotificationID#" class="dropdown-item">    
                           #getTrans(notificationitem.strTitleVar)#
                           #DateFormat(notificationitem.dtmCreated, "dd.mm.yyyy")#
                         </a>
-
                     </cfif>
                 </cfloop>
             </cfif>  
@@ -31,9 +31,7 @@
                 <cfset msgRows = arrayLen(notificationEntrys)>
                 <cfif msgRows gt 5>
                     <cfset msgUnreadLeft = msgRows - 5>
-
                     +#msgUnreadLeft#
-
                 </cfif>
             </a>
         </cfoutput>        

@@ -32,18 +32,36 @@
                         <cfif len(trim(qTenants.strCompanyName))>
                             <cfif len(trim(qTenants.strLogo))>
                                 <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center" alt="#qTenants.strCompanyName#">
-                                #qTenants.strCompanyName#
+                                <cfif len(trim(qTenants.strCompanyName)) gt 12>
+                                    #qTenants.strCompanyName.left(12)#..
+                                <cfelse>
+                                    #qTenants.strCompanyName#
+                                </cfif>
                             <cfelse>
                                 <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strCompanyName,2)#</div>
-                                #qTenants.strCompanyName#
+                                <cfif len(trim(qTenants.strCompanyName)) gt 12>
+                                    #qTenants.strCompanyName.left(12)#..
+                                <cfelse>
+                                    #qTenants.strCompanyName#
+                                </cfif>
                             </cfif>
                         <cfelse>
                             <cfif len(trim(qTenants.strLogo))>
                                 <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center" alt="#qTenants.strContactPerson#">
-                                #qTenants.strContactPerson#
+                                <cfif len(trim(qTenants.strContactPerson)) gt 12>
+                                    #qTenants.strContactPerson.left(12)#..
+                                <cfelse>
+                                    #qTenants.strContactPerson#
+                                </cfif>
                             <cfelse>
                                 <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strContactPerson,2)#</div>
-                                <span class="nav-link-title">#qTenants.strContactPerson#</span>
+                                <span class="nav-link-title">
+                                    <cfif len(trim(qTenants.strContactPerson)) gt 12>
+                                        #qTenants.strContactPerson.left(12)#..
+                                    <cfelse>
+                                        #qTenants.strContactPerson#
+                                    </cfif>
+                                </span>
                             </cfif>
                         </cfif>
                     </a>

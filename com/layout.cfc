@@ -18,7 +18,6 @@ component displayname="layout" output="false" {
         local.struct['layoutPageFooter'] = '';
         local.struct['layoutDivStart'] = '';
         local.struct['layoutDivEnd'] = '';
-        local.struct['horizontal'] = '';
 
     
         switch(arguments.layoutValue){

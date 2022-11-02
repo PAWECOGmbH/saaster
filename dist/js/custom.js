@@ -233,7 +233,7 @@ $(document).ready(function(){
 	});
 
 
-	//Dashboard widget sorting
+	// Dashboard widget sorting
 	$('div.dashboard').sortable({
 		handle: '.move-widget',
 		tolerance: 'pointer',
@@ -353,7 +353,7 @@ $(document).ready(function(){
 
 
 
-/* Select all Notifications */
+// Select all Notifications
 $(document).on('click','.allCheck', function(event) {
 	if($('.allCheck').is(':checked')){	
 		$('.notificationCheckBox').prop('checked', true);
@@ -366,7 +366,7 @@ $(document).on('click','.allCheck', function(event) {
 	}
 });
 
-/* select single notification */
+// select single notification
 $(document).on('click','.notificationCheckBox', function(event) {
 	var checkBoxes = $('.notificationCheckBox:input:checkbox').length;
 	var checkedCheckboxes = $('.notificationCheckBox:input:checkbox:checked').length;
@@ -388,10 +388,9 @@ $(document).on('click','.notificationCheckBox', function(event) {
 	}
 });
 
-/* Update Notifications "Read" && animation */
+// Update Notifications "Read" && animation
 $(document).on('click','.notificationText', function(event) {
-	event.preventDefault(); 
-	/* var aElement = $(this); */
+	event.preventDefault();
 	var dataLocation = $(this).data('location');
 	var notificationID = $(this).attr('id');
 
@@ -414,9 +413,10 @@ $(document).on('click','.notificationText', function(event) {
 	}
 });
 
+
+// Read a page's GET URL variables and return them as an associative array.
 $( document ).ready(function() {
-	if( window.location.href.indexOf("Nid") > -1) {
-		/* Read a page's GET URL variables and return them as an associative array. */
+	if( window.location.href.indexOf("nid") > -1) {
 		function getUrlVars()
 		{
 			var vars = [], hash;
@@ -429,7 +429,7 @@ $( document ).ready(function() {
 			}
 			return vars;
 		}
-		var notificationID = getUrlVars()["Nid"];
+		var notificationID = getUrlVars()["nid"];
 
 		$('a[id="'+notificationID+'"]').trigger( "click" );
 
@@ -437,7 +437,7 @@ $( document ).ready(function() {
 });
 
 
-/* Delete Notification */
+// Delete Notification
 $(document).on('click','#deleteNotification', function(event){
 	event.preventDefault(); 
 	var trashButton = $(this);
@@ -454,7 +454,7 @@ $(document).on('click','#deleteNotification', function(event){
 	swal({
 		title: txtone,
 		text: txttwo,
-		icon: 'success',
+		icon: 'error',
 		buttons: [btnone, btntwo],
 		dangerMode: true,
 	})
@@ -477,7 +477,7 @@ $(document).on('click','#deleteNotification', function(event){
 
 
 
-/* Delete all chosen checkboxes */
+// Delete all chosen checkboxes
 $(document).on('click','#deleteAllSelected', function(){
 		btnone = $('#sweetAlertTrans').data('btnone');
 		btntwo = $('#sweetAlertTrans').data('btntwo');
@@ -488,7 +488,7 @@ $(document).on('click','#deleteAllSelected', function(){
 	swal({
 		title: txtone,
 		text: txttwo,
-		icon: 'success',
+		icon: 'error',
 		buttons: [btnone, btntwo],
 		dangerMode: true,
 	})
@@ -516,7 +516,6 @@ $(document).on('click','#deleteAllSelected', function(){
 					url: dataLocation + '&' + new Date().getTime(),
 					success:function(data){$('#readMsges').html(data);
 					if( window.location.href.indexOf("page") > -1) {
-						/* Read a page's GET URL variables and return them as an associative array. */
 						function getUrlVars()
 						{
 							var vars = [], hash;

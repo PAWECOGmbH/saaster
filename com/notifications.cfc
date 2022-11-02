@@ -1,9 +1,5 @@
 component displayname="notifications" output="false" {
 
-    param name="notiStruct" required="false" type="any";
-    param name="customerID" required="false" type="any";
-    param name="userID" required="false" type="any";
-
     // Create a notification entry
     public struct function insertNotification(required struct notiStruct) {
 
@@ -41,7 +37,6 @@ component displayname="notifications" output="false" {
         }
 
         try {
-
             queryExecute(
                 options = {datasource=application.datasource, result="local.newID"},
                 params = {
@@ -66,27 +61,25 @@ component displayname="notifications" output="false" {
         } catch (any e) {
 
             local.argsReturnValue['message'] = e.message;
-
         }
 
         return local.argsReturnValue;
-
     }
 
-    /* Get Notification Position for nav notifications and pagination */
 
-    public any function getNotificationPos(notificationID){
+    // Get Notification Position for nav notifications and pagination
+    public numeric function getNotificationPos(required numeric notificationID){
+        
         local.qNotificationTillPos = queryExecute(
                 options = {datasource=application.datasource},
                 params = {
                     notificationID: {type: "numeric", value: arguments.notificationID}                    
                 },
-
                 sql ="
-                SELECT COUNT(intNotificationID) as intNotificationPos
-                FROM notifications
-                WHERE intNotificationID >= :notificationID;
-            "  
+                    SELECT COUNT(intNotificationID) as intNotificationPos
+                    FROM notifications
+                    WHERE intNotificationID >= :notificationID
+                "  
         )
 
         local.notification_page = ceiling(local.qNotificationTillPos.intNotificationPos/10);
@@ -94,9 +87,8 @@ component displayname="notifications" output="false" {
     }
 
 
-    /* get notifications from DB entrys  */
-
-    public any function getNotifications(required numeric customerID, numeric userID){
+    // get notifications from DB entrys
+    public array function getNotifications(required numeric customerID, numeric userID){
 
         if(structKeyExists(arguments, "userID") and structKeyExists(arguments, "customerID")){
             local.customer_ID = arguments.customerID;
@@ -109,17 +101,17 @@ component displayname="notifications" output="false" {
                     userID: {type: "numeric", value: local.user_ID}
                 },
                 sql ="
-                    SELECT * 
+                    SELECT intNotificationID, intCustomerID, intUserID, dtmCreated, strTitleVar, strDescrVar, strLink, strLinkTextVar
                     FROM notifications
-                    WHERE
-                    (dtmRead IS NULL) AND
-                    (intUserID = :userID
-                    AND intCustomerID = :customerID)
-                    ORDER BY dtmCreated DESC;
+                    WHERE dtmRead IS NULL
+                    AND intUserID = :userID
+                    AND intCustomerID = :customerID
+                    ORDER BY dtmCreated DESC
                 "  
             )
 
-        }else if(structKeyExists(arguments, "customerID")){
+        } else if(structKeyExists(arguments, "customerID")){
+            
             local.customer_ID = arguments.customerID;
 
             local.qGetNotificationsByDte = queryExecute(
@@ -129,22 +121,24 @@ component displayname="notifications" output="false" {
                     userID: {type: "numeric", value: local.user_ID}
                 },
                 sql ="
-                    SELECT * 
+                    SELECT intNotificationID, intCustomerID, intUserID, dtmCreated, strTitleVar, strDescrVar, strLink, strLinkTextVar
                     FROM notifications
-                    WHERE (dtmRead IS NULL) AND
-                    (intCustomerID = :customerID)
-                    ORDER BY dtmCreated DESC;
+                    WHERE dtmRead IS NULL 
+                    AND intCustomerID = :customerID
+                    ORDER BY dtmCreated DESC
                 "
             )
         }
-       getNotifications = local.qGetNotificationsByDte;
-       return getNotifications;
+
+       return local.qGetNotificationsByDte;
     }
 
-    /* get ALL Notifications */
-    public any function getAllNotifications(required numeric customerID, numeric userID){
+
+    // get ALL Notifications 
+    public array function getAllNotifications(required numeric customerID, numeric userID){
 
         if(structKeyExists(arguments, "userID") and structKeyExists(arguments, "customerID")){
+
             local.customer_ID = arguments.customerID;
             local.user_ID = arguments.userID;
 
@@ -155,16 +149,16 @@ component displayname="notifications" output="false" {
                     userID: {type: "numeric", value: local.user_ID}
                 },
                 sql ="
-                    SELECT * 
+                    SELECT intNotificationID, intCustomerID, intUserID, dtmCreated, strTitleVar, strDescrVar, strLink, strLinkTextVar, dtmRead
                     FROM notifications
-                    WHERE
-                    (intUserID = :userID
-                    AND intCustomerID = :customerID)
-                    ORDER BY dtmCreated DESC;
+                    WHERE intUserID = :userID
+                    AND intCustomerID = :customerID
+                    ORDER BY dtmCreated DESC
                 "
             )
 
-        }else if(structKeyExists(arguments, "customerID")){
+        } else if(structKeyExists(arguments, "customerID")){
+
             local.customer_ID = arguments.customerID;
 
             local.qGetNotificationsByDte = queryExecute(
@@ -174,23 +168,27 @@ component displayname="notifications" output="false" {
                     userID: {type: "numeric", value: local.user_ID}
                 },
                 sql ="
-                    SELECT * 
+                    SELECT intNotificationID, intCustomerID, intUserID, dtmCreated, strTitleVar, strDescrVar, strLink, strLinkTextVar, dtmRead 
                     FROM notifications
-                    (intCustomerID = :customerID)
-                    ORDER BY dtmCreated DESC;
+                    WHERE intCustomerID = :customerID
+                    ORDER BY dtmCreated DESC
                 "
             )
         }
-       getNotifications = local.qGetNotificationsByDte;
-       return getNotifications;
+
+       return local.qGetNotificationsByDte;
     }
-    /* Update Notifications Read */
-    public any function updateReadNotifications(required numeric notificationID){
+
+
+    // Update Notifications Read
+    public void function updateReadNotifications(required numeric notificationID){
 
         if(structKeyExists(arguments, "notificationID")){
+
             local.notificationID = arguments.notificationID;
+
             local.qUpdateNotificationRead = queryExecute(
-                options = {datasource=application.datasource, returntype="array"},
+                options = {datasource=application.datasource},
                 params = {
                     qnotificationID: {type: "numeric", value: local.notificationID},
                     dateTime: {type: "datetime", value: now()}
@@ -198,16 +196,20 @@ component displayname="notifications" output="false" {
                 sql ="
                     UPDATE notifications
                     SET dtmRead = :dateTime
-                    WHERE intNotificationID = :qnotificationID;
+                    WHERE intNotificationID = :qnotificationID
                 "
             )
         }
     }
-    /* Delete Notifications Read */
+
+
+    // Delete Notifications Read
     public void function deleteNotifications(required numeric notificationID){
 
         if(structKeyExists(arguments, "notificationID")){
+
             local.notificationID = arguments.notificationID;
+
             local.qDeleteNotification = queryExecute(
                 options = {datasource=application.datasource},
                 params = {
@@ -215,14 +217,18 @@ component displayname="notifications" output="false" {
                 },
                 sql ="
                     DELETE FROM notifications 
-                    WHERE intNotificationID = :qnotificationID;
+                    WHERE intNotificationID = :qnotificationID
                 "
             )
         }
     }
-    /* Delete Multiple Notifications */
-    public any function deleteMultipleNotifications(required string singleNotificationIDs){
+
+
+    // Delete Multiple Notifications
+    public void function deleteMultipleNotifications(required string singleNotificationIDs){
+
         local.strCheckBoxID = arguments.singleNotificationIDs;
+        
         local.qDeleteMultipleNotifications = queryExecute(
             options = {datasource=application.datasource},
             params = {
@@ -230,9 +236,8 @@ component displayname="notifications" output="false" {
             },
             sql ="
                 DELETE FROM notifications 
-                WHERE intNotificationID IN (:qnotificationIDs);
+                WHERE intNotificationID IN (:qnotificationIDs)
             "
         )
-       return;
     }
 }

@@ -274,22 +274,27 @@ div.dashboard div.card-header label.form-check {
     }
 
     .border-t-0{
-        border-top: none!important;
-        border-top-color: none!important;
-        border-top-style: none!important;
-        border-top-width: none!important;
+        border-color: #e6e7e9!important;
+        border-style: solid!important;
+        border-width: 1px!important;
     }
     
-    .border-b-0{
-        border-top: none!important;
-        border-top-color: none!important;
-        border-top-style: none!important;
-        border-top-width: none!important;
+    .border-k-0{
+        border: none!important;
+        border-color: none!important;
+        border-style: none!important;
+        border-width: none!important;
     }
+    
     .custom-w{
         max-width: 80%;
     }
+
+    .custom-w-9{
+        max-width: 90%;
+    }
+
     .w-break{
-        word-break: break-all!important;
+        word-break: break-word!important;
         white-space: normal!important;
     }

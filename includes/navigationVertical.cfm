@@ -2,7 +2,6 @@
         notificationObj = new com.notifications();
         notificationEntrys = notificationObj.getNotifications(session.customer_id, session.user_id);           
     </cfscript>
-    
     <cfset qTenants = application.objCustomer.getAllTenants(session.user_id)>
 
     <cfoutput>
@@ -201,12 +200,12 @@
                                         <cfbreak>
                                     <cfelse>
                                         <cfif (len(getTrans(notificationitem.strTitleVar)) gt 11)>
-                                            <a href="#application.mainURL#/notifications?Nid=#notificationitem.intNotificationID#" class="dropdown-item">
+                                            <a href="#application.mainURL#/notifications?nid=#notificationitem.intNotificationID#" class="dropdown-item">
                                                 #getTrans(notificationitem.strTitleVar).left(11)#..
                                                 #DateFormat(notificationitem.dtmCreated, "dd.mm.yyyy")#
                                             </a>    
                                         <cfelse>
-                                            <a href="#application.mainURL#/notifications?Nid=#notificationitem.intNotificationID#" class="dropdown-item">    
+                                            <a href="#application.mainURL#/notifications?nid=#notificationitem.intNotificationID#" class="dropdown-item">    
                                                 #getTrans(notificationitem.strTitleVar)#
                                                 #DateFormat(notificationitem.dtmCreated, "dd.mm.yyyy")#
                                             </a>

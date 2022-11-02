@@ -17,7 +17,8 @@ VALUES
 ('txtMultipleNotificationDelete', 'Wollen Sie die ausgewählten Benachrichtigungen löschen?', 'Do you want to delete the selected notifications?'),
 ('titMultipleNotificationDelete', 'Benachrichtigungen löschen', 'Delete notifications'),
 ('alertNotificationDeleted', 'Die Benachrichtigung wurde gelöscht.', 'The notification have been deleted.'),
-('alertMultipleNotificationDeleted', 'Die Benachrichtigungen wurden gelöscht.', 'The notifications have been deleted.');
+('alertMultipleNotificationDeleted', 'Die Benachrichtigungen wurden gelöscht.', 'The notifications have been deleted.'),
+('txtNotificationEmpty', 'Keine Benachrichtigungen verfügbar', 'No notifications available');
 
 
 
