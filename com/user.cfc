@@ -646,7 +646,7 @@ component displayname="user" output="false" {
             }
 
             // Send activation link
-            mail to="#local.qUsersMailCheck.strEmail#" from="#application.fromEmail#" subject="#variables.getTrans('subjectConfirmEmail')#" type="html" {
+            mail to="#arguments.useremail#" from="#application.fromEmail#" subject="#variables.getTrans('subjectConfirmEmail')#" type="html" {
                 include template="/config.cfm";
                 include template="/includes/mail_design.cfm";
             }
