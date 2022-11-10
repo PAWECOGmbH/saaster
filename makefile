@@ -2,11 +2,11 @@ SHELL := bash
 
 help:
 	@echo Available targets:
-	@echo dev 		-> Creates a local development environment
-	@echo reinit 	-> Rebuilds the database
-	@echo seed 		-> Ability to seed test data
-	@echo clean 	-> Remove all containers and volumes
-	@echo url 		-> List of all URLs
+	@echo "dev	-> Creates a local development environment"
+	@echo "reinit	-> Rebuilds the database"
+	@echo "seed	-> Ability to seed test data"
+	@echo "clean	-> Remove all containers and volumes"
+	@echo "url	-> List of all URLs"
 
 .DEFAULT_GOAL := help
 
