@@ -11,7 +11,7 @@ if (structKeyExists(form, "new_group")) {
     )
 
     param name="form.group_name" default="";
-    param name="form.countryID" default=NULL;
+    param name="form.countryID" default="";
 
     try {
 
@@ -46,7 +46,7 @@ if (structKeyExists(form, "edit_plangroup")) {
     if (isNumeric(form.edit_plangroup)) {
 
         param name="form.group_name" default="";
-        param name="form.countryID" default=NULL;
+        param name="form.countryID" default="";
 
         queryExecute(
             options = {datasource = application.datasource},
@@ -191,10 +191,33 @@ if (structKeyExists(form, "edit_plan")) {
         max_users = form.max_users;
         desc = form.desc;
 
-        if (structKeyExists(form, "recommended")) {
-            recommended = 1;
+        recommended = structKeyExists(form, "recommended") ? 1 : 0;
+        
+        if (structKeyExists(form, "free")) {
+
+            free = 1;
+            test_days = 0;
+
+            // Set all prices to 0
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    planID: {type: "numeric", value: form.edit_plan}
+                },
+                sql = "
+                    UPDATE plan_prices
+                    SET decPriceMonthly = 0,
+                        decPriceYearly = 0,
+                        decVat = 0,
+                        intVatType = 1,
+                        blnIsNet = 1,
+                        blnOnRequest = 0
+                    WHERE intPlanID = :planID
+                "
+            )
+
         } else {
-            recommended = 0;
+            free = 0;
         }
 
         queryExecute(
@@ -207,6 +230,7 @@ if (structKeyExists(form, "edit_plan")) {
                 button_name: {type: "nvarchar", value: button_name},
                 booking_link: {type: "nvarchar", value: booking_link},
                 recommended: {type: "boolean", value: recommended},
+                free: {type: "boolean", value: free},
                 test_days: {type: "numeric", value: test_days},
                 max_users: {type: "numeric", value: max_users},
                 planID: {type: "numeric", value: form.edit_plan}
@@ -221,6 +245,7 @@ if (structKeyExists(form, "edit_plan")) {
                     strBookingLink = :booking_link,
                     intNumTestDays = :test_days,
                     blnRecommended = :recommended,
+                    blnFree = :free,
                     intMaxUsers = :max_users
                 WHERE intPlanID = :planID
             "
@@ -278,6 +303,36 @@ if (structKeyExists(url, "delete_plan")) {
 
 
     }
+
+}
+
+// Set plan as default
+if (structKeyExists(url, "default")) {
+
+    setDefault = structKeyExists(form, "default") ? 1 : 0;
+
+    queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+            planID: {type: "numeric", value: form.planID},
+            groupID: {type: "numeric", value: form.groupID},
+            default: {type: "boolean", value: setDefault}
+        },
+        sql = "
+
+            UPDATE plans
+            SET blnDefaultPlan = 0
+            WHERE intPlanGroupID = :groupID;
+
+            UPDATE plans
+            SET blnDefaultPlan = :default
+            WHERE intPlanGroupID = :groupID
+            AND intPlanID = :planID;
+
+        "
+    )
+
+    location url="#application.mainURL#/sysadmin/plans" addtoken="false";
 
 }
 
@@ -439,34 +494,68 @@ if (structKeyExists(form, "new_feature")) {
     )
 
     param name="form.feature_name" default="";
+    param name="form.feature_variable" default="";
     param name="form.description" default="";
     param name="category" default=0;
+
     if (structKeyExists(form, "category")) {
         category = 1;
+        form.feature_variable = "";
     }
 
-    try {
+    variableExists = false;
 
-        queryExecute(
-            options = {datasource = application.datasource},
+    if( len(trim(form.feature_variable))){
+
+        chkName = queryExecute(
+            options = {
+                datasource = application.datasource
+            },
             params = {
-                feature_name: {type: "nvarchar", value: form.feature_name},
-                description: {type: "nvarchar", value: form.description},
-                category: {type: "boolean", value: category},
-                nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
+                customvariable: {type: "varchar", value: form.feature_variable}
             },
             sql = "
-                INSERT INTO plan_features (strFeatureName, strDescription, blnCategory, intPrio)
-                VALUES (:feature_name, :description, :category, :nextPrio)
+                SELECT intPlanFeatureID FROM plan_features
+                WHERE strVariable = :customvariable
             "
-        )
+        );
 
-        getAlert('Feature saved.');
+        if(chkName.recordCount){
+            variableExists = true;
+        }
 
-    } catch (any e) {
+    }
 
-        getAlert(e.message, 'danger');
 
+    if( !variableExists ){
+
+        try {
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    feature_name: {type: "nvarchar", value: form.feature_name},
+                    feature_variable: {type: "varchar", value: trim(form.feature_variable)},
+                    description: {type: "nvarchar", value: form.description},
+                    category: {type: "boolean", value: category},
+                    nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
+                },
+                sql = "
+                    INSERT INTO plan_features (strFeatureName, strDescription, strVariable, blnCategory, intPrio)
+                    VALUES (:feature_name, :description, :feature_variable, :category, :nextPrio)
+                "
+            )
+
+            getAlert('Feature saved.');
+
+        } catch (any e) {
+
+            getAlert(e.message, 'danger');
+
+        }
+
+    }else{
+        getAlert('Variable name already exists. Please choose another name.', 'danger');
     }
 
     location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
@@ -479,30 +568,76 @@ if (structKeyExists(form, "edit_feature")) {
     if (isNumeric(form.edit_feature)) {
 
         param name="form.feature_name" default="";
+        param name="form.feature_variable" default="";
         param name="form.description" default="";
         param name="category" default=0;
+
         if (structKeyExists(form, "category")) {
             category = 1;
+            form.feature_variable = "";
         }
 
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                featureID: {type: "numeric", value: form.edit_feature},
-                feature_name: {type: "nvarchar", value: form.feature_name},
-                description: {type: "nvarchar", value: form.description},
-                category: {type: "boolean", value: category}
-            },
-            sql = "
-                UPDATE plan_features
-                SET strFeatureName = :feature_name,
-                    strDescription = :description,
-                    blnCategory = :category
-                WHERE intPlanFeatureID = :featureID
-            "
-        )
+        variableExists = false;
 
-        getAlert('Feature saved.');
+        if( len(trim(form.feature_variable))){
+
+            chkName = queryExecute(
+                options = {
+                    datasource = application.datasource
+                },
+                params = {
+                    featureID: {type: "numeric", value: form.edit_feature},
+                    customvariable: {type: "varchar", value: form.feature_variable}
+                },
+                sql = "
+                    SELECT intPlanFeatureID FROM plan_features
+                    WHERE strVariable = :customvariable
+                    AND intPlanFeatureID != :featureID
+                "
+            );
+
+            if(chkName.recordCount){
+                variableExists = true;
+            }
+
+        }
+
+
+        if( !variableExists ){
+
+            try {
+
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        featureID: {type: "numeric", value: form.edit_feature},
+                        feature_name: {type: "nvarchar", value: trim(form.feature_name)},
+                        feature_variable: {type: "varchar", value: trim(form.feature_variable)},
+                        description: {type: "nvarchar", value: form.description},
+                        category: {type: "boolean", value: category}
+                    },
+                    sql = "
+                        UPDATE plan_features
+                        SET strFeatureName = :feature_name,
+                            strDescription = :description,
+                            blnCategory = :category,
+                            strVariable = :feature_variable
+                        WHERE intPlanFeatureID = :featureID
+                    "
+                )
+
+                getAlert('Feature updated.');
+
+            } catch (any e) {
+
+                getAlert(e.message, 'danger');
+
+            }
+
+        }else{
+            getAlert('Variable name already exists. Please choose another name.', 'danger');
+        }
+
         location url="#application.mainURL#/sysadmin/planfeatures" addtoken="false";
 
     }
@@ -617,8 +752,6 @@ if (structKeyExists(form, "edit_features")) {
                 if (thisField eq "checkmark") {
                     checkmark = evaluate("checkmark_#thisFeatureID#");
 
-                    dump(checkmark);
-
                     if (checkmark eq "on") {
                         checkmark = 1;
                     }
@@ -705,6 +838,236 @@ if (structKeyExists(form, "plan_modules")) {
         location url="#application.mainURL#/sysadmin/plan/edit/#form.plan_modules#?tab=modules" addtoken="false";
 
     }
+
+}
+
+
+
+
+// ---- Edit booked plan or book via sysadmin
+
+if (structKeyExists(url, "booking")) {
+
+    param name="url.b" default=0;
+    param name="url.c" default=0;
+    param name="url.p" default=0;
+    param name="url.r" default="";
+
+    // Get some customer data
+    customerData = application.objCustomer.getCustomerData(url.c);
+    custLanguage = customerData.language;
+    custCurrency = customerData.currencyStruct.iso;
+    custCurrencyID = customerData.currencyStruct.id;
+
+
+    // Edit the booked period
+    if (structKeyExists(url, "period")) {
+
+        bookingStruct = structNew();
+        bookingStruct['bookingID'] = url.b;
+
+        if (structKeyExists(form, "start_date") and dateFormat(form.start_date, "yyyy-mm-dd") <= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateStart'] = form.start_date;
+        }
+        if (structKeyExists(form, "end_date") and dateFormat(form.end_date, "yyyy-mm-dd") >= dateFormat(now(), "yyyy-mm-dd")) {
+            bookingStruct['dateEnd'] = form.end_date;
+        }
+
+        updateBooking = new com.book('plan', custLanguage).updateBooking(bookingStruct);
+
+        getAlert('Plan period saved.');
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Cancel a booked plan
+    if (structKeyExists(url, "cancel")) {
+
+        // Cancel plan
+        cancelPlan = new com.cancel(customerID=url.c, thisID=url.p, what='plan').cancel();
+
+        if (cancelPlan.success) {
+            getAlert('Plan canceled. The schedule task will do the rest.');
+        } else {
+            getAlert(cancelPlan.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Revoke cancellation
+    if (structKeyExists(url, "revoke")) {
+
+        // Cancel module
+        revoke = new com.cancel(customerID=url.c, thisID=url.p, what='plan').revoke();
+
+        if (revoke.success) {
+            getAlert('Cancellation revoked');
+        } else {
+            getAlert(revoke.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Book plan right now (for free)
+    if (structKeyExists(url, "free")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        structUpdate(planDetails, "priceMonthly", 0);
+        structUpdate(planDetails, "priceMonthlyAfterVAT", 0);
+        structUpdate(planDetails, "priceYearly", 0);
+        structUpdate(planDetails, "priceYearlyAfterVAT", 0);
+        structUpdate(planDetails, "testDays", 0);
+
+        structInsert(planDetails, "priceOnetime", 0);
+        structInsert(planDetails, "priceOneTimeAfterVAT", 0);
+
+        // Make booking right now
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring='onetime', makeBooking=true);
+
+        if (makeBooking.success) {
+            getAlert('Plan activated for free.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+    }
+
+
+    // Make invoice which the client can then pay to activate the plan
+    if (structKeyExists(url, "invoice")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        // Set the test days to 0 in order to make the invoice immediately
+        structUpdate(planDetails, "testDays", 0);
+
+        // Make booking and invoice right now
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The invoice was successfully created. You can now make changes if you wish. If all is well, you can send it to the customer by clicking on the email button.');
+            session.comingfrom = "sysadmin_plans";
+            location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
+        } else {
+            getAlert(makeBooking.message, 'danger');
+            location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+        }
+
+
+
+
+    }
+
+
+    // Activate the test time
+    if (structKeyExists(url, "test")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        // Make booking with test phase
+        makeBooking = new com.book('plan', custLanguage).checkBooking(customerID=url.c, bookingData=planDetails, recurring="test", makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+        if (makeBooking.success) {
+            getAlert('The plan has been successfully activated.');
+        } else {
+            getAlert(makeBooking.message, 'danger');
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+
+    }
+
+
+    // Change the cycle of a module
+    if (structKeyExists(url, "change")) {
+
+        // Get plan infos of the plan to be booked
+        planDetails = new com.plans(language=custLanguage, currencyID=custCurrencyID).getPlanDetail(url.p);
+
+        objBooking = new com.book('plan', custLanguage);
+
+        // Check booking
+        checkBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=false);
+
+
+        // If the amount to pay is greater than 0, make invoice
+        if (checkBooking.amountToPay gt 0) {
+
+            // Make booking and invoice right now
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=true, chargeInvoice=false);
+
+            if (makeBooking.success) {
+                getAlert('The invoice was successfully created, check it out!');
+            } else {
+                getAlert(makeBooking.message, 'danger');
+            }
+
+            location url="#application.mainURL#/sysadmin/invoice/edit/#makeBooking.invoiceID#" addtoken="false";
+
+        } else {
+
+            // Save the new plan
+            makeBooking = objBooking.checkBooking(customerID=url.c, bookingData=planDetails, recurring=url.r, makeBooking=true, makeInvoice=false, chargeInvoice=false);
+
+            if (makeBooking.success) {
+                getAlert('The cycle was changed.');
+            } else {
+                getAlert(makeBooking.message, 'danger');
+            }
+
+            location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+        }
+
+
+    }
+
+
+    // Delete the plan (the booking)
+    if (structKeyExists(url, "delete")) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: url.b},
+                planID: {type: "numeric", value: url.p},
+                customerID: {type: "numeric", value: url.c}
+            },
+            sql = "
+
+                DELETE FROM bookings
+                WHERE intCustomerID = :customerID
+                AND intPlanID = :planID;
+
+                DELETE FROM invoices
+                WHERE intBookingID = :bookingID
+                AND intPaymentStatusID != 3
+                AND intPaymentStatusID != 4;
+
+            "
+        )
+
+        getAlert('The plan was withdrawn from the customer.');
+
+        location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";
+
+
+    }
+
 
 }
 

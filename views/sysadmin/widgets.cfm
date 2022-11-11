@@ -1,11 +1,23 @@
 <cfscript>
+
     qWidgets = queryExecute (
         options = {datasource = application.datasource},
         sql = "
-            SELECT widgets.*, widget_ratio.strDescription
-            FROM widgets INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
+            SELECT widgets.*, widget_ratio.strDescription,
+            (
+                SELECT GROUP_CONCAT(intPlanID)
+                FROM widgets_plans
+                WHERE intWidgetID = widgets.intWidgetID
+            ) as planList,
+            (
+                SELECT GROUP_CONCAT(intModuleID)
+                FROM widgets_modules
+                WHERE intWidgetID = widgets.intWidgetID
+            ) as moduleList
+            FROM widgets
+            INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
         "
-    );
+    )
 
     qWidgetRatio = queryExecute (
         options = {datasource = application.datasource},
@@ -13,28 +25,46 @@
             SELECT *
             FROM widget_ratio
         "
-    );
+    )
+
+    qPlans = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT intPlanID, strPlanName
+            FROM plans
+            ORDER BY intPrio
+        "
+    )
+
+    qModules = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "
+            SELECT intModuleID, strModuleName
+            FROM modules
+            ORDER BY intPrio
+        "
+    )
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
-                        <h4 class="page-title">#getTrans('')#</h4>
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                        <h4 class="page-title">Widgets</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
                             <li class="breadcrumb-item active">Widgets</li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##widget_new" class="btn btn-primary">
                             <i class="fas fa-plus pe-3"></i> Add widget
                         </a>
@@ -45,7 +75,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -87,7 +117,7 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <div class="row">
-                                                                        <div class="col-lg-2 mb-3">
+                                                                        <div class="col-lg-12 mb-3">
                                                                             <label class="form-check form-switch">
                                                                                 <input class="form-check-input" type="checkbox" name="active" <cfif qWidgets.blnActive>checked</cfif>>
                                                                                 <span class="form-check-label">Active</span>
@@ -108,11 +138,37 @@
                                                                             </select>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="mb-3">
+                                                                    <div class="row mb-3">
                                                                         <label class="form-label">Path to the widget file</label>
                                                                         <div class="input-group">
                                                                             <span class="input-group-text">root/</span>
                                                                             <input type="text" name="path" class="form-control" autocomplete="off" value="#HTMLEditFormat(qWidgets.strFilePath)#" maxlength="255" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-lg-12 mb-3">
+                                                                            <label class="form-check form-switch">
+                                                                                <input class="form-check-input" type="checkbox" name="perm" <cfif qWidgets.blnPermDisplay>checked</cfif>>
+                                                                                <span class="form-check-label">Display widget permanently or...</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-lg-6 mb-3">
+                                                                            <label class="form-check-label mb-2">... display only with these <b>plans</b>:</label>
+                                                                            <select name="planList" class="form-select" multiple>
+                                                                                <cfloop query="qPlans">
+                                                                                    <option value="#qPlans.intPlanID#" <cfif listFind(qWidgets.planList, qPlans.intPlanID)>selected</cfif>>#qPlans.strPlanName#</option>
+                                                                                </cfloop>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-lg-6 mb-3">
+                                                                            <label class="form-check-label mb-2">... display only with these <b>modules</b>:</label>
+                                                                            <select name="moduleList" class="form-select" multiple>
+                                                                                <cfloop query="qModules">
+                                                                                    <option value="#qModules.intModuleID#" <cfif listFind(qWidgets.moduleList, qModules.intModuleID)>selected</cfif>>#qModules.strModuleName#</option>
+                                                                                </cfloop>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -164,11 +220,37 @@
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                        <div class="mb-3">
+                                                        <div class="mb-4">
                                                             <label class="form-label">Path to the widget file</label>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">root/</span>
                                                                 <input type="text" name="path" class="form-control" autocomplete="off" maxlength="255" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12 mb-3">
+                                                                <label class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" name="perm" checked>
+                                                                    <span class="form-check-label">Display widget permanently or...</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-6 mb-3">
+                                                                <label class="form-check-label mb-2">... display only with these <b>plans</b>:</label>
+                                                                <select name="planList" class="form-select" multiple>
+                                                                    <cfloop query="qPlans">
+                                                                        <option value="#qPlans.intPlanID#">#qPlans.strPlanName#</option>
+                                                                    </cfloop>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-lg-6 mb-3">
+                                                                <label class="form-check-label mb-2">... display only with these <b>modules</b>:</label>
+                                                                <select name="moduleList" class="form-select" multiple>
+                                                                    <cfloop query="qModules">
+                                                                        <option value="#qModules.intModuleID#">#qModules.strModuleName#</option>
+                                                                    </cfloop>
+                                                                </select>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -191,4 +273,5 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>

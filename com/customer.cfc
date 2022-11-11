@@ -1,20 +1,20 @@
 
 component displayname="customer" output="false" {
 
-    <!--- Get the users data using an ID --->
+    // Get the users data using an ID
     public query function getUserDataByID(required numeric userID) {
 
         local.userQuery = queryNew('');
 
         if (len(trim(arguments.userID)) and arguments.userID gt 0) {
 
-            local.qCustomer = queryExecute(
+            local.qUser = queryExecute(
 
                 options = {datasource = application.datasource},
                 params = {
                     thisUserID: {type: "numeric", value = arguments.userID}
                 },
-                sql = "                
+                sql = "
                     SELECT DISTINCT
                     users.intUserID,
                     users.strSalutation,
@@ -28,6 +28,7 @@ component displayname="customer" output="false" {
                     users.blnActive,
                     users.dtmLastLogin,
                     users.blnAdmin,
+                    users.blnSuperAdmin,
                     users.strUUID,
                     customers.intCustomerID,
                     customers.intCustParentID,
@@ -47,14 +48,14 @@ component displayname="customer" output="false" {
                     customers.strBillingAddress,
                     customers.strBillingInfo,
                     customers.intCountryID
-                    FROM customer_user 
+                    FROM customer_user
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
                     WHERE customer_user.intUserID = :thisUserID
                 "
             )
-            
-            local.userQuery = local.qCustomer;
+
+            local.userQuery = local.qUser;
 
         }
 
@@ -64,91 +65,84 @@ component displayname="customer" output="false" {
 
 
 
-    <!--- Update customer --->
+    // Update customer
     public struct function updateCustomer(required struct customerStruct, required numeric customerID) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
+        local.company = '';
+        local.contact = '';
+        local.address = '';
+        local.address2 = '';
+        local.zip = '';
+        local.city = '';
+        local.countryID = 0;
+        local.timezoneID = application.objGlobal.getCountry(local.countryID).intTimezoneID;
+        local.email = '';
+        local.phone = '';
+        local.website = '';
+        local.billing_name = '';
+        local.billing_email = '';
+        local.billing_address = '';
+        local.billing_info = '';
+
         if (structKeyExists(arguments.customerStruct, "company")) {
             local.company = application.objGlobal.cleanUpText(arguments.customerStruct.company, 100);
-        } else {
-            local.company = '';
         }
         if (structKeyExists(arguments.customerStruct, "contact")) {
             local.contact = application.objGlobal.cleanUpText(arguments.customerStruct.contact, 100);
-        } else {
-            local.contact = '';
         }
         if (structKeyExists(arguments.customerStruct, "address")) {
             local.address = application.objGlobal.cleanUpText(arguments.customerStruct.address, 100);
-        } else {
-            local.address = '';
         }
         if (structKeyExists(arguments.customerStruct, "address2")) {
             local.address2 = application.objGlobal.cleanUpText(arguments.customerStruct.address2, 100);
-        } else {
-            local.address2 = '';
         }
         if (structKeyExists(arguments.customerStruct, "zip")) {
             local.zip = application.objGlobal.cleanUpText(arguments.customerStruct.zip, 10);
-        } else {
-            local.zip = '';
         }
         if (structKeyExists(arguments.customerStruct, "city")) {
             local.city = application.objGlobal.cleanUpText(arguments.customerStruct.city, 100);
-        } else {
-            local.city = '';
         }
         if (structKeyExists(arguments.customerStruct, "countryID") and isNumeric(arguments.customerStruct.countryID)) {
             local.countryID = arguments.customerStruct.countryID;
-        } else {
-            local.countryID = 1;
+        }
+        if (structKeyExists(arguments.customerStruct, "timezoneID") and isNumeric(arguments.customerStruct.timezoneID) and arguments.customerStruct.timezoneID gt 0) {
+            local.timezoneID = arguments.customerStruct.timezoneID;
         }
         if (structKeyExists(arguments.customerStruct, "email")) {
             local.email = application.objGlobal.cleanUpText(arguments.customerStruct.email, 100);
-        } else {
-            local.email = '';
         }
         if (structKeyExists(arguments.customerStruct, "phone")) {
             local.phone = application.objGlobal.cleanUpText(arguments.customerStruct.phone, 100);
-        } else {
-            local.phone = '';
         }
         if (structKeyExists(arguments.customerStruct, "website")) {
             local.website = application.objGlobal.cleanUpText(arguments.customerStruct.website, 100);
-        } else {
-            local.website = '';
-        }  
+        }
         if (structKeyExists(arguments.customerStruct, "billing_name")) {
             local.billing_name = application.objGlobal.cleanUpText(arguments.customerStruct.billing_name, 100);
-        } else {
-            local.billing_name = '';
         }
         if (structKeyExists(arguments.customerStruct, "billing_email")) {
             local.billing_email = application.objGlobal.cleanUpText(arguments.customerStruct.billing_email, 100);
-        } else {
-            local.billing_email = '';
         }
         if (structKeyExists(arguments.customerStruct, "billing_address")) {
             local.billing_address = application.objGlobal.cleanUpText(arguments.customerStruct.billing_address);
-        } else {
-            local.billing_address = '';
         }
         if (structKeyExists(arguments.customerStruct, "billing_info")) {
             local.billing_info = application.objGlobal.cleanUpText(arguments.customerStruct.billing_info);
-        } else {
-            local.billing_info = '';
-        }      
+        }
 
         try {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
+                    mutDate: {type: "datetime", value: now()},
+                    customerID: {type: "numeric", value: arguments.customerID},
                     company: {type: "nvarchar", value: local.company},
                     contact: {type: "nvarchar", value: local.contact},
                     address: {type: "nvarchar", value: local.address},
@@ -156,20 +150,19 @@ component displayname="customer" output="false" {
                     zip: {type: "nvarchar", value: local.zip},
                     city: {type: "nvarchar", value: local.city},
                     countryID: {type: "numeric", value: local.countryID},
+                    timezoneID: {type: "numeric", value: local.timezoneID},
                     email: {type: "nvarchar", value: local.email},
                     phone: {type: "nvarchar", value: local.phone},
                     website: {type: "nvarchar", value: local.website},
                     billing_name: {type: "nvarchar", value: local.billing_name},
                     billing_email: {type: "nvarchar", value: local.billing_email},
                     billing_address: {type: "nvarchar", value: local.billing_address},
-                    billing_info: {type: "nvarchar", value: local.billing_info},
-
-                    intCustomerID: {type: "nvarchar", value: arguments.customerID}
+                    billing_info: {type: "nvarchar", value: local.billing_info}
                 },
                 sql = "
 
                     UPDATE customers
-                    SET dtmMutDate = now(),
+                    SET dtmMutDate = :mutDate,
                         strCompanyName = :company,
                         strContactPerson = :contact,
                         strAddress = :address,
@@ -177,6 +170,7 @@ component displayname="customer" output="false" {
                         strZIP = :zip,
                         strCity = :city,
                         intCountryID = :countryID,
+                        intTimezoneID = :timezoneID,
                         strPhone = :phone,
                         strEmail = :email,
                         strWebsite = :website,
@@ -184,8 +178,8 @@ component displayname="customer" output="false" {
                         strBillingEmail = :billing_email,
                         strBillingAddress = :billing_address,
                         strBillingInfo = :billing_info
-                    WHERE intCustomerID = :intCustomerID
-                    
+                    WHERE intCustomerID = :customerID
+
                 "
 
             );
@@ -206,18 +200,18 @@ component displayname="customer" output="false" {
     }
 
 
-    <!--- Insert tenant (only the most important data) --->
+    // Insert tenant (only the most important data)
     public struct function insertTenant(required struct tenantStruct) {
 
-        <!--- Default variables --->
+        // Default variables
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
-            
+
         param name="local.company_name" default="";
         param name="local.contact_person" default="";
 
-        <!--- Needed values --->
+        // Needed values
         if (!structKeyExists(tenantStruct, "customerID") or !isNumeric(tenantStruct.customerID)) {
             local.argsReturnValue['message'] = "customerID not valid!";
             return local.argsReturnValue;
@@ -228,73 +222,65 @@ component displayname="customer" output="false" {
         }
 
         local.customerID = tenantStruct.customerID;
-        local.userID = tenantStruct.userID;       
+        local.userID = tenantStruct.userID;
 
-        if (structKeyExists(arguments.tenantStruct, "company_name")) {
-            local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100);
-        } else {
-            local.company_name = '';
-        }
-
-        if (structKeyExists(arguments.tenantStruct, "contact_person")) {
-            local.contact_person = application.objGlobal.cleanUpText(tenantStruct.contact_person, 100);
-        } else {
-            local.contact_person = 'untitled company';
-        }
+        local.company_name = application.objGlobal.cleanUpText(tenantStruct.company_name, 100) ?: '';
+        local.contact_person = application.objGlobal.cleanUpText(tenantStruct.contact_person, 100) ?: 'untitled company';
 
         try {
 
             queryExecute(
 
-                options = {datasource = '#application.datasource#'},
+                options = {datasource = application.datasource},
                 params = {
                     company_name: {type: "nvarchar", value: local.company_name},
                     contact_person: {type: "nvarchar", value: local.contact_person},
                     intCustParentID: {type: "numeric", value: local.customerID},
-                    intUserID: {type: "numeric", value: local.userID}
+                    intUserID: {type: "numeric", value: local.userID},
+                    dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
 
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson)
-                    VALUES (:intCustParentID, now(), now(), 1, :company_name,
+                    VALUES (:intCustParentID, :dateNow, :dateNow, 1, :company_name,
                         (SELECT intCountryID FROM countries WHERE blnDefault = 1), :contact_person);
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
                     INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
-                    VALUES (@last_inserted_customer_id, :intUserID, 0);               
-                    
+                    VALUES (@last_inserted_customer_id, :intUserID, 0);
+
                 "
 
             )
 
             local.argsReturnValue['message'] = "OK";
-            local.argsReturnValue['success'] = true;   
-            return local.argsReturnValue; 
+            local.argsReturnValue['success'] = true;
+            return local.argsReturnValue;
 
         } catch (any e) {
 
             local.argsReturnValue['message'] = e.message;
-            return local.argsReturnValue; 
+            return local.argsReturnValue;
 
-        }               
+        }
 
     }
-    
 
-    <!--- Get all tenants --->
+
+    // Get all tenants
     public query function getAllTenants(required numeric userID) {
 
         if (arguments.userID gt 0) {
 
             local.qTenants = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     userID: {type: "numeric", value: arguments.userID}
                 },
                 sql = "
                     SELECT customer_user.blnStandard, customers.*, users.blnSuperAdmin, users.blnAdmin
-                    FROM customer_user 
+                    FROM customer_user
                     INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intUserID = :userID
@@ -305,39 +291,176 @@ component displayname="customer" output="false" {
 
             return local.qTenants;
 
-        } 
+        }
 
     }
 
 
-    <!--- Get customer data --->
-    public query function getCustomerData(required numeric customerID) {
+    // Get customer data
+    public struct function getCustomerData(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
 
+            local.objPrices = new com.prices();
+            local.objInvoices = new com.invoices();
+            local.objCurrency = new com.currency();
+            local.customerStruct = structNew();
+
             local.qCustomer = queryExecute(
                 options = {datasource = application.datasource},
-                params = {                    
+                params = {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT customers.*, countries.strCountryName,
-                    (
-                        SELECT strLanguageISO
-                        FROM languages
-                        WHERE intLanguageID = countries.intLanguageID
-                    ) as strLanguageISO
-                    FROM customers INNER JOIN countries ON customers.intCountryID = countries.intCountryID
-                    WHERE customers.intCustomerID = :customerID
+                    SELECT *
+                    FROM customers
+                    WHERE intCustomerID = :customerID
                 "
             )
 
-            return local.qCustomer;
+            local.customerStruct['customerID'] = local.qCustomer.intCustomerID;
+            local.customerStruct['custParentID'] = local.qCustomer.intCustParentID;
+            local.customerStruct['insertDate'] = local.qCustomer.dtmInsertDate;
+            local.customerStruct['mutDate'] = local.qCustomer.dtmMutDate;
+            local.customerStruct['active'] = local.qCustomer.blnActive;
+            local.customerStruct['companyName'] = local.qCustomer.strCompanyName;
+            local.customerStruct['contactPerson'] = local.qCustomer.strContactPerson;
+            local.customerStruct['address'] = local.qCustomer.strAddress;
+            local.customerStruct['address2'] = local.qCustomer.strAddress2;
+            local.customerStruct['zip'] = local.qCustomer.strZIP;
+            local.customerStruct['city'] = local.qCustomer.strCity;
+            local.customerStruct['countryID'] = local.qCustomer.intCountryID;
+            local.customerStruct['timezoneID'] = local.qCustomer.intTimezoneID;
+            local.customerStruct['phone'] = local.qCustomer.strPhone;
+            local.customerStruct['email'] = local.qCustomer.strEmail;
+            local.customerStruct['website'] = local.qCustomer.strWebsite;
+            local.customerStruct['logo'] = local.qCustomer.strLogo;
+            local.customerStruct['billingAccountName'] = local.qCustomer.strBillingAccountName;
+            local.customerStruct['billingEmail'] = local.qCustomer.strBillingEmail;
+            local.customerStruct['billingAddress'] = local.qCustomer.strBillingAddress;
+            local.customerStruct['billingInfo'] = local.qCustomer.strBillingInfo;
+
+            local.customerStruct['currencyStruct'] = {};
+            local.language = "";
+            local.countryName = "";
+
+            // Check currency via country first
+            if (local.qCustomer.intCountryID gt 0) {
+                local.country = application.objGlobal.getCountry(local.qCustomer.intCountryID);
+                local.countryName = local.country.strCountryName;
+                if (len(trim(local.country.strCurrency))) {
+                    local.language = application.objLanguage.getAnyLanguage(local.country.intLanguageID).iso;
+                    local.currency = local.objCurrency.getCurrency(local.country.strCurrency);
+                    if (isStruct(local.currency) and !structIsEmpty(local.currency)) {
+                        if (local.currency.active) {
+                            local.customerStruct['currencyStruct'] = local.currency;
+                        }
+                    }
+                }
+            }
+
+            // If the currency struct is empty, get the currency via the last invoice, if they have any
+            if (structIsEmpty(local.customerStruct.currencyStruct)) {
+                local.invoiceArray = objInvoices.getInvoices(arguments.customerID).arrayInvoices;
+                if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
+                    local.lastInvoice = arrayLast(invoiceArray);
+                    local.language = local.lastInvoice.invoiceLanguage;
+                    local.currency = local.objCurrency.getCurrency(lastInvoice.invoiceCurrency);
+                    if (local.currency.active) {
+                        local.customerStruct['currencyStruct'] = local.currency;
+                    }
+                }
+            }
+
+            // If the currency is still empty, get default currency
+            if (structIsEmpty(local.customerStruct.currencyStruct)) {
+                local.currency = local.objCurrency.getCurrency();
+                local.customerStruct['currencyStruct'] = local.currency;
+            }
+
+            // Default language
+            if (!len(trim(local.language))) {
+                local.language = application.objLanguage.getDefaultLanguage().iso;
+            }
+
+            local.customerStruct['language'] = local.language;
+            local.customerStruct['countryName'] = local.countryName;
+
+
+            return local.customerStruct;
 
         }
 
     }
 
 
+    // Save the current plan, the current modules and also the custom settings into a session
+    public void function setProductSessions(required numeric customerID, required string language) {
+
+        // Save current plan into a session
+        checkPlan = new com.plans(language=arguments.language).getCurrentPlan(arguments.customerID);
+        session.currentPlan = checkPlan;
+
+        // Save current modules into a session
+        checkModules = new com.modules(language=arguments.language).getBookedModules(arguments.customerID);
+        session.currentModules = checkModules;
+
+    }
+
+
+    // Delete account right now
+    public boolean function deleteAccount(required numeric customerID) {
+
+        if (arguments.customerID gt 0) {
+
+            // Get all users of the customer
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT users.strPhoto, customers.strLogo
+                    FROM users
+                    INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
+                    WHERE users.intCustomerID = :customerID
+                "
+            )
+
+            // Loop over the users and delete pictures
+            loop query="local.qCustomer" {
+                if (fileExists(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"))) {
+                    fileDelete(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"));
+                }
+            }
+
+            // Delete the customers logo
+            if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
+                fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
+            }
+
+
+            // Delete the customer (the foreign key does the rest)
+            local.qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    DELETE FROM customers
+                    WHERE intCustomerID = :customerID
+                "
+            )
+
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+
+
 }
-  

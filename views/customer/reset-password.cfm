@@ -1,10 +1,9 @@
-<cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">    
+<cfinclude template="/includes/header.cfm">  
 
+<cfoutput>
 <div class="page-wrapper" >
-    <div class="container-xl">    
-        <cfoutput>
-        <div class="page-header mb-3">
+    <div class="#getLayout.layoutPage#">    
+        <div class="#getLayout.layoutPageHeader# mb-3">
             <h4 class="page-title">#getTrans('titResetPassword')#</h4>                        
             <ol class="breadcrumb breadcrumb-dots">
                 <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -47,8 +46,9 @@
                     </div>
                 </form>
             </div>
-        </div>   
-        </cfoutput>                 
+        </div>        
     </div>
-</div>    
-<cfinclude template="/includes/footer.cfm">  
+    <cfinclude template="/includes/footer.cfm">
+
+</div>
+</cfoutput>     

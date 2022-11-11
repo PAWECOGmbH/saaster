@@ -21,29 +21,28 @@
         "
     )
 
-    getModal = createObject("component", "com.translate");
+    getModal = new com.translate();
 
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="page-header">
+                    <div class="#getLayout.layoutPageHeader#">
                         <h4 class="page-title">Plan groups</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans & Prices</a></li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans</a></li>
                             <li class="breadcrumb-item active">Plan groups</li>
                         </ol>
                     </div>
                 </div>
-                <div class="col-lg-6 mb-3 text-end page-header">
+                <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
                             <i class="fas fa-angle-double-left pe-3"></i> Back to plans
@@ -58,7 +57,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -88,7 +87,7 @@
                                                 <tr <cfif qPlanGroups.recordCount gt 1>id="sort_#qPlanGroups.intPlanGroupID#"</cfif>>
                                                     <td class="move text-center"><cfif qPlanGroups.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qPlanGroups.intPrio#</td>
-                                                    <td>#qPlanGroups.strGroupName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
+                                                    <td>#qPlanGroups.strGroupName# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
                                                     <td>#qPlanGroups.strCountryName#</td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##plangroup_#qPlanGroups.intPlanGroupID#">Edit</a></td>
                                                     <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_group=#qPlanGroups.intPlanGroupID#', 'Delete plan group', 'Caution: If you delete a plan group, all the associated plans will also be deleted. Do you really want to delete this group irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
@@ -107,15 +106,17 @@
                                                                         <label class="form-label">Group name</label>
                                                                         <input type="text" name="group_name" class="form-control" autocomplete="off" value="#HTMLEditFormat(qPlanGroups.strGroupName)#" maxlength="100" required>
                                                                     </div>
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Country</label>
-                                                                        <select name="countryID" class="form-select">
-                                                                            <option value=""></option>
-                                                                            <cfloop query="qCountries">
-                                                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#qCountries.strCountryName#</option>
-                                                                            </cfloop>
-                                                                        </select>
-                                                                    </div>
+                                                                    <cfif qCountries.recordCount>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Country</label>
+                                                                            <select name="countryID" class="form-select">
+                                                                                <option value=""></option>
+                                                                                <cfloop query="qCountries">
+                                                                                    <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                                                </cfloop>
+                                                                            </select>
+                                                                        </div>
+                                                                    </cfif>
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -125,7 +126,7 @@
                                                         </form>
                                                     </div>
                                                 </div>
-                                                #getModal.init('plan_groups', 'strGroupName', qPlanGroups.intPlanGroupID, 100).openModal('trans_plangroup', cgi.path_info, 'Translate plan group')#
+                                                #getModal.args('plan_groups', 'strGroupName', qPlanGroups.intPlanGroupID, 100).openModal('trans_plangroup', cgi.path_info, 'Translate plan group')#
                                                 <cfif qPlanGroups.recordCount gt 1>
                                                     <script>
                                                         // Save new prio
@@ -182,15 +183,17 @@
                                                     <label class="form-label">Group name</label>
                                                     <input type="text" name="group_name" class="form-control" autocomplete="off" maxlength="100" required>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Country</label>
-                                                    <select name="countryID" class="form-select">
-                                                        <option value=""></option>
-                                                        <cfloop query="qCountries">
-                                                            <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
-                                                        </cfloop>
-                                                    </select>
-                                                </div>
+                                                <cfif qCountries.recordCount>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Country</label>
+                                                        <select name="countryID" class="form-select">
+                                                            <option value=""></option>
+                                                            <cfloop query="qCountries">
+                                                                <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                                            </cfloop>
+                                                        </select>
+                                                    </div>
+                                                </cfif>
                                             </div>
                                             <div class="modal-footer">
                                                 <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -211,5 +214,5 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
-</div>
 
+</div>

@@ -54,30 +54,29 @@
             break;
     }
 
-    getModal = createObject("component", "com.translate");
+    getModal = new com.translate();
 
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
-                        <h4 class="page-title">Plans & Prices</h4>
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                        <h4 class="page-title">Plans</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans & Prices</a></li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans</a></li>
                             <li class="breadcrumb-item active">#qPlan.strPlanName#</li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 text-end">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 text-end">
                         <div class="button-group">
                             <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
                                 <i class="fas fa-angle-double-left pe-3"></i> Back to plans
@@ -90,7 +89,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -101,7 +100,7 @@
                                 </div>
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">
-                                        <a href="##" data-bs-toggle="modal" data-bs-target="##plans_preview"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
+                                        <a href="#application.mainURL#/plans" target="_blank"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
                                     </div>
                                 </cfif>
                             </div>
@@ -118,10 +117,17 @@
                                                 </a>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
-                                                    <i class="fas fa-coins pe-3"></i>
-                                                    Prices
-                                                </a>
+                                                <cfif qPlan.blnFree>
+                                                    <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                <cfelse>
+                                                    <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
+                                                        <i class="fas fa-coins pe-3"></i>
+                                                        Prices
+                                                    </a>
+                                                </cfif>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="##features" class="nav-link #features#" data-bs-toggle="tab">
@@ -161,7 +167,6 @@
             </div>
         </div>
     </cfoutput>
-
     <cfinclude template="/includes/footer.cfm">
+
 </div>
-<cfinclude template="plans_preview.cfm">

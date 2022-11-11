@@ -1,18 +1,27 @@
-
-<!--- If a session exists, we fetch the customer data in this file, because we need the data on almost every page. --->
-<cfif structKeyExists(session, "customer_id")>
-<cfset getCustomerData = application.objCustomer.getCustomerData(session.customer_id)>
-</cfif>
-
+<cfoutput>
 <!doctype html>
-<html lang="<cfoutput>#session.lng#</cfoutput>">
-	
-<cfinclude template="includes/head.cfm">	
-<body>	
+<html lang="#session.lng#">
+
+<cfinclude template="includes/head.cfm">
+<body #getLayout.layoutBody#>
+</cfoutput>
 	<div class="page">
-		<cfinclude template="#thiscontent.thisPath#">
+		<cfif fileExists(thiscontent.thisPath)>
+			<cfinclude template="#thiscontent.thisPath#">
+		<cfelse>
+			<cfinclude template="/frontend/start.cfm">
+		</cfif>
 	</div>
 	<cfinclude template="includes/js.cfm">
-</body>	
+	<cfif structKeyExists(session, "filledData")>
+		<cfinclude template="/includes/fill_data_modal.cfm">
+		<script type="text/javascript">
+			$(window).on('load', function() {
+				$('#fillData').modal('show');
+			});
+		</script>
+	</cfif>
+</body>
 </html>
 <cfset structDelete(session, "alert") />
+

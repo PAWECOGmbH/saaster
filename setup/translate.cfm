@@ -14,34 +14,34 @@
                     // Set "Pro" or "Free" API-URL
                     deepLPro = "https://api.deepl.com/v2/translate?auth_key=";
                     deepLFree = "https://api-free.deepl.com/v2/translate?auth_key=";
-                    
+
                     if(form.apiType eq 0){
                         deeplURL = deepLFree;
                     }else{
                         deeplURL = deepLPro;
                     }
-        
+
                     // Test if key is valid
                     deeplTest = deeplURL & form.apiKey;
                     deeplTest = deeplTest & "&text=test";
                     deeplTest = deeplTest & "&source_lang=en" & "&target_lang=" & form.lng;
                     cfhttp( url=deeplTest, resolveurl=true, method="get", timeout="30");
-                    
+
                     // Test if language is supported
                     lngSupported = cfhttp.filecontent;
                     lngSupported = findNoCase("target_lang", lngSupported, 0);
-        
+
                     // If the provided API key is not valid, redirect back to translate page
                     if(cfhttp.status_code eq 403){
                         getAlert('The provided API key is not valid!', 'warning');
-                        location url="step3b.cfm?newlng=#form.lngID#" addtoken="false";
+                        location url="step2b.cfm?newlng=#form.lngID#" addtoken="false";
                     }
-        
+
                     if(lngSupported gt 0){
                         getAlert('The requested language is not supported by DeepL!', 'warning');
-                        location url="step3b.cfm?newlng=#form.lngID#" addtoken="false";
+                        location url="step2b.cfm?newlng=#form.lngID#" addtoken="false";
                     }
-        
+
                     gettext = queryExecute(
                         options = {datasource = application.datasource},
                         sql = "
@@ -49,15 +49,15 @@
                             FROM system_translations
                         "
                     )
-        
+
                     loop query = gettext {
                         deepl = deeplURL & form.apiKey;
                         deepl = deepl & "&text=" & urlencodedformat(gettext.strStringEN);
                         deepl = deepl & "&source_lang=en" & "&target_lang=" & form.lng;
-        
+
                         cfhttp( url=deepl, resolveurl=true, method="get", timeout="30" );
                         deepl_answer = deserializeJSON(cfhttp.FileContent);
-        
+
                         if(structKeyExists(deepl_answer, "translations")) {
                             translatedText = deepl_answer.translations[1].text;
                             queryExecute(
@@ -74,14 +74,14 @@
                             )
                         }
                     }
-                    
+
                     getAlert('The translation finished successfully!');
-                    location url="step3b.cfm?newlng=#form.lngID#" addtoken="false";
-        
+                    location url="step2b.cfm?newlng=#form.lngID#" addtoken="false";
+
                 } catch(any e){
 
                     getAlert('Something went wrong...', 'danger');
-                    location url="step3b.cfm?newlng=#form.lngID#" addtoken="false";
+                    location url="step2b.cfm?newlng=#form.lngID#" addtoken="false";
                 }
             }
 
@@ -102,14 +102,14 @@
                         WHERE strVariable = :textVar
                     "
                 );
-                
+
                 getAlert('Successfully saved!');
-                location url="step3b.cfm?newlng=#form.lngID####form.anchor#" addtoken="false";
-                
+                location url="step2b.cfm?newlng=#form.lngID####form.anchor#" addtoken="false";
+
             } catch(any e){
 
                 getAlert('Something went wrong...', 'danger');
-                location url="step3b.cfm?newlng=#form.lngID####form.anchor#" addtoken="false";
+                location url="step2b.cfm?newlng=#form.lngID####form.anchor#" addtoken="false";
             }
     }
 </cfscript>

@@ -6,12 +6,12 @@
             <span class="nav-link-icon d-md-none d-lg-inline-block">
                 <i class="fas fa-globe"></i>
             </span>
-            <span class="nav-link-title">
-            #getAnyLanguage(session.lng).language#
+            <span class="nav-link-title d-none d-sm-none d-md-block">
+                #application.objLanguage.getAnyLanguage(session.lng).language#
             </span>
         </a>
-        <div class="dropdown-menu">
-            <cfloop list="#application.allLanguages#" index="i">                
+        <div class="dropdown-menu lng-dropdown">
+            <cfloop list="#application.allLanguages#" index="i">
                 <cfset lngIso = listfirst(i,"|")>
                 <cfset lngName = listlast(i,"|")>
                 <cfif lngIso neq session.lng>

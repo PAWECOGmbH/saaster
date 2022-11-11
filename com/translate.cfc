@@ -1,7 +1,7 @@
 
 component displayname="translate" accessors="true" {
 
-    public any function init(required string thisTable, required string thisField, required numeric thisID, numeric maxLength) {
+    public any function args(required string thisTable, required string thisField, required numeric thisID, numeric maxLength) {
 
         param name="arguments.maxLength" default="";
 
@@ -14,25 +14,6 @@ component displayname="translate" accessors="true" {
         return this;
 
     }
-
-
-    // A query with all non-default languages
-    public query function getNonDefaultLng() {
-
-        local.qNonDefLng = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM languages
-                WHERE blnDefault = 0
-                ORDER BY intPrio
-            "
-        )
-
-        return local.qNonDefLng;
-
-    }
-
 
 
     // Open a modal
@@ -86,13 +67,14 @@ component displayname="translate" accessors="true" {
     private string function transFields(boolean itsEditor) {
 
         param name="arguments.itsEditor" default=0;
+
         local.itsEditor = "";
-
-
         local.transTable = variables.thisTable & "_trans";
 
         // Loop over existing languages exept the default language
-        local.getLng = getNonDefaultLng();
+        local.getLng = application.objLanguage.getAllLanguages('WHERE blnDefault = 0');
+
+
         loop query = local.getLng {
             if (arguments.itsEditor eq 1) {
                 local.itsEditor = "editor";
@@ -115,9 +97,6 @@ component displayname="translate" accessors="true" {
     }
 
 
-
-
-
     // Get the text which has to be translated
     public string function textToTranslate() {
 
@@ -130,10 +109,6 @@ component displayname="translate" accessors="true" {
         return;
 
     }
-
-
-
-
 
 
 }

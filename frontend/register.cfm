@@ -1,52 +1,58 @@
-<cfparam name="session.step" default="1">
-<cfparam name="session.first_name" default="">
-<cfparam name="session.name" default="">
-<cfparam name="session.company" default="">
-<cfparam name="session.email" default="">
+<cfscript>
+    param name="session.step" default="1";
+    param name="session.first_name" default="";
+    param name="session.name" default="";
+    param name="session.company" default="";
+    param name="session.email" default="";
+</cfscript>
 
 <cfoutput>
-<body  class=" border-top-wide border-primary d-flex flex-column">
+<div class="border-top-wide border-primary d-flex flex-column">
     <div class="page page-center">
         <div class="container-tight py-4">
             <cfif session.step eq 1>
                 <div class="text-center mb-4">
                     <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="./handler/register.cfm">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration?reinit=3">
                     <input type="hidden" name="register_btn">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('formSignUp')#</h2>
                         <cfif structKeyExists(session, "alert")>
                             #session.alert#
                         </cfif>
-
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formFirstName')#</label>
+                            <label class="form-label">#getTrans('formFirstName')# *</label>
                             <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formName')#</label>
+                            <label class="form-label">#getTrans('formName')# *</label>
                             <input type="text" name="name" class="form-control" value="#session.name#"  minlength="3" maxlenght="100" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formCompanyName')#</label>
-                            <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100" required>
+                            <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100">
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">#getTrans('formEmailAddress')#</label>
+                            <label class="form-label">#getTrans('formEmailAddress')# *</label>
                             <input type="email" name="email" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
                         </div>
-
-
-                        <!--- <div class="mb-3">
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('formLanguage')#</label>
+                            <select name="language" class="form-select">
+                                <cfloop list="#application.allLanguages#" index="i">
+                                    <cfset lngIso = listfirst(i,"|")>
+                                    <cfset lngName = listlast(i,"|")>
+                                    <option value="#lngIso#" <cfif lngIso eq session.lng>selected</cfif>>#lngName#</option>
+                                </cfloop>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-check">
-                                <input type="checkbox" class="form-check-input"/>
-                                <span class="form-check-label">Agree the <a href="./terms-of-service.html" tabindex="-1">terms and policy</a>.</span>
+                                <input type="checkbox" class="form-check-input" required>
+                                <span class="form-check-label"><a href="##" data-bs-toggle="modal" data-bs-target="##privacy_policy">#getTrans('txtAgreePolicy')#</a></span>
                             </label>
-                        </div> --->
+                        </div>
                         <div class="form-footer">
                             <button id="submit_button" type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
                         </div>
@@ -59,7 +65,7 @@
                 <div class="text-center mb-4">
                     <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="36" alt="Logo"></a>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="./handler/register.cfm">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration">
                     <input type="hidden" name="create_account">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('titChoosePassword')#</h2>
@@ -83,7 +89,24 @@
             </cfif>
         </div>
     </div>
-</body>
+</div>
+
+<div id="privacy_policy" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+    <form action="step3.cfm" method="post">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">#getTrans('titlePrivacyPolicy')#</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    #getTrans('txtPrivacyPolicy')#
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 </cfoutput>
 
 

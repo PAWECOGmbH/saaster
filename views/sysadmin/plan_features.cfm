@@ -10,29 +10,28 @@
         "
     )
 
-    getModal = createObject("component", "com.translate");
+    getModal = new com.translate();
 
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-6 mb-3">
-                    <div class="page-header">
+                    <div class="#getLayout.layoutPageHeader#">
                         <h4 class="page-title">Plan features</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
-                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans & Prices</a></li>
+                            <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans</a></li>
                             <li class="breadcrumb-item active">Plan features</li>
                         </ol>
                     </div>
                 </div>
-                <div class="col-lg-6 mb-3 text-end page-header">
+                <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
                             <i class="fas fa-angle-double-left pe-3"></i> Back to plans
@@ -47,7 +46,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -98,11 +97,17 @@
                                                                         <textarea class="form-control" name="description" rows="3">#qPlanFeatures.strDescription#</textarea>
                                                                     </div>
                                                                     <div class="mb-3">
-                                                                        <label class="form-label">Default</label>
+                                                                        <label class="form-label">Category</label>
                                                                         <label class="form-check form-switch">
                                                                             <input class="form-check-input" type="checkbox" name="category" <cfif qPlanFeatures.blnCategory eq 1>checked</cfif>>
                                                                             <span class="form-check-label">It's a category</span>
                                                                         </label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">Variable
+                                                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                                        </label>
+                                                                        <input type="text" name="feature_variable" class="form-control" autocomplete="off" value="#HTMLEditFormat(qPlanFeatures.strVariable)#" maxlength="100">
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
@@ -113,8 +118,8 @@
                                                         </form>
                                                     </div>
                                                 </div>
-                                                #getModal.init('plan_features', 'strFeatureName', qPlanFeatures.intPlanFeatureID, 100).openModal('featurename', cgi.path_info, 'Translate feature')#
-                                                #getModal.init('plan_features', 'strDescription', qPlanFeatures.intPlanFeatureID).openModal('featuredesc', cgi.path_info, 'Translate description')#
+                                                #getModal.args('plan_features', 'strFeatureName', qPlanFeatures.intPlanFeatureID, 100).openModal('featurename', cgi.path_info, 'Translate feature')#
+                                                #getModal.args('plan_features', 'strDescription', qPlanFeatures.intPlanFeatureID).openModal('featuredesc', cgi.path_info, 'Translate description')#
                                                 <cfif qPlanFeatures.recordCount gt 1>
                                                     <script>
                                                         // Save new prio
@@ -182,6 +187,12 @@
                                                         <span class="form-check-label">It's a category</span>
                                                     </label>
                                                 </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Variable
+                                                        <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                    </label>
+                                                    <input type="text" name="feature_variable" class="form-control" autocomplete="off" maxlength="100">
+                                                </div>
                                             </div>
                                             <div class="modal-footer">
                                                 <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -202,4 +213,5 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>

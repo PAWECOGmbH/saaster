@@ -67,7 +67,7 @@
     </cfoutput>
     <cfoutput query="qFeatures">
     <cfif len(trim(qFeatures.strValue))>
-    #getModal.init('plans_plan_features', 'strValue', qFeatures.intPlansPlanFeatID, 100).openModal('value', cgi.path_info & '?tab=features', 'Translate value')#
+    #getModal.args('plans_plan_features', 'strValue', qFeatures.intPlansPlanFeatID, 100).openModal('value', cgi.path_info & '?tab=features', 'Translate value')#
     </cfif>
     </cfoutput>
 

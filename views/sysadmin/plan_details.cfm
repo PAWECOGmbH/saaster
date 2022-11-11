@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label">Button name</label>
+                <label class="form-label">Button name (for not registered users)</label>
                 <div class="input-group input-group-flat">
                     <input type="text" class="form-control" name="button_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qPlan.strButtonName)#" placeholder="Book now">
                     <span class="input-group-text">
@@ -66,6 +66,17 @@
                     Leave empty if you want to use the default setting.
                 </small>
             </div>
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <label class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="free" <cfif qPlan.blnFree>checked</cfif>>
+                        <span class="form-check-label">Free plan</span>
+                    </label>
+                    <small class="form-hint">
+                        Activate this plan as "Free". All settings in the "Prices" tab then become ineffective.
+                    </small>
+                </div>
+            </div>
             <div class="row mb-3">
                 <div class="col-lg-4">
                     <label class="form-check form-switch">
@@ -73,12 +84,16 @@
                         <span class="form-check-label">Recommended</span>
                     </label>
                     <small class="form-hint">
-                        Activate the checkbox if you want to mark the plan as "recommendation".
+                        Mark this plan as "recommendation".
                     </small>
                 </div>
                 <div class="col-lg-4">
                     <label class="form-label text-end">Number of test days *</label>
-                    <input type="text" class="form-control text-end" name="test_days" autocomplete="off" maxlength="10" value="#qPlan.intNumTestDays#" placeholder="30" required>
+                    <cfif qPlan.blnFree>
+                        <input type="text" class="form-control text-end" value="#qPlan.intNumTestDays#" disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
+                    <cfelse>
+                        <input type="text" class="form-control text-end" name="test_days" autocomplete="off" maxlength="10" value="#qPlan.intNumTestDays#" placeholder="30" required>
+                    </cfif>
                     <small class="form-hint">
                         Enter 0 if you don't want to provide any test days.
                     </small>
@@ -106,8 +121,8 @@
         <button type="submit" id="submit_button" class="btn btn-primary">Save details</button>
     </div>
 </form>
-#getModal.init('plans', 'strPlanName', qPlan.intPlanID, 100).openModal('plan_name', cgi.path_info, 'Translate plan name')#
-#getModal.init('plans', 'strShortDescription', qPlan.intPlanID).openModal('short_desc', cgi.path_info, 'Translate short description')#
-#getModal.init('plans', 'strButtonName', qPlan.intPlanID, 50).openModal('button_name', cgi.path_info, 'Translate button name')#
-#getModal.init('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 1)#
+#getModal.args('plans', 'strPlanName', qPlan.intPlanID, 100).openModal('plan_name', cgi.path_info, 'Translate plan name')#
+#getModal.args('plans', 'strShortDescription', qPlan.intPlanID).openModal('short_desc', cgi.path_info, 'Translate short description')#
+#getModal.args('plans', 'strButtonName', qPlan.intPlanID, 50).openModal('button_name', cgi.path_info, 'Translate button name')#
+#getModal.args('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 1)#
 </cfoutput>

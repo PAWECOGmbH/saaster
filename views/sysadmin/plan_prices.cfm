@@ -51,7 +51,7 @@
                 <div class="col-lg-3 me-3 mb-3">
                     <div class="mb-3 text-end w-75">
                         <label class="form-label text-end">Vat (%)</label>
-                        <input type="text" name="vat" class="form-control text-end" autocomplete="off" value="#trim(numberFormat(qPrices.decVat, '__.__'))#" maxlength="10">
+                        <input type="text" name="vat" class="form-control text-end" autocomplete="off" value="#trim(decimalFormat(qPrices.decVat))#" maxlength="10">
                     </div>
                 </div>
                 <div class="col-lg-6">

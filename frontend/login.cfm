@@ -1,14 +1,14 @@
-<cfif structKeyExists(url, "logout")>
-    <cfset getAlert('alertLoggedOut', 'info') />
-<cfelseif structKeyExists(session, "user_id") and session.user_id gt 0>
-    <cflocation url="#application.mainURL#/dashboard" addtoken="false">
-</cfif>
 
-<cfparam name="session.email" default="">
-
+<cfscript>
+    if (structKeyExists(url, "logout")) {
+        getAlert('alertLoggedOut', 'info');
+    } else if (structKeyExists(session, "user_id") and session.user_id gt 0) {
+        location url="#application.mainURL#/dashboard" addtoken="false";
+    }
+    param name="session.email" default="";
+</cfscript>
 
 <cfoutput>
-
 <div class="border-top-wide border-primary d-flex flex-column">
 
     <div class="page page-center">
@@ -33,13 +33,13 @@
                     <div class="mb-2">
                         <label class="form-label">#getTrans('formPassword')#</label>
                         <div class="input-group input-group-flat">
-                            <input type="password" name="password" class="form-control" required>                       
+                            <input type="password" name="password" class="form-control" required>
                         </div>
                     </div>
-                    <div class="form-footer">                        
+                    <div class="form-footer">
                         <button type="submit" id="sumbit_button" class="btn btn-primary w-100">#getTrans('formSignIn')#</button>
                     </div>
-                </div>                
+                </div>
                 <div class="text-center mt-2">
                     #getTrans('formRegisterText')# <a href="#application.mainURL#/register">#getTrans('formSignUp')#</a>
                 </div>

@@ -1,18 +1,17 @@
 <cfscript>
-    qLanguages = application.objGlobal.getAllLanguages();
+    qLanguages = application.objLanguage.getAllLanguages();
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
 
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Languages</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -20,7 +19,7 @@
                             <li class="breadcrumb-item active">Languages</li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##lng_new" class="btn btn-primary">
                             <i class="fas fa-plus pe-3"></i> Add language
                         </a>
@@ -31,7 +30,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="card">
@@ -54,7 +53,11 @@
                                     <tbody id="dragndrop_body">
                                     <cfloop query="qLanguages">
                                         <tr id="sort_#qLanguages.intLanguageID#">
-                                            <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                            <cfif qLanguages.recordCount gt 1>
+                                                <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                            <cfelse>
+                                                <td class="text-center"></td>
+                                            </cfif>
                                             <td class="text-center">#qLanguages.intPrio#</td>
                                             <td>#qLanguages.strLanguageEN#</td>
                                             <td>#qLanguages.strLanguage#</td>
@@ -94,7 +97,13 @@
                                                                 <div class="col-lg-4">
                                                                     <label class="form-label">&nbsp;</label>
                                                                     <label class="form-check form-switch pt-2">
-                                                                        <input class="form-check-input" type="checkbox" name="chooseable" <cfif qLanguages.blnChooseable>checked</cfif>>
+                                                                        <cfif qLanguages.recordCount eq 1>
+                                                                            <input class="form-check-input" type="checkbox" name="chooseable" checked disabled>
+                                                                            <input type="hidden" name="chooseable" value="1">
+                                                                        <cfelse>
+                                                                            <input class="form-check-input" type="checkbox" name="chooseable" <cfif qLanguages.blnChooseable>checked</cfif>>
+                                                                        </cfif>
+
                                                                         <span class="form-check-label">Chooseable</span>
                                                                     </label>
                                                                 </div>
@@ -108,45 +117,7 @@
                                                 </form>
                                             </div>
                                         </div>
-                                        <script>
 
-                                            // Save new prio
-                                            function fnSaveSort(){
-
-                                                var jsonTmp = "[";
-                                                    $('##dragndrop_body > tr').each(function (i, row) {
-                                                        var divbox = $(this).attr('id');
-                                                        var aTR = divbox.split('_');
-                                                        var newslist = 0;
-                                                        jsonTmp += "{\"prio\" :" + (i+1) + ',';
-                                                        if(newslist != 0){
-                                                            var setlist = JSON.stringify(newslist);
-                                                            jsonTmp += "\"strBoxList\" :" + setlist + ',';
-                                                        }
-                                                        jsonTmp += "\"intLanguageID\" :" + aTR[1] + '},';
-                                                    }
-                                                );
-
-                                                jsonTmp += jsonTmp.slice(0,-1);
-                                                jsonTmp += "]]";
-
-                                                var ajaxResponse = $.ajax({
-                                                    type: "post",
-                                                    url: "#application.mainURL#/handler/ajax_sort.cfm?languages",
-                                                    contentType: "application/json",
-                                                    data: JSON.stringify( jsonTmp )
-                                                })
-
-                                                // Response
-                                                ajaxResponse.then(
-                                                    function( apiResponse ){
-                                                        if(apiResponse.trim() == 'ok'){
-                                                            location.href = '#application.mainURL#/sysadmin/languages';
-                                                        }
-                                                    }
-                                                );
-                                            }
-                                        </script>
                                     </cfloop>
                                     </tbody>
                                     <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
@@ -204,4 +175,51 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>
+
+
+
+<cfif qLanguages.recordCount gt 1>
+    <cfoutput>
+    <script>
+
+        // Save new prio
+        function fnSaveSort(){
+
+            var jsonTmp = "[";
+                $('##dragndrop_body > tr').each(function (i, row) {
+                    var divbox = $(this).attr('id');
+                    var aTR = divbox.split('_');
+                    var newslist = 0;
+                    jsonTmp += "{\"prio\" :" + (i+1) + ',';
+                    if(newslist != 0){
+                        var setlist = JSON.stringify(newslist);
+                        jsonTmp += "\"strBoxList\" :" + setlist + ',';
+                    }
+                    jsonTmp += "\"intLanguageID\" :" + aTR[1] + '},';
+                }
+            );
+
+            jsonTmp += jsonTmp.slice(0,-1);
+            jsonTmp += "]]";
+
+            var ajaxResponse = $.ajax({
+                type: "post",
+                url: "#application.mainURL#/handler/ajax_sort.cfm?languages",
+                contentType: "application/json",
+                data: JSON.stringify( jsonTmp )
+            })
+
+            // Response
+            ajaxResponse.then(
+                function( apiResponse ){
+                    if(apiResponse.trim() == 'ok'){
+                        location.href = '#application.mainURL#/sysadmin/languages';
+                    }
+                }
+            );
+        }
+    </script>
+    </cfoutput>
+</cfif>

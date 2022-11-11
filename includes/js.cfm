@@ -5,7 +5,7 @@
 <script src="#application.mainURL#/dist/js/dropify.min.js"></script>
 
 <script src="#application.mainURL#/dist/js/tabler.min.js"></script>
-<!--- <script src="#application.mainURL#/dist/js/demo.min.js"></script> --->
+<script src="#application.mainURL#/dist/js/litepicker.js"></script>
 
 <!-- Sweet alert Plugin -->
 <script src="#application.mainURL#/dist/js/sweetalert.min.js"></script>
@@ -19,32 +19,13 @@
 <!--- Trumbowyg editor --->
 <script src="#application.mainURL#/dist/trumbowyg/trumbowyg.min.js"></script>
 
+<!--- Toggleinput JS --->
+<script src="#application.mainURL#/dist/js/jquery.toggleinput.js"></script>
 
 <!--- Custom JS --->
 <script src="#application.mainURL#/dist/js/custom.js"></script>
 
 </cfoutput>
-
-<script>
-
-<cfif thiscontent.thisPath eq "views/dashboard.cfm">
-    // load content into widget
-    $(document).ready(function(){
-        var dataURL = $('.widget').attr('data-href');
-        $('.widget').load(dataURL);
-    });
-</cfif>
-
-$('.dropify').dropify();
-
-$(document).ready(function () {
-    $("#submit_form").submit(function () {
-        $("#submit_button").attr("disabled", true).addClass("not-allowed");
-        return true;
-    });
-});
-
-</script>
 
 
 <!--- Disable Browser-back after logout --->

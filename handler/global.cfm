@@ -1,16 +1,16 @@
 <cfscript>
 
-<!--- Logout and delete all sessions--->
+// Logout and delete all sessions
 if (structKeyExists(url, "logout")) {
 
     structClear(SESSION);
     onSessionStart();
-
+    
     location url="#application.mainURL#/login?logout" addtoken="no";
-}  
+}
 
 
-<!--- Switch the company/tenant --->
+// Switch the company/tenant
 if (structKeyExists(url, "switch")) {
 
     if (isNumeric(url.switch)) {
@@ -27,12 +27,23 @@ if (structKeyExists(url, "switch")) {
                 FROM customers INNER JOIN customer_user ON customers.intCustomerID = customer_user.intCustomerID
                 WHERE customers.intCustomerID = :intCustomerID AND customer_user.intUserID = :intUserID
             "
-        )     
+        )
 
         if (qTenant.recordCount) {
-            
+
             session.customer_id = qTenant.intCustomerID;
-            
+
+            // Set plans and modules as well as the custom settings into a session
+            application.objCustomer.setProductSessions(session.customer_id, session.lng);
+
+            // Is the needed data of the cutomer already filled out?
+            dataFilledIn = new com.register().checkFilledData(session.customer_id);
+
+            if (!dataFilledIn) {
+                session.filledData = false;
+            }
+
+            logWrite("Switch tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully changed tenant!", false);
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {
@@ -43,8 +54,8 @@ if (structKeyExists(url, "switch")) {
 
     }
 
-    
-}  
+
+}
 
 
 </cfscript>

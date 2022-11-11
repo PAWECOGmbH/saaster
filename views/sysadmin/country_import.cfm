@@ -3,7 +3,7 @@
     param name="session.ci_sort" default="strCountryName ASC" type="string";
 
     if(structKeyExists(form, "search") and len(trim(form.search))) {
-        session.ci_search = form.search; 
+        session.ci_search = form.search;
     }else if (structKeyExists(form, "delete") or structKeyExists(url, "delete")) {
         session.ci_search = "";
     }
@@ -21,23 +21,33 @@
         "
     );
 
-    if(len(trim(session.ci_search))){
+    // Filter out unsupport search characters
+    searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
+    searchTerm = replace(searchTerm,' - ', "-", "all");
+
+    if(len(trim(searchTerm))){
+        if (FindNoCase("@",searchTerm)){
+            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+        }else {
+            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+        }
+
         qCountries = queryExecute (
             options = {datasource = application.datasource},
             sql = "
                 SELECT *
                 FROM countries
                 WHERE blnActive = 0
-                AND (
-                    strCountryName LIKE '%#session.ci_search#%' OR
-                    strLocale LIKE '%#session.ci_search#%' OR
-                    strISO1 LIKE '%#session.ci_search#%' OR
-                    strISO2 LIKE '%#session.ci_search#%' OR
-                    strCurrency LIKE '%#session.ci_search#%' OR
-                    strRegion LIKE '%#session.ci_search#%' OR
-                    strSubRegion LIKE '%#session.ci_search#%' OR
-                    strTimezone   LIKE '%#session.ci_search#%'
+                AND MATCH (
+                    countries.strCountryName,
+                    countries.strLocale,
+                    countries.strISO1,
+                    countries.strISO2,
+                    countries.strCurrency,
+                    countries.strRegion,
+                    countries.strSubRegion
                 )
+                #searchString#
                 ORDER BY #session.ci_sort#
             "
         );
@@ -50,21 +60,20 @@
                 WHERE blnActive = 0
                 ORDER BY #session.ci_sort#
             "
-        );   
+        );
     }
 
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
-<cfinclude template="/includes/navigation.cfm">
 
 <div class="page-wrapper">
     <cfoutput>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
                         <h4 class="page-title">Countries</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -73,7 +82,7 @@
                             <li class="breadcrumb-item active">Import</li>
                         </ol>
                     </div>
-                    <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/sysadmin/countries?delete" class="btn btn-primary">
                             <i class="fas fa-angle-double-left pe-3"></i> Back to overview
                         </a>
@@ -84,7 +93,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+        <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="card">
@@ -97,9 +106,9 @@
                                         <div class="input-group mb-2">
                                             <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
-                                            <cfif len(trim(session.ci_search))>
+                                            <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #session.ci_search# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
                                                 </button>
                                             </cfif>
                                         </div>
@@ -163,4 +172,5 @@
         </div>
     </cfoutput>
     <cfinclude template="/includes/footer.cfm">
+
 </div>

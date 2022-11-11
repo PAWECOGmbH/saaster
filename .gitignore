@@ -1,10 +1,17 @@
 ### Test files ###
-test.cfm
+test.*
 
 ### Userdata folder ###
 userdata/**
 
+### Modules folder ###
+modules/**
+
 ### Config files ###
+config.cfm
 .cfconfig.json
 .env
 server.json
+
+### Log files ###
+*.log

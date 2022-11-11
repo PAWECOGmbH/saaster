@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="300"
+   height="324.84415"
+   viewBox="0 0 240.00001 259.87533"
+   version="1.1"
+   id="svg3355"
+   inkscape:version="0.91 r"
+   sodipodi:docname="VPay logo 2015.svg">
+  <metadata
+     id="metadata8699">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1215"
+     inkscape:window-height="776"
+     id="namedview8697"
+     showgrid="false"
+     units="px"
+     fit-margin-top="1"
+     fit-margin-left="1"
+     fit-margin-right="1"
+     fit-margin-bottom="1"
+     inkscape:zoom="0.60723595"
+     inkscape:cx="192.30736"
+     inkscape:cy="95.319626"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3355" />
+  <defs
+     id="defs3357" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8681"
+     d="m 239.20001,0.80000003 -238.40000997,0 0,258.27533997 238.40000997,0 z m 0,0"
+     style="fill:#1c3378;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8683"
+     d="m 233.23394,168.52635 -226.46787,0 0,-161.760279 226.46787,0 z m 0,0"
+     style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8685"
+     d="m 177.28469,36.128151 -44.43334,106.071169 -29.03259,0 L 81.94895,57.529685 C 80.63089,52.326738 79.46889,50.418972 75.44526,48.199039 68.82013,44.643682 57.92861,41.279063 48.35514,39.18056 l 0.6417,-3.052409 46.68795,0 c 5.94875,0 11.3078,3.954234 12.66059,10.7875 l 11.56789,61.377649 28.54697,-72.165149 28.82445,0"
+     style="fill:#1c3378;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8687"
+     d="m 69.87806,209.97668 c 1.05793,0.2948 2.46275,0.38138 4.21441,0.38138 6.45171,0 10.38862,-3.31258 10.38862,-9.08787 0,-5.48044 -3.64211,-8.41146 -9.62549,-8.41146 -2.35868,0 -4.05835,0.22554 -4.97754,0.45091 z m -8.5502,-22.96246 c 3.08708,-0.58966 7.37089,-1.02326 13.19821,-1.02326 6.31291,0 10.92625,1.38746 13.94393,4.02363 2.80964,2.41072 4.63065,6.27828 4.63065,10.90893 0,4.66533 -1.40477,8.53285 -4.07566,11.18638 -3.43393,3.57267 -8.8277,5.25498 -14.93252,5.25498 -1.59555,0 -3.08708,-0.0866 -4.21441,-0.29481 l 0,18.59194 -8.5502,0 z m 0,0"
+     style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8689"
+     d="m 125.56718,214.88482 -3.71147,-12.14029 c -0.91918,-3.00037 -1.68226,-6.36494 -2.39335,-9.22657 l -0.13897,0 c -0.69373,2.86163 -1.40477,6.31291 -2.23725,9.22657 l -3.64211,12.14029 z m -13.5277,6.79854 -4.07566,13.97861 -8.8971,0 15.14066,-49.30676 11.01295,0 15.36607,49.30676 -9.26125,0 -4.28381,-13.97861 z m 0,0"
+     style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path8691"
+     d="m 158.74479,235.66197 0,-20.56906 -14.93252,-28.7377 9.79892,0 5.68858,12.64319 c 1.61292,3.67678 2.79223,6.43434 4.07567,9.81627 l 0.1212,0 c 1.19668,-3.15647 2.54946,-6.2262 4.14502,-9.81627 l 5.68858,-12.64319 9.74693,0 -15.713,28.52961 0,20.77715 z m 0,0"
+     style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+</svg>

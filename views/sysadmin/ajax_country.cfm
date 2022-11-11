@@ -1,4 +1,8 @@
 <cfscript>
+    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
+        getAlert('alertSessionExpired', 'warning');
+        location url="#application.mainURL#/login" addtoken="false";
+    }
     setting showdebugoutput = false;
     param name="url.countryID" default=0 type="numeric";
 
@@ -27,8 +31,8 @@
         WHERE blnActive = 1
     </cfquery>
 
-    <cfset qLanguages = application.objGlobal.getAllLanguages()>
-    <cfset timeZones = createObject("component", "com.sysadmin").getTimezones()>
+    <cfset qLanguages = application.objLanguage.getAllLanguages()>
+    <cfset timeZones = new com.time(session.customer_id).getTimezones()>
 
     <cfoutput>
         <form action="#application.mainURL#/sysadm/countries" method="post">
@@ -40,7 +44,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-lg-6 mb-3">
-                        <label class="form-label">Country name (english)</label>
+                        <label class="form-label">Country name *</label>
                         <input type="text" name="country" class="form-control" autocomplete="off" value="#HTMLEditFormat(qCountry.strCountryName)#" maxlength="100" required>
                     </div>
                     <div class="col-lg-6 mb-3">
@@ -108,9 +112,9 @@
                     </div>
                     <div class="col-lg-6 mb-3">
                         <label class="form-label">Timezone</label>
-                        <select name="timezone" class="form-select">
+                        <select name="timezoneID" class="form-select">
                             <cfloop array="#timeZones#" index="i">
-                                <option value="#i#" <cfif i eq qCountry.strTimezone>selected</cfif>>#i#</option>
+                                <option value="#i.id#" <cfif i.id eq qCountry.intTimezoneID>selected</cfif>>(#i.utc#) #i.city# - #i.timezone#</option>
                             </cfloop>
                         </select>
                     </div>
