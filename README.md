@@ -17,8 +17,9 @@ To run saaster we recommend your host supports:
 
 - MySQL 5.7 or greater.
 - Lucee 5.3 or greater.
+- Any web server with rewrte
 
-That's pretty much it. We recommend to use IIS, Apache or NGINX as a web server for running saaster. Example configurations for the above stated web servers, you can find in our documentation.
+That's pretty much it. Saaster should run on all popular web servers and got tested with IIS and Tuckey servlet filter. The chosen web server should support URL rewriting.
 
 ## Local development environment
 
