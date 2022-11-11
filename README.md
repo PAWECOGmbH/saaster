@@ -13,7 +13,8 @@ Saaster is a web application written in CFML that offers all the basic functiona
 
 ## Requirements
 
-To run saaster we recommend your host supports:
+The following list contains all the requirements that your system hast to fulfill to run saaster.
+For local development we strongly recommend the usage of the docker configuration that is provided by saaster.
 
 - MySQL 5.7 or greater.
 - Lucee 5.3 or greater.
