@@ -18,7 +18,7 @@ For local development we strongly recommend the usage of the docker configuratio
 
 - MySQL 5.7 or greater.
 - Lucee 5.3 or greater.
-- Any web server. The chosen web server should support URL rewriting.
+- Any web server with URL rewriting support.
 
 That's pretty much it. Saaster should run on all popular web servers and got tested with IIS and Tuckey servlet filter. The chosen web server should support URL rewriting.
 
