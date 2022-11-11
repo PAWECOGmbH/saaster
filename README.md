@@ -1,6 +1,6 @@
 # Saaster
 
-Saaster is a web application written in CFML that offers all the basic functionality that you need for a SaaS project.
+Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
 
 #### Used open source software:
 - https://github.com/tabler/tabler/blob/main/LICENSE
@@ -13,11 +13,12 @@ Saaster is a web application written in CFML that offers all the basic functiona
 
 ## Requirements
 
-To run saaster we recommend your host supports:
+The following list contains all the requirements that your system hast to fulfill to run saaster.
+For local development we strongly recommend the usage of the docker configuration that is provided by saaster.
 
 - MySQL 5.7 or greater.
 - Lucee 5.3 or greater.
-- Any web server with rewrte
+- Any web server with URL rewriting support.
 
 That's pretty much it. Saaster should run on all popular web servers and got tested with IIS and Tuckey servlet filter. The chosen web server should support URL rewriting.
 
