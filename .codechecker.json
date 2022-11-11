@@ -1,0 +1,77 @@
+{
+	"paths" : "**.cf?",
+	"minSeverity" : 1,
+	"customRules" : [
+		{
+			"name": "Use lower case gt",
+			"category": "saaster",
+			"pattern": " GT ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case lt",
+			"category": "saaster",
+			"pattern": " LT ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case eq",
+			"category": "saaster",
+			"pattern": " EQ ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case xor",
+			"category": "saaster",
+			"pattern": " XOR ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case neq",
+			"category": "saaster",
+			"pattern": " NEQ ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case gte",
+			"category": "saaster",
+			"pattern": " GTE ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		},
+		{
+			"name": "Use lower case lte",
+			"category": "saaster",
+			"pattern": " LTE ",
+			"caseSensitive": true,
+			"extensions": "cfm,cfc",
+			"severity": "3"
+		}
+	],
+	"excludeRules" : {
+		"Formatting Functions - Best Practices" : "*",
+		"Maintenance" : "*",
+		"Standards" : "*",
+		"Security Risks - Best Practices": "*",
+		"Performance": [
+			"Don't use Evaluate method",
+			"Don't use iif method",
+			"Use Len method",
+			"Don't use IsDefined"
+		],
+		"QueryParamScanner": "*",
+		"Case Sensitive Functions - Best Practices": "*",
+		"LuceeMissingTags": "*"
+	}
+}
