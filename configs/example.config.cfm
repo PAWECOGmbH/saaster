@@ -14,7 +14,7 @@ variables.datasource = "database";
 // ####################################
 
 // Environment
-variables.environment = "dev" // "dev" or "prod"
+variables.environment = "dev"; // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
 // Is only used when the environment is set to prod
@@ -106,7 +106,7 @@ variables.payrexxPSPs = "";
 // ####################################
 
 cfsavecontent (variable="variables.footerText") {
-    echo("<div><p>Open source software running under the <a href='https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt' target='_blank'>MIT license</a> - #dateFormat(now(), 'yyyy')# by #variables.appOwner#</p></div>");
+    echo("<div><p>Open source software running under the <a href='https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE' target='_blank'>MIT license</a> - #dateFormat(now(), 'yyyy')# by #variables.appOwner#</p></div>");
 }
 
 
