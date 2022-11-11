@@ -1,6 +1,6 @@
 # Saaster
 
-Saaster is a web application written in CFML that offers all the basic functionality that you need for a SaaS project.
+Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
 
 #### Used open source software:
 - https://github.com/tabler/tabler/blob/main/LICENSE
