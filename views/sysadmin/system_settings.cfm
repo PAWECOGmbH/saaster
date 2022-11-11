@@ -134,7 +134,7 @@
                                 <div class="border align-baseline p-3">
                                     <div class="col-12">
                                         <div class="row g-3">
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="horizontal" class="form-imagecheck-input" #getLayout.horizontal#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal</p>
@@ -142,7 +142,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="horizontalDark" class="form-imagecheck-input" #getLayout.horizontalDark#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal dark</p>
@@ -150,7 +150,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="navbarSticky" class="form-imagecheck-input" #getLayout.navbarSticky#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar sticky</p>
@@ -158,7 +158,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="condensed" class="form-imagecheck-input" #getLayout.condensed#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Condensed</p>
@@ -166,7 +166,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="navbarDark" class="form-imagecheck-input" #getLayout.navbarDark#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar dark</p>
@@ -174,7 +174,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="navbarOverlap" class="form-imagecheck-input" #getLayout.navbarOverlap#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar overlap</p>
@@ -182,7 +182,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="verticalTransparent" class="form-imagecheck-input" #getLayout.verticalTransparent#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical</p>
@@ -190,7 +190,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="vertical" class="form-imagecheck-input" #getLayout.vertical#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical dark</p>
@@ -198,7 +198,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="rightVertical" class="form-imagecheck-input" #getLayout.rightVertical#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Right vertical</p>
@@ -206,7 +206,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="combined" class="form-imagecheck-input" #getLayout.combined#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Combined</p>
@@ -214,7 +214,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="fluid" class="form-imagecheck-input" #getLayout.fluid#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid</p>
@@ -222,7 +222,7 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-6 col-lg-4">
                                                 <label class="form-imagecheck mb-2">
                                                     <input name="settingLayout" type="radio" value="fluidVertical" class="form-imagecheck-input" #getLayout.fluidVertical#/>
                                                     <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid vertical</p>
