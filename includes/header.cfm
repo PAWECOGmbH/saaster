@@ -22,10 +22,13 @@
                     <img src="#getLayout.layoutLogo#" alt="logo" class="navbar-brand-image">
                 </a>
             </h1>
-            
+
 
             <div class="#getLayout.layoutDiv#">
-                
+
+                <!--- Notifications --->
+                <cfinclude template="notifications.cfm">
+
                 <!--- Language changer --->
                 <div #getLayout.layoutClass#>
                     <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>
@@ -79,7 +82,7 @@
 
     #getLayout.layoutHeaderEnd#
 
-    
+
     <cfswitch expression="#getLayout.layoutString#">
         <cfcase value="horizontal"><cfinclude template="navigation.cfm"></cfcase>
         <cfcase value="horizontalDark"><cfinclude template="navigation.cfm"></cfcase>
