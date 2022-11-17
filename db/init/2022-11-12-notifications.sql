@@ -23,7 +23,6 @@ SET strStringDE = 'Meldungen gelöscht.',
 WHERE strVariable = 'alertMultipleNotificationDeleted';
 
 
-
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('titDateTime', 'Datum/Zeit', 'Date/Time');
 
@@ -35,5 +34,10 @@ VALUES ('titNotification', 'Meldung', 'Notification');
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
 VALUES ('titStatus', 'Status', 'Status');
+
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('txtMarkAsRead', 'Als gelesen markieren', 'Mark as read');
+
+
 
 SET FOREIGN_KEY_CHECKS = 1;

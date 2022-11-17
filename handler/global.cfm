@@ -5,7 +5,7 @@ if (structKeyExists(url, "logout")) {
 
     structClear(SESSION);
     onSessionStart();
-    
+
     location url="#application.mainURL#/login?logout" addtoken="no";
 }
 
@@ -54,6 +54,58 @@ if (structKeyExists(url, "switch")) {
 
     }
 
+
+}
+
+
+// Notifications (set as read and multiple delete)
+if (structKeyExists(form, "noti_action")) {
+
+    param name="url.page" default="1" type="numeric";
+
+    if (!len(trim(form.noti_action)) or !structKeyExists(form, "notiID")) {
+        location url="#application.mainURL#/notifications?page=#url.page#" addtoken="no";
+    }
+
+    local.objNotification = new com.notifications();
+
+    if (form.noti_action eq "read") {
+
+        loop list=form.notiID index="i" {
+
+            local.objNotification.setRead(i, session.customer_id);
+
+        }
+
+        location url="#application.mainURL#/notifications?page=#url.page#" addtoken="no";
+
+    } else if (form.noti_action eq "delete") {
+
+        loop list=form.notiID index="i" {
+
+            local.objNotification.delNoti(i, session.customer_id);
+            getAlert('alertMultipleNotificationDeleted');
+
+        }
+
+        location url="#application.mainURL#/notifications?page=1" addtoken="no";
+
+    }
+
+}
+
+
+// Delete notification
+if (structKeyExists(url, "noti_del")) {
+
+    if (isNumeric(url.noti_del)) {
+
+        new com.notifications().delNoti(url.noti_del, session.customer_id);
+        getAlert('alertNotificationDeleted');
+
+    }
+
+    location url="#application.mainURL#/notifications?page=#url.page#" addtoken="no";
 
 }
 

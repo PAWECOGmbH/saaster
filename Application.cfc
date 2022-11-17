@@ -28,7 +28,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.fromEmail = variables.fromEmail;
         application.toEmail = variables.toEmail;
         application.errorMail = variables.errorEmail;
-        
+
         if (variables.environment eq "dev") {
             application.environment = "dev";
             application.usersIP = variables.usersIP;
@@ -58,6 +58,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
         application.objLayout = new com.layout();
+        application.objNotifications = new com.notifications();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -261,7 +262,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
     }
 
     public void function onError(struct exception, string eventName) {
-       
+
         if (application.environment eq "dev") {
 
             writeOutput(arguments.exception);

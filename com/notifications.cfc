@@ -72,17 +72,21 @@ component displayname="notifications" output="false" {
 
 
     // Get all notifications
-    public struct function getNotifications(required numeric customerID, numeric start, numeric count) {
+    public struct function getNotifications(required numeric customerID, numeric start, numeric count, boolean read) {
 
         local.queryLimit;
-        local.queryOrder;
+        local.queryWhere;
 
-        if (structKeyExists(arguments, "start") and structKeyExists(arguments, "count")) {
-            local.queryLimit = "LIMIT #arguments.start#, #arguments.count#"
+        if (structKeyExists(arguments, "count")) {
+            local.queryLimit = "LIMIT #arguments.count#";
         }
 
-        if (structKeyExists(arguments, "order")) {
-            local.queryOrder = "ORDER BY " & arguments.order;
+        if (structKeyExists(arguments, "read")) {
+            local.queryWhere = "AND dtmRead IS NULL";
+        }
+
+        if (structKeyExists(arguments, "start") and structKeyExists(arguments, "count")) {
+            local.queryLimit = "LIMIT #arguments.start#, #arguments.count#";
         }
 
         local.qTotalCount = queryExecute(
@@ -110,6 +114,7 @@ component displayname="notifications" output="false" {
                 SELECT *
                 FROM notifications
                 WHERE intCustomerID = :customerID
+                #local.queryWhere#
                 ORDER BY dtmCreated DESC
                 #local.queryLimit#
             "
@@ -138,6 +143,87 @@ component displayname="notifications" output="false" {
         local.notificationStruct['arrayNoti'] = local.arrayNoti;
 
         return local.notificationStruct;
+
+    }
+
+
+    // Get notification detail
+    public struct function getNotificationDetail(required numeric notiID, required numeric customerID) {
+
+        local.notiStruct = structNew();
+
+        local.qNotification = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                notiID: {type: "numeric", value: arguments.notiID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT *
+                FROM notifications
+                WHERE intNotificationID = :notiID
+                AND intCustomerID = :customerID
+
+            "
+        )
+
+        if (local.qNotification.recordCount) {
+
+            local.notiStruct['notiID'] = local.qNotification.intNotificationID;
+            local.notiStruct['customerID'] = local.qNotification.intCustomerID;
+            local.notiStruct['userID'] = local.qNotification.intUserID;
+            local.notiStruct['created'] = local.qNotification.dtmCreated;
+            local.notiStruct['title_var'] = local.qNotification.strTitleVar;
+            local.notiStruct['desc_var'] = local.qNotification.strDescrVar;
+            local.notiStruct['link'] = local.qNotification.strLink;
+            local.notiStruct['link_text_var'] = local.qNotification.strLinkTextVar;
+            local.notiStruct['read'] = local.qNotification.dtmRead;
+
+        }
+
+        return local.notiStruct;
+
+    }
+
+
+    // Get notification detail
+    public void function setRead(required numeric notiID, required numeric customerID) {
+
+        local.qNotification = queryExecute(
+            options = {datasource = application.datasource, result="test"},
+            params = {
+                notiID: {type: "numeric", value: arguments.notiID},
+                customerID: {type: "numeric", value: arguments.customerID},
+                dateNow: {type: "datetime", value: now()}
+            },
+            sql = "
+                UPDATE notifications
+                SET dtmRead = :dateNow
+                WHERE intNotificationID = :notiID
+                AND intCustomerID = :customerID
+
+            "
+        )
+
+    }
+
+
+    // Delete notification
+    public void function delNoti(required numeric notiID, required numeric customerID) {
+
+        local.qNotification = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                notiID: {type: "numeric", value: arguments.notiID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                DELETE FROM notifications
+                WHERE intNotificationID = :notiID
+                AND intCustomerID = :customerID
+
+            "
+        )
 
     }
 
