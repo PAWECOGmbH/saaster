@@ -1,19 +1,13 @@
 <cfsetting showdebugoutput="no">
-
 <cfscript>
-
-    setting showdebugoutput="no";
-
     param name="url.nID" default="0" type="numeric";
     objNoti = new com.notifications();
     notiStruct = objNoti.getNotificationDetail(url.nID, session.customer_id);
     if (structIsEmpty(notiStruct)) {
         location url="dashboard" addtoken="false";
     }
-
     // Set notification as read
     objNoti.setRead(url.nID, session.customer_id);
-
 </cfscript>
 
 <cfoutput>

@@ -155,44 +155,20 @@ $(document).ready(function(){
 		}
 	});
 
-
 	// load modal with dynamic content (general)
 	$('.openPopup').on('click',function(){
 		var dataURL = $(this).attr('data-href');
 		$('#dyn_modal-content').load(dataURL,function(){
 			$('#dynModal').modal('show');
-		});
-	});
-
-	// load modal with dynamic content for payments
-	$('.openPopupPayments').on('click',function(){
-		var dataURL = $(this).attr('data-href');
-		$('#dyn_modal-content').load(dataURL,function(){
-			$('#dynModalPayments').modal('show');
 			window.Litepicker && (new Litepicker({
-				element: document.getElementById('payment_date'),
-				buttonText: {
-					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
-				},
-			}));
-		});
-	});
-
-	// load modal with dynamic content for sysadmin (edit module period)
-	$('.openPopupPeriod').on('click',function(){
-		var dataURL = $(this).attr('data-href');
-		$('#dyn_modal-content').load(dataURL,function(){
-			$('#dynModalPeriod').modal('show');
-			window.Litepicker && (new Litepicker({
-				element: document.getElementById('start_date'),
+				element: document.getElementById('date1'),
 				buttonText: {
 					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
 					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
 				},
 			}));
 			window.Litepicker && (new Litepicker({
-				element: document.getElementById('end_date'),
+				element: document.getElementById('date2'),
 				buttonText: {
 					previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
 					nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,

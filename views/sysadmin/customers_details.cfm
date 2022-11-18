@@ -319,7 +319,7 @@
 
                                                                             <cfif currentPlan.planID eq plan.planID>
 
-                                                                                <a href="##" class="openPopupPeriod dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
+                                                                                <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
                                                                                     Edit period
                                                                                 </a>
 
@@ -660,15 +660,6 @@
     </div>
 </form>
 </cfoutput>
-
-
-<div id="dynModalPeriod" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-        <div class="modal-content" id="dyn_modal-content">
-            <!--- dynamic content from ajax request (ajax_period.cfm) --->
-        </div>
-    </div>
-</div>
 
 <!--- Delete the session, if there is one --->
 <cfset structDelete(session, "comingfrom")>

@@ -175,12 +175,4 @@
 
 </div>
 
-<div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <div class="modal-content" id="dyn_modal-content">
-            <!--- dynamic content from ajax request (ajax_notifications.cfm) --->
-        </div>
-    </div>
-</div>
-
 </cfoutput>

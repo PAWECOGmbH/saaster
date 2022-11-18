@@ -228,13 +228,6 @@
                                             <tr><td colspan="100%" class="text-center text-red">If you want to offer your software only in certain countries, you have to add the desired countries here.</td></tr>
                                         </tbody>
                                     </cfif>
-                                    <div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-                                        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                            <div class="modal-content" id="dyn_modal-content">
-                                                <!--- dynamic content from ajax request (ajax_country.cfm) --->
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div id="country_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                             <form action="#application.mainURL#/sysadm/countries" method="post">
