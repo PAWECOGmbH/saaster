@@ -1,3 +1,4 @@
+<cfsetting showdebugoutput="no">
 <cfscript>
     if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
         getAlert('alertSessionExpired', 'warning');

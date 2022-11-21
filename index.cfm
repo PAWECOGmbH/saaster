@@ -21,7 +21,15 @@
 			});
 		</script>
 	</cfif>
+	<div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+			<div class="modal-content" id="dyn_modal-content">
+				<!--- dynamic content from ajax request --->
+			</div>
+		</div>
+	</div>
 </body>
 </html>
 <cfset structDelete(session, "alert") />
+
 

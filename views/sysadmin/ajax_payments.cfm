@@ -1,3 +1,5 @@
+<cfsetting showdebugoutput="no">
+
 <cfscript>
     if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
         getAlert('alertSessionExpired', 'warning');
@@ -39,7 +41,7 @@
                     <td>
                         <div class="input-icon">
                             <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
-                            <input class="form-control" placeholder="Select a date" name="payment_date" id="payment_date" value="#dateFormat(now(), 'yyyy-mm-dd')#" required>
+                            <input class="form-control" placeholder="Select a date" name="payment_date" id="date1" value="#dateFormat(now(), 'yyyy-mm-dd')#" required>
                         </div>
                     </td>
                     <td><input type="text" name="payment_type" class="form-control" maxlength="50" placeholder="Credit card"></td>
