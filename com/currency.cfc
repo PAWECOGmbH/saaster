@@ -1,7 +1,17 @@
+/**
+* Everything related to currencies.
+* 
+*/
 
 component displayname="currency" output="false" {
 
-    // Get a structure of data of a currency
+    /**
+    * Gets a structure of data of a currency.
+    *
+    * @currency         ID, ISO or name of desired currency.
+    *
+    * @return           Struct with data of currency.
+    */
     public struct function getCurrency(any currency) {
 
         local.currStruct = structNew();
@@ -83,7 +93,11 @@ component displayname="currency" output="false" {
     }
 
 
-    // Get all active currencies
+    /**
+    * Gets all active currencies.
+    *
+    * @return           Array with all active currencies.
+    */
     public array function getActiveCurrencies() {
 
         local.qCurrencies = queryExecute (
@@ -119,7 +133,13 @@ component displayname="currency" output="false" {
     }
 
 
-    // Get currency of a given country
+    /**
+    * Get currency of a given country
+    *
+    * @country          ID, ISO or name of country.
+    *
+    * @return           Struct with data of currency from requested country.
+    */
     public struct function getCurrencyOfCountry(required any country) {
 
         local.currencyStruct = structNew();

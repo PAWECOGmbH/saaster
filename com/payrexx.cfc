@@ -1,14 +1,17 @@
 
 component displayname="payrexx" output="false" {
 
-    variables.payrexxAPIurl = application.payrexxStruct.payrexxAPIurl;
-    variables.payrexxAPIinstance = application.payrexxStruct.payrexxAPIinstance;
-    variables.payrexxAPIkey = application.payrexxStruct.payrexxAPIkey;
+    public any function init() {
 
-    if (!len(trim(variables.payrexxAPIurl)) or !len(trim(variables.payrexxAPIinstance)) or !len(trim(variables.payrexxAPIkey))) {
-        throw("Please check your Payrexx API data!");
+        variables.payrexxAPIurl = application.payrexxStruct.payrexxAPIurl;
+        variables.payrexxAPIinstance = application.payrexxStruct.payrexxAPIinstance;
+        variables.payrexxAPIkey = application.payrexxStruct.payrexxAPIkey;
+
+        if (!len(trim(variables.payrexxAPIurl)) or !len(trim(variables.payrexxAPIinstance)) or !len(trim(variables.payrexxAPIkey))) {
+            throw("Please check your Payrexx API data!");
+        }
+
     }
-
 
     // Get the webhook data
     public query function getWebhook(required numeric customerID, required string status, any default, string includingFailed) {

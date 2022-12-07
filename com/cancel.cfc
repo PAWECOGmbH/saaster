@@ -1,7 +1,18 @@
+/**
+* Cancelation and revoking of plans or modules.
+* 
+*/
 
 component displayname="cancel" output="false" {
 
-
+    /**
+    * Initializes customerID, ID from plan or module and what should get canceled.
+    *
+    * @customerID       ID of customer.
+    * @thisID           ID of module or plan.
+    * @what             What should get canceled or revoked. (Plan or Module)
+    *
+    */
     public any function init(required numeric customerID, required numeric thisID, required string what) {
 
         variables.customerID = arguments.customerID;
@@ -40,7 +51,11 @@ component displayname="cancel" output="false" {
     }
 
 
-    // Cancel plan or module
+    /**
+    * Cancels plan or module.
+    *
+    * @return           Returns struct with message and status.
+    */
     public struct function cancel() {
 
         local.argsReturnValue = structNew();
@@ -105,8 +120,11 @@ component displayname="cancel" output="false" {
 
     }
 
-
-    // Revoke cancellation
+    /**
+    * Revoke cancellation of plan or module.
+    *
+    * @return           Returns struct with message and status.
+    */
     public struct function revoke() {
 
         local.argsReturnValue = structNew();

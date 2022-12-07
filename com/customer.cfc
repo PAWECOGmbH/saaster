@@ -1,7 +1,17 @@
+/**
+* Everything related to customers.
+*
+*/
 
 component displayname="customer" output="false" {
 
-    // Get the users data using an ID
+    /**
+    * Get the users data using an ID
+    *
+    * @userID           ID of user.    
+    *
+    * @return           Query with data of requested user.
+    */
     public query function getUserDataByID(required numeric userID) {
 
         local.userQuery = queryNew('');
@@ -64,8 +74,13 @@ component displayname="customer" output="false" {
     }
 
 
-
-    // Update customer
+    /**
+    * Updates customer information
+    *
+    * @userID           ID of user.    
+    *
+    * @return           Returns struct with message and status.
+    */
     public struct function updateCustomer(required struct customerStruct, required numeric customerID) {
 
         // Default variables
@@ -200,7 +215,13 @@ component displayname="customer" output="false" {
     }
 
 
-    // Insert tenant (only the most important data)
+    /**
+    * Insert tenant (only the most important data)
+    *
+    * @tenantStruct     Struct of tenant   
+    *
+    * @return           Returns struct with message and status.
+    */
     public struct function insertTenant(required struct tenantStruct) {
 
         // Default variables
@@ -268,7 +289,13 @@ component displayname="customer" output="false" {
     }
 
 
-    // Get all tenants
+    /**
+    * Get all tenants
+    *
+    * @userID           ID of user.
+    *
+    * @return           Query with data from tenant.
+    */
     public query function getAllTenants(required numeric userID) {
 
         if (arguments.userID gt 0) {
@@ -296,7 +323,13 @@ component displayname="customer" output="false" {
     }
 
 
-    // Get customer data
+    /**
+    * Get customer data
+    *
+    * @customerID       ID of customer.
+    *
+    * @return           Struct with data from customer.
+    */
     public struct function getCustomerData(required numeric customerID) {
 
         if (arguments.customerID gt 0) {
@@ -394,7 +427,13 @@ component displayname="customer" output="false" {
     }
 
 
-    // Save the current plan, the current modules and also the custom settings into a session
+    /**
+    * Save the current plan, the current modules and also the custom settings into a session.
+    *
+    * @customerID       ID of customer.
+    * @language         ID of language.
+    *
+    */
     public void function setProductSessions(required numeric customerID, required string language) {
 
         // Save current plan into a session
@@ -408,7 +447,13 @@ component displayname="customer" output="false" {
     }
 
 
-    // Delete account right now
+    /**
+    * Deletes account.
+    *
+    * @customerID       ID of customer to delete.
+    *
+    * @return           Boolean that represents the success state of deletion.
+    */
     public boolean function deleteAccount(required numeric customerID) {
 
         if (arguments.customerID gt 0) {

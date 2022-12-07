@@ -1,6 +1,17 @@
+/**
+* A variety of global functions with different usage.
+*
+*/
+
 component displayname="globalFunctions" output="false" {
 
-    // SEF building
+    /**
+    * Builds SEF urls
+    *
+    * @sef_string       String with SEF value.
+    *
+    * @return           Struct with path and permission rights.
+    */
     public struct function getSEF(string sef_string) {
 
         local.returnStruct = structNew();
@@ -88,13 +99,23 @@ component displayname="globalFunctions" output="false" {
     }
 
 
-    // Create a uuid without dash, all lowercase and two ids combined
+    /**
+    * Create a uuid without dash, all lowercase and two ids combined.
+    *
+    * @return           String with UUID.
+    *
+    */
     public string function getUUID() {
         return lcase(replace(createUUID(), "-", "", "all")) & lcase(replace(createUUID(), "-", "", "all"));
     }
 
 
-    // Alerts in diffrent colors (returns a session)
+    /**
+    * Creates alerts in diffrent colors.
+    *
+    * @return           Sets session with alert.
+    *
+    */
     public string function getAlert(required string alertVariable, string alertType) {
 
         param name="arguments.alertType" default="success";
@@ -143,7 +164,14 @@ component displayname="globalFunctions" output="false" {
     }
 
 
-    // Hashing and salting passwords
+    /**
+    * Hashing and salting passwords.
+    *
+    * @thisString       String that should get hashed and salted.
+    *
+    * @return           Struct with hash and salt.
+    *
+    */
     public struct function generateHash(required string thisString) {
 
         local.returnStruct = structNew();
@@ -156,7 +184,14 @@ component displayname="globalFunctions" output="false" {
     }
 
 
-    // Email validating
+    /**
+    * Email validating
+    *
+    * @thisEmail        Email that should get verified.
+    *
+    * @return           Boolean that represents if the email is valid.
+    *
+    */
     public boolean function checkEmail(thisEmail) {
 
         local.response = true;
@@ -176,7 +211,15 @@ component displayname="globalFunctions" output="false" {
     }
 
 
-    // Get all countries or a country by id
+    /**
+    * Get all countries or a country by id
+    *
+    * @countryID        Email that should get verified.
+    * @language         ISO of language.
+    *
+    * @return           Boolean that represents if the email is valid.
+    *
+    */
     public query function getCountry(numeric countryID, string language) {
 
         param name="arguments.language" default=application.objLanguage.getDefaultLanguage().iso;

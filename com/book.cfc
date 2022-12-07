@@ -1,6 +1,17 @@
+/**
+* Booking of plans and modules.
+*
+*/
 
 component displayname="book" output="false" {
 
+    /**
+    * Initializes type and language for this component.
+    *
+    * @type             Type of booking.
+    * @language         Language of booking.
+    *
+    */
     public any function init(string type, string language) {
 
         param name="arguments.type" default="plan";
@@ -13,8 +24,16 @@ component displayname="book" output="false" {
 
     }
 
-
-    // Create and encrypt booking link
+    /**
+    * Creates booking links for modules or plans.
+    *
+    * @thisID           ID of the module or plan.
+    * @lngID            ID of the language.
+    * @currencyID       ID of the currency.
+    * @recurring        Recurring state of booking.
+    *
+    * @return           Encrypted booking link.
+    */
     public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string recurring) {
 
         local.argsJSon = {};
@@ -38,7 +57,13 @@ component displayname="book" output="false" {
     }
 
 
-    // Decrypt booking link
+    /**
+    * Decrypts already encrypted booking links.
+    *
+    * @bookingLink      Encrypted booking link.
+    *
+    * @return           Struct with data from decrypted booking link,
+    */
     public struct function decryptBookingLink(required string bookingLink) {
 
         local.toDecrypt = toString(toBinary(arguments.bookingLink));
@@ -48,8 +73,20 @@ component displayname="book" output="false" {
 
     }
 
-
-    // We prepare the booking requested by the customer and return the data. If required, an entry can be made in the DB immediately.
+    /**
+    * We prepare the booking requested by the customer and return the data. 
+    * If required, an entry can be made in the DB immediately.
+    *
+    * @customerID       ID of customer.
+    * @bookingData      Struct with data from booking.
+    * @recurring        Recurring state of booking.
+    * @makeBooking      Flag if booking should be made.
+    * @makeInvoice      Flage if invoice should be made.
+    * @chargeInvoice    FLage if invoices should be charged.
+    * @bookingLink      Link of booking.
+    *
+    * @return           Struct with data from requested booking.
+    */
     public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking, boolean makeInvoice, boolean chargeInvoice) {
 
         local.argsReturnValue = structNew();
@@ -117,6 +154,7 @@ component displayname="book" output="false" {
             local.newProductID = local.bookingData.planID;
             local.planID = local.newProductID;
             local.moduleID = "";
+
 
 
         // Special settings for modules
@@ -734,8 +772,13 @@ component displayname="book" output="false" {
     }
 
 
-
-    // Update the desired booking
+    /**
+    * Update the desired booking.
+    *
+    * @bookingData      Struct with booking data.
+    *
+    * @return           ID of booking.
+    */
     public numeric function updateBooking(required struct bookingData) {
 
         if (!structKeyExists(arguments.bookingData, "bookingID")) {
@@ -811,8 +854,15 @@ component displayname="book" output="false" {
     }
 
 
-
-    // Calculating the price to pay after an up- or downgrade (for plans AND modules)
+    /**
+    * Calculating the price to pay after an up- or downgrade (for plans AND modules)
+    *
+    * @customerID       ID of customer.
+    * @newProductID     ID of product.
+    * @recurring        Recurring state.
+    *
+    * @return           Struct with calculation regarding the upgrade.
+    */
     public struct function calculateUpgrade(required numeric customerID, required numeric newProductID, required string recurring) {
 
         // Get the already paid amount
@@ -863,7 +913,7 @@ component displayname="book" output="false" {
             local.credit = local.paidAmount - local.costRunningDays;
 
 
-            // Get the data of the new plan/module ////////////////////
+            // Get the data of the new plan or module 
             if (variables.type eq "plan") {
                 local.productData = variables.object.getPlanDetail(arguments.newProductID);
             } else {

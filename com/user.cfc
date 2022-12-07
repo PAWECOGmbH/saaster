@@ -1,7 +1,11 @@
 
 component displayname="user" output="false" {
 
-    variables.getTrans = application.objLanguage.getTrans;
+    public any function init() {
+
+        variables.getTrans = application.objLanguage.getTrans;
+        
+    }
 
     // Login
     public struct function checkLogin() {
