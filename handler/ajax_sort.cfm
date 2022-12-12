@@ -14,6 +14,8 @@ if (structKeyExists(url, "extend")) {
     sqlExtend = "";
 }
 
+thisTable = "";
+
 if (structKeyExists(url, "languages")) {
     thisTable = "languages";
 }
@@ -92,7 +94,7 @@ if(thisTable neq "plans"){
         group_id = 0;
 
         loop from=1 to=arrayLen(datax)-1 index="i" {
-        
+
             group_id = datax[i].group;
 
             if(!listFind(groups, group_id)){
@@ -106,7 +108,7 @@ if(thisTable neq "plans"){
             //writedump(group_idx);
 
             prio = 1;
-            
+
             loop from=1 to=arrayLen(datax)-1 index="i" {
 
                 //writedump(datax[i]);
@@ -140,7 +142,7 @@ if(thisTable neq "plans"){
                     )
 
                     prio++;
-        
+
                 }
 
             }
