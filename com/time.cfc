@@ -98,28 +98,30 @@ component displayname="time" output="false" {
     }
 
 
-    public date function utc2local(date utcDate) {
-        
+    public date function utc2local(date utcDate, string timezone) {
+
         local.utcDate = arguments.utcDate ?: now();
+        local.timezone = arguments.timezone ?: variables.timezone;
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
 
         // Get infos of the corresponding timezone
-        local.zoneInfos = local.objJAVATimezone.getTimeZone(variables.timezone);
+        local.zoneInfos = local.objJAVATimezone.getTimeZone(local.timezone);
 
         // Get utc offset of timezone
         local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
 
         // Are we having dst time?
-        local.inDST = local.zoneInfos.observesDaylightTime();
+        local.inDST = local.zoneInfos.inDayLightTime(local.utcDate);
 
-        // Add hours to time if dst
+        // Add 1 hour to offsetHours if dst
         if (local.inDST) {
-            local.localDate = dateAdd("h", local.offsetHours+1, local.utcDate);
-        } else {
-            local.localDate = dateAdd("h", local.offsetHours, local.utcDate);
+            local.offsetHours = local.offsetHours+1;
         }
+
+        // Add hours to time
+        local.localDate = dateAdd("h", local.offsetHours, local.utcDate);
 
         return local.localDate;
 
@@ -128,8 +130,8 @@ component displayname="time" output="false" {
 
     // Convert a given date with the timezone to utc
     public date function local2utc(required date givenDate, required string timezone) {
-        
-        local.givenDate = isDate(arguments.givenDate) ? arguments.givenDate : now();
+
+        local.givenDate = arguments.givenDate ?: now();        l
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
@@ -141,13 +143,14 @@ component displayname="time" output="false" {
         local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
 
         // Are we having dst time?
-        local.inDST = local.zoneInfos.observesDaylightTime();
+        local.inDST = local.zoneInfos.inDayLightTime(local.givenDate);
 
-        // Subtract hours if dst
+        // Add 1 hour to offsetHours if dst
         if (local.inDST) {
             local.offsetHours = local.offsetHours+1;
         }
 
+        // Substract hours to time
         local.utcDate = dateAdd("h", -local.offsetHours, local.givenDate);
 
         return local.utcDate;
