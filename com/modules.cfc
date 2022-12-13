@@ -447,25 +447,4 @@ component displayname="modules" output="false" {
     }
 
 
-    // Get all login includes which we include when the user logs in
-    public array function getModuleLoginIncludes(required numeric customerID) {
-
-        local.includeArray = arrayNew(1);
-
-        loop array=getBookedModules(arguments.customerID) index="i" {
-
-            local.fileToInclude = "/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
-
-            // Does the file exist?
-            if (fileExists(expandPath(local.fileToInclude))) {
-                arrayAppend(local.includeArray, local.fileToInclude);
-            }
-
-        }
-
-        return local.includeArray;
-
-    }
-
-
 }
