@@ -1,23 +1,15 @@
 # Saaster
 
-Saaster is a web application written in CFML that offers all the basic functionality that you need for a SaaS project.
-
-#### Used open source software:
-- https://github.com/tabler/tabler/blob/main/LICENSE
-- https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md
-- https://github.com/Alex-D/Trumbowyg/blob/develop/LICENSE
-- https://github.com/twbs/bootstrap/blob/main/LICENSE
-- https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE
-- https://fontawesome.com/v4/license/
-- https://github.com/jquery/jquery
+Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
 
 ## Requirements
 
-To run saaster we recommend your host supports:
+The following list contains all the requirements that your system hast to fulfill to run saaster.
+For local development we strongly recommend the usage of the docker configuration that is provided by saaster.
 
 - MySQL 5.7 or greater.
 - Lucee 5.3 or greater.
-- Any web server with rewrte
+- Any web server with URL rewriting support.
 
 That's pretty much it. Saaster should run on all popular web servers and got tested with IIS and Tuckey servlet filter. The chosen web server should support URL rewriting.
 
@@ -42,13 +34,13 @@ MacOS:
 
 ## Setup local development environment
 
-### 1. Clone the repository
+### Clone the repository
 
 ```git
 git clone https://github.com/PAWECOGmbH/saaster
 ```
 
-### 2. Create the required config files
+### Create the required config files
 
 You can find some example config files in the "configs" folder of the repository. Copy them to the root directory of the application and rename them as followed:
 
@@ -61,7 +53,7 @@ config/example.config.cfm      ->   /config.cfm
 
 These files should work out of the box. You can obviously change the values of these configs to your liking.
 
-### 3. Start the application
+### Start the application
 
 Now you can start the application. Open any console* in the root application directory and execute the following commands:
 
@@ -92,7 +84,6 @@ Mailslurper: http://localhost:9000
 Lucee Admin: http://localhost/lucee/admin/server.cfm
 ------------------------------------------------------
 ```
-
 
 ### Seeding MySQL files
 
@@ -127,3 +118,13 @@ make reinit
 If you need some customers or invoices while developing, you can make use of the mockdata generator we implementet.
 
 You can access it under `/setup/mockdata/index.cfm`
+
+## Used open source software
+
+- [Tabler](https://github.com/tabler/tabler/blob/main/LICENSE)
+- [Dropify](https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md)
+- [Trumbowyg](https://github.com/Alex-D/Trumbowyg/blob/develop/LICENSE)
+- [Bootstrap](https://github.com/twbs/bootstrap/blob/main/LICENSE)
+- [MockDataCFC](https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE)
+- [Fontawesome](https://fontawesome.com/v4/license/)
+- [jquery](https://github.com/jquery/jquery)

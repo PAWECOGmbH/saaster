@@ -717,4 +717,37 @@ component displayname="globalFunctions" output="false" {
 
     }
 
+
+    // Get all login includes which we include when the user logs in
+    public array function getLoginIncludes(required numeric customerID) {
+
+        local.includeArray = arrayNew(1);
+
+        // Get the include in myApp
+        local.fileToInclude = "/myapp/" & "/login_include.cfm";
+
+        // Does the file exist?
+        if (fileExists(expandPath(local.fileToInclude))) {
+            arrayAppend(local.includeArray, local.fileToInclude);
+        }
+
+        local.objModules = new com.modules();
+
+        // Includes for modules
+        loop array=local.objModules.getBookedModules(arguments.customerID) index="i" {
+
+            local.fileToInclude = "/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
+
+            // Does the file exist?
+            if (fileExists(expandPath(local.fileToInclude))) {
+                arrayAppend(local.includeArray, local.fileToInclude);
+            }
+
+        }
+
+        return local.includeArray;
+
+    }
+
+
 }
