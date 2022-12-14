@@ -1,7 +1,7 @@
-<center>
+<div align="center">
 <img src="dist/img/logo.png#gh-light-mode-only" height="100"/>
 <img src="dist/img/logo_dark.png#gh-dark-mode-only" height="100"/>
-</center>
+</div>
 <br>
 
 ## 👋 Introduction
