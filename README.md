@@ -8,7 +8,7 @@
 Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
 <br>
 <div align="center">
-    <a href="https://docs.saaster.io">Documentation</a>
+    <a href="https://docs.saaster.io">📚 Documentation</a>
 </div>
 
 
