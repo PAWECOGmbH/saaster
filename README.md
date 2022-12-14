@@ -137,7 +137,7 @@ make reinit
 
 If you need some customers or invoices while developing, you can make use of the mockdata generator we implementet.
 
-You can access it under `/setup/mockdata/index.cfm`
+You can access it under: `/setup/mockdata/index.cfm`
 
 ## 🔗 Dependencies
 
