@@ -9,6 +9,7 @@ Saaster is a basic application written in CFML that offers all the basic functio
 <br>
 <div align="center">
     <a href="https://docs.saaster.io">📚 Documentation</a>
+    <a href="https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE">📃 License</a>
 </div>
 
 
