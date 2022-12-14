@@ -1,38 +1,57 @@
-# Saaster
+<div align="center">
+<img src="dist/img/logo.png#gh-light-mode-only" height="100"/>
+<img src="dist/img/logo_dark.png#gh-dark-mode-only" height="100"/>
+</div>
+<br>
 
+## 👋 Introduction
 Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
+<br>
+<div align="center">
+    <a target="_blank" href="https://saaster.io">🌐 Website</a>
+    <a target="_blank" href="https://docs.saaster.io">📚 Documentation</a>
+    <a target="_blank" href="https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE">📃 License</a>
+</div>
 
-## Requirements
+
+## 👀 Demo
+Checkout our demo at [demo.saaster.io](https://demo.saaster.io/login)
+<br><br>
+**Login**<br>
+User: demo@saaster.io<br>
+Pass: testtest
+
+## ✔️ Requirements
 
 The following list contains all the requirements that your system hast to fulfill to run saaster.
 For local development we strongly recommend the usage of the docker configuration that is provided by saaster.
 
-- MySQL 5.7 or greater.
+- MySQL 5.7
 - Lucee 5.3 or greater.
 - Any web server with URL rewriting support.
 
 That's pretty much it. Saaster should run on all popular web servers and got tested with IIS and Tuckey servlet filter. The chosen web server should support URL rewriting.
 
-## Local development environment
+## 👷 Local development environment
 
-Windows:
+<img src="https://www.vectorlogo.zone/logos/microsoft/microsoft-icon.svg" height="13"/> Windows:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) with any Distrobution for example: [Ubuntu](https://apps.microsoft.com/store/detail/ubuntu/9PDXGNCFSCZV?hl=en-en&gl=EN)</br> In Docker Desktop enable WSL Integration with the distro you choosed.
 - make (Install in WSL2 distro)
 
-Linux:
+🐧 Linux:
 
 - Docker
 - Docker Compose
 - make
 
-MacOS:
+<img src="https://www.vectorlogo.zone/logos/apple/apple-tile.svg" height="13"/> MacOS:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - make (Install over xcode)
 
-## Setup local development environment
+## 📥 Setup local development environment
 
 ### Clone the repository
 
@@ -98,11 +117,12 @@ make seed
 Then enter the number of the sql file you would like to seed.
 
 ```bash
-[1] create-plans.sql   
-[2] create-widgets.sql 
-[3] create-sysadmin.sql
-[4] create-modules.sql 
-Choose a number: 3
+[1] create-modules.sql 
+[2] create-notifications.sql 
+[3] create-plans.sql 
+[4] create-widgets.sql 
+[5] create-sysadmin.sql
+Choose a number: 5
 ```
 
 ### Rebuild database
@@ -117,9 +137,9 @@ make reinit
 
 If you need some customers or invoices while developing, you can make use of the mockdata generator we implementet.
 
-You can access it under `/setup/mockdata/index.cfm`
+You can access it under: `/setup/mockdata/index.cfm`
 
-## Used open source software
+## 🔗 Dependencies
 
 - [Tabler](https://github.com/tabler/tabler/blob/main/LICENSE)
 - [Dropify](https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md)
