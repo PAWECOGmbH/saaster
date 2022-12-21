@@ -6,22 +6,25 @@ component extends="taffy.core.api" {
     // Set application variables
     application.datasource = variables.datasource;
 
-    // Instantiate jwt
+    // Instantiate jwt and set variables
     application.jwt = new jwt.models.jwt();
     application.apiSecret = variables.apiSecret;
     application.issJWT = variables.appName;
 
+    // Add mappings for the api
+    this.mappings["/resources"] = expandPath("./resources");
+    this.mappings["/taffy"] = expandPath("./taffy");
+    
     // Object initialising
-    this.mappings["/saaster"] = ExpandPath("../com");
-
     application.objLanguage = new com.language();
     application.objSettings = new com.settings();
     application.objLog = new com.log();
-    logWrite = application.objLog.logWrite;
-
     application.objGlobal = new com.global();
     application.objCustomer = new com.customer();
     application.objUser = new com.user();
+
+    // Create global log variable
+    logWrite = application.objLog.logWrite;
 
     // Load language struct and save it into the application scope
     application.langStruct = application.objLanguage.initLanguages();
@@ -40,10 +43,6 @@ component extends="taffy.core.api" {
         disableDashboard = true,
         disabledDashboardRedirect = "/",
     }; 
-
-    // Add mappings for the api
-    this.mappings["/resources"] = expandPath("./resources");
-    this.mappings["/taffy"] = expandPath("./taffy");
 
     // this function is called after the request has been parsed and all request details are known
     function onTaffyRequest(verb, cfc, requestArguments, mimeExt, headers){
