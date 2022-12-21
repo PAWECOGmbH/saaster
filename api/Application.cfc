@@ -6,38 +6,92 @@ component extends="taffy.core.api" {
     // Set application variables
     application.datasource = variables.datasource;
 
-    // Disable dashboard
+    // Instantiate jwt
+    application.jwt = new jwt.models.jwt();
+    application.apiSecret = variables.apiSecret;
+    application.issJWT = variables.appName;
+
+    // Set timezone
+    setTimezone("UTC+00:00");
+
+    // Set taffy framework settings
     variables.framework = {
+        reloadKey = "reload",
+        reloadPassword = variables.apiReloadPassword,
+        reloadOnEveryRequest = false,
         disableDashboard = true,
         disabledDashboardRedirect = "/",
-    };
+    }; 
 
     // Add mappings for the api
     this.mappings["/resources"] = expandPath("./resources");
     this.mappings["/taffy"] = expandPath("./taffy");
 
     // this function is called after the request has been parsed and all request details are known
-    function onTaffyRequest(verb, cfc, requestArguments, mimeExt){
+    function onTaffyRequest(verb, cfc, requestArguments, mimeExt, headers){
 
-        local.loginData = getBasicAuthCredentials();
-
-        // Return 401 if no basic auth is provided
-        if(not structKeyExists(local.loginData, "username") and not structKeyExists(local.loginData, "password")){
-            return noData().withStatus(401);
+        if(arguments.cfc eq "authenticate") {
+            return true;
         }
 
-        // Return 401 if no api key is provided
-        if(not structKeyExists(arguments.requestArguments, "apiKey")){
+        // Check if authorization header exists
+        if(not structKeyExists(arguments.headers, "Authorization")){
             return noData().withStatus(401);
         }
         
-        // Check provided basic auth and api key
-        if(local.loginData.username eq "admin" and local.loginData.password eq "testtest"){
-            return true;
-        }else {
+        // Remove bearer keyword and parse only token
+        local.token = trim(ReplaceNoCase(arguments.headers.Authorization, "Bearer", ""));
+
+        // Check if token is valid
+        try {
+            local.decodedJWT = application.jwt.decode(local.token, application.apiSecret, "HS256")
+            local.isValidToken = true;
+        }catch(any e) {
+            if(structKeyExists(e, "message") and e.message eq "Token has expired"){
+                // Get nonce from token
+                local.tokenNonce = application.jwt.decode(token = local.token, verify = false).nonce;
+                
+                // Delete orphan nonce entry
+                local.qOrphanDeleteNonce = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        thisOrphanNonceUUID: {type: "string", value: local.tokenNonce}
+                    },
+                    sql = "
+                        DELETE FROM api_nonce
+                        WHERE strNonceUUID = :thisOrphanNonceUUID
+                    "
+                )
+                
+                local.isValidToken = false;
+            }else {
+                local.isValidToken = false;
+            }
+        }
+
+        // Return 401 when token isn't valid
+        if(not local.IsValidToken){
             return noData().withStatus(401);
         }
 
+        // Check nonce and delete if exists
+        queryExecute(
+            options = {datasource = application.datasource, result="local.qCheckNonce"},
+            params = {
+                thisNonceUUID: {type: "string", value: local.decodedJWT.nonce}
+            },
+            sql = "
+                DELETE FROM api_nonce
+                WHERE strNonceUUID = :thisNonceUUID
+            "
+        )
+ 
+        // Return 401 when no matching nonce entry is found
+        if(not local.qCheckNonce.recordCount){
+            return noData().withStatus(401);
+        }
+
+        return true;
     }
 
 }
