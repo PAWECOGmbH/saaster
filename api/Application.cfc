@@ -11,6 +11,24 @@ component extends="taffy.core.api" {
     application.apiSecret = variables.apiSecret;
     application.issJWT = variables.appName;
 
+    // Object initialising
+    this.mappings["/saaster"] = ExpandPath("../com");
+
+    application.objLanguage = new com.language();
+    application.objSettings = new com.settings();
+    application.objLog = new com.log();
+    logWrite = application.objLog.logWrite;
+
+    application.objGlobal = new com.global();
+    application.objCustomer = new com.customer();
+    application.objUser = new com.user();
+
+    // Load language struct and save it into the application scope
+    application.langStruct = application.objLanguage.initLanguages();
+
+    // Load system setting struct and save it into the application scope
+    application.systemSettingStruct = application.objSettings.initSystemSettings();
+
     // Set timezone
     setTimezone("UTC+00:00");
 
@@ -90,6 +108,8 @@ component extends="taffy.core.api" {
         if(not local.qCheckNonce.recordCount){
             return noData().withStatus(401);
         }
+
+        logWrite("API", 1, "File: #callStackGet("string", 0 , 1)#, API call on #arguments.cfc# resource!", false);
 
         return true;
     }
