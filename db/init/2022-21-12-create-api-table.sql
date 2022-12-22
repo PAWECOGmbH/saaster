@@ -9,7 +9,7 @@ CREATE TABLE `api_management`  (
   `strApiKeySalt` varchar(255) NULL,
   `dtmValidUntil` datetime(6) NULL,
   PRIMARY KEY (`intApiID`)
-) AUTO_INCREMENT=1000;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 DROP TABLE IF EXISTS `api_nonce`;
 CREATE TABLE `api_nonce`  (
@@ -18,7 +18,7 @@ CREATE TABLE `api_nonce`  (
   `dtmNonceCreated` datetime(6) NOT NULL,
   `intCreatedBy` int(11) NOT NULL,
   PRIMARY KEY (`intNonceID`)
-);
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `system_mappings` VALUES (76, 'sysadm/api-settings', 'handler/sysadmin/api_settings.cfm', 0, 0, 1);
 INSERT INTO `system_mappings` VALUES (77, 'sysadmin/api-settings', 'views/sysadmin/api_settings.cfm', 0, 0, 0);
