@@ -1,6 +1,8 @@
 
 <cfscript>
 
+setting requesttimeout=250;
+
 qAllLanguages = application.objLanguage.getAllLanguages();
 
 
