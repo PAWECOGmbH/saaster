@@ -13,5 +13,9 @@ config.cfm
 .env
 server.json
 
+### API file ###
+api/taffy/dashboard
+api/taffy/examples
+
 ### Log files ###
 *.log
