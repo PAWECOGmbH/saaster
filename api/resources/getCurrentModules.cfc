@@ -12,7 +12,7 @@ component extends="taffy.core.resource" taffy_uri="/getcurrentModules/{customerI
             arguments.language,
             arguments.currencyID).getBookedModules(arguments.customerID);
 
-        return rep('Hello');
+        return rep(local.qGetModules);
 
     }
 
