@@ -17,11 +17,22 @@ component extends="taffy.core.api" {
     
     // Object initialising
     application.objLanguage = new com.language();
-    application.objSettings = new com.settings();
-    application.objLog = new com.log();
     application.objGlobal = new com.global();
-    application.objCustomer = new com.customer();
-    application.objUser = new com.user();
+
+    // Set environment relevant variables
+    if (variables.environment eq "dev") {
+        application.environment = "dev";
+        application.usersIP = variables.usersIP;
+        if (cgi.https eq "on") {
+            application.mainURL = "https://" & cgi.server_name;
+        } else {
+            application.mainURL = "http://" & cgi.server_name;
+        }
+    } else {
+        application.environment = "prod";
+        application.usersIP = cgi.remote_addr;
+        application.mainURL = variables.mainURL;
+    }
 
     // Create global log variable
     logWrite = application.objLog.logWrite;
