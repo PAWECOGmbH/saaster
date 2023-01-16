@@ -18,6 +18,10 @@ component extends="taffy.core.api" {
     // Object initialising
     application.objLanguage = new com.language();
     application.objGlobal = new com.global();
+    application.objLog = new com.log();
+    application.objSettings = new com.settings();
+    application.objUser = new com.user();
+    application.objCustomer = new com.customer();
 
     // Set environment relevant variables
     if (variables.environment eq "dev") {
@@ -53,11 +57,12 @@ component extends="taffy.core.api" {
         reloadOnEveryRequest = false,
         disableDashboard = true,
         disabledDashboardRedirect = "/",
+        allowCrossDomain = true,
     }; 
 
     // this function is called after the request has been parsed and all request details are known
     function onTaffyRequest(verb, cfc, requestArguments, mimeExt, headers){
-
+        
         if(arguments.cfc eq "authenticate") {
             return true;
         }
