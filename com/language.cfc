@@ -71,7 +71,7 @@ component displayname="language" output="false" {
         } else if (structKeyExists(session, "lng")) {
             local.thisLang = session.lng;
         } else {
-            local.thisLang = application.getLanguage.iso;
+            local.thisLang = getDefaultLanguage().iso;
         }
 
         local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
