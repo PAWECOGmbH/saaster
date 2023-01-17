@@ -1,11 +1,18 @@
-component extends="taffy.core.resource" taffy_uri="/authenticate/{apiID}/{apiKey}" {
+component extends="taffy.core.resource" taffy_uri="/authenticate" {
 
-    function get(required string apiKey, required numeric apiID){
+    function get(){
+
+        local.apiID = request._taffyrequest.headers.apiID ?: 0;
+        local.apiKey = request._taffyrequest.headers.apiKey ?: 0;
+
+        if(local.apiID eq 0 or local.apiKey eq 0){
+            return noData().withStatus(400);
+        }
         
         local.qCheckApiKey = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                thisApiID: {type: "numeric", value: arguments.apiID},
+                thisApiID: {type: "numeric", value: local.apiID},
             },
             sql = "
                 SELECT strApiName, strApiKeyHash, strApiKeySalt, dtmValidUntil
@@ -16,7 +23,7 @@ component extends="taffy.core.resource" taffy_uri="/authenticate/{apiID}/{apiKey
         )
 
         // Check if the provided API key is valid
-        local.apiKeyValid = local.qCheckApiKey.strApiKeyHash eq hash(arguments.apiKey & qCheckApiKey.strApiKeySalt, 'SHA-512')
+        local.apiKeyValid = local.qCheckApiKey.strApiKeyHash eq hash(local.apiKey & qCheckApiKey.strApiKeySalt, 'SHA-512')
 
         // Return 401 when api key isn't valid
         if(not local.apiKeyValid){
@@ -52,7 +59,7 @@ component extends="taffy.core.resource" taffy_uri="/authenticate/{apiID}/{apiKey
             params = {
                 thisNonceUUID: {type: "string", value: local.nonceUUID},
                 thisCreationTime: {type: "datetime", value: now()},
-                thisCreatedBy: {type: "numeric", value: arguments.apiID}
+                thisCreatedBy: {type: "numeric", value: local.apiID}
             },
             sql = "
                 INSERT INTO api_nonce (strNonceUUID, dtmNonceCreated, intCreatedBy)

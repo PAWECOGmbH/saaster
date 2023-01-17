@@ -1,16 +1,23 @@
+component extends="taffy.core.resource" taffy_uri="/getCurrentPlan" {
 
-component extends="taffy.core.resource" taffy_uri="/getcurrentPlan/{customerID}" {
+    function get() {
 
-    function get(required numeric customerID, numeric lngID, string language, numeric currencyID) {
+        // Required
+        local.customerID = request._taffyrequest.headers.CustomerID ?: 0
 
-        arguments.language = request._taffyrequest.headers.language ?: ""
-        arguments.lngID = request._taffyrequest.headers.lngID ?: 0
-        arguments.currencyID = request._taffyrequest.headers.currencyID ?: 0
+        // Optional
+        local.language = request._taffyrequest.headers.language ?: ""
+        local.lngID = request._taffyrequest.headers.lngID ?: 0
+        local.currencyID = request._taffyrequest.headers.currencyID ?: 0
+
+        if(local.customerID eq 0){
+            return noData().withStatus(400);
+        }
 
         local.qGetPlan = new com.plans(
-            arguments.lngID,
-            arguments.language,
-            arguments.currencyID).getCurrentPlan(arguments.customerID);
+            local.lngID,
+            local.language,
+            local.currencyID).getCurrentPlan(local.customerID);
 
         return rep(local.qGetPlan);
 
