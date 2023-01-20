@@ -18,7 +18,7 @@ component displayname="log" {
             local.logMsg = local.curTime & " - " & local.severityTypes[arguments.severity] & ": " & arguments.name & " - " &  arguments.message & Chr(13) & Chr(10);
             local.subFolderMonth = dateformat(local.curTime,'yyyy-mm');
 
-            directoryCreate( expandPath('logs/#local.subFolderMonth#'), true, true);
+            directoryCreate( expandPath('/logs/#local.subFolderMonth#'), true, true);
             fileAppend("../logs/#local.subFolderMonth#/#DateTimeFormat(local.curTime, "dd")#.log", local.logMsg);
 
             if (sendMail){

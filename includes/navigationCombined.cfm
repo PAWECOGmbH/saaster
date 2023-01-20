@@ -106,6 +106,7 @@
                 
                                         <span class="dropdown-header">System</span>
                                         <a href="#application.mainURL#/sysadmin/system-settings" class="dropdown-item">System settings</a>
+                                        <a href="#application.mainURL#/sysadmin/api-settings" class="dropdown-item">API settings</a>
                                         <a href="#application.mainURL#/sysadmin/languages" class="dropdown-item">Languages</a>
                                         <a href="#application.mainURL#/sysadmin/currencies" class="dropdown-item">Currencies</a>
                                         <a href="#application.mainURL#/sysadmin/countries" class="dropdown-item">Countries</a>
