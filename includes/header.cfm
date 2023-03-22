@@ -1,5 +1,6 @@
 <cfscript>
     usersImgStruct = application.objUser.getUserImage(session.user_id);
+    getSysAdminData = application.objSysadmin.getSysAdminData();
 </cfscript>
 
 <header class="navbar navbar-expand-md navbar-light d-print-none">
@@ -13,9 +14,11 @@
         <cfoutput>
 
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="#application.mainURL#/dashboard">
-                <img src="#application.mainURL#/dist/img/logo.svg" alt="logo" class="navbar-brand-image">
-            </a>
+            <cfif len(trim(getSysAdminData.logo))>
+                <a href="#application.mainURL#/dashboard"><img src="#application.mainURL#/userdata/images/logos/#getSysAdminData.logo#" class="navbar-brand-image" alt="Logo"></a>
+            <cfelse>
+                <a href="#application.mainURL#/dashboard"><img src="#application.mainURL#/dist/img/logo.svg" alt="logo" class="navbar-brand-image"></a>
+            </cfif>
         </h1>
         <div class="navbar-nav flex-row order-md-last">
 

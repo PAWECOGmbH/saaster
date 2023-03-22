@@ -50,6 +50,7 @@ component displayname="Application" output="false" hint="Handle the application.
         application.objGlobal = new com.global();
         application.objUser = new com.user();
         application.objCustomer = new com.customer();
+        application.objSysadmin = new com.sysadmin();
         application.objLanguage = new com.language();
 
         <!--- Save all choosable languages into a list --->

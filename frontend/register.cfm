@@ -4,6 +4,7 @@
     param name="session.name" default="";
     param name="session.company" default="";
     param name="session.email" default="";
+    getSysAdminData = application.objSysadmin.getSysAdminData();
 </cfscript>
 
 <cfoutput>
@@ -12,7 +13,11 @@
         <div class="container-tight py-4">
             <cfif session.step eq 1>
                 <div class="text-center mb-4">
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                    <cfif len(trim(getSysAdminData.logo))>
+                        <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysAdminData.logo#" height="80" alt="Logo"></a>
+                    <cfelse>
+                        <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                    </cfif>
                 </div>
                 <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration?reinit=3">
                     <input type="hidden" name="register_btn">

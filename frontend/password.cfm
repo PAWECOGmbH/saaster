@@ -1,4 +1,6 @@
-
+<cfscript>
+    getSysAdminData = application.objSysadmin.getSysAdminData();
+</cfscript>
 <cfparam name="session.step" default="1">
 
 <div class="border-top-wide border-primary d-flex flex-column">
@@ -8,7 +10,11 @@
         <div class="container-tight py-4">
             <cfoutput> 
                 <div class="text-center mb-4">
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                    <cfif len(trim(getSysAdminData.logo))>
+                        <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysAdminData.logo#" height="80" alt="Logo"></a>
+                    <cfelse>
+                        <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                    </cfif>
                 </div>
 
               
