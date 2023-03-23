@@ -59,6 +59,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.objCustomer = new com.customer();
         application.objLayout = new com.layout();
         application.objNotifications = new com.notifications();
+        application.objSysadmin = new com.sysadmin();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
