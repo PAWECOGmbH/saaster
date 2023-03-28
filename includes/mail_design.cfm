@@ -140,9 +140,9 @@
                       <td bgcolor="###variables.headerBGColor#" width="100%" align="left">
                         <a target="_blank">
                           <cfif len(trim(customerData.logo))>
-                            <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#customerData.logo#" height="150" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; height: 150px; font-size: 16px;" border="0">
+                            <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#customerData.logo#" width="200" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; width: 200px; font-size: 16px;" border="0">
                           <cfelse>
-                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" height="150" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; height: 150px; font-size: 16px;" border="0">
+                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="200" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; width: 200px; font-size: 16px;" border="0">
                           </cfif>
                         </a>
                       </td>
