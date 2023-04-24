@@ -25,6 +25,29 @@
         <div class="#getLayout.layoutPage#">
             <div class="row">
 
+                <!--- Formular for worker to create new ticket --->
+                <form action="#application.mainURL#/ticket" method="post">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Support</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label class="form-label">E-Mail*</label>
+                                <input class="form-control" type="email">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Reference*</label>
+                                <input class="form-control" type="text">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Description*</label>
+                                <textarea class="form-control" type="text" rows="5"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Send</button>
+                        </div>
+                    </div>
+                </form>   
 
             </div>
         </div>

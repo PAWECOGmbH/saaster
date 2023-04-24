@@ -66,6 +66,10 @@
                         <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
                             #getTrans('txtMyProfile')#
                         </a>
+                        <!--- Ticketsystem --->
+                        <a class="dropdown-item" href="#application.mainURL#/ticket/new">
+                            #getTrans('titSupport')#
+                        </a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#application.mainURL#/global?logout">
                             #getTrans('txtLogout')#

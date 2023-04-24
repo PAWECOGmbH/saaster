@@ -48,6 +48,8 @@
                         <a href="#application.mainURL#/sysadmin/mappings" class="dropdown-item">Mappings</a>
                         <a href="#application.mainURL#/sysadmin/translations" class="dropdown-item">Translations</a>
                         <a href="#application.mainURL#/sysadmin/widgets" class="dropdown-item">Widgets</a>
+                        <!--- Ticketsystem --->
+                        <a href="#application.mainURL#/sysadmin/ticketsystem" class="dropdown-item">Ticketsystem</a>
 
                     </div>
                     </cfoutput>
@@ -196,6 +198,10 @@
                     </a>
                     <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
                         #getTrans('txtMyProfile')#
+                    </a>
+                    <!--- Ticketsystem --->
+                    <a class="dropdown-item" href="#application.mainURL#/ticket/new">
+                        #getTrans('titSupport')#
                     </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#application.mainURL#/global?logout">
