@@ -119,7 +119,7 @@
                             <!--- Answer input field --->
                             <div class="col-12">
                                 <form action="#application.mainURL#/ticket" method="post">
-                                    <textarea class="form-control mb-2" rows="5"></textarea>
+                                    <textarea class="form-control mb-2" rows="5" name="answer"></textarea>
                                     <button class="btn btn-primary" type="submit">Send</button>
                                 </form>
                             </div>

@@ -33,13 +33,13 @@
                         <div class="card-body">
                             <div class="mb-2">
                                 <label class="form-label">#getTrans('txtReference')#*</label>
-                                <input class="form-control" type="text">
+                                <input class="form-control" type="text" name="reference" maxlenght="255" <cfif structKeyExists(session, "reference")> value="#session.reference#"</cfif> required>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">#getTrans('txtDescription')#*</label>
-                                <textarea class="form-control" type="text" rows="5"></textarea>
+                                <textarea class="form-control" type="text" rows="5" name="description" maxlength="2000" required><cfif structKeyExists(session, "description")>#session.description#</cfif></textarea>
                             </div>
-                            <button class="btn btn-primary" type="submit">#getTrans('txtSend')#</button>
+                            <button class="btn btn-primary" type="submit" name="create_user">#getTrans('txtSend')#</button>
                         </div>
                     </div>
                 </form>    

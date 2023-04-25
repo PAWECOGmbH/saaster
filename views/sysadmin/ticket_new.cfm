@@ -34,17 +34,17 @@
                         <div class="card-body">
                             <div class="mb-2">
                                 <label class="form-label">E-Mail*</label>
-                                <input class="form-control" type="email">
+                                <input class="form-control" type="email" name="email" maxlenght="255" <cfif structKeyExists(session, "email")>value="#session.email#"</cfif> required>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Reference*</label>
-                                <input class="form-control" type="text">
+                                <input class="form-control" type="text" name="reference" maxlenght="255" <cfif structKeyExists(session, "reference")> value="#session.reference#"</cfif> required>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Description*</label>
-                                <textarea class="form-control" type="text" rows="5"></textarea>
+                                <textarea class="form-control" type="text" rows="5" name="description" maxlenght="2000" required><cfif structKeyExists(session, "description")>#session.description#</cfif></textarea>
                             </div>
-                            <button class="btn btn-primary" type="submit">Send</button>
+                            <button class="btn btn-primary" type="submit" name="create_worker">Send</button>
                         </div>
                     </div>
                 </form>   

@@ -2,8 +2,8 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 /* Create tabelle status */
-DROP TABLE IF EXISTS 'status';
-CREATE TABLE 'status'  (
+DROP TABLE IF EXISTS 'ticket_status';
+CREATE TABLE 'ticket_status'  (
   'intStatusID' int(11) NOT NULL AUTO_INCREMENT,
   'strName' varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY ('intStatusID') USING BTREE
@@ -25,14 +25,14 @@ CREATE TABLE 'ticket'  (
   INDEX '_intUserID'('intUserID') USING BTREE,
   INDEX '_intWorkerID'('intWorkerID') USING BTREE,
   INDEX '_strUUID'('strUUID') USING BTREE,
-  CONSTRAINT 'frn_tick_status' FOREIGN KEY ('intStatusID') REFERENCES 'status' ('intStatusID') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT 'frn_tick_ticket_status' FOREIGN KEY ('intStatusID') REFERENCES 'ticket_status' ('intStatusID') ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT 'frn_tick_users_1' FOREIGN KEY ('intUserID') REFERENCES 'users' ('intUserID') ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT 'frn_tick_users_2' FOREIGN KEY ('intWorkerID') REFERENCES 'users' ('intUserID') ON DELETE SET NULL ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 /* Create tabelle answer */
-DROP TABLE IF EXISTS 'answer';
-CREATE TABLE 'answer'  (
+DROP TABLE IF EXISTS 'ticket_answer';
+CREATE TABLE 'ticket_answer'  (
   'intAnswerID' int(11) NOT NULL AUTO_INCREMENT,
   'intTicketID' int(11) NOT NULL,
   'intUserID' int(11) NOT NULL,
@@ -41,8 +41,8 @@ CREATE TABLE 'answer'  (
   PRIMARY KEY ('intAnswerID') USING BTREE,
   INDEX '_intTicketID'('intTicketID') USING BTREE,
   INDEX '_intUserID'('intUserID') USING BTREE,
-  CONSTRAINT 'frn_answ_ticket' FOREIGN KEY ('intTicketID') REFERENCES 'ticket' ('intTicketID') ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT 'frn_answ_users' FOREIGN KEY ('intUserID') REFERENCES 'users' ('intUserID') ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT 'frn_ta_ticket' FOREIGN KEY ('intTicketID') REFERENCES 'ticket' ('intTicketID') ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT 'frn_ta_users' FOREIGN KEY ('intUserID') REFERENCES 'users' ('intUserID') ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 /* System mapping entries */
@@ -68,7 +68,25 @@ VALUES
 ('txtCheck', 'Überprüfen', 'Check'),
 ('txtCheckFirst', 'Dein Support-Ticket mit der Ticketnummer: ', 'Your support ticket with the ticket number: '),
 ('txtCheckSecond', ' wurde erfolgreich übermittelt.', ' has been sent successfully.'),
-('txtCheckThird', 'Wir werden uns schnellstmöglich bei Ihnen melden!', 'We will contact you as soon as possible!');
+('txtCheckThird', 'Wir werden uns schnellstmöglich bei Ihnen melden!', 'We will contact you as soon as possible!'),
+('titTicketnumber', 'Ticketnummer', 'Ticket number'),
+('txtInfo', 'Info', 'Info'),
+('txtUser', 'Benutzer', 'User'),
+('txtCreated', 'Erstellt', 'Created'),
+('txtStatus', 'Status', 'Status'),
+('txtWorker', 'Mitarbeiter', 'Worker'),
+('txtClose', 'Schliessen', 'Close'),
+('txtReferenceError', 'Geben Sie einen Betreff an!', 'Enter a reference!'),
+('txtDescriptionError', 'Geben Sie eine Beschreibung ein!', 'Enter a description!'),
+('txtDescriptionReferenceError', 'Geben Sie eine Beschreibung und Betreff ein!', 'Enter a description and reference!'),
+('txtCreateTicketError', 'Abfrage qCreateTicket konnte nicht ausgeführt werden!', 'Could not execute query qCreateTicket!'),
+('txtCheckUuidError', 'Abfrage qUuidCheck konnte nicht ausgeführt werden!', 'Could not execute query qUuidCheck!');
+
+INSERT INTO ticket_status (strName)
+VALUES 
+('New'),
+('Processing'),
+('Closed');
 
 
 

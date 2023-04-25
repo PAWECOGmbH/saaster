@@ -1,3 +1,13 @@
+<cfscript>
+
+    objTicket = new com.ticket();
+
+    getTickets = objTicket.getTickets();
+    WriteDump(getTickets);
+
+</cfscript>
+
+
 <cfinclude template="/includes/header.cfm">
 
 <div class="page-wrapper">

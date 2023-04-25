@@ -7,10 +7,10 @@
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
                     <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
-                        <h4 class="page-title">Ticketsystem</h4>
+                        <h4 class="page-title">Ticket</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
-                            <li class="breadcrumb-item">Ticketsystem</li>
+                            <li class="breadcrumb-item">Ticket</li>
                             <li class="breadcrumb-item active">Detail</li>
                         </ol>
                     </div>
@@ -27,7 +27,7 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <h3 class="card-title">Ticketnumber:</h3>
+                        <h3 class="card-title">#getTrans('titTicketnumber')#:</h3>
                     </div>
 
                     <div class="card-body">
@@ -66,28 +66,28 @@
                                 <form action="#application.mainURL#/ticket" method="post">
                                     <div class="card mb-2">
                                         <div class="card-header">
-                                            <h4 class="no-margin">Info</h4>
+                                            <h4 class="no-margin">#getTrans('txtInfo')#</h4>
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-1">
-                                                <label class="bold">User:</label>
+                                                <label class="bold">#getTrans('txtUser')#:</label>
                                                 <span>Hans Meier</span>
                                             </div>
                                             <div class="mb-1">
-                                                <label class="bold">Created:</label>
+                                                <label class="bold">#getTrans('txtCreated')#:</label>
                                                 <span>22.04.2023</span>
                                             </div>
                                             <div class="mb-1">
-                                                <label class="bold">Status:</label>
+                                                <label class="bold">#getTrans('txtStatus')#:</label>
                                                 <span>open</span>
                                             </div>
                                             <div class="mb-1">
-                                                <label class="bold">Worker:</label>
+                                                <label class="bold">#getTrans('txtWorker')#:</label>
                                                 <span>Peter Pan</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary button-max-width" type="submit">Close</button>
+                                    <button class="btn btn-primary button-max-width" type="submit">#getTrans('txtClose')#</button>
                                 </form>
                             </div>
 
@@ -118,8 +118,8 @@
                             <!--- Answer input field --->
                             <div class="col-12">
                                 <form action="#application.mainURL#/ticket" method="post">
-                                    <textarea class="form-control mb-2" rows="5"></textarea>
-                                    <button class="btn btn-primary" type="submit">Send</button>
+                                    <textarea class="form-control mb-2" rows="5" name="answer"></textarea>
+                                    <button class="btn btn-primary" type="submit">#getTrans('txtSend')#</button>
                                 </form>
                             </div>
 
