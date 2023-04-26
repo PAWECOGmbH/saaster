@@ -79,9 +79,15 @@ VALUES
 ('txtReferenceError', 'Geben Sie einen Betreff an!', 'Enter a reference!'),
 ('txtDescriptionError', 'Geben Sie eine Beschreibung ein!', 'Enter a description!'),
 ('txtDescriptionReferenceError', 'Geben Sie eine Beschreibung und Betreff ein!', 'Enter a description and reference!'),
-('txtCreateTicketError', 'Abfrage qCreateTicket konnte nicht ausgeführt werden!', 'Could not execute query qCreateTicket!'),
-('txtCheckUuidError', 'Abfrage qUuidCheck konnte nicht ausgeführt werden!', 'Could not execute query qUuidCheck!');
+('txtCreateTicketError', 'Abfrage zum Erstellen des Tickets konnte nicht ausgeführt werden!', 'Could not execute query to create ticket!'),
+('txtCheckUuidError', 'Abfrage qUuidCheck konnte nicht ausgeführt werden!', 'Could not execute query qUuidCheck!'),
+('txtAnswerCreated', 'Antwort erfolgreich gesendet!', 'Response sent successfully!'),
+('txtAnswerError', 'Geben Sie eine Antwort ein!', 'Enter a answer!'),
+('txtTicketError', 'Geben Sie eine Antwort auf Ihr Ticket ein!', 'Enter a reply to your ticket!'),
+('txtCreateAnswerError', 'Die Abfrage zum Erstellen der Antwort konnte nicht ausgeführt werden!', 'Could not execute query to create answer!'),
+('txtTicketUserError', 'Das ist nicht dein Ticket!', 'That is not your ticket!');
 
+/* Ticket status */
 INSERT INTO ticket_status (strName)
 VALUES 
 ('New'),

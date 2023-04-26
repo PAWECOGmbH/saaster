@@ -1,9 +1,12 @@
 <cfscript>
 
+    /* Initialise ticket object */
     objTicket = new com.ticket();
 
-    getTickets = objTicket.getTickets();
-    WriteDump(getTickets);
+    /* Execute function */
+    qWorker = objTicket.getWorker();
+    qStatus = objTicket.getStatus();
+    qTickets = objTicket.getTickets(form);
 
 </cfscript>
 
@@ -54,19 +57,23 @@
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <select class="form-select" name="worker" onchange="this.form.submit()">
                                         <option value="">Worker</option>
-                                        <option value="1">Peter Pan</option>
+                                        <cfloop query="#qWorker#">
+                                            <option value="#intUserID#">#strFirstName# #strLastName#</option>
+                                        </cfloop>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <select class="form-select" name="status" onchange="this.form.submit()">
                                         <option value="">Status</option>
-                                        <option value="1">open</option>
+                                        <cfloop query="#qStatus#">
+                                            <option value="#intStatusID#">#strName#</option>
+                                        </cfloop>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3">
                                     <div class="form-selectgroup input-group">
-                                        <input class="form-control" type="text" name="search">
-                                        <button class="btn" type="submit">Search</button>
+                                        <input class="form-control" type="text" name="text">
+                                        <button class="btn" type="submit" name="search">Search</button>
                                     </div>
                                 </div>
                             </div>
@@ -88,17 +95,19 @@
                                         </tr>
                                     </thead>
                                     <tbody class="table-body">
-                                        <tr>
-                                            <td>3JD3G3K55JFJI</td>
-                                            <td>Zahlung funktionierte nicht</td>
-                                            <td>Hans Meier</td>
-                                            <td>22.04.2023</td>
-                                            <td>Peter Pan</td>
-                                            <td>open</td>
-                                            <td>
-                                                <a href="#application.mainURL#/sysadmin/ticketsystem/detail" class="btn">Open</a>
-                                            </td>
-                                        </tr>
+                                        <cfloop query="#qTickets#">
+                                            <tr>
+                                                <td>#strUUID#</td>
+                                                <td>#strReference#</td>
+                                                <td>#userFirstName# #userLastName#</td>
+                                                <td>#dateTimeFormat(dtmOpen, "dd.mm.yyyy kk:nn:ss")#</td>
+                                                <td>#workerFirstName# #workerLastName#</td>
+                                                <td>#strName#</td>
+                                                <td>
+                                                    <a href="#application.mainURL#/sysadmin/ticketsystem/detail?ticket=#strUUID#" class="btn">Open</a>
+                                                </td>
+                                            </tr>
+                                        </cfloop>
                                     </tbody>
                                 </table>
                             </div>

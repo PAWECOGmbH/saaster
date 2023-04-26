@@ -1,3 +1,25 @@
+<cfscript>
+
+    /* checks if variable exists otherwise it will be created */
+    param name="url.ticket" default="";
+
+    /* Initialise ticket object */
+    objTicket = new com.ticket();
+
+    /* Execute function */
+    qWorker = objTicket.getWorker();
+    qTicket = objTicket.getTicketUser(url.ticket, session.user_id);
+
+    /* Checks if ticket was found */
+    if(qTicket.recordCount eq 1){
+        qAnswers = objTicket.getAnswers(qTicket.intTicketID);
+    } else {
+        getAlert("#getTrans('txtTicketUserError')#", "warning");
+    }
+    
+
+</cfscript>
+
 <cfinclude template="/includes/header.cfm">
 
 <div class="page-wrapper">
@@ -27,7 +49,7 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <h3 class="card-title">#getTrans('titTicketnumber')#:</h3>
+                        <h3 class="card-title">Ticketnumber: #qTicket.strUUID#</h3>
                     </div>
 
                     <div class="card-body">
@@ -37,91 +59,76 @@
                             <div class="col-9">
                                 <div class="card">
                                     <div class="card-header">
-                                        <p class="no-margin">Lorem ipsum dolor sit amet, consetetur sadipscing elitr</p>
+                                        <p class="no-margin">#qTicket.strReference#</p>
                                     </div>
                                     <div class="card-body">
-                                        <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut 
-                                        labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo 
-                                        dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
-                                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore 
-                                        et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. 
-                                        Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, 
-                                        consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, 
-                                        sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, 
-                                        no sea takimata sanctus est Lorem ipsum dolor sit amet. 
-                                        Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, 
-                                        vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit 
-                                        praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, 
-                                        consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. 
-                                        Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea 
-                                        commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, 
-                                        vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent 
-                                        luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
+                                        <p>#qTicket.strDescription#</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!--- Ticket information box --->
                             <div class="col-3">
-                                <form action="#application.mainURL#/ticket" method="post">
-                                    <div class="card mb-2">
-                                        <div class="card-header">
-                                            <h4 class="no-margin">#getTrans('txtInfo')#</h4>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-1">
-                                                <label class="bold">#getTrans('txtUser')#:</label>
-                                                <span>Hans Meier</span>
-                                            </div>
-                                            <div class="mb-1">
-                                                <label class="bold">#getTrans('txtCreated')#:</label>
-                                                <span>22.04.2023</span>
-                                            </div>
-                                            <div class="mb-1">
-                                                <label class="bold">#getTrans('txtStatus')#:</label>
-                                                <span>open</span>
-                                            </div>
-                                            <div class="mb-1">
-                                                <label class="bold">#getTrans('txtWorker')#:</label>
-                                                <span>Peter Pan</span>
-                                            </div>
-                                        </div>
+                                <div class="card mb-2">
+                                    <div class="card-header">
+                                        <h4 class="no-margin">Info</h4>
                                     </div>
-                                    <button class="btn btn-primary button-max-width" type="submit">#getTrans('txtClose')#</button>
-                                </form>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            
-                            <!--- Answer output --->
-                            <div class="col-12">
-                                <div class="card">
                                     <div class="card-body">
-                                        <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et 
-                                        dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores.</p>
-                                        <div class="d-flex justify-content-between">
-                                            <p class="no-margin text-footer">Hans Meier</p>
-                                            <p class="no-margin text-footer">22.04.2023</p>
+                                        <div class="mb-1">
+                                            <label class="bold">User:</label>
+                                            <span>#qTicket.userFirstName# #qTicket.userLastName#</span>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="bold">Created:</label>
+                                            <span>#dateTimeFormat(qTicket.dtmOpen, "dd.mm.yyyy kk:nn:ss")#</span>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="bold">Status:</label>
+                                            <span>#qTicket.strName#</span>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="bold">Worker:</label>
+                                            <span>#qTicket.workerFirstName# #qTicket.workerLastName#</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row">
+                            
+                            <!--- Answer output --->
+                            <cfif qTicket.recordCount eq 1>
+                                <cfloop query="#qAnswers#">
+                                    <div class="col-12 mb-2">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <p>#qAnswers.strAnswer#</p>
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="no-margin text-footer">#qAnswers.strFirstName# #qAnswers.strLastName#</p>
+                                                    <p class="no-margin text-footer">#dateTimeFormat(qAnswers.dtmSent, "dd.mm.yyyy kk:nn:ss")#</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </cfloop>
+                            </cfif>
+                        </div>
 
                         <div class="row">
                             
-                            <!--- Answer input field --->
-                            <div class="col-12">
-                                <form action="#application.mainURL#/ticket" method="post">
-                                    <textarea class="form-control mb-2" rows="5" name="answer"></textarea>
-                                    <button class="btn btn-primary" type="submit">#getTrans('txtSend')#</button>
-                                </form>
-                            </div>
+                            <cfif qTicket.intUserID eq session.user_id and qTicket.intStatusID eq 2>
+                                <!--- Answer input field --->
+                                <div class="col-12">
+                                    <form action="#application.mainURL#/ticket?ticket=#qTicket.strUUID#" method="post">
+                                        <textarea class="form-control mb-2" rows="5" name="answer" maxlenght="1000"><cfif structKeyExists(session, "answer")>#session.answer#</cfif></textarea>
+                                        <button class="btn btn-primary" type="submit" name="answer_user">Send</button>
+                                    </form>
+                                </div>
+                            </cfif>
 
                         </div>
                     </div>

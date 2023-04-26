@@ -1,4 +1,5 @@
-<cfparam name="url.a" default="">
+<!--- checks if variable exists otherwise it will be created --->
+<cfparam name="url.ticket" default="">
 
 <cfinclude template="/includes/header.cfm">
 
@@ -34,10 +35,10 @@
                                 <img class="text-img" src="../../dist/img/check.svg" alt="check">
                             </div>
                             <div class="col-10 d-none d-lg-block">
-                                <p class="text-check-large">#getTrans('txtCheckFirst')##url.a##getTrans('txtCheckSecond')#<br>#getTrans('txtCheckThird')#</p>
+                                <p class="text-check-large">#getTrans('txtCheckFirst')##url.ticket##getTrans('txtCheckSecond')#<br>#getTrans('txtCheckThird')#</p>
                             </div>
                             <div class="col-10 d-lg-none">
-                                <p class="text-check-small">#getTrans('txtCheckFirst')##url.a##getTrans('txtCheckSecond')#<br>#getTrans('txtCheckThird')#</p>
+                                <p class="text-check-small">#getTrans('txtCheckFirst')##url.ticket##getTrans('txtCheckSecond')#<br>#getTrans('txtCheckThird')#</p>
                             </div>
                         </div>
                     </div>
