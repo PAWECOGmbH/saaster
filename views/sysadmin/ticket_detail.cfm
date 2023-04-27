@@ -1,20 +1,20 @@
 <cfscript>
 
-    /* checks if variable exists otherwise it will be created */
+    // checks if variable exists otherwise it will be created 
     param name="url.ticket" default="";
 
-    /* Initialise ticket object */
+    // Initialise ticket object 
     objTicket = new com.ticket();
 
-    /* Execute function */
+    // Execute function 
     qWorker = objTicket.getWorker();
     qTicket = objTicket.getTicketWorker(url.ticket);
 
-    /* Checks if ticket was found */
+    // Checks if ticket was found 
     if(qTicket.recordCount eq 1){
         qAnswers = objTicket.getAnswers(qTicket.intTicketID);
     } else {
-        getAlert("That is not your ticket!", "warning");
+        getAlert("Ticket not found!", "warning");
     }
 
 </cfscript>

@@ -1,9 +1,9 @@
 <cfscript>
 
-    /* Initialise ticket object */
+    // Initialise ticket object 
     objTicket = new com.ticket();
 
-    /* Execute function */
+    // Execute function 
     qWorker = objTicket.getWorker();
     qStatus = objTicket.getStatus();
     qTickets = objTicket.getTickets(form);

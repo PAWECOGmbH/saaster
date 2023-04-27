@@ -85,9 +85,14 @@ VALUES
 ('txtAnswerError', 'Geben Sie eine Antwort ein!', 'Enter a answer!'),
 ('txtTicketError', 'Geben Sie eine Antwort auf Ihr Ticket ein!', 'Enter a reply to your ticket!'),
 ('txtCreateAnswerError', 'Die Abfrage zum Erstellen der Antwort konnte nicht ausgeführt werden!', 'Could not execute query to create answer!'),
-('txtTicketUserError', 'Das ist nicht dein Ticket!', 'That is not your ticket!');
+('txtTicketUserError', 'Ticket nicht gefunden!', 'Ticket not found!'),
+('txtAnswerStatusError', 'Das Ticket hat den falschen Status um eine antwort zu senden!', 'The ticket has the wrong status to send a reply!'),
+('txtEmailError', 'E-Mail konnte nicht gesendet werden!', 'Could not send E-Mail!'),
+('txtEmailUserError', 'Abfrage zum Abrufen von Benutzerdaten konnte nicht ausgeführt werden!', 'Could not execute query to get user data!'),
+('txtTicketCheckError', 'Die Abfrage zum Suchen von Tickets vom Benutzer konnte nicht ausgeführt werden!', 'Could not execute query to find tickets from user!'),
+('txtTicketAmountError', 'Du hast bereits drei Tickets, die noch nicht abgeschlossen sind!', 'You already have three tickets that are not yet closed!');
 
-/* Ticket status */
+/* Ticket status entries */
 INSERT INTO ticket_status (strName)
 VALUES 
 ('New'),
