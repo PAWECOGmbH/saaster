@@ -54,7 +54,7 @@ VALUES
 ('ticket/new', 'views/customer/ticket_new.cfm', 0, 0, 0),
 ('ticket/detail', 'views/customer/ticket_detail.cfm', 0, 0, 0),
 ('ticket/check', 'views/customer/ticket_check.cfm', 0, 0, 0),
-('ticket', 'handler/ticket.cfm', 0, 0, 1);
+('ticket', 'handler/ticket.cfm', 0, 0, 0);
 
 /* Language variables*/
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
@@ -90,7 +90,11 @@ VALUES
 ('txtEmailError', 'E-Mail konnte nicht gesendet werden!', 'Could not send E-Mail!'),
 ('txtEmailUserError', 'Abfrage zum Abrufen von Benutzerdaten konnte nicht ausgeführt werden!', 'Could not execute query to get user data!'),
 ('txtTicketCheckError', 'Die Abfrage zum Suchen von Tickets vom Benutzer konnte nicht ausgeführt werden!', 'Could not execute query to find tickets from user!'),
-('txtTicketAmountError', 'Du hast bereits drei Tickets, die noch nicht abgeschlossen sind!', 'You already have three tickets that are not yet closed!');
+('txtTicketAmountError', 'Du hast bereits drei Tickets, die noch nicht abgeschlossen sind!', 'You already have three tickets that are not yet closed!'),
+('txtEmailCreateTicketFirst', 'Wir haben Ihre Support-Anfrage erhalten, wir werden diese schnellstmöglich bearbeiten.', 'We have received your support request, we will process it as soon as possible.'),
+('txtEmailCreateTicketSecond', 'Mit dem unten stehenden Link können Sie Ihr Ticket öffnen.', 'With the link below you can open your ticket.'),
+('txtEmailAnswerFirst', 'Einer unserer Experten analysierte das Problem und schickte Ihnen einen Lösungsvorschlag.', 'One of our experts analyzed the problem and sent you a suggested solution.'),
+('txtEmailAnswerSecond', 'Mit dem unten stehenden Link können Sie Ihr Ticket öffnen, um die Antwort zu lesen.', 'With the link below you can open your ticket to read the answer.');
 
 /* Ticket status entries */
 INSERT INTO ticket_status (strName)
@@ -99,6 +103,8 @@ VALUES
 ('Processing'),
 ('Closed');
 
+INSERT INTO system_settings 
+VALUES (7, 'settingTicketsystem', '1', 'Choose if you want to activate the ticket system.');
 
 
 SET FOREIGN_KEY_CHECKS = 1;

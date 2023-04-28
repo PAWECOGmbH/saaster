@@ -98,7 +98,7 @@
                                         <cfloop query="#qTickets#">
                                             <tr>
                                                 <td>#strUUID#</td>
-                                                <td>#strReference#</td>
+                                                <td>#left(strReference, 70)#</td>
                                                 <td>#userFirstName# #userLastName#</td>
                                                 <td>#dateTimeFormat(dtmOpen, "dd.mm.yyyy kk:nn:ss")#</td>
                                                 <td>#workerFirstName# #workerLastName#</td>

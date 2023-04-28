@@ -5,6 +5,10 @@ component displayname="ticket" output="false" {
     local.objLanguage = new com.language();
     getTrans = local.objLanguage.getTrans;
 
+    // Initialise log object with logWrite function
+    local.objLog = new com.log();
+    logWrite = local.objLog.logWrite;
+
 
     // Function to create ticket 
     public struct function createTicket(required struct formStruct){
@@ -63,6 +67,7 @@ component displayname="ticket" output="false" {
                         "
                     )
                 } catch (any e) {
+                    logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not execute query to find user: #e.message#", false);
                     local.argsReturnValue.message = "Could not execute query to find user!";
                     return local.argsReturnValue;
                 }
@@ -107,6 +112,7 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not execute query to find tickets from user: #e.message#", false);
             local.argsReturnValue.message = local.worker ? "Could not execute query to find tickets from user!" : "#getTrans('txtTicketCheckError')#";
             return local.argsReturnValue;
         }
@@ -148,6 +154,7 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not execute query to create ticket: #e.message#", false);
             local.argsReturnValue.message = local.worker ? "Could not execute query to create ticket!" : "#getTrans('txtCreateTicketError')#";
             return local.argsReturnValue;
         }
@@ -532,6 +539,7 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not assign worker: #e.message#", false);
             local.argsReturnValue.message = "Could not assign worker!";
             return local.argsReturnValue;
         }
@@ -544,7 +552,7 @@ component displayname="ticket" output="false" {
 
     
     // Function to close a ticket 
-    public struct function closeTicket(required struct formStruct, required string ticketUUID){
+    public struct function updateStatus(required struct formStruct, required string ticketUUID){
 
         // Initialise return struct 
         local.argsReturnValue = structNew();
@@ -568,6 +576,7 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not close ticket: #e.message#", false);
             local.argsReturnValue.message = "Could not close ticket!";
             return local.argsReturnValue;
         }
@@ -611,6 +620,7 @@ component displayname="ticket" output="false" {
         // Check if belongs to worker or user
         if(local.ticket.intUserID eq arguments.userID or local.ticket.intWorkerID eq arguments.userID){
             local.ticketID = local.ticket.intTicketID;
+            local.userID = local.ticket.intUserID;
         } else {
             local.argsReturnValue.message = local.worker ? "Enter a reply to your ticket!" : "#getTrans('txtTicketError')#";
             return local.argsReturnValue;
@@ -641,6 +651,7 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e){
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not execute query to create answer: #e.message#", false);
             local.argsReturnValue.message = local.worker ? "Could not execute query to create answer!" : "#getTrans('txtCreateAnswerError')#";
             return local.argsReturnValue;
         }
@@ -651,7 +662,7 @@ component displayname="ticket" output="false" {
         // Send E-Mail
         if(local.worker){
 
-            local.email = sendEmail(arguments.formStruct, arguments.ticketUUID, arguments.userID, local.worker);
+            local.email = sendEmail(arguments.formStruct, arguments.ticketUUID, local.userID, local.worker);
 
             // Check if email was sent
             if(not local.email.success){
@@ -690,10 +701,12 @@ component displayname="ticket" output="false" {
                 "
             )
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not execute query to get user data: #e.message#", false);
             local.argsReturnValue.message = arguments.worker ? "Could not execute query to get user data!" : "#getTrans('txtEmailUserError')#";
             return local.argsReturnValue;
         }
 
+        local.language = local.qUser.strLanguage;
         variables.mailTitle = "Ticket: #arguments.ticketUUID#";
         variables.mailType = "html";
 
@@ -702,14 +715,14 @@ component displayname="ticket" output="false" {
             
             cfsavecontent (variable = "variables.mailContent") {
                 echo("
-                    Hello #local.qUser.strFirstName# #local.qUser.strLastName#<br><br>
-                    We have received your support request, we will process it as soon as possible.<br>
-                    With the link below you can open your ticket.<br><br>
+                    #getTrans('titHello', local.language)# #local.qUser.strFirstName# #local.qUser.strLastName#<br><br>
+                    #getTrans('txtEmailCreateTicketFirst', local.language)#<br>
+                    #getTrans('txtEmailCreateTicketSecond', local.language)#<br><br>
 
                     <a href='#local.link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#local.link#</a><br><br>
                     
-                    #variables.getTrans('txtRegards')#<br>
-                    #variables.getTrans('txtYourTeam')#<br>
+                    #getTrans('txtRegards', local.language)#<br>
+                    #getTrans('txtYourTeam', local.language)#<br>
                     #application.appOwner#
                 ");
             }
@@ -718,9 +731,9 @@ component displayname="ticket" output="false" {
             
             cfsavecontent (variable = "variables.mailContent") {
                 echo("
-                    Hello #local.qUser.strFirstName# #local.qUser.strLastName#<br><br>
-                    One of our experts analyzed the problem and sent you a suggested solution.<br>
-                    With the link below you can open your ticket to read the answer.<br><br>
+                    #getTrans('titHello', local.language)# #local.qUser.strFirstName# #local.qUser.strLastName#<br><br>
+                    #getTrans('txtEmailAnswerFirst', local.language)#<br>
+                    #getTrans('txtEmailAnswerSecond', local.language)#<br><br>
 
                     <a href='#local.link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#local.link#</a><br><br>
                     
@@ -739,6 +752,7 @@ component displayname="ticket" output="false" {
                 include template="/includes/mail_design.cfm";
             }
         } catch (any e) {
+            logWrite("Ticketsystem", 3, "File: #callStackGet("string", 0 , 1)#, Could not send E-Mail: #e.message#", false);
             local.argsReturnValue.message = arguments.worker ? "Could not send E-Mail!" : "#getTrans('txtEmailError')#";
             return local.argsReturnValue;
         }

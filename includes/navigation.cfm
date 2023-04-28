@@ -49,8 +49,9 @@
                                 <a href="#application.mainURL#/sysadmin/translations" class="dropdown-item">Translations</a>
                                 <a href="#application.mainURL#/sysadmin/widgets" class="dropdown-item">Widgets</a>
                                 <!--- Ticketsystem --->
-                                <a href="#application.mainURL#/sysadmin/ticketsystem" class="dropdown-item">Ticketsystem</a>
-
+                                <cfif application.systemSettingStruct.settingTicketsystem eq 2>
+                                    <a href="#application.mainURL#/sysadmin/ticketsystem" class="dropdown-item">Ticketsystem</a>
+                                </cfif>
                             </div>
                             </cfoutput>
                         </li>
