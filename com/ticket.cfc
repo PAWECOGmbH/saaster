@@ -280,6 +280,7 @@ component displayname="ticket" output="false" {
                     LEFT JOIN users wo
                     ON ticket.intWorkerID = wo.intUserID
                     WHERE ticket.intWorkerID = #local.worker#
+                    AND ticket.intStatusID != 3
                 "
             )
 
@@ -310,6 +311,7 @@ component displayname="ticket" output="false" {
                         ON ticket.intWorkerID = wo.intUserID
                         WHERE us.strFirstName = '#local.firstName#'
                         AND us.strLastName = '#local.lastName#'
+                        AND ticket.intStatusID != 3
                         ORDER BY ticket.dtmOpen DESC
                     "
                 )
@@ -332,6 +334,7 @@ component displayname="ticket" output="false" {
                         LEFT JOIN users wo
                         ON ticket.intWorkerID = wo.intUserID
                         WHERE us.strFirstName = '#local.name#'
+                        AND ticket.intStatusID != 3
                         ORDER BY ticket.dtmOpen DESC
                     "
                 )
@@ -352,6 +355,7 @@ component displayname="ticket" output="false" {
                             LEFT JOIN users wo
                             ON ticket.intWorkerID = wo.intUserID
                             WHERE us.strLastName = '#local.name#'
+                            AND ticket.intStatusID != 3
                             ORDER BY ticket.dtmOpen DESC
                         "
                     )
@@ -374,8 +378,8 @@ component displayname="ticket" output="false" {
                 ON ticket.intUserID = us.intUserID
                 LEFT JOIN users wo
                 ON ticket.intWorkerID = wo.intUserID
-                WHERE ticket.intStatusID = 1
-                ORDER BY ticket.dtmOpen ASC
+                WHERE ticket.intStatusID != 3
+                ORDER BY ticket.intStatusID
             "
         )
 
