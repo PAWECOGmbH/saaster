@@ -40,6 +40,7 @@
     qStandardVatType = systemSetting('settingStandardVatType');
     qInvoiceNet = systemSetting('settingInvoiceNet');
     qLayout = systemSetting('settingLayout');
+    qTicket = systemSetting('settingTicketsystem');
 
 </cfscript>
 
@@ -125,6 +126,24 @@
                                                 <option value="1" <cfif qInvoiceNet.strDefaultValue eq 1>selected</cfif>>Netto</option>
                                                 <option value="0" <cfif qInvoiceNet.strDefaultValue eq 0>selected</cfif>>Gross (brutto)</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h3>Ticketsystem settings</h3>
+                                <div class="border align-baseline p-3">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>#qTicket.strDescription#</p>
+                                            <label class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="#qTicket.strSettingVariable#" value="1" <cfif qTicket.strDefaultValue eq 1 or qTicket.strDefaultValue eq "">checked</cfif>>
+                                                <span class="form-check-label small pt-1">Inactive</span>
+                                            </label>
+                                            <label class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="#qTicket.strSettingVariable#" value="2" <cfif qTicket.strDefaultValue eq 2>checked</cfif>>
+                                                <span class="form-check-label small pt-1">Active</span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>

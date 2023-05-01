@@ -265,10 +265,43 @@ div.dashboard div.card-header label.form-check {
     }
 }
 
-    .navbar-dark {
-        box-shadow: inset 0 -1px 0 0 rgba(98, 105, 118, 0.16);
-    }
+.navbar-dark {
+    box-shadow: inset 0 -1px 0 0 rgba(98, 105, 118, 0.16);
+}
 
-    .list-group-item-action:hover, .list-group-item-action:focus {
-        color: #000;
-    }
+.list-group-item-action:hover, .list-group-item-action:focus {
+    color: #000;
+}
+
+.text-check-large{
+    font-size: 1.8rem;
+    padding: 0 0 0 40px;
+    margin: 0;
+}
+
+.text-check-small{
+    font-size: 1rem;
+    padding: 0 0 0 20px;
+    margin: 0;
+}
+
+.text-img{
+    width: 100%;
+    height: auto;
+}
+
+.no-margin{
+    margin: 0;
+}
+
+.button-max-width{
+    width: 100%;
+}
+
+.bold{
+    font-weight: 600;
+}
+
+.text-footer{
+    color: lightgrey;
+}

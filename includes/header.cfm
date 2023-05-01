@@ -66,6 +66,12 @@
                         <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
                             #getTrans('txtMyProfile')#
                         </a>
+                        <!--- Ticketsystem --->
+                        <cfif application.systemSettingStruct.settingTicketsystem eq 2>
+                            <a class="dropdown-item" href="#application.mainURL#/ticket/new">
+                                #getTrans('titSupport')#
+                            </a>
+                        </cfif>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#application.mainURL#/global?logout">
                             #getTrans('txtLogout')#
