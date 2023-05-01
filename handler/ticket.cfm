@@ -12,7 +12,8 @@ if(structKeyExists(form, "create_user")){
     // Check execution 
     if(createTicket.success){
         logWrite("Ticketsystem", 1, "File: #callStackGet("string", 0 , 1)#, Ticket successfully created", false);
-        location url="#application.mainURL#/ticket/check?ticket=#createTicket.uuid#" addtoken="false";
+        session.ticket = createTicket.uuid;
+        location url="#application.mainURL#/ticket/check" addtoken="false";
     } else {
         logWrite("Ticketsystem", 2, "File: #callStackGet("string", 0 , 1)#, Could not create ticket: #createTicket.message#", false);
         getAlert(createTicket.message, "warning");
