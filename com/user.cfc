@@ -363,6 +363,7 @@ component displayname="user" output="false" {
         local.admin = 0;
         local.superadmin = 0;
         local.active = 0;
+        local.sysadmin = 0;
 
 
         if (structKeyExists(arguments.userStruct, "salutation")) {
@@ -398,6 +399,11 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "active")) {
             local.active = arguments.userStruct.active;
         }
+        if(arguments.customerID eq 1){
+            local.sysadmin = 1;
+            local.admin = 1;
+            local.superadmin = 1;
+        }
 
 
         try {
@@ -418,11 +424,12 @@ component displayname="user" output="false" {
                     active: {type: "boolean", value: local.active},
                     language: {type: "varchar", value: local.language},
                     newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
-                    dateNow: {type: "datetime", value: now()}
+                    dateNow: {type: "datetime", value: now()},
+                    sysadmin: {type: "integer", value: local.sysadmin}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, strUUID)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID)
+                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID)
                 "
 
             )
