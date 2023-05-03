@@ -345,8 +345,15 @@ if (structKeyExists(form, 'login_btn')) {
                 }
             }
 
-            location url="#objUserLogin.redirect#" addtoken="false";
-
+            objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
+            blnresend = false;
+            
+            if (objUserMfa.blnMfa){
+                objUserMfa = application.objUser.sendMfaCode(session.user_id, "#blnresend#");
+                location url="#objUserMfa.redirect#" addtoken="false";
+            } else {
+                location url="#objUserLogin.redirect#" addtoken="false";
+            }
 
         } else {
 
@@ -362,6 +369,8 @@ if (structKeyExists(form, 'login_btn')) {
             }
 
         }
+
+        
 
     } else {
 
@@ -545,6 +554,42 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
 }
 
+if (structKeyExists(form, 'mfa_btn')){
 
+    param name="form.mfa_1" default=0;
+    param name="form.mfa_2" default=0;
+    param name="form.mfa_3" default=0;
+    param name="form.mfa_4" default=0;
+    param name="form.mfa_5" default=0;
+    param name="form.mfa_6" default=0;
 
+    mfa_1 = toString(form.mfa_1);
+    mfa_2 = toString(form.mfa_2);
+    mfa_3 = toString(form.mfa_3);
+    mfa_4 = toString(form.mfa_4);
+    mfa_5 = toString(form.mfa_5);
+    mfa_6 = toString(form.mfa_6);
+
+    mfaCodes = toNumeric(mfa_1 & mfa_2 & mfa_3 & mfa_4 & mfa_5 & mfa_6);
+    checkMfa = application.objUser.checkMfa(url.uid, mfaCodes);
+    
+    if(checkMfa.success eq true){
+        session.user_id = url.uid;
+        location url="#application.mainURL#/dashboard" addtoken="false";
+    } else{
+        getAlert(checkMfa.message, 'warning');
+        uid = checkMfa.uid;
+        location url="#application.mainURL#/mfa?uid=#uid#" addtoken="false";
+    }
+    
+}
+
+if (structKeyExists(url, 'resend')){
+    objUserMfa = application.objUser.sendMfaCode(session.user_id, "#url.resend#");
+
+    if(objUserMfa.success eq true){
+        getAlert(objUserMfa.message, 'success');
+        location url="#application.mainURL#/mfa" addtoken="false";
+    }
+}
 </cfscript>

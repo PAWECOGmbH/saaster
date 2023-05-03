@@ -265,10 +265,80 @@ div.dashboard div.card-header label.form-check {
     }
 }
 
-    .navbar-dark {
-        box-shadow: inset 0 -1px 0 0 rgba(98, 105, 118, 0.16);
-    }
+.navbar-dark {
+    box-shadow: inset 0 -1px 0 0 rgba(98, 105, 118, 0.16);
+}
 
-    .list-group-item-action:hover, .list-group-item-action:focus {
-        color: #000;
-    }
+.list-group-item-action:hover, .list-group-item-action:focus {
+    color: #000;
+}
+
+.otc {
+	position: relative;
+	width: 320px;
+	margin: 0 auto;
+}
+
+.otc fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.otc fieldset div {
+	display: flex;
+	align-items: center;
+}
+
+.otc legend {
+	margin: 0 auto 1em;
+	color: #5555FF;
+}
+
+input[type="number"] {
+	width: .82em;
+	line-height: 1;
+	margin: .1em;
+	padding: 8px 0 4px;
+	font-size: 2.65em;
+	text-align: center;
+	appearance: textfield;
+	-webkit-appearance: textfield;
+	border: 2px solid #BBBBFF;
+	color: purple;
+	border-radius: 4px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 2 group of 3 items */
+input[type="number"]:nth-child(n+4) {
+	order: 2;
+}
+.otc div.mb-3::before {
+	content: '';
+	height: 2px;
+	width: 24px;
+	margin: 0 .25em;
+	order: 1;
+	background: #BBBBFF;
+}
+
+/* From: https://gist.github.com/ffoodd/000b59f431e3e64e4ce1a24d5bb36034 */
+.otc label {
+	border: 0 !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	-webkit-clip-path: inset(50%) !important;
+	clip-path: inset(50%) !important;
+	height: 1px !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	white-space: nowrap !important;
+}

@@ -170,6 +170,7 @@ component displayname="user" output="false" {
         local.admin = 0;
         local.active = 0;
         local.tenantID = '';
+        local.mfa = 0;
 
         if (structKeyExists(arguments.userStruct, "salutation")) {
             local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
@@ -204,6 +205,9 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "tenantID")) {
             local.tenantID = arguments.userStruct.tenantID;
         }
+        if (structKeyExists(arguments.userStruct, "mfa")) {
+            local.mfa = arguments.userStruct.mfa;
+        }
 
         try {
 
@@ -221,7 +225,8 @@ component displayname="user" output="false" {
                     language: {type: "nvarchar", value: local.language},
                     admin: {type: "numeric", value: local.admin},
                     superadmin: {type: "numeric", value: local.superadmin},
-                    active: {type: "numeric", value: local.active}
+                    active: {type: "numeric", value: local.active},
+                    mfa: {type: "numeric", value: local.mfa}
                 },
                 sql = "
                     UPDATE users
@@ -233,7 +238,8 @@ component displayname="user" output="false" {
                         strLanguage = :language,
                         blnAdmin = :admin,
                         blnSuperAdmin = :superadmin,
-                        blnActive = :active
+                        blnActive = :active,
+                        blnMfa = :mfa
                     WHERE intUserID = :intUserID
                 "
 
@@ -701,4 +707,118 @@ component displayname="user" output="false" {
 
     }
 
+
+    public any function sendMfaCode(required numeric userID, boolean blnResend){
+
+        num1 = 99999;
+        num2 = 1000000;
+        local.authCode = randRange(num1, num2, "SHA1PRNG");
+        getTime = new com.time();
+        ValidyTime = dateAdd("h", 3, now());
+        /* local.mfaDateTime = lsTimeFormat(getTime.utc2local(utcDate=ValidyTime)); */
+        local.mfaDateTime = ValidyTime;
+
+        objUserMfa = application.objCustomer.getUserDataByID(arguments.userID);
+        
+        queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: arguments.userID},
+                authcode: {type: "numeric", value:local.authCode},
+                mfaDateTime: {type: "datetime", value: local.mfaDateTime},
+            },
+            sql = "
+                UPDATE users
+                SET intMfaCode = :authcode,
+                dtmMfaDateTime = :mfaDateTime
+                WHERE intUserID = :userID
+            "
+        )
+
+        variables.mailTitle = variables.getTrans('txtMfaCode');
+        variables.mailType = "html";
+
+        cfsavecontent (variable = "variables.mailContent") {
+
+            echo("
+                #variables.getTrans('titHello')# #objUserMfa.strFirstName# #objUserMfa.strLastName#<br><br>
+                #variables.getTrans('txtThreeTimeTry')#<br>
+                #variables.getTrans('txtCodeValidity')#<br><br>
+                #local.authCode#<br><br>
+                
+                #variables.getTrans('txtRegards')#<br>
+                #variables.getTrans('txtYourTeam')#<br>
+                #application.appOwner#
+            ");
+        }
+
+        // Send activation link
+        mail to="#objUserMfa.strEmail#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
+            include template="/config.cfm";
+            include template="/includes/mail_design.cfm";
+        }
+        structDelete(session, "user_id");
+        session.mfaCheckCount = 0;
+        if(arguments.blnResend){
+
+            local.argsReturnValue['message'] = variables.getTrans('txtResendDone');
+            local.argsReturnValue['success'] = true;
+            return local.argsReturnValue;
+
+        } else{
+            local.returnStruct['redirect'] = "#application.mainURL#/mfa?uid=#arguments.userid#";
+            return local.returnStruct;
+        }
+        
+
+    }
+
+    public struct function checkMfa(required numeric mfaUserID, required numeric mfaCode){
+
+        local.mfaCheckTime = dateAdd("h", 3, now());
+
+        local.qGetUserMfa = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: arguments.mfaUserID}
+            },
+            sql = "
+                SELECT intmfaCode, dtmMfaDateTime
+                FROM users
+                WHERE intUserID = :userID
+            "
+        )
+        
+        if(arguments.mfaCode eq local.qGetUserMfa.intmfaCode){
+
+            mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
+            mfaCheckTime = parseDateTime(local.mfaCheckTime);
+
+            if(DateDiff("h", mfaCheckTime, mfaRequestTime) neq 0){
+                local.argsReturnValue['message'] = variables.getTrans('txtCodeValidity');
+                local.argsReturnValue['uid'] = arguments.mfaUserID;
+                local.argsReturnValue['success'] = false;
+                session.mfaCheckCount++;
+            } else {
+                local.argsReturnValue['success'] = true;
+            }
+
+        } else {
+            local.argsReturnValue['message'] = variables.getTrans('txtErrorMfaCode');
+            local.argsReturnValue['uid'] = arguments.mfaUserID;
+            local.argsReturnValue['success'] = false;
+            session.mfaCheckCount++;
+        }
+
+        if(session.mfaCheckCount eq 3){
+            local.argsReturnValue['message'] = variables.getTrans('txtThreeTimeTry');
+            local.argsReturnValue['uid'] = arguments.mfaUserID;
+            local.argsReturnValue['success'] = false;
+            session.mfaCheckCount++;
+        } 
+        
+        return local.argsReturnValue;
+
+    }
 }
