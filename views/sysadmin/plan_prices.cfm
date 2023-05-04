@@ -1,20 +1,9 @@
 
 <cfscript>
-    qPrices = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisPlanID: {type: "numeric", value: thisPlanID}
-        },
-        sql = "
-            SELECT currencies.strCurrencyEN, currencies.strCurrencyISO, currencies.intCurrencyID as currID, plan_prices.*
-            FROM currencies
-            LEFT JOIN plan_prices
-            ON currencies.intCurrencyID = plan_prices.intCurrencyID
-            AND plan_prices.intPlanID = :thisPlanID
-            WHERE blnActive = 1
-            ORDER BY currencies.intPrio
-        "
-    )
+
+    objPlans = new com.plans();
+    qPrices = objPlans.getPrices(thisPlanID);
+
 </cfscript>
 
 <cfoutput>

@@ -1,6 +1,8 @@
 
 <cfscript>
 
+    objPlans = new com.plans();
+
     // Exception handling for sef and user id
     param name="thiscontent.thisID" default=0 type="numeric";
     thisPlanID = thiscontent.thisID;
@@ -9,26 +11,8 @@
         location url="#application.mainURL#/sysadmin/plans" addtoken="false";
     }
 
-    qPlanGroups = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM plan_groups
-            ORDER BY intPrio
-        "
-    )
-
-    qPlan = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisPlanID: {type: "numeric", value: thisPlanID}
-        },
-        sql = "
-            SELECT plans.*, plan_groups.strGroupName
-            FROM plans INNER JOIN plan_groups ON plans.intPlanGroupID = plan_groups.intPlanGroupID
-            WHERE plans.intPlanID = :thisPlanID
-        "
-    )
+    qPlanGroups = objPlans.getPlanGroups();
+    qPlan = objPlans.getPlan(thisPlanID);
 
     if(!qPlan.recordCount){
         location url="#application.mainURL#/sysadmin/plans" addtoken="false";

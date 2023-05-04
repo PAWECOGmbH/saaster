@@ -461,6 +461,122 @@ component displayname="customer" output="false" {
 
     }
 
+    public query function getCurrentModules(required numeric customerID){
+
+        local.qCurrentModules = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT *
+                FROM bookings
+                WHERE intCustomerID = :customerID
+                AND intModuleID > 0
+            "
+        );
+
+        return local.qCurrentModules;
+    }
+
+    public query function getTotalCustomersSearch(required string search, required numeric start){
+
+        local.entries = 10;
+
+        local.qTotalCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson,
+                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
+                FROM customers
+
+                INNER JOIN users
+                ON customers.intCustomerID = users.intCustomerID
+                OR customers.intCustParentID = users.intCustomerID
+
+                WHERE customers.blnActive = 1
+                AND MATCH (
+                    customers.strCompanyName,
+                    customers.strContactPerson,
+                    customers.strAddress,
+                    customers.strZIP,
+                    customers.strCity,
+                    customers.strEmail
+                )
+                #arguments.search#
+                ORDER BY #session.cust_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qTotalCustomers;
+    }
+
+    public query function getTotalCustomers(){
+
+        local.qTotalCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intCustomerID) as totalCustomers
+                FROM customers
+                WHERE blnActive = 1
+            "
+        );
+
+        return local.qTotalCustomers;
+    }
+
+    public query function getCustomerSearch(required string search, required numeric start){
+
+        local.entries = 10;
+
+        local.qCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
+                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
+                FROM customers
+
+                INNER JOIN users
+                ON customers.intCustomerID = users.intCustomerID
+                OR customers.intCustParentID = users.intCustomerID
+
+                WHERE customers.blnActive = 1
+                AND MATCH (
+                    customers.strCompanyName,
+                    customers.strContactPerson,
+                    customers.strAddress,
+                    customers.strZIP,
+                    customers.strCity,
+                    customers.strEmail
+                )
+                #arguments.search#
+                ORDER BY #session.cust_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qCustomers;
+    }
+
+    public query function getCustomer(required numeric start){
+
+        local.entries = 10;
+
+        local.qCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT customers.*, countries.strCountryName
+                FROM customers
+                LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
+                WHERE customers.blnActive = 1
+                ORDER BY #session.cust_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qCustomers;
+    }
 
 
 }

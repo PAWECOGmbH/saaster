@@ -2,13 +2,10 @@
 <cfinclude template="/includes/header.cfm">
 
 <cfscript>
-    qApiUser = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intApiID, strApiName, dtmValidUntil
-            FROM api_management
-        "
-    )
+
+    objApi = new com.api();
+    qApiUser = objApi.getApi();
+
 </cfscript>
 
 <div class="page-wrapper">

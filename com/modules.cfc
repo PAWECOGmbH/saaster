@@ -446,5 +446,57 @@ component displayname="modules" output="false" {
 
     }
 
+    public query function getModule(required numeric modulID){
+
+        local.qModule = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                thisModuleID: {type: "numeric", value: arguments.modulID}
+            },
+            sql = "
+                SELECT *
+                FROM modules
+                WHERE intModuleID = :thisModuleID
+            "
+        );
+
+        return local.qModule;
+    }
+
+    public query function getPrices(required numeric modulID){
+
+        local.qPrices = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                thisModuleID: {type: "numeric", value: arguments.modulID}
+            },
+            sql = "
+                SELECT currencies.strCurrencyEN, currencies.strCurrencyISO, currencies.intCurrencyID as currID, modules_prices.*
+                FROM currencies
+                LEFT JOIN modules_prices
+                ON currencies.intCurrencyID = modules_prices.intCurrencyID
+                AND modules_prices.intModuleID = :thisModuleID
+                WHERE blnActive = 1
+                ORDER BY currencies.intPrio
+            "
+        );
+
+        return local.qPrices;
+    }
+
+    public query function getModules(){
+
+        local.qModules = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM modules
+                ORDER BY intPrio
+            "
+        );
+
+        return local.qModules;
+    }
+
 
 }

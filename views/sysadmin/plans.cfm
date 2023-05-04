@@ -1,33 +1,10 @@
 
 <cfscript>
 
-    qPlanGroups = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM plan_groups
-            ORDER BY intPrio
-        "
-    )
-
-    qPlans = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT plans.*, plan_groups.strGroupName
-            FROM plans INNER JOIN plan_groups ON plans.intPlanGroupID = plan_groups.intPlanGroupID
-            ORDER BY plan_groups.intPrio, plans.intPrio
-        "
-    )
-
-    qCountries = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intCountryID, strCountryName
-            FROM countries
-            WHERE blnActive = 1
-            ORDER BY intPrio
-        "
-    )
+    objPlans = new com.plans();
+    qPlanGroups = objPlans.getAllPlanGroups();
+    qPlans = objPlans.getAllPlans();
+    qCountries = objPlans.getAllCountries();
 
 </cfscript>
 

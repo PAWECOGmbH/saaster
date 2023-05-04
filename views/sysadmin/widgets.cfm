@@ -1,49 +1,10 @@
 <cfscript>
 
-    qWidgets = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT widgets.*, widget_ratio.strDescription,
-            (
-                SELECT GROUP_CONCAT(intPlanID)
-                FROM widgets_plans
-                WHERE intWidgetID = widgets.intWidgetID
-            ) as planList,
-            (
-                SELECT GROUP_CONCAT(intModuleID)
-                FROM widgets_modules
-                WHERE intWidgetID = widgets.intWidgetID
-            ) as moduleList
-            FROM widgets
-            INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
-        "
-    )
-
-    qWidgetRatio = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM widget_ratio
-        "
-    )
-
-    qPlans = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intPlanID, strPlanName
-            FROM plans
-            ORDER BY intPrio
-        "
-    )
-
-    qModules = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intModuleID, strModuleName
-            FROM modules
-            ORDER BY intPrio
-        "
-    )
+    objWidget = new com.widget();
+    qWidgets = objWidget.getWidgets();
+    qWidgetRatio = objWidget.getWidgetRatio();
+    qPlans = objWidget.getPlans();
+    qModules = objWidget.getModules();
 
 </cfscript>
 

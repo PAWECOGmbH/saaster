@@ -1588,5 +1588,198 @@ component displayname="invoices" output="false" {
 
     }
 
+    public query function getInvoice(required string invoiceUUID){
 
+        local.qInvoice = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                uuid: {type: "varchar", value: arguments.invoiceUUID}
+            },
+            sql = "
+                SELECT intInvoiceID
+                FROM invoices
+                WHERE strUUID = :uuid
+            "
+        )
+
+        return local.qInvoice;
+    }
+
+    public query function getTotalInvoicesSearch(required string search, required string term, required numeric start){
+
+        local.entries = 10;
+
+        local.qTotalInvoices = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT  COUNT(intInvoiceID) as totalInvoices,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle,
+                        invoices.dtmInvoiceDate,
+                        invoices.dtmDueDate,
+                        invoices.strCurrency,
+                        invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
+                        invoice_status.strInvoiceStatusVariable,
+                        invoice_status.strColor,
+                        IF(
+                            LENGTH(customers.strCompanyName),
+                            customers.strCompanyName,
+                            IF(
+                                LENGTH(invoices.intUserID),
+                                (
+                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                                    FROM users
+                                    WHERE intUserID = invoices.intUserID
+                                ),
+                                customers.strContactPerson
+                            )
+                        ) as customerName
+
+                FROM invoices
+
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                #session.status_sql#
+
+                INNER JOIN customers ON 1=1
+                AND invoices.intCustomerID = customers.intCustomerID
+
+                WHERE (
+                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
+                    #arguments.search#
+                    OR
+                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
+                    #arguments.search#
+                    OR invoices.intInvoiceNumber = '#arguments.term#'
+                )
+
+                ORDER BY #session.i_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qTotalInvoices;
+    }
+
+    public query function getTotalInvoices(){
+
+        local.qTotalInvoices = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT COUNT(intInvoiceID) as totalInvoices
+                FROM invoices
+                WHERE 1=1
+                #session.status_sql#
+            "
+        );
+
+        return local.qTotalInvoices;
+    }
+
+    public query function getAllInvoicesSearch(required string search, required string term, required numeric start){
+
+        local.entries = 10;
+
+        local.qInvoices = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT  invoices.intInvoiceID,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle,
+                        invoices.dtmInvoiceDate,
+                        invoices.dtmDueDate,
+                        invoices.strCurrency,
+                        invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
+                        invoice_status.strInvoiceStatusVariable,
+                        invoice_status.strColor,
+                        IF(
+                            LENGTH(customers.strCompanyName),
+                            customers.strCompanyName,
+                            IF(
+                                LENGTH(invoices.intUserID),
+                                (
+                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                                    FROM users
+                                    WHERE intUserID = invoices.intUserID
+                                ),
+                                customers.strContactPerson
+                            )
+                        ) as customerName
+
+                FROM invoices
+
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                #session.status_sql#
+
+                INNER JOIN customers ON 1=1
+                AND invoices.intCustomerID = customers.intCustomerID
+
+                WHERE (
+                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
+                    #arguments.search#
+                    OR
+                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
+                    #arguments.search#
+                    OR invoices.intInvoiceNumber = '#arguments.term#'
+                )
+
+                ORDER BY #session.i_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qInvoices;
+    }
+
+    public query function getAllInvoices(required numeric start){
+
+        local.entries = 10;
+
+        local.qInvoices = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT  invoices.intInvoiceID,
+                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
+                        invoices.strInvoiceTitle,
+                        invoices.dtmInvoiceDate,
+                        invoices.dtmDueDate,
+                        invoices.strCurrency,
+                        invoices.decTotalPrice,
+                        invoices.intPaymentStatusID,
+                        invoice_status.strInvoiceStatusVariable,
+                        invoice_status.strColor,
+                        IF(
+                            LENGTH(customers.strCompanyName),
+                            customers.strCompanyName,
+                            IF(
+                                LENGTH(invoices.intUserID),
+                                (
+                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
+                                    FROM users
+                                    WHERE intUserID = invoices.intUserID
+                                ),
+                                customers.strContactPerson
+                            )
+                        ) as customerName
+
+                FROM invoices
+
+                INNER JOIN invoice_status ON 1=1
+                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
+                #session.status_sql#
+
+                INNER JOIN customers ON 1=1
+                AND invoices.intCustomerID = customers.intCustomerID
+
+                ORDER BY #session.i_sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qInvoices;
+    }
+    
 }

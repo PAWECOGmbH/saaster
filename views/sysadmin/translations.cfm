@@ -4,6 +4,8 @@
     param name="session.visTrans" default="0" type="numeric";
     param name="session.displayLanguage" default="#application.objLanguage.getDefaultLanguage().iso#" type="string";
 
+    objTranslate = new com.translate();
+
     s_badge_custom = "";
     s_badge_system = "";
 
@@ -35,38 +37,13 @@
     }
 
     // The language query is used in order to translate entries
-    qLanguages = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intLanguageID, strLanguageISO, strLanguageEN, strLanguage, blnDefault, intPrio
-            FROM languages
-            ORDER BY blnDefault DESC, intPrio
-        "
-    )
+    qLanguages = objTranslate.getLanguages();
 
     // When entering a search
     if(len(trim(session.search))) {
         session.visTrans = 0
 
-        // Custom results
-        defaultQueryCustom = "
-            SELECT *
-            FROM custom_translations
-            WHERE strVariable LIKE '%#session.search#%'
-        ";
-        orListCustom = "";
-        orderQryCustom = "
-            ORDER BY strVariable
-        ";
-
-        // Loop over query and append to query string
-        loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
-        }
-
-        cfquery(datasource=application.datasource name="qCustomResults") {
-            writeOutput(defaultQueryCustom & orListCustom & orderQryCustom);
-        }
+        qCustomResults = objTranslate.searchCustomTranslations();
 
         s_badge_custom = "";
 
@@ -76,25 +53,7 @@
             s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
         }
 
-        // System results
-        defaultQuerySys = "
-        SELECT *
-        FROM system_translations
-        WHERE strVariable LIKE '%#session.search#%'
-        ";
-        orListCustom = "";
-        orderQrySys = "
-            ORDER BY strVariable
-        ";
-
-        // Loop over query and append to query string
-        loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
-        }
-
-        cfquery(datasource=application.datasource name="qSystemResults") {
-            writeOutput(defaultQuerySys & orListCustom & orderQrySys);
-        }
+        qSystemResults = objTranslate.searchSystemTranslations();
 
         s_badge_system = "";
 
@@ -109,21 +68,8 @@
     }
 
     if(session.visTrans) {
-        qSystemResults = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM system_translations
-            "
-        );
-
-        qCustomResults = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM custom_translations
-            "
-        );
+        qSystemResults = objTranslate.getSystemTranslations();
+        qCustomResults = objTranslate.getCustomTranslations();
     }
 </cfscript>
 

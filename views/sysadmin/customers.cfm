@@ -29,41 +29,12 @@
         }else {
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
-        qTotalCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson,
-                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
-                FROM customers
 
-                INNER JOIN users
-                ON customers.intCustomerID = users.intCustomerID
-                OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.blnActive = 1
-                AND MATCH (
-                    customers.strCompanyName,
-                    customers.strContactPerson,
-                    customers.strAddress,
-                    customers.strZIP,
-                    customers.strCity,
-                    customers.strEmail
-                )
-                #searchString#
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        )
+        qTotalCustomers = application.objCustomer.getTotalCustomersSearch(searchString, cust_start);
     }
     else {
-        qTotalCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intCustomerID) as totalCustomers
-                FROM customers
-                WHERE blnActive = 1
-            "
-        )
+
+        qTotalCustomers = application.objCustomer.getTotalCustomers();
     }
 
     pages = ceiling(qTotalCustomers.totalCustomers / getEntries);
@@ -85,43 +56,11 @@
         }else {
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
-        qCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
-                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
-                FROM customers
 
-                INNER JOIN users
-                ON customers.intCustomerID = users.intCustomerID
-                OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.blnActive = 1
-                AND MATCH (
-                    customers.strCompanyName,
-                    customers.strContactPerson,
-                    customers.strAddress,
-                    customers.strZIP,
-                    customers.strCity,
-                    customers.strEmail
-                )
-                #searchString#
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        );
+        qCustomers = application.objCustomer.getCustomerSearch(searchString, cust_start);
     }else {
-        qCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT customers.*, countries.strCountryName
-                FROM customers
-                LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-                WHERE customers.blnActive = 1
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        );
+        
+        qCustomers = application.objCustomer.getCustomer(cust_start);
     }
 
     cntCountries = application.objGlobal.getCountry().recordCount;

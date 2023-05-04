@@ -1,20 +1,9 @@
 
 <cfscript>
-    qModules = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisPlanID: {type: "numeric", value: thisPlanID}
-        },
-        sql = "
-            SELECT modules.*, plans_modules.intModuleID as currModule
-            FROM modules
-            LEFT JOIN plans_modules
-            ON modules.intModuleID = plans_modules.intModuleID
-            AND plans_modules.intPlanID = :thisPlanID
-            WHERE modules.blnActive = 1
-            ORDER BY modules.intPrio
-        "
-    )
+
+    objPlans = new com.plans();
+    qModules = objPlans.getModules(thisPlanID);
+    
 </cfscript>
 
 <cfoutput>

@@ -13,33 +13,13 @@
     cfparam(name="getLayout.fluidVertical" default="");
 
 
-
-    // Function query execute system settings
-    function systemSetting(required string settingVariable) {
-
-        qSystemSettings = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                settingVariable: {type: "varchar", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT *
-                FROM system_settings
-                WHERE strSettingVariable = :settingVariable
-            "
-        )
-
-        return qSystemSettings;
-
-    }
-
-
-    qInvoiceNumberStart = systemSetting('settingInvoiceNumberStart');
-    qRoundFactor = systemSetting('settingRoundFactor');
-    qInvoicePrefix = systemSetting('settingInvoicePrefix');
-    qStandardVatType = systemSetting('settingStandardVatType');
-    qInvoiceNet = systemSetting('settingInvoiceNet');
-    qLayout = systemSetting('settingLayout');
+    objSettings = new com.settings();
+    qInvoiceNumberStart = objSettings.getSystemSetting('settingInvoiceNumberStart');
+    qRoundFactor = objSettings.getSystemSetting('settingRoundFactor');
+    qInvoicePrefix = objSettings.getSystemSetting('settingInvoicePrefix');
+    qStandardVatType = objSettings.getSystemSetting('settingStandardVatType');
+    qInvoiceNet = objSettings.getSystemSetting('settingInvoiceNet');
+    qLayout = objSettings.getSystemSetting('settingLayout');
 
 </cfscript>
 

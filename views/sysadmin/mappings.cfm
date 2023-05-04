@@ -1,19 +1,9 @@
 <cfscript>
-    qCustomMappings = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM custom_mappings
-            ORDER BY intCustomMappingID DESC
-        "
-    )
-    qSystemMappings = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM system_mappings
-        "
-    )
+
+    objMapping = new com.mapping();
+    qCustomMappings = objMapping.getCustomMappings();
+    qSystemMappings = objMapping.getSystemMappings();
+    
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">

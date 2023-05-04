@@ -6,6 +6,8 @@
     param name="session.invoice_page" default=1 type="numeric";
     param name="session.status_sql" default="";
 
+    objInvoice = new com.invoices();
+
     getEntries = 10;
     invoice_start = 0;
 
@@ -42,65 +44,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qTotalInvoices = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT  COUNT(intInvoiceID) as totalInvoices,
-                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                        invoices.strInvoiceTitle,
-                        invoices.dtmInvoiceDate,
-                        invoices.dtmDueDate,
-                        invoices.strCurrency,
-                        invoices.decTotalPrice,
-                        invoices.intPaymentStatusID,
-                        invoice_status.strInvoiceStatusVariable,
-                        invoice_status.strColor,
-                        IF(
-                            LENGTH(customers.strCompanyName),
-                            customers.strCompanyName,
-                            IF(
-                                LENGTH(invoices.intUserID),
-                                (
-                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
-                                    FROM users
-                                    WHERE intUserID = invoices.intUserID
-                                ),
-                                customers.strContactPerson
-                            )
-                        ) as customerName
-
-                FROM invoices
-
-                INNER JOIN invoice_status ON 1=1
-                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
-
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
-
-                WHERE (
-                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #searchString#
-                    OR
-                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #searchString#
-                    OR invoices.intInvoiceNumber = '#searchTerm#'
-                )
-
-                ORDER BY #session.i_sort#
-                LIMIT #invoice_start#, #getEntries#
-            "
-        )
+        qTotalInvoices = objInvoice.getTotalInvoicesSearch(searchString, searchTerm, invoice_start);
     } else {
-        qTotalInvoices = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intInvoiceID) as totalInvoices
-                FROM invoices
-                WHERE 1=1
-                #session.status_sql#
-            "
-        )
+
+        qTotalInvoices = objInvoice.getTotalInvoices();
     }
 
     pages = ceiling(qTotalInvoices.totalInvoices / getEntries);
@@ -117,104 +64,12 @@
     }
 
     if (len(trim(searchTerm))) {
-        qInvoices = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT  invoices.intInvoiceID,
-                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                        invoices.strInvoiceTitle,
-                        invoices.dtmInvoiceDate,
-                        invoices.dtmDueDate,
-                        invoices.strCurrency,
-                        invoices.decTotalPrice,
-                        invoices.intPaymentStatusID,
-                        invoice_status.strInvoiceStatusVariable,
-                        invoice_status.strColor,
-                        IF(
-                            LENGTH(customers.strCompanyName),
-                            customers.strCompanyName,
-                            IF(
-                                LENGTH(invoices.intUserID),
-                                (
-                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
-                                    FROM users
-                                    WHERE intUserID = invoices.intUserID
-                                ),
-                                customers.strContactPerson
-                            )
-                        ) as customerName
 
-                FROM invoices
-
-                INNER JOIN invoice_status ON 1=1
-                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
-
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
-
-                WHERE (
-                    MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #searchString#
-                    OR
-                    MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #searchString#
-                    OR invoices.intInvoiceNumber = '#searchTerm#'
-                )
-
-                ORDER BY #session.i_sort#
-                LIMIT #invoice_start#, #getEntries#
-            "
-        )
-
-
+        qInvoices = objInvoice.getAllInvoicesSearch(searchString, searchTerm, invoice_start);
     } else {
 
-
-        qInvoices = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT  invoices.intInvoiceID,
-                        CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
-                        invoices.strInvoiceTitle,
-                        invoices.dtmInvoiceDate,
-                        invoices.dtmDueDate,
-                        invoices.strCurrency,
-                        invoices.decTotalPrice,
-                        invoices.intPaymentStatusID,
-                        invoice_status.strInvoiceStatusVariable,
-                        invoice_status.strColor,
-                        IF(
-                            LENGTH(customers.strCompanyName),
-                            customers.strCompanyName,
-                            IF(
-                                LENGTH(invoices.intUserID),
-                                (
-                                    SELECT CONCAT(users.strFirstName, ' ', users.strLastName)
-                                    FROM users
-                                    WHERE intUserID = invoices.intUserID
-                                ),
-                                customers.strContactPerson
-                            )
-                        ) as customerName
-
-                FROM invoices
-
-                INNER JOIN invoice_status ON 1=1
-                AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
-
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
-
-                ORDER BY #session.i_sort#
-                LIMIT #invoice_start#, #getEntries#
-            "
-        )
-
+        qInvoices = objInvoice.getAllInvoices(invoice_start);
     }
-
-    objInvoice = new com.invoices();
 
 </cfscript>
 
