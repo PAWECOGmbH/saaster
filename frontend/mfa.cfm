@@ -35,9 +35,7 @@
                         <div class="mb-3">
 
                             <label class="form-label">#getTrans('txtMfaLable')#</label>
-                            <!--- <input type="text" name="email" class="form-control" value="#session.email#" required> --->
                             <input type="number" pattern="[0-9]*"  value="" inputtype="numeric" autocomplete="one-time-code" id="otc-1" name="mfa_1" required>
-                            <!-- Autocomplete not to put on other input -->
                             <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-2" name="mfa_2" required>
                             <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-3" name="mfa_3" required>
                             <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-4" name="mfa_4" required>
@@ -49,18 +47,11 @@
                     
 
                 </div>
-                <!--- <div class="text-center mt-2">
-                    #getTrans('formRegisterText')# <a href="#application.mainURL#/register">#getTrans('formSignUp')#</a>
-                </div>
-                <div class="text-center mt-1 mb-4">
-                    #getTrans('formForgotPassword')# <a href="#application.mainURL#/password">#getTrans('formReset')#</a>
-                </div> --->
             </form>
             
             
             <div class="form-footer text-center">
                 <a role="button" href="#application.mainURL#/registration?resend=1&uid=#uid#">#getTrans('txtResendMfa')#</a>
-                <!--- <button type="button" id="resend_button" class="btn btn-primary w-100">#getTrans('txtResendMfa')#</button> --->
             </div>
 
         </div>

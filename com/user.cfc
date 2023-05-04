@@ -710,13 +710,13 @@ component displayname="user" output="false" {
 
     public any function sendMfaCode(required numeric userID, boolean blnResend){
 
-        num1 = 99999;
-        num2 = 1000000;
-        local.authCode = randRange(num1, num2, "SHA1PRNG");
-        getTime = new com.time();
-        ValidyTime = dateAdd("h", 3, now());
+        local.num1 = 99999;
+        local.num2 = 1000000;
+        local.authCode = randRange(local.num1, local.num2, "SHA1PRNG");
+        local.getTime = new com.time();
+        local.ValidyTime = dateAdd("h", 3, now());
         /* local.mfaDateTime = lsTimeFormat(getTime.utc2local(utcDate=ValidyTime)); */
-        local.mfaDateTime = ValidyTime;
+        local.mfaDateTime = local.ValidyTime;
 
         objUserMfa = application.objCustomer.getUserDataByID(arguments.userID);
         
@@ -792,10 +792,10 @@ component displayname="user" output="false" {
         
         if(arguments.mfaCode eq local.qGetUserMfa.intmfaCode){
 
-            mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
-            mfaCheckTime = parseDateTime(local.mfaCheckTime);
+            local.mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
+            local.mfaCheckTime = parseDateTime(local.mfaCheckTime);
 
-            if(DateDiff("h", mfaCheckTime, mfaRequestTime) neq 0){
+            if(DateDiff("h", local.mfaCheckTime, local.mfaRequestTime) neq 0){
                 local.argsReturnValue['message'] = variables.getTrans('txtCodeValidity');
                 local.argsReturnValue['uid'] = arguments.mfaUserID;
                 local.argsReturnValue['success'] = false;

@@ -3,14 +3,16 @@ ADD COLUMN intMfaCode INTEGER(11),
 ADD COLUMN dtmMfaDateTime datetime DEFAULT NULL,
 ADD COLUMN blnMfa TINYINT(1) NOT NULL DEFAULT 0;
 
-INSERT INTO `system_translations` VALUES (318,"txtSubjectMFA", "Your Multi factor authentication Code", "Ihre Multi factor authentication Code");
-INSERT INTO `system_translations` VALUES (319,"txtMfaCode", "Here is your multi factor authentication code below", "Unten ist Ihre multi factor authentication Code");
-INSERT INTO `system_translations` VALUES (320,"txtThreeTimeTry", "You have 3 tries to login to your dashboard", "Sie haben insgesamt drei Versuche, um sich mit diesem Code einzuloggen.");
-INSERT INTO `system_translations` VALUES (321,"txtCodeValidity", "This code is only valid for one hour.", "Dieser Code ist nur eine Stunde lang g&uuml;ltig.");
-INSERT INTO `system_translations` VALUES (322,"titMfa", "Multi factor authentication.", "Multi-Faktor-Authentifizierung.");
-INSERT INTO `system_translations` VALUES (323,"txtMfaLable", "Multi factor authentication Code.", "Multi Faktor Authentifizierung Code.");
-INSERT INTO `system_translations` VALUES (324,"txtResendMfa", "Resend Code.", "Erneut senden");
-INSERT INTO `system_translations` VALUES (325,"txtErrorMfaCode", "Incorrect Code, please try again.", "Ihr Code ist nicht korrekt, bitte erneut versuchen");
-INSERT INTO `system_translations` VALUES (326,"txtResendDone", "Resended Mfa Code.", "Der Code wurde erneut gesendet");
+INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
+VALUES ('txtSubjectMFA', 'Ihr Code für die Mehrfaktor-Authentifizierung', 'Your multi factor authentication code'),
+('txtMfaCode', 'Nachfolgend finden Sie den Code für die Multi-Faktor-Authentifizierung', 'Below is your multi factor authentication code'),
+('txtThreeTimeTry', 'Sie haben insgesamt drei Versuche, sich mit diesem Code anzumelden.', 'You have a total of three attempts to log in with this code.'),
+('txtCodeValidity', 'Dieser Code ist nur für eine Stunde g&uuml;ltig.', 'This code is valid for one hour only.'),
+('titMfa', 'Multi-Faktor-Authentisierung.', 'Multi-factor authentication.'),
+('txtMfaLable', 'Multi-Faktor-Authentifizierung Code.', 'Multi factor authentication Code.'),
+('txtResendMfa', 'Erneut senden', 'Resend'),
+('txtErrorMfaCode', 'Ihr Code ist nicht korrekt, bitte versuchen Sie es erneut.', 'Your code is incorrect, please try again.'),
+('txtResendDone', 'Der Code wurde gesendet.', 'The code has been sent');
 
-INSERT INTO `system_mappings` VALUES (78, 'mfa', 'frontend/mfa.cfm', 0, 0, 0);
+INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysadmin)
+VALUES ('mfa', 'frontend/mfa.cfm', 0, 0, 0);
