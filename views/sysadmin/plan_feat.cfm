@@ -2,8 +2,8 @@
 
 <cfscript>
 
-    objPlans = new com.plans();
-    qFeatures = objPlans.getFeatures(thisPlanID);
+    objSysadmin = new com.sysadmin();
+    qFeatures = objSysadmin.getFeatures(thisPlanID);
 
 </cfscript>
 

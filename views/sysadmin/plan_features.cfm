@@ -2,8 +2,8 @@
 <cfscript>
     
     getModal = new com.translate();
-    objPlans = new com.plans();
-    qPlanFeatures = objPlans.getPlanFeatures();
+    objSysadmin = new com.sysadmin();
+    qPlanFeatures = objSysadmin.getPlanFeatures();
 
 </cfscript>
 

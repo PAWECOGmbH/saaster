@@ -1,9 +1,9 @@
 
 
 <cfscript>
-
-    objModule = new com.modules();
-    qPrices = objModule.getPrices(thisModuleID);
+    
+    objSysadmin = new com.sysadmin();
+    qPrices = objSysadmin.getPricesModule(thisModuleID);
     
 </cfscript>
 

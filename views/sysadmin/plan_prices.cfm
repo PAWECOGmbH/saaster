@@ -1,8 +1,8 @@
 
 <cfscript>
 
-    objPlans = new com.plans();
-    qPrices = objPlans.getPrices(thisPlanID);
+    objSysadmin = new com.sysadmin();
+    qPrices = objSysadmin.getPlanPrices(thisPlanID);
 
 </cfscript>
 

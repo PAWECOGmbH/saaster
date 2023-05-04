@@ -3,8 +3,8 @@
 
 <cfscript>
 
-    objApi = new com.api();
-    qApiUser = objApi.getApi();
+    objSysadmin = new com.sysadmin();
+    qApiUser = objSysadmin.getApi();
 
 </cfscript>
 

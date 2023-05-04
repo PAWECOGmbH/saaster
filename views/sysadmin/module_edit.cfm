@@ -1,6 +1,6 @@
 <cfscript>
 
-    objModule = new com.modules();
+    objSysadmin = new com.sysadmin();
 
     // Exception handling for sef and user id
     param name="thiscontent.thisID" default=0 type="numeric";
@@ -9,7 +9,7 @@
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";
     }
 
-    qModule = objModule.getModule(thisModuleID);
+    qModule = objSysadmin.getModule(thisModuleID);
 
     if(not qModule.recordCount){
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";

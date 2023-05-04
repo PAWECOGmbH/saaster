@@ -30,8 +30,10 @@
     objBookModule = new com.book('module');
     objBookPlan = new com.book('plan');
 
+    objSysadmin = new com.sysadmin();
+
     // Get the current modules of the customer (we are using a query because the function is filtered with a date)
-    qCurrentModules = application.objCustomer.getCurrentModules(thisCustomerID);
+    qCurrentModules = objSysadmin.getCurrentModules(thisCustomerID);
 
     currentModuleList = valueList(qCurrentModules.intModuleID);
 

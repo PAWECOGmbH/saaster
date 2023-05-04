@@ -184,18 +184,4 @@ component displayname="currency" output="false" {
 
     }
 
-    public query function getCurrencies(){
-
-        local.qCurrencies = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM currencies
-                ORDER BY intPrio
-            "
-        );
-
-        return local.qCurrencies;
-    }
-
 }

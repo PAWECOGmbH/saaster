@@ -3,6 +3,8 @@
     param name="session.cust_sort" default="intPrio" type="string";
     param name="session.customers_page" default=1 type="numeric";
 
+    objSysadmin = new com.sysadmin();
+
     getEntries = 10;
     cust_start = 0;
 
@@ -30,11 +32,11 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qTotalCustomers = application.objCustomer.getTotalCustomersSearch(searchString, cust_start);
+        qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start);
     }
     else {
 
-        qTotalCustomers = application.objCustomer.getTotalCustomers();
+        qTotalCustomers = objSysadmin.getTotalCustomers();
     }
 
     pages = ceiling(qTotalCustomers.totalCustomers / getEntries);
@@ -57,10 +59,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCustomers = application.objCustomer.getCustomerSearch(searchString, cust_start);
+        qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start);
     }else {
         
-        qCustomers = application.objCustomer.getCustomer(cust_start);
+        qCustomers = objSysadmin.getCustomer(cust_start);
     }
 
     cntCountries = application.objGlobal.getCountry().recordCount;

@@ -1,5 +1,7 @@
 <cfscript>
 
+    objInvoices = new com.invoices();
+
     // If the download is called up by e-mail
     if (structKeyExists(url, "pdf")) {
 

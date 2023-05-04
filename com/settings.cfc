@@ -102,21 +102,4 @@ component displayname="settings" output="false" {
 
     }
 
-    public query function getSystemSetting(required string settingVariable){
-
-        local.qSystemSettings = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                settingVariable: {type: "varchar", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT *
-                FROM system_settings
-                WHERE strSettingVariable = :settingVariable
-            "
-        );
-
-        return local.qSystemSettings;
-    }
-
 }

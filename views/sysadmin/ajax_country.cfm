@@ -1,7 +1,7 @@
 <cfsetting showdebugoutput="no">
 <cfscript>
 
-    objAjax = new com.ajax();
+    objSysadmin = new com.sysadmin();
 
     if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
         getAlert('alertSessionExpired', 'warning');
@@ -14,13 +14,13 @@
         abort;
     }
 
-    qCountry = objAjax.getCountry(url.countryID);
+    qCountry = objSysadmin.getCountryAjax(url.countryID);
         
 </cfscript>
 
 <cfif qCountry.recordCount>
 
-    <cfset qTotalCountries = objAjax.getCountries()>
+    <cfset qTotalCountries = objSysadmin.getCountriesAjax()>
     <cfset qLanguages = application.objLanguage.getAllLanguages()>
     <cfset timeZones = new com.time(session.customer_id).getTimezones()>
 

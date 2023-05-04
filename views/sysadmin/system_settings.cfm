@@ -13,13 +13,13 @@
     cfparam(name="getLayout.fluidVertical" default="");
 
 
-    objSettings = new com.settings();
-    qInvoiceNumberStart = objSettings.getSystemSetting('settingInvoiceNumberStart');
-    qRoundFactor = objSettings.getSystemSetting('settingRoundFactor');
-    qInvoicePrefix = objSettings.getSystemSetting('settingInvoicePrefix');
-    qStandardVatType = objSettings.getSystemSetting('settingStandardVatType');
-    qInvoiceNet = objSettings.getSystemSetting('settingInvoiceNet');
-    qLayout = objSettings.getSystemSetting('settingLayout');
+    objSysadmin = new com.sysadmin();
+    qInvoiceNumberStart = objSysadmin.getSystemSetting('settingInvoiceNumberStart');
+    qRoundFactor = objSysadmin.getSystemSetting('settingRoundFactor');
+    qInvoicePrefix = objSysadmin.getSystemSetting('settingInvoicePrefix');
+    qStandardVatType = objSysadmin.getSystemSetting('settingStandardVatType');
+    qInvoiceNet = objSysadmin.getSystemSetting('settingInvoiceNet');
+    qLayout = objSysadmin.getSystemSetting('settingLayout');
 
 </cfscript>
 

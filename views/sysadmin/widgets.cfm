@@ -1,10 +1,10 @@
 <cfscript>
 
-    objWidget = new com.widget();
-    qWidgets = objWidget.getWidgets();
-    qWidgetRatio = objWidget.getWidgetRatio();
-    qPlans = objWidget.getPlans();
-    qModules = objWidget.getModules();
+    objSysadmin = new com.sysadmin();
+    qWidgets = objSysadmin.getWidgets();
+    qWidgetRatio = objSysadmin.getWidgetRatio();
+    qPlans = objSysadmin.getPlans();
+    qModules = objSysadmin.getModulesWidget();
 
 </cfscript>
 

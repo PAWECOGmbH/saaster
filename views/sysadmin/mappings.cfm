@@ -1,8 +1,8 @@
 <cfscript>
 
-    objMapping = new com.mapping();
-    qCustomMappings = objMapping.getCustomMappings();
-    qSystemMappings = objMapping.getSystemMappings();
+    objSysadmin = new com.sysadmin();
+    qCustomMappings = objSysadmin.getCustomMappings();
+    qSystemMappings = objSysadmin.getSystemMappings();
     
 </cfscript>
 

@@ -2,7 +2,7 @@
     param name="session.ci_search" default="" type="string";
     param name="session.ci_sort" default="strCountryName ASC" type="string";
 
-    objCountry = new com.country();
+    objSysadmin = new com.sysadmin();
 
     if(structKeyExists(form, "search") and len(trim(form.search))) {
         session.ci_search = form.search;
@@ -14,7 +14,7 @@
         session.ci_sort = form.sort;
     }
 
-    qTotalCountries = objCountry.getTotalCountriesImport();
+    qTotalCountries = objSysadmin.getTotalCountriesImport();
 
     // Filter out unsupport search characters
     searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
@@ -27,10 +27,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = objCountry.getCountriesImportSearch(searchString);
+        qCountries = objSysadmin.getCountriesImportSearch(searchString);
     }else {
 
-        qCountries = objCountry.getCountriesImport();
+        qCountries = objSysadmin.getCountriesImport();
     }
 
 </cfscript>

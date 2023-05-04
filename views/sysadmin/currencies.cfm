@@ -1,7 +1,7 @@
 <cfscript>
 
-    objCurrency = new com.currency();
-    qCurrencies = objCurrency.getCurrencies();
+    objSysadmin = new com.sysadmin();
+    qCurrencies = objSysadmin.getCurrencies();
 
 </cfscript>
 

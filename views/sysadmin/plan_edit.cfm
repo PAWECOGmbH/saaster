@@ -1,7 +1,7 @@
 
 <cfscript>
 
-    objPlans = new com.plans();
+    objSysadmin = new com.sysadmin();
 
     // Exception handling for sef and user id
     param name="thiscontent.thisID" default=0 type="numeric";
@@ -11,8 +11,8 @@
         location url="#application.mainURL#/sysadmin/plans" addtoken="false";
     }
 
-    qPlanGroups = objPlans.getPlanGroups();
-    qPlan = objPlans.getPlan(thisPlanID);
+    qPlanGroups = objSysadmin.getPlanGroups();
+    qPlan = objSysadmin.getPlan(thisPlanID);
 
     if(!qPlan.recordCount){
         location url="#application.mainURL#/sysadmin/plans" addtoken="false";

@@ -1,9 +1,9 @@
 
 <cfscript>
     
-    objPlans = new com.plans();
-    qPlanGroups = objPlans.getPlanGroupsCountry();
-    qCountries = objPlans.getCountries();
+    objSysadmin = new com.sysadmin();
+    qPlanGroups = objSysadmin.getPlanGroupsCountry();
+    qCountries = objSysadmin.getPlanGroupsCountries();
 
     getModal = new com.translate();
 

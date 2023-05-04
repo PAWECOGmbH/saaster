@@ -1,7 +1,7 @@
 <cfscript>
 
-    objModule = new com.modules();
-    qModules = objModule.getModules();
+    objSysadmin = new com.sysadmin();
+    qModules = objSysadmin.getModules();
 
 </cfscript>
 

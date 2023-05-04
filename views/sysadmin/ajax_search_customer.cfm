@@ -7,8 +7,8 @@
     setting showdebugoutput = false;
     param name="url.search" default="";
 
-    objAjax = new com.ajax();
-    qCustomer = objAjax.getCustomer(url.search);
+    objSysadmin = new com.sysadmin();
+    qCustomer = objSysadmin.getCustomerAjax(url.search);
 
 </cfscript>
 <div class="mt-2">

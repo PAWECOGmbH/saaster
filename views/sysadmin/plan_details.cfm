@@ -1,8 +1,8 @@
 
 <cfscript>
 
-    objPlans = new com.plans();
-    qNonDefLng = objPlans.getNonDefLng();
+    objSysadmin = new com.sysadmin();
+    qNonDefLng = objSysadmin.getNonDefLng();
 
 </cfscript>
 

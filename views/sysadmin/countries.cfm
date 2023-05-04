@@ -3,7 +3,7 @@
     param name="session.c_sort" default="intPrio" type="string";
     param name="session.c_page" default=1 type="numeric";
 
-    objCountry = new com.country();
+    objSysadmin = new com.sysadmin();
 
     getEntries = 10;
     c_start = 0;
@@ -31,11 +31,11 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
         
-        qTotalCountries = objCountry.getTotalCountriesSearch(searchString);
+        qTotalCountries = objSysadmin.getTotalCountriesSearch(searchString);
     }
     else {
         
-        qTotalCountries = objCountry.getTotalCountries();
+        qTotalCountries = objSysadmin.getTotalCountries();
     }
 
     pages = ceiling(qTotalCountries.totalCountries / getEntries);
@@ -58,11 +58,11 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = objCountry.getCountriesSearch(searchString, c_start);
+        qCountries = objSysadmin.getCountriesSearch(searchString, c_start);
     }
     else {
         
-        qCountries = objCountry.getCountries(c_start);
+        qCountries = objSysadmin.getCountries(c_start);
     }
 
     qLanguages = application.objLanguage.getAllLanguages();

@@ -4,7 +4,7 @@
     param name="session.visTrans" default="0" type="numeric";
     param name="session.displayLanguage" default="#application.objLanguage.getDefaultLanguage().iso#" type="string";
 
-    objTranslate = new com.translate();
+    objSysadmin = new com.sysadmin();
 
     s_badge_custom = "";
     s_badge_system = "";
@@ -37,13 +37,13 @@
     }
 
     // The language query is used in order to translate entries
-    qLanguages = objTranslate.getLanguages();
+    qLanguages = objSysadmin.getLanguages();
 
     // When entering a search
     if(len(trim(session.search))) {
         session.visTrans = 0
 
-        qCustomResults = objTranslate.searchCustomTranslations();
+        qCustomResults = objSysadmin.searchCustomTranslations();
 
         s_badge_custom = "";
 
@@ -53,7 +53,7 @@
             s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
         }
 
-        qSystemResults = objTranslate.searchSystemTranslations();
+        qSystemResults = objSysadmin.searchSystemTranslations();
 
         s_badge_system = "";
 
@@ -68,8 +68,8 @@
     }
 
     if(session.visTrans) {
-        qSystemResults = objTranslate.getSystemTranslations();
-        qCustomResults = objTranslate.getCustomTranslations();
+        qSystemResults = objSysadmin.getSystemTranslations();
+        qCustomResults = objSysadmin.getCustomTranslations();
     }
 </cfscript>
 

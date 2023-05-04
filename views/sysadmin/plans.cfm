@@ -1,10 +1,10 @@
 
 <cfscript>
 
-    objPlans = new com.plans();
-    qPlanGroups = objPlans.getAllPlanGroups();
-    qPlans = objPlans.getAllPlans();
-    qCountries = objPlans.getAllCountries();
+    objSysadmin = new com.sysadmin();
+    qPlanGroups = objSysadmin.getAllPlanGroups();
+    qPlans = objSysadmin.getAllPlans();
+    qCountries = objSysadmin.getAllCountries();
 
 </cfscript>
 
