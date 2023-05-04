@@ -4,14 +4,14 @@ ADD COLUMN dtmMfaDateTime datetime DEFAULT NULL,
 ADD COLUMN blnMfa TINYINT(1) NOT NULL DEFAULT 0;
 
 INSERT INTO system_translations (strVariable, strStringDE, strStringEN)
-VALUES ('txtSubjectMFA', 'Ihr Code für die Mehrfaktor-Authentifizierung.', 'Your multi-factor authentication code.'),
-('txtMfaCode', 'Nachfolgend finden Sie den Code für die Multi-Faktor-Authentifizierung.', 'Below is your multi-factor authentication code.'),
+VALUES ('txtSubjectMFA', 'Ihr Code für die Zwei-Faktor-Authentifizierung.', 'Your multi-factor authentication code.'),
+('txtMfaCode', 'Nachfolgend finden Sie den Code für die Zwei-Faktor-Authentifizierung.', 'Below is your multi-factor authentication code.'),
 ('txtThreeTimeTry', 'Sie haben insgesamt drei Versuche, sich mit diesem Code anzumelden.', 'You have a total of three attempts to log in with this code.'),
 ('txtCodeValidity', 'Dieser Code ist nur für eine Stunde gültig.', 'This code is valid for one hour only.'),
-('titMfa', 'Multi-Faktor-Authentifizierung.', 'Multi-factor authentication.'),
-('txtMfaLable', 'Multi-Faktor-Authentifizierung Code.', 'Multi-factor authentication Code.'),
-('txtResendMfa', 'Erneut senden.', 'Resend.'),
-('txtErrorMfaCode', 'Ihr Code ist nicht korrekt, bitte versuchen Sie es erneut.', 'Your code is incorrect, please try again.'),
+('titMfa', 'Zwei-Faktor-Authentifizierung', 'Multi-factor authentication'),
+('txtMfaLable', 'Zwei-Faktor-Authentifizierungs-Code', 'Multi-factor authentication code'),
+('txtResendMfa', 'Erneut senden', 'Resend'),
+('txtErrorMfaCode', 'Ihr Code ist nicht korrekt, bitte versuchen Sie es erneut!', 'Your code is incorrect, please try again!'),
 ('txtResendDone', 'Der Code wurde gesendet.', 'The code has been sent.');
 
 INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysadmin)
