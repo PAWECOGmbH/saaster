@@ -585,7 +585,7 @@ if (structKeyExists(form, 'mfa_btn')){
 }
 
 if (structKeyExists(url, 'resend')){
-    objUserMfa = application.objUser.sendMfaCode(session.user_id, "#url.resend#");
+    objUserMfa = application.objUser.sendMfaCode(url.uid, "#url.resend#");
 
     if(objUserMfa.success eq true){
         getAlert(objUserMfa.message, 'success');
