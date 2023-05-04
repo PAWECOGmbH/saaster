@@ -589,7 +589,7 @@ if (structKeyExists(url, 'resend')){
 
     if(objUserMfa.success eq true){
         getAlert(objUserMfa.message, 'success');
-        location url="#application.mainURL#/mfa" addtoken="false";
+        location url="#application.mainURL#/mfa?uid=#objUserMfa.uid#" addtoken="false";
     }
 }
 </cfscript>

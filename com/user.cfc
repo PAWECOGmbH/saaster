@@ -715,7 +715,6 @@ component displayname="user" output="false" {
         local.authCode = randRange(local.num1, local.num2, "SHA1PRNG");
         local.getTime = new com.time();
         local.ValidyTime = dateAdd("h", 3, now());
-        /* local.mfaDateTime = lsTimeFormat(getTime.utc2local(utcDate=ValidyTime)); */
         local.mfaDateTime = local.ValidyTime;
 
         objUserMfa = application.objCustomer.getUserDataByID(arguments.userID);
@@ -763,6 +762,7 @@ component displayname="user" output="false" {
         if(arguments.blnResend){
 
             local.argsReturnValue['message'] = variables.getTrans('txtResendDone');
+            local.argsReturnValue['uid'] = arguments.userid;
             local.argsReturnValue['success'] = true;
             return local.argsReturnValue;
 
