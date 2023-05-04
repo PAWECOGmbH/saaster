@@ -362,9 +362,8 @@ component displayname="user" output="false" {
         local.language = application.objLanguage.getDefaultLanguage().iso;
         local.admin = 0;
         local.superadmin = 0;
-        local.active = 0;
         local.sysadmin = 0;
-
+        local.active = 0;
 
         if (structKeyExists(arguments.userStruct, "salutation")) {
             local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
@@ -396,13 +395,15 @@ component displayname="user" output="false" {
                 local.admin = 1;
             }
         }
+        if (structKeyExists(arguments.userStruct, "sysadmin")) {
+            local.sysadmin = arguments.userStruct.sysadmin;
+            if (local.sysadmin eq 1) {
+                local.admin = 1;
+                local.superadmin = 1;
+            }
+        }
         if (structKeyExists(arguments.userStruct, "active")) {
             local.active = arguments.userStruct.active;
-        }
-        if(arguments.customerID eq 1){
-            local.sysadmin = 1;
-            local.admin = 1;
-            local.superadmin = 1;
         }
 
 
