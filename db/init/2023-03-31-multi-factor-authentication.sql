@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
 ALTER TABLE users
 ADD COLUMN intMfaCode INTEGER(11),
 ADD COLUMN dtmMfaDateTime datetime DEFAULT NULL,
@@ -16,3 +19,5 @@ VALUES ('txtSubjectMFA', 'Ihr Code für die Zwei-Faktor-Authentifizierung.', 'Yo
 
 INSERT INTO system_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysadmin)
 VALUES ('mfa', 'frontend/mfa.cfm', 0, 0, 0);
+
+SET FOREIGN_KEY_CHECKS = 1;
