@@ -43,7 +43,7 @@
     if(len(trim(session.search))) {
         session.visTrans = 0
 
-        qCustomResults = objSysadmin.searchCustomTranslations();
+        qCustomResults = objSysadmin.searchCustomTranslations(session.search);
 
         s_badge_custom = "";
 
@@ -53,7 +53,7 @@
             s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
         }
 
-        qSystemResults = objSysadmin.searchSystemTranslations();
+        qSystemResults = objSysadmin.searchSystemTranslations(session.search);
 
         s_badge_system = "";
 

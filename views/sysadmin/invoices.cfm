@@ -7,6 +7,7 @@
     param name="session.status_sql" default="";
 
     objSysadmin = new com.sysadmin();
+    objInvoice = new com.invoices();
 
     getEntries = 10;
     invoice_start = 0;
@@ -44,10 +45,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qTotalInvoices = objSysadmin.getTotalInvoicesSearch(searchString, searchTerm, invoice_start);
+        qTotalInvoices = objSysadmin.getTotalInvoicesSearch(searchString, searchTerm, invoice_start, session.status_sql, session.i_sort);
     } else {
 
-        qTotalInvoices = objSysadmin.getTotalInvoices();
+        qTotalInvoices = objSysadmin.getTotalInvoices(session.status_sql);
     }
 
     pages = ceiling(qTotalInvoices.totalInvoices / getEntries);
@@ -65,10 +66,10 @@
 
     if (len(trim(searchTerm))) {
 
-        qInvoices = objSysadmin.getAllInvoicesSearch(searchString, searchTerm, invoice_start);
+        qInvoices = objSysadmin.getAllInvoicesSearch(searchString, searchTerm, invoice_start, session.status_sql, session.i_sort);
     } else {
 
-        qInvoices = objSysadmin.getAllInvoices(invoice_start);
+        qInvoices = objSysadmin.getAllInvoices(invoice_start, session.status_sql, session.i_sort);
     }
 
 </cfscript>

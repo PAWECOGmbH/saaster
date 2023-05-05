@@ -19,11 +19,11 @@
     if(listLen(allWidgets)){
         qRemoveWidgets = objWidget.deleteMultipleWidget(allWidgets);
     }else{
-        qRemoveWidgets = objWidget.deleteWidget();
+        qRemoveWidgets = objWidget.deleteWidget(session.user_id);
     }
 
 
-    qOldUserWidgets = objWidget.getOldUserWidgets();
+    qOldUserWidgets = objWidget.getOldUserWidgets(session.user_id);
     oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
     lastUserWidgetPrio = qOldUserWidgets.recordCount;
 
@@ -32,12 +32,12 @@
         if(not listFind(oldUserWidgetIDs, row.intWidgetID)){
 
             lastUserWidgetPrio++;
-            qInsertWidgets = objWidget.insertWidget(row.intWidgetID, lastUserWidgetPrio);
+            qInsertWidgets = objWidget.insertWidget(row.intWidgetID, lastUserWidgetPrio, session.user_id);
         }
 
     }
 
-    qUserWidgets = objWidget.getUserWidgets();
+    qUserWidgets = objWidget.getUserWidgets(session.user_id);
 
 </cfscript>
 

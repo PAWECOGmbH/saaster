@@ -58,11 +58,11 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = objSysadmin.getCountriesSearch(searchString, c_start);
+        qCountries = objSysadmin.getCountriesSearch(searchString, c_start, session.c_sort);
     }
     else {
         
-        qCountries = objSysadmin.getCountries(c_start);
+        qCountries = objSysadmin.getCountries(c_start, session.c_sort);
     }
 
     qLanguages = application.objLanguage.getAllLanguages();

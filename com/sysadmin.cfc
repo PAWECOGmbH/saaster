@@ -161,7 +161,7 @@ component displayname="sysadmin" output="false" {
         return local.qTotalCountries;
     }
 
-    public query function getCountriesSearch(required string search, required numeric start){
+    public query function getCountriesSearch(required string search, required numeric start, required string sort){
 
         local.entries = 10;
 
@@ -174,7 +174,7 @@ component displayname="sysadmin" output="false" {
                 WHERE blnActive = 1
                 AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
                 #arguments.search#
-                ORDER BY #session.c_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -182,7 +182,7 @@ component displayname="sysadmin" output="false" {
         return local.qCountries;
     }
 
-    public query function getCountriesImportSearch(required string search){
+    public query function getCountriesImportSearch(required string search, required string sort){
         
         local.qCountries = queryExecute (
             options = {datasource = application.datasource},
@@ -200,14 +200,14 @@ component displayname="sysadmin" output="false" {
                     countries.strSubRegion
                 )
                 #arguments.search#
-                ORDER BY #session.ci_sort#
+                ORDER BY #arguments.sort#
             "
         );
 
         return local.qCountries;
     }
 
-    public query function getCountries(required numeric start){
+    public query function getCountries(required numeric start, required string sort){
 
         local.entries = 10;
 
@@ -218,7 +218,7 @@ component displayname="sysadmin" output="false" {
                 FROM countries
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
-                ORDER BY #session.c_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -226,7 +226,7 @@ component displayname="sysadmin" output="false" {
         return local.qCountries;
     }
 
-    public query function getCountriesImport(){
+    public query function getCountriesImport(required string sort){
 
         local.qCountries = queryExecute (
             options = {datasource = application.datasource},
@@ -234,7 +234,7 @@ component displayname="sysadmin" output="false" {
                 SELECT *
                 FROM countries
                 WHERE blnActive = 0
-                ORDER BY #session.ci_sort#
+                ORDER BY #arguments.sort#
             "
         );
 
@@ -273,7 +273,7 @@ component displayname="sysadmin" output="false" {
         return local.qCurrentModules;
     }
 
-    public query function getTotalCustomersSearch(required string search, required numeric start){
+    public query function getTotalCustomersSearch(required string search, required numeric start, required string sort){
 
         local.entries = 10;
 
@@ -298,7 +298,7 @@ component displayname="sysadmin" output="false" {
                     customers.strEmail
                 )
                 #arguments.search#
-                ORDER BY #session.cust_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -320,7 +320,7 @@ component displayname="sysadmin" output="false" {
         return local.qTotalCustomers;
     }
 
-    public query function getCustomerSearch(required string search, required numeric start){
+    public query function getCustomerSearch(required string search, required numeric start, required string sort){
 
         local.entries = 10;
 
@@ -345,7 +345,7 @@ component displayname="sysadmin" output="false" {
                     customers.strEmail
                 )
                 #arguments.search#
-                ORDER BY #session.cust_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -353,7 +353,7 @@ component displayname="sysadmin" output="false" {
         return local.qCustomers;
     }
 
-    public query function getCustomer(required numeric start){
+    public query function getCustomer(required numeric start, required string sort){
 
         local.entries = 10;
 
@@ -364,7 +364,7 @@ component displayname="sysadmin" output="false" {
                 FROM customers
                 LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
                 WHERE customers.blnActive = 1
-                ORDER BY #session.cust_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -372,7 +372,7 @@ component displayname="sysadmin" output="false" {
         return local.qCustomers;
     }
 
-    public query function getTotalInvoicesSearch(required string search, required string term, required numeric start){
+    public query function getTotalInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
 
         local.entries = 10;
 
@@ -407,7 +407,7 @@ component displayname="sysadmin" output="false" {
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
+                #arguments.status#
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
@@ -421,7 +421,7 @@ component displayname="sysadmin" output="false" {
                     OR invoices.intInvoiceNumber = '#arguments.term#'
                 )
 
-                ORDER BY #session.i_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -429,7 +429,7 @@ component displayname="sysadmin" output="false" {
         return local.qTotalInvoices;
     }
 
-    public query function getTotalInvoices(){
+    public query function getTotalInvoices(required string status){
 
         local.qTotalInvoices = queryExecute(
             options = {datasource = application.datasource},
@@ -437,14 +437,14 @@ component displayname="sysadmin" output="false" {
                 SELECT COUNT(intInvoiceID) as totalInvoices
                 FROM invoices
                 WHERE 1=1
-                #session.status_sql#
+                #arguments.status#
             "
         );
 
         return local.qTotalInvoices;
     }
 
-    public query function getAllInvoicesSearch(required string search, required string term, required numeric start){
+    public query function getAllInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
 
         local.entries = 10;
 
@@ -479,7 +479,7 @@ component displayname="sysadmin" output="false" {
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
+                #arguments.status#
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
@@ -493,7 +493,7 @@ component displayname="sysadmin" output="false" {
                     OR invoices.intInvoiceNumber = '#arguments.term#'
                 )
 
-                ORDER BY #session.i_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -501,7 +501,7 @@ component displayname="sysadmin" output="false" {
         return local.qInvoices;
     }
 
-    public query function getAllInvoices(required numeric start){
+    public query function getAllInvoices(required numeric start, required string status, required string sort){
 
         local.entries = 10;
 
@@ -536,12 +536,12 @@ component displayname="sysadmin" output="false" {
 
                 INNER JOIN invoice_status ON 1=1
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
-                #session.status_sql#
+                #arguments.status#
 
                 INNER JOIN customers ON 1=1
                 AND invoices.intCustomerID = customers.intCustomerID
 
-                ORDER BY #session.i_sort#
+                ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
@@ -855,13 +855,13 @@ component displayname="sysadmin" output="false" {
         return local.qLanguages;
     }
 
-    public query function searchCustomTranslations(){
+    public query function searchCustomTranslations(required string search){
 
         // Custom results
         defaultQueryCustom = "
             SELECT *
             FROM custom_translations
-            WHERE strVariable LIKE '%#session.search#%'
+            WHERE strVariable LIKE '%#arguments.search#%'
         ";
         orListCustom = "";
         orderQryCustom = "
@@ -872,7 +872,7 @@ component displayname="sysadmin" output="false" {
 
         // Loop over query and append to query string
         loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
+            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#arguments.search#%'", " ");
         }
 
         cfquery(datasource=application.datasource name="qCustomResults") {
@@ -882,13 +882,13 @@ component displayname="sysadmin" output="false" {
         return qCustomResults;
     }
 
-    public query function searchSystemTranslations(){
+    public query function searchSystemTranslations(required string search){
 
         // System results
         defaultQuerySys = "
         SELECT *
         FROM system_translations
-        WHERE strVariable LIKE '%#session.search#%'
+        WHERE strVariable LIKE '%#arguments.search#%'
         ";
         orListCustom = "";
         orderQrySys = "
@@ -899,7 +899,7 @@ component displayname="sysadmin" output="false" {
 
         // Loop over query and append to query string
         loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#session.search#%'", " ");
+            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#arguments.search#%'", " ");
         }
 
         cfquery(datasource=application.datasource name="qSystemResults") {

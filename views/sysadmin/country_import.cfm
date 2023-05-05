@@ -27,10 +27,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = objSysadmin.getCountriesImportSearch(searchString);
+        qCountries = objSysadmin.getCountriesImportSearch(searchString, session.ci_sort);
     }else {
 
-        qCountries = objSysadmin.getCountriesImport();
+        qCountries = objSysadmin.getCountriesImport(session.ci_sort);
     }
 
 </cfscript>

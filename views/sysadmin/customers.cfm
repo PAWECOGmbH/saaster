@@ -32,7 +32,7 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start);
+        qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start, session.cust_sort);
     }
     else {
 
@@ -59,10 +59,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start);
+        qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start, session.cust_sort);
     }else {
         
-        qCustomers = objSysadmin.getCustomer(cust_start);
+        qCustomers = objSysadmin.getCustomer(cust_start, session.cust_sort);
     }
 
     cntCountries = application.objGlobal.getCountry().recordCount;

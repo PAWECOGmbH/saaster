@@ -61,12 +61,12 @@ component displayname="widget" output="false" {
         return local.qRemoveWidgets;
     }
 
-    public query function deleteWidget(){
+    public query function deleteWidget(required numeric userID){
 
         local.qRemoveWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.user_id}
+                user_id: {type: "numeric", value: arguments.userID}
             },
             sql = "
                 DELETE FROM user_widgets
@@ -77,12 +77,12 @@ component displayname="widget" output="false" {
         return local.qRemoveWidgets;
     }
 
-    public query function getOldUserWidgets(){
+    public query function getOldUserWidgets(required numeric userID){
 
         local.qOldUserWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.user_id}
+                user_id: {type: "numeric", value: arguments.userID}
             },
             sql = "
                 SELECT intWidgetID
@@ -94,13 +94,13 @@ component displayname="widget" output="false" {
         return local.qOldUserWidgets;
     }
 
-    public query function insertWidget(required numeric widgetID, required numeric prio){
+    public query function insertWidget(required numeric widgetID, required numeric prio, required numeric userID){
 
         local.qInsertWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 widget_id: {type: "numeric", value: arguments.widgetID},
-                user_id: {type: "numeric", value: session.user_id},
+                user_id: {type: "numeric", value: arguments.userID},
                 sortorder: {type: "numeric", value: arguments.prio}
             },
             sql = "
@@ -112,12 +112,12 @@ component displayname="widget" output="false" {
         return local.qInsertWidgets;
     }
 
-    public query function getUserWidgets(){
+    public query function getUserWidgets(required numeric userID){
 
         local.qUserWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.user_id}
+                user_id: {type: "numeric", value: arguments.userID}
             },
             sql = "
                 SELECT
