@@ -16,13 +16,12 @@
                         <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
                     </cfif>
                 </div>
-
-              
+        
                 <cfif session.step eq 1>
                     <form class="card" id="submit_form" method="post" action="#application.mainURL#/registration">
                         <input type="hidden" name="reset_pw_btn_1">
                         <div class="card-body p-6">
-                            <div class="text-center card-title mb-4">#gettRans('titResetPassword')#</div>
+                            <div class="text-center card-title mb-4">#getTrans('titResetPassword')#</div>
                             <cfif structKeyExists(session, "alert")>
                                 #session.alert#
                             </cfif>
