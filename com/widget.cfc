@@ -1,11 +1,11 @@
 component displayname="widget" output="false" {
 
-    public query function getAllWidgets(required string moduleList){
+    public query function getAllWidgets(required string moduleList, required numeric planID){
 
         local.qWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                planID: {type: "numeric", value: session.currentPlan.planID},
+                planID: {type: "numeric", value: arguments.planID},
                 moduleList: {type: "varchar", value: listLen(arguments.moduleList) ? arguments.moduleList : 0}
             },
             sql = "
@@ -43,12 +43,12 @@ component displayname="widget" output="false" {
         return local.qWidgets;
     }
 
-    public query function deleteMultipleWidget(required string allWidgets){
+    public query function deleteMultipleWidget(required string allWidgets, required numeric userID){
 
         local.qRemoveWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: session.user_id},
+                user_id: {type: "numeric", value: arguments.userID},
                 allWidgets: {type: "varchar", value: arguments.allWidgets, list: true, separator: ","}
             },
             sql = "

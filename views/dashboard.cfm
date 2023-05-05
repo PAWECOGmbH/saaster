@@ -11,13 +11,13 @@
     }
 
     // Get all widgets which are connected to plans and modules (or displayed permanent)
-    qWidgets = objWidget.getAllWidgets(moduleList);
+    qWidgets = objWidget.getAllWidgets(moduleList, session.currentPlan.planID);
 
     allWidgets = valueList(qWidgets.intWidgetID);
 
     // Remove user widgets that have been deactivated by admin
     if(listLen(allWidgets)){
-        qRemoveWidgets = objWidget.deleteMultipleWidget(allWidgets);
+        qRemoveWidgets = objWidget.deleteMultipleWidget(allWidgets, session.user_id);
     }else{
         qRemoveWidgets = objWidget.deleteWidget(session.user_id);
     }
