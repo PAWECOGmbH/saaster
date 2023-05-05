@@ -350,3 +350,29 @@ $( '#keygen' ).on('click',function()
 {
 	$( '#apiKey' ).val( generateUUID() );
 });
+
+$(document).ready(function(){
+
+	$('input[name="sysadmin"]').on('click', function(){
+		if($('input[name="sysadmin"]').prop('checked')){
+			$('input[name="superadmin"]').prop('checked', true);
+			$('input[name="admin"]').prop('checked', true);
+		}
+	});
+
+	$('input[name="superadmin"]').on('click', function(){
+		if($('input[name="superadmin"]').prop('checked')){
+			$('input[name="admin"]').prop('checked', true);
+		} else {
+			$('input[name="sysadmin"]').prop('checked', false);
+		}
+	});
+
+	$('input[name="admin"]').on('click', function(){
+		if(!$('input[name="admin"]').prop('checked')){
+			$('input[name="sysadmin"]').prop('checked', false);
+			$('input[name="superadmin"]').prop('checked', false);
+		}
+	});
+
+});
