@@ -1,25 +1,9 @@
 
 <cfscript>
-
-    qPlanGroups = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT plan_groups.*, countries.strCountryName
-            FROM plan_groups
-            LEFT JOIN countries ON plan_groups.intCountryID = countries.intCountryID
-            ORDER BY plan_groups.intPrio
-        "
-    )
-
-    qCountries = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT intCountryID, strCountryName
-            FROM countries
-            WHERE blnActive = 1
-            ORDER BY intPrio
-        "
-    )
+    
+    objSysadmin = new com.sysadmin();
+    qPlanGroups = objSysadmin.getPlanGroupsCountry();
+    qCountries = objSysadmin.getPlanGroupsCountries();
 
     getModal = new com.translate();
 

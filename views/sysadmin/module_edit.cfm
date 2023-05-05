@@ -1,4 +1,7 @@
 <cfscript>
+
+    objSysadmin = new com.sysadmin();
+
     // Exception handling for sef and user id
     param name="thiscontent.thisID" default=0 type="numeric";
     thisModuleID = thiscontent.thisID;
@@ -6,17 +9,7 @@
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";
     }
 
-    qModule = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisModuleID: {type: "numeric", value: thisModuleID}
-        },
-        sql = "
-            SELECT *
-            FROM modules
-            WHERE intModuleID = :thisModuleID
-        "
-    );
+    qModule = objSysadmin.getModule(thisModuleID);
 
     if(not qModule.recordCount){
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";

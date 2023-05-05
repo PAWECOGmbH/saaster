@@ -1,20 +1,12 @@
 <cfscript>
 
+    objInvoices = new com.invoices();
+
     // If the download is called up by e-mail
     if (structKeyExists(url, "pdf")) {
 
         // Get the invoiceID
-        qInvoice = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                uuid: {type: "varchar", value: url.pdf}
-            },
-            sql = "
-                SELECT intInvoiceID
-                FROM invoices
-                WHERE strUUID = :uuid
-            "
-        )
+        qInvoice = objInvoices.getInvoice(url.pdf);
 
         if (qInvoice.recordCount) {
             thiscontent.thisID = qInvoice.intInvoiceID;
@@ -31,8 +23,6 @@
     if(not isNumeric(thisInvoiceID) or thisInvoiceID lte 0) {
         location url="#application.mainURL#/login" addtoken="false";
     }
-
-    objInvoices = new com.invoices();
 
     // Get the invoice data
     getInvoiceData = objInvoices.getInvoiceData(thisInvoiceID);

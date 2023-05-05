@@ -1,4 +1,5 @@
 <cfscript>
+
     cfparam(name="getLayout.horizontal" default="");
     cfparam(name="getLayout.horizontalDark" default="");
     cfparam(name="getLayout.vertical" default="");
@@ -13,35 +14,15 @@
     cfparam(name="getLayout.fluidVertical" default="");
 
 
-
-    // Function query execute system settings
-    function systemSetting(required string settingVariable) {
-
-        qSystemSettings = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                settingVariable: {type: "varchar", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT *
-                FROM system_settings
-                WHERE strSettingVariable = :settingVariable
-            "
-        )
-
-        return qSystemSettings;
-
-    }
-
-
-    qInvoiceNumberStart = systemSetting('settingInvoiceNumberStart');
-    qRoundFactor = systemSetting('settingRoundFactor');
-    qInvoicePrefix = systemSetting('settingInvoicePrefix');
-    qStandardVatType = systemSetting('settingStandardVatType');
-    qInvoiceNet = systemSetting('settingInvoiceNet');
-    qLayout = systemSetting('settingLayout');
-    qColorPrimary = systemSetting('settingColorPrimary');
-    qColorSecondary = systemSetting('settingColorSecondary');
+    objSysadmin = new com.sysadmin();
+    qInvoiceNumberStart = objSysadmin.getSystemSetting('settingInvoiceNumberStart');
+    qRoundFactor = objSysadmin.getSystemSetting('settingRoundFactor');
+    qInvoicePrefix = objSysadmin.getSystemSetting('settingInvoicePrefix');
+    qStandardVatType = objSysadmin.getSystemSetting('settingStandardVatType');
+    qInvoiceNet = objSysadmin.getSystemSetting('settingInvoiceNet');
+    qLayout = objSysadmin.getSystemSetting('settingLayout');
+    qColorPrimary = objSysadmin.getSystemSetting('settingColorPrimary');
+    qColorSecondary = objSysadmin.getSystemSetting('settingColorSecondary');
 
 </cfscript>
 

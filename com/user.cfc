@@ -709,4 +709,22 @@ component displayname="user" output="false" {
 
     }
 
+    public query function getOptinUser(required string userUUID){
+        
+        local.qOptinUser = queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+            strUUID: {type: "nvarchar", value: arguments.userUUID}
+            },
+            sql = "
+                SELECT *
+                FROM users
+                WHERE strUUID = :strUUID
+            "
+        )
+
+        return local.qOptinUser;
+    }
+
 }

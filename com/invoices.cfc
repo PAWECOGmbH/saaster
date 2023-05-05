@@ -1588,5 +1588,21 @@ component displayname="invoices" output="false" {
 
     }
 
+    public query function getInvoice(required string invoiceUUID){
 
+        local.qInvoice = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                uuid: {type: "varchar", value: arguments.invoiceUUID}
+            },
+            sql = "
+                SELECT intInvoiceID
+                FROM invoices
+                WHERE strUUID = :uuid
+            "
+        )
+
+        return local.qInvoice;
+    }
+    
 }

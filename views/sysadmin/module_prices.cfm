@@ -1,21 +1,10 @@
 
 
 <cfscript>
-    qPrices = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisModuleID: {type: "numeric", value: thisModuleID}
-        },
-        sql = "
-            SELECT currencies.strCurrencyEN, currencies.strCurrencyISO, currencies.intCurrencyID as currID, modules_prices.*
-            FROM currencies
-            LEFT JOIN modules_prices
-            ON currencies.intCurrencyID = modules_prices.intCurrencyID
-            AND modules_prices.intModuleID = :thisModuleID
-            WHERE blnActive = 1
-            ORDER BY currencies.intPrio
-        "
-    )
+    
+    objSysadmin = new com.sysadmin();
+    qPrices = objSysadmin.getPricesModule(thisModuleID);
+    
 </cfscript>
 
 <cfoutput>
