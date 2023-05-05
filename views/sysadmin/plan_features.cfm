@@ -1,16 +1,9 @@
 
 <cfscript>
-
-    qPlanFeatures = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM plan_features
-            ORDER BY intPrio
-        "
-    )
-
+    
     getModal = new com.translate();
+    objSysadmin = new com.sysadmin();
+    qPlanFeatures = objSysadmin.getPlanFeatures();
 
 </cfscript>
 

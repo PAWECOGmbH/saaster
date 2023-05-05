@@ -2,6 +2,8 @@
     param name="session.ci_search" default="" type="string";
     param name="session.ci_sort" default="strCountryName ASC" type="string";
 
+    objSysadmin = new com.sysadmin();
+
     if(structKeyExists(form, "search") and len(trim(form.search))) {
         session.ci_search = form.search;
     }else if (structKeyExists(form, "delete") or structKeyExists(url, "delete")) {
@@ -12,14 +14,7 @@
         session.ci_sort = form.sort;
     }
 
-    qTotalCountries = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT COUNT(intCountryID) as totalCountries
-            FROM countries
-            WHERE blnActive = 0
-        "
-    );
+    qTotalCountries = objSysadmin.getTotalCountriesImport();
 
     // Filter out unsupport search characters
     searchTerm = ReplaceList(trim(session.ci_search),'##,<,>,/,{,},[,],(,),+,,{,},?,*,",'',',',,,,,,,,,,,,,,,');
@@ -32,35 +27,10 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM countries
-                WHERE blnActive = 0
-                AND MATCH (
-                    countries.strCountryName,
-                    countries.strLocale,
-                    countries.strISO1,
-                    countries.strISO2,
-                    countries.strCurrency,
-                    countries.strRegion,
-                    countries.strSubRegion
-                )
-                #searchString#
-                ORDER BY #session.ci_sort#
-            "
-        );
+        qCountries = objSysadmin.getCountriesImportSearch(searchString, session.ci_sort);
     }else {
-        qCountries = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM countries
-                WHERE blnActive = 0
-                ORDER BY #session.ci_sort#
-            "
-        );
+
+        qCountries = objSysadmin.getCountriesImport(session.ci_sort);
     }
 
 </cfscript>

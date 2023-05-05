@@ -1,21 +1,10 @@
 
 
 <cfscript>
-    qFeatures = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            thisPlanID: {type: "numeric", value: thisPlanID}
-        },
-        sql = "
-            SELECT plan_features.strFeatureName, plan_features.blnCategory, plan_features.intPlanFeatureID as currID,
-                   plans_plan_features.*
-            FROM plan_features
-            LEFT JOIN plans_plan_features
-            ON plan_features.intPlanFeatureID = plans_plan_features.intPlanFeatureID
-            AND plans_plan_features.intPlanID = :thisPlanID
-            ORDER BY plan_features.intPrio
-        "
-    )
+
+    objSysadmin = new com.sysadmin();
+    qFeatures = objSysadmin.getFeatures(thisPlanID);
+
 </cfscript>
 
 <cfif qFeatures.recordCount>

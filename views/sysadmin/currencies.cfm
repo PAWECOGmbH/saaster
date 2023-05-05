@@ -1,12 +1,8 @@
 <cfscript>
-    qCurrencies = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM currencies
-            ORDER BY intPrio
-        "
-    )
+
+    objSysadmin = new com.sysadmin();
+    qCurrencies = objSysadmin.getCurrencies();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
