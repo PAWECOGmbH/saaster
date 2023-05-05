@@ -1,4 +1,5 @@
 <cfscript>
+
     cfparam(name="getLayout.horizontal" default="");
     cfparam(name="getLayout.horizontalDark" default="");
     cfparam(name="getLayout.vertical" default="");
@@ -13,33 +14,15 @@
     cfparam(name="getLayout.fluidVertical" default="");
 
 
-
-    // Function query execute system settings
-    function systemSetting(required string settingVariable) {
-
-        qSystemSettings = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                settingVariable: {type: "varchar", value: arguments.settingVariable}
-            },
-            sql = "
-                SELECT *
-                FROM system_settings
-                WHERE strSettingVariable = :settingVariable
-            "
-        )
-
-        return qSystemSettings;
-
-    }
-
-
-    qInvoiceNumberStart = systemSetting('settingInvoiceNumberStart');
-    qRoundFactor = systemSetting('settingRoundFactor');
-    qInvoicePrefix = systemSetting('settingInvoicePrefix');
-    qStandardVatType = systemSetting('settingStandardVatType');
-    qInvoiceNet = systemSetting('settingInvoiceNet');
-    qLayout = systemSetting('settingLayout');
+    objSysadmin = new com.sysadmin();
+    qInvoiceNumberStart = objSysadmin.getSystemSetting('settingInvoiceNumberStart');
+    qRoundFactor = objSysadmin.getSystemSetting('settingRoundFactor');
+    qInvoicePrefix = objSysadmin.getSystemSetting('settingInvoicePrefix');
+    qStandardVatType = objSysadmin.getSystemSetting('settingStandardVatType');
+    qInvoiceNet = objSysadmin.getSystemSetting('settingInvoiceNet');
+    qLayout = objSysadmin.getSystemSetting('settingLayout');
+    qColorPrimary = objSysadmin.getSystemSetting('settingColorPrimary');
+    qColorSecondary = objSysadmin.getSystemSetting('settingColorSecondary');
 
 </cfscript>
 
@@ -126,6 +109,24 @@
                                                 <option value="0" <cfif qInvoiceNet.strDefaultValue eq 0>selected</cfif>>Gross (brutto)</option>
                                             </select>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+
+                                <h3>Color settings</h3>
+                                <div class="border align-baseline p-3">
+                                    <div class="row">
+                                        <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
+                                            <p class="no-margin">#qColorPrimary.strDescription#</p>
+                                            <input type="color" class="form-control form-control-color color-width" name="#qColorPrimary.strSettingVariable#" value="#qColorPrimary.strDefaultValue#">
+                                        </div>
+                                        <div class="col-lg-1"></div>
+                                        <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
+                                            <p class="no-margin">#qColorSecondary.strDescription#</p>
+                                            <input type="color" class="form-control form-control-color color-width" name="#qColorSecondary.strSettingVariable#" value="#qColorSecondary.strDefaultValue#">
+                                        </div>
+                                        <div class="col-lg-5"></div>
                                     </div>
                                 </div>
                             </div>

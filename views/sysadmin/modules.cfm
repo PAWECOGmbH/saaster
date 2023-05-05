@@ -1,12 +1,8 @@
 <cfscript>
-    qModules = queryExecute (
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM modules
-            ORDER BY intPrio
-        "
-    );
+
+    objSysadmin = new com.sysadmin();
+    qModules = objSysadmin.getModules();
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">

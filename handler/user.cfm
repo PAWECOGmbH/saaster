@@ -118,7 +118,8 @@ if (structKeyExists(form, "user_new_btn")) {
     param name="form.phone" default="";
     param name="form.mobile" default="";
     param name="form.admin" default="0";
-    param name="form.superadmin" default="0";
+    param name="form.superadmin" default="0";    
+    param name="form.sysadmin" default="0";
     param name="form.active" default="0";
     param name="form.language" default=session.lng;
 
@@ -136,6 +137,11 @@ if (structKeyExists(form, "user_new_btn")) {
         form.active = 1;
     } else {
         form.active = 0;
+    }
+    if (form.sysadmin eq 1 or form.sysadmin eq "on") {
+        form.sysadmin = 1;
+    } else {
+        form.sysadmin = 0;
     }
 
     session.salutation = form.salutation;
