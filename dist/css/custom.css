@@ -280,3 +280,7 @@ div.dashboard div.card-header label.form-check {
 .color-width{
     width: 5rem;
 }
+
+.no-max-width{
+    max-width: revert;
+}
