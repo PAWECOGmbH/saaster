@@ -1,5 +1,5 @@
-a {
-    outline: none;
+ a {
+outline: none;
 }
 
 .dropify-message>.file-icon>p {
@@ -58,11 +58,11 @@ a {
     min-height: 150px;
 }
 
-.badge {
+/* .badge {
     font-size: 70%;
     font-weight: normal;
     padding: 4px 5px;
-}
+} */
 
 .no-border {
     border: none;
@@ -134,7 +134,7 @@ td.feature {
     margin: auto auto auto -1px;
     background: #f4f4f4;
     color: #444;
-    /* border: 1px #d0d0d0 solid; */
+    /* border: 1px #d0d0d0 solid; */ 
     line-height: normal;
     overflow: hidden;
     cursor: pointer;
@@ -150,8 +150,6 @@ td.feature {
 .has-toggle-input label:first-of-type {
     margin-left: auto;
 }
-
-.has-toggle-input label:last-of-type {}
 
 .toggleradio {
     width: 15%;
@@ -283,4 +281,4 @@ div.dashboard div.card-header label.form-check {
 
 .no-max-width{
     max-width: revert;
-}
+} 

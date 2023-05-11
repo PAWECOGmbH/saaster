@@ -1,15 +1,19 @@
 <cfcontent type="text/css" />
 
 <cfoutput>
-
+    
 .btn-primary{
-    --tblr-btn-color: #application.systemSettingStruct.settingColorPrimary# !important;
-    --tblr-btn-color-interactive: #application.systemSettingStruct.settingColorPrimary# !important;
+    --tblr-btn-bg: #application.systemSettingStruct.settingColorPrimary# !important;
+    --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorPrimary# !important;
+    --tblr-btn-disabled-bg:#application.systemSettingStruct.settingColorPrimary# !important;
+    --tblr-btn-active-bg:#application.systemSettingStruct.settingColorPrimary# !important;
 }
 
 .btn-secondary{
-    --tblr-btn-color: #application.systemSettingStruct.settingColorSecondary# !important;
-    --tblr-btn-color-interactive: #application.systemSettingStruct.settingColorSecondary# !important;
+    --tblr-btn-bg: #application.systemSettingStruct.settingColorSecondary# !important;
+    --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorSecondary# !important;
+    --tblr-btn-disabled-bg:#application.systemSettingStruct.settingColorSecondary# !important;
+    --tblr-btn-active-bg:#application.systemSettingStruct.settingColorSecondary# !important;
 }
 
 

@@ -105,58 +105,60 @@
                             <h3 class="card-title">#getTrans('titPlansAndModules')#</h3>
                         </div>
                         <div class="card-body">
+                            <div class="list-group ">
 
-                            <cfif session.currentPlan.planID gt 0>
+                                <cfif session.currentPlan.planID gt 0>
 
-                                <!--- Display the current plan --->
-                                <cfinclude template="/includes/plan_view.cfm">
+                                    <!--- Display the current plan --->
+                                    <cfinclude template="/includes/plan_view.cfm">
 
-                                <cfif session.superAdmin>
+                                    <cfif session.superAdmin>
 
-                                    <cfif session.currentPlan.status eq "canceled">
+                                        <cfif session.currentPlan.status eq "canceled">
 
-                                        <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
+                                            <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
 
-                                    <cfelse>
+                                        <cfelse>
 
-                                        <cfif session.currentPlan.status neq "payment">
+                                            <cfif session.currentPlan.status neq "payment">
 
-                                            <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
-                                                <div class="d-flex justify-content-between">
-                                                    <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
-                                                </div>
-                                                <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
-                                            </a>
+                                                <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
+                                                    </div>
+                                                    <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
+                                                </a>
+
+                                            </cfif>
 
                                         </cfif>
 
                                     </cfif>
 
+                                <cfelse>
+
+                                    <cfif session.superAdmin>
+
+                                        <p>#getTrans('msgNoPlanBooked')#</p>
+                                        <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
+                                    </cfif>
+
                                 </cfif>
 
-                            <cfelse>
+                                <cfif arrayLen(moduleArray)>
 
-                                <cfif session.superAdmin>
-
-                                    <p>#getTrans('msgNoPlanBooked')#</p>
-                                    <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
+                                        </div>
+                                        <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
+                                    </a>
 
                                 </cfif>
 
-                            </cfif>
-
-                            <cfif arrayLen(moduleArray)>
-
-                                <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
-                                    </div>
-                                    <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
-                                </a>
-
-                            </cfif>
-
-                        </div>
+                            </div>
+                        </div>        
                     </div>
                 </div>
             </cfif>
