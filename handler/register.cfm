@@ -347,10 +347,11 @@ if (structKeyExists(form, 'login_btn')) {
 
             objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
             blnresend = false;
-            
-            if (objUserMfa.blnMfa){
-                objUserMfa = application.objUser.sendMfaCode(session.user_id, "#blnresend#");
-                location url="#objUserMfa.redirect#" addtoken="false";
+            mfaUUID = application.objGlobal.getUUID();
+
+            if (objUserMfa.blnMfa){  
+                objSendMfa = application.objUser.sendMfaCode(mfaUUID, "#blnresend#");
+                location url="#objSendMfa.redirect#" addtoken="false";
             } else {
                 location url="#objUserLogin.redirect#" addtoken="false";
             }
@@ -571,25 +572,24 @@ if (structKeyExists(form, 'mfa_btn')){
     mfa_6 = toString(form.mfa_6);
 
     mfaCodes = toNumeric(mfa_1 & mfa_2 & mfa_3 & mfa_4 & mfa_5 & mfa_6);
-    checkMfa = application.objUser.checkMfa(url.uid, mfaCodes);
+    checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
     
     if(checkMfa.success eq true){
-        session.user_id = url.uid;
         location url="#application.mainURL#/dashboard" addtoken="false";
     } else{
         getAlert(checkMfa.message, 'warning');
-        uid = checkMfa.uid;
-        location url="#application.mainURL#/mfa?uid=#uid#" addtoken="false";
+        uuid = checkMfa.uuid;
+        location url="#application.mainURL#/mfa?uuid=#uuid#" addtoken="false";
     }
     
 }
 
 if (structKeyExists(url, 'resend')){
-    objUserMfa = application.objUser.sendMfaCode(url.uid, "#url.resend#");
+    objUserMfa = application.objUser.sendMfaCode(url.uuid, "#url.resend#");
 
     if(objUserMfa.success eq true){
         getAlert(objUserMfa.message, 'success');
-        location url="#application.mainURL#/mfa?uid=#objUserMfa.uid#" addtoken="false";
+        location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
     }
 }
 </cfscript>
