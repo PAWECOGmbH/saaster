@@ -226,7 +226,7 @@ component displayname="user" output="false" {
                     admin: {type: "numeric", value: local.admin},
                     superadmin: {type: "numeric", value: local.superadmin},
                     active: {type: "numeric", value: local.active},
-                    mfa: {type: "numeric", value: local.mfa}
+                    mfa: {type: "boolean", value: local.mfa}
                 },
                 sql = "
                     UPDATE users
@@ -708,14 +708,12 @@ component displayname="user" output="false" {
     }
 
 
-    public any function sendMfaCode(required string mfaUUID, boolean blnResend){
+    public struct function sendMfaCode(required string mfaUUID, boolean blnResend, string mfaMail, string mfaName){
 
         local.num1 = 99999;
         local.num2 = 1000000;
         local.authCode = randRange(local.num1, local.num2, "SHA1PRNG");
-        local.getTime = new com.time();
-        local.ValidyTime = dateAdd("h", 3, now());
-        local.mfaDateTime = local.ValidyTime;
+        local.mfaDateTime = dateAdd("h", 3, now());
         local.newuuid = arguments.mfaUUID;
 
         queryExecute(
@@ -724,8 +722,8 @@ component displayname="user" output="false" {
             params = {
                 authcode: {type: "numeric", value:local.authCode},
                 mfaDateTime: {type: "datetime", value: local.mfaDateTime},
-                strUUID: {type: "nvarchar", value: arguments.mfaUUID},
-                strEmail: {type: "nvarchar", value: session.user_email}
+                strUUID: {type: "varchar", value: arguments.mfaUUID},
+                strEmail: {type: "varchar", value: arguments.mfaMail}
             },
             sql = "
                 UPDATE users
@@ -742,7 +740,7 @@ component displayname="user" output="false" {
         cfsavecontent (variable = "variables.mailContent") {
 
             echo("
-                #variables.getTrans('titHello')# #session.user_name#<br><br>
+                #variables.getTrans('titHello')# #arguments.mfaName#<br><br>
                 #variables.getTrans('txtThreeTimeTry')#<br>
                 #variables.getTrans('txtCodeValidity')#<br><br>
                 #local.authCode#<br><br>
@@ -754,13 +752,12 @@ component displayname="user" output="false" {
         }
 
         // Send activation link
-        mail to="#session.user_email#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
+        mail to="#arguments.mfaMail#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
             include template="/config.cfm";
             include template="/includes/mail_design.cfm";
         }
        
-        session.mfaCheckCount = 0;
-        structDelete(session, 'user_id');
+       
         if(arguments.blnResend){
             local.argsReturnValue['message'] = variables.getTrans('txtResendDone');
             local.argsReturnValue['success'] = true;
@@ -780,7 +777,7 @@ component displayname="user" output="false" {
         local.qGetUserMfa = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                UUID: {type: "string", value: arguments.mfaUUID}
+                UUID: {type: "varchar", value: arguments.mfaUUID}
             },
             sql = "
                 SELECT intmfaCode, dtmMfaDateTime, intUserID
@@ -798,9 +795,8 @@ component displayname="user" output="false" {
                 local.argsReturnValue['message'] = variables.getTrans('txtCodeValidity');
                 local.argsReturnValue['uuid'] = arguments.mfaUUID;
                 local.argsReturnValue['success'] = false;
-                session.mfaCheckCount++;
             } else {
-                session.user_id = local.qGetUserMfa.intUserID;
+                local.argsReturnValue['userid'] = local.qGetUserMfa.intUserID;
                 local.argsReturnValue['success'] = true;
             }
 
@@ -808,15 +804,7 @@ component displayname="user" output="false" {
             local.argsReturnValue['message'] = variables.getTrans('txtErrorMfaCode');
             local.argsReturnValue['uuid'] = arguments.mfaUUID;
             local.argsReturnValue['success'] = false;
-            session.mfaCheckCount++;
         }
-
-        if(session.mfaCheckCount eq 3){
-            local.argsReturnValue['message'] = variables.getTrans('txtThreeTimeTry');
-            local.argsReturnValue['uuid'] = arguments.mfaUUID;
-            local.argsReturnValue['success'] = false;
-            session.mfaCheckCount++;
-        } 
         
         return local.argsReturnValue;
 

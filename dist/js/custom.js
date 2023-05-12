@@ -384,7 +384,7 @@ $(document).ready(function(){
 	$("#mfa_form input").on("paste", function(){
 		setTimeout(function() {
 			$("#mfa_form").submit();
-		}, 100);
+		});
 	});
 
 });

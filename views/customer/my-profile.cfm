@@ -160,13 +160,18 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-sm-6 col-md-4 mt-4">
-                                        <div class="form-group">
+                                    <div class="col-sm-6 col-md-4 mb-3">
+                                       <!---  <div class="form-group">
                                             <label class="form-check form-check-inline">
                                                 <input class="form-check-input" type="checkbox" name="mfa" <cfif qCustomer.blnMfa eq 1>checked</cfif>>
                                                 <span class="form-check-label small pt-1">#getTrans('titMfa')#</span>
                                             </label>
-                                        </div>
+                                        </div> --->
+                                        <label class="form-label">#getTrans('titMfa')#</label>
+                                        <label class="form-check form-switch mt-3">
+                                            <input class="form-check-input" type="checkbox" name="mfa" <cfif qCustomer.blnMfa eq 1>checked</cfif>>
+                                            <span class="form-check-label small pt-1">#getTrans('btnActivate')#</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>

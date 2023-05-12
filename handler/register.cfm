@@ -335,7 +335,6 @@ if (structKeyExists(form, 'login_btn')) {
                 session.filledData = false;
             }
 
-            logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false);
 
             // Let's check whether there is a file we have to include coming from modules
             filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
@@ -349,10 +348,14 @@ if (structKeyExists(form, 'login_btn')) {
             blnresend = false;
             mfaUUID = application.objGlobal.getUUID();
 
-            if (objUserMfa.blnMfa){  
-                objSendMfa = application.objUser.sendMfaCode(mfaUUID, "#blnresend#");
+            if (objUserMfa.blnMfa){ 
+                structDelete(session, 'user_id');
+                session.mfaCheckCount = 0;
+                objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
+                logWrite("MFA", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, multi-factor-authentication code was send to user.", false);
                 location url="#objSendMfa.redirect#" addtoken="false";
             } else {
+                logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false);
                 location url="#objUserLogin.redirect#" addtoken="false";
             }
 
@@ -573,11 +576,19 @@ if (structKeyExists(form, 'mfa_btn')){
 
     mfaCodes = toNumeric(mfa_1 & mfa_2 & mfa_3 & mfa_4 & mfa_5 & mfa_6);
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
-    
+
     if(checkMfa.success eq true){
+        session.user_id = checkMfa.userid;
+        logWrite("mfa check", 1, "File: #callStackGet("string", 0 , 1)#, User: #checkMfa.userid#, User successfully logged in with multi-factor-authentication.", false);
         location url="#application.mainURL#/dashboard" addtoken="false";
     } else{
-        getAlert(checkMfa.message, 'warning');
+        if(session.mfaCheckCount eq 3){
+            getAlert(getTrans('txtThreeTimeTry'), 'warning');
+        } else {
+            getAlert(checkMfa.message, 'warning');
+            session.mfaCheckCount++;
+        }
+        logWrite("mfa check", 3, "File: #callStackGet("string", 0 , 1)#, multi-factor-authentication failed #session.mfaCheckCount# times.", false);
         uuid = checkMfa.uuid;
         location url="#application.mainURL#/mfa?uuid=#uuid#" addtoken="false";
     }
@@ -585,10 +596,14 @@ if (structKeyExists(form, 'mfa_btn')){
 }
 
 if (structKeyExists(url, 'resend')){
-    objUserMfa = application.objUser.sendMfaCode(url.uuid, "#url.resend#");
+
+    structDelete(session, 'user_id');
+    objUserMfa = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
 
     if(objUserMfa.success eq true){
+        logWrite("mfa resend", 1, "File: #callStackGet("string", 0 , 1)#, User (uuid): #url.uuid#, successfully resend multi-factor-authentication code.", false);
         getAlert(objUserMfa.message, 'success');
+        session.mfaCheckCount = 0;
         location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
     }
 }

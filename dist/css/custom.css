@@ -294,9 +294,19 @@ div.dashboard div.card-header label.form-check {
 	margin: 0 auto 1em;
 	color: #5555FF;
 }
+.otc input:active,
+.otc input:focus{
+    border-color: #BBBBFF;
+    outline: none;
+}
+.otc input::selection{
+    background-color: transparent;
+    color: purple;
+    border-color: #BBBBFF;
+}
 
 input[type="number"] {
-	width: .82em;
+	width: 12%;
 	line-height: 1;
 	margin: .1em;
 	padding: 8px 0 4px;
