@@ -21,11 +21,12 @@ if (application.environment eq "dev") {
 // Called by Payrexx (Webhook)
 } else {
 
-    if (!isDefined(form)) {
+    if (!structKeyExists(getHttpRequestData(), "content")) {
+        logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", false);
         abort;
     }
 
-    jsonData = getHttpRequestData(form).content;
+    jsonData = getHttpRequestData().content;
     jsonData = deSerializeJSON(jsonData);
 
 }
@@ -156,13 +157,13 @@ if (structKeyExists(jsonData, "transaction")) {
             "
         )
 
+        logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, Webhook data successfully saved.", false);
         writeOutput("OK");
 
 
     } catch (any e) {
 
-        // todo: send error mail
-
+        logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, Error: #e.message#", true);
         writeDump(e);
 
     }
