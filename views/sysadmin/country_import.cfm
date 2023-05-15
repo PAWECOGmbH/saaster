@@ -105,7 +105,7 @@
                                     <table class="table card-table table-vcenter text-nowrap" id="checkall">
                                         <thead>
                                             <tr>
-                                                <th width="5%"><input type="checkbox" class="form-check-input" id="checkAll"/></th>
+                                                <th width="5%"><input type="checkbox" class="form-check-input checkall" id="checkAll"/></th>
                                                 <th width="35%">Country</th>
                                                 <th width="10%" class="text-center">ISO 1</th>
                                                 <th width="10%" class="text-center">ISO 2</th>

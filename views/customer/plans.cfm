@@ -144,7 +144,7 @@
                                             <div class="col-lg-6">
                                                 <label class="form-selectgroup-item flex-fill">
                                                     <input type="radio" name="recurring" value="yearly" class="form-selectgroup-input plan_recurring" <cfif bookedPlan.recurring eq "yearly">checked</cfif>>
-                                                    <div class="form-selectgroup-label d-flex align-items-top">
+                                                    <div class="form-selectgroup-label d-flex align-items-top p-3">
                                                         <div class="me-3">
                                                             <span class="form-selectgroup-check"></span>
                                                         </div>

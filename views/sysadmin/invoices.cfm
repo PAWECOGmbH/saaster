@@ -146,49 +146,49 @@
                                         <div class="form-selectgroup">
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="0" class="form-selectgroup-input" <cfif session.status eq 0>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 0>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 0>border-0</cfif>">
                                                     ALL
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="1" class="form-selectgroup-input" <cfif session.status eq 1>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 1>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 1>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'muted', 'statInvoiceDraft')#
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="2" class="form-selectgroup-input" <cfif session.status eq 2>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 2>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 2>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'blue', 'statInvoiceOpen')#
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="3" class="form-selectgroup-input" <cfif session.status eq 3>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 3>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 3>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'green', 'statInvoicePaid')#
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="4" class="form-selectgroup-input" <cfif session.status eq 4>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 4>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 4>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'orange', 'statInvoicePartPaid')#
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="5" class="form-selectgroup-input" <cfif session.status eq 5>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 5>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 5>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'purple', 'statInvoiceCanceled')#
                                                 </span>
                                             </label>
 
                                             <label class="form-selectgroup-item">
                                                 <input type="radio" onclick="this.form.submit()" name="status" value="6" class="form-selectgroup-input" <cfif session.status eq 6>checked</cfif>>
-                                                <span class="form-selectgroup-label <cfif session.status neq 6>no-border</cfif>">
+                                                <span class="form-selectgroup-label <cfif session.status neq 6>border-0</cfif>">
                                                     #objInvoice.getInvoiceStatusBadge(session.lng, 'red', 'statInvoiceOverDue')#
                                                 </span>
                                             </label>
