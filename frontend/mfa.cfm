@@ -33,12 +33,12 @@
                         <div class="mb-3 text-center">
 
                             <label class="form-label">#getTrans('txtMfaLable')#</label>
-                            <input type="number" pattern="[0-9]*" value="" inputtype="numeric" autocomplete="one-time-code" id="otc-1" name="mfa_1" maxlength="1" required>
-                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-2" name="mfa_2" maxlength="1" required>
-                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-3" name="mfa_3" maxlength="1" required>
-                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-4" name="mfa_4" maxlength="1" required>
-                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-5" name="mfa_5" maxlength="1" required>
-                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-6" name="mfa_6" maxlength="1" required>
+                            <input type="number" pattern="[0-9]*" value="" inputtype="numeric" autocomplete="one-time-code" id="otc-1" name="mfa_1" maxlength="1" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
+                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-2" name="mfa_2" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
+                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-3" name="mfa_3" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
+                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-4" name="mfa_4" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
+                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-5" name="mfa_5" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
+                            <input type="number" pattern="[0-9]*" min="0" max="9" maxlength="1"  value="" inputtype="numeric" id="otc-6" name="mfa_6" oninput="validateInput(this)" onkeypress="return onlyDigits(event)" required>
 
                         </div>
                     </cfif>

@@ -372,15 +372,13 @@ $(document).ready(function(){
 	});
 
 	in1.addEventListener('input', splitNumber);
-
+	
 	$('input[name="mfa_6"]').keyup(function(){
 		if(validateCode()){
 			$("#mfa_form").submit();
-		} else {
-			alert('multi factor authentication Code required!');
 		}
-	})
-	
+	});
+
 	$("#mfa_form input").on("paste", function(){
 		setTimeout(function() {
 			$("#mfa_form").submit();
@@ -427,3 +425,22 @@ function validateCode()
 		return false;
 	}
 }
+
+function validateInput(input) {
+
+	input.value = input.value.replace(/\s/g, '');
+
+	if (input.value.length > 1) {
+		input.value = input.value.slice(0, 1);
+	}
+}
+
+function onlyDigits(event) {
+	var charCode = (event.which) ? event.which : event.keyCode;
+	if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+		event.preventDefault();
+		return false;
+	}
+	return true;
+}
+

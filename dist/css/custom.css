@@ -296,13 +296,13 @@ div.dashboard div.card-header label.form-check {
 }
 .otc input:active,
 .otc input:focus{
-    border-color: #BBBBFF;
+    border-color: #a4cdfd;
     outline: none;
 }
 .otc input::selection{
     background-color: transparent;
-    color: purple;
-    border-color: #BBBBFF;
+    color: #206bc4;
+    border-color: #a4cdfd;
 }
 
 input[type="number"] {
@@ -314,8 +314,8 @@ input[type="number"] {
 	text-align: center;
 	appearance: textfield;
 	-webkit-appearance: textfield;
-	border: 2px solid #BBBBFF;
-	color: purple;
+	border: 2px solid #a4cdfd;
+	color: #206bc4;
 	border-radius: 4px;
 }
 
@@ -335,7 +335,7 @@ input[type="number"]:nth-child(n+4) {
 	width: 24px;
 	margin: 0 .25em;
 	order: 1;
-	background: #BBBBFF;
+	background: #a4cdfd;
 }
 
 /* From: https://gist.github.com/ffoodd/000b59f431e3e64e4ce1a24d5bb36034 */
