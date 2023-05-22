@@ -707,7 +707,7 @@ component displayname="user" output="false" {
 
     }
 
-
+    // If the user has enabled the mfa option, an mfa code is sent to the user after successful login
     public struct function sendMfaCode(required string mfaUUID, boolean blnResend, string mfaMail, string mfaName){
 
         local.num1 = 99999;
@@ -751,7 +751,7 @@ component displayname="user" output="false" {
             ");
         }
 
-        // Send activation link
+        // Send mfa code to user
         mail to="#arguments.mfaMail#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
             include template="/config.cfm";
             include template="/includes/mail_design.cfm";
@@ -770,6 +770,7 @@ component displayname="user" output="false" {
 
     }
 
+    // After the user has entered the Mfa code, the numbers are checked here.
     public struct function checkMfa(required string mfaUUID, required numeric mfaCode){
 
         local.mfaCheckTime = dateAdd("h", 3, now());
@@ -791,6 +792,7 @@ component displayname="user" output="false" {
             local.mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
             local.mfaCheckTime = parseDateTime(local.mfaCheckTime);
 
+            // This checks if the Mfa code is still valid
             if(DateDiff("h", local.mfaCheckTime, local.mfaRequestTime) neq 0){
                 local.argsReturnValue['message'] = variables.getTrans('txtCodeValidity');
                 local.argsReturnValue['uuid'] = arguments.mfaUUID;
