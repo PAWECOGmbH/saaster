@@ -305,7 +305,7 @@ div.dashboard div.card-header label.form-check {
     border-color: #a4cdfd;
 }
 
-input[type="number"] {
+.otc input[type="number"] {
 	width: 12%;
 	line-height: 1;
 	margin: .1em;
@@ -326,7 +326,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* 2 group of 3 items */
-input[type="number"]:nth-child(n+4) {
+.otc input[type="number"]:nth-child(n+4) {
 	order: 2;
 }
 .otc div.mb-3::before {
