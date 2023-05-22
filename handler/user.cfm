@@ -15,6 +15,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
     param name="form.superadmin" default="0";
     param name="form.active" default="0";
     param name="form.tenantID" default="";
+    param name="form.mfa" default="0";
     param name="thisUserID" default="#session.user_id#";
     param name="thisCustomerID" default="#session.customer_id#";
     param name="thisReferer" default="my-profile";
@@ -43,6 +44,11 @@ if (structKeyExists(form, "edit_profile_btn")) {
         form.active = 0;
     }
 
+    if (form.mfa eq 1 or form.mfa eq "on") {
+        form.mfa = 1;
+    } else {
+        form.mfa = 0;
+    }
 
     // Check whether the email is valid
     checkEmail = application.objGlobal.checkEmail(form.email);
