@@ -223,9 +223,9 @@ component displayname="user" output="false" {
                     phone: {type: "nvarchar", value: local.phone},
                     mobile: {type: "nvarchar", value: local.mobile},
                     language: {type: "nvarchar", value: local.language},
-                    admin: {type: "numeric", value: local.admin},
-                    superadmin: {type: "numeric", value: local.superadmin},
-                    active: {type: "numeric", value: local.active},
+                    admin: {type: "boolean", value: local.admin},
+                    superadmin: {type: "boolean", value: local.superadmin},
+                    active: {type: "boolean", value: local.active},
                     mfa: {type: "boolean", value: local.mfa}
                 },
                 sql = "
