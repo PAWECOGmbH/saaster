@@ -89,29 +89,64 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-lg-4 mb-3">
-                                        <div class="form-label">#getTrans('titActive')#</div>
-                                        <label class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="active" checked>
-                                            <span class="form-check-label">#getTrans('txtActivateThisUser')#</span>
-                                        </label>
-                                    </div>
-                                    <div class="col-lg-4 mb-3">
-                                        <div class="form-label">#getTrans('titAdmin')#</div>
-                                        <label class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="admin">
-                                            <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
-                                        </label>
-                                    </div>
-                                    <cfif session.superadmin>
+                                    <cfif !session.sysadmin>
                                         <div class="col-lg-4 mb-3">
-                                            <div class="form-label">#getTrans('titSuperAdmin')#</div>
+                                            <div class="form-label">#getTrans('titActive')#</div>
                                             <label class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" name="superadmin">
-                                                <span class="form-check-label">#getTrans('txtSetUserAsSuperAdmin')#</span>
+                                                <input class="form-check-input" type="checkbox" name="active" checked>
+                                                <span class="form-check-label">#getTrans('txtActivateThisUser')#</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-lg-4 mb-3">
+                                            <div class="form-label">#getTrans('titAdmin')#</div>
+                                            <label class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="admin">
+                                                <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
+                                            </label>
+                                        </div>
+                                        <cfif session.superadmin>
+                                            <div class="col-lg-4 mb-3">
+                                                <div class="form-label">#getTrans('titSuperAdmin')#</div>
+                                                <label class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="superadmin">
+                                                    <span class="form-check-label">#getTrans('txtSetUserAsSuperAdmin')#</span>
+                                                </label>
+                                            </div>
+                                        </cfif>
+                                    </cfif>
+                                    <cfif session.sysadmin>
+                                        <div class="col-lg-3 mb-3">
+                                            <div class="form-label">#getTrans('titActive')#</div>
+                                            <label class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="active" checked>
+                                                <span class="form-check-label">#getTrans('txtActivateThisUser')#</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-lg-3 mb-3">
+                                            <div class="form-label">#getTrans('titAdmin')#</div>
+                                            <label class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="admin">
+                                                <span class="form-check-label">#getTrans('txtSetUserAsAdmin')#</span>
+                                            </label>
+                                        </div>
+                                        <cfif session.superadmin>
+                                            <div class="col-lg-3 mb-3">
+                                                <div class="form-label">#getTrans('titSuperAdmin')#</div>
+                                                <label class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="superadmin">
+                                                    <span class="form-check-label">#getTrans('txtSetUserAsSuperAdmin')#</span>
+                                                </label>
+                                            </div>
+                                        </cfif>
+                                        <div class="col-lg-3 mb-3">
+                                            <div class="form-label">#getTrans('titSysAdmin')#</div>
+                                            <label class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="sysadmin">
+                                                <span class="form-check-label">#getTrans('txtSetUserAsSysAdmin')#</span>
                                             </label>
                                         </div>
                                     </cfif>
+
                                     <div class="col-sm-6 col-md-3 mb-3">
                                         <div class="form-group">
                                             <label class="form-label">#getTrans('formSalutation')#</label>

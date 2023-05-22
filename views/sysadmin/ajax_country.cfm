@@ -1,5 +1,8 @@
 <cfsetting showdebugoutput="no">
 <cfscript>
+
+    objSysadmin = new com.sysadmin();
+
     if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
         getAlert('alertSessionExpired', 'warning');
         location url="#application.mainURL#/login" addtoken="false";
@@ -11,27 +14,13 @@
         abort;
     }
 
-    qCountry = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            countryID: {type: "numeric", value: url.countryID}
-        },
-        sql = "
-            SELECT *
-            FROM countries
-            WHERE intCountryID = :countryID
-        "
-    )
+    qCountry = objSysadmin.getCountryAjax(url.countryID);
+        
 </cfscript>
 
 <cfif qCountry.recordCount>
 
-    <cfquery datasource="#application.datasource#" name="qTotalCountries">
-        SELECT COUNT(intCountryID) as totalCountries
-        FROM countries
-        WHERE blnActive = 1
-    </cfquery>
-
+    <cfset qTotalCountries = objSysadmin.getCountriesAjax()>
     <cfset qLanguages = application.objLanguage.getAllLanguages()>
     <cfset timeZones = new com.time(session.customer_id).getTimezones()>
 

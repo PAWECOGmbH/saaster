@@ -3,6 +3,8 @@
     param name="session.cust_sort" default="intPrio" type="string";
     param name="session.customers_page" default=1 type="numeric";
 
+    objSysadmin = new com.sysadmin();
+
     getEntries = 10;
     cust_start = 0;
 
@@ -29,41 +31,12 @@
         }else {
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
-        qTotalCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson,
-                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
-                FROM customers
 
-                INNER JOIN users
-                ON customers.intCustomerID = users.intCustomerID
-                OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.blnActive = 1
-                AND MATCH (
-                    customers.strCompanyName,
-                    customers.strContactPerson,
-                    customers.strAddress,
-                    customers.strZIP,
-                    customers.strCity,
-                    customers.strEmail
-                )
-                #searchString#
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        )
+        qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start, session.cust_sort);
     }
     else {
-        qTotalCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intCustomerID) as totalCustomers
-                FROM customers
-                WHERE blnActive = 1
-            "
-        )
+
+        qTotalCustomers = objSysadmin.getTotalCustomers();
     }
 
     pages = ceiling(qTotalCustomers.totalCustomers / getEntries);
@@ -85,43 +58,11 @@
         }else {
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
-        qCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
-                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
-                FROM customers
 
-                INNER JOIN users
-                ON customers.intCustomerID = users.intCustomerID
-                OR customers.intCustParentID = users.intCustomerID
-
-                WHERE customers.blnActive = 1
-                AND MATCH (
-                    customers.strCompanyName,
-                    customers.strContactPerson,
-                    customers.strAddress,
-                    customers.strZIP,
-                    customers.strCity,
-                    customers.strEmail
-                )
-                #searchString#
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        );
+        qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start, session.cust_sort);
     }else {
-        qCustomers = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT customers.*, countries.strCountryName
-                FROM customers
-                LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
-                WHERE customers.blnActive = 1
-                ORDER BY #session.cust_sort#
-                LIMIT #cust_start#, #getEntries#
-            "
-        );
+        
+        qCustomers = objSysadmin.getCustomer(cust_start, session.cust_sort);
     }
 
     cntCountries = application.objGlobal.getCountry().recordCount;

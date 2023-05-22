@@ -368,8 +368,8 @@ component displayname="user" output="false" {
         local.language = application.objLanguage.getDefaultLanguage().iso;
         local.admin = 0;
         local.superadmin = 0;
+        local.sysadmin = 0;
         local.active = 0;
-
 
         if (structKeyExists(arguments.userStruct, "salutation")) {
             local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
@@ -401,6 +401,13 @@ component displayname="user" output="false" {
                 local.admin = 1;
             }
         }
+        if (structKeyExists(arguments.userStruct, "sysadmin")) {
+            local.sysadmin = arguments.userStruct.sysadmin;
+            if (local.sysadmin eq 1) {
+                local.admin = 1;
+                local.superadmin = 1;
+            }
+        }
         if (structKeyExists(arguments.userStruct, "active")) {
             local.active = arguments.userStruct.active;
         }
@@ -424,11 +431,12 @@ component displayname="user" output="false" {
                     active: {type: "boolean", value: local.active},
                     language: {type: "varchar", value: local.language},
                     newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
-                    dateNow: {type: "datetime", value: now()}
+                    dateNow: {type: "datetime", value: now()},
+                    sysadmin: {type: "integer", value: local.sysadmin}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, strUUID)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID)
+                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID)
                 "
 
             )
@@ -668,7 +676,7 @@ component displayname="user" output="false" {
         return local.mailChanged;
 
     }
-
+    
 
     // After the customer has clicked the confirmation e-mail, we update the database
     public struct function updateEmail(required string newUserMail, required numeric confUserID){
@@ -705,7 +713,8 @@ component displayname="user" output="false" {
 
         return local.argsReturnValue;
 
-    }
+    }    
+    
 
     // If the user has enabled the mfa option, an mfa code is sent to the user after successful login
     public struct function sendMfaCode(required string mfaUUID, boolean blnResend, string mfaMail, string mfaName){
@@ -769,6 +778,7 @@ component displayname="user" output="false" {
         }
 
     }
+    
 
     // After the user has entered the Mfa code, the numbers are checked here.
     public struct function checkMfa(required string mfaUUID, required numeric mfaCode){
@@ -811,4 +821,25 @@ component displayname="user" output="false" {
         return local.argsReturnValue;
 
     }
+    
+
+    // Get users data using a UUID
+    public query function getOptinUser(required string userUUID){
+        
+        local.qOptinUser = queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+            strUUID: {type: "nvarchar", value: arguments.userUUID}
+            },
+            sql = "
+                SELECT *
+                FROM users
+                WHERE strUUID = :strUUID
+            "
+        )
+
+        return local.qOptinUser;
+    }
+
 }

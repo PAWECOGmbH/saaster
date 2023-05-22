@@ -1,4 +1,5 @@
 <cfscript>
+
 	qCustomer = application.objCustomer.getUserDataByID(session.user_ID);
 
     iniUserObj = application.objUser;
@@ -6,18 +7,7 @@
 
     if (structKeyExists(url, "c") and len(trim(url.c)) eq 64){
         
-        qOptinUser = queryExecute(
-
-            options = {datasource = application.datasource},
-            params = {
-            strUUID: {type: "nvarchar", value: url.c}
-            },
-            sql = "
-                SELECT *
-                FROM users
-                WHERE strUUID = :strUUID
-            "
-        )
+        qOptinUser = iniUserObj.getOptinUser(url.c);
         cReferer = "my-profile";
 
         local.userID = qOptinUser.intUserID

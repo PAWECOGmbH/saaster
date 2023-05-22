@@ -1,15 +1,8 @@
 
 <cfscript>
 
-    qNonDefLng = queryExecute(
-        options = {datasource = application.datasource},
-        sql = "
-            SELECT *
-            FROM languages
-            WHERE blnDefault = 0
-            ORDER BY intPrio
-        "
-    )
+    objSysadmin = new com.sysadmin();
+    qNonDefLng = objSysadmin.getNonDefLng();
 
 </cfscript>
 

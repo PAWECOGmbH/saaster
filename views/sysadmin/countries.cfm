@@ -3,6 +3,7 @@
     param name="session.c_sort" default="intPrio" type="string";
     param name="session.c_page" default=1 type="numeric";
 
+    objSysadmin = new com.sysadmin();
 
     getEntries = 10;
     c_start = 0;
@@ -29,35 +30,12 @@
         }else {
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
-
-        qTotalCountries = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intCountryID) as totalCountries
-                FROM countries
-                WHERE blnActive = 1
-                AND MATCH (
-                    countries.strCountryName,
-                    countries.strLocale,
-                    countries.strISO1,
-                    countries.strISO2,
-                    countries.strCurrency,
-                    countries.strRegion,
-                    countries.strSubRegion
-                )
-                #searchString#
-            "
-        );
+        
+        qTotalCountries = objSysadmin.getTotalCountriesSearch(searchString);
     }
     else {
-        qTotalCountries = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT COUNT(intCountryID) as totalCountries
-                FROM countries
-                WHERE blnActive = 1
-            "
-        )
+        
+        qTotalCountries = objSysadmin.getTotalCountries();
     }
 
     pages = ceiling(qTotalCountries.totalCountries / getEntries);
@@ -80,32 +58,11 @@
             searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
         }
 
-        qCountries = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT countries.*, languages.strLanguageEN
-                FROM countries
-                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
-                WHERE blnActive = 1
-                AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
-                #searchString#
-                ORDER BY #session.c_sort#
-                LIMIT #c_start#, #getEntries#
-            "
-        );
+        qCountries = objSysadmin.getCountriesSearch(searchString, c_start, session.c_sort);
     }
     else {
-        qCountries = queryExecute(
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT countries.*, languages.strLanguageEN
-                FROM countries
-                LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
-                WHERE blnActive = 1
-                ORDER BY #session.c_sort#
-                LIMIT #c_start#, #getEntries#
-            "
-        )
+        
+        qCountries = objSysadmin.getCountries(c_start, session.c_sort);
     }
 
     qLanguages = application.objLanguage.getAllLanguages();
