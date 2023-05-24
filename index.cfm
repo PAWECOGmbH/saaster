@@ -3,15 +3,16 @@
 <html lang="#session.lng#">
 
 <cfinclude template="includes/head.cfm">
-<body #getLayout.layoutBody#>
+<body #getLayout.layoutBody# class="d-flex flex-column">
+	
 </cfoutput>
-	<div class="page">
-		<cfif fileExists(thiscontent.thisPath)>
-			<cfinclude template="#thiscontent.thisPath#">
-		<cfelse>
-			<cfinclude template="/frontend/start.cfm">
-		</cfif>
-	</div>
+	
+	<cfif fileExists(thiscontent.thisPath)>
+		<cfinclude template="#thiscontent.thisPath#">
+	<cfelse>
+		<cfinclude template="/frontend/start.cfm">
+	</cfif>
+	
 	<cfinclude template="includes/js.cfm">
 	<cfif structKeyExists(session, "filledData")>
 		<cfinclude template="/includes/fill_data_modal.cfm">

@@ -189,7 +189,7 @@
                     </div>
                 </a>
 
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <div class="dropdown-menu dropdown-menu-end">
 
                     <a class="dropdown-item" href="#application.mainURL#/account-settings">
                         #getTrans('txtAccountSettings')#

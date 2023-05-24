@@ -142,7 +142,7 @@
                           <cfif len(trim(customerData.logo))>
                             <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#customerData.logo#" width="200" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; width: 200px; font-size: 16px;" border="0">
                           <cfelse>
-                            <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" width="200" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; width: 200px; font-size: 16px;" border="0">
+                            <img alt="Logo" src="#application.mainURL#/dist/img/logo-no-background.png" width="200" style="display: block; font-family: #fontFamily#; color: ###headerFontColor#; width: 200px; font-size: 16px;" border="0">
                           </cfif>
                         </a>
                       </td>

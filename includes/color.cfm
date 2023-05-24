@@ -7,7 +7,8 @@
     --tblr-btn-disabled-bg: #application.systemSettingStruct.settingColorPrimary# !important;
 }
 .btn-primary:hover,
-.btn-primary:active{
+.btn-primary:active,
+.btn-primary:focus-visible{
     --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorPrimary# !important;
     --tblr-btn-active-bg: #application.systemSettingStruct.settingColorPrimary# !important;    
     filter: brightness(110%) saturate(105%);
@@ -19,7 +20,8 @@
 }
 
 .btn-secondary:hover,
-.btn-secondary:active{
+.btn-secondary:active
+.btn-secondary:focus-visible{
     --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorSecondary# !important;
     --tblr-btn-active-bg:#application.systemSettingStruct.settingColorSecondary# !important;
     filter: brightness(110%) saturate(105%);

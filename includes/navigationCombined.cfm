@@ -17,7 +17,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
-                <h1 class="#getLayout.layoutTitel#">
+                <div class="#getLayout.layoutTitel#">
                     <cfif len(trim(getSysadminData.logo))>
                         <a href="#application.mainURL#/dashboard">
                             <img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
@@ -28,7 +28,7 @@
                         </a>
                     </cfif>
                     
-                </h1>
+                </div>
                 
 
                 <div class="#getLayout.layoutDiv#">

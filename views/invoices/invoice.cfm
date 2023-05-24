@@ -75,7 +75,7 @@
                             <cfif len(trim(sysAdminData.logo))>
                                 <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#sysAdminData.logo#" style="display: block; max-width: 250px; float: right;" border="0">
                             <cfelse>
-                                <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" style="display: block; max-width: 250px; float: right;" border="0">
+                                <img alt="Logo" src="#application.mainURL#/dist/img/logo-no-background.png" style="display: block; max-width: 250px; float: right;" border="0">
                             </cfif>
                         </div>
                         <div class="col-6">
