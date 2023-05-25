@@ -1,5 +1,5 @@
 <div align="center">
-<img src="dist/img/logo.png#gh-light-mode-only" height="100"/>
+<img src="dist/img/logo-no-background.png" height="100"/>
 </div>
 <br>
 
