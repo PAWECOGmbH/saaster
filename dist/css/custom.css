@@ -275,3 +275,6 @@ div.dashboard div.card-header label.form-check {
 .no-max-width{
     max-width: revert;
 } 
+.black-text > th{
+    color:black!important;
+}

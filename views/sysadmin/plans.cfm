@@ -73,7 +73,7 @@
                                 <cfif qPlanGroups.recordCount and qPlans.recordCount>
                                     <table class="table card-table table-vcenter text-nowrap">
                                         <thead>
-                                            <tr>
+                                            <tr class="black-text">
                                                 <th width="5%"></th>
                                                 <th width="5%" class="text-center">Prio</th>
                                                 <th width="30%">Plan name</th>
