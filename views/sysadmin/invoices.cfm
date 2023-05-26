@@ -200,7 +200,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-vcenter table-mobile-md card-table">
                                         <thead>
-                                            <tr class="black-text">
+                                            <tr>
                                                 <th>Date (UTC)</th>
                                                 <th>Number</th>
                                                 <th>Status</th>
