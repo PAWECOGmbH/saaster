@@ -1,9 +1,1 @@
-start
-
-<cfscript>
-
-dump(application.objLanguage.getDefaultLanguage());
-
-</cfscript>
-
-
+<cflocation url="./plans" addtoken="false">
