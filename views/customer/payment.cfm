@@ -26,7 +26,7 @@
                     </div>
 
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a onclick="sweetAlert('info', '#application.mainURL#/payment-settings?add=#session.customer_id#', '#getTrans('txtInformation')#', '#getTrans('msgWeDoNotCharge')#', '#getTrans('btnNoCancel')#', 'OK')" class="btn btn-primary">
+                        <a href="#application.mainURL#/payment-settings?add=#session.customer_id#" class="btn btn-primary">
                             <i class="fas fa-plus pe-3"></i> #getTrans('btnAddPaymentMethod')#
                         </a>
                     </div>
@@ -82,7 +82,7 @@
                             <cfelse>
                                 <p>
                                     <span class="text-red">#getTrans('txtNoPaymentMethod')# </span>
-                                    <a href="##?" onclick="sweetAlert('info', '#application.mainURL#/payment-settings?add=#session.customer_id#', '#getTrans('txtInformation')#', '#getTrans('msgWeDoNotCharge')#', '#getTrans('btnNoCancel')#', 'OK')">
+                                    <a href="#application.mainURL#/payment-settings?add=#session.customer_id#">
                                         #getTrans('btnAddPaymentMethod')#
                                     </a>
                                 </p>
