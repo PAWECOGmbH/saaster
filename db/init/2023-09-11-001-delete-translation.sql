@@ -1,2 +1,2 @@
 
-DELETE FROM system_translation WHERE intSystTransID = 271;
+DELETE FROM system_translations WHERE intSystTransID = 271;
