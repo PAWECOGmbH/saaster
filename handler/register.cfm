@@ -348,7 +348,7 @@ if (structKeyExists(form, 'login_btn')) {
             blnresend = false;
             mfaUUID = application.objGlobal.getUUID();
 
-            if (objUserMfa.blnMfa){ 
+            if (objUserMfa.blnMfa){
                 structDelete(session, 'user_id');
                 session.mfaCheckCount = 0;
                 objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
@@ -374,7 +374,7 @@ if (structKeyExists(form, 'login_btn')) {
 
         }
 
-        
+
 
     } else {
 
@@ -558,7 +558,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
 }
 
-if (structKeyExists(form, 'mfa_btn')){
+if (structKeyExists(form, 'mfa_btn')) {
 
     param name="form.mfa_1" default=0;
     param name="form.mfa_2" default=0;
@@ -567,32 +567,36 @@ if (structKeyExists(form, 'mfa_btn')){
     param name="form.mfa_5" default=0;
     param name="form.mfa_6" default=0;
 
-    mfa_1 = toString(form.mfa_1);
-    mfa_2 = toString(form.mfa_2);
-    mfa_3 = toString(form.mfa_3);
-    mfa_4 = toString(form.mfa_4);
-    mfa_5 = toString(form.mfa_5);
-    mfa_6 = toString(form.mfa_6);
+    mfa_1 = isNumeric(form.mfa_1) ? toString(form.mfa_1) : 0;
+    mfa_2 = isNumeric(form.mfa_2) ? toString(form.mfa_2) : 0;
+    mfa_3 = isNumeric(form.mfa_3) ? toString(form.mfa_3) : 0;
+    mfa_4 = isNumeric(form.mfa_4) ? toString(form.mfa_4) : 0;
+    mfa_5 = isNumeric(form.mfa_5) ? toString(form.mfa_5) : 0;
+    mfa_6 = isNumeric(form.mfa_6) ? toString(form.mfa_6) : 0;
 
     mfaCodes = toNumeric(mfa_1 & mfa_2 & mfa_3 & mfa_4 & mfa_5 & mfa_6);
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
 
-    if(checkMfa.success eq true){
+    if (checkMfa.success eq true) {
+
         session.user_id = checkMfa.userid;
         logWrite("mfa check", 1, "File: #callStackGet("string", 0 , 1)#, User: #checkMfa.userid#, User successfully logged in with multi-factor-authentication.", false);
         location url="#application.mainURL#/dashboard" addtoken="false";
-    } else{
-        if(session.mfaCheckCount eq 3){
+
+    } else {
+
+        if (session.mfaCheckCount eq 3) {
             getAlert(getTrans('txtThreeTimeTry'), 'warning');
         } else {
             getAlert(checkMfa.message, 'warning');
             session.mfaCheckCount++;
         }
-        logWrite("mfa check", 3, "File: #callStackGet("string", 0 , 1)#, multi-factor-authentication failed #session.mfaCheckCount# times.", false);
-        uuid = checkMfa.uuid;
-        location url="#application.mainURL#/mfa?uuid=#uuid#" addtoken="false";
+
+        logWrite("mfa check", 3, "File: #callStackGet("string", 0 , 1)#, Multi-factor-authentication failed #session.mfaCheckCount# times.", false);
+        location url="#application.mainURL#/mfa?uuid=#checkMfa.uuid#" addtoken="false";
+
     }
-    
+
 }
 
 if (structKeyExists(url, 'resend')){
