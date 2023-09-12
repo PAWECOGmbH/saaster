@@ -4,7 +4,7 @@
     param name="session.name" default="";
     param name="session.company" default="";
     param name="session.email" default="";
-    getSysadminData = application.objSysadmin.getSysAdminData(); 
+    getSysadminData = application.objSysadmin.getSysAdminData();
 </cfscript>
 
 <cfoutput>
@@ -95,7 +95,6 @@
         </div>
     </div>
 </div>
-
 <div id="privacy_policy" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <form action="step3.cfm" method="post">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -111,7 +110,5 @@
         </div>
     </form>
 </div>
-
 </cfoutput>
-
-
+<cfset structDelete(session, "alert") />
