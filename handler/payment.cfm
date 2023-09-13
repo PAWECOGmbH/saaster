@@ -130,7 +130,7 @@ if (structKeyExists(url, "add")) {
             paymentStruct['cancelRedirectUrl'] = "#application.mainURL#/account-settings/payment";
             paymentStruct['lookAndFeelProfile'] = variables.payrexxDesignID; // config.cfm
             paymentStruct['purpose'] = "Validation test";
-            paymentStruct['amount'] = 100;
+            paymentStruct['amount'] = 0;
             paymentStruct['preAuthorization'] = true;
 
             // Are there any specific PSPs defined?

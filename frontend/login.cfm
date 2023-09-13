@@ -3,11 +3,12 @@
     if (structKeyExists(url, "logout")) {
         getAlert('alertLoggedOut', 'info');
     } else if (structKeyExists(session, "user_id") and session.user_id gt 0) {
+        structDelete(session, "alert");
         location url="#application.mainURL#/dashboard" addtoken="false";
     }
     param name="session.email" default="";
 
-    getSysadminData = application.objSysadmin.getSysAdminData();    
+    getSysadminData = application.objSysadmin.getSysAdminData();
 </cfscript>
 
 <cfoutput>
@@ -59,3 +60,4 @@
     </div>
 </div>
 </cfoutput>
+<cfset structDelete(session, "alert") />

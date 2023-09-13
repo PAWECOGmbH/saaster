@@ -57,3 +57,4 @@
     </div>
 </div>
 </cfoutput>
+<cfset structDelete(session, "alert") />

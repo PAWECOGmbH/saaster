@@ -170,6 +170,7 @@ component displayname="user" output="false" {
         local.admin = 0;
         local.active = 0;
         local.tenantID = '';
+        local.mfa = 0;
 
         if (structKeyExists(arguments.userStruct, "salutation")) {
             local.salutation = application.objGlobal.cleanUpText(arguments.userStruct.salutation, 20);
@@ -204,6 +205,9 @@ component displayname="user" output="false" {
         if (structKeyExists(arguments.userStruct, "tenantID")) {
             local.tenantID = arguments.userStruct.tenantID;
         }
+        if (structKeyExists(arguments.userStruct, "mfa")) {
+            local.mfa = arguments.userStruct.mfa;
+        }
 
         try {
 
@@ -219,9 +223,10 @@ component displayname="user" output="false" {
                     phone: {type: "nvarchar", value: local.phone},
                     mobile: {type: "nvarchar", value: local.mobile},
                     language: {type: "nvarchar", value: local.language},
-                    admin: {type: "numeric", value: local.admin},
-                    superadmin: {type: "numeric", value: local.superadmin},
-                    active: {type: "numeric", value: local.active}
+                    admin: {type: "boolean", value: local.admin},
+                    superadmin: {type: "boolean", value: local.superadmin},
+                    active: {type: "boolean", value: local.active},
+                    mfa: {type: "boolean", value: local.mfa}
                 },
                 sql = "
                     UPDATE users
@@ -233,7 +238,8 @@ component displayname="user" output="false" {
                         strLanguage = :language,
                         blnAdmin = :admin,
                         blnSuperAdmin = :superadmin,
-                        blnActive = :active
+                        blnActive = :active,
+                        blnMfa = :mfa
                     WHERE intUserID = :intUserID
                 "
 
@@ -670,7 +676,7 @@ component displayname="user" output="false" {
         return local.mailChanged;
 
     }
-
+    
 
     // After the customer has clicked the confirmation e-mail, we update the database
     public struct function updateEmail(required string newUserMail, required numeric confUserID){
@@ -707,8 +713,117 @@ component displayname="user" output="false" {
 
         return local.argsReturnValue;
 
-    }
+    }    
+    
 
+    // If the user has enabled the mfa option, an mfa code is sent to the user after successful login
+    public struct function sendMfaCode(required string mfaUUID, boolean blnResend, string mfaMail, string mfaName){
+
+        local.num1 = 99999;
+        local.num2 = 1000000;
+        local.authCode = randRange(local.num1, local.num2, "SHA1PRNG");
+        local.mfaDateTime = dateAdd("h", 3, now());
+        local.newuuid = arguments.mfaUUID;
+
+        queryExecute(
+
+            options = {datasource = application.datasource},
+            params = {
+                authcode: {type: "numeric", value:local.authCode},
+                mfaDateTime: {type: "datetime", value: local.mfaDateTime},
+                strUUID: {type: "varchar", value: arguments.mfaUUID},
+                strEmail: {type: "varchar", value: arguments.mfaMail}
+            },
+            sql = "
+                UPDATE users
+                SET intMfaCode = :authcode,
+                dtmMfaDateTime = :mfaDateTime,
+                strUUID = :strUUID
+                WHERE strEmail = :strEmail;
+            "
+        )
+
+        variables.mailTitle = variables.getTrans('txtMfaCode');
+        variables.mailType = "html";
+
+        cfsavecontent (variable = "variables.mailContent") {
+
+            echo("
+                #variables.getTrans('titHello')# #arguments.mfaName#<br><br>
+                #variables.getTrans('txtThreeTimeTry')#<br>
+                #variables.getTrans('txtCodeValidity')#<br><br>
+                #local.authCode#<br><br>
+                
+                #variables.getTrans('txtRegards')#<br>
+                #variables.getTrans('txtYourTeam')#<br>
+                #application.appOwner#
+            ");
+        }
+
+        // Send mfa code to user
+        mail to="#arguments.mfaMail#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
+            include template="/config.cfm";
+            include template="/includes/mail_design.cfm";
+        }
+       
+       
+        if(arguments.blnResend){
+            local.argsReturnValue['message'] = variables.getTrans('txtResendDone');
+            local.argsReturnValue['success'] = true;
+            return local.argsReturnValue;
+
+        } else{
+            local.returnStruct['redirect'] = "#application.mainURL#/mfa?uuid=#local.newUUID#";
+            return local.returnStruct;
+        }
+
+    }
+    
+
+    // After the user has entered the Mfa code, the numbers are checked here.
+    public struct function checkMfa(required string mfaUUID, required numeric mfaCode){
+
+        local.mfaCheckTime = dateAdd("h", 3, now());
+
+        local.qGetUserMfa = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                UUID: {type: "varchar", value: arguments.mfaUUID}
+            },
+            sql = "
+                SELECT intmfaCode, dtmMfaDateTime, intUserID
+                FROM users
+                WHERE strUUID = :UUID
+            "
+        )
+        
+        if(arguments.mfaCode eq local.qGetUserMfa.intmfaCode){
+
+            local.mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
+            local.mfaCheckTime = parseDateTime(local.mfaCheckTime);
+
+            // This checks if the Mfa code is still valid
+            if(DateDiff("h", local.mfaCheckTime, local.mfaRequestTime) neq 0){
+                local.argsReturnValue['message'] = variables.getTrans('txtCodeValidity');
+                local.argsReturnValue['uuid'] = arguments.mfaUUID;
+                local.argsReturnValue['success'] = false;
+            } else {
+                local.argsReturnValue['userid'] = local.qGetUserMfa.intUserID;
+                local.argsReturnValue['success'] = true;
+            }
+
+        } else {
+            local.argsReturnValue['message'] = variables.getTrans('txtErrorMfaCode');
+            local.argsReturnValue['uuid'] = arguments.mfaUUID;
+            local.argsReturnValue['success'] = false;
+        }
+        
+        return local.argsReturnValue;
+
+    }
+    
+
+    // Get users data using a UUID
     public query function getOptinUser(required string userUUID){
         
         local.qOptinUser = queryExecute(
