@@ -1,10 +1,6 @@
 <cfsetting showdebugoutput="no">
 
 <cfscript>
-    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
-        getAlert('alertSessionExpired', 'warning');
-        location url="#application.mainURL#/login" addtoken="false";
-    }
     setting showdebugoutput = false;
     param name="url.invoiceID" default=0 type="numeric";
     if(!isNumeric(url.invoiceID)){

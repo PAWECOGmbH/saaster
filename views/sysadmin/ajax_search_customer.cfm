@@ -1,15 +1,9 @@
 <cfsetting showdebugoutput="no">
 <cfscript>
-    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
-        getAlert('alertSessionExpired', 'warning');
-        location url="#application.mainURL#/login" addtoken="false";
-    }
     setting showdebugoutput = false;
     param name="url.search" default="";
-
     objSysadmin = new com.sysadmin();
     qCustomer = objSysadmin.getCustomerAjax(url.search);
-
 </cfscript>
 <div class="mt-2">
     <cfoutput query="qCustomer">

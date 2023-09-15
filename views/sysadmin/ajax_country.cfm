@@ -3,10 +3,6 @@
 
     objSysadmin = new com.sysadmin();
 
-    if (!structKeyExists(session, "sysadmin") or !session.sysadmin) {
-        getAlert('alertSessionExpired', 'warning');
-        location url="#application.mainURL#/login" addtoken="false";
-    }
     setting showdebugoutput = false;
     param name="url.countryID" default=0 type="numeric";
 
@@ -15,7 +11,7 @@
     }
 
     qCountry = objSysadmin.getCountryAjax(url.countryID);
-        
+
 </cfscript>
 
 <cfif qCountry.recordCount>
