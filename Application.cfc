@@ -198,15 +198,17 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         }
 
         // If there is no session, send to login
-        if (!findNoCase("setup", cgi.script_name)
-            and !findNoCase("frontend", thiscontent.thisPath)
+        if (!findNoCase("frontend", thiscontent.thisPath)
             and !findNoCase("register", thiscontent.thisPath)
             and !findNoCase("ajax", thiscontent.thisPath)
             and !findNoCase("print", thiscontent.thisPath)
-            and !structKeyExists(url, "u") and !structKeyExists(url, "p")) {
-            if (!structKeyExists(session, "user_id")) {
-                getAlert('alertSessionExpired', 'warning');
-                location url="#application.mainURL#/login" addtoken="false";
+            and !structKeyExists(url, "u")
+            and !structKeyExists(url, "p")) {
+            if (!findNoCase("setup", cgi.script_name)) {
+                if (!structKeyExists(session, "user_id")) {
+                    getAlert('alertSessionExpired', 'warning');
+                    location url="#application.mainURL#/login" addtoken="false";
+                }
             }
         }
 
