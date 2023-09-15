@@ -197,12 +197,6 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             structDelete(session, "redirect");
         }
 
-
-        dump(cgi.script_name);
-        dump(trueFalseFormat(findNoCase("setup", cgi.script_name)));
-
-
-
         // If there is no session, send to login
         if (!findNoCase("frontend", thiscontent.thisPath)
             and !findNoCase("register", thiscontent.thisPath)
@@ -210,7 +204,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             and !findNoCase("print", thiscontent.thisPath)
             and !structKeyExists(url, "u")
             and !structKeyExists(url, "p")) {
-            if (!trueFalseFormat(findNoCase("setup", cgi.script_name))) {
+            if (!findNoCase("setup", cgi.script_name)) {
                 if (!structKeyExists(session, "user_id")) {
                     getAlert('alertSessionExpired', 'warning');
                     location url="#application.mainURL#/login" addtoken="false";
