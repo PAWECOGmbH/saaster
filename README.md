@@ -23,7 +23,6 @@ Pass: testtest<br><br><br>
 ## 👀 Test demo plans:
 <a target="_blank" href="https://demo.saaster.io/plans">See plans</a><br><br><br>
 
-
 ## ✔️ Requirements
 
 The following list contains all the requirements that your system hast to fulfill to run saaster.
