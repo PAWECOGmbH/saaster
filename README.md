@@ -11,18 +11,17 @@ Saaster is a base application written in CFML that offers all the basic function
 <a target="_blank" href="https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE">📃 License</a><br><br>
 
 ## 👀 Demo as a SysAdmin
-Checkout our demo at <a target="_blank" href="https://saaster.io/login">demo.saaster.io</a>
+Checkout our demo at <a target="_blank" href="https://demo.saaster.io/login">demo.saaster.io</a>
 
 **Login**<br>
 User: demo@saaster.io<br>
 Pass: testtest<br><br><br>
 
 ## 👀 Demo as a customer
-<a target="_blank" href="https://saaster.io/register">Register here</a><br><br>
+<a target="_blank" href="https://demo.saaster.io/register">Register here</a><br><br>
 
 ## 👀 Test demo plans:
-<a target="_blank" href="https://saaster.io">See plans</a><br><br><br>
-
+<a target="_blank" href="https://demo.saaster.io/plans">See plans</a><br><br><br>
 
 ## ✔️ Requirements
 

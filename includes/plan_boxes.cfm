@@ -9,10 +9,6 @@
 
 <cfoutput>
 
-<cfif structKeyExists(session, "alert")>
-    #session.alert#
-</cfif>
-
 <div class="mb-5">
     <div class="form-label">#getTrans('titPayment')#</div>
     <div class="form-group radio-toggle has-toggle-input toggleradio mt-3">
