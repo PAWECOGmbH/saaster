@@ -1,24 +1,28 @@
 <div align="center">
-<img src="dist/img/logo-no-background.png" height="100"/>
+<img src="https://www.saaster.io/images/saaster-logo.png" height="100"/>
 </div>
 <br>
 
 ## 👋 Introduction
-Saaster is a basic application written in CFML that offers all the basic functionality that you need for a SaaS project.
-<br>
-<div align="center">
-    <a target="_blank" href="https://saaster.io">🌐 Website</a>
-    <a target="_blank" href="https://docs.saaster.io">📚 Documentation</a>
-    <a target="_blank" href="https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE">📃 License</a>
-</div>
-
-
-## 👀 Demo
-Checkout our demo at [demo.saaster.io](https://demo.saaster.io/login)
+Saaster is a base application written in CFML that offers all the basic functionality that you need for a SaaS project.
 <br><br>
+<a target="_blank" href="https://saaster.io">🌐 Website</a><br>
+<a target="_blank" href="https://docs.saaster.io">📚 Documentation</a><br>
+<a target="_blank" href="https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE">📃 License</a><br><br>
+
+## 👀 Demo as a SysAdmin
+Checkout our demo at <a target="_blank" href="https://saaster.io/login">demo.saaster.io</a>
+
 **Login**<br>
 User: demo@saaster.io<br>
-Pass: testtest
+Pass: testtest<br><br><br>
+
+## 👀 Demo as a customer
+<a target="_blank" href="https://saaster.io/register">Register here</a><br><br>
+
+## 👀 Test demo plans:
+<a target="_blank" href="https://saaster.io">See plans</a><br><br><br>
+
 
 ## ✔️ Requirements
 
