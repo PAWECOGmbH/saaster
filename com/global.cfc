@@ -736,11 +736,15 @@ component displayname="globalFunctions" output="false" {
         // Includes for modules
         loop array=local.objModules.getBookedModules(arguments.customerID) index="i" {
 
-            local.fileToInclude = "/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
+            if (structKeyExists(i.moduleData, "table_prefix")) {
 
-            // Does the file exist?
-            if (fileExists(expandPath(local.fileToInclude))) {
-                arrayAppend(local.includeArray, local.fileToInclude);
+                local.fileToInclude = "/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
+
+                // Does the file exist?
+                if (fileExists(expandPath(local.fileToInclude))) {
+                    arrayAppend(local.includeArray, local.fileToInclude);
+                }
+
             }
 
         }
