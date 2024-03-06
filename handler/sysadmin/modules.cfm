@@ -620,10 +620,8 @@ if (structKeyExists(url, "booking")) {
         bookingStruct = structNew();
         bookingStruct['bookingID'] = url.b;
 
-        if (structKeyExists(form, "start_date") and dateFormat(form.start_date, "yyyy-mm-dd") <= dateFormat(now(), "yyyy-mm-dd")) {
-            bookingStruct['dateStart'] = form.start_date;
-        }
-        if (structKeyExists(form, "end_date") and dateFormat(form.end_date, "yyyy-mm-dd") >= dateFormat(now(), "yyyy-mm-dd")) {
+        bookingStruct['dateStart'] = form.start_date;
+        if (dateFormat(form.end_date, "yyyy-mm-dd") >= dateFormat(form.start_date, "yyyy-mm-dd")) {
             bookingStruct['dateEnd'] = form.end_date;
         }
 
