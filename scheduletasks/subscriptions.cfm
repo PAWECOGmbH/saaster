@@ -1,7 +1,7 @@
 
 <cfscript>
 
-// This file is called by the scheduler (recommended: 4h cycle)
+// This file is called by the scheduler (recommended: 2h cycle)
 
 //================== Existing tasks ================
 //
@@ -23,6 +23,8 @@ if (url.pass eq variables.schedulePassword) {
     objPrices = new com.prices();
     objCurrency = new com.currency();
     objBook = new com.book();
+    objModules = new com.modules();
+    objPlans = new com.plans();
 
 
     // First round: look for "waiting" plans or modules
@@ -42,10 +44,6 @@ if (url.pass eq variables.schedulePassword) {
         "
     )
 
-
-    dump(qWaiting);
-    //abort;
-
     loop query=qWaiting {
 
         // Plans to delete
@@ -56,14 +54,16 @@ if (url.pass eq variables.schedulePassword) {
                 utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
             },
             sql = "
-                SELECT intBookingID
+                SELECT intBookingID, intCustomerID, strStatus
                 FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intPlanID > 0
                 AND dteEndDate <= DATE(:utcDate)
             "
         )
+
         loop query=qPlans {
+
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -74,6 +74,17 @@ if (url.pass eq variables.schedulePassword) {
                     WHERE intBookingID = :bookingID
                 "
             )
+
+            // Are there any modules included?
+            bookingData = objPlans.getCurrentPlan(qPlans.intCustomerID);
+            if (structKeyExists(bookingData, "modulesIncluded")) {
+                if (isArray(bookingData.modulesIncluded) and arrayLen(bookingData.modulesIncluded)) {
+                    loop array=bookingData.modulesIncluded index="a" {
+                        objModules.distributeScheduler(moduleID=a.moduleID, customerID=qPlans.intCustomerID, status=qPlans.strStatus);
+                    }
+                }
+            }
+
         }
 
         // Modules to delete
@@ -85,14 +96,17 @@ if (url.pass eq variables.schedulePassword) {
                 utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
             },
             sql = "
-                SELECT intBookingID
+                SELECT intBookingID, intCustomerID,
                 FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
                 AND dteEndDate <= DATE(:utcDate)
             "
         )
+
         loop query=qModules {
+
+            // Delete booking
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -103,8 +117,11 @@ if (url.pass eq variables.schedulePassword) {
                     WHERE intBookingID = :bookingID
                 "
             )
-        }
 
+            // Update scheduletasks
+            objModules.distributeScheduler(moduleID=qModules.intModuleID, customerID=qModules.intCustomerID, status='canceled');
+
+        }
 
 
         // Change the waiting product to 'active'
@@ -133,20 +150,14 @@ if (url.pass eq variables.schedulePassword) {
             utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
         },
         sql = "
-
             SELECT  intBookingID, intCustomerID, intPlanID, intModuleID, strRecurring, strStatus,
                     DATE_FORMAT(dteStartDate, '%Y-%m-%e') as dteStartDate,
                     DATE_FORMAT(dteEndDate, '%Y-%m-%e') as dteEndDate
             FROM bookings
             WHERE DATE(dteEndDate) < DATE(:utcDate)
             AND strStatus != 'payment'
-
         "
     )
-
-    dump(qRenewBookings);
-    //abort;
-
 
     loop query=qRenewBookings {
 
@@ -305,8 +316,8 @@ if (url.pass eq variables.schedulePassword) {
             // Processing modules ################################################
             } else if (qRenewBookings.intModuleID gt 0) {
 
-                objModules = new com.modules(language=language, currencyID=currencyID);
-                moduleData = objModules.getModuleData(qRenewBookings.intModuleID);
+                objModuless = new com.modules(language=language, currencyID=currencyID);
+                moduleData = objModuless.getModuleData(qRenewBookings.intModuleID);
 
                 // Make invoice struct
                 invoiceStruct = structNew();
@@ -415,6 +426,9 @@ if (url.pass eq variables.schedulePassword) {
 
                     updateBooking = objBook.updateBooking(updateStruct);
 
+                    // Update scheduletasks
+                    objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status=qRenewBookings.strStatus);
+
                     // Send invoice by email
                     sendInvoice = objInvoice.sendInvoice(invoiceID);
                     if (!sendInvoice.success) {
@@ -429,7 +443,6 @@ if (url.pass eq variables.schedulePassword) {
 
 
             }
-
 
 
         // Delete a plan or module that has been canceled
@@ -447,6 +460,20 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
+            // Update scheduletasks
+            if (qRenewBookings.intModuleID gt 0) {
+                objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='canceled');
+            } else if (qRenewBookings.intPlanID gt 0) {
+                // Are there any modules included?
+                bookingData = objPlans.getCurrentPlan(qRenewBookings.intCustomerID);
+                if (structKeyExists(bookingData, "modulesIncluded")) {
+                    if (isArray(bookingData.modulesIncluded) and arrayLen(bookingData.modulesIncluded)) {
+                        loop array=bookingData.modulesIncluded index="a" {
+                            objModules.distributeScheduler(moduleID=a.moduleID, customerID=qRenewBookings.intCustomerID, status='canceled');
+                        }
+                    }
+                }
+            }
 
 
         // Set expired plans or modules to "expired"
@@ -458,6 +485,11 @@ if (url.pass eq variables.schedulePassword) {
             updateStruct['status'] = "expired";
 
             updateBooking = objBook.updateBooking(updateStruct);
+
+            // Update scheduletasks
+            if (qRenewBookings.intModuleID gt 0) {
+                objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
+            }
 
         }
 

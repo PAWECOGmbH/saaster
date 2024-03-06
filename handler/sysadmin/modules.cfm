@@ -594,6 +594,179 @@ if (structKeyExists(form, "edit_prices")) {
 }
 
 
+if (structKeyExists(form, "new_scheduletask")) {
+
+    if (isNumeric(form.new_scheduletask)) {
+
+        scheduleTime = createDateTime(
+            dateFormat(form.start_date, 'yyyy'),
+            dateFormat(form.start_date, 'mm'),
+            dateFormat(form.start_date, 'dd'),
+            timeFormat(form.start_time, 'HH'),
+            timeFormat(form.start_time, 'MM'),
+            timeFormat(form.start_time, 'SS'));
+
+        startDateTime = new com.time(session.customer_id).local2utc(givenDate=scheduleTime);
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                task_name: {type: "nvarchar", value: form.schedule_name},
+                moduleID: {type: "numeric", value: form.new_scheduletask},
+                starttime: {type: "datetime", value: startDateTime},
+                task_path: {type: "nvarchar", value: form.path},
+                it_minute: {type: "numeric", value: form.iteration}
+            },
+            sql = "
+                INSERT INTO scheduletasks (strName, intModuleID, dtmStartTime, strPath, intIterationMinutes, blnActive)
+                VALUES (:task_name, :moduleID, :starttime, :task_path, :it_minute, 1)
+            "
+        )
+
+        // In case there are bookings already
+        qGetBookings = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: form.new_scheduletask}
+            },
+            sql = "
+                SELECT intModuleID, intCustomerID, strStatus
+                FROM bookings
+                WHERE intModuleID = :moduleID
+            "
+        )
+
+        if (qGetBookings.recordCount) {
+            objModule = new com.modules();
+            loop query="qGetBookings" {
+                objModule.distributeScheduler(moduleID=qGetBookings.intModuleID, customerID=qGetBookings.intCustomerID, status=qGetBookings.strStatus);
+            }
+        }
+
+        getAlert('Scheduletask added and activated for all bookings (if any).');
+        location url="#application.mainURL#/sysadmin/modules/edit/#form.new_scheduletask#?tab=scheduletasks" addtoken="false";
+
+    }
+
+}
+
+
+if (structKeyExists(form, "edit_scheduletask")) {
+
+    if (isNumeric(form.edit_scheduletask)) {
+
+        param name="url.moduleID" default="0" type="numeric";
+
+        if (structKeyExists(url, "overview")) {
+
+            Activated = structKeyExists(form, "active") ? 1 : 0;
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    taskID: {type: "numeric", value: form.edit_scheduletask},
+                    isAcive: {type: "boolean", value: Activated}
+                },
+                sql = "
+                    UPDATE scheduletasks
+                    SET blnActive = :isAcive
+                    WHERE intScheduletaskID = :taskID
+                "
+            )
+
+            if (Activated) {
+                getAlert('Scheduletask activated.');
+            } else {
+                getAlert('Scheduletask stopped.');
+            }
+
+            location url="#application.mainURL#/sysadmin/modules/edit/#url.moduleID#?tab=scheduletasks" addtoken="false";
+
+
+        } else {
+
+            scheduleTime = createDateTime(
+                dateFormat(form.start_date, 'yyyy'),
+                dateFormat(form.start_date, 'mm'),
+                dateFormat(form.start_date, 'dd'),
+                timeFormat(form.start_time, 'HH'),
+                timeFormat(form.start_time, 'MM'),
+                timeFormat(form.start_time, 'SS'));
+
+            startDateTime = new com.time(session.customer_id).local2utc(givenDate=scheduleTime);
+
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    task_name: {type: "nvarchar", value: form.schedule_name},
+                    taskID: {type: "numeric", value: form.edit_scheduletask},
+                    starttime: {type: "datetime", value: startDateTime},
+                    task_path: {type: "nvarchar", value: form.path},
+                    it_minute: {type: "numeric", value: form.iteration}
+                },
+                sql = "
+                    UPDATE scheduletasks
+                    SET strName = :task_name,
+                        dtmStartTime = :starttime,
+                        strPath = :task_path,
+                        intIterationMinutes = :it_minute
+                    WHERE intScheduletaskID = :taskID
+                "
+            )
+
+            getAlert('Scheduletask saved.');
+            location url="#application.mainURL#/sysadmin/modules/edit/#url.moduleID#?tab=scheduletasks" addtoken="false";
+
+        }
+
+    }
+
+}
+
+
+if (structKeyExists(url, "delete_scheduletask")) {
+
+    if (isNumeric(url.delete_scheduletask)) {
+
+        param name="url.moduleID" default="0" type="numeric";
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                taskID: {type: "numeric", value: url.delete_scheduletask}
+            },
+            sql = "
+                DELETE FROM scheduletasks
+                WHERE intScheduletaskID = :taskID
+            "
+        )
+
+        // Delete all scheduletask entries
+        loop from="1" to="20" index="i" {
+            if (i lt 10) {
+                i = "0" & i;
+            }
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    taskID: {type: "numeric", value: url.delete_scheduletask}
+                },
+                sql = "
+                    DELETE FROM scheduler_#i#
+                    WHERE intScheduletaskID = :taskID
+                "
+            )
+        }
+
+
+        getAlert('Scheduletask deleted.');
+        location url="#application.mainURL#/sysadmin/modules/edit/#url.moduleID#?tab=scheduletasks" addtoken="false";
+
+    }
+
+}
+
+
 
 
 
@@ -782,24 +955,7 @@ if (structKeyExists(url, "booking")) {
     // Delete the module (the booking)
     if (structKeyExists(url, "delete")) {
 
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                bookingID: {type: "numeric", value: url.b},
-                moduleID: {type: "numeric", value: url.m},
-                customerID: {type: "numeric", value: url.c}
-            },
-            sql = "
-
-                DELETE FROM bookings
-                WHERE intCustomerID = :customerID
-                AND intModuleID = :moduleID;
-
-                DELETE FROM invoices
-                WHERE intBookingID = :bookingID;
-
-            "
-        )
+        deleteModule = new com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);
 
         getAlert('The module was withdrawn from the customer.');
 

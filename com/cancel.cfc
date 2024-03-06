@@ -49,7 +49,7 @@ component displayname="cancel" output="false" {
 
         if (variables.isAllowed) {
 
-            // Cancellation at expiry date
+            // Cancellation
             queryExecute (
                 options = {datasource = application.datasource},
                 params = {
@@ -64,7 +64,6 @@ component displayname="cancel" output="false" {
                     AND #variables.sqlField# = :thisID
                 "
             )
-
 
             // Delete plans/modules in the future
             queryExecute (
@@ -87,8 +86,6 @@ component displayname="cancel" output="false" {
                 "
             )
 
-
-
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;
 
@@ -101,6 +98,37 @@ component displayname="cancel" output="false" {
 
 
         return local.argsReturnValue;
+
+
+    }
+
+    // Delete module (only possible via SysAdmin)
+    public boolean function delete(required numeric bookingID, required numeric moduleID, required numeric customerID) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: arguments.bookingID},
+                moduleID: {type: "numeric", value: arguments.moduleID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+
+                DELETE FROM bookings
+                WHERE intCustomerID = :customerID
+                AND intModuleID = :moduleID;
+
+                DELETE FROM invoices
+                WHERE intBookingID = :bookingID;
+
+            "
+        )
+
+        // Update scheduletasks
+        local.objModule = new com.modules();
+        local.objModule.distributeScheduler(moduleID=arguments.moduleID, customerID=arguments.customerID, status='canceled');
+
+        return true;
 
 
     }
