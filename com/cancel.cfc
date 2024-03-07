@@ -1,7 +1,6 @@
 
 component displayname="cancel" output="false" {
 
-
     public any function init(required numeric customerID, required numeric thisID, required string what) {
 
         variables.customerID = arguments.customerID;
@@ -36,6 +35,7 @@ component displayname="cancel" output="false" {
         }
 
         return this;
+
 
     }
 
