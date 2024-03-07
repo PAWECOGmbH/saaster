@@ -501,13 +501,13 @@
                                                                         <li class="nav-item ms-auto">
                                                                             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Action</a>
                                                                             <div class="dropdown-menu">
-                                                                                <cfif listFind(currentModuleList, module.moduleID) and moduleStatus.status neq "expired" and moduleStatus.status neq "test">
+                                                                                <cfif listFind(currentModuleList, module.moduleID) and moduleStatus.status neq "expired">
                                                                                     <cfif moduleStatus.status eq "canceled">
                                                                                         <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&revoke" class="dropdown-item">
                                                                                             Revoke cancellation
                                                                                         </a>
                                                                                     <cfelse>
-                                                                                        <a href="##" class="openPopupPeriod dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
+                                                                                        <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
                                                                                             Edit period
                                                                                         </a>
                                                                                         <cfif moduleStatus.status neq "payment">
