@@ -29,7 +29,7 @@ variables.schedulePassword = "saaster2022";
 //  APPLICATION SETTINGS
 // ####################################
 
-// The name of your application.cfc
+// The name of your application.cfc / make sure its unique
 variables.applicationname = "saaster.io";
 
 // Please use the timespan tag directly
