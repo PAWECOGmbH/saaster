@@ -22,7 +22,7 @@ component displayname="payrexx" output="false" {
             local.sql_failed = "";
         } else {
             local.sql_failed = "AND blnFailed = 0";
-        }  
+        }
 
 
         local.qWebhook = queryExecute(
@@ -125,7 +125,7 @@ component displayname="payrexx" output="false" {
         } else {
             local.respond = httpRes.errordetail;
         }
-    
+
         return local.respond;
 
     }

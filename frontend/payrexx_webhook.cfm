@@ -47,6 +47,7 @@ if (structKeyExists(jsonData, "transaction")) {
     if (structKeyExists(webhookData, "pspId") and listFind(variables.payrexxPSPs, webhookData.pspId)) {
 
         customerID = 0;
+        projectName = "";
         internTransID = 0;
         gatewayID = 0;
         paymentAmount = 0;
@@ -59,8 +60,9 @@ if (structKeyExists(jsonData, "transaction")) {
         paymentBrand = "";
         cardNumber = "";
 
-        if (structKeyExists(webhookData, "referenceId") and isNumeric(webhookData.referenceId) and webhookData.referenceId gt 0) {
-            customerID = webhookData.referenceId;
+        if (structKeyExists(webhookData, "referenceId")) {
+            customerID = listFirst(webhookData.referenceId, "@");
+            projectName = listLast(webhookData.referenceId, "@");
         }
         if (structKeyExists(webhookData, "id")) {
             internTransID = webhookData.id;
@@ -111,69 +113,73 @@ if (structKeyExists(jsonData, "transaction")) {
             default = 1;
         }
 
+        // Insert only if it's the correct webhook
+        if (projectName eq application.applicationname) {
 
-        try {
+            try {
 
-            queryExecute(
+                queryExecute(
 
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: customerID},
-                    transID: {type: "numeric", value: internTransID},
-                    gatewayID: {type: "numeric", value: gatewayID},
-                    paymentAmount: {type: "decimal", value: paymentAmount, scale: 2},
-                    dateTime: {type: "datetime", value: dateTime},
-                    status: {type: "varchar", value: status},
-                    language: {type: "varchar", value: language},
-                    serviceProvider: {type: "varchar", value: serviceProvider},
-                    serviceProviderID: {type: "numeric", value: serviceProviderID},
-                    payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
-                    paymentBrand: {type: "nvarchar", value: paymentBrand},
-                    cardNumber: {type: "varchar", value: cardNumber},
-                    default: {type: "boolean", value: default}
-                },
-                sql = "
-                    INSERT INTO payrexx
-                    (
-                        intCustomerID,
-                        dtmTimeUTC,
-                        intGatewayID,
-                        intTransactionID,
-                        strStatus,
-                        strLanguage,
-                        strPSP,
-                        intPSPID,
-                        decAmount,
-                        decPayrexxFee,
-                        strPaymentBrand,
-                        strCardNumber,
-                        blnDefault
-                    )
-                    VALUES (
-                        :customerID,
-                        :dateTime,
-                        :gatewayID,
-                        :transID,
-                        :status,
-                        :language,
-                        :serviceProvider,
-                        :serviceProviderID,
-                        :paymentAmount,
-                        :payrexxFee,
-                        :paymentBrand,
-                        :cardNumber,
-                        :default
-                    )
+                    options = {datasource = application.datasource},
+                    params = {
+                        customerID: {type: "numeric", value: customerID},
+                        transID: {type: "numeric", value: internTransID},
+                        gatewayID: {type: "numeric", value: gatewayID},
+                        paymentAmount: {type: "decimal", value: paymentAmount, scale: 2},
+                        dateTime: {type: "datetime", value: dateTime},
+                        status: {type: "varchar", value: status},
+                        language: {type: "varchar", value: language},
+                        serviceProvider: {type: "varchar", value: serviceProvider},
+                        serviceProviderID: {type: "numeric", value: serviceProviderID},
+                        payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
+                        paymentBrand: {type: "nvarchar", value: paymentBrand},
+                        cardNumber: {type: "varchar", value: cardNumber},
+                        default: {type: "boolean", value: default}
+                    },
+                    sql = "
+                        INSERT INTO payrexx
+                        (
+                            intCustomerID,
+                            dtmTimeUTC,
+                            intGatewayID,
+                            intTransactionID,
+                            strStatus,
+                            strLanguage,
+                            strPSP,
+                            intPSPID,
+                            decAmount,
+                            decPayrexxFee,
+                            strPaymentBrand,
+                            strCardNumber,
+                            blnDefault
+                        )
+                        VALUES (
+                            :customerID,
+                            :dateTime,
+                            :gatewayID,
+                            :transID,
+                            :status,
+                            :language,
+                            :serviceProvider,
+                            :serviceProviderID,
+                            :paymentAmount,
+                            :payrexxFee,
+                            :paymentBrand,
+                            :cardNumber,
+                            :default
+                        )
 
-                "
-            )
+                    "
+                )
 
-            logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, Webhook data successfully saved.", false);
+                logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, Webhook data successfully saved.", false);
 
 
-        } catch (any e) {
+            } catch (any e) {
 
-            logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, Error: #e.message#", true);
+                logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, Error: #e.message#", true);
+
+            }
 
         }
 
