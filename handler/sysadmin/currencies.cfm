@@ -44,10 +44,10 @@
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    lng_en: {type: "nvarchar", value: lng_en},
-                    lng_own: {type: "varchar", value: lng_own},
-                    iso: {type: "varchar", value: iso},
-                    sign: {type: "varchar", value: sign},
+                    lng_en: {type: "nvarchar", value: left(form.lng_en, 20)},
+                    lng_own: {type: "nvarchar", value: left(form.lng_own, 20)},
+                    iso: {type: "varchar", value: left(form.iso, 3)},
+                    sign: {type: "varchar", value: left(form.sign, 3)},
                     thisID: {type: "numeric", value: form.edit_currency},
                     active: {type: "boolean", value: active},
                     default: {type: "boolean", value: itsDefault}
@@ -95,10 +95,10 @@
         queryExecute(
             options = {datasource = application.datasource},
             params = {
-                lng_en: {type: "varchar", value: left(form.lng_en, 20)},
-                lng_own: {type: "varchar", value: left(form.lng_own, 20)},
-                iso: {type: "varchar", value: left(form.iso, 2)},
-                sign: {type: "varchar", value: left(form.sign, 2)},
+                lng_en: {type: "nvarchar", value: left(form.lng_en, 20)},
+                lng_own: {type: "nvarchar", value: left(form.lng_own, 20)},
+                iso: {type: "varchar", value: left(form.iso, 3)},
+                sign: {type: "varchar", value: left(form.sign, 3)},
                 active: {type: "boolean", value: active},
                 newPrio: {type: "numeric", value: qNewPrio.newPrio}
             },
