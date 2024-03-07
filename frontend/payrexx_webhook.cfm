@@ -24,11 +24,12 @@ if (application.environment eq "dev") {
     if (structKeyExists(url, "pass") and url.pass eq variables.payrexxWebhookPassword) {
 
         if (!structKeyExists(getHttpRequestData(), "content")) {
-            logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", false);
+            logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", true);
             abort;
         }
 
     } else {
+        logWrite("Production Webhook", 2, "File: #callStackGet("string", 0 , 1)#, Webhook password was not passed in or wrong password!", false);
         abort;
     }
 
