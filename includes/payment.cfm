@@ -70,7 +70,7 @@
     }
 
     paymentStruct['skipResultPage'] = true;
-    paymentStruct['referenceId'] = session.customer_id;
+    paymentStruct['referenceId'] = session.customer_id & "@" & application.applicationname; // In order to recive the correct webhook, we need to pass the project name
     paymentStruct['currency'] = thisStruct.currency;
     paymentStruct['successRedirectUrl'] = successLink;
     paymentStruct['failedRedirectUrl'] = failLink;

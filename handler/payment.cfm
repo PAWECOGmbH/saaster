@@ -123,7 +123,7 @@ if (structKeyExists(url, "add")) {
 
             paymentStruct = structNew();
             paymentStruct['skipResultPage'] = true;
-            paymentStruct['referenceId'] = session.customer_id;
+            paymentStruct['referenceId'] = session.customer_id & "@" & application.applicationname; // In order to recive the correct webhook, we need to pass the project name
             paymentStruct['currency'] = objCurrency.getCurrency().iso;
             paymentStruct['successRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=success";
             paymentStruct['failedRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=failed";

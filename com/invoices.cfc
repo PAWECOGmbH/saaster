@@ -1299,7 +1299,7 @@ component displayname="invoices" output="false" {
             local.paymentStruct = structNew();
             local.paymentStruct['amount'] = local.qOpenInvoices.decTotalPrice * 100;
             local.paymentStruct['purpose'] = local.qOpenInvoices.strInvoiceTitle;
-            local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID;
+            local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID & "@" & application.applicationname; // In order to recive the correct webhook, we need to pass the project name
 
             // Try to charge over Payrexx
             local.charge = local.objPayrexx.callPayrexx(local.paymentStruct, "POST", "Transaction", local.qOpenInvoices.intTransactionID);
@@ -1604,5 +1604,5 @@ component displayname="invoices" output="false" {
 
         return local.qInvoice;
     }
-    
+
 }
