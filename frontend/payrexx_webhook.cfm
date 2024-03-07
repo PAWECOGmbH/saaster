@@ -4,7 +4,6 @@
 // This file is called up by Payrexx as soon as a payment (preAuthorization) has been made.
 // The webhook contains a JSON with information about the customer's payment.
 
-
 // For local purpose: We get the JSON file via cfhttp
 if (application.environment eq "dev") {
 
@@ -13,15 +12,24 @@ if (application.environment eq "dev") {
     if (isJSON(httpRes.filecontent)) {
         jsonData = deSerializeJSON(httpRes.filecontent);
     } else {
-        throw('No JSON file found!');
+        logWrite("Development Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", false);
+        abort;
     }
 
 
 // Called by Payrexx (Webhook)
 } else {
 
-    if (!structKeyExists(getHttpRequestData(), "content")) {
-        logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", false);
+    // Only execute if the url variable was passed in
+    if (structKeyExists(url, "pass") and url.pass eq variables.payrexxWebhookPassword) {
+
+        if (!structKeyExists(getHttpRequestData(), "content")) {
+            logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", true);
+            abort;
+        }
+
+    } else {
+        logWrite("Production Webhook", 2, "File: #callStackGet("string", 0 , 1)#, Webhook password was not passed in or wrong password!", false);
         abort;
     }
 
@@ -161,20 +169,17 @@ if (structKeyExists(jsonData, "transaction")) {
             )
 
             logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, Webhook data successfully saved.", false);
-            writeOutput("OK");
 
 
         } catch (any e) {
 
             logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, Error: #e.message#", true);
-            writeDump(e);
 
         }
 
     } else {
 
         logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, The PSP IDs from the configuration (config.cfm) do not match the webhook!", false);
-        writeOutput("The PSP IDs from the configuration (config.cfm) do not match the webhook!");
 
     }
 

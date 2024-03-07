@@ -45,6 +45,7 @@ variables.requesttimeout = 60;
 variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
 variables.documentsFileTypes = ["pdf"];
 
+
 // ####################################
 //  API SETTINGS
 // ####################################
@@ -100,6 +101,9 @@ variables.payrexxDesignID = "";
 
 // Webhook directory for developing environment
 variables.payrexxWebhookDev = "";
+
+// The webhook password that is specified in the url variable
+variables.payrexxWebhookPassword = "payrexxSaaster2024";
 
 // PSP IDs (comma separated list without spaces)
 variables.payrexxPSPs = "";
