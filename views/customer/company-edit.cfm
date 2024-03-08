@@ -92,7 +92,7 @@
 <cfoutput>
 <div class="page-wrapper">
     <div class="#getLayout.layoutPage#">
-        
+
         <div class="#getLayout.layoutPageHeader# mb-3">
             <h4 class="page-title"><cfoutput>#getTrans('titEditCompany')#</cfoutput></h4>
 
@@ -264,7 +264,7 @@
                     <div class="card-footer">
                         <div class="button-group">
                             <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
-                            <cfif session.superadmin>
+                            <cfif session.superadmin and not session.sysadmin>
                                 <a href="##" data-bs-toggle="modal" data-bs-target="##delete_account" class="btn btn-outline-danger float-end">#getTrans('titDeleteAccount')#</a>
                             </cfif>
                         </div>

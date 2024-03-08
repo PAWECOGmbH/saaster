@@ -35,7 +35,7 @@
                     </cfif>
                     <div class="mb-3">
                         <label class="form-label">#getTrans('formEmailAddress')#</label>
-                        <input type="email" name="email" class="form-control" value="#session.email#" required>
+                        <input type="email" name="email" class="form-control" value="#session.email#" required autofocus>
                     </div>
                     <div class="mb-2">
                         <label class="form-label">#getTrans('formPassword')#</label>
