@@ -335,6 +335,16 @@ if (structKeyExists(form, 'login_btn')) {
                 session.filledData = false;
             }
 
+            objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
+            blnresend = false;
+            mfaUUID = application.objGlobal.getUUID();
+
+            if (objUserMfa.blnMfa){
+                structDelete(session, 'user_id');
+                session.mfaCheckCount = 0;
+                objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
+                location url="#objSendMfa.redirect#" addtoken="false";
+            }
 
             // Let's check whether there is a file we have to include coming from modules
             filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
@@ -344,20 +354,9 @@ if (structKeyExists(form, 'login_btn')) {
                 }
             }
 
-            objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
-            blnresend = false;
-            mfaUUID = application.objGlobal.getUUID();
+            location url="#objUserLogin.redirect#" addtoken="false";
 
-            if (objUserMfa.blnMfa){
-                structDelete(session, 'user_id');
-                session.mfaCheckCount = 0;
-                objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
-                logWrite("MFA", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, multi-factor-authentication code was send to user.", false);
-                location url="#objSendMfa.redirect#" addtoken="false";
-            } else {
-                logWrite("Login", 1, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User successfully logged in!", false);
-                location url="#objUserLogin.redirect#" addtoken="false";
-            }
+
 
         } else {
 
@@ -581,6 +580,15 @@ if (structKeyExists(form, 'mfa_btn')) {
 
         session.user_id = checkMfa.userid;
         logWrite("mfa check", 1, "File: #callStackGet("string", 0 , 1)#, User: #checkMfa.userid#, User successfully logged in with multi-factor-authentication.", false);
+
+        // Let's check whether there is a file we have to include coming from modules
+        filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
+        if (!arrayIsEmpty(filesToInlude)) {
+            loop array=filesToInlude item="path" {
+                include template=path;
+            }
+        }
+
         location url="#application.mainURL#/dashboard" addtoken="false";
 
     } else {
