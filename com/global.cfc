@@ -75,10 +75,7 @@ component displayname="globalFunctions" output="false" {
             if (local.qCheckSEF.recordCount) {
                 local.returnStruct['thisPath'] = local.thisPath;
                 local.returnStruct['noaccess'] = true;
-            } else {
-                local.returnStruct['thisPath'] = "frontend/start.cfm";
             }
-
 
 
         }
