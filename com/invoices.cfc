@@ -1490,7 +1490,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send activation link
-            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady')#" type="html" {
+            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.customerData.language)#" type="html" {
                 include template="/config.cfm";
                 include template="/includes/mail_design.cfm";
             }
