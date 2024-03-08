@@ -658,6 +658,7 @@ component displayname="plans" output="false" {
                                 SELECT intInvoiceID
                                 FROM invoices
                                 WHERE intBookingID = bookings.intBookingID
+                                ORDER BY intInvoiceID DESC
                                 LIMIT 1
                             ) as intInvoiceID
                     FROM bookings
