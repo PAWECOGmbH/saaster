@@ -162,11 +162,9 @@
                                                                                     <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceMonthly, "none")#)</a>
                                                                                     <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceYearly, "none")#)</a>
                                                                                 <cfelse>
-                                                                                    <a class="dropdown-item activate-module" href="#linkO#">#module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
+                                                                                    <a class="dropdown-item activate-module" href="#linkO#">#getTrans('txtOnetime')# #module.moduleData.currencySign# #lsCurrencyFormat(module.moduleData.priceOneTime, "none")#</a>
                                                                                 </cfif>
-                                                                                <cfif module.moduleStatus.status eq "expired">
-                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
-                                                                                </cfif>
+                                                                                <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')"><i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#</a>
                                                                             </div>
                                                                         </div>
                                                                     <cfelse>
@@ -175,6 +173,13 @@
                                                                         </a>
                                                                     </cfif>
                                                                 </cfif>
+                                                            <cfelseif module.moduleStatus.status eq "canceled">
+                                                                <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
+                                                                    <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                </a>
+                                                                <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke" class="card-btn text-blue">
+                                                                    <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
+                                                                </a>
                                                             <cfelse>
                                                                 <cfif module.moduleStatus.status eq "payment" and module.invoiceID gt 0 and session.superAdmin>
                                                                     <a href="#application.mainURL#/account-settings/invoice/#module.invoiceID#" class="card-btn">
@@ -184,6 +189,11 @@
                                                                     <cfif len(trim(module.moduleData.settingPath))>
                                                                         <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
                                                                             <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                        </a>
+                                                                    </cfif>
+                                                                    <cfif module.moduleStatus.recurring neq "onetime">
+                                                                        <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
+                                                                            <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                         </a>
                                                                     </cfif>
                                                                 </cfif>
