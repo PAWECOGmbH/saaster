@@ -31,7 +31,6 @@ component displayname="Application" output="false" extends="myapp.myApplication"
 
         if (variables.environment eq "dev") {
             application.environment = "dev";
-            application.usersIP = variables.usersIP;
             if (cgi.https eq "on") {
                 application.mainURL = "https://" & cgi.server_name;
             } else {
@@ -39,7 +38,6 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             }
         } else {
             application.environment = "prod";
-            application.usersIP = cgi.remote_addr;
             application.mainURL = variables.mainURL;
         }
 
@@ -99,6 +97,12 @@ component displayname="Application" output="false" extends="myapp.myApplication"
 
         // Save the language into the session
         session.lng = local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso;
+
+        if (application.environment eq "dev") {
+            session.usersIP = variables.usersIP;
+        } else {
+            session.usersIP = cgi.remote_addr;
+        }
 
         // Custom code
         ownSessionStart();

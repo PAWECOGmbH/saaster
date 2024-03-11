@@ -266,7 +266,7 @@ component displayname="customer" output="false" {
 
             // Set the default plan, if defined
             local.objPlans = new com.plans();
-            local.planGroup = new com.plans().prepareForGroupID(local.newCustomerID, application.usersIP);
+            local.planGroup = new com.plans().prepareForGroupID(local.newCustomerID, session.usersIP);
             local.objPlans.setDefaultPlan(local.newCustomerID, local.planGroup.groupID);
 
             local.argsReturnValue['message'] = "OK";
