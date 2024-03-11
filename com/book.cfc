@@ -85,6 +85,8 @@ component displayname="book" output="false" {
         local.invoiceCurrency = "";
         local.invoiceLanguage = "";
 
+        local.modulesIncluded = arrayNew(1);
+
         local.objPrices = new com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
 
 
@@ -117,6 +119,13 @@ component displayname="book" output="false" {
             local.newProductID = local.bookingData.planID;
             local.planID = local.newProductID;
             local.moduleID = "";
+
+            // Are there modules included?
+            if (structKeyExists(local.bookingData, "modulesIncluded")) {
+                if (isArray(local.bookingData.modulesIncluded)) {
+                    local.modulesIncluded = local.bookingData.modulesIncluded;
+                }
+            }
 
 
         // Special settings for modules
@@ -496,6 +505,17 @@ component displayname="book" output="false" {
 
                 local.bookingID = newID.generated_key;
 
+                // Update scheduletasks
+                if (local.moduleID gt 0) {
+                    local.objModule = new com.modules();
+                    local.objModule.distributeScheduler(moduleID=local.moduleID, customerID=arguments.customerID, status=local.status);
+                } else if (arrayLen(local.modulesIncluded)) {
+                    local.objModule = new com.modules();
+                    loop array=local.modulesIncluded index="a" {
+                        local.objModule.distributeScheduler(moduleID=a.moduleID, customerID=arguments.customerID, status=local.status);
+                    }
+                }
+
 
             // Change the plan or module
             } else {
@@ -559,6 +579,17 @@ component displayname="book" output="false" {
 
                         local.bookingID = newID.generated_key;
 
+                        // Update scheduletasks
+                        if (local.moduleID gt 0) {
+                            local.objModule = new com.modules();
+                            local.objModule.distributeScheduler(moduleID=local.moduleID, customerID=arguments.customerID, status=local.status);
+                        } else if (arrayLen(local.modulesIncluded)) {
+                            local.objModule = new com.modules();
+                            loop array=local.modulesIncluded index="a" {
+                                local.objModule.distributeScheduler(moduleID=a.moduleID, customerID=arguments.customerID, status=local.status);
+                            }
+                        }
+
                     }
 
 
@@ -579,6 +610,17 @@ component displayname="book" output="false" {
                             AND #local.sql_field#
                         "
                     )
+
+                    // Update scheduletasks
+                    if (local.moduleID gt 0) {
+                        local.objModule = new com.modules();
+                        local.objModule.distributeScheduler(moduleID=local.moduleID, customerID=arguments.customerID, status=local.status);
+                    } else if (arrayLen(local.modulesIncluded)) {
+                        local.objModule = new com.modules();
+                        loop array=local.modulesIncluded index="a" {
+                            local.objModule.distributeScheduler(moduleID=a.moduleID, customerID=arguments.customerID, status=local.status);
+                        }
+                    }
 
                     // Get the ID of the main entry
                     local.qBookings = queryExecute (
@@ -761,6 +803,7 @@ component displayname="book" output="false" {
             "
         )
 
+        local.customerID = local.qBooking.intCustomerID;
         local.planID = local.qBooking.intPlanID;
         local.moduleID = local.qBooking.intModuleID;
         local.dateStart = local.qBooking.dteStartDate;
@@ -809,6 +852,19 @@ component displayname="book" output="false" {
                 WHERE intBookingID = :bookingID
             "
         )
+
+        // Update scheduletasks
+        if (local.moduleID gt 0) {
+            local.objModule = new com.modules();
+            local.objModule.distributeScheduler(moduleID=local.moduleID, customerID=local.customerID, status=local.status);
+        } else {
+            if (structKeyExists(arguments.bookingData, "modulesIncluded") and arrayLen(arguments.bookingData.modulesIncluded)) {
+                local.objModule = new com.modules();
+                loop array=arguments.bookingData.modulesIncluded index="a" {
+                    local.objModule.distributeScheduler(moduleID=a.moduleID, customerID=local.customerID, status=local.status);
+                }
+            }
+        }
 
         return local.qBooking.intBookingID;
 

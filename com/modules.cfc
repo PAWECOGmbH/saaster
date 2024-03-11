@@ -446,4 +446,130 @@ component displayname="modules" output="false" {
 
     }
 
+
+    // Distribute the booking of a module in the scheduler
+    public boolean function distributeScheduler(required numeric moduleID, required numeric customerID, required string status) {
+
+        // Initialise variables
+        local.targetTable = "";
+        local.schedulerID = 0;
+        local.whatsToDo = "";
+
+        // Act according the status
+        if (arguments.status eq "test" or arguments.status eq "free" or arguments.status eq "active") {
+            local.whatsToDo = "run";
+        } else {
+            local.whatsToDo = "stop";
+        }
+
+        // Get scheduletask data
+        local.qGetScheduleTask = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: arguments.moduleID}
+            },
+            sql = "
+                SELECT  intScheduletaskID, intIterationMinutes,
+                        DATE_ADD(IF(dtmStartTime < NOW(), NOW(), dtmStartTime), INTERVAL intIterationMinutes MINUTE) AS dtmStartTime
+                FROM scheduletasks
+                WHERE intModuleID = :moduleID
+            "
+        )
+
+        if (local.qGetScheduleTask.recordCount) {
+
+            loop query="local.qGetScheduleTask" {
+
+                // We need to delete the value
+                if (local.whatsToDo eq "stop") {
+
+                    loop from="1" to="20" index="local.i" {
+
+                        local.tableName = "scheduler_#numberFormat(local.i, '00')#"; // Generates table names such as scheduler_01, scheduler_02, etc.
+
+                        queryExecute (
+                            options = {datasource = application.datasource},
+                            params = {
+                                schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
+                                customerID: {type: "numeric", value: arguments.customerID}
+                            },
+                            sql = "
+                                DELETE FROM #local.tableName#
+                                WHERE intScheduletaskID = :schedID
+                                AND intCustomerID = :customerID
+                            "
+                        )
+
+                    }
+
+                }
+
+                // We need to insert the value
+                if (local.whatsToDo eq "run") {
+
+                    // Initialize variables to track the table with the fewest records
+                    local.minRecords = 99999999;
+                    local.targetTable;
+                    local.sqlCount;
+
+                    // Generate the SQL for counting entries in each table and combine them using UNION
+                    loop from="1" to="20" index="local.i" {
+
+                        local.tableName = "scheduler_#numberFormat(local.i, '00')#"; // Generates table names such as scheduler_01, scheduler_02, etc.
+
+                        if (local.i gt 1) {
+                            local.sqlCount &= " UNION ALL ";
+                        }
+
+                        local.sqlCount &= "SELECT '" & local.tableName & "' AS tableName, COUNT(*) AS thisCount FROM " & local.tableName;
+
+                        // Execute the combined query
+                        local.qCount = queryExecute(sql=local.sqlCount, options={datasource: application.datasource});
+
+                        // Iterate over the results to find the table with the fewest entries
+                        loop from="1" to="#local.qCount.recordCount#" index="local.j" {
+                            if (local.j eq 1 or local.qCount.thisCount[local.j] < local.minRecords) {
+                                local.minRecords = local.qCount.thisCount[local.j];
+                                local.targetTable = local.qCount.tableName[local.j];
+                            }
+                        }
+
+                    }
+
+                    // Now we have found the table with the fewest entries, so we insert the data record there
+                    if (len(trim(local.targetTable))) {
+
+                        queryExecute (
+                            options = {datasource = application.datasource},
+                            params = {
+                                schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
+                                customerID: {type: "numeric", value: arguments.customerID},
+                                startTime: {type: "datetime", value: local.qGetScheduleTask.dtmStartTime}
+                            },
+                            sql = "
+                                INSERT INTO #local.targetTable# (intScheduletaskID, intCustomerID, dtmLastRun, dtmNextRun)
+                                SELECT :schedID, :customerID, NULL, :startTime
+                                FROM DUAL
+                                WHERE NOT EXISTS (
+                                    SELECT 1
+                                    FROM #local.targetTable#
+                                    WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
+                                )
+                                LIMIT 1
+                            "
+                        )
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return true;
+
+    }
+
+
 }

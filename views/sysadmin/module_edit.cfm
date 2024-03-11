@@ -18,12 +18,16 @@
     param name="url.tab" default="details";
     details = "";
     prices = "";
+    scheduletasks = "";
     switch (url.tab) {
         case "details":
             details = "show active";
             break;
         case "prices":
             prices = "show active";
+            break;
+        case "scheduletasks":
+            scheduletasks = "show active";
             break;
     }
 
@@ -91,6 +95,12 @@
                                                     </a>
                                                 </li>
                                             </cfif>
+                                            <li class="nav-item">
+                                                <a href="##scheduletasks" class="nav-link #scheduletasks#" data-bs-toggle="tab">
+                                                    <i class="fas fa-clock pe-3"></i>
+                                                    Scheduletasks
+                                                </a>
+                                            </li>
                                         </ul>
                                         <div class="card-body">
                                             <div class="tab-content">
@@ -99,6 +109,9 @@
                                                 </div>
                                                 <div class="tab-pane #prices#" id="prices">
                                                     <cfinclude template="module_prices.cfm">
+                                                </div>
+                                                <div class="tab-pane #scheduletasks#" id="scheduletasks">
+                                                    <cfinclude template="module_scheduletasks.cfm">
                                                 </div>
                                             </div>
                                         </div>

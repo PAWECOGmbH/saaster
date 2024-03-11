@@ -129,15 +129,16 @@ component displayname="time" output="false" {
 
 
     // Convert a given date with the timezone to utc
-    public date function local2utc(required date givenDate, required string timezone) {
+    public date function local2utc(required date givenDate, string timezone) {
 
-        local.givenDate = arguments.givenDate ?: now();        l
+        local.givenDate = arguments.givenDate ?: now();
+        local.timeZone = arguments.timezone ?: variables.timezone;
 
         // Init the Java object
         local.objJAVATimezone = createObject( "java", "java.util.TimeZone" );
 
         // Get infos of the corresponding timezone
-        local.zoneInfos = local.objJAVATimezone.getTimeZone(arguments.timezone);
+        local.zoneInfos = local.objJAVATimezone.getTimeZone(local.timeZone);
 
         // Get utc offset of timezone
         local.offsetHours = local.zoneInfos.getOffset(0)/3600000;
