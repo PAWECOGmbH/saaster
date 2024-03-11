@@ -28,7 +28,7 @@
                         </cfif>
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formFirstName')# *</label>
-                            <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required>
+                            <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required autofocus>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formName')# *</label>
@@ -79,7 +79,7 @@
                         </cfif>
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formPassword')#</label>
-                            <input type="password" name="password" class="form-control" placeholder="#getTrans('formPassword')#" required message="#getTrans('alertEnterPassword1')#" maxlenght="100" minlength="8">
+                            <input type="password" name="password" class="form-control" placeholder="#getTrans('formPassword')#" required message="#getTrans('alertEnterPassword1')#" maxlenght="100" minlength="8"  autofocus>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">#getTrans('formPassword2')#</label>

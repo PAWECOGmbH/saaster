@@ -99,28 +99,37 @@ if (structKeyExists(form, "delete")) {
 
         objUserLogin = application.objUser.checkLogin(argumentCollection = form);
 
-        if (isStruct(objUserLogin)) {
+        if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
 
-            if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
+            user_email = objUserLogin.user_email;
+            user_name = objUserLogin.user_name;
+            user_id = objUserLogin.user_id;
 
-                deleteAccount = application.objCustomer.deleteAccount(session.customer_id);
-                deletedAccount = session.customer_id;
+            deleteAccount = application.objCustomer.deleteAccount(session.customer_id);
 
-                if (deleteAccount) {
-                    structClear(SESSION);
-                    onSessionStart();
-                    logWrite("Delete account", 1, "File: #callStackGet("string", 0 , 1)#, User: #deletedAccount#, Account got successfully deleted!", false);
+            if (deleteAccount.success) {
 
-                    location url="#application.mainURL#?logout" addtoken="false";
-                }
+                structClear(SESSION);
+                onSessionStart();
+                logWrite("Delete account", 1, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, Account got successfully deleted!", false);
+
+                location url="#application.mainURL#?logout" addtoken="false";
+
+            } else {
+
+                logWrite("Delete account", 1, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, The account could not be deleted because there are tenants without users.", false);
+                getAlert(deleteAccount.message, 'warning');
+                location url="#application.mainURL#/account-settings/company" addtoken="false";
 
             }
 
-        }
+        } else {
 
-        getAlert('alertWrongLogin', 'danger');
-        logWrite("Delete account", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, User provided wrong credentials!", false);
-        location url="#application.mainURL#/account-settings/company" addtoken="false";
+            getAlert('alertWrongLogin', 'danger');
+            logWrite("Delete account", 2, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, User provided wrong credentials!", false);
+            location url="#application.mainURL#/account-settings/company" addtoken="false";
+
+        }
 
     }
 

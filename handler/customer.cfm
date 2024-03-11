@@ -1,7 +1,7 @@
 
 <cfscript>
 
-// Company edit 
+// Company edit
 if (structKeyExists(form, "edit_company_btn")) {
 
     param name="form.company" default="";
@@ -137,7 +137,7 @@ if (structKeyExists(form, "logo_upload_btn")) {
 
             getAlert('msgFileUploadedSuccessfully', 'success');
             logWrite("Logo upload", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload was successful!", false);
-            
+
         } else {
 
             getAlert(fileUpload.message, 'danger');
@@ -186,7 +186,7 @@ if (structKeyExists(url, "del_logo")) {
                 WHERE intCustomerID = :customerID
             "
         )
-        
+
         location url="#application.mainURL#/account-settings/company" addtoken="false";
 
     }

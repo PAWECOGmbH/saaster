@@ -233,8 +233,7 @@ component displayname="customer" output="false" {
         try {
 
             queryExecute(
-
-                options = {datasource = application.datasource},
+                options = {datasource = application.datasource, result="newTenant"},
                 params = {
                     company_name: {type: "nvarchar", value: local.company_name},
                     contact_person: {type: "nvarchar", value: local.contact_person},
@@ -243,19 +242,32 @@ component displayname="customer" output="false" {
                     dateNow: {type: "datetime", value: now()}
                 },
                 sql = "
-
                     INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson)
                     VALUES (:intCustParentID, :dateNow, :dateNow, 1, :company_name,
-                        (SELECT intCountryID FROM countries WHERE blnDefault = 1), :contact_person);
-
-                    SET @last_inserted_customer_id = LAST_INSERT_ID();
-
-                    INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
-                    VALUES (@last_inserted_customer_id, :intUserID, 0);
+                        (SELECT intCountryID FROM countries WHERE blnDefault = 1), :contact_person)
 
                 "
-
             )
+
+            local.newCustomerID = newTenant.generatedKey;
+
+            // Insert the current admin as user for the new tenant
+            queryExecute(
+                options = {datasource = application.datasource, result="newTenant"},
+                params = {
+                    intUserID: {type: "numeric", value: local.userID},
+                    newCustomerID: {type: "numeric", value: local.newCustomerID}
+                },
+                sql = "
+                    INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
+                    VALUES (:newCustomerID, :intUserID, 0);
+                "
+            )
+
+            // Set the default plan, if defined
+            local.objPlans = new com.plans();
+            local.planGroup = new com.plans().prepareForGroupID(local.newCustomerID, session.usersIP);
+            local.objPlans.setDefaultPlan(local.newCustomerID, local.planGroup.groupID);
 
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;
@@ -412,9 +424,51 @@ component displayname="customer" output="false" {
 
 
     // Delete account right now
-    public boolean function deleteAccount(required numeric customerID) {
+    public struct function deleteAccount(required numeric customerID) {
+
+        // Default variables
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
 
         if (arguments.customerID gt 0) {
+
+            // Get all registered tenants
+            local.qCheckTenants = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    SELECT intCustomerID
+                    FROM customers
+                    WHERE intCustParentID = :customerID
+                "
+            )
+
+            loop query="local.qCheckTenants" {
+
+                // Get users of the tenant
+                local.qCheckTenants = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        customerID: {type: "numeric", value: local.qCheckTenants.intCustomerID}
+                    },
+                    sql = "
+                        SELECT intUserID
+                        FROM users
+                        WHERE intCustomerID = :customerID
+                        AND blnSuperAdmin = 1
+                    "
+                )
+
+                // If there is a tenant without user with super privileges, stop deleting
+                if (!local.qCheckTenants.recordCount) {
+                    local.argsReturnValue['message'] = application.objLanguage.getTrans('alertCantDeleteAccount');
+                    return local.argsReturnValue;
+                }
+
+            }
 
             // Get all users of the customer
             local.qCustomer = queryExecute(
@@ -424,24 +478,29 @@ component displayname="customer" output="false" {
                 },
                 sql = "
                     SELECT users.strPhoto, customers.strLogo
-                    FROM users
-                    INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
-                    WHERE users.intCustomerID = :customerID
+                    FROM customers
+                    LEFT JOIN users ON customers.intCustomerID = users.intCustomerID
+                    WHERE customers.intCustomerID = :customerID
                 "
             )
 
-            // Loop over the users and delete pictures
-            loop query="local.qCustomer" {
-                if (fileExists(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"))) {
-                    fileDelete(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"));
+            // Delete the customers logo
+            if (local.qCustomer.recordCount) {
+                if (len(trim(local.qCustomer.strPhoto))) {
+                    if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
+                        fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
+                    }
                 }
             }
 
-            // Delete the customers logo
-            if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
-                fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
+            // Loop over the users and delete pictures
+            loop query="local.qCustomer" {
+                if (len(trim(local.qCustomer.strPhoto))) {
+                    if (fileExists(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"))) {
+                        fileDelete(expandPath("/userdata/images/users/#local.qCustomer.strPhoto#"));
+                    }
+                }
             }
-
 
             // Delete the customer (the foreign key does the rest)
             local.qCustomer = queryExecute(
@@ -450,17 +509,23 @@ component displayname="customer" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
+
+                    UPDATE customers
+                    SET intCustParentID = 0
+                    WHERE intCustParentID = :customerID;
+
                     DELETE FROM customers
-                    WHERE intCustomerID = :customerID
+                    WHERE intCustomerID = :customerID;
+
                 "
             )
 
-
-            return true;
+            local.argsReturnValue['success'] = true;
+            return local.argsReturnValue;
 
         }
 
-        return false;
+        return local.argsReturnValue;
 
     }
 

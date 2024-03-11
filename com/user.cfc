@@ -77,7 +77,7 @@ component displayname="user" output="false" {
                     local.objPlans = new com.plans();
 
                     // Get plan group
-                    local.planGroup = local.objPlans.prepareForGroupID(qCheckLogin.intCustomerID, application.usersIP);
+                    local.planGroup = local.objPlans.prepareForGroupID(qCheckLogin.intCustomerID, session.usersIP);
 
                     // Set the default plan, if defined
                     local.objPlans.setDefaultPlan(qCheckLogin.intCustomerID, local.planGroup.groupID);
@@ -676,7 +676,7 @@ component displayname="user" output="false" {
         return local.mailChanged;
 
     }
-    
+
 
     // After the customer has clicked the confirmation e-mail, we update the database
     public struct function updateEmail(required string newUserMail, required numeric confUserID){
@@ -713,8 +713,8 @@ component displayname="user" output="false" {
 
         return local.argsReturnValue;
 
-    }    
-    
+    }
+
 
     // If the user has enabled the mfa option, an mfa code is sent to the user after successful login
     public struct function sendMfaCode(required string mfaUUID, boolean blnResend, string mfaMail, string mfaName){
@@ -753,7 +753,7 @@ component displayname="user" output="false" {
                 #variables.getTrans('txtThreeTimeTry')#<br>
                 #variables.getTrans('txtCodeValidity')#<br><br>
                 #local.authCode#<br><br>
-                
+
                 #variables.getTrans('txtRegards')#<br>
                 #variables.getTrans('txtYourTeam')#<br>
                 #application.appOwner#
@@ -765,8 +765,8 @@ component displayname="user" output="false" {
             include template="/config.cfm";
             include template="/includes/mail_design.cfm";
         }
-       
-       
+
+
         if(arguments.blnResend){
             local.argsReturnValue['message'] = variables.getTrans('txtResendDone');
             local.argsReturnValue['success'] = true;
@@ -778,7 +778,7 @@ component displayname="user" output="false" {
         }
 
     }
-    
+
 
     // After the user has entered the Mfa code, the numbers are checked here.
     public struct function checkMfa(required string mfaUUID, required numeric mfaCode){
@@ -796,7 +796,7 @@ component displayname="user" output="false" {
                 WHERE strUUID = :UUID
             "
         )
-        
+
         if(arguments.mfaCode eq local.qGetUserMfa.intmfaCode){
 
             local.mfaRequestTime = parseDateTime(local.qGetUserMfa.dtmMfaDateTime);
@@ -817,15 +817,15 @@ component displayname="user" output="false" {
             local.argsReturnValue['uuid'] = arguments.mfaUUID;
             local.argsReturnValue['success'] = false;
         }
-        
+
         return local.argsReturnValue;
 
     }
-    
+
 
     // Get users data using a UUID
     public query function getOptinUser(required string userUUID){
-        
+
         local.qOptinUser = queryExecute(
 
             options = {datasource = application.datasource},

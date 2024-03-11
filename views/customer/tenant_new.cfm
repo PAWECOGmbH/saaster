@@ -12,7 +12,7 @@
 <cfoutput>
 <div class="page-wrapper" >
     <div class="#getLayout.layoutPage#">
-        
+
         <div class="#getLayout.layoutPageHeader# mb-3">
             <h4 class="page-title">#getTrans('btnNewTenant')#</h4>
             <ol class="breadcrumb breadcrumb-dots">

@@ -146,7 +146,7 @@ component displayname="sysadmin" output="false" {
         return local.qTotalCountries;
     }
 
-    
+
     public query function getTotalCountriesImport(){
 
         local.qTotalCountries = queryExecute (
@@ -183,7 +183,7 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCountriesImportSearch(required string search, required string sort){
-        
+
         local.qCountries = queryExecute (
             options = {datasource = application.datasource},
             sql = "
@@ -628,8 +628,8 @@ component displayname="sysadmin" output="false" {
         return local.qModules;
     }
 
-    public query function getNonDefLng(){    
-    
+    public query function getNonDefLng(){
+
         local.qNonDefLng = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -655,10 +655,10 @@ component displayname="sysadmin" output="false" {
         )
 
         return local.qPlanGroups;
-    }     
-    
+    }
+
     public query function getPlan(required numeric planID){
-        
+
         local.qPlan = queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -693,7 +693,7 @@ component displayname="sysadmin" output="false" {
         );
 
         return local.qFeatures;
-    }   
+    }
 
     public query function getPlanFeatures(){
 
@@ -851,7 +851,7 @@ component displayname="sysadmin" output="false" {
                 ORDER BY blnDefault DESC, intPrio
             "
         )
-        
+
         return local.qLanguages;
     }
 
@@ -905,7 +905,7 @@ component displayname="sysadmin" output="false" {
         cfquery(datasource=application.datasource name="qSystemResults") {
             writeOutput(defaultQuerySys & orListCustom & orderQrySys);
         }
-        
+
         return qSystemResults;
     }
 
@@ -955,7 +955,7 @@ component displayname="sysadmin" output="false" {
                 INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
             "
         );
-        
+
         return local.qWidgets;
     }
 
@@ -996,8 +996,50 @@ component displayname="sysadmin" output="false" {
                 ORDER BY intPrio
             "
         );
-        
+
         return local.qModules;
     }
+
+
+    public query function getScheduleTasksOfModule(required numeric moduleID) {
+
+        local.qScheduleTasksModule = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                moduleID: {type: "numeric", value: arguments.moduleID}
+            },
+            sql = "
+                SELECT *
+                FROM scheduletasks
+                WHERE intModuleID = :moduleID
+            "
+        );
+
+        return local.qScheduleTasksModule;
+
+    }
+
+    public query function getScheduleTask(required numeric taskID) {
+
+        local.qScheduleTask = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                taskID: {type: "numeric", value: arguments.taskID}
+            },
+            sql = "
+                SELECT *
+                FROM scheduletasks
+                WHERE intScheduletaskID = :taskID
+            "
+        );
+
+        return local.qScheduleTask;
+
+    }
+
+
+
+
+
 
 }
