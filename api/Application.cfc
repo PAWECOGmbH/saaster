@@ -1,5 +1,5 @@
 component extends="taffy.core.api" {
-    
+
     // Including config file
     include template="../config.cfm";
 
@@ -14,7 +14,7 @@ component extends="taffy.core.api" {
     // Add mappings for the api
     this.mappings["/resources"] = expandPath("./resources");
     this.mappings["/taffy"] = expandPath("./taffy");
-    
+
     // Object initialising
     application.objLanguage = new com.language();
     application.objGlobal = new com.global();
@@ -26,7 +26,6 @@ component extends="taffy.core.api" {
     // Set environment relevant variables
     if (variables.environment eq "dev") {
         application.environment = "dev";
-        application.usersIP = variables.usersIP;
         if (cgi.https eq "on") {
             application.mainURL = "https://" & cgi.server_name;
         } else {
@@ -34,7 +33,6 @@ component extends="taffy.core.api" {
         }
     } else {
         application.environment = "prod";
-        application.usersIP = cgi.remote_addr;
         application.mainURL = variables.mainURL;
     }
 
@@ -58,11 +56,11 @@ component extends="taffy.core.api" {
         disableDashboard = true,
         disabledDashboardRedirect = "/",
         allowCrossDomain = true,
-    }; 
+    };
 
     // this function is called after the request has been parsed and all request details are known
     function onTaffyRequest(verb, cfc, requestArguments, mimeExt, headers){
-        
+
         if(arguments.cfc eq "authenticate") {
             return true;
         }
@@ -71,7 +69,7 @@ component extends="taffy.core.api" {
         if(not structKeyExists(arguments.headers, "Authorization")){
             return noData().withStatus(401);
         }
-        
+
         // Remove bearer keyword and parse only token
         local.token = trim(ReplaceNoCase(arguments.headers.Authorization, "Bearer", ""));
 
@@ -83,7 +81,7 @@ component extends="taffy.core.api" {
             if(structKeyExists(e, "message") and e.message eq "Token has expired"){
                 // Get nonce from token
                 local.tokenNonce = application.jwt.decode(token = local.token, verify = false).nonce;
-                
+
                 // Delete orphan nonce entry
                 local.qOrphanDeleteNonce = queryExecute(
                     options = {datasource = application.datasource},
@@ -95,7 +93,7 @@ component extends="taffy.core.api" {
                         WHERE strNonceUUID = :thisOrphanNonceUUID
                     "
                 )
-                
+
                 local.isValidToken = false;
             }else {
                 local.isValidToken = false;
@@ -118,7 +116,7 @@ component extends="taffy.core.api" {
                 WHERE strNonceUUID = :thisNonceUUID
             "
         )
- 
+
         // Return 401 when no matching nonce entry is found
         if(not local.qCheckNonce.recordCount){
             return noData().withStatus(401);

@@ -12,7 +12,7 @@
     if (structKeyExists(session, "customer_id")) {
         groupStruct = objPlans.prepareForGroupID(customerID=session.customer_id);
     } else {
-        groupStruct = objPlans.prepareForGroupID(ipAddress=application.usersIP);
+        groupStruct = objPlans.prepareForGroupID(ipAddress=session.usersIP);
     }
 
     hasPlans = true;
