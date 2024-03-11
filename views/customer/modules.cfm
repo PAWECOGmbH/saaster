@@ -222,145 +222,147 @@
                             <div class="card-body">
                                 <div class="row">
                                     <cfloop array="#getAllModules#" index="module">
-                                        <cfif module.bookable or arrayLen(module.includedInPlans)>
-                                            <div class="col-lg-3 mb-4">
-                                                <div class="card" style="min-height: 450px;">
-                                                    <div class="card-body p-4 text-center">
-                                                        <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
-                                                        <h3 class="m-0 mb-3">#module.name#</h3>
-                                                        <div class="text-muted">#module.shortdescription#</div>
-                                                        <div class="mt-3">
-                                                            <cfif module.itsFree>
-                                                                <div class="text-muted">#getTrans('txtFree')#</div>
-                                                            <cfelseif module.priceOnetime gt 0>
-                                                                <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceOnetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
-                                                            <cfelseif module.priceMonthly gt 0>
-                                                                <div class="text-muted">
-                                                                    #module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))# #getTrans('txtOr')#<br />
-                                                                    #module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")# #lcase(getTrans('txtYearly'))#
-                                                                </div>
-                                                            </cfif>
-                                                            <cfif arrayLen(module.includedInPlans)>
-                                                                <div class="text-muted small"><br />(#getTrans('txtIncludedInPlan')#)</div>
-                                                            </cfif>
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex">
-                                                        <a href="##?" class="card-btn w-50" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
-                                                            <i class="fa-solid fa-circle-info pe-2"></i> Info
-                                                        </a>
-                                                        <cfif session.superAdmin>
-                                                            <cfif not arrayLen(module.includedInPlans)>
-                                                                <cfif module.priceMonthly gt 0>
-                                                                    <cfset testLink = module.bookingLinkM>
-                                                                    <cfset linkM = module.bookingLinkM>
-                                                                    <cfset linkY = module.bookingLinkY>
+                                        <cfif structKeyExists(module, "bookable")>
+                                            <cfif module.bookable or arrayLen(module.includedInPlans)>
+                                                <div class="col-lg-3 mb-4">
+                                                    <div class="card" style="min-height: 450px;">
+                                                        <div class="card-body p-4 text-center">
+                                                            <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.picture#)"></span>
+                                                            <h3 class="m-0 mb-3">#module.name#</h3>
+                                                            <div class="text-muted">#module.shortdescription#</div>
+                                                            <div class="mt-3">
+                                                                <cfif module.itsFree>
+                                                                    <div class="text-muted">#getTrans('txtFree')#</div>
                                                                 <cfelseif module.priceOnetime gt 0>
-                                                                    <cfset testLink = module.bookingLinkO>
-                                                                    <cfset linkO = module.bookingLinkO>
+                                                                    <div class="text-muted">#module.currencySign# #lsCurrencyFormat(module.priceOnetime, "none")# #lcase(getTrans('txtOneTime'))#</div>
+                                                                <cfelseif module.priceMonthly gt 0>
+                                                                    <div class="text-muted">
+                                                                        #module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")# #lcase(getTrans('txtMonthly'))# #getTrans('txtOr')#<br />
+                                                                        #module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")# #lcase(getTrans('txtYearly'))#
+                                                                    </div>
                                                                 </cfif>
-                                                                <cfif module.testDays gt 0 and (module.priceMonthly gt 0 or module.priceOnetime gt 0)>
-                                                                    <a href="#testLink#" class="card-btn w-50 activate-module">
-                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnTestNow')#
-                                                                    </a>
-                                                                <cfelseif module.itsFree>
-                                                                    <a href="#module.bookingLinkO#" class="card-btn w-50 activate-module">
-                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
-                                                                    </a>
-                                                                <cfelse>
-                                                                    <cfif module.priceMonthly gt 0 or module.priceOnetime gt 0>
-                                                                        <cfif getWebhook.recordCount>
-                                                                            <cfset linkM = module.bookingLinkM>
-                                                                            <cfset linkY = module.bookingLinkY>
-                                                                            <cfset linkO = module.bookingLinkO>
-                                                                        <cfelse>
-                                                                            <cfset linkM = application.mainURL & "/account-settings/payment">
-                                                                            <cfset linkY = application.mainURL & "/account-settings/payment">
-                                                                            <cfset linkO = application.mainURL & "/account-settings/payment">
-                                                                        </cfif>
-                                                                        <cfif module.priceMonthly gt 0>
-                                                                            <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
-                                                                                <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                                <cfif arrayLen(module.includedInPlans)>
+                                                                    <div class="text-muted small"><br />(#getTrans('txtIncludedInPlan')#)</div>
+                                                                </cfif>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex">
+                                                            <a href="##?" class="card-btn w-50" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
+                                                                <i class="fa-solid fa-circle-info pe-2"></i> Info
+                                                            </a>
+                                                            <cfif session.superAdmin>
+                                                                <cfif not arrayLen(module.includedInPlans)>
+                                                                    <cfif module.priceMonthly gt 0>
+                                                                        <cfset testLink = module.bookingLinkM>
+                                                                        <cfset linkM = module.bookingLinkM>
+                                                                        <cfset linkY = module.bookingLinkY>
+                                                                    <cfelseif module.priceOnetime gt 0>
+                                                                        <cfset testLink = module.bookingLinkO>
+                                                                        <cfset linkO = module.bookingLinkO>
+                                                                    </cfif>
+                                                                    <cfif module.testDays gt 0 and (module.priceMonthly gt 0 or module.priceOnetime gt 0)>
+                                                                        <a href="#testLink#" class="card-btn w-50 activate-module">
+                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnTestNow')#
+                                                                        </a>
+                                                                    <cfelseif module.itsFree>
+                                                                        <a href="#module.bookingLinkO#" class="card-btn w-50 activate-module">
+                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                        </a>
+                                                                    <cfelse>
+                                                                        <cfif module.priceMonthly gt 0 or module.priceOnetime gt 0>
+                                                                            <cfif getWebhook.recordCount>
+                                                                                <cfset linkM = module.bookingLinkM>
+                                                                                <cfset linkY = module.bookingLinkY>
+                                                                                <cfset linkO = module.bookingLinkO>
+                                                                            <cfelse>
+                                                                                <cfset linkM = application.mainURL & "/account-settings/payment">
+                                                                                <cfset linkY = application.mainURL & "/account-settings/payment">
+                                                                                <cfset linkO = application.mainURL & "/account-settings/payment">
+                                                                            </cfif>
+                                                                            <cfif module.priceMonthly gt 0>
+                                                                                <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
+                                                                                    <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                                    </a>
+                                                                                    <div class="dropdown-menu">
+                                                                                        <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")#)</a>
+                                                                                        <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")#)</a>
+                                                                                    </div>
+                                                                                </div>
+                                                                            <cfelseif module.priceOnetime gt 0>
+                                                                                <a href="#linkO#" class="card-btn w-50 activate-module">
                                                                                     <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                                 </a>
-                                                                                <div class="dropdown-menu">
-                                                                                    <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")#)</a>
-                                                                                    <a class="dropdown-item activate-module" href="#linkY#">#getTrans('txtYearly')# (#module.currencySign# #lsCurrencyFormat(module.priceYearly, "none")#)</a>
-                                                                                </div>
-                                                                            </div>
-                                                                        <cfelseif module.priceOnetime gt 0>
-                                                                            <a href="#linkO#" class="card-btn w-50 activate-module">
-                                                                                <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
-                                                                            </a>
+                                                                            </cfif>
                                                                         </cfif>
                                                                     </cfif>
                                                                 </cfif>
                                                             </cfif>
-                                                        </cfif>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="modul_#module.moduleID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">#module.name#</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="mb-3">
-                                                                #module.description#
-                                                            </div>
-                                                            <div class="mb-3">
-
-                                                                <cfif module.itsFree>
-                                                                    <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
-                                                                <cfelseif module.priceOnetime gt 0>
-                                                                    <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceOnetime, "none")#</div>
-                                                                    <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
-                                                                    <div class="text-muted small">#module.vat_text_onetime#</div>
-                                                                <cfelse>
-                                                                    <div class="row my-3 col-md-12">
-                                                                        <div class="col-md-6">
-                                                                            <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceMonthly, "none")#</div>
-                                                                            <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
-                                                                            <div class="text-muted small">#module.vat_text_monthly#</div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
-                                                                            <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceYearly, "none")#</div>
-                                                                            <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
-                                                                            <div class="text-muted small">#module.vat_text_yearly#</div>
-                                                                        </div>
-                                                                    </div>
-                                                                </cfif>
-
-                                                            </div>
-                                                            <div class="row p-2 mt-4">
-                                                                <cfif arrayLen(module.includedInPlans)>
-                                                                    <div class="fw-bold">#getTrans('txtIncludedInPlans')#:</div>
-                                                                    <div class="mt-3">
-                                                                        <cfloop array="#module.includedInPlans#" index="i">
-                                                                            <ul class="my-0">
-                                                                                <li class="my-0 py-0">#i.name#</li>
-                                                                            </ul>
-                                                                        </cfloop>
-                                                                        <cfif session.superadmin>
-                                                                            <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
-                                                                        </cfif>
-                                                                    </div>
-                                                                </cfif>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">#getTrans('btnClose')#</a>
                                                         </div>
                                                     </div>
-
                                                 </div>
-                                            </div>
+                                                <div id="modul_#module.moduleID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+                                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">#module.name#</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    #module.description#
+                                                                </div>
+                                                                <div class="mb-3">
+
+                                                                    <cfif module.itsFree>
+                                                                        <div class="display-6 fw-bold my-3">#getTrans('txtFree')#</div>
+                                                                    <cfelseif module.priceOnetime gt 0>
+                                                                        <div class="display-6 fw-bold mt-3 mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceOnetime, "none")#</div>
+                                                                        <div class="text-muted mb-1">#getTrans('txtOneTime')#</div>
+                                                                        <div class="text-muted small">#module.vat_text_onetime#</div>
+                                                                    <cfelse>
+                                                                        <div class="row my-3 col-md-12">
+                                                                            <div class="col-md-6">
+                                                                                <div class="fw-bold my-3">#getTrans('txtMonthly')#</div>
+                                                                                <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceMonthly, "none")#</div>
+                                                                                <div class="text-muted mb-1">#getTrans('txtMonthlyPayment')#</div>
+                                                                                <div class="text-muted small">#module.vat_text_monthly#</div>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <div class="fw-bold my-3">#getTrans('txtYearly')#</div>
+                                                                                <div class="display-6 fw-bold mb-1"><span class="currency">#module.currencySign#</span> #lsCurrencyFormat(module.priceYearly, "none")#</div>
+                                                                                <div class="text-muted mb-1">#getTrans('txtYearlyPayment')#</div>
+                                                                                <div class="text-muted small">#module.vat_text_yearly#</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </cfif>
+
+                                                                </div>
+                                                                <div class="row p-2 mt-4">
+                                                                    <cfif arrayLen(module.includedInPlans)>
+                                                                        <div class="fw-bold">#getTrans('txtIncludedInPlans')#:</div>
+                                                                        <div class="mt-3">
+                                                                            <cfloop array="#module.includedInPlans#" index="i">
+                                                                                <ul class="my-0">
+                                                                                    <li class="my-0 py-0">#i.name#</li>
+                                                                                </ul>
+                                                                            </cfloop>
+                                                                            <cfif session.superadmin>
+                                                                                <p class="mt-3 ps-3"><a href="#application.mainURL#/plans">#getTrans('txtBookNow')#</a></p>
+                                                                            </cfif>
+                                                                        </div>
+                                                                    </cfif>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">#getTrans('btnClose')#</a>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </cfif>
                                         </cfif>
                                     </cfloop>
                                 </div>
