@@ -354,6 +354,7 @@ if (structKeyExists(form, 'login_btn')) {
                 }
             }
 
+            structDelete(session, "alert");
             location url="#objUserLogin.redirect#" addtoken="false";
 
 
