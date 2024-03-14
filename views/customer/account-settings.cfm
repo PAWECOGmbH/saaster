@@ -3,6 +3,11 @@
     objPlans = new com.plans(language=session.lng);
     moduleArray = new com.modules().getAllModules();
 
+    // Check whether there are plans defined or not
+    planGroup = objPlans.prepareForGroupID(session.customer_id).groupID;
+    getPlansAsArray = objPlans.getPlans(planGroup);
+    hasPlans = arrayLen(getPlansAsArray) ? true : false;
+
 </cfscript>
 
 <cfinclude template="/includes/header.cfm">
@@ -138,8 +143,12 @@
 
                                 <cfif session.superAdmin>
 
-                                    <p>#getTrans('msgNoPlanBooked')#</p>
-                                    <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+                                    <cfif hasPlans>
+
+                                        <p>#getTrans('msgNoPlanBooked')#</p>
+                                        <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
+
+                                    </cfif>
 
                                 </cfif>
 
