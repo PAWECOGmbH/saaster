@@ -714,6 +714,10 @@ if (structKeyExists(form, "edit_scheduletask")) {
                 "
             )
 
+            // Update scheduler
+            objModule = new com.modules();
+            objModule.distributeScheduler(moduleID=url.moduleID, customerID=0, status="active");
+
             getAlert('Scheduletask saved.');
             location url="#application.mainURL#/sysadmin/modules/edit/#url.moduleID#?tab=scheduletasks" addtoken="false";
 

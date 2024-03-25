@@ -205,6 +205,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         if (!findNoCase("frontend", thiscontent.thisPath)
             and !findNoCase("register", thiscontent.thisPath)
             and !findNoCase("setup", cgi.script_name)
+            and !findNoCase("scheduletasks", cgi.script_name)
             and !structKeyExists(url, "u")
             and !structKeyExists(url, "p")) {
             if (!structKeyExists(session, "user_id")) {

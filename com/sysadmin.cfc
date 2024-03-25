@@ -1037,7 +1037,42 @@ component displayname="sysadmin" output="false" {
 
     }
 
+    public datetime function calcNextRun(required datetime maxStartTime, required numeric numMinutes) {
 
+        local.thisTime = now();
+
+        // If the start time is in the future, set this start time as next run
+        if (local.thisTime lt arguments.maxStartTime) {
+
+            local.nextRun = arguments.maxStartTime;
+
+        } else {
+
+            // Define start time and interval
+            local.startDate = parseDateTime(arguments.maxStartTime);
+            local.minutesToAdd = arguments.numMinutes;
+
+
+
+            // Calculate how many minutes have passed since the original start date
+            local.pastMinutes = dateDiff("n", local.startDate, local.thisTime);
+
+            // Calculate how many intervals have elapsed since the original start date
+            local.pastIntervals = ceiling(local.pastMinutes / local.minutesToAdd);
+
+            // Calculate the next start time based on the previous intervals
+            local.nextRun = dateAdd("n", local.pastIntervals * local.minutesToAdd, local.startDate);
+
+            // If the current time falls exactly on an interval, set the next run to the next interval
+            if (local.nextRun lte local.thisTime) {
+                local.nextRun = dateAdd("n", local.minutesToAdd, local.nextRun);
+            }
+
+        }
+
+        return local.nextRun;
+
+    }
 
 
 

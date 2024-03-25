@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="mb-2">
-                            <label class="form-label">Start time</label>
+                            <label class="form-label">Time</label>
                             <input type="time" name="start_time" class="form-control" value="#timeFormat(startDateTime.utc2local(utcDate=qSchdule.dtmStartTime), 'HH:MM')#" required>
                         </div>
                     </div>
