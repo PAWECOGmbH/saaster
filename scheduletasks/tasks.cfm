@@ -81,13 +81,16 @@ if (url.pass eq variables.schedulePassword) {
                             include template="/#qGetTasks.strPath#";
                         }
 
+                        // Calculate next run
+                        nextRun = application.objSysadmin.calcNextRun(qGetTasks.dtmStartTime, qGetTasks.intIterationMinutes);
+
                         // Update scheduler
                         queryExecute(
                             options = {datasource = application.datasource},
                             params = {
                                 scheduleID: {type: "numeric", value: qGetTasks.intScheduletaskID},
                                 utcDate: {type: "datetime", value: now()},
-                                nextRun: {type: "datetime", value: dateAdd("n", qGetTasks.intIterationMinutes, now())}
+                                nextRun: {type: "datetime", value: nextRun}
                             },
                             sql = "
                                 UPDATE scheduler_#url.task#

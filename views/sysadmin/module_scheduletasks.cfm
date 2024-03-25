@@ -23,7 +23,8 @@
                     <tr>
                         <th width="20%">Name</th>
                         <th width="25%">Path</th>
-                        <th width="20%">Starttime</th>
+                        <th width="10%">Start date</th>
+                        <th width="10%">Time</th>
                         <th width="10%">Iteration</th>
                         <th width="10%">Active</th>
                         <th width="5%">&nbsp;</th>
@@ -38,7 +39,8 @@
                             <tr>
                                 <td>#qSchduleTasks.strName#</td>
                                 <td>#qSchduleTasks.strPath#</td>
-                                <td>#lsDateTimeFormat(startDateTime.utc2local(utcDate=qSchduleTasks.dtmStartTime))#</td>
+                                <td>#lsDateFormat(startDateTime.utc2local(utcDate=qSchduleTasks.dtmStartTime))#</td>
+                                <td>#lsTimeFormat(startDateTime.utc2local(utcDate=qSchduleTasks.dtmStartTime))#</td>
                                 <td>#qSchduleTasks.intIterationMinutes#</td>
                                 <td>
                                     <label class="form-check form-switch">
@@ -79,7 +81,7 @@
                                         </div>
                                         <div class="col-lg-4">
                                             <div class="mb-2">
-                                                <label class="form-label">Start time</label>
+                                                <label class="form-label">Time</label>
                                                 <input type="time" name="start_time" class="form-control" required>
                                             </div>
                                         </div>
