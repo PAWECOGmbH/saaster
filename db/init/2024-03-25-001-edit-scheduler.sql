@@ -1,0 +1,1 @@
+ALTER TABLE `schedulecontrol` DROP COLUMN `intCntCustomer`;
