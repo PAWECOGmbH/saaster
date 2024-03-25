@@ -352,7 +352,6 @@ if (structKeyExists(form, 'login_btn')) {
             filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
             if (!arrayIsEmpty(filesToInlude)) {
                 loop array=filesToInlude item="path" {
-                    logWrite("system", "info", "Module include after login [Path: #path#]");
                     include template=path;
                 }
             }
