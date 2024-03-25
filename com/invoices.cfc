@@ -1271,7 +1271,7 @@ component displayname="invoices" output="false" {
 
         local.returnValue = structNew();
         local.returnValue['success'] = false;
-        local.returnValue['message'] = "cannotcharge";
+        local.returnValue['message'] = "The payment could not be charged!";
 
         local.objPayrexx = new com.payrexx();
         local.objInvoice = new com.invoices();
@@ -1317,9 +1317,11 @@ component displayname="invoices" output="false" {
 
                 local.insPayment = local.objInvoice.insertPayment(local.payment);
 
+                local.returnValue['invoiceID'] = arguments.invoiceID;
                 local.returnValue['success'] = true;
+                local.returnValue['message'] = "Charged successfully!";
 
-                break;
+                return local.returnValue;
 
 
             } else {

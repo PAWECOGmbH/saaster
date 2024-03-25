@@ -2,7 +2,7 @@
 
     <cfoutput>
     <div class="collapse navbar-collapse" id="navbar-menu">
-    </cfoutput>    
+    </cfoutput>
         <ul class="navbar-nav pt-lg-3">
             <li class="nav-item <cfif listlast(cgi.path_info, '/') eq 'dashboard'>active</cfif>">
                 <cfoutput>
@@ -37,6 +37,7 @@
                         <a href="#application.mainURL#/sysadmin/invoices" class="dropdown-item">Invoices</a>
                         <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans</a>
                         <a href="#application.mainURL#/sysadmin/modules" class="dropdown-item">Modules</a>
+                        <a href="#application.mainURL#/sysadmin/widgets" class="dropdown-item">Widgets</a>
                         <div class="dropdown-divider"></div>
 
                         <span class="dropdown-header">System</span>
@@ -47,7 +48,7 @@
                         <a href="#application.mainURL#/sysadmin/countries" class="dropdown-item">Countries</a>
                         <a href="#application.mainURL#/sysadmin/mappings" class="dropdown-item">Mappings</a>
                         <a href="#application.mainURL#/sysadmin/translations" class="dropdown-item">Translations</a>
-                        <a href="#application.mainURL#/sysadmin/widgets" class="dropdown-item">Widgets</a>
+                        <a href="#application.mainURL#/sysadmin/logs" class="dropdown-item">Logfiles</a>
 
                     </div>
                     </cfoutput>
@@ -206,7 +207,7 @@
             </cfoutput>
 
             </div>
-        
+
     </div>
 
-    
+

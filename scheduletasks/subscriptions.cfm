@@ -11,6 +11,7 @@
 //  - Delete after cancellation
 //  - Set status for expired plans
 //  - Check open invoices (overdue)
+//  - Delete logfiles older than 30 days
 //
 
 setting requesttimeout = 1000;
@@ -25,6 +26,7 @@ if (url.pass eq variables.schedulePassword) {
     objBook = new com.book();
     objModules = new com.modules();
     objPlans = new com.plans();
+    objLogs = application.objLog;
 
 
     // First round: look for "waiting" plans or modules
@@ -54,7 +56,7 @@ if (url.pass eq variables.schedulePassword) {
                 utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
             },
             sql = "
-                SELECT intBookingID, intCustomerID, strStatus
+                SELECT intBookingID, intCustomerID, strStatus, intPlanID
                 FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intPlanID > 0
@@ -75,12 +77,15 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
+            // Make log
+            objLogs.logWrite("scheduletask", "info", "Plan changed (waiting) and predecessor deleted [PlanID: #qPlans.intPlanID#, CustomerID: #qWaiting.intCustomerID#]");
+
             // Are there any modules included?
             bookingData = objPlans.getCurrentPlan(qPlans.intCustomerID);
             if (structKeyExists(bookingData, "modulesIncluded")) {
                 if (isArray(bookingData.modulesIncluded) and arrayLen(bookingData.modulesIncluded)) {
                     loop array=bookingData.modulesIncluded index="a" {
-                        objModules.distributeScheduler(moduleID=a.moduleID, customerID=qPlans.intCustomerID, status=qPlans.strStatus);
+                        objModules.distributeScheduler(moduleID=a.moduleID, customerID=qWaiting.intCustomerID, status=qPlans.strStatus);
                     }
                 }
             }
@@ -96,7 +101,7 @@ if (url.pass eq variables.schedulePassword) {
                 utcDate: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
             },
             sql = "
-                SELECT intBookingID, intCustomerID,
+                SELECT intBookingID, intCustomerID, intModuleID
                 FROM bookings
                 WHERE intCustomerID = :customerID
                 AND intModuleID = :moduleID
@@ -118,8 +123,11 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
+            // Make log
+            objLogs.logWrite("scheduletask", "info", "Module changed (waiting) and predecessor deleted [ModuleID: #qModules.intModuleID#, CustomerID: #qWaiting.intCustomerID#]");
+
             // Update scheduletasks
-            objModules.distributeScheduler(moduleID=qModules.intModuleID, customerID=qModules.intCustomerID, status='canceled');
+            objModules.distributeScheduler(moduleID=qModules.intModuleID, customerID=qWaiting.intCustomerID, status='canceled');
 
         }
 
@@ -136,6 +144,15 @@ if (url.pass eq variables.schedulePassword) {
 
         updateBooking = objBook.updateBooking(updateStruct);
 
+        // Make log for plan
+        if (qWaiting.intPlanID gt 0) {
+            objLogs.logWrite("scheduletask", "info", "Waiting plan activated [PlanID: #qWaiting.intPlanID#, CustomerID: #qWaiting.intCustomerID#]");
+        }
+
+        // Make log for module
+        if (qWaiting.intModuleID gt 0) {
+            objLogs.logWrite("scheduletask", "info", "Waiting module activated [ModuleID: #qWaiting.intModuleID#, CustomerID: #qWaiting.intCustomerID#]");
+        }
 
     }
 
@@ -209,11 +226,16 @@ if (url.pass eq variables.schedulePassword) {
                 newInvoice = objInvoice.createInvoice(invoiceStruct);
 
                 if (newInvoice.success) {
+
                     invoiceID = newInvoice.newInvoiceID;
+
+                    // Make log
+                    objLogs.logWrite("scheduletask", "info", "Invoice for plan renewal created [InvoiceID: #invoiceID#, Title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+
                 } else {
 
-                    // todo: make log and error mail
-                    dump(newInvoice);
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not create invoice [Title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #newInvoice.message#", true);
                     break;
 
                 }
@@ -245,12 +267,17 @@ if (url.pass eq variables.schedulePassword) {
 
                 insPositions = objInvoice.insertInvoicePositions(posInfo);
 
-                if (!insPositions.success) {
+                if (insPositions.success) {
+
+                    // Make log
+                    objLogs.logWrite("scheduletask", "info", "Position for plan invoice created [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+
+                } else {
 
                     objInvoice.deleteInvoice(invoiceID);
 
-                    // todo: make log and error mail
-                    dump(insPositions);
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not insert the invoice position for plans: invoice deleted [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #insPositions.message#", true);
                     break;
 
                 }
@@ -259,9 +286,21 @@ if (url.pass eq variables.schedulePassword) {
                 // Try to charge the amount now (Payrexx)
                 chargeNow = objInvoice.payInvoice(invoiceID);
 
+                // If not successful
                 if (!chargeNow.success) {
 
-                    // todo: make log, mail and notification
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not charge via Payrexx, trying to send the invoice by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #chargeNow.message#", true);
+
+                    // Notify the customer (account notification)
+                    notiStruct = {};
+                    notiStruct['customerID'] = qRenewBookings.intCustomerID;
+                    notiStruct['userID'] = 0;
+                    notiStruct['title_var'] = "titCouldNotCharge";
+                    notiStruct['descr_var'] = "msgCouldNotCharge";
+                    notiStruct['link'] = "account-settings/invoice/" & invoiceID;
+                    notiStruct['linktext_var'] = "txtPayInvoice";
+                    application.objNotifications.insertNotification(notiStruct);
 
                     // Change the status to 'payment'
                     updateStruct = structNew();
@@ -278,9 +317,13 @@ if (url.pass eq variables.schedulePassword) {
                     sendInvoice = objInvoice.sendPaymentRequest(invoiceID);
                     if (!sendInvoice.success) {
 
-                        // todo: make log and error mail
-                        dump(sendInvoice);
-                        break;
+                        // Make log and send error mail
+                        objLogs.logWrite("scheduletask", "error", "Could not send the invoice by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #sendInvoice.message#", true);
+
+                    } else {
+
+                        // Make log
+                        objLogs.logWrite("scheduletask", "info", "Payment successfully completed [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
@@ -298,13 +341,17 @@ if (url.pass eq variables.schedulePassword) {
 
                     updateBooking = objBook.updateBooking(updateStruct);
 
-                    // Send invoice by email
+                    // Send receipt by email
                     sendInvoice = objInvoice.sendInvoice(invoiceID);
                     if (!sendInvoice.success) {
 
-                        // todo: make log and error mail
-                        dump(sendInvoice);
-                        break;
+                        // Make log and send error mail
+                        objLogs.logWrite("scheduletask", "error", "Could not send the receipt by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #sendInvoice.message#", true);
+
+                    } else {
+
+                        // Make log
+                        objLogs.logWrite("scheduletask", "info", "The receipt was sent by email successfully [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
@@ -336,11 +383,16 @@ if (url.pass eq variables.schedulePassword) {
                 newInvoice = objInvoice.createInvoice(invoiceStruct);
 
                 if (newInvoice.success) {
+
                     invoiceID = newInvoice.newInvoiceID;
+
+                    // Make log
+                    objLogs.logWrite("scheduletask", "info", "Invoice for module renewal created [InvoiceID: #invoiceID#, Title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+
                 } else {
 
-                    // todo: make log and error mail
-                    dump(newInvoice);
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not create invoice [Title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #newInvoice.message#", true);
                     break;
 
                 }
@@ -372,12 +424,17 @@ if (url.pass eq variables.schedulePassword) {
 
                 insPositions = objInvoice.insertInvoicePositions(posInfo);
 
-                if (!insPositions.success) {
+                if (insPositions.success) {
+
+                    // Make log
+                    objLogs.logWrite("scheduletask", "info", "Position for module invoice created [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+
+                } else {
 
                     objInvoice.deleteInvoice(invoiceID);
 
-                    // todo: make log and error mail
-                    dump(insPositions);
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not insert the invoice position for modules: invoice deleted [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #insPositions.message#", true);
                     break;
 
                 }
@@ -388,9 +445,18 @@ if (url.pass eq variables.schedulePassword) {
 
                 if (!chargeNow.success) {
 
-                    objInvoice.deleteInvoice(invoiceID);
+                    // Make log and send error mail
+                    objLogs.logWrite("scheduletask", "error", "Could not charge via Payrexx, trying to send the invoice by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #chargeNow.message#", true);
 
-                    // todo: make log, mail and notification
+                    // Notify the customer (account notification)
+                    notiStruct = {};
+                    notiStruct['customerID'] = qRenewBookings.intCustomerID;
+                    notiStruct['userID'] = 0;
+                    notiStruct['title_var'] = "titCouldNotCharge";
+                    notiStruct['descr_var'] = "msgCouldNotCharge";
+                    notiStruct['link'] = "account-settings/invoice/" & invoiceID;
+                    notiStruct['linktext_var'] = "txtPayInvoice";
+                    application.objNotifications.insertNotification(notiStruct);
 
                     // Change the status to 'payment'
                     updateStruct = structNew();
@@ -406,9 +472,13 @@ if (url.pass eq variables.schedulePassword) {
                     sendInvoice = objInvoice.sendPaymentRequest(invoiceID);
                     if (!sendInvoice.success) {
 
-                        // todo: make log and error mail
-                        dump(sendInvoice);
-                        break;
+                        // Make log and send error mail
+                        objLogs.logWrite("scheduletask", "error", "Could not send the invoice by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #sendInvoice.message#", true);
+
+                    } else {
+
+                        // Make log
+                        objLogs.logWrite("scheduletask", "info", "Payment successfully completed [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
@@ -429,13 +499,17 @@ if (url.pass eq variables.schedulePassword) {
                     // Update scheduletasks
                     objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status=qRenewBookings.strStatus);
 
-                    // Send invoice by email
+                    // Send receipt by email
                     sendInvoice = objInvoice.sendInvoice(invoiceID);
                     if (!sendInvoice.success) {
 
-                        // todo: make log and error mail
-                        dump(sendInvoice);
-                        break;
+                        // Make log and send error mail
+                        objLogs.logWrite("scheduletask", "error", "Could not send the receipt by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#], Error message: #sendInvoice.message#", true);
+
+                    } else {
+
+                        // Make log
+                        objLogs.logWrite("scheduletask", "info", "The receipt was sent by email successfully [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
@@ -459,6 +533,9 @@ if (url.pass eq variables.schedulePassword) {
                     AND strStatus = 'canceled'
                 "
             )
+
+            // Make log
+            objLogs.logWrite("scheduletask", "info", "A plan or module has been deleted after cancellation [CustomerID: #qRenewBookings.intCustomerID#]");
 
             // Update scheduletasks
             if (qRenewBookings.intModuleID gt 0) {
@@ -486,6 +563,9 @@ if (url.pass eq variables.schedulePassword) {
 
             updateBooking = objBook.updateBooking(updateStruct);
 
+            // Make log
+            objLogs.logWrite("scheduletask", "info", "A plan or module has been set to expired [BookingID: CustomerID: #qRenewBookings.intBookingID#, #qRenewBookings.intCustomerID#]");
+
             // Update scheduletasks
             if (qRenewBookings.intModuleID gt 0) {
                 objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
@@ -511,8 +591,15 @@ if (url.pass eq variables.schedulePassword) {
     )
 
 
+    // Delete logfiles older than 30 days or empty folders
+    objLogs.deleteOldLogfiles();
+
+
 
 } else {
+
+    // Make log
+    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (subscriptions.cfm) manually with wrong password. Passwort was: #url.pass#");
 
     location url="#application.mainURL#" addtoken="false";
 

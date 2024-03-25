@@ -40,7 +40,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     checkEmail = application.objGlobal.checkEmail(form.email);
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
-        logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Provided email is not valid!", false);
+        logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/company" addtoken="false";
     }
 
@@ -48,7 +48,7 @@ if (structKeyExists(form, "edit_company_btn")) {
         checkEmail = application.objGlobal.checkEmail(form.billing_email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
-            logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Provided email is not valid!", false);
+            logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
     }
@@ -58,10 +58,10 @@ if (structKeyExists(form, "edit_company_btn")) {
 
     if (objCustomerEdit.success) {
         getAlert('msgChangesSaved', 'success');
-        logWrite("Edit company", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Company info successfully saved!", false);
+        logWrite("user", "info", "Customer changes saved [CustomerID: #session.user_id#, UserID: #session.user_id#]");
     } else {
         getAlert(objCustomerEdit.message, 'danger');
-        logWrite("Edit company", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Company info could not be saved!", false);
+        logWrite("system", "error", "Customer could not be saved. [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #objCustomerEdit.message#]");
     }
 
     // Clear sessions
@@ -108,12 +108,12 @@ if (structKeyExists(form, "logo_upload_btn")) {
         }
         catch("java.io.IOException" e){
             getAlert( "msgFileUploadError", 'danger');
-            logWrite("Logo upload", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: msgFileUploadError]");
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
         catch(any e){
             getAlert( e.message, 'danger');
-            logWrite("Logo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #e.message#]");
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
@@ -136,18 +136,19 @@ if (structKeyExists(form, "logo_upload_btn")) {
             )
 
             getAlert('msgFileUploadedSuccessfully', 'success');
-            logWrite("Logo upload", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload was successful!", false);
+            logWrite("user", "info", "Logo uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #fileUpload.fileName#]");
 
         } else {
 
             getAlert(fileUpload.message, 'danger');
-            logWrite("Logo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Logo upload didn't succeed!", false);
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #fileUpload.message#]");
 
         }
 
     } else {
 
         getAlert('msgPleaseChooseFile', 'warning');
+        logWrite("user", "warning", "User did not choose a file for logo upload [CustomerID: #session.user_id#, UserID: #session.user_id#]");
 
     }
 
@@ -187,6 +188,8 @@ if (structKeyExists(url, "del_logo")) {
             "
         )
 
+        logWrite("user", "info", "Logo deleted [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #qLogo.strLogo#]");
+
         location url="#application.mainURL#/account-settings/company" addtoken="false";
 
     }
@@ -201,7 +204,6 @@ if (structKeyExists(form, "new_tenant_btn")) {
     param name="form.contact_person" default="";
 
     if (!len(trim(contact_person))) {
-        logWrite("Create new tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Contact person is not provided!", false);
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -217,12 +219,12 @@ if (structKeyExists(form, "new_tenant_btn")) {
     if (insertTenant.success) {
 
         getAlert('alertTenantAdded', 'success');
-        logWrite("Create new tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully created new tenant!", false);
+        logWrite("user", "info", "New tenant created [CustomerID: #session.customer_id#, UserID: #session.user_id#, Tenant: #form.company_name#]");
 
     } else {
 
         getAlert(insertTenant.message, 'danger');
-        logWrite("Create new tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, New tenant could not be created!", false);
+        logWrite("system", "error", "Could not create new tenant [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #insertTenant.message#]");
 
     }
 
@@ -238,7 +240,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!isNumeric(url.delete) or url.delete lte 0) {
         getAlert('No tenant found!', 'danger');
-        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant not found!", false);
+        logWrite("user", "warning", "Someone tried to delete a tenant via url manually: tenantID is not numeric [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.delete#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -247,7 +249,7 @@ if (structKeyExists(url, "delete")) {
 
     if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
-        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant not found!", false);
+        logWrite("user", "warning", "Someone tried to delete a tenant but no tenant found [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.delete#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -256,7 +258,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to delete this tenant!', 'danger');
-        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, User is not allowed to delete this tenant!", false);
+        logWrite("user", "warning", "User tried to delete a tenant: not allowed [CustomerID: #session.customer_id#, UserID: #session.user_id#, tenantID to delete: #url.delete#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -276,16 +278,15 @@ if (structKeyExists(url, "delete")) {
             myCustomerID: {type: "numeric", value: session.customer_id}
         },
         sql = "
-            DELETE FROM customers WHERE intCustomerID = :customerID AND intCustomerID != :myCustomerID
+            DELETE FROM customers
+            WHERE intCustomerID = :customerID
+            AND intCustomerID != :myCustomerID
         "
     )
 
     if (getAnswer.recordCount) {
         getAlert('alertTenantDeleted', 'success');
-        logWrite("Delete tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant got successfully deleted!", false);
-    } else {
-        getAlert('No user found!', 'danger');
-        logWrite("Delete tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant could not be deleted!", false);
+        logWrite("user", "info", "Tenant has been deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#, tenantID to delete: #url.delete#]");
     }
 
     location url="#application.mainURL#/account-settings/tenants" addtoken="false";
@@ -298,7 +299,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (!isNumeric(url.change_tenant)) {
         getAlert('The customerID is not of type numeric!', 'danger');
-        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Tenant url value is not numeric!", false);
+        logWrite("user", "warning", "Someone tried to change a tenant via url manually: tenantID is not numeric [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.change_tenant#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -307,7 +308,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (structIsEmpty(getTenant)) {
         getAlert('No tenant found!', 'danger');
-        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, No tenant found!", false);
+        logWrite("user", "warning", "Someone tried to change a tenant but no tenant found [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.change_tenant#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -318,7 +319,7 @@ if (structKeyExists(url, "change_tenant")) {
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to edit this tenant!', 'danger');
-        logWrite("Change status of tenant", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, User not allowed to edit this tenant!", false);
+        logWrite("user", "warning", "User tried to change a tenant: not allowed [CustomerID: #session.customer_id#, UserID: #session.user_id#, to tenantID: #url.change_tenant#]");
         location url="#application.mainURL#/account-settings/tenants" addtoken="false";
     }
 
@@ -335,10 +336,12 @@ if (structKeyExists(url, "change_tenant")) {
         "
     )
 
-
+    logWrite("user", "info", "Tenant changed [CustomerID: #session.customer_id#, UserID: #session.user_id#, to tenantID: #url.change_tenant#]");
     location url="#application.mainURL#/account-settings/tenants" addtoken="false";
 
 }
 
+logWrite("user", "warning", "Access attempt to handler/customer.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>

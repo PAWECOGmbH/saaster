@@ -12,7 +12,7 @@ if (application.environment eq "dev") {
     if (isJSON(httpRes.filecontent)) {
         jsonData = deSerializeJSON(httpRes.filecontent);
     } else {
-        logWrite("Development Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", false);
+        logWrite("payrexx", "warning", "DEV: No content found or JSON failure!");
         abort;
     }
 
@@ -24,12 +24,12 @@ if (application.environment eq "dev") {
     if (structKeyExists(url, "pass") and url.pass eq variables.payrexxWebhookPassword) {
 
         if (!structKeyExists(getHttpRequestData(), "content")) {
-            logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, No content found or JSON failure!", true);
+            logWrite("payrexx", "warning", "No content found or JSON failure!");
             abort;
         }
 
     } else {
-        logWrite("Production Webhook", 2, "File: #callStackGet("string", 0 , 1)#, Webhook password was not passed in or wrong password!", false);
+        logWrite("payrexx", "warning", "Webhook password was not passed in or wrong password!");
         abort;
     }
 
@@ -114,7 +114,7 @@ if (structKeyExists(jsonData, "transaction")) {
         }
 
         // Insert only if it's the correct webhook
-        if (projectName eq application.applicationname) {
+        if (projectName eq variables.applicationname) {
 
             try {
 
@@ -172,20 +172,24 @@ if (structKeyExists(jsonData, "transaction")) {
                     "
                 )
 
-                logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, Webhook data successfully saved.", false);
+                logWrite("payrexx", "info", "Webhook data successfully saved [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#]");
 
 
             } catch (any e) {
 
-                logWrite("Production Webhook", 4, "File: #callStackGet("string", 0 , 1)#, Error: #e.message#", true);
+                logWrite("payrexx", "error", "Could not insert the webhook data into the payrexx table. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, Error: #e.message#]", true);
 
             }
+
+        } else {
+
+            logWrite("payrexx", "warning", "Webhook could not be inserted because the application name does not match the project name. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, projectName: #projectName#, applicationName: #variables.applicationname#]");
 
         }
 
     } else {
 
-        logWrite("Production Webhook", 1, "File: #callStackGet("string", 0 , 1)#, The PSP IDs from the configuration (config.cfm) do not match the webhook!", false);
+        logWrite("payrexx", "warning", "The PSP IDs from the configuration (config.cfm) do not match the webhook.");
 
     }
 

@@ -22,6 +22,8 @@
     }
 
     if (failed) {
+
+        logWrite("user", "error", "We do not have all information while booking", true);
         getAlert('alertErrorOccured', 'danger');
         location url="#application.mainURL#/account-settings" addtoken="false";
     }

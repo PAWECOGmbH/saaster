@@ -6,7 +6,7 @@ component displayname="customer" output="false" {
     variables.argsReturnValue['success'] = false;
 
     // Insert optin
-    public numeric function insertOptin(required struct optinValues) {
+    public struct function insertOptin(required struct optinValues) {
 
         local.first_name = '';
         local.name = '';
@@ -39,7 +39,7 @@ component displayname="customer" output="false" {
 
             options = {datasource = '#application.datasource#'},
             params = {
-                check_mail: {type: "nvarchar", value: local.email},
+                check_mail: {type: "varchar", value: local.email},
             },
             sql = "
                 DELETE FROM optin
@@ -48,33 +48,37 @@ component displayname="customer" output="false" {
 
         );
 
-        queryExecute(
+        try {
 
-            options = {datasource = '#application.datasource#', result = 'getNewID'},
-            params = {
-                first_name: {type: "nvarchar", value: local.first_name},
-                name: {type: "nvarchar", value: local.name},
-                company: {type: "nvarchar", value: local.company},
-                email: {type: "nvarchar", value: local.email},
-                language: {type: "nvarchar", value: local.language},
-                newUUID: {type: "nvarchar", value: local.newUUID}
-            },
-            sql = "
-                INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strLanguage, strUUID)
-                VALUES (:first_name, :name, :company, :email, :language, :newUUID)
-            "
+            queryExecute(
 
-        );
+                options = {datasource = '#application.datasource#', result = 'getNewID'},
+                params = {
+                    first_name: {type: "nvarchar", value: local.first_name},
+                    name: {type: "nvarchar", value: local.name},
+                    company: {type: "nvarchar", value: local.company},
+                    email: {type: "varchar", value: local.email},
+                    language: {type: "varchar", value: local.language},
+                    newUUID: {type: "nvarchar", value: local.newUUID}
+                },
+                sql = "
+                    INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strLanguage, strUUID)
+                    VALUES (:first_name, :name, :company, :email, :language, :newUUID)
+                "
 
-        if (isNumeric(getNewID.generated_key) and getNewID.generated_key gt 0) {
+            );
 
-            return getNewID.generated_key;
+            variables.argsReturnValue['newID'] = getNewID.generated_key;
+            variables.argsReturnValue['success'] = true;
 
-        } else {
+        } catch(any e) {
 
-            return 0;
+            variables.argsReturnValue['message'] = e.message;
+            variables.argsReturnValue['newID'] = 0;
 
         }
+
+        return variables.argsReturnValue;
 
     }
 

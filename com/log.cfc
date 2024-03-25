@@ -1,32 +1,294 @@
 component displayname="log" {
 
     // Logging function
-    public void function logWrite(required string name, required numeric severity, required string message, required boolean sendMail) {
+    public void function logWrite(required string type, required string level, required string message, boolean sendMail = false, string date = "") {
 
-        local.severityTypes = ["INFORMATION", "WARNING", "ERROR", "FATAL"];
+        // Check system admin time zone and create corresponding time instance
         local.getSysadmin = new com.sysadmin().getSysAdminData();
-
-        if(local.getSysadmin.timezoneID neq ""){
+        if(local.getSysadmin.timezoneID neq "") {
             local.getTime = new com.time(1);
-        }else {
+        } else {
             local.getTime = new com.time();
         }
 
-        local.curTime = local.getTime.utc2local(now());
+        // Generate timestamp based on the sysadmin time zone
+        local.timeStamp = local.getTime.utc2local(now());
 
-        if (arguments.severity lte 4 and arguments.severity gte 1) {
-            local.logMsg = local.curTime & " - " & local.severityTypes[arguments.severity] & ": " & arguments.name & " - " &  arguments.message & Chr(13) & Chr(10);
-            local.subFolderMonth = dateformat(local.curTime,'yyyy-mm');
+        // Use today's date based on the user time zone if no date is specified
+        local.currentDate = len(trim(arguments.date)) ? dateFormat(arguments.date, "yyyy-mm-dd") : dateFormat(now(), "yyyy-mm-dd");
+        local.rootPath = expandPath("/");
+        local.logPath = "#local.rootPath#logs/#arguments.type#/#dateFormat(local.currentDate, 'yyyy-mm')#/#dateFormat(local.currentDate, 'dd')#";
+        local.logFile = "#local.logPath#/#arguments.level#.log";
 
-            directoryCreate( expandPath('/logs/#local.subFolderMonth#'), true, true);
-            fileAppend("../logs/#local.subFolderMonth#/#DateTimeFormat(local.curTime, "dd")#.log", local.logMsg);
+        // Create directory structure if it does not exist
+        if (!directoryExists(local.logPath)) {
+            directoryCreate(local.logPath, true);
+        }
 
-            if (sendMail){
-                cfmail(subject="#local.severityTypes[arguments.severity]#", to="#application.errorMail#", from="#application.fromEmail#" ) {
-                    writeOutput("<h3>#local.severityTypes[arguments.severity]# - #arguments.name#</h3><p>#local.curTime#</p><hr>#arguments.message#");
+        // Prepare log message
+        local.logEntry = "#local.timeStamp# #arguments.message#";
+
+        // If the log level is 'error', add Lucee call stack information
+        if (arguments.level == "error") {
+            local.callerInfo = callStackGet("string", 1, 1);
+            if (len(trim(local.callerInfo))) {
+                local.logEntry &= " Caller: " & local.callerInfo;
+            }
+        }
+
+        local.logEntry &= Chr(13) & Chr(10); // Add line break
+
+        // Attach message to the log file
+        fileAppend(local.logFile, local.logEntry);
+
+        // Send log by e-mail, if desired
+        if (arguments.sendMail) {
+            cfmail(subject="#ucase(arguments.level)# in #application.projectName#", to="#application.errorMail#", from="#application.fromEmail#" ) {
+                writeOutput("#local.logEntry#");
+            }
+        }
+
+    }
+
+
+    // Get logfiles directly from the log directory
+    public query function getLogs(string type = "", string date = "", string level = "") {
+
+        // Init
+        local.logPath = expandPath("/logs");
+        local.filterDate = "";
+        local.filterLevel = "";
+
+        // Create base path based on the type, if specified
+        if (len(trim(arguments.type))) {
+            local.logPath &= "/#arguments.type#";
+        }
+
+        // Add date to filter
+        if (len(trim(arguments.date))) {
+            local.filterDate = dateFormat(arguments.date, "yyyy-mm-dd");
+        }
+
+        // Add level to filter
+        if (len(trim(arguments.level))) {
+            local.filterLevel = arguments.level & ".log";
+        }
+
+        // Temporary variables to avoid the closure scope problems
+        var tempFilterDate = local.filterDate;
+        var tempFilterLevel = local.filterLevel;
+
+        // List log files with a closure that captures the necessary local variables
+        local.qLogfiles = directoryList(
+            path=local.logPath,
+            type="file",
+            recurse=true,
+            listInfo="query",
+            filter=function(path) {
+                // Use of temporary variables within the closure
+                return filterTheList(path=path, dateFilter=tempFilterDate, levelFilter=tempFilterLevel);
+            },
+            sort="dateLastModified desc"
+        );
+
+        return local.qLogfiles;
+
+    }
+
+
+
+    // Universal filter function with extended filter options
+    public boolean function filterTheList(required string path, string dateFilter = "", string levelFilter = "") {
+
+        // Initialise variables for filter results
+        local.dateMatch = false;
+        local.levelMatch = false;
+
+        // Filter date if a date filter has been specified
+        if (len(trim(arguments.dateFilter))) {
+            local.pathSegments = listToArray(arguments.path, "/");
+            local.dateSegment = local.pathSegments[arrayLen(local.pathSegments)-2] & "-" & local.pathSegments[arrayLen(local.pathSegments)-1];
+            local.dateMatch = (local.dateSegment == arguments.dateFilter);
+        } else {
+            // No date filter specified, therefore the date is considered to match
+            local.dateMatch = true;
+        }
+
+        // Filter file names if a file name filter has been specified
+        if (len(trim(arguments.levelFilter))) {
+
+            // Extract the file name from the path
+            local.fileName = listLast(path, "/");
+
+            // Check whether the file name matches the filter criteria
+            local.levelMatch = findNoCase(arguments.levelFilter, local.fileName);
+
+        } else {
+
+            // No file name filter specified, therefore the name is considered to match
+            local.levelMatch = true;
+
+        }
+
+
+        // Determine whether the path matches the filter criteria
+        return local.dateMatch AND local.levelMatch;
+    }
+
+
+
+    // Get logfile details
+    public array function getLogDetail(required string filepath) {
+
+        local.logLines = [];
+
+        // Check whether the file exists
+        if (fileExists(arguments.filepath)) {
+
+            // Open file for reading
+            local.fileObj = fileOpen(arguments.filepath, "read");
+
+            // Read through the file line by line
+            while (!fileIsEOF(local.fileObj)) {
+                local.line = fileReadLine(local.fileObj);
+                arrayAppend(local.logLines, trim(local.line)); // Add read line to array
+            }
+
+            // Close file
+            fileClose(local.fileObj);
+
+        } else {
+
+            // Add error message if the file does not exist
+            arrayAppend(local.logLines, "Die angegebene Datei existiert nicht.");
+
+        }
+
+        return local.logLines;
+
+    }
+
+
+    // Delete logfile and even the directory
+    public struct function deleteLogfile(required string file) {
+
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
+
+        // Check whether the file exists
+        if (fileExists(arguments.file)) {
+
+            // Delete the file
+            try {
+
+                fileDelete(arguments.file);
+
+                // Determine the path to the directory of the deleted file
+                local.directory = getDirectoryFromPath(arguments.file);
+
+                // Retrieve list of all files in the directory
+                local.filesInDirectory = directoryList(local.directory, false, "name");
+
+                // Delete directory if it does not contain any other files
+                if (!ArrayLen(local.filesInDirectory)) {
+                    directoryDelete(local.directory);
+                }
+
+                // Success message, file and directory deleted if necessary
+                local.argsReturnValue['message'] = "The file and, if applicable, the empty directory have been successfully deleted.";
+                local.argsReturnValue['success'] = true;
+
+
+            } catch (any e) {
+
+                // Error message if deletion fails
+                local.argsReturnValue['message'] = "Error while deleting the file or directory: " & e.message;
+
+            }
+
+        } else {
+
+            // Message if the file does not exist
+            local.argsReturnValue['message'] = "The specified file does not exist.";
+
+        }
+
+        return local.argsReturnValue;
+
+    }
+
+
+    // Get all log types filtered by getLogs()
+    public array function getLogTypes() {
+
+        // Get all logs
+        local.logs = getLogs();
+
+        // Init
+        local.mainPath = expandPath("/logs");
+        local.typeArray = [];
+
+        // Loop through the query object
+        for (local.currentRow=1; local.currentRow <= local.logs.recordCount; local.currentRow++) {
+
+            // Extract the type from the directory path
+            local.type = listFirst(replace(local.logs.directory[local.currentRow], local.mainPath & "/", ""), "/");
+
+            // Prevent duplicates by checking whether the type already exists in the array
+            if (!arrayContains(local.typeArray, local.type)) {
+                arrayAppend(local.typeArray, local.type);
+            }
+
+        }
+
+        return local.typeArray;
+
+
+    }
+
+
+    // Delete logfiles older than 30 days
+    public void function deleteOldLogfiles() {
+
+        local.logPath = expandPath("/logs");
+        local.thirtyDaysAgo = dateAdd("d", -30, now());
+
+        // List all log files and directories recursively
+        local.allFilesAndDirs = directoryList(path=local.logPath, recurse=true, listInfo="query", sort="dateLastModified desc");
+
+        // Iterate over the results and delete files older than 30 days
+        for (local.currentRow=1; local.currentRow <= local.allFilesAndDirs.recordCount; local.currentRow++) {
+            local.currentPath = local.allFilesAndDirs.directory[local.currentRow] & "/" & local.allFilesAndDirs.name[local.currentRow];
+            local.lastModified = local.allFilesAndDirs.dateLastModified[local.currentRow];
+
+            // Check whether the current element is a file and is older than 30 days
+            if (local.allFilesAndDirs.type[local.currentRow] == "file" && local.lastModified < local.thirtyDaysAgo) {
+                fileDelete(local.currentPath);
+            }
+
+        }
+
+        // Iterate again to delete empty directories
+        for (local.currentRow=local.allFilesAndDirs.recordCount; local.currentRow >= 1; local.currentRow--) {
+            if (local.allFilesAndDirs.type[local.currentRow] == "dir") {
+                local.currentDir = local.allFilesAndDirs.directory[local.currentRow] & "/" & local.allFilesAndDirs.name[local.currentRow];
+                local.dirContent = directoryList(local.currentDir, false, "array");
+
+                // If the directory is empty, delete it
+                if (arrayLen(local.dirContent) == 0) {
+                    directoryDelete(local.currentDir);
                 }
             }
         }
+
+
     }
 
+
+
+
 }
+
+
+
