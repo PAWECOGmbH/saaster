@@ -83,7 +83,7 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "email");
 
             getAlert('alertOptinSent', 'info');
-            logWrite("user", "info", "Register new user step 1: Opt-in E-Mail sent [E-Mail: #form.email#]");
+            logWrite("user", "info", "Register new user step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
             location url="#application.mainURL#/login" addtoken="false";
 
         } else {
@@ -127,7 +127,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
         session.uuid = qCheckOptin.strUUID;
         session.lng = qCheckOptin.strLanguage;
         getAlert('alertChoosePassword', 'info');
-        logWrite("user", "info", "Register new user step 2: A user has confirmed the opt-in mail. [UUID: #url.u#]");
+        logWrite("user", "info", "Register new user step 2: A user has confirmed the opt-in e-mail. [UUID: #url.u#]");
 
     } else {
 
@@ -151,13 +151,13 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
             session.uuid = qCheckUser.strUUID;
             session.lng = qCheckUser.strLanguage;
             getAlert('alertChoosePassword', 'info');
-            logWrite("user", "info", "Register new user step 2: A user invited by the administrator has confirmed the opt-in mail. [UUID: #url.u#]");
+            logWrite("user", "info", "Register new user step 2: A user invited by the administrator has confirmed the opt-in email. [UUID: #url.u#]");
 
         } else {
 
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
-            logWrite("user", "warning", "Register new user step 2: Opt-in not valid anymore. [UUID: #url.u#]");
+            logWrite("user", "warning", "Register new user step 2: Opt-in e-mail not valid anymore. [UUID: #url.u#]");
 
         }
 
@@ -367,11 +367,11 @@ if (structKeyExists(form, 'login_btn')) {
             // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
                 getAlert('msgAccountDisabledByAdmin', 'warning');
-                logWrite("user", "warning", "User tried to login but account is not active [CustomerID: #objUserLogin.customer_id#, UserID: #objUserLogin.user_id#]");
+                logWrite("user", "warning", "User tried to login but account is not active [E-mail: #form.email#]");
                 location url="#application.mainURL#/login" addtoken="false";
             } else {
                 getAlert('alertWrongLogin', 'warning');
-                logWrite("user", "warning", "Unsuccessful login try [CustomerID: #objUserLogin.customer_id#, UserID: #objUserLogin.user_id#]");
+                logWrite("user", "warning", "Unsuccessful login try [E-mail: #form.email#]");
                 location url="#application.mainURL#/login" addtoken="false";
             }
 
@@ -450,7 +450,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             include template="/includes/mail_design.cfm";
         }
 
-        logWrite("user", "info", "Reset password: E-Mail sent in order to reset the password. [E-Mail: #form.email#]");
+        logWrite("user", "info", "Reset password: E-mail sent in order to reset the password. [E-Mail: #form.email#]");
 
     } else {
 
