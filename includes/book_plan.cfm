@@ -23,9 +23,10 @@
 
     if (failed) {
 
-        logWrite("user", "error", "We do not have all information while booking", true);
         getAlert('alertErrorOccured', 'danger');
+        logWrite("system", "error", "Booking a plan failed, data in moduleStruct missing [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
         location url="#application.mainURL#/account-settings" addtoken="false";
+
     }
 
     objPlans = new com.plans(lngID=planStruct.lngID, currencyID=planStruct.currencyID);
@@ -55,11 +56,13 @@
             application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
             getAlert('msgPlanActivated');
+            logWrite("system", "info", "A plan has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
             location url="#application.mainURL#/account-settings" addtoken=false;
 
         } else {
 
             getAlert(makeBooking.message, 'danger');
+            logWrite("system", "error", "Could not book a plan [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#, Error: #makeBooking.message#]");
             location url="#application.mainURL#/account-settings" addtoken=false;
 
         }
@@ -76,6 +79,7 @@
         application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
         getAlert('msgThanksForPurchaseFindInvoice');
+        logWrite("system", "info", "A booked plan has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
         location url="#application.mainURL#/account-settings" addtoken=false;
 
     } else {
@@ -83,9 +87,11 @@
         // If the amount couldn't be charged we have to send the customer back to the payment page
         if (makeBooking.message eq "cannotcharge") {
             getAlert('msgCannotCharge', 'warning');
+            logWrite("system", "warning", "Could not charge payment [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
             location url="#application.mainURL#/account-settings/payment" addtoken=false;
         } else {
             getAlert(makeBooking.message, 'danger');
+            logWrite("system", "error", "Could not charge payment [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#, Error: #makeBooking.message#]");
             location url="#application.mainURL#/account-settings" addtoken=false;
         }
 
