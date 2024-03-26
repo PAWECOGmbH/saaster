@@ -56,7 +56,7 @@
             application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
             getAlert('msgPlanActivated');
-            logWrite("system", "info", "A plan has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
+            logWrite("user", "info", "A plan has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
             location url="#application.mainURL#/account-settings" addtoken=false;
 
         } else {
@@ -79,7 +79,7 @@
         application.objCustomer.setProductSessions(session.customer_id, getAnyLanguage(lngID).iso);
 
         getAlert('msgThanksForPurchaseFindInvoice');
-        logWrite("system", "info", "A booked plan has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
+        logWrite("user", "info", "A booked plan has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
         location url="#application.mainURL#/account-settings" addtoken=false;
 
     } else {

@@ -55,7 +55,7 @@
             // Save module array into a session
             session.currentModules = objModules.getBookedModules(session.customer_id);
             getAlert('msgModuleActivated');
-            logWrite("system", "info", "A module has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
+            logWrite("user", "info", "A module has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
             location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         } else {
@@ -79,7 +79,7 @@
         session.currentModules = objModules.getBookedModules(session.customer_id);
 
         getAlert('msgThanksForPurchaseFindInvoice');
-        logWrite("system", "info", "A booked module has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
+        logWrite("user", "info", "A booked module has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
         location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
     } else {

@@ -596,7 +596,6 @@ if (structKeyExists(form, 'mfa_btn')) {
         filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
         if (!arrayIsEmpty(filesToInlude)) {
             loop array=filesToInlude item="path" {
-                logWrite("system", "info", "Module include after MFA login [Path: #path#]");
                 include template=path;
             }
         }
