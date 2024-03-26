@@ -599,7 +599,7 @@ if (url.pass eq variables.schedulePassword) {
 } else {
 
     // Make log
-    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (subscriptions.cfm) manually with wrong password. Passwort was: #url.pass#");
+    application.objLog.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (subscriptions.cfm) manually with wrong password. Passwort was: #url.pass#");
 
     location url="#application.mainURL#" addtoken="false";
 
