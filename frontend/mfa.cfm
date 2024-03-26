@@ -3,7 +3,7 @@
     getSysadminData = application.objSysadmin.getSysAdminData();
     if(structKeyExists(url, 'uuid')){
         uuid = url.uuid;
-        if (session.mfaCheckCount gte 3) {
+        if (structKeyExists(session, "mfaCheckCount") and session.mfaCheckCount gte 3) {
             getAlert(getTrans('txtThreeTimeTry'), 'warning');
         }
     };
@@ -31,7 +31,7 @@
                     <cfif structKeyExists(session, "alert")>
                         #session.alert#
                     </cfif>
-                    <cfif session.mfaCheckCount lt 3>
+                    <cfif structKeyExists(session, "mfaCheckCount") and session.mfaCheckCount lt 3>
                         <p class="text-center">#getTrans('txtmfaLead')#</p>
                         <div class="mb-3 text-center">
                             <label class="form-label">#getTrans('txtMfaLable')#</label>

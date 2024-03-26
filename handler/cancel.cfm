@@ -13,12 +13,14 @@ if (structKeyExists(url, "plan")) {
 
             if (!revokePlan.success) {
                 getAlert(revokePlan.message, 'danger');
-                logWrite("Revoke plan", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Plan could not be revoked!", false);
+
+                logWrite("user", "warning", "Plan could not be revoked! [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
                 location url="#application.mainURL#/account-settings" addtoken="false";
             }
 
+            logWrite("user", "info", "Plan cancellation revoked [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             getAlert('msgRevokedSuccessful', 'success');
-            logWrite("Revoke plan", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Plan got successfully revoked!", false);
+
 
         } else {
 
@@ -26,12 +28,12 @@ if (structKeyExists(url, "plan")) {
 
             if (!cancelPlan.success) {
                 getAlert(cancelPlan.message, 'danger');
-                logWrite("Cancel plan", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Plan could not be cancelled!", false);
+                logWrite("user", "error", "Plan could not be cancelled! [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #cancelPlan.message#]");
                 location url="#application.mainURL#/account-settings" addtoken="false";
             }
 
+            logWrite("user", "info", "Plan cancelled [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             getAlert('msgCanceledSuccessful', 'info');
-            logWrite("Cancel plan", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Plan got successfully cancelled!", false);
 
         }
 
@@ -57,12 +59,13 @@ if (structKeyExists(url, "module")) {
 
             if (!revokeModule.success) {
                 getAlert(revokeModule.message, 'danger');
-                logWrite("Revoke module", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Module could not be revoked!", false);
+                logWrite("user", "error", "Module could not be revoked! [ModuleID: #url.module#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #revokeModule.message#]");
                 location url="#application.mainURL#/account-settings/modules" addtoken="false";
             }
 
+            logWrite("user", "info", "Module cancellation revoked [ModuleID: #url.module#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             getAlert('msgRevokedSuccessful', 'success');
-            logWrite("Revoke module", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Module got successfully revoked!", false);
+
 
         } else {
 
@@ -70,12 +73,12 @@ if (structKeyExists(url, "module")) {
 
             if (!cancelModule.success) {
                 getAlert(cancelModule.message, 'danger');
-                logWrite("Cancel module", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Module could not be cancelled!", false);
+                logWrite("user", "error", "Module could not be cancelled! [ModuleID: #url.module#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #cancelModule.message#]");
                 location url="#application.mainURL#/account-settings/modules" addtoken="false";
             }
 
+            logWrite("user", "info", "Module cancelled [ModuleID: #url.module#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             getAlert('msgCanceledSuccessful', 'success');
-            logWrite("Cancel module", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Module got successfully cancelled!", false);
 
         }
 
@@ -109,15 +112,15 @@ if (structKeyExists(form, "delete")) {
 
             if (deleteAccount.success) {
 
+                logWrite("user", "info", "Account deleted [CustomerID: #session.customer_id#, UserID: #user_id#, E-Mail: #user_email#, Name: #user_name#]");
+
                 structClear(SESSION);
                 onSessionStart();
-                logWrite("Delete account", 1, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, Account got successfully deleted!", false);
-
                 location url="#application.mainURL#?logout" addtoken="false";
 
             } else {
 
-                logWrite("Delete account", 1, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, The account could not be deleted because there are tenants without users.", false);
+                logWrite("user", "warning", "Could not delete account [CustomerID: #session.customer_id#, UserID: #user_id#, E-Mail: #user_email#, Name: #user_name#, Message: #deleteAccount.message#]");
                 getAlert(deleteAccount.message, 'warning');
                 location url="#application.mainURL#/account-settings/company" addtoken="false";
 
@@ -126,7 +129,7 @@ if (structKeyExists(form, "delete")) {
         } else {
 
             getAlert('alertWrongLogin', 'danger');
-            logWrite("Delete account", 2, "File: #callStackGet("string", 0 , 1)#, User: #user_name#, UserID: #user_id#, E-Mail: #user_email#, User provided wrong credentials!", false);
+            logWrite("user", "warning", "Couldn't delete the account, because of wrong login or user status [CustomerID: #session.customer_id#, UserID: #user_id#, is active: #objUserLogin.active#, is superAdmin: #objUserLogin.superadmin#]");
             location url="#application.mainURL#/account-settings/company" addtoken="false";
 
         }
@@ -135,10 +138,7 @@ if (structKeyExists(form, "delete")) {
 
 }
 
-
-
-
-
+logWrite("user", "warning", "Access attempt to handler/cancel.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>

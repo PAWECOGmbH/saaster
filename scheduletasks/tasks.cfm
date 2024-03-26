@@ -4,9 +4,12 @@
 // This file gets executed from the scheduler every 2 minutes
 
 setting requesttimeout = 1000;
+objLogs = application.objLog;
 
 param name="url.task" default="01";
 if (!isNumeric(url.task)) {
+    // Make log
+    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler task_xx manually and did not send the url.task as numeric. The value for url.task was: #url.task#");
     abort;
 }
 
@@ -25,7 +28,7 @@ if (url.pass eq variables.schedulePassword) {
 
     if (qRunning.recordCount) {
 
-        // If seconds is in minus, the previous task is still running
+        // If seconds are in minus, the previous task is still running
         if (qRunning.seconds gt 0) {
 
             // Update schedulecontrol
@@ -67,6 +70,9 @@ if (url.pass eq variables.schedulePassword) {
 
             if (qGetTasks.recordCount) {
 
+                // Make log
+                objLogs.logWrite("scheduletask", "info", "There are #qGetTasks.recordCount# tasks to run");
+
                 // Make loop over all the tasks
                 loop query="qGetTasks" {
 
@@ -78,7 +84,17 @@ if (url.pass eq variables.schedulePassword) {
 
                         // Include the file
                         if (fileExists(qGetTasks.strPath)) {
+
                             include template="/#qGetTasks.strPath#";
+
+                            // Make log
+                            objLogs.logWrite("scheduletask", "info", "Task executed: #qGetTasks.strPath#");
+
+                        } else {
+
+                            // Make log
+                            objLogs.logWrite("scheduletask", "error", "File not found: #qGetTasks.strPath#", true);
+
                         }
 
                         // Calculate next run
@@ -104,10 +120,6 @@ if (url.pass eq variables.schedulePassword) {
 
                 }
 
-            } else {
-
-                echo('There is nothing to do!');
-
             }
 
             // Update schedulecontrol
@@ -123,7 +135,6 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
-            echo('schedulecontrol updated!');
 
         } else {
 
@@ -143,20 +154,25 @@ if (url.pass eq variables.schedulePassword) {
                     "
                 )
 
+                // Make log
+                objLogs.logWrite("scheduletask", "warning", "The scheduletask task_#url.task# was greater than 5 minutes, something went wrong! Automatically corrected.");
+
             }
 
         }
 
     } else {
 
-        echo('No tasks found!');
+        // Make log
+        objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler manually with wrong number. url.task was: #url.task#");
 
     }
 
 
 } else {
 
-    echo('Password missing!');
+    // Make log
+    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (task_#url.task#.cfm) manually with wrong password. Passwort was: #url.pass#");
 
 }
 

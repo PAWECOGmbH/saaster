@@ -22,8 +22,11 @@
     }
 
     if (failed) {
+
         getAlert('alertErrorOccured', 'danger');
+        logWrite("system", "error", "Booking a module failed, data in moduleStruct missing [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
         location url="#application.mainURL#/account-settings/modules" addtoken="false";
+
     }
 
     objModules = new com.modules(lngID=moduleStruct.lngID, currencyID=moduleStruct.currencyID);
@@ -52,11 +55,13 @@
             // Save module array into a session
             session.currentModules = objModules.getBookedModules(session.customer_id);
             getAlert('msgModuleActivated');
+            logWrite("user", "info", "A module has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
             location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         } else {
 
             getAlert(makeBooking.message, 'danger');
+            logWrite("system", "error", "Could not book a module [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#, Error: #makeBooking.message#]");
             location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
         }
@@ -74,6 +79,7 @@
         session.currentModules = objModules.getBookedModules(session.customer_id);
 
         getAlert('msgThanksForPurchaseFindInvoice');
+        logWrite("user", "info", "A booked module has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
         location url="#application.mainURL#/account-settings/modules" addtoken=false;
 
     } else {
@@ -81,9 +87,11 @@
         // If the amount couldn't be charged we have to send the customer back to the payment page
         if (makeBooking.message eq "cannotcharge") {
             getAlert('msgCannotCharge', 'warning');
+            logWrite("system", "warning", "Could not charge payment [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
             location url="#application.mainURL#/account-settings/payment" addtoken=false;
         } else {
             getAlert(makeBooking.message, 'danger');
+            logWrite("system", "error", "Could not charge payment [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#, Error: #makeBooking.message#]");
             location url="#application.mainURL#/account-settings/modules" addtoken=false;
         }
 

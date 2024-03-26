@@ -177,6 +177,14 @@ $(document).ready(function(){
 		});
 	});
 
+	// load modal with dynamic content (general big)
+	$('.openPopup_big').on('click',function(){
+		var dataURL = $(this).attr('data-href');
+		$('#dyn_modal-content').load(dataURL,function(){
+			$('#dynModal_big').modal('show');
+		});
+	});
+
 	// Load trumbowyg editor
 	$('.editor').each(function(index, element){
 		var $this = $(element);
@@ -330,11 +338,11 @@ $(document).ready(function(){
 		let data = e.data || e.target.value;
 		if ( ! data ) return;
 		if ( data.length === 1 ) return;
-		
+
 		popuNext(e.target, data);
 	},
 	popuNext = function(el, data) {
-		el.value = data[0]; 
+		el.value = data[0];
 		data = data.substring(1);
 		if ( el.nextElementSibling && data.length ) {
 			popuNext(el.nextElementSibling, data);
@@ -346,21 +354,21 @@ $(document).ready(function(){
 			if (e.keyCode === 16 || e.keyCode == 9 || e.keyCode == 224 || e.keyCode == 18 || e.keyCode == 17) {
 				return;
 			}
-			
+
 			if ( (e.keyCode === 8 || e.keyCode === 37) && this.previousElementSibling && this.previousElementSibling.tagName === "INPUT" ) {
 				this.previousElementSibling.select();
 			} else if (e.keyCode !== 8 && this.nextElementSibling) {
 				this.nextElementSibling.select();
 			}
-			
+
 			if ( e.target.value.length > 1 ) {
 				splitNumber(e);
 			}
 		});
-		
+
 		input.addEventListener('focus', function(e) {
 			if ( this === in1 ) return;
-			
+
 			if ( in1.value == '' ) {
 				in1.focus();
 			}
@@ -372,7 +380,7 @@ $(document).ready(function(){
 	});
 
 	in1.addEventListener('input', splitNumber);
-	
+
 	$('input[name="mfa_6"]').keyup(function(){
 		if(validateCode()){
 			$("#mfa_form").submit();
@@ -390,12 +398,12 @@ $(document).ready(function(){
 function generateUUID()
 {
 	var d = new Date().getTime();
-	
+
 	if( window.performance && typeof window.performance.now === "function" )
 	{
 		d += performance.now();
 	}
-	
+
 	var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c)
 	{
 		var r = (d + Math.random()*16)%16 | 0;

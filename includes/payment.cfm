@@ -104,9 +104,8 @@
 
         } catch (any e) {
 
-            // todo: send error mail
-
-            getAlert(e.message);
+            getAlert(e.message, 'danger');
+            logWrite("payrexx", "error", "Could not create gateway [Error: #e.message#]", true);
             location url=failLink addtoken="false";
 
         }
@@ -115,6 +114,7 @@
     } else {
 
         getAlert(payrexxRespond.message, 'danger');
+        logWrite("payrexx", "error", "Could not create gateway [Error: #payrexxRespond.message#]", true);
         location url=failLink addtoken="false";
 
     }

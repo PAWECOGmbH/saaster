@@ -3,6 +3,8 @@
 // Logout and delete all sessions
 if (structKeyExists(url, "logout")) {
 
+    logWrite("user", "info", "User has logged out [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
     structClear(SESSION);
     onSessionStart();
 
@@ -31,6 +33,8 @@ if (structKeyExists(url, "switch")) {
 
         if (qTenant.recordCount) {
 
+            comingFromCustomerID = session.customer_id;
+
             session.customer_id = qTenant.intCustomerID;
 
             // Set plans and modules as well as the custom settings into a session
@@ -43,7 +47,7 @@ if (structKeyExists(url, "switch")) {
                 session.filledData = false;
             }
 
-            logWrite("Switch tenant", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully changed tenant!", false);
+            logWrite("user", "info", "Tenant switched [CustomerID: #comingFromCustomerID#, UserID: #session.user_id#, to tenantID: #session.customer_id#]");
             location url="#application.mainURL#/dashboard" addtoken="no";
 
         } else {
@@ -108,6 +112,9 @@ if (structKeyExists(url, "noti_del")) {
     location url="#application.mainURL#/notifications?page=#url.page#" addtoken="no";
 
 }
+
+logWrite("user", "warning", "Access attempt to handler/global.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+location url="#application.mainURL#/dashboard" addtoken="false";
 
 
 </cfscript>

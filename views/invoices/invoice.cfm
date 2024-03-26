@@ -21,6 +21,11 @@
         location url="#application.mainURL#/account-settings/invoices" addtoken="false";
     }
 
+    // The user has canceled the Payrexx payment, make log
+    if (structKeyExists(url, "psp_response") and url.psp_response eq "cancel") {
+        logWrite("user", "info", "Pay invoice: The user has canceled the Payrexx payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #thisInvoiceID#]");
+    }
+
     // Get customer data
     getCustomerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
 

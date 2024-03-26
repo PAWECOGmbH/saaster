@@ -72,9 +72,15 @@ component displayname="globalFunctions" output="false" {
                 "
             )
 
+            // If we find an entry, the .cfm file may not be called directly
             if (local.qCheckSEF.recordCount) {
                 local.returnStruct['thisPath'] = local.thisPath;
                 local.returnStruct['noaccess'] = true;
+            }
+
+            // Check whether someone is trying to call a file in the sysadmin folder without a sysadmin session
+            if (find("/sysadmin/", local.thisPath) and (!structKeyExists(session, "sysadmin") or !session.sysadmin)) {
+                local.returnStruct['onlySysAdmin'] = true;
             }
 
 

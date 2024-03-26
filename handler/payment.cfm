@@ -64,13 +64,13 @@ if (structKeyExists(url, "del")) {
 
 
             getAlert('msgPaymentMethodDeleted', 'success');
-            logWrite("Delete payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Sucessfully delete the payment method!", false);
+            logWrite("user", "info", "Payment method deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
         } else {
 
             getAlert('msgNeedOnePaymentType', 'info');
-            logWrite("Delete payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Can't delete the only payment method!", false);
+            logWrite("user", "warning", "Payment method could not be deleted, one is needed [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
         }
@@ -106,15 +106,15 @@ if (structKeyExists(url, "add")) {
                 // If there is no data from the webhook, send the customer back and try again
                 if (getWebhook.recordCount) {
                     getAlert('msgPaymentMethodAdded', 'success');
-                    logWrite("Add payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Sucessfully added payment method!", false);
+                    logWrite("user", "info", "Payment method added [CustomerID: #session.customer_id#, UserID: #session.user_id#, TransactionID: #getWebhook.intTransactionID#, paymentType: #getWebhook.strPaymentBrand#]");
                 } else {
                     getAlert('alertErrorOccured', 'warning');
-                    logWrite("Add payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false);
+                    logWrite("payrexx", "error", "Payment method could not be added [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: No entry in webhook]");
                 }
 
             } else {
                 getAlert('alertErrorOccured', 'warning');
-                logWrite("Add payment method", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false);
+                logWrite("payrexx", "error", "Payment method could not be added [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #url.psp#]");
             }
 
             location url="#application.mainURL#/account-settings/payment" addtoken=false;
@@ -127,7 +127,7 @@ if (structKeyExists(url, "add")) {
             paymentStruct['currency'] = objCurrency.getCurrency().iso;
             paymentStruct['successRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=success";
             paymentStruct['failedRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=failed";
-            paymentStruct['cancelRedirectUrl'] = "#application.mainURL#/account-settings/payment";
+            paymentStruct['cancelRedirectUrl'] = "#application.mainURL#/account-settings/payment?cancel";
             paymentStruct['lookAndFeelProfile'] = variables.payrexxDesignID; // config.cfm
             paymentStruct['purpose'] = "Validation test";
             paymentStruct['amount'] = 0;
@@ -142,35 +142,25 @@ if (structKeyExists(url, "add")) {
             // Call Payrexx and create a gateway
             payrexxRespond = objPayrexx.callPayrexx(paymentStruct, "POST", "Gateway");
 
-            if (isStruct(payrexxRespond) and payrexxRespond.status eq "success") {
+            if (payrexxRespond.status eq "success") {
 
                 gatewayData = payrexxRespond.data[1];
 
-                try {
-
-                    // Redirect to the payment terminal with the choosen language
-                    if (len(trim(variables.payrexxAPIinstance))) {
-                        payrexxURL = "https://" & variables.payrexxAPIinstance & ".payrexx.com/" & session.lng & "/?payment=" & gatewayData.hash;
-                    } else {
-                        payrexxURL = gatewayData.link;
-                    }
-
-                    location url=payrexxURL addtoken="false";
-
-
-                } catch (any e) {
-
-                    getAlert(e.message);
-                    logWrite("Add payment method", 4, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, #e.message#", true);
-                    location url="#application.mainURL#/account-settings/payment" addtoken="false";
-
+                // Build link to the payment terminal with the choosen language
+                if (len(trim(variables.payrexxAPIinstance))) {
+                    payrexxURL = "https://" & variables.payrexxAPIinstance & ".payrexx.com/" & session.lng & "/?payment=" & gatewayData.hash;
+                } else {
+                    payrexxURL = gatewayData.link;
                 }
+
+                logWrite("user", "info", "Sent the user to Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, GatewayID: #gatewayData.id#]");
+                location url=payrexxURL addtoken="false";
 
 
             } else {
 
                 getAlert(payrexxRespond.message, 'danger');
-                logWrite("Add payment method", 3, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error adding payment method!", false);
+                logWrite("payrexx", "error", "Could not call Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #payrexxRespond.message#]", true);
                 location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
             }
@@ -207,7 +197,7 @@ if (structKeyExists(url, "default")) {
             "
         )
 
-        logWrite("Update payment method", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Updated payment method!", false);
+        logWrite("user", "info", "User has changed the default payment method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
         location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
     }
@@ -253,13 +243,14 @@ if (structKeyExists(url, "pay")) {
                     // Set plans and modules as well as the custom settings into a session
                     application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
-                    logWrite("Pay invoice", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Successfully paid invoice: #url.pay#", false);
                     getAlert('msgInvoicePaid', 'success');
+                    logWrite("user", "info", "Invoice has been paid [CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #url.pay#, payment type: #getWebhook.strPaymentBrand#]");
+
 
                 } else {
 
-                    logWrite("Pay invoice", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Error on paying invoice: #url.pay#", false);
                     getAlert('alertErrorOccured', 'warning');
+                    logWrite("payrexx", "error", "Pay invoice: Payment method could not be charged [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: No entry in webhook]");
 
                 }
 
@@ -270,12 +261,13 @@ if (structKeyExists(url, "pay")) {
                 incoiceData = objInvoices.getInvoiceData(url.pay);
 
                 successLink = "#application.mainURL#/payment-settings?pay=#url.pay#&other&psp_response=success";
-                cancelLink = "#application.mainURL#/account-settings/invoice/#url.pay#?psp_response=failed";
+                cancelLink = "#application.mainURL#/account-settings/invoice/#url.pay#?psp_response=cancel";
                 failLink = "#application.mainURL#/account-settings/invoice/#url.pay#?psp_response=failed";
                 purpose = getTrans('titInvoiceNumber') & " " & incoiceData.number;
                 amountToPay = incoiceData.amountOpen;
                 currency = incoiceData.currency;
 
+                logWrite("user", "info", "Pay invoice: Sent the user to Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, purpose: #purpose#, amountToPay: #currency# #amountToPay#]");
                 include template="/includes/payment.cfm";
 
             }
@@ -288,23 +280,25 @@ if (structKeyExists(url, "pay")) {
             anyLanguage = application.objLanguage.getAnyLanguage(session.lng).iso;
 
             if (!getWebhook.recordCount) {
+                logWrite("payrexx", "error", "Pay invoice: Invoice could not be paid [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: No entry in webhook]");
                 location url="#application.mainURL#/account-settings/payment" addtoken="false";
             }
 
             // Charge the amount now (Payrexx)
             chargeNow = new com.invoices().payInvoice(url.pay);
+
             if (chargeNow.success) {
 
                 // Set plans and modules as well as the custom settings into a session
                 application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
 
                 getAlert('msgInvoicePaid');
-                logWrite("Pay invoice", 1, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Successfully paid invoice: #url.pay#", false);
+                logWrite("user", "info", "Invoice has been paid via Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #chargeNow.invoiceID#]");
 
             } else {
 
                 getAlert('txtChargingNotPossible', 'warning');
-                logWrite("Pay invoice", 2, "File: #callStackGet("string", 0 , 1)#, Customer: #session.customer_id#, Charging is not possible for invoice: #url.pay#", false);
+                logWrite("payrexx", "error", "Pay invoice: Invoice could not be paid [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #chargeNow.message#]");
 
             }
 
@@ -317,7 +311,7 @@ if (structKeyExists(url, "pay")) {
 }
 
 
-
+logWrite("user", "warning", "Access attempt to handler/payment.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>

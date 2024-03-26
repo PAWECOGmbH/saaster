@@ -122,8 +122,6 @@ component extends="taffy.core.api" {
             return noData().withStatus(401);
         }
 
-        logWrite("API", 1, "File: #callStackGet("string", 0 , 1)#, API call on #arguments.cfc# resource!", false);
-
         return true;
     }
 

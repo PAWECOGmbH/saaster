@@ -579,6 +579,13 @@ component displayname="book" output="false" {
 
                         local.bookingID = newID.generated_key;
 
+                        // Make log
+                        if (local.moduleID gt 0) {
+                            application.objLog.logWrite("user", "info", "Customer booked a module [CustomerID: #arguments.customerID#, ModuleID: #local.moduleID#, Recurring: #local.recurring#, Status: #local.status#]");
+                        } else {
+                            application.objLog.logWrite("user", "info", "Customer booked a plan [CustomerID: #arguments.customerID#, PlanID: #local.planID#, Recurring: #local.recurring#, Status: #local.status#]");
+                        }
+
                         // Update scheduletasks
                         if (local.moduleID gt 0) {
                             local.objModule = new com.modules();
@@ -738,7 +745,15 @@ component displayname="book" output="false" {
                         local.objInvoice.deleteInvoice(local.invoiceID);
                         local.argsReturnValue['message'] = local.chargeNow.message;
                         local.argsReturnValue['success'] = false;
+                        application.objLog.logWrite("payrexx", "error", "Could not charge amount [CustomerID: #arguments.customerID#, InvoiceID: #local.invoiceID#, Error: #local.chargeNow.message#]");
                         return local.argsReturnValue;
+                    }
+
+                    // Make log
+                    if (local.moduleID gt 0) {
+                        application.objLog.logWrite("user", "info", "The booked module has been paid [CustomerID: #arguments.customerID#, ModuleID: #local.moduleID#, InvoiceID: #local.invoiceID#]");
+                    } else {
+                        application.objLog.logWrite("user", "info", "The booked plan has been paid [CustomerID: #arguments.customerID#, PlanID: #local.planID#, InvoiceID: #local.invoiceID#]");
                     }
 
                     // Send invoice by email
@@ -746,7 +761,15 @@ component displayname="book" output="false" {
                     if (!local.sendInvoice.success) {
                         local.argsReturnValue['message'] = local.sendInvoice.message;
                         local.argsReturnValue['success'] = false;
+                        application.objLog.logWrite("system", "error", "Could not send the invoice [CustomerID: #arguments.customerID#, InvoiceID: #local.invoiceID#, Error: #local.sendInvoice.message#]");
                         return local.argsReturnValue;
+                    }
+
+                    // Make log
+                    if (local.moduleID gt 0) {
+                        application.objLog.logWrite("user", "info", "Receipt for booked module sent by e-mail to customer [CustomerID: #arguments.customerID#, ModuleID: #local.moduleID#, InvoiceID: #local.invoiceID#]");
+                    } else {
+                        application.objLog.logWrite("user", "info", "Receipt for booked plan sent by e-mail to customer [CustomerID: #arguments.customerID#, PlanID: #local.planID#, InvoiceID: #local.invoiceID#]");
                     }
 
                 }
@@ -864,6 +887,13 @@ component displayname="book" output="false" {
                     local.objModule.distributeScheduler(moduleID=a.moduleID, customerID=local.customerID, status=local.status);
                 }
             }
+        }
+
+        // Make log
+        if (local.moduleID gt 0) {
+            application.objLog.logWrite("user", "info", "A module has been updated [CustomerID: #local.customerID#, ModuleID: #local.moduleID#, Recurring: #local.recurring#, Status: #local.status#]");
+        } else {
+            application.objLog.logWrite("user", "info", "A plan has been updated [CustomerID: #local.customerID#, PlanID: #local.planID#, Recurring: #local.recurring#, Status: #local.status#]");
         }
 
         return local.qBooking.intBookingID;
