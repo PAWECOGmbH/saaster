@@ -45,6 +45,9 @@ variables.requesttimeout = 60;
 variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
 variables.documentsFileTypes = ["pdf"];
 
+// List of paths or files to be excluded for session handling
+variables.SessionExceptions = [""];
+
 
 // ####################################
 //  API SETTINGS
