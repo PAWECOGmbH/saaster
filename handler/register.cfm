@@ -602,7 +602,7 @@ if (structKeyExists(form, 'mfa_btn')) {
             logWrite("user", "warning", "Login via MFA: The user tried 3 times without success. [UUID: #url.uuid#]");
         } else {
             getAlert(checkMfa.message, 'warning');
-            param name="session.mfaCheckCount" default="0";
+            param name="session.mfaCheckCount" default="1";
             logWrite("user", "warning", "Login via MFA: #session.mfaCheckCount#. try to authenticate with the code [UUID: #url.uuid#]");
             session.mfaCheckCount++;
         }
