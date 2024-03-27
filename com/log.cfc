@@ -106,7 +106,8 @@ component displayname="log" {
 
         // Filter date if a date filter has been specified
         if (len(trim(arguments.dateFilter))) {
-            local.pathSegments = listToArray(arguments.path, "/");
+            local.path = replace(arguments.path, "\", "/", "all");
+            local.pathSegments = listToArray(local.path, "/");
             local.dateSegment = local.pathSegments[arrayLen(local.pathSegments)-2] & "-" & local.pathSegments[arrayLen(local.pathSegments)-1];
             local.dateMatch = (local.dateSegment == arguments.dateFilter);
         } else {
