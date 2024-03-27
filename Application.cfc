@@ -247,7 +247,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             // ### Login/session handling ###################################
 
             // Append the array from config.cfm
-            local.exceptions = ["/frontend/", "/setup/", "/scheduletasks/", "/registration", "/register", "/login", "/password"];
+            local.exceptions = ["/frontend/", "/setup/", "/scheduletasks/", "/registration", "/register", "/login", "/password", "error.cfm"];
             loop array=variables.SessionExceptions index="local.path" {
                 if (len(trim(local.path))) {
                     arrayAppend(local.exceptions, local.path);
@@ -281,6 +281,11 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             if (!local.isException and !structKeyExists(session, "user_id")) {
                 getAlert('alertSessionExpired', 'warning');
                 location url="#application.mainURL#/login" addtoken="false";
+            }
+
+            // If someone is trying to call a .cfm file directly
+            if (thiscontent.noaccess) {
+                location url="#application.mainURL#" addtoken="false";
             }
 
         }
