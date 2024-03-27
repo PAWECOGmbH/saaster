@@ -55,7 +55,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
-        logWrite("Edit profile", 2, "File: #callStackGet("string", 0 , 1)#, User: #thisUserID#, Mail is invalid!", false);
+        logWrite("user", "warning", "User edit: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
 
@@ -79,7 +79,7 @@ if (structKeyExists(form, "edit_profile_btn")) {
     if (qCheckDouble.recordCount) {
         getAlert('alertEmailAlreadyUsed', 'warning');
         structDelete(session, "email");
-        logWrite("Edit profile", 2, "File: #callStackGet("string", 0 , 1)#, User: #thisUserID#, Mail is already in use!", false);
+        logWrite("user", "warning", "User edit: E-Mail is already in use. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/#thisReferer#" addtoken="false";
     }
 
@@ -95,13 +95,13 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
     if (objUserEdit.success) {
         getAlert('msgChangesSaved', 'success');
-        logWrite("Edit profile", 1, "File: #callStackGet("string", 0 , 1)#, User: #thisUserID#, Successfully saved profile changes!", false);
+        logWrite("user", "info", "User changes saved. [CustomerID: #session.user_id#, UserID: #session.user_id#]");
         if (thisReferer eq "my-profile"){
             session.user_name = form.first_name & " " & form.last_name;
         }
     } else {
         getAlert(objUserEdit.message, 'danger');
-        logWrite("Edit profile", 3, "File: #callStackGet("string", 0 , 1)#, User: #thisUserID#, #objUserEdit.message#", false);
+        logWrite("system", "error", "User could not be saved. [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #objUserEdit.message#]");
     }
 
     if (thisReferer eq "my-profile") {
@@ -124,7 +124,7 @@ if (structKeyExists(form, "user_new_btn")) {
     param name="form.phone" default="";
     param name="form.mobile" default="";
     param name="form.admin" default="0";
-    param name="form.superadmin" default="0";    
+    param name="form.superadmin" default="0";
     param name="form.sysadmin" default="0";
     param name="form.active" default="0";
     param name="form.language" default=session.lng;
@@ -162,7 +162,7 @@ if (structKeyExists(form, "user_new_btn")) {
 
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
-        logWrite("New profile", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Mail is invalid!", false);
+        logWrite("user", "warning", "User new: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
@@ -181,20 +181,17 @@ if (structKeyExists(form, "user_new_btn")) {
     )
     if (qCheckEmail.recordCount) {
         getAlert('alertEmailAlreadyUsed', 'warning');
-        logWrite("New profile", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Mail is already in use!", false);
+        logWrite("user", "warning", "User new: E-Mail is already in use. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
     // Save the user using a function
     objUserInsert = application.objUser.insertUser(form, session.customer_id);
 
-
     if (objUserInsert.success) {
-
 
         // Send the invitation link using a function
         objInvitation = application.objUser.sendInvitation(objUserInsert.newUserID, session.user_id);
-
 
         // Clear sessions
         structDelete(session, "salutation");
@@ -205,14 +202,12 @@ if (structKeyExists(form, "user_new_btn")) {
         structDelete(session, "mobile");
 
         getAlert('alertNewUserCreated', 'success');
-
-        logWrite("New profile", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully created profile with ID: #objUserInsert.newUserID#!", false);
+        logWrite("user", "info", "User added with ID #objUserInsert.newUserID# [CustomerID: #session.user_id#, UserID: #session.user_id#]");
 
     } else {
 
-        logWrite("New profile", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, #objUserInsert.message#", false);
-
         getAlert(objUserInsert.message, 'danger');
+        logWrite("system", "error", "User could not be saved [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #objUserInsert.message#]");
 
     }
 
@@ -242,12 +237,12 @@ if (structKeyExists(form, "photo_upload_btn")) {
         }
         catch("java.io.IOException" e){
             getAlert( "msgFileUploadError", 'danger');
-            logWrite("Profile photo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Photo upload failed!", false);
+            logWrite("system", "error", "Photo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: msgFileUploadError]");
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
         catch(any e){
             getAlert( e.message, 'danger');
-            logWrite("Profile photo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, #e.message#", false);
+            logWrite("system", "error", "Photo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #e.message#]");
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
@@ -268,21 +263,21 @@ if (structKeyExists(form, "photo_upload_btn")) {
                     WHERE intUserID = :userID
                 "
             )
-            
+
             getAlert('msgFileUploadedSuccessfully', 'success');
-            logWrite("Profile photo upload", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully uploaded photo!", false);
+            logWrite("user", "info", "Photo uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #fileUpload.fileName#]");
 
         } else {
 
-            logWrite("Profile photo upload", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, #fileUpload.message#", false);
             getAlert(fileUpload.message, 'danger');
+            logWrite("system", "error", "Photo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #fileUpload.message#]");
 
         }
 
     } else {
 
-        logWrite("Profile photo upload", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, No file to upload!", false);
         getAlert('msgPleaseChooseFile', 'warning');
+        logWrite("user", "warning", "User did not choose a file for photo upload [CustomerID: #session.user_id#, UserID: #session.user_id#]");
 
     }
 
@@ -323,7 +318,7 @@ if (structKeyExists(url, "del_photo")) {
             "
         )
 
-        logWrite("Profile delete photo", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully deleted photo!", false);
+        logWrite("user", "info", "Photo deleted [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #qPhoto.strPhoto#]");
 
         location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
 
@@ -341,12 +336,12 @@ if (structKeyExists(form, "change_pw_btn")) {
     if (len(trim(form.password)) and len(trim(form.password2))) {
         if (not trim(form.password) eq trim(form.password2)) {
             getAlert('alertPasswordsNotSame', 'warning');
-            logWrite("Profile change password", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Passwords are not the same!", false);
+            logWrite("user", "warning", "User tried to change passwords. Passwords are not the same. [CustomerID: #session.user_id#, UserID: #session.user_id#]");
             location url="#application.mainURL#/account-settings/reset-password" addtoken="false";
         }
     } else {
         getAlert('alertChoosePassword', 'warning');
-        logWrite("Profile change password", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Required passwords not provided!", false);
+        logWrite("user", "warning", "User tried to change passwords. Password field empty. [CustomerID: #session.user_id#, UserID: #session.user_id#]");
         location url="#application.mainURL#/account-settings/reset-password" addtoken="false";
     }
 
@@ -369,11 +364,10 @@ if (structKeyExists(form, "change_pw_btn")) {
     changePW = application.objUser.changePassword(form.password, newUUID);
     if (changePW.success) {
         getAlert('alertPasswordResetSuccessfully', 'success');
-        logWrite("Profile change password", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Changed password for user!", false);
+        logWrite("user", "info", "User changed passwords. [CustomerID: #session.user_id#, UserID: #session.user_id#]");
     } else {
         getAlert(changePW.message, 'danger');
-        logWrite("Profile change password", 3, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, #changePW.message#", false);
-
+        logWrite("system", "error", "Could not change password. [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #changePW.message#]");
     }
 
     location url="#application.mainURL#/account-settings/reset-password" addtoken="false";
@@ -388,6 +382,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!isNumeric(url.delete) or url.delete lte 0) {
         getAlert('No user found!', 'danger');
+        logWrite("system", "warning", "Delete user: url.delete is not numeric or 0. [CustomerID: #session.user_id#, UserID: #session.user_id#, url.delete: #url.delete#]");
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
@@ -396,6 +391,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!isQuery(getUserData) or !getUserData.recordCount) {
         getAlert('No user found!', 'danger');
+        logWrite("system", "warning", "Delete user: No user found. [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to delete: #url.delete#]");
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
@@ -404,6 +400,7 @@ if (structKeyExists(url, "delete")) {
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to delete this user!', 'danger');
+        logWrite("user", "warning", "Tried to delete a user from another tenant [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to delete: #url.delete#]");
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
@@ -412,6 +409,11 @@ if (structKeyExists(url, "delete")) {
 
         photoPath = expandPath('../userdata/images/users/#getUserData.strPhoto#');
         objUserFileDelete = application.objGlobal.deleteFile(photoPath);
+        if (objUserFileDelete.success) {
+            logWrite("system", "info", "Users Photo has been deleted [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to delete: #url.delete#, Filename: #getUserData.strPhoto#]");
+        } else {
+            logWrite("system", "warning", "Users Photo could not be deleted [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to delete: #url.delete#, Filename: #getUserData.strPhoto#]");
+        }
 
     }
 
@@ -429,10 +431,10 @@ if (structKeyExists(url, "delete")) {
 
     if (getAnswer.recordCount) {
         getAlert('msgUserDeleted', 'success');
-        logWrite("Delete profile", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully deleted profile with ID: #getUserData.intUserID#!", false);
+        logWrite("user", "info", "User has been deleted. [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID deleted: #url.delete#]");
     } else {
         getAlert('No user found!', 'danger');
-        logWrite("Delete profile", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, No matching user with ID: #getUserData.intUserID# found!", false);
+        logWrite("system", "warning", "No matching user in database [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to delete: #url.delete#]");
     }
 
     location url="#application.mainURL#/account-settings/users" addtoken="false";
@@ -448,6 +450,7 @@ if (structKeyExists(url, "invit")) {
 
     if (!isQuery(getUserData) or !getUserData.recordCount) {
         getAlert('No user found!', 'danger');
+        logWrite("system", "warning", "Send invitation link: No user found. [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to send invitation: #url.invit#]");
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
@@ -455,6 +458,7 @@ if (structKeyExists(url, "invit")) {
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getUserData.intCustomerID);
     if (!checkTenantRange) {
         getAlert('You are not allowed to edit this user!', 'danger');
+        logWrite("user", "warning", "Tried to send invitation link to a user from another tenant [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to send invitation: #url.invit#]");
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
@@ -462,17 +466,21 @@ if (structKeyExists(url, "invit")) {
         sendInvit = application.objUser.sendInvitation(url.invit, session.user_id);
         if (sendInvit.success) {
             getAlert(sendInvit.message, 'success');
-            logWrite("Send invitation link", 1, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Successfully sendet invitation link to user: #url.invit#!", false);
+            logWrite("user", "info", "Invitation has been sent [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to send invitation: #url.invit#]");
         } else {
             getAlert(sendInvit.message, 'danger');
-            logWrite("Send invitation link", 2, "File: #callStackGet("string", 0 , 1)#, User: #session.user_id#, Failed to send invitation link to user: #url.invit#!", false);
+            logWrite("system", "error", "Invitation could not be sent [CustomerID: #session.user_id#, UserID: #session.user_id#, UserID to send invitation: #url.invit#, Error: #sendInvit.message#]");
         }
     } else {
         getAlert(sendInvit.message, 'danger');
+        logWrite("user", "warning", "Send invitation: url.invit is not numeric or is 0 [CustomerID: #session.user_id#, UserID: #session.user_id#, url.invit: #url.invit#]");
     }
 
     location url="#application.mainURL#/account-settings/users" addtoken="false";
 
 }
+
+logWrite("user", "warning", "Access attempt to handler/user.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>

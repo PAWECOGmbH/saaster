@@ -4,6 +4,11 @@
     objPayrexx = new com.payrexx();
     getWebhook = objPayrexx.getWebhook(customerID=session.customer_id, status='authorized', default='', includingFailed='yes');
 
+    // The user has canceled the Payrexx payment, make log]
+    if (structKeyExists(url, "cancel")) {
+        logWrite("user", "info", "The user has canceled the Payrexx payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+    }
+
 </cfscript>
 
 

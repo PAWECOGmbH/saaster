@@ -126,7 +126,7 @@ component displayname="payrexx" output="false" {
             local.respond = httpRes.errordetail;
         }
 
-        return local.respond;
+        return deserializeJSON(httpRes.filecontent);
 
     }
 

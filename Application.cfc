@@ -201,19 +201,6 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             structDelete(session, "redirect");
         }
 
-        // If there is no session, send to login
-        if (!findNoCase("frontend", thiscontent.thisPath)
-            and !findNoCase("register", thiscontent.thisPath)
-            and !findNoCase("setup", cgi.script_name)
-            and !findNoCase("scheduletasks", cgi.script_name)
-            and !structKeyExists(url, "u")
-            and !structKeyExists(url, "p")) {
-            if (!structKeyExists(session, "user_id")) {
-                getAlert('alertSessionExpired', 'warning');
-                location url="#application.mainURL#/login" addtoken="false";
-            }
-        }
-
 
         // Check whether the user has access to corresponding sections
         if (structKeyExists(session, "customer_id")) {
@@ -255,11 +242,56 @@ component displayname="Application" output="false" extends="myapp.myApplication"
                 location url="#application.mainURL#/dashboard" addtoken="false";
             }
 
+        } else {
+
+            // ### Login/session handling ###################################
+
+            // Append the array from config.cfm
+            local.exceptions = ["/frontend/", "/setup/", "/scheduletasks/", "/registration", "/register", "/login", "/password", "error.cfm"];
+            loop array=variables.SessionExceptions index="local.path" {
+                if (len(trim(local.path))) {
+                    arrayAppend(local.exceptions, local.path);
+                }
+            }
+
+            // Default the exception to false
+            local.isException = false;
+
+            // Get the current path
+            local.thisPath;
+            if (len(trim(cgi.script_name))) {
+                local.thisPath = cgi.script_name;
+            }
+            if (len(trim(cgi.path_info))) {
+                local.thisPath = cgi.path_info;
+            }
+            if (local.thisPath eq "/index.cfm") {
+                local.thisPath = "";
+            }
+
+            // Check whether the current path is included in the list of exceptions
+            for (local.exceptionPath in local.exceptions) {
+                if (findNoCase(local.exceptionPath, local.thisPath) or !len(trim(local.thisPath))) {
+                    local.isException = true;
+                    break;
+                }
+            }
+
+            // If it is not an exception and no session exists, redirect to the login page
+            if (!local.isException and !structKeyExists(session, "user_id")) {
+                getAlert('alertSessionExpired', 'warning');
+                location url="#application.mainURL#/login" addtoken="false";
+            }
+
+            // If someone is trying to call a .cfm file directly
+            if (thiscontent.noaccess) {
+                location url="#application.mainURL#" addtoken="false";
+            }
+
         }
 
         // Custom code
         ownRequest();
-
 
         include template="\#ARGUMENTS.TargetPage#";
         return true;

@@ -37,7 +37,7 @@ if (structKeyExists(form, 'register_btn')) {
 
         if (qCheckDouble.recordCount) {
             getAlert('alertHasAccountAlready', 'warning');
-            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Mail is already registered!", false);
+            logWrite("user", "warning", "Register new user step 1: E-Mail already registered [E-Mail: #form.email#]");
             location url="#application.mainURL#/login" addtoken="false";
         }
 
@@ -54,7 +54,7 @@ if (structKeyExists(form, 'register_btn')) {
         // Save the customer into the temporary table optin
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
-        if (isNumeric(objUserRegister1) and objUserRegister1 gt 0) {
+        if (objUserRegister1.success) {
 
             mailTitle = "#getTrans('subjectConfirmEmail')#";
             mailType = "html";
@@ -83,13 +83,13 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "email");
 
             getAlert('alertOptinSent', 'info');
-            logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Registration was successful!", false);
+            logWrite("user", "info", "Register new user step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
             location url="#application.mainURL#/login" addtoken="false";
 
         } else {
 
-            getAlert('alertErrorOccured', 'danger');
-            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Registration failed!", false);
+            getAlert(objUserRegister1.message, 'danger');
+            logWrite("system", "error", "Register new user step 1: Registration failed [E-Mail: #form.email#, Error: #objUserRegister1.message#]");
             location url="#application.mainURL#/register" addtoken="false";
 
         }
@@ -97,13 +97,12 @@ if (structKeyExists(form, 'register_btn')) {
     } else {
 
         getAlert('alertEnterEmail', 'warning');
-        logWrite("Register", 3, "File: #callStackGet("string", 0 , 1)#, Registration failed!", false);
+        logWrite("user", "warning", "Register new user step 1: Could not register, wrong email format. [E-Mail: #form.email#]");
         location url="#application.mainURL#/register" addtoken="false";
 
     }
 
 }
-
 
 // Coming from double opt-in mail (also for new users added by the admin)
 if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
@@ -127,6 +126,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
         session.uuid = qCheckOptin.strUUID;
         session.lng = qCheckOptin.strLanguage;
         getAlert('alertChoosePassword', 'info');
+        logWrite("user", "info", "Register new user step 2: A user has confirmed the opt-in e-mail. [UUID: #url.u#]");
 
     } else {
 
@@ -150,22 +150,21 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
             session.uuid = qCheckUser.strUUID;
             session.lng = qCheckUser.strLanguage;
             getAlert('alertChoosePassword', 'info');
+            logWrite("user", "info", "Register new user step 2: A user invited by the administrator has confirmed the opt-in email. [UUID: #url.u#]");
 
         } else {
 
             session.step = 1;
-            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
             getAlert('alertNotValidAnymore', 'warning');
+            logWrite("user", "warning", "Register new user step 2: Opt-in e-mail not valid anymore. [UUID: #url.u#]");
 
         }
 
     }
 
-    logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Opt in successfully validated!", false);
     location url="#application.mainURL#/register" addtoken="false";
 
 }
-
 
 // Register new user step 3 (create account)
 if (structKeyExists(form, 'create_account')) {
@@ -178,13 +177,13 @@ if (structKeyExists(form, 'create_account')) {
         if (not trim(form.password) eq trim(form.password2)) {
             session.step = 2;
             getAlert('alertPasswordsNotSame', 'warning');
-            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Passwords don't match!", false);
+            logWrite("user", "warning", "Register new user step 3: The passwords don't match");
             location url="#application.mainURL#/register" addtoken="false";
         }
     } else {
         session.step = 2;
         getAlert('alertChoosePassword', 'warning');
-        logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Choosen passwords match and are valid!", false);
+        logWrite("user", "warning", "Register new user step 3: The password fields are empty");
         location url="#application.mainURL#/register" addtoken="false";
     }
 
@@ -215,7 +214,7 @@ if (structKeyExists(form, 'create_account')) {
             StructInsert(customerStruct, "salt", hashedStruct.thisSalt);
 
             // Save the customer into the db
-            insertCustomer = new com.register().insertCustomer(customerStruct);
+            insertCustomer = objRegister.insertCustomer(customerStruct);
 
             if (insertCustomer.success) {
 
@@ -226,14 +225,14 @@ if (structKeyExists(form, 'create_account')) {
                 structDelete(session, "uuid");
 
                 getAlert('alertAccountCreatedLogin', 'success');
-                logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Data of customer successfully inserted!", false);
+                logWrite("user", "info", "Register new user step 3: Account created [E-Mail: #qCheckOptin.strEmail#]");
                 location url="#application.mainURL#/login" addtoken="false";
 
             } else {
 
                 session.step = 1;
                 getAlert(insertCustomer.message, 'danger');
-                logWrite("Register", 3, "File: #callStackGet("string", 0 , 1)#, #insertCustomer.message#", false);
+                logWrite("system", "error", "Register new user step 3: Could not create account [E-Mail: #qCheckOptin.strEmail#, Error: #insertCustomer.message#]");
                 location url="#application.mainURL#/register" addtoken="false";
 
             }
@@ -263,14 +262,14 @@ if (structKeyExists(form, 'create_account')) {
                 if (setNewPassword.success) {
 
                     getAlert('alertAccountCreatedLogin', 'success');
-                    logWrite("Register", 1, "File: #callStackGet("string", 0 , 1)#, Password got successfully set!", false);
+                    logWrite("user", "info", "Register new user step 3: A user invited by the administrator has set the password. [UUID: #qCheckUser.strUUID#]");
                     location url="#application.mainURL#/login" addtoken="false";
 
                 } else {
 
                     session.step = 1;
                     getAlert('alertNotValidAnymore', 'warning');
-                    logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
+                    logWrite("user", "warning", "Register new user step 3: A user invited by the administrator couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: #qCheckUser.strUUID#]");
                     location url="#application.mainURL#/register" addtoken="false";
 
                 }
@@ -280,7 +279,7 @@ if (structKeyExists(form, 'create_account')) {
 
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
-            logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
+            logWrite("user", "warning", "Register new user step 3: A user couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: #session.uuid#]");
             location url="#application.mainURL#/register" addtoken="false";
 
         }
@@ -289,7 +288,7 @@ if (structKeyExists(form, 'create_account')) {
 
         session.step = 1;
         getAlert('alertNotValidAnymore', 'warning');
-        logWrite("Register", 2, "File: #callStackGet("string", 0 , 1)#, Optin not valid anymore!", false);
+        logWrite("user", "warning", "Register new user step 3: A user couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: none]");
         location url="#application.mainURL#/register" addtoken="false";
 
     }
@@ -343,6 +342,7 @@ if (structKeyExists(form, 'login_btn')) {
                 structDelete(session, 'user_id');
                 session.mfaCheckCount = 0;
                 objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
+                logWrite("user", "info", "User got MFA by e-mail after login. [E-Mail: #session.user_email#]");
                 location url="#objSendMfa.redirect#" addtoken="false";
             }
 
@@ -355,6 +355,7 @@ if (structKeyExists(form, 'login_btn')) {
             }
 
             structDelete(session, "alert");
+            logWrite("user", "info", "Login successfull [CustomerID: #session.customer_id#, UserID: #session.user_id#, E-Mail: #session.user_email#]");
             location url="#objUserLogin.redirect#" addtoken="false";
 
 
@@ -364,11 +365,11 @@ if (structKeyExists(form, 'login_btn')) {
             // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
                 getAlert('msgAccountDisabledByAdmin', 'warning');
-                logWrite("Login", 2, "File: #callStackGet("string", 0 , 1)#, User: #objUserLogin.user_id#, User tried to log in but account is not active!", false);
+                logWrite("user", "warning", "User tried to login but account is not active [E-mail: #form.email#]");
                 location url="#application.mainURL#/login" addtoken="false";
             } else {
                 getAlert('alertWrongLogin', 'warning');
-                logWrite("Login", 2, "File: #callStackGet("string", 0 , 1)#, Unsuccessful login try!", false);
+                logWrite("user", "warning", "Unsuccessful login try [E-mail: #form.email#]");
                 location url="#application.mainURL#/login" addtoken="false";
             }
 
@@ -379,15 +380,12 @@ if (structKeyExists(form, 'login_btn')) {
     } else {
 
         getAlert('alertErrorOccured', 'danger');
-        logWrite("Login", 3, "File: #callStackGet("string", 0 , 1)#, Error on login try!", false);
+        logWrite("system", "error", "Error on login try!", true);
         location url="#application.mainURL#/login" addtoken="false";
 
     }
 
 }
-
-
-
 
 // Reset the password step 1
 if (structKeyExists(form, "reset_pw_btn_1")) {
@@ -447,14 +445,18 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             include template="/includes/mail_design.cfm";
         }
 
+        logWrite("user", "info", "Reset password: E-mail sent in order to reset the password. [E-Mail: #form.email#]");
+
+    } else {
+
+        logWrite("user", "warning", "Reset password: No account found with this e-mail address. [E-Mail: #form.email#]");
+
     }
 
     getAlert('alertIfAccountFoundEmail', 'info');
-    logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUser.intUserID#, Password reset started and mail sent!", false);
     location url="#application.mainURL#/login" addtoken="false";
 
 }
-
 
 // Confirm the password reset
 if (structKeyExists(url, "p")) {
@@ -475,7 +477,7 @@ if (structKeyExists(url, "p")) {
     if (qCheckUUID.recordCount) {
 
         getAlert('alertChoosePassword', 'info');
-        logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUUID.intUserID#, Requested link for password reset is valid!", false);
+        logWrite("user", "info", "The user has clicked the link to reset the password. The link was valid. [UserID: #qCheckUUID.intUserID#, UUID: #url.p#]");
         session.step = 2;
         session.uuid = url.p;
         location url="#application.mainURL#/password" addtoken="false";
@@ -483,13 +485,12 @@ if (structKeyExists(url, "p")) {
     } else {
 
         getAlert('alertNotValidAnymore', 'warning');
-        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User: #qCheckUUID.intUserID#, Requested link for password reset is not valid!", false);
+        logWrite("user", "warning", "The user has clicked the link to reset the password. The link was not valid anymore. [UserID: #qCheckUUID.intUserID#, UUID: #url.p#]");
         location url="#application.mainURL#/password" addtoken="false";
 
     }
 
 }
-
 
 // Reset password now
 if (structKeyExists(form, "reset_pw_btn_2")) {
@@ -504,7 +505,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         thisResetUUID = session.uuid;
     } else {
         getAlert('alertNotValidAnymore', 'warning');
-        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, Requested link for password reset is not valid!", false);
+        logWrite("user", "warning", "Reset password: The user tried to reset the password, but the session has expired.");
         location url="#application.mainURL#/password" addtoken="false";
     }
 
@@ -513,14 +514,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
         if (not form.password eq form.password2) {
             getAlert('alertPasswordsNotSame', 'warning');
-            logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Passwords don't match!", false);
+            logWrite("user", "warning", "Reset password: The user tried to reset the password, but the passwords don't match. [UUID: #thisResetUUID#]");
             location url="#application.mainURL#/password" addtoken="false";
         }
 
     } else {
 
         getAlert('alertChoosePassword', 'warning');
-        logWrite("Password reset", 2, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Passwords are not valid!", false);
+        logWrite("user", "warning", "Reset password: The user tried to reset the password, but the password fields are empty. [UUID: #thisResetUUID#]");
         location url="#application.mainURL#/password" addtoken="false";
 
     }
@@ -547,13 +548,15 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         );
 
         getAlert('alertPasswordResetSuccess', 'success');
-        logWrite("Password reset", 1, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, Password reset was successful!", false);
+        logWrite("user", "info", "Reset password: The user has successfully reset the password [UUID: #thisResetUUID#]");
         location url="#application.mainURL#/login" addtoken="false";
 
     } else {
+
         getAlert(changePassword.message, 'danger');
-        logWrite("Password reset", 3, "File: #callStackGet("string", 0 , 1)#, User (UUID): #thisResetUUID#, #changePassword.message#", false);
+        logWrite("system", "error", "Reset password: Could not reset the password [UUID: #thisResetUUID#, Error: #changePassword.message#]");
         location url="#application.mainURL#/password" addtoken="false";
+
     }
 
 }
@@ -580,7 +583,7 @@ if (structKeyExists(form, 'mfa_btn')) {
     if (checkMfa.success eq true) {
 
         session.user_id = checkMfa.userid;
-        logWrite("mfa check", 1, "File: #callStackGet("string", 0 , 1)#, User: #checkMfa.userid#, User successfully logged in with multi-factor-authentication.", false);
+        logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
 
         // Let's check whether there is a file we have to include coming from modules
         filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
@@ -594,30 +597,39 @@ if (structKeyExists(form, 'mfa_btn')) {
 
     } else {
 
-        if (session.mfaCheckCount eq 3) {
+        if (structKeyExists(session, "mfaCheckCount") and session.mfaCheckCount eq 3) {
             getAlert(getTrans('txtThreeTimeTry'), 'warning');
+            logWrite("user", "warning", "Login via MFA: The user tried 3 times without success. [UUID: #url.uuid#]");
         } else {
             getAlert(checkMfa.message, 'warning');
+            param name="session.mfaCheckCount" default="0";
+            setLogCount = session.mfaCheckCount+1;
+            logWrite("user", "warning", "Login via MFA: #setLogCount#. try to authenticate with the code [UUID: #url.uuid#]");
             session.mfaCheckCount++;
         }
 
-        logWrite("mfa check", 3, "File: #callStackGet("string", 0 , 1)#, Multi-factor-authentication failed #session.mfaCheckCount# times.", false);
         location url="#application.mainURL#/mfa?uuid=#checkMfa.uuid#" addtoken="false";
 
     }
 
 }
 
-if (structKeyExists(url, 'resend')){
+if (structKeyExists(url, 'resend')) {
 
     structDelete(session, 'user_id');
     objUserMfa = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
 
-    if(objUserMfa.success eq true){
-        logWrite("mfa resend", 1, "File: #callStackGet("string", 0 , 1)#, User (uuid): #url.uuid#, successfully resend multi-factor-authentication code.", false);
+    if (objUserMfa.success eq true) {
+
         getAlert(objUserMfa.message, 'success');
+        logWrite("user", "warning", "Login via MFA: New MFA code send to the user [E-Mail: #session.user_email#, UUID: #url.uuid#]");
         session.mfaCheckCount = 0;
         location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
+
     }
 }
+
+logWrite("user", "warning", "Access attempt to handler/register.cfm without method");
+location url="#application.mainURL#/dashboard" addtoken="false";
+
 </cfscript>
