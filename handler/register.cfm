@@ -603,7 +603,8 @@ if (structKeyExists(form, 'mfa_btn')) {
         } else {
             getAlert(checkMfa.message, 'warning');
             param name="session.mfaCheckCount" default="0";
-            logWrite("user", "warning", "Login via MFA: #session.mfaCheckCount#. try to authenticate with the code [UUID: #url.uuid#]");
+            setLogCount = session.mfaCheckCount+1;
+            logWrite("user", "warning", "Login via MFA: #setLogCount#. try to authenticate with the code [UUID: #url.uuid#]");
             session.mfaCheckCount++;
         }
 
