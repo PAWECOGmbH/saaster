@@ -104,7 +104,6 @@ if (structKeyExists(form, 'register_btn')) {
 
 }
 
-
 // Coming from double opt-in mail (also for new users added by the admin)
 if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
@@ -166,7 +165,6 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
     location url="#application.mainURL#/register" addtoken="false";
 
 }
-
 
 // Register new user step 3 (create account)
 if (structKeyExists(form, 'create_account')) {
@@ -389,9 +387,6 @@ if (structKeyExists(form, 'login_btn')) {
 
 }
 
-
-
-
 // Reset the password step 1
 if (structKeyExists(form, "reset_pw_btn_1")) {
 
@@ -463,7 +458,6 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 
 }
 
-
 // Confirm the password reset
 if (structKeyExists(url, "p")) {
 
@@ -497,7 +491,6 @@ if (structKeyExists(url, "p")) {
     }
 
 }
-
 
 // Reset password now
 if (structKeyExists(form, "reset_pw_btn_2")) {
@@ -635,7 +628,7 @@ if (structKeyExists(url, 'resend')) {
     }
 }
 
-logWrite("user", "warning", "Access attempt to handler/register.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+logWrite("user", "warning", "Access attempt to handler/register.cfm without method");
 location url="#application.mainURL#/dashboard" addtoken="false";
 
 </cfscript>
