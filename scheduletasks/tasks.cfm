@@ -83,7 +83,7 @@ if (url.pass eq variables.schedulePassword) {
                         variables.moduleID = qGetTasks.intModuleID;
 
                         // Include the file
-                        if (fileExists(qGetTasks.strPath)) {
+                        if (fileExists("/#qGetTasks.strPath#")) {
 
                             include template="/#qGetTasks.strPath#";
 
