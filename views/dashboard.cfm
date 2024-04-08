@@ -51,7 +51,7 @@
                 <div class="col-md-12 col-lg-12">
 
                     <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
-                        <h4 class="page-title">Dashboard by #getCustomerData.companyName#</h4>
+                        <h4 class="page-title">Dashboard</h4>
 
                     </div>
 
