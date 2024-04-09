@@ -40,7 +40,7 @@ if (structKeyExists(form, "edit_company_btn")) {
     checkEmail = application.objGlobal.checkEmail(form.email);
     if (!checkEmail) {
         getAlert('alertEnterEmail', 'warning');
-        logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
+        logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.customer_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
         location url="#application.mainURL#/account-settings/company" addtoken="false";
     }
 
@@ -48,7 +48,7 @@ if (structKeyExists(form, "edit_company_btn")) {
         checkEmail = application.objGlobal.checkEmail(form.billing_email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
-            logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.user_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
+            logWrite("user", "warning", "Customer edit: wrong email format. [CustomerID: #session.customer_id#, UserID: #session.user_id#, E-Mail: #form.email#]");
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
     }
@@ -58,10 +58,10 @@ if (structKeyExists(form, "edit_company_btn")) {
 
     if (objCustomerEdit.success) {
         getAlert('msgChangesSaved', 'success');
-        logWrite("user", "info", "Customer changes saved [CustomerID: #session.user_id#, UserID: #session.user_id#]");
+        logWrite("user", "info", "Customer changes saved [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
     } else {
         getAlert(objCustomerEdit.message, 'danger');
-        logWrite("system", "error", "Customer could not be saved. [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #objCustomerEdit.message#]");
+        logWrite("system", "error", "Customer could not be saved. [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #objCustomerEdit.message#]");
     }
 
     // Clear sessions
@@ -108,12 +108,12 @@ if (structKeyExists(form, "logo_upload_btn")) {
         }
         catch("java.io.IOException" e){
             getAlert( "msgFileUploadError", 'danger');
-            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: msgFileUploadError]");
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: msgFileUploadError]");
             location url="#application.mainURL#/account-settings/company" addtoken="false";
         }
         catch(any e){
             getAlert( e.message, 'danger');
-            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #e.message#]");
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #e.message#]");
             location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
         }
 
@@ -136,19 +136,19 @@ if (structKeyExists(form, "logo_upload_btn")) {
             )
 
             getAlert('msgFileUploadedSuccessfully', 'success');
-            logWrite("user", "info", "Logo uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #fileUpload.fileName#]");
+            logWrite("user", "info", "Logo uploaded [CustomerID: #session.customer_id#, UserID: #session.user_id#, Filename: #fileUpload.fileName#]");
 
         } else {
 
             getAlert(fileUpload.message, 'danger');
-            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.user_id#, UserID: #session.user_id#, Error: #fileUpload.message#]");
+            logWrite("system", "error", "Logo could not be uploaded [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #fileUpload.message#]");
 
         }
 
     } else {
 
         getAlert('msgPleaseChooseFile', 'warning');
-        logWrite("user", "warning", "User did not choose a file for logo upload [CustomerID: #session.user_id#, UserID: #session.user_id#]");
+        logWrite("user", "warning", "User did not choose a file for logo upload [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 
     }
 
@@ -188,7 +188,7 @@ if (structKeyExists(url, "del_logo")) {
             "
         )
 
-        logWrite("user", "info", "Logo deleted [CustomerID: #session.user_id#, UserID: #session.user_id#, Filename: #qLogo.strLogo#]");
+        logWrite("user", "info", "Logo deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#, Filename: #qLogo.strLogo#]");
 
         location url="#application.mainURL#/account-settings/company" addtoken="false";
 

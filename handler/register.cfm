@@ -328,12 +328,6 @@ if (structKeyExists(form, 'login_btn')) {
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            // Is the needed data of the cutomer already filled out?
-            dataFilledIn = objRegister.checkFilledData(session.customer_id);
-            if (!dataFilledIn) {
-                session.filledData = false;
-            }
-
             objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
             blnresend = false;
             mfaUUID = application.objGlobal.getUUID();
@@ -344,6 +338,12 @@ if (structKeyExists(form, 'login_btn')) {
                 objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
                 logWrite("user", "info", "User got MFA by e-mail after login. [E-Mail: #session.user_email#]");
                 location url="#objSendMfa.redirect#" addtoken="false";
+            }
+
+            // Is the needed data of the cutomer already filled out?
+            dataFilledIn = objRegister.checkFilledData(session.customer_id);
+            if (!dataFilledIn) {
+                session.filledData = false;
             }
 
             // Let's check whether there is a file we have to include coming from modules
@@ -584,6 +584,12 @@ if (structKeyExists(form, 'mfa_btn')) {
 
         session.user_id = checkMfa.userid;
         logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
+
+        // Is the needed data of the cutomer already filled out?
+        dataFilledIn = objRegister.checkFilledData(session.customer_id);
+        if (!dataFilledIn) {
+            session.filledData = false;
+        }
 
         // Let's check whether there is a file we have to include coming from modules
         filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);

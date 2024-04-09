@@ -24,14 +24,14 @@ if (url.pass eq variables.schedulePassword) {
             FROM schedulecontrol
             WHERE strTaskName = 'task_#url.task#'
         "
-    );
+    )
 
     if (qRunning.recordCount) {
 
         // If seconds are in minus, the previous task is still running
         if (qRunning.seconds gt 0) {
 
-            // Update schedulecontrol
+            // Update schedulecontrol: set starttime to now
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -67,11 +67,7 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
-
             if (qGetTasks.recordCount) {
-
-                // Make log
-                objLogs.logWrite("scheduletask", "info", "There are #qGetTasks.recordCount# tasks to run");
 
                 // Make loop over all the tasks
                 loop query="qGetTasks" {
@@ -83,17 +79,36 @@ if (url.pass eq variables.schedulePassword) {
                         variables.moduleID = qGetTasks.intModuleID;
 
                         // Include the file
-                        if (fileExists("/#qGetTasks.strPath#")) {
+                        if (fileExists("#qGetTasks.strPath#")) {
 
-                            include template="/#qGetTasks.strPath#";
+                            try {
 
-                            // Make log
-                            objLogs.logWrite("scheduletask", "info", "Task executed: #qGetTasks.strPath#");
+                                // Make log
+                                objLogs.logWrite("scheduletask", "info", "Start running file #qGetTasks.strPath#");
+
+                                include template="/#qGetTasks.strPath#";
+
+                                // Make log
+                                objLogs.logWrite("scheduletask", "info", "Stop running file #qGetTasks.strPath#");
+
+                            } catch(any e) {
+
+                                // Decativate the schedule task
+                                application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
+                                // Make log
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true);
+
+                            }
+
 
                         } else {
 
+                            // Decativate the schedule task
+                            application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
                             // Make log
-                            objLogs.logWrite("scheduletask", "error", "File not found: #qGetTasks.strPath#", true);
+                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true);
 
                         }
 
@@ -116,13 +131,22 @@ if (url.pass eq variables.schedulePassword) {
                             "
                         )
 
+                    } else {
+
+                        // Decativate the schedule task
+                        application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
+                        // Make log
+                        objLogs.logWrite("scheduletask", "warning", "Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]");
+
                     }
 
                 }
 
             }
 
-            // Update schedulecontrol
+
+            // Update schedulecontrol: set end time to now plus one second
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -138,28 +162,11 @@ if (url.pass eq variables.schedulePassword) {
 
         } else {
 
-            // If the difference is greater than 5 minutes, something went wrong -> correct it!
-            if (dateDiff("n", qRunning.dtmStart, now()) gt 5 or dateDiff("n", qRunning.dtmStart, now()) eq 0) {
-
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        utcDate: {type: "datetime", value: now()}
-                    },
-                    sql = "
-                        UPDATE schedulecontrol
-                        SET dtmStart = :utcDate,
-                            dtmEnd = DATE_ADD(:utcDate, INTERVAL 1 SECOND)
-                        WHERE strTaskName = 'task_#url.task#'
-                    "
-                )
-
-                // Make log
-                objLogs.logWrite("scheduletask", "warning", "The scheduletask task_#url.task# was greater than 5 minutes, something went wrong! Automatically corrected.");
-
-            }
+            // Make log
+            objLogs.logWrite("scheduletask", "warning", "Scheduled task #url.task# still running, please check!", true);
 
         }
+
 
     } else {
 
