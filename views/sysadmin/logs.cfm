@@ -118,7 +118,7 @@
                                                     <td>#ucase(replace(qLogfiles.name, ".log", ""))#</td>
                                                     <td>#lsDateFormat(getTime.utc2local(utcDate=qLogfiles.dateLastModified))# #lsTimeFormat(getTime.utc2local(utcDate=qLogfiles.dateLastModified))#</td>
                                                     <td class="text-center">#round(qLogfiles.size/1000)# kb</td>
-                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/logs?logfile=#qLogfiles.directory#/#qLogfiles.name#', 'Delete logfile', 'Do you really want to delete this log file?', 'No', 'Yes')">Delete</a></td>
+                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/logs?logfile=#urlEncodedFormat(qLogfiles.directory)#/#qLogfiles.name#', 'Delete logfile', 'Do you really want to delete this log file?', 'No', 'Yes')">Delete</a></td>
                                                 </tr>
                                             </cfloop>
                                         </tbody>

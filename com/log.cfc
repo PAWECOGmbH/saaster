@@ -161,7 +161,7 @@ component displayname="log" {
         } else {
 
             // Add error message if the file does not exist
-            arrayAppend(local.logLines, "Die angegebene Datei existiert nicht.");
+            arrayAppend(local.logLines, "The specified file does not exist.");
 
         }
 
@@ -227,14 +227,19 @@ component displayname="log" {
         local.logs = getLogs();
 
         // Init
-        local.mainPath = expandPath("/logs");
         local.typeArray = [];
 
         // Loop through the query object
-        for (local.currentRow=1; local.currentRow <= local.logs.recordCount; local.currentRow++) {
+        loop query=local.logs {
 
-            // Extract the type from the directory path
-            local.type = listFirst(replace(local.logs.directory[local.currentRow], local.mainPath & "/", ""), "/");
+            // For Windows environment we need to replace the "\". Then we replace /logs/ to ~
+            local.dirName = local.logs.directory.replace("\", "/", "all").replace("/logs/", "~", "one");
+
+            // Remove the first part until ~
+            local.firstPart = listLast(local.dirName, "~");
+
+            // Use the part before the first /
+            local.type = listFirst(local.firstPart, "/");
 
             // Prevent duplicates by checking whether the type already exists in the array
             if (!arrayContains(local.typeArray, local.type)) {
@@ -244,7 +249,6 @@ component displayname="log" {
         }
 
         return local.typeArray;
-
 
     }
 

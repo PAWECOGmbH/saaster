@@ -286,7 +286,10 @@ if (structKeyExists(url, "email")) {
 
     if (isNumeric(url.i)) {
 
-        // Update invoice status
+        // Update invoice status to open
+        objInvoice.setInvoiceStatus(url.i);
+
+        // Send invoice by email
         sendEmail = objInvoice.sendInvoice(url.i);
         if (sendEmail.success) {
             getAlert('The invoice has been sent by email successfully.');
