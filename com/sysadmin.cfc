@@ -1037,6 +1037,22 @@ component displayname="sysadmin" output="false" {
 
     }
 
+    public void function deactivateTask(required numeric taskID) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                taskID: {type: "numeric", value: arguments.taskID}
+            },
+            sql = "
+                UPDATE scheduletasks
+                SET blnActive = 0
+                WHERE intScheduletaskID = :taskID
+            "
+        )
+
+    }
+
     public datetime function calcNextRun(required datetime maxStartTime, required numeric numMinutes) {
 
         local.thisTime = now();
