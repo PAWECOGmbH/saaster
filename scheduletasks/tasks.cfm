@@ -86,7 +86,7 @@ if (url.pass eq variables.schedulePassword) {
                                 // Make log
                                 objLogs.logWrite("scheduletask", "info", "Start running file #qGetTasks.strPath#");
 
-                                include template="/#qGetTasks.strPath#";
+                                include template="\#qGetTasks.strPath#";
 
                                 // Make log
                                 objLogs.logWrite("scheduletask", "info", "Stop running file #qGetTasks.strPath#");
