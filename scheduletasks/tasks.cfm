@@ -5,6 +5,7 @@
 
 setting requesttimeout = 1000;
 objLogs = application.objLog;
+objTime = new com.time(1);
 
 param name="url.task" default="01";
 if (!isNumeric(url.task)) {
@@ -69,6 +70,9 @@ if (url.pass eq variables.schedulePassword) {
 
             if (qGetTasks.recordCount) {
 
+                // Start time for log entries, based on dtmNextRun
+                local.baseTime = objTime.utc2local(qGetTasks.dtmNextRun);
+
                 // Make loop over all the tasks
                 loop query="qGetTasks" {
 
@@ -83,13 +87,28 @@ if (url.pass eq variables.schedulePassword) {
 
                             try {
 
-                                // Make log
-                                objLogs.logWrite("scheduletask", "info", "Start running file #qGetTasks.strPath#");
+                                // Add the start tick count at the beginning of the task
+                                local.startTickCount = getTickCount();
 
+                                // Make start log
+                                objLogs.logWrite(type="scheduletask", level="info", message="Start running file #qGetTasks.strPath#", sendMail=false, date=local.baseTime);
+
+                                // Include the given file
                                 include template="\#qGetTasks.strPath#";
 
-                                // Make log
-                                objLogs.logWrite("scheduletask", "info", "Stop running file #qGetTasks.strPath#");
+                                // Calculate the elapsed milliseconds since the task was started
+                                local.elapsedMilliseconds = getTickCount() - local.startTickCount;
+
+                                // Conversion to seconds
+                                local.elapsedSeconds = local.elapsedMilliseconds / 1000;
+
+                                // Adjust current time
+                                local.currentTime = dateAdd("s", local.elapsedSeconds, local.baseTime);
+
+
+                                // Make end log
+                                objLogs.logWrite(type="scheduletask", level="info", message="Stop running file #qGetTasks.strPath#", sendMail=false, date=local.currentTime);
+
 
                             } catch(any e) {
 
@@ -97,7 +116,7 @@ if (url.pass eq variables.schedulePassword) {
                                 application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                                 // Make log
-                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true);
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true, local.baseTime);
 
                             }
 
@@ -108,7 +127,7 @@ if (url.pass eq variables.schedulePassword) {
                             application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                             // Make log
-                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true);
+                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true, local.baseTime);
 
                         }
 
@@ -137,7 +156,7 @@ if (url.pass eq variables.schedulePassword) {
                         application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                         // Make log
-                        objLogs.logWrite("scheduletask", "warning", "Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]");
+                        objLogs.logWrite(type="scheduletask", level="warning", message="Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", sendMail=false, date=local.baseTime);
 
                     }
 
