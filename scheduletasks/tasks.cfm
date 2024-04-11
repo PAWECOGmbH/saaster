@@ -79,7 +79,7 @@ if (url.pass eq variables.schedulePassword) {
                         variables.moduleID = qGetTasks.intModuleID;
 
                         // Include the file
-                        if (fileExists("#qGetTasks.strPath#")) {
+                        if (fileExists(expandPath("\#qGetTasks.strPath#"))) {
 
                             try {
 
