@@ -21,8 +21,10 @@ component displayname="log" {
         local.logFile = "#local.logPath#/#arguments.level#.log";
 
         // Create directory structure if it does not exist
-        if (!directoryExists(local.logPath)) {
-            directoryCreate(local.logPath, true);
+        lock name="createDirectoryLock" type="exclusive" timeout="5" {
+            if (!directoryExists(local.logPath)) {
+                directoryCreate(local.logPath, true);
+            }
         }
 
         // Prepare log message
