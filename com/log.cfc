@@ -1,7 +1,7 @@
 component displayname="log" {
 
     // Logging function
-    public void function logWrite(required string type, required string level, required string message, boolean sendMail = false, string date = "") {
+    public void function logWrite(required string type, required string level, required string message, boolean sendMail, datetime date) {
 
         // Check system admin time zone and create corresponding time instance
         local.getSysadmin = new com.sysadmin().getSysAdminData();
@@ -12,7 +12,7 @@ component displayname="log" {
         }
 
         // Generate timestamp based on the sysadmin time zone
-        local.timeStamp = local.getTime.utc2local(now());
+        local.timeStamp = (structKeyExists(arguments, "date") and isDate(arguments.date)) ? arguments.date : local.getTime.utc2local(now());
 
         // Use today's date based on the user time zone if no date is specified
         local.currentDate = len(trim(arguments.date)) ? dateFormat(arguments.date, "yyyy-mm-dd") : dateFormat(now(), "yyyy-mm-dd");
@@ -21,8 +21,10 @@ component displayname="log" {
         local.logFile = "#local.logPath#/#arguments.level#.log";
 
         // Create directory structure if it does not exist
-        if (!directoryExists(local.logPath)) {
-            directoryCreate(local.logPath, true);
+        lock name="createDirectoryLock" type="exclusive" timeout="5" {
+            if (!directoryExists(local.logPath)) {
+                directoryCreate(local.logPath, true);
+            }
         }
 
         // Prepare log message
@@ -42,7 +44,7 @@ component displayname="log" {
         fileAppend(local.logFile, local.logEntry);
 
         // Send log by e-mail, if desired
-        if (arguments.sendMail) {
+        if (structKeyExists(arguments, "sendMail") and arguments.sendMail) {
             cfmail(subject="#ucase(arguments.level)# in #application.projectName#", to="#application.errorMail#", from="#application.fromEmail#" ) {
                 writeOutput("#local.logEntry#");
             }
