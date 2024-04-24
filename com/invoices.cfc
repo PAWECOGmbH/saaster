@@ -1607,4 +1607,52 @@ component displayname="invoices" output="false" {
         return local.qInvoice;
     }
 
+
+    public struct function setSwissQrInvoiceStruct(required numeric deptorID, required numeric amount, string currency="CHF", string addText = "") {
+
+        // get billers data (sysadmin)
+        local.billerData = application.objSysAdmin.getSysAdminData();
+
+        // Get deptors data (customer)
+        local.deptorData = application.objCustomer.getCustomerData(arguments.deptorID);
+
+        local.qrDataSet = {};
+
+        if (isStruct(local.billerData)) {
+
+            // Set the qr code size (square)
+            local.qrDataSet['qrSize'] = "300";
+
+            // Path to the swiss cross logo (if desired)
+            local.qrDataSet['qrLogo'] = "./dist/img/ch-cross.png";
+
+            // Set all the needed data
+            local.qrDataSet['billerIBAN'] = application.objSysAdmin.getSystemSetting('settingIBANnumber').strDefaultValue;
+            local.qrDataSet['billerQrReference'] = application.objSysAdmin.getSystemSetting('settingQRreference').strDefaultValue;
+
+            local.qrDataSet['billerName'] = len(trim(local.billerData.companyName)) ? local.billerData.companyName : local.billerData.strContactPerson; // Company or Pre- and Lastname
+            local.qrDataSet['billerStreetAndNumber'] = local.billerData.address; // Street and number
+            local.qrDataSet['billerZipAndCity'] = local.billerData.zip & " " & local.billerData.city; // ZIP and City
+            local.qrDataSet['billerCountryIso'] =  "CH"; // Only CH possible because its Swiss bill
+
+            local.qrDataSet['debtorName'] = len(trim(local.deptorData.companyName)) ? local.deptorData.companyName : local.deptorData.contactPerson; // Company or Pre- and Lastname
+            local.qrDataSet['debtorStreetAndNumber'] = local.deptorData.address; // Street and number
+            local.qrDataSet['debtorZipAndCity'] = local.deptorData.zip & " " & local.deptorData.city; // ZIP and City
+            local.qrDataSet['debtorCountryIso'] = len(trim(local.deptorData.countryISO)) ? local.deptorData.countryISO : "CH"; // Country in ISO format (2 digits)
+
+            local.qrDataSet['invoiceAmount'] = arguments.amount; // Amount (xxx.xx)
+            local.qrDataSet['invoiceCurrency'] = arguments.currency; // Currency (only CHF or EUR possible)
+            local.qrDataSet['invoiceAddText'] = arguments.addText; // Additional info text
+
+        }
+
+        return local.qrDataSet;
+
+    }
+
+
+
+
+
+
 }

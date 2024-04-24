@@ -48,23 +48,28 @@
     customerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
 
     // Get sysadmin data
-    sysAdminData = new com.sysadmin().getSysAdminData();
+    objSysadmin = application.objSysAdmin;
+    sysAdminData = objSysadmin.getSysAdminData();
+
+    // Generate UUID for the pdf name
+    pdfName = "invoice-" & replace(lcase(getInvoiceData.number), " ", "", "all") & "-" & dateTimeFormat(getTime.utc2local(now()), "yyyymmddHHNNSS");
+
+    // If Swiss QR invoice is activated
+    swissQrInvoice = false;
+    if (objSysadmin.getSystemSetting('settingSwissQrBill').strDefaultValue eq 1) {
+
+        swissQrInvoice = true;
+
+        qrStruct = objInvoices.setSwissQrInvoiceStruct(getInvoiceData.customerID, getInvoiceData.amountOpen, getInvoiceData.currency, getInvoiceData.number);
+        swissQrSlip = new com.swissqrbill().generateSwissBill(qrStruct, "variable");
+
+    }
 
 </cfscript>
 
-<cfdocument
-    overwrite="yes"
-    pageType="A4"
-    saveAsName="invoice.pdf"
-    unit="cm"
-    marginLeft="1.8"
-    marginRight="1.8"
-    marginTop="2"
-    marginBottom="1"
-    format="pdf">
-
+<!--- Save the HTML part into a variable --->
+<cfsavecontent variable="invoiceData">
     <cfoutput>
-
     <head>
         <title>#getInvoiceData.title#</title>
     </head>
@@ -186,21 +191,83 @@
                 </td>
             </tr>
         </table>
-        <cfdocumentitem type="footer">
-            <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
-                <tr>
-                    <td align="center">
-                        <b>#sysAdminData.companyName#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
-                        #getTrans('formEmailAddress')#: #sysAdminData.email# |
-                        #getTrans('formPhone')#: #sysAdminData.phone# |
-                        #getTrans('formWebsite')#: #sysAdminData.website#
-
-                    </td>
-                </tr>
-            </table>
-        </cfdocumentitem>
     </body>
     </html>
     </cfoutput>
+</cfsavecontent>
+<cfsavecontent variable="invoiceDataFooter">
+    <cfoutput>
+    <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
+        <tr>
+            <td align="center">
+                <b>#sysAdminData.companyName#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
+                #getTrans('formEmailAddress')#: #sysAdminData.email# |
+                #getTrans('formPhone')#: #sysAdminData.phone# |
+                #getTrans('formWebsite')#: #sysAdminData.website#
 
-</cfdocument>
+            </td>
+        </tr>
+    </table>
+    </cfoutput>
+</cfsavecontent>
+
+
+<cfif !swissQrInvoice>
+
+    <cfdocument
+        saveAsName="#pdfName#.pdf"
+        pageType="A4"
+        unit="cm"
+        marginLeft="1.8"
+        marginRight="1.8"
+        marginTop="2"
+        marginBottom="1"
+        format="pdf"
+        overwrite="yes">
+
+        <cfoutput>
+        #invoiceData#
+        <cfdocumentitem type="footer">
+            #invoiceDataFooter#
+        </cfdocumentitem>
+        </cfoutput>
+
+    </cfdocument>
+
+
+
+<!--- With Swiss QR invoice  --->
+<cfelse>
+
+    <cfdocument
+        name="invoice"
+        pageType="A4"
+        unit="cm"
+        marginLeft="1.8"
+        marginRight="1.8"
+        marginTop="2"
+        marginBottom="1"
+        format="pdf"
+        overwrite="yes">
+
+        <cfoutput>
+        #invoiceData#
+        <cfdocumentitem type="footer">
+            #invoiceDataFooter#
+        </cfdocumentitem>
+        </cfoutput>
+
+    </cfdocument>
+
+    <cfpdf action="merge" destination="#pdfName#.pdf" overwrite="yes">
+        <cfpdfparam source="invoice">
+        <cfpdfparam source="#swissQrSlip#">
+    </cfpdf>
+
+    <!--- Open PDF in browser and delete the file immediately --->
+    <cfheader name="Content-Disposition" value="attachment;filename=""#pdfName#.pdf"";">
+    <cfheader name="Content-Type" value="application/pdf">
+    <cfcontent type="application/pdf" file="#pdfName#.pdf" deletefile="yes" reset="yes">
+    </cfcontent>
+
+</cfif>
