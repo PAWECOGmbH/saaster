@@ -16,12 +16,12 @@ component extends="taffy.core.api" {
     this.mappings["/taffy"] = expandPath("./taffy");
 
     // Object initialising
-    application.objLanguage = new com.language();
-    application.objGlobal = new com.global();
-    application.objLog = new com.log();
-    application.objSettings = new com.settings();
-    application.objUser = new com.user();
-    application.objCustomer = new com.customer();
+    application.objLanguage = new backend.core.com.language();
+    application.objGlobal = new backend.core.com.global();
+    application.objLog = new backend.core.com.log();
+    application.objSettings = new backend.core.com.settings();
+    application.objUser = new backend.core.com.user();
+    application.objCustomer = new backend.core.com.customer();
 
     // Set environment relevant variables
     if (variables.environment eq "dev") {

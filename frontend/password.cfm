@@ -18,7 +18,7 @@
                 </div>
 
                 <cfif session.step eq 1>
-                    <form class="card" id="submit_form" method="post" action="#application.mainURL#/registration">
+                    <form class="card" id="submit_form" method="post" action="#application.mainURL#/logincheck">
                         <input type="hidden" name="reset_pw_btn_1">
                         <div class="card-body p-6">
                             <div class="text-center card-title mb-4">#getTrans('titResetPassword')#</div>
@@ -38,7 +38,7 @@
                         </div>
                     </form>
                 <cfelseif session.step eq 2>
-                    <form class="card" id="submit_form" method="post" action="#application.mainURL#/registration">
+                    <form class="card" id="submit_form" method="post" action="#application.mainURL#/logincheck">
                         <input type="hidden" name="reset_pw_btn_2">
                         <div class="card-body p-6">
                             <div class="card-title text-center mb-4">#getTrans('titChoosePassword')#</div>

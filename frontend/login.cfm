@@ -8,7 +8,7 @@
     }
     param name="session.email" default="";
 
-    getSysadminData = application.objSysadmin.getSysAdminData();
+    getSysadminData = new backend.core.com.sysadmin().getSysAdminData();
 </cfscript>
 
 <cfoutput>
@@ -26,7 +26,7 @@
                 </cfif>
             </div>
 
-            <form id="submit_form" class="card card-md" method="post" action="#application.mainURL#/registration">
+            <form id="submit_form" class="card card-md" method="post" action="#application.mainURL#/logincheck">
                 <input type="hidden" name="login_btn">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">#getTrans('formSignIn')#</h2>
@@ -61,3 +61,38 @@
 </div>
 </cfoutput>
 <cfset structDelete(session, "alert") />
+
+
+<!--- Disable Browser-back after logout --->
+<cfif structKeyExists(url, "logout")>
+<script>
+    (function (global) {
+        if(typeof (global) === "undefined") {
+            throw new Error("window is undefined");
+        }
+        var _hash = "!";
+        var noBackPlease = function () {
+            global.location.href += "#";
+
+            global.setTimeout(function () {
+                global.location.href += "!";
+            }, 50);
+        };
+        global.onhashchange = function () {
+            if (global.location.hash !== _hash) {
+                global.location.hash = _hash;
+            }
+        };
+        global.onload = function () {
+            noBackPlease();
+            document.body.onkeydown = function (e) {
+                var elm = e.target.nodeName.toLowerCase();
+                if (e.which === 8 && (elm !== 'input' && elm  !== 'textarea')) {
+                    e.preventDefault();
+                }
+                e.stopPropagation();
+            };
+        }
+    })(window);
+</script>
+</cfif>

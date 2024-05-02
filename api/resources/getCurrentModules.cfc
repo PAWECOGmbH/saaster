@@ -14,7 +14,7 @@ component extends="taffy.core.resource" taffy_uri="/getcurrentModules" {
             return noData().withStatus(400);
         }
 
-        local.qGetModules = new com.modules(
+        local.qGetModules = new backend.core.com.modules(
             local.lngID,
             local.language,
             local.currencyID).getBookedModules(local.customerID);

@@ -19,7 +19,7 @@
                         <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
                     </cfif>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration?reinit=3">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck?reinit=3">
                     <input type="hidden" name="register_btn">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('formSignUp')#</h2>
@@ -70,7 +70,7 @@
                 <div class="text-center mb-4">
                     <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="36" alt="Logo"></a>
                 </div>
-                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/registration">
+                <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck">
                     <input type="hidden" name="create_account">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-4">#getTrans('titChoosePassword')#</h2>

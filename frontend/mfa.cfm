@@ -23,7 +23,7 @@
                 </cfif>
             </div>
 
-            <form id="mfa_form" class="card card-md otc" method="post" action="#application.mainURL#/registration?uuid=#uuid#">
+            <form id="mfa_form" class="card card-md otc" method="post" action="#application.mainURL#/logincheck?uuid=#uuid#">
                 <input type="hidden" name="mfa_btn">
                 <div class="card-body">
 
@@ -48,7 +48,7 @@
             </form>
 
             <div class="form-footer text-center">
-                <a role="button" href="#application.mainURL#/registration?resend=1&uuid=#uuid#">#getTrans('txtResendMfa')#</a>
+                <a role="button" href="#application.mainURL#/logincheck?resend=1&uuid=#uuid#">#getTrans('txtResendMfa')#</a>
             </div>
 
         </div>
