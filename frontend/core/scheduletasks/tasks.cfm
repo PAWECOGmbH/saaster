@@ -5,6 +5,7 @@
 
 setting requesttimeout = 1000;
 objLogs = application.objLog;
+objTime = new com.time(1);
 
 param name="url.task" default="01";
 if (!isNumeric(url.task)) {
@@ -24,14 +25,14 @@ if (url.pass eq variables.schedulePassword) {
             FROM schedulecontrol
             WHERE strTaskName = 'task_#url.task#'
         "
-    );
+    )
 
     if (qRunning.recordCount) {
 
         // If seconds are in minus, the previous task is still running
         if (qRunning.seconds gt 0) {
 
-            // Update schedulecontrol
+            // Update schedulecontrol: set starttime to now
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -67,11 +68,10 @@ if (url.pass eq variables.schedulePassword) {
                 "
             )
 
-
             if (qGetTasks.recordCount) {
 
-                // Make log
-                objLogs.logWrite("scheduletask", "info", "There are #qGetTasks.recordCount# tasks to run");
+                // Start time for log entries, based on dtmNextRun
+                local.baseTime = objTime.utc2local(qGetTasks.dtmNextRun);
 
                 // Make loop over all the tasks
                 loop query="qGetTasks" {
@@ -83,17 +83,51 @@ if (url.pass eq variables.schedulePassword) {
                         variables.moduleID = qGetTasks.intModuleID;
 
                         // Include the file
-                        if (fileExists("/#qGetTasks.strPath#")) {
+                        if (fileExists(expandPath("\#qGetTasks.strPath#"))) {
 
-                            include template="/#qGetTasks.strPath#";
+                            try {
 
-                            // Make log
-                            objLogs.logWrite("scheduletask", "info", "Task executed: #qGetTasks.strPath#");
+                                // Add the start tick count at the beginning of the task
+                                local.startTickCount = getTickCount();
+
+                                // Make start log
+                                objLogs.logWrite(type="scheduletask", level="info", message="Start running file #qGetTasks.strPath#", sendMail=false, date=local.baseTime);
+
+                                // Include the given file
+                                include template="\#qGetTasks.strPath#";
+
+                                // Calculate the elapsed milliseconds since the task was started
+                                local.elapsedMilliseconds = getTickCount() - local.startTickCount;
+
+                                // Conversion to seconds
+                                local.elapsedSeconds = local.elapsedMilliseconds / 1000;
+
+                                // Adjust current time
+                                local.currentTime = dateAdd("s", local.elapsedSeconds, local.baseTime);
+
+
+                                // Make end log
+                                objLogs.logWrite(type="scheduletask", level="info", message="Stop running file #qGetTasks.strPath#", sendMail=false, date=local.currentTime);
+
+
+                            } catch(any e) {
+
+                                // Decativate the schedule task
+                                application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
+                                // Make log
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true, local.baseTime);
+
+                            }
+
 
                         } else {
 
+                            // Decativate the schedule task
+                            application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
                             // Make log
-                            objLogs.logWrite("scheduletask", "error", "File not found: #qGetTasks.strPath#", true);
+                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true, local.baseTime);
 
                         }
 
@@ -116,13 +150,22 @@ if (url.pass eq variables.schedulePassword) {
                             "
                         )
 
+                    } else {
+
+                        // Decativate the schedule task
+                        application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
+
+                        // Make log
+                        objLogs.logWrite(type="scheduletask", level="warning", message="Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", sendMail=false, date=local.baseTime);
+
                     }
 
                 }
 
             }
 
-            // Update schedulecontrol
+
+            // Update schedulecontrol: set end time to now plus one second
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -138,28 +181,11 @@ if (url.pass eq variables.schedulePassword) {
 
         } else {
 
-            // If the difference is greater than 5 minutes, something went wrong -> correct it!
-            if (dateDiff("n", qRunning.dtmStart, now()) gt 5 or dateDiff("n", qRunning.dtmStart, now()) eq 0) {
-
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        utcDate: {type: "datetime", value: now()}
-                    },
-                    sql = "
-                        UPDATE schedulecontrol
-                        SET dtmStart = :utcDate,
-                            dtmEnd = DATE_ADD(:utcDate, INTERVAL 1 SECOND)
-                        WHERE strTaskName = 'task_#url.task#'
-                    "
-                )
-
-                // Make log
-                objLogs.logWrite("scheduletask", "warning", "The scheduletask task_#url.task# was greater than 5 minutes, something went wrong! Automatically corrected.");
-
-            }
+            // Make log
+            objLogs.logWrite("scheduletask", "warning", "Scheduled task #url.task# still running, please check!", true);
 
         }
+
 
     } else {
 

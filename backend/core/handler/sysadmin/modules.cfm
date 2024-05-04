@@ -714,6 +714,24 @@ if (structKeyExists(form, "edit_scheduletask")) {
                 "
             )
 
+            // Set LastRun to NULL
+            loop from="1" to="20" index="i" {
+                if (i lt 10) {
+                    i = "0" & i;
+                }
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        taskID: {type: "numeric", value: form.edit_scheduletask}
+                    },
+                    sql = "
+                        UPDATE scheduler_#i#
+                        SET dtmLastRun = NULL
+                        WHERE intScheduletaskID = :taskID
+                    "
+                )
+            }
+
             // Update scheduler
             objModule = new backend.core.com.modules();
             objModule.distributeScheduler(moduleID=url.moduleID, customerID=0, status="active");

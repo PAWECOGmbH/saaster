@@ -1,7 +1,7 @@
 component displayname="log" {
 
     // Logging function
-    public void function logWrite(required string type, required string level, required string message, boolean sendMail = false, string date = "") {
+    public void function logWrite(required string type, required string level, required string message, boolean sendMail, datetime date) {
 
         // Check system admin time zone and create corresponding time instance
         local.getSysadmin = new backend.core.com.sysadmin().getSysAdminData();
@@ -12,7 +12,7 @@ component displayname="log" {
         }
 
         // Generate timestamp based on the sysadmin time zone
-        local.timeStamp = local.getTime.utc2local(now());
+        local.timeStamp = (structKeyExists(arguments, "date") and isDate(arguments.date)) ? arguments.date : local.getTime.utc2local(now());
 
         // Use today's date based on the user time zone if no date is specified
         local.currentDate = len(trim(arguments.date)) ? dateFormat(arguments.date, "yyyy-mm-dd") : dateFormat(now(), "yyyy-mm-dd");
@@ -21,8 +21,10 @@ component displayname="log" {
         local.logFile = "#local.logPath#/#arguments.level#.log";
 
         // Create directory structure if it does not exist
-        if (!directoryExists(local.logPath)) {
-            directoryCreate(local.logPath, true);
+        lock name="createDirectoryLock" type="exclusive" timeout="5" {
+            if (!directoryExists(local.logPath)) {
+                directoryCreate(local.logPath, true);
+            }
         }
 
         // Prepare log message
@@ -42,7 +44,7 @@ component displayname="log" {
         fileAppend(local.logFile, local.logEntry);
 
         // Send log by e-mail, if desired
-        if (arguments.sendMail) {
+        if (structKeyExists(arguments, "sendMail") and arguments.sendMail) {
             cfmail(subject="#ucase(arguments.level)# in #application.projectName#", to="#application.errorMail#", from="#application.fromEmail#" ) {
                 writeOutput("#local.logEntry#");
             }
@@ -161,7 +163,7 @@ component displayname="log" {
         } else {
 
             // Add error message if the file does not exist
-            arrayAppend(local.logLines, "Die angegebene Datei existiert nicht.");
+            arrayAppend(local.logLines, "The specified file does not exist.");
 
         }
 
@@ -227,14 +229,19 @@ component displayname="log" {
         local.logs = getLogs();
 
         // Init
-        local.mainPath = expandPath("/logs");
         local.typeArray = [];
 
         // Loop through the query object
-        for (local.currentRow=1; local.currentRow <= local.logs.recordCount; local.currentRow++) {
+        loop query=local.logs {
 
-            // Extract the type from the directory path
-            local.type = listFirst(replace(local.logs.directory[local.currentRow], local.mainPath & "/", ""), "/");
+            // For Windows environment we need to replace the "\". Then we replace /logs/ to ~
+            local.dirName = local.logs.directory.replace("\", "/", "all").replace("/logs/", "~", "one");
+
+            // Remove the first part until ~
+            local.firstPart = listLast(local.dirName, "~");
+
+            // Use the part before the first /
+            local.type = listFirst(local.firstPart, "/");
 
             // Prevent duplicates by checking whether the type already exists in the array
             if (!arrayContains(local.typeArray, local.type)) {
@@ -244,7 +251,6 @@ component displayname="log" {
         }
 
         return local.typeArray;
-
 
     }
 

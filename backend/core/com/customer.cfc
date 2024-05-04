@@ -358,11 +358,13 @@ component displayname="customer" output="false" {
             local.customerStruct['currencyStruct'] = {};
             local.language = "";
             local.countryName = "";
+            local.countryIso = "";
 
             // Check currency via country first
             if (local.qCustomer.intCountryID gt 0) {
                 local.country = application.objGlobal.getCountry(local.qCustomer.intCountryID);
                 local.countryName = local.country.strCountryName;
+                local.countryIso = local.country.strISO1;
                 if (len(trim(local.country.strCurrency))) {
                     local.language = application.objLanguage.getAnyLanguage(local.country.intLanguageID).iso;
                     local.currency = local.objCurrency.getCurrency(local.country.strCurrency);
@@ -400,6 +402,7 @@ component displayname="customer" output="false" {
 
             local.customerStruct['language'] = local.language;
             local.customerStruct['countryName'] = local.countryName;
+            local.customerStruct['countryISO'] = local.countryIso;
 
 
             return local.customerStruct;

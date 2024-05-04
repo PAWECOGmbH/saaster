@@ -476,5 +476,35 @@ $(document).ready(function(){
 		}
 	});
 
+	// Sysadmin settings for Swiss QR Bill
+    $('#roundFactorSelect').change(function() {
+        var selectedValue = $(this).val();
+        if (selectedValue === '5') {
+            $('#QrBillContainer').show();
+        } else {
+            $('#QrBillContainer').hide();
+            $('#QrBillCheckbox').val('0');
+            $('#extraLink').hide();
+        }
+    });
+    $('#QrBillCheckbox').change(function() {
+        if ($(this).val() === '1') {
+            $('#extraLink').show();
+        } else {
+            $('#extraLink').hide();
+        }
+    });
+    if ($('#roundFactorSelect').val() === '5') {
+        $('#QrBillContainer').show();
+        if ($('#QrBillCheckbox').val() === '1') {
+            $('#extraLink').show();
+        } else {
+            $('#extraLink').hide();
+        }
+    } else {
+        $('#QrBillContainer').hide();
+        $('#extraLink').hide();
+    }
+
 });
 
