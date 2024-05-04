@@ -18,7 +18,7 @@
 	<cfinclude template="/backend/core/views/footer.cfm">
 	<cfinclude template="/backend/core/views/js.cfm">
 	<cfif structKeyExists(session, "filledData")>
-		<cfinclude template="fill_data_modal.cfm">
+		<cfinclude template="/backend/core/views/fill_data_modal.cfm">
 		<script type="text/javascript">
 			$(window).on('load', function() {
 				$('#fillData').modal('show');

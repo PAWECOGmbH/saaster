@@ -132,7 +132,7 @@
                                                             jsonTmp += "]]";
                                                             var ajaxResponse = $.ajax({
                                                                 type: "post",
-                                                                url: "#application.mainURL#/handler/ajax_sort.cfm?plangroups",
+                                                                url: "#application.mainURL#/backend/core/handler/ajax_sort.cfm?plangroups",
                                                                 contentType: "application/json",
                                                                 data: JSON.stringify( jsonTmp )
                                                             })

@@ -91,7 +91,7 @@ function showResult(str) {
 			document.getElementById("livesearch").innerHTML=this.responseText;
 		}
 	}
-	xmlhttp.open("GET","/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
+	xmlhttp.open("GET","/backend/core/views/sysadmin/ajax_search_customer.cfm?search="+str,true);
 	xmlhttp.send();
 }
 function intoTf(c, i) {
@@ -311,7 +311,7 @@ $(document).ready(function(){
 			recurring = 'monthly';
 		}
 
-		$('#change_plan').load('/includes/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
+		$('#change_plan').load('/backend/core/views/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
 
 	});
 
@@ -327,7 +327,7 @@ $(document).ready(function(){
 			}
 		});
 
-		$('#change_plan').load('/includes/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
+		$('#change_plan').load('/backend/core/views/plan_calc.cfm?plan_id=' + plan_id + '&recurring=' + recurring);
 
 
 	});

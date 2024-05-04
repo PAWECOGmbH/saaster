@@ -114,7 +114,7 @@
                             <cfif session.currentPlan.planID gt 0>
 
                                 <!--- Display the current plan --->
-                                <cfinclude template="/includes/plan_view.cfm">
+                                <cfinclude template="/backend/core/views/plan_view.cfm">
 
                                 <cfif session.superAdmin>
 

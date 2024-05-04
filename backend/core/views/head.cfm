@@ -15,10 +15,9 @@
     <link type="text/css" href="#application.mainURL#/dist/css/demo.min.css" rel="stylesheet"/>
     <link type="text/css" href="#application.mainURL#/dist/fontawesome/css/all.css" rel="stylesheet" />
     <link type="text/css" href="#application.mainURL#/dist/css/sweetalert.css" rel="stylesheet" />
-    <link type="text/css" href="#application.mainURL#/dist/css/dropify.min.css" rel="stylesheet" />
     <link type="text/css" href="#application.mainURL#/dist//trumbowyg/ui/trumbowyg.min.css" rel="stylesheet"/>
     <link type="text/css" href="#application.mainURL#/dist/css/custom.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/includes/color.cfm" rel="stylesheet"/>
+    <link type="text/css" href="#application.mainURL#/backend/core/views/color.cfm" rel="stylesheet"/>
     </cfoutput>
 
 </head>

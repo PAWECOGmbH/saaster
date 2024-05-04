@@ -114,7 +114,7 @@
                                                 <cfset dirPath = listLast(replacedPath, "~")>
                                                 <tr id="checkAll">
                                                     <td><input type="checkbox" name="logfile" value="#qLogfiles.directory#/#qLogfiles.name#"></td>
-                                                    <td style="cursor: pointer;" class="openPopup_big" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_logfile.cfm?logfile=#qLogfiles.directory#/#qLogfiles.name#">#dirPath#/#qLogfiles.name#</td>
+                                                    <td style="cursor: pointer;" class="openPopup_big" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_logfile.cfm?logfile=#qLogfiles.directory#/#qLogfiles.name#">#dirPath#/#qLogfiles.name#</td>
                                                     <td>#ucase(replace(qLogfiles.name, ".log", ""))#</td>
                                                     <td>#lsDateFormat(getTime.utc2local(utcDate=qLogfiles.dateLastModified))# #lsTimeFormat(getTime.utc2local(utcDate=qLogfiles.dateLastModified))#</td>
                                                     <td class="text-center">#round(qLogfiles.size/1000)# kb</td>

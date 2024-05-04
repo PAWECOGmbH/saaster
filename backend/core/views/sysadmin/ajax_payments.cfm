@@ -15,7 +15,7 @@
 
 <cfoutput>
 
-<form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">
+<form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">
     <input type="hidden" name="payments" value="#thisInvoiceID#">
     <div class="modal-header">
         <h5 class="modal-title">Payments</h5>

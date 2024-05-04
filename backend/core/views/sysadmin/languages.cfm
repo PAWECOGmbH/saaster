@@ -206,7 +206,7 @@
 
             var ajaxResponse = $.ajax({
                 type: "post",
-                url: "#application.mainURL#/handler/ajax_sort.cfm?languages",
+                url: "#application.mainURL#/backend/core/handler/ajax_sort.cfm?languages",
                 contentType: "application/json",
                 data: JSON.stringify( jsonTmp )
             })

@@ -55,7 +55,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <!--- ## qTenants is in includes/tenant_changer.cfm (header.cfm) --->
+                                <!--- ## qTenants is in /backend/core/views/tenant_changer.cfm (header.cfm) --->
                                 <cfloop query="qTenants">
                                     <tr>
                                         <td>
@@ -164,7 +164,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            <!--- ## qTenants is in includes/tenant_changer.cfm (header.cfm) --->
+                            <!--- ## qTenants is in /backend/core/views/tenant_changer.cfm (header.cfm) --->
                             <cfloop query="qTenants">
                                 <tr>
                                     <td>

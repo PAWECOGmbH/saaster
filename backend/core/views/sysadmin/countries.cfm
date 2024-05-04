@@ -174,7 +174,7 @@
                                                     <td class="text-center">#qCountries.strISO1#</td>
                                                     <td>#qCountries.strRegion#</td>
                                                     <td>#qCountries.strLanguageEN#</td>
-                                                    <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
+                                                    <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
                                                     <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
                                                 </tr>
                                                 #getModal.args('countries', 'strCountryName', qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#

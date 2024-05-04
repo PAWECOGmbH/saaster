@@ -238,7 +238,7 @@
 
             var ajaxResponse = $.ajax({
                 type: "post",
-                url: "#application.mainURL#/handler/ajax_sort.cfm?currencies",
+                url: "#application.mainURL#/backend/core/handler/ajax_sort.cfm?currencies",
                 contentType: "application/json",
                 data: JSON.stringify( jsonTmp )
             })

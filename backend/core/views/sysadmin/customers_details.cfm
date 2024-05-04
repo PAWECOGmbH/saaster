@@ -310,7 +310,7 @@
 
                                                                             <cfif currentPlan.planID eq plan.planID>
 
-                                                                                <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
+                                                                                <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
                                                                                     Edit period
                                                                                 </a>
 
@@ -508,7 +508,7 @@
                                                                                                 Revoke cancellation
                                                                                             </a>
                                                                                         <cfelse>
-                                                                                            <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
+                                                                                            <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
                                                                                                 Edit period
                                                                                             </a>
                                                                                             <cfif moduleStatus.status neq "payment">

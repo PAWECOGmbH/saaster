@@ -244,11 +244,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         } else {
             
-            // Protect the 'backend' folder     
-
-            /* dump(thiscontent);
-            abort; */
-
+            // Protect the 'backend' folder 
             if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
                 getAlert('alertSessionExpired', 'warning');
                 location url="#application.mainURL#/login" addtoken="false";

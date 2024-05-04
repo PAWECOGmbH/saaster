@@ -64,7 +64,7 @@
                                             <tr id="checkAll">
                                                 <td><input type="checkbox" name="notiID" value="#i.notiID#"></td>
                                                 <td>#lsDateFormat(getTime.utc2local(utcDate=i.created))# #lsTimeFormat(getTime.utc2local(utcDate=i.created))#</td>
-                                                <td style="cursor: pointer;" class="openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/customer/ajax_notification.cfm?nID=#i.notiID#">
+                                                <td style="cursor: pointer;" class="openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/notifications/detail.cfm?nID=#i.notiID#">
                                                     <cfif isDate(i.read)>
                                                         #getTrans(i.title_var)#
                                                     <cfelse>

@@ -48,7 +48,7 @@
                                     </label>
                                 </td>
                                 <td><a href="#application.mainURL#/#qSchduleTasks.strPath#?pass=#variables.schedulePassword#" class="btn" target="_blank">Run</a></td>
-                                <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/views/sysadmin/ajax_scheduletasks.cfm?taskID=#qSchduleTasks.intScheduletaskID#&moduleID=#qModule.intModuleID#">Edit</a></td>
+                                <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_scheduletasks.cfm?taskID=#qSchduleTasks.intScheduletaskID#&moduleID=#qModule.intModuleID#">Edit</a></td>
                                 <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_scheduletask=#qSchduleTasks.intScheduletaskID#&moduleID=#qModule.intModuleID#', 'Delete scheduletask', 'Are you sure you want to delete this scheduletask?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                             </tr>
                         </form>

@@ -97,7 +97,7 @@ if (structKeyExists(url, "add")) {
 
                 // If we are in dev mode, call the JSON data from the given server
                 if (application.environment eq "dev") {
-                    include template="/frontend/payrexx_webhook.cfm";
+                    include template="/frontend/core/handler/payrexx_webhook.cfm";
                 }
 
                 // Get the webhook data
@@ -217,7 +217,7 @@ if (structKeyExists(url, "pay")) {
 
                 // If we are in dev mode, call the JSON data from the given server
                 if (application.environment eq "dev") {
-                    include template="/frontend/payrexx_webhook.cfm";
+                    include template="/frontend/core/handler/payrexx_webhook.cfm";
                 }
 
                 // Get the webhook data
@@ -268,7 +268,7 @@ if (structKeyExists(url, "pay")) {
                 currency = incoiceData.currency;
 
                 logWrite("user", "info", "Pay invoice: Sent the user to Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, purpose: #purpose#, amountToPay: #currency# #amountToPay#]");
-                include template="/includes/payment.cfm";
+                include template="/backend/core/views/payment.cfm";
 
             }
 

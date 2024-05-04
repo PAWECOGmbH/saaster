@@ -114,7 +114,7 @@
                             </div>
                             <div class="card-body">
 
-                                <h3>Color settings</h3>
+                                <h3>Button settings</h3>
                                 <div class="border align-baseline p-3">
                                     <div class="row">
                                         <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">

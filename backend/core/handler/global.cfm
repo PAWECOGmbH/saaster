@@ -29,7 +29,7 @@ if (structKeyExists(url, "switch")) {
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
             // Is the needed data of the cutomer already filled out?
-            dataFilledIn = new backend.core.com.register().checkFilledData(session.customer_id);
+            dataFilledIn = new frontend.core.com.register().checkFilledData(session.customer_id);
 
             if (!dataFilledIn) {
                 session.filledData = false;

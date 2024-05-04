@@ -83,7 +83,7 @@
                                         </cfif>
                                         <div class="ms-4 mt-2">
                                             <cfif qInvoice.paymentstatusID gt 1>
-                                                <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
+                                                <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
                                             <cfelse>
                                                 <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
                                             </cfif>

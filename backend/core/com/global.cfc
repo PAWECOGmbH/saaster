@@ -741,7 +741,7 @@ component displayname="globalFunctions" output="false" {
 
             if (structKeyExists(i.moduleData, "table_prefix")) {
 
-                local.fileToInclude = "/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
+                local.fileToInclude = "/backend/modules/" & i.moduleData.table_prefix & "/login_include.cfm";
 
                 // Does the file exist?
                 if (fileExists(expandPath(local.fileToInclude))) {

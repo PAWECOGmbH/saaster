@@ -77,7 +77,7 @@
 <!--- Same plan and recurring? --->
 <cfif (bookedPlan.planID eq url.plan_id) and ((bookedPlan.recurring eq url.recurring) or planDetail.itsFree)>
 
-    <cfinclude template="/includes/plan_view.cfm">
+    <cfinclude template="/backend/core/views/plan_view.cfm">
 
     <cfif bookedPlan.status eq "expired">
         <cfif url.recurring eq "monthly">

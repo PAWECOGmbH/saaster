@@ -18,6 +18,6 @@ CREATE TABLE `widgets`  (
 -- ----------------------------
 -- Records of widgets
 -- ----------------------------
-INSERT INTO `widgets` VALUES (1, 'Last Login', 'myapp/widgets/welcome.cfm', 1, 3, 1);
+INSERT INTO `widgets` VALUES (1, 'Last Login', 'backend/myapp/widgets/welcome.cfm', 1, 3, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;

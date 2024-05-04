@@ -148,8 +148,8 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.test_days" default="0";
         param name="form.path" default="";
 
-        mapping = "modules/" & form.prefix & "/settings";
-        path =  "modules/" & form.prefix & "/settings.cfm";
+        mapping = "backend/modules/" & form.prefix & "/settings";
+        path =  "backend/modules/" & form.prefix & "/settings.cfm";
 
         // Is there already an entry in the custom mappings?
         qMappings = queryExecute(
@@ -254,9 +254,9 @@ if (structKeyExists(form, "edit_module")) {
 
         // Create the folder specified
         createFolderSuccess = true;
-        if (!directoryExists(expandPath('/modules/#form.prefix#'))) {
+        if (!directoryExists(expandPath('/backend/modules/#form.prefix#'))) {
             try {
-                directoryCreate(expandPath('/modules/#form.prefix#'));
+                directoryCreate(expandPath('/backend/modules/#form.prefix#'));
             } catch (any e) {
                 createFolderSuccess = false;
                 getAlert('Could not create the folder!');
@@ -266,7 +266,7 @@ if (structKeyExists(form, "edit_module")) {
 
         // Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...)
         createFileSuccess = true;
-        if (!fileExists(expandPath('/modules/#form.prefix#/navigation.cfm'))) {
+        if (!fileExists(expandPath('/backend/modules/#form.prefix#/navigation.cfm'))) {
 savecontent variable="naviContent" {
 writeOutput("
 <a href='' class='dropdown-item'>Your page 1</a>
@@ -275,7 +275,7 @@ writeOutput("
 ");
 }
             try {
-                fileWrite(expandPath('/modules/#form.prefix#/navigation.cfm'), naviContent);
+                fileWrite(expandPath('/backend/modules/#form.prefix#/navigation.cfm'), naviContent);
             } catch (any e) {
                 createFileSuccess = false;
                 getAlert(e.message, 'danger');
@@ -285,7 +285,7 @@ writeOutput("
 
         // Create the file for settings
         createSettingFileSuccess = true;
-        if (!fileExists(expandPath('/modules/#form.prefix#/settings.cfm'))) {
+        if (!fileExists(expandPath('/backend/modules/#form.prefix#/settings.cfm'))) {
 savecontent variable="settingContent" {
 writeOutput("
 <cfscript>
@@ -294,7 +294,7 @@ dump('Hello settings!');
 ");
 }
             try {
-                fileWrite(expandPath('/modules/#form.prefix#/settings.cfm'), settingContent);
+                fileWrite(expandPath('/backend/modules/#form.prefix#/settings.cfm'), settingContent);
             } catch (any e) {
                 createSettingFileSuccess = false;
                 getAlert(e.message, 'danger');
@@ -303,12 +303,12 @@ dump('Hello settings!');
 
         // Create the file for the login inlude
         createLoginFileSuccess = true;
-        if (!fileExists(expandPath('/modules/#form.prefix#/login_include.cfm'))) {
+        if (!fileExists(expandPath('/backend/modules/#form.prefix#/login_include.cfm'))) {
 savecontent variable="loginContent" {
 writeOutput("<!--- This file will be included while users login --->");
 }
             try {
-                fileWrite(expandPath('/modules/#form.prefix#/login_include.cfm'), loginContent);
+                fileWrite(expandPath('/backend/modules/#form.prefix#/login_include.cfm'), loginContent);
             } catch (any e) {
                 createLoginFileSuccess = false;
                 getAlert(e.message, 'danger');

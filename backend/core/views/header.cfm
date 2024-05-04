@@ -34,7 +34,7 @@
             <div class="#getLayout.layoutDiv#">
 
                 <!--- Notifications --->
-                <cfinclude template="notifications.cfm">
+                <cfinclude template="notifications/flyout.cfm">
 
                 <!--- Language changer --->
                 <div #getLayout.layoutClass#>

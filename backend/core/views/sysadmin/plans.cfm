@@ -185,7 +185,7 @@
 
             var ajaxResponse = $.ajax({
                 type: "post",
-                url: "#application.mainURL#/handler/ajax_sort.cfm?plans",
+                url: "#application.mainURL#/backend/core/handler/ajax_sort.cfm?plans",
                 contentType: "application/json",
                 data: JSON.stringify( jsonTmp )
             })

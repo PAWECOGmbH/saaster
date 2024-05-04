@@ -1,4 +1,4 @@
-<cfscript>"##"
+<cfscript>
 
     // How many notifications do we have? (used for the notifications overview too)
     qTotalNoties = application.objNotifications.getNotifications(session.customer_id).totalCount;
@@ -41,7 +41,7 @@
                                     <div class="d-block text-muted mt-n1 small">
                                         #lsDateFormat(getTime.utc2local(utcDate=i.created))# #lsTimeFormat(getTime.utc2local(utcDate=i.created))#
                                     </div>
-                                    <a style="cursor: pointer;" class="openPopup text-body d-block" data-bs-toggle="modal" data-href="#application.mainURL#/views/customer/ajax_notification.cfm?nID=#i.notiID#">#getTrans(i.title_var)#</a>
+                                    <a style="cursor: pointer;" class="openPopup text-body d-block" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/notifications/detail.cfm?nID=#i.notiID#">#getTrans(i.title_var)#</a>
                                     <div class="d-block text-muted mt-n1 text-truncate">
                                         #left(getTrans(i.desc_var), 50)#
                                     </div>

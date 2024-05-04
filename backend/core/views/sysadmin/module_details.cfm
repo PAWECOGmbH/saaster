@@ -54,9 +54,9 @@
                             </small>
                         </div>
                         <cfif len(trim(qModule.strSettingPath))>
-                            You can develop your module in this folder: /modules/#qModule.strTabPrefix#/<br />
+                            You can develop your module in this folder: /backend/modules/#qModule.strTabPrefix#/<br />
                             Code your settings in this file: /#qModule.strSettingPath#.cfm<br />
-                            Mapping is already set to: <a href="#application.mainURL#/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/modules/#qModule.strTabPrefix#/settings</a>
+                            Mapping is already set to: <a href="#application.mainURL#/backend/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/backend/modules/#qModule.strTabPrefix#/settings</a>
                         </cfif>
                     </fieldset>
                 </div>

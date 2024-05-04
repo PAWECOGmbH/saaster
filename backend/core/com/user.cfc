@@ -456,7 +456,7 @@ component displayname="user" output="false" {
                 // Send activation link
                 mail to="#local.qUser.toEmail#" from="#application.fromEmail#" subject="#variables.getTrans('txtInvitationFrom')# #local.qUser.fromName#" type="html" {
                     include template="/config.cfm";
-                    include template="/frontend/core/handler/mail_design.cfm";
+                    include template="/frontend/core/mail_design.cfm";
                 }
 
                 local.argsReturnValue['message'] = variables.getTrans('msgUserGotInvitation');
@@ -557,7 +557,7 @@ component displayname="user" output="false" {
             // Send activation link
             mail to="#arguments.useremail#" from="#application.fromEmail#" subject="#variables.getTrans('subjectConfirmEmail')#" type="html" {
                 include template="/config.cfm";
-                include template="/frontend/core/handler/mail_design.cfm";
+                include template="/frontend/core/mail_design.cfm";
             }
 
             local.mailChanged = true;
@@ -658,7 +658,7 @@ component displayname="user" output="false" {
         // Send mfa code to user
         mail to="#arguments.mfaMail#" from="#application.fromEmail#" subject="#variables.getTrans('txtSubjectMFA')#" type="#variables.mailType#" {
             include template="/config.cfm";
-            include template="/frontend/core/handler/mail_design.cfm";
+            include template="/frontend/core/mail_design.cfm";
         }
 
 

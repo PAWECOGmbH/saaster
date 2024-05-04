@@ -165,7 +165,7 @@
                                         <div class="card-body" id="change_plan">
 
                                             <!--- Display the current plan --->
-                                            <cfinclude template="/includes/plan_view.cfm">
+                                            <cfinclude template="/backend/core/views/plan_view.cfm">
 
                                             <cfif bookedPlan.status eq "expired">
                                                 <cfif getWebhook.recordCount>

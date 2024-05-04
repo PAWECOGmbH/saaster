@@ -59,7 +59,7 @@
                                 <form action="#application.mainURL#/user" method="post" enctype="multipart/form-data">
                                     <div class="row mb-3">
                                         <div class="col-auto text-center">
-                                            <!--- Object "objUser" initialized in includes/header.cfm --->
+                                            <!--- Object "objUser" initialized in /backend/core/views/header.cfm --->
                                             <img src="#application.objUser.getUserImage(session.user_id).userImage#" alt="#session.user_name#" class="avatar avatar-xl brround"><br />
                                         </div>
                                         <div class="col">

@@ -443,7 +443,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 
         // Send email to reset the password
         mail from="#application.fromEmail#" to="#form.email#" subject="#getTrans('titResetPassword')#" type="html" {
-            include template="/frontend/core/handler/mail_design.cfm";
+            include template="/frontend/core/mail_design.cfm";
         }
 
         logWrite("user", "info", "Reset password: E-mail sent in order to reset the password. [E-Mail: #form.email#]");
@@ -628,6 +628,17 @@ if (structKeyExists(url, 'resend')) {
         location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
 
     }
+}
+
+// Logout and delete all sessions
+if (structKeyExists(url, "logout")) {
+
+    logWrite("user", "info", "User has logged out [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
+    structClear(SESSION);
+    onSessionStart();
+
+    location url="#application.mainURL#/login?logout" addtoken="no";
 }
 
 logWrite("user", "warning", "Access attempt to frontend/core/handler/register.cfm without method");
