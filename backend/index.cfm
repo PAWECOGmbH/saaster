@@ -9,7 +9,7 @@
 <body #getLayout.layoutBody#>
 </cfoutput>
 	<div class="page">
-		<cfif fileExists(thiscontent.thisPath)>
+		<cfif fileExists(thiscontent.thisPath) or fileExists("/" & thiscontent.thisPath)>
 			<cfinclude template="/#thiscontent.thisPath#">
 		<cfelse>
 			<cfinclude template="/backend/core/views/dashboard.cfm">
