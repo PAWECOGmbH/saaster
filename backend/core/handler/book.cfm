@@ -15,12 +15,12 @@
 
     // Include the plan process
     if (structKeyExists(url, "plan")) {
-        include template="book_plan.cfm";
+        include template="/backend/core/handler/book_plan.cfm";
     }
 
     // Include the module process
     if (structKeyExists(url, "module")) {
-        include template="book_module.cfm";
+        include template="/backend/core/handler/book_module.cfm";
     }
 
 
@@ -28,5 +28,5 @@
 
 
 <!--- Include the payment services --->
-<cfinclude template="payment.cfm">
+<cfinclude template="/backend/core/handler/payment.cfm">
 

@@ -5,7 +5,7 @@
 
 setting requesttimeout = 1000;
 objLogs = application.objLog;
-objTime = new com.time(1);
+objTime = new backend.core.com.time(1);
 
 param name="url.task" default="01";
 if (!isNumeric(url.task)) {

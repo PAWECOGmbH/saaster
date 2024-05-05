@@ -23,7 +23,7 @@ INSERT INTO `system_mappings` VALUES (1, 'login', 'frontend/login.cfm', 0, 0, 0)
 INSERT INTO `system_mappings` VALUES (2, 'register', 'frontend/register.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (3, 'password', 'frontend/password.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (4, 'dashboard', 'backend/core/views/dashboard.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (5, 'account-settings/my-profile', 'backend/core/views/views/customer/my-profile.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (5, 'account-settings/my-profile', 'backend/core/views/customer/my-profile.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (6, 'customer', 'backend/core/handler/customer.cfm', 1, 0, 0);
 INSERT INTO `system_mappings` VALUES (7, 'global', 'backend/core/handler/global.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (9, 'logincheck', 'frontend/core/handler/register.cfm', 0, 0, 0);
@@ -73,7 +73,7 @@ INSERT INTO `system_mappings` VALUES (63, 'sysadm/customers', 'backend/core/hand
 INSERT INTO `system_mappings` VALUES (64, 'sysadmin/customers/edit', 'backend/core/views/sysadmin/customers_edit.cfm', 0, 0, 1);
 INSERT INTO `system_mappings` VALUES (65, 'sysadmin/customers/details', 'backend/core/views/sysadmin/customers_details.cfm', 0, 0, 1);
 INSERT INTO `system_mappings` VALUES (66, 'sysadmin/system-settings', 'backend/core/views/sysadmin/system_settings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/core/handler/book.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (67, 'book', 'backend/core/handler/book.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (68, 'cancel', 'backend/core/handler/cancel.cfm', 0, 1, 0);
 INSERT INTO `system_mappings` VALUES (69, 'dashboard-settings', 'backend/core/handler/dashboard.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (70, 'account-settings/plans', 'backend/core/views/customer/plans.cfm', 0, 1, 0);
@@ -81,7 +81,7 @@ INSERT INTO `system_mappings` VALUES (71, 'plan-settings', 'backend/core/handler
 INSERT INTO `system_mappings` VALUES (72, 'account-settings/payment', 'backend/core/views/customer/payment.cfm', 0, 1, 0);
 INSERT INTO `system_mappings` VALUES (73, 'payment-settings', 'backend/core/handler/payment.cfm', 0, 1, 0);
 INSERT INTO `system_mappings` VALUES (74, 'account-settings/settings', 'backend/core/views/customer/settings.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (75, 'notifications', 'backend/core/views/customer/notifications.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (75, 'notifications', 'backend/core/views/notifications/overview.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (76, 'sysadm/api-settings', 'backend/core/handler/sysadmin/api_settings.cfm', 0, 0, 1);
 INSERT INTO `system_mappings` VALUES (77, 'sysadmin/api-settings', 'backend/core/views/sysadmin/api_settings.cfm', 0, 0, 0);
 INSERT INTO `system_mappings` VALUES (78, 'mfa', 'frontend/mfa.cfm', 0, 0, 0);

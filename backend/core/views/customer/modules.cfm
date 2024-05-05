@@ -50,7 +50,7 @@
                 #session.alert#
             </cfif>
         </div>
-        <div class="container-xl">
+       <div class="#getLayout.layoutPage#">
             <cfif arrayLen(getBookedModules)>
                 <div class="row mb-5">
                     <div class="col-lg-12">
