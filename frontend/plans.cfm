@@ -7,7 +7,7 @@
         }
     }
 
-    objPlans = new com.plans();
+    objPlans = new backend.core.com.plans();
 
     if (structKeyExists(session, "customer_id")) {
         groupStruct = objPlans.prepareForGroupID(customerID=session.customer_id);
@@ -47,10 +47,10 @@
             </cfif>
             <cfif hasPlans>
                 <div class="text-center mb-4">
-                    <cfinclude template="/includes/plan_boxes.cfm">
+                    <cfinclude template="plan_boxes.cfm">
                 </div>
                 <div class="text-center mb-4">
-                    <cfinclude template="/includes/plan_features.cfm">
+                    <cfinclude template="plan_features.cfm">
                 </div>
             </cfif>
         </div>

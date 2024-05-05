@@ -14,7 +14,7 @@ component extends="taffy.core.resource" taffy_uri="/getCurrentPlan" {
             return noData().withStatus(400);
         }
 
-        local.qGetPlan = new com.plans(
+        local.qGetPlan = new backend.core.com.plans(
             local.lngID,
             local.language,
             local.currencyID).getCurrentPlan(local.customerID);

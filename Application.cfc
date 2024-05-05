@@ -1,5 +1,5 @@
 
-component displayname="Application" output="false" extends="myapp.myApplication" {
+component displayname="Application" output="false" extends="backend.myapp.ownApplication" {
 
     // Datasource and custom variables
     include template="config.cfm";
@@ -49,15 +49,15 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         application.payrexxStruct = local.payrexxStruct;
 
         // Object initialising
-        application.objLog = new com.log();
-        application.objGlobal = new com.global();
-        application.objLanguage = new com.language();
-        application.objSettings = new com.settings();
-        application.objUser = new com.user();
-        application.objCustomer = new com.customer();
-        application.objLayout = new com.layout();
-        application.objNotifications = new com.notifications();
-        application.objSysadmin = new com.sysadmin();
+        application.objLog = new backend.core.com.log();
+        application.objGlobal = new backend.core.com.global();
+        application.objLanguage = new backend.core.com.language();
+        application.objSettings = new backend.core.com.settings();
+        application.objUser = new backend.core.com.user();
+        application.objCustomer = new backend.core.com.customer();
+        application.objLayout = new backend.core.com.layout();
+        application.objNotifications = new backend.core.com.notifications();
+        application.objSysadmin = new backend.core.com.sysadmin();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -206,7 +206,7 @@ component displayname="Application" output="false" extends="myapp.myApplication"
         if (structKeyExists(session, "customer_id")) {
 
             // More global variables (with customer session)
-            getTime = new com.time(session.customer_id);
+            getTime = new backend.core.com.time(session.customer_id);
             getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
 
             local.no_access = false;
@@ -243,42 +243,9 @@ component displayname="Application" output="false" extends="myapp.myApplication"
             }
 
         } else {
-
-            // ### Login/session handling ###################################
-
-            // Append the array from config.cfm
-            local.exceptions = ["/frontend/", "/setup/", "/scheduletasks/", "/registration", "/register", "/login", "/password", "error.cfm"];
-            loop array=variables.SessionExceptions index="local.path" {
-                if (len(trim(local.path))) {
-                    arrayAppend(local.exceptions, local.path);
-                }
-            }
-
-            // Default the exception to false
-            local.isException = false;
-
-            // Get the current path
-            local.thisPath;
-            if (len(trim(cgi.script_name))) {
-                local.thisPath = cgi.script_name;
-            }
-            if (len(trim(cgi.path_info))) {
-                local.thisPath = cgi.path_info;
-            }
-            if (local.thisPath eq "/index.cfm") {
-                local.thisPath = "";
-            }
-
-            // Check whether the current path is included in the list of exceptions
-            for (local.exceptionPath in local.exceptions) {
-                if (findNoCase(local.exceptionPath, local.thisPath) or !len(trim(local.thisPath))) {
-                    local.isException = true;
-                    break;
-                }
-            }
-
-            // If it is not an exception and no session exists, redirect to the login page
-            if (!local.isException and !structKeyExists(session, "user_id")) {
+            
+            // Protect the 'backend' folder 
+            if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
                 getAlert('alertSessionExpired', 'warning');
                 location url="#application.mainURL#/login" addtoken="false";
             }
