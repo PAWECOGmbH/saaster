@@ -75,9 +75,9 @@ CREATE TABLE `modules`  (
 -- ----------------------------
 -- Records of modules
 -- ----------------------------
-INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, 'modules/todo/settings', 1, 1);
-INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, 'modules/easyerp/settings', 0, 2);
-INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, 'modules/mailchimp/settings', 0, 3);
+INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, 'backend/modules/todo/settings', 1, 1);
+INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, 'backend/modules/easyerp/settings', 0, 2);
+INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, 'backend/modules/mailchimp/settings', 0, 3);
 
 
 -- ----------------------------
@@ -167,9 +167,9 @@ CREATE TABLE `custom_mappings`  (
 -- ----------------------------
 -- Records of custom_mappings
 -- ----------------------------
-INSERT INTO `custom_mappings` VALUES (1, 'modules/todo/settings', 'modules/todo/settings.cfm', 1, 0, 0, 1);
-INSERT INTO `custom_mappings` VALUES (2, 'modules/easyerp/settings', 'modules/easyerp/settings.cfm', 1, 0, 0, 2);
-INSERT INTO `custom_mappings` VALUES (3, 'modules/mailchimp/settings', 'modules/mailchimp/settings.cfm', 1, 0, 0, 3);
+INSERT INTO `custom_mappings` VALUES (1, 'backend/modules/todo/settings', 'backend/modules/todo/settings.cfm', 1, 0, 0, 1);
+INSERT INTO `custom_mappings` VALUES (2, 'backend/modules/easyerp/settings', 'backend/modules/easyerp/settings.cfm', 1, 0, 0, 2);
+INSERT INTO `custom_mappings` VALUES (3, 'backend/modules/mailchimp/settings', 'backend/modules/mailchimp/settings.cfm', 1, 0, 0, 3);
 
 
 SET FOREIGN_KEY_CHECKS = 1;

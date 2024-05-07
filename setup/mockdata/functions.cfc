@@ -81,11 +81,11 @@ component name="mockdata-functions" {
 
     public function createInvoices(required numeric amount, numeric customer) {
 
-        objInvoice = new com.invoices();
+        objInvoice = new backend.core.com.invoices();
         invoiceData = structNew();
         setting = application.objSettings;
 
-        local.objCurrency = new com.currency();
+        local.objCurrency = new backend.core.com.currency();
 
         qCustomers = queryExecute(
             options = {datasource = application.datasource},

@@ -13,7 +13,7 @@ component extends="taffy.core.resource" taffy_uri="/getPlanFeatureSetting" {
             return noData().withStatus(400);
         }
 
-        local.qGetPlanFeatureSettings = new com.settings().getSetting(local.settingVariable, local.planID, local.language);
+        local.qGetPlanFeatureSettings = new backend.core.com.settings().getSetting(local.settingVariable, local.planID, local.language);
 
         return rep(local.qGetPlanFeatureSettings);
     }
