@@ -243,12 +243,17 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
             }
 
         } else {
-            
-            // Protect the 'backend' folder 
+
+            // Protect the 'backend' folder excluding the pdf print page
             if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
-                getAlert('alertSessionExpired', 'warning');
-                location url="#application.mainURL#/login" addtoken="false";
+                if (structKeyExists(url, "pdf")) {
+                    location url="#application.mainURL#/backend/core/views/invoices/print.cfm?pdf=#url.pdf#" addtoken="false";
+                } else {
+                    getAlert('alertSessionExpired', 'warning');
+                    location url="#application.mainURL#/login" addtoken="false";
+                }
             }
+
 
             // If someone is trying to call a .cfm file directly
             if (thiscontent.noaccess) {

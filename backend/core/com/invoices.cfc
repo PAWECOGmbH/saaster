@@ -1294,7 +1294,7 @@ component displayname="invoices" output="false" {
         )
 
         // Loop over all registered cards until the amount could be charged (default first)
-        loop query="local.qOpenInvoices" {            
+        loop query="local.qOpenInvoices" {
 
             local.paymentStruct = structNew();
             local.paymentStruct['amount'] = local.qOpenInvoices.decTotalPrice * 100;
@@ -1624,7 +1624,7 @@ component displayname="invoices" output="false" {
             local.qrDataSet['qrSize'] = "300";
 
             // Path to the swiss cross logo (if desired)
-            local.qrDataSet['qrLogo'] = "./dist/img/ch-cross.png";
+            local.qrDataSet['qrLogo'] = application.mainURL & "/dist/img/ch-cross.png";
 
             // Set all the needed data
             local.qrDataSet['billerIBAN'] = application.objSysAdmin.getSystemSetting('settingIBANnumber').strDefaultValue;
