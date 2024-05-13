@@ -8,11 +8,11 @@
     <meta name="description" content="saaster.io - the saas boilerplate / framework for coldfusion and lucee">
     <cfoutput>
     <link type="text/css" href="#application.mainURL#/dist/css/dropify.min.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/dist/css/tabler.min.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/dist/css/tabler-flags.min.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/dist/css/tabler-payments.min.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/dist/css/tabler-vendors.min.css" rel="stylesheet"/>
-    <link type="text/css" href="#application.mainURL#/dist/css/demo.min.css" rel="stylesheet"/>
+   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-flags.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-payments.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-vendors.min.css">
     <link type="text/css" href="#application.mainURL#/dist/fontawesome/css/all.css" rel="stylesheet" />
     <link type="text/css" href="#application.mainURL#/dist/css/sweetalert.css" rel="stylesheet" />
     <link type="text/css" href="#application.mainURL#/dist//trumbowyg/ui/trumbowyg.min.css" rel="stylesheet"/>
