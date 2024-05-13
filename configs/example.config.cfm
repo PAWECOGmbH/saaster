@@ -8,7 +8,6 @@
 variables.datasource = "database";
 
 
-
 // ####################################
 //  SERVER SETTINGS
 // ####################################
@@ -22,7 +21,6 @@ variables.mainURL = "https://www.saaster.io";
 
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "saaster2022";
-
 
 
 // ####################################
@@ -44,9 +42,6 @@ variables.requesttimeout = 60;
 // Set allowed image file types
 variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
 variables.documentsFileTypes = ["pdf"];
-
-// List of paths or files to be excluded for session handling
-variables.SessionExceptions = [""];
 
 
 // ####################################
@@ -76,14 +71,12 @@ variables.toEmail = "info@saaster.io";
 variables.errorEmail = "error@saaster.io";
 
 
-
 // ####################################
 //  CUSTOMER SETTINGS
 // ####################################
 
 // To simulate a customer in local environment, enter a public IP address here.
 variables.usersIP = "62.171.127.255";
-
 
 
 // ####################################
@@ -112,7 +105,6 @@ variables.payrexxWebhookPassword = "payrexxSaaster2024";
 variables.payrexxPSPs = "";
 
 
-
 // ####################################
 //  Footer text variable
 // ####################################
@@ -120,7 +112,6 @@ variables.payrexxPSPs = "";
 cfsavecontent (variable="variables.footerText") {
     echo("<div><p>Open source software running under the <a href='https://github.com/PAWECOGmbH/saaster/blob/main/LICENSE' target='_blank'>MIT license</a> - #dateFormat(now(), 'yyyy')# by #variables.appOwner#</p></div>");
 }
-
 
 
 // ####################################
