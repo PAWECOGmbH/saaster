@@ -16,7 +16,7 @@
 <div class="page-wrapper">
     <div class="#getLayout.layoutPage#">
 
-        
+
         <div class="#getLayout.layoutPageHeader# mb-3">
             <h2 class="page-title">#getTrans('txtAccountSettings')#</h2>
 
@@ -111,27 +111,44 @@
                         </div>
                         <div class="card-body">
 
-                            <cfif session.currentPlan.planID gt 0>
+                            <div class="list-group">
 
-                                <!--- Display the current plan --->
-                                <cfinclude template="/backend/core/views/plan_view.cfm">
+                                <cfif session.currentPlan.planID gt 0>
 
-                                <cfif session.superAdmin>
+                                    <!--- Display the current plan --->
+                                    <cfinclude template="/backend/core/views/plan_view.cfm">
 
-                                    <cfif session.currentPlan.status eq "canceled">
+                                    <cfif session.superAdmin>
 
-                                        <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
+                                        <cfif session.currentPlan.status eq "canceled">
 
-                                    <cfelse>
+                                            <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
 
-                                        <cfif session.currentPlan.status neq "payment">
+                                        <cfelse>
 
-                                            <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
-                                                <div class="d-flex justify-content-between">
-                                                    <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
-                                                </div>
-                                                <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
-                                            </a>
+                                            <cfif session.currentPlan.status neq "payment">
+
+                                                <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
+                                                    </div>
+                                                    <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
+                                                </a>
+
+                                            </cfif>
+
+                                        </cfif>
+
+                                    </cfif>
+
+                                <cfelse>
+
+                                    <cfif session.superAdmin>
+
+                                        <cfif hasPlans>
+
+                                            <p>#getTrans('msgNoPlanBooked')#</p>
+                                            <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
 
                                         </cfif>
 
@@ -139,31 +156,18 @@
 
                                 </cfif>
 
-                            <cfelse>
+                                <cfif arrayLen(moduleArray)>
 
-                                <cfif session.superAdmin>
-
-                                    <cfif hasPlans>
-
-                                        <p>#getTrans('msgNoPlanBooked')#</p>
-                                        <p class="mb-4"><a class="btn btn-success" href="#application.mainURL#/account-settings/plans">#getTrans('txtBookNow')#</a></p>
-
-                                    </cfif>
+                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
+                                        </div>
+                                        <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
+                                    </a>
 
                                 </cfif>
 
-                            </cfif>
-
-                            <cfif arrayLen(moduleArray)>
-
-                                <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
-                                    </div>
-                                    <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
-                                </a>
-
-                            </cfif>
+                            </div>
 
                         </div>
                     </div>
@@ -172,7 +176,7 @@
 
         </div>
     </div>
-    
+
 
 </div>
 </cfoutput>
