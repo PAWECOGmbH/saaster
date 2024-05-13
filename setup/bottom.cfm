@@ -5,8 +5,7 @@
 </body>
 </html>
 
-<script src="../dist/js/tabler.min.js"></script>
-<script src="../dist/js/search_select.js"></script>
+<cfinclude template="/backend/core/views/js.cfm">
 
 <script>
     var select_box_element = document.querySelector('#select_box');

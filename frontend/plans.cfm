@@ -39,21 +39,19 @@
 
 
 <cfoutput>
-<div class="border-top-wide border-primary d-flex flex-column">
-    <div class="page page-center">
-        <div class="container py-4">
-            <cfif structKeyExists(session, "alert")>
-                #session.alert#
-            </cfif>
-            <cfif hasPlans>
-                <div class="text-center mb-4">
-                    <cfinclude template="plan_boxes.cfm">
-                </div>
-                <div class="text-center mb-4">
-                    <cfinclude template="plan_features.cfm">
-                </div>
-            </cfif>
-        </div>
+<div class="page page-center">
+    <div class="container py-4">
+        <cfif structKeyExists(session, "alert")>
+            #session.alert#
+        </cfif>
+        <cfif hasPlans>
+            <div class="text-center mb-4">
+                <cfinclude template="plan_boxes.cfm">
+            </div>
+            <div class="text-center mb-4">
+                <cfinclude template="plan_features.cfm">
+            </div>
+        </cfif>
     </div>
 </div>
 </cfoutput>
