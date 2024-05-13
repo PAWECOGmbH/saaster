@@ -2,10 +2,6 @@
 
 <cfoutput>
 
-    .btn-primary{
-        --tblr-btn-bg: #application.systemSettingStruct.settingColorPrimary# !important;
-        --tblr-btn-disabled-bg: #application.systemSettingStruct.settingColorPrimary# !important;
-    }
     .btn-primary:hover,
     .btn-primary:active{
         --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorPrimary# !important;
