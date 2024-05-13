@@ -185,16 +185,17 @@ if (url.pass eq variables.schedulePassword) {
 
             // Get invoice data of the last invoice
             invoiceArray = objInvoice.getInvoices(qRenewBookings.intCustomerID).arrayInvoices;
-            lastInvoice = arrayLast(invoiceArray);
-            language = lastInvoice.invoiceLanguage;
-            currencyID = objCurrency.getCurrency(lastInvoice.invoiceCurrency).id;
-            getTime = new backend.core.com.time(qRenewBookings.intCustomerID);
-            if (!len(trim(language))) {
+            if (!arrayIsEmpty(invoiceArray)) {
+                lastInvoice = arrayLast(invoiceArray);
+                language = lastInvoice.invoiceLanguage;
+                currencyID = objCurrency.getCurrency(lastInvoice.invoiceCurrency).id;
+                currency = lastInvoice.invoiceCurrency;
+            } else {
                 language = application.objLanguage.getDefaultLanguage().iso;
-            }
-            if (!isNumeric(currencyID)) {
                 currencyID = objCurrency.getCurrency().id;
+                currency = objCurrency.getCurrency().iso;
             }
+            getTime = new backend.core.com.time(qRenewBookings.intCustomerID);
             startDate = dateFormat(now(), "yyyy-mm-dd");
             if (qRenewBookings.strRecurring eq "monthly") {
                 endDate = dateFormat(dateAdd("m", 1, startDate), "yyyy-mm-dd");
@@ -214,7 +215,7 @@ if (url.pass eq variables.schedulePassword) {
                 invoiceStruct['bookingID'] = qRenewBookings.intBookingID;
                 invoiceStruct['customerID'] = qRenewBookings.intCustomerID;
                 invoiceStruct['title'] = getTrans('titRenewal', language) & " " & planData.planName;
-                invoiceStruct['currency'] = lastInvoice.invoiceCurrency;
+                invoiceStruct['currency'] = currency;
                 invoiceStruct['isNet'] = planData.isNet;
                 invoiceStruct['vatType'] = planData.vatType;
                 invoiceStruct['paymentStatusID'] = 2;
@@ -323,7 +324,7 @@ if (url.pass eq variables.schedulePassword) {
                     } else {
 
                         // Make log
-                        objLogs.logWrite("scheduletask", "info", "Payment successfully completed [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+                        objLogs.logWrite("scheduletask", "info", "Invoice successfully sent by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
@@ -351,7 +352,7 @@ if (url.pass eq variables.schedulePassword) {
                     } else {
 
                         // Make log
-                        objLogs.logWrite("scheduletask", "info", "The receipt was sent by email successfully [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
+                        objLogs.logWrite("scheduletask", "info", "Receipt successfully sent by email [InvoiceID: #invoiceID#, Invoice title: #invoiceStruct['title']#, CustomerID: #qRenewBookings.intCustomerID#]");
 
                     }
 
