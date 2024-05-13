@@ -181,8 +181,23 @@ if (url.pass eq variables.schedulePassword) {
 
         } else {
 
-            // Make log
-            objLogs.logWrite("scheduletask", "warning", "Scheduled task #url.task# still running, please check!", true);
+            // If the difference is greater than 15 minutes, something went wrong -> correct it!
+            if (dateDiff("n", qRunning.dtmStart, now()) gt 15 or dateDiff("n", qRunning.dtmStart, now()) eq 0) {
+
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        utcDate: {type: "datetime", value: now()}
+                    },
+                    sql = "
+                        UPDATE schedulecontrol
+                        SET dtmStart = :utcDate,
+                            dtmEnd = DATE_ADD(:utcDate, INTERVAL 1 SECOND)
+                        WHERE strTaskName = 'task_#url.task#'
+                    "
+                )
+
+            }
 
         }
 
