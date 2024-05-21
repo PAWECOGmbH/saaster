@@ -109,7 +109,7 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getTotalCountriesSearch(required string search){
-
+        
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -570,6 +570,19 @@ component displayname="sysadmin" output="false" {
             sql = "
                 SELECT *
                 FROM system_mappings
+            "
+        );
+
+        return local.qSystemMappings;
+    }
+
+    public query function getFrontendMappings(){
+
+        local.qSystemMappings = queryExecute (
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM frontend_mappings
             "
         );
 
