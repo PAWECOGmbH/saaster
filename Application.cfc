@@ -15,7 +15,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     this.setdomaincookies = true;
     processingdirective pageEncoding="utf-8";
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
-    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!
+    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!!
 
 
     public boolean function onApplicationStart() {
