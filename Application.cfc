@@ -1,5 +1,5 @@
 
-component displayname="Application" output="yes" extends="backend.myapp.ownApplication" {
+component displayname="Application" output="false" extends="backend.myapp.ownApplication" {
 
     // Datasource and custom variables
     include template="config.cfm";
@@ -15,7 +15,8 @@ component displayname="Application" output="yes" extends="backend.myapp.ownAppli
     this.setdomaincookies = true;
     processingdirective pageEncoding="utf-8";
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
-    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!!
+    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!
+
 
     public boolean function onApplicationStart() {
 
@@ -292,5 +293,4 @@ component displayname="Application" output="yes" extends="backend.myapp.ownAppli
     setting enablecfoutputonly = false;
 
 }
-
 
