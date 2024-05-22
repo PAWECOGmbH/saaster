@@ -16,6 +16,16 @@ if (structKeyExists(form, "modal_lng")) {
     table = form.table;
     key = form.key;
 
+    if(referer eq "/sysadmin/mappings##frontend" and field neq "strhtmlcodes"){
+        loop list=form.fieldnames index="i" {
+            if (listFirst(i, "_") eq "text") {
+                text_value = evaluate(i);
+                text_value = application.objGlobal.cleanUpText(text_value)
+                form[i] = text_value
+            }
+        }    
+    }
+
     try {
 
         loop list=form.fieldnames index="i" {

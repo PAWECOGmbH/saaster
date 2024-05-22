@@ -111,20 +111,20 @@ if (structKeyExists(form, "new_mapping_frontend")) {
     param name="form.metadescription" default="";
     param name="form.htmlcodes" default="";
 
-    local.form.mapping = left(form.mapping, 3000);
-    local.form.path = left(form.path, 3000);
-    local.form.metatitle = left(form.metatitle, 3000);
-    local.form.metadescription = left(form.metadescription, 3000);
-    local.form.htmlcodes = left(form.htmlcodes, 3000);
+    local.mapping = application.objGlobal.cleanUpText(form.mapping, 255);
+    local.path = application.objGlobal.cleanUpText(form.path, 255);
+    local.metatitle = application.objGlobal.cleanUpText(form.metatitle, 255);
+    local.metadescription = application.objGlobal.cleanUpText(form.metadescription, 3000);
+    local.htmlcodes = left(form.htmlcodes, 3000);
 
     queryExecute(
         options = {datasource = application.datasource},
         params = {
-            mapping: {type: "nvarchar", value: local.form.mapping},
-            path: {type: "nvarchar", value: local.form.path},
-            metatitle: {type: "nvarchar", value: local.form.metatitle},
-            metadescription: {type: "nvarchar", value: local.form.metadescription},
-            htmlcodes: {type: "nvarchar", value: local.form.htmlcodes}
+            mapping: {type: "varchar", value: local.mapping},
+            path: {type: "varchar", value: local.path},
+            metatitle: {type: "nvarchar", value: local.metatitle},
+            metadescription: {type: "nvarchar", value: local.metadescription},
+            htmlcodes: {type: "nvarchar", value: local.htmlcodes}
         },
         sql = "
             INSERT INTO frontend_mappings (strMapping, strPath, strMetatitle, strMetadescription, strhtmlcodes)
@@ -168,21 +168,21 @@ if(structKeyExists(form, "edit_mapping_frontend")) {
         param name="form.metadescription" default="";
         param name="form.htmlcodes" default="";
 
-        local.form.mapping = left(form.mapping, 3000);
-        local.form.path = left(form.path, 3000);
-        local.form.metatitle = left(form.metatitle, 3000);
-        local.form.metadescription = left(form.metadescription, 3000);
-        local.form.htmlcodes = left(form.htmlcodes, 3000);
+        local.mapping = application.objGlobal.cleanUpText(form.mapping, 255);
+        local.path = application.objGlobal.cleanUpText(form.path, 255);
+        local.metatitle = application.objGlobal.cleanUpText(form.metatitle, 255);
+        local.metadescription = application.objGlobal.cleanUpText(form.metadescription, 3000);
+        local.htmlcodes = left(form.htmlcodes, 3000);
 
         queryExecute(
             options = {datasource = application.datasource},
             params = {
                 mappingID: {type: "numeric", value: form.edit_mapping_frontend},
-                mapping: {type: "nvarchar", value: local.form.mapping},
-                path: {type: "nvarchar", value: local.form.path},
-                metatitle: {type: "nvarchar", value: local.form.metatitle},
-                metadescription: {type: "nvarchar", value: local.form.metadescription},
-                htmlcodes: {type: "nvarchar", value: local.form.htmlcodes}
+                mapping: {type: "varchar", value: local.mapping},
+                path: {type: "varchar", value: local.path},
+                metatitle: {type: "nvarchar", value: local.metatitle},
+                metadescription: {type: "nvarchar", value: local.metadescription},
+                htmlcodes: {type: "nvarchar", value: local.htmlcodes}
             },
             sql = "
                 UPDATE frontend_mappings

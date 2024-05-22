@@ -137,7 +137,7 @@
                         </div>
                         <div id="frontend" class="card tab-pane show">
                             <div class="card-body">
-                                <div class="card-title">Frontend mappings</div><!--- !!!!!!!!!!!!! --->
+                                <div class="card-title">Frontend mappings</div>
                                 <p>Here you can create your own Frontend mappings. These mappings are not affected by any system updates.</p>
                                 <div class="table-responsive">
                                     <table class="table table-vcenter card-table">
@@ -174,7 +174,7 @@
                                                         <td></td>
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <input type="text" name="mapping" value="#qFrontendMappings.strMapping#" class="form-control"> 
+                                                                <input type="text" name="mapping" value="#HTMLEditFormat(qFrontendMappings.strMapping)#" class="form-control" maxlength="255"> 
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_mapping_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
                                                                 </span>
@@ -182,7 +182,7 @@
                                                         </td>
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <input type="text" name="path" value="#qFrontendMappings.strPath#" class="form-control">
+                                                                <input type="text" name="path" value="#HTMLEditFormat(qFrontendMappings.strPath)#" class="form-control" maxlength="255">
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
                                                                 </span>
@@ -193,7 +193,7 @@
 
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <input type="text" name="metatitle" value="#qFrontendMappings.strMetatitle#" class="form-control" id="input#qFrontendMappings.intFrontendMappingsID#">
+                                                                <input type="text" name="metatitle" value="#HTMLEditFormat(qFrontendMappings.strMetatitle)#" class="form-control" id="input#qFrontendMappings.intFrontendMappingsID#" maxlength="255">
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metatitle_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
                                                                 </span>
@@ -207,7 +207,7 @@
                                                         </td>
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <input type="text" name="metadescription" value="#qFrontendMappings.strMetadescription#" class="form-control" id="inputDesc#qFrontendMappings.intFrontendMappingsID#">
+                                                                <input type="text" name="metadescription" value="#HTMLEditFormat(qFrontendMappings.strMetadescription)#" class="form-control" id="inputDesc#qFrontendMappings.intFrontendMappingsID#" maxlength="3000">
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metadescription_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
                                                                 </span>
@@ -224,7 +224,7 @@
 
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <textarea type="text" name="htmlcodes"  class="form-control mappings-frontend-textareaheight">#qFrontendMappings.strhtmlcodes#</textarea>
+                                                                <textarea type="text" name="htmlcodes"  class="form-control mappings-frontend-textareaheight" maxlength="3000">#qFrontendMappings.strhtmlcodes#</textarea>
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
                                                                 </span>
@@ -236,9 +236,9 @@
                                                 </form>
                                                 <cfset cgiPathTab = "#cgi.path_info###frontend">
                                                 <!--- Modal --->
-                                                #getModal.args('frontend_mappings', 'strMapping', qFrontendMappings.intFrontendMappingsID, 3000).openModal('frontend_mapping', cgiPathTab, 'Translate Mapping')#
-                                                #getModal.args('frontend_mappings', 'strPath', qFrontendMappings.intFrontendMappingsID, 3000).openModal('frontend_path', cgiPathTab, 'Translate Path')#
-                                                #getModal.args('frontend_mappings', 'strMetatitle', qFrontendMappings.intFrontendMappingsID, 3000).openModal('frontend_metatitle', cgiPathTab, 'Translate Metatitle')#
+                                                #getModal.args('frontend_mappings', 'strMapping', qFrontendMappings.intFrontendMappingsID, 255).openModal('frontend_mapping', cgiPathTab, 'Translate Mapping')#
+                                                #getModal.args('frontend_mappings', 'strPath', qFrontendMappings.intFrontendMappingsID, 255).openModal('frontend_path', cgiPathTab, 'Translate Path')#
+                                                #getModal.args('frontend_mappings', 'strMetatitle', qFrontendMappings.intFrontendMappingsID, 255).openModal('frontend_metatitle', cgiPathTab, 'Translate Metatitle')#
                                                 #getModal.args('frontend_mappings', 'strMetadescription', qFrontendMappings.intFrontendMappingsID, 3000).openModal('frontend_metadescription', cgiPathTab, 'Translate Metadescription')#
                                                 #getModal.args('frontend_mappings', 'strhtmlcodes', qFrontendMappings.intFrontendMappingsID, 3000).openModal('frontend_htmlcodes', cgiPathTab, 'Translate HTML Codes')#
                                             </cfoutput>
