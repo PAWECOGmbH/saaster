@@ -516,12 +516,12 @@ $(document).ready(function() {
         metadescription: 1000
     };
 
-    function updatePixelCount(inputId, progressId, progressBarId, maxPixels) {
+    function updatePixelCount(inputId, progressId, progressBarId, maxPixels, fontSettings) {
         const input = document.getElementById(inputId);
         const progress = document.getElementById(progressId);
         const progressbar = document.getElementById(progressBarId);
         const text = input.value;
-        const pixels = getTextWidth(text);
+        const pixels = getTextWidth(text, fontSettings);
         const percentage = (pixels / maxPixels) * 100;
         progress.style.width = percentage + '%';
         
@@ -529,27 +529,28 @@ $(document).ready(function() {
 
         if (percentage <= (200 / maxPixels) * 100) {
             progress.style.backgroundColor = 'orange';
-        } else if (percentage > 90) {
+        } else if (percentage > 100) {
             progress.style.backgroundColor = 'red';
         } else {
             progress.style.backgroundColor = 'green';
         }
     }
 
-    function getTextWidth(text) {
+    function getTextWidth(text, fontSettings) {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        context.font = getComputedStyle(document.body).font;
+        context.font = fontSettings;
         return Math.round(context.measureText(text).width);
     }
 
     $('[id^=input]').each(function() {
         const id = $(this).attr('id').replace('input', '');
         const maxPixelValue = id.includes('Desc') ? maxPixels.metadescription : maxPixels.metatitle;
-        updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue);
+        const fontSettings = id.includes('Desc') ? '400 14px Arial, sans-serif' : '400 20px Roboto, HelveticaNeue, Arial, sans-serif';
+        updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue, fontSettings);
 
         $(this).on('input', function() {
-            updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue);
+            updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue, fontSettings);
         });
     });
 
@@ -568,6 +569,7 @@ $(document).ready(function() {
                 const progressId = `progress${textareaId}`;
                 const progressbarId = `progressbar${textareaId}`;
                 const maxPixelValue = targetId.includes('metadescription') ? maxPixels.metadescription : maxPixels.metatitle;
+                const fontSettings = targetId.includes('metadescription') ? '400 14px Arial, sans-serif' : '400 20px Roboto, HelveticaNeue, Arial, sans-serif';
 
                 // Add progress bar HTML dynamically
                 if (!document.getElementById(progressId)) {
@@ -581,15 +583,19 @@ $(document).ready(function() {
                     `);
                 }
 
-                updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue);
+                updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
 
                 textarea.on('input', function() {
-                    updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue);
+                    updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
                 });
             });
         }
     });
 });
+
+
+
+
 
 
 
