@@ -176,7 +176,7 @@
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="mapping" value="#HTMLEditFormat(qFrontendMappings.strMapping)#" class="form-control" maxlength="255"> 
                                                                 <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_mapping_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
+                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_mapping_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate mapping" data-bs-original-title="Translate mapping"></i></a>
                                                                 </span>
                                                             </div>
                                                         </td>
@@ -184,7 +184,7 @@
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="path" value="#HTMLEditFormat(qFrontendMappings.strPath)#" class="form-control" maxlength="255">
                                                                 <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
+                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate path" data-bs-original-title="Translate path"></i></a>
                                                                 </span>
                                                             </div>
                                                         </td>
@@ -195,7 +195,7 @@
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="metatitle" value="#HTMLEditFormat(qFrontendMappings.strMetatitle)#" class="form-control" id="input#qFrontendMappings.intFrontendMappingsID#" maxlength="255">
                                                                 <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metatitle_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
+                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metatitle_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta title" data-bs-original-title="Translate meta title"></i></a>
                                                                 </span>
                                                             </div>
                                                             <div class="d-flex">
@@ -209,7 +209,7 @@
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="metadescription" value="#HTMLEditFormat(qFrontendMappings.strMetadescription)#" class="form-control" id="inputDesc#qFrontendMappings.intFrontendMappingsID#" maxlength="3000">
                                                                 <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metadescription_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
+                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metadescription_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta description" data-bs-original-title="Translate meta description"></i></a>
                                                                 </span>
                                                             </div>
                                                             <div class="d-flex">
@@ -226,7 +226,7 @@
                                                             <div class="input-group input-group-flat">
                                                                 <textarea type="text" name="htmlcodes"  class="form-control mappings-frontend-textareaheight" maxlength="3000">#qFrontendMappings.strhtmlcodes#</textarea>
                                                                 <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate plan name" data-bs-original-title="Translate plan name"></i></a>
+                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate HTML Codes" data-bs-original-title="Translate HTML Codes"></i></a>
                                                                 </span>
                                                             </div>
                                                         </td>
