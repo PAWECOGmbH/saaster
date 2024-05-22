@@ -138,7 +138,7 @@
                         <div id="frontend" class="card tab-pane show">
                             <div class="card-body">
                                 <div class="card-title">Frontend mappings</div><!--- !!!!!!!!!!!!! --->
-                                <p class="text-red">Here you can create your own Frontend mappings. These mappings are not affected by any system updates.</p>
+                                <p>Here you can create your own Frontend mappings. These mappings are not affected by any system updates.</p>
                                 <div class="table-responsive">
                                     <table class="table table-vcenter card-table">
                                         <thead>
