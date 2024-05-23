@@ -115,6 +115,7 @@ if (structKeyExists(form, "new_mapping_frontend")) {
     local.path = application.objGlobal.cleanUpText(form.path, 255);
     local.metatitle = application.objGlobal.cleanUpText(form.metatitle, 255);
     local.metadescription = application.objGlobal.cleanUpText(form.metadescription, 3000);
+    local.htmlcodes = toString(binaryDecode(form.htmlcodes, "base64"));
     local.htmlcodes = left(form.htmlcodes, 3000);
 
     queryExecute(
@@ -160,18 +161,19 @@ if(structKeyExists(form, "edit_mapping_frontend")) {
         )
 
     } else {
-
+        
         param name="form.edit_mapping_frontend" default="";
         param name="form.mapping" default="";
         param name="form.path" default="";
         param name="form.metatitle" default="";
         param name="form.metadescription" default="";
         param name="form.htmlcodes" default="";
-
+        
         local.mapping = application.objGlobal.cleanUpText(form.mapping, 255);
         local.path = application.objGlobal.cleanUpText(form.path, 255);
         local.metatitle = application.objGlobal.cleanUpText(form.metatitle, 255);
         local.metadescription = application.objGlobal.cleanUpText(form.metadescription, 3000);
+        local.htmlcodes = toString(binaryDecode(form.htmlcodes, "base64"));
         local.htmlcodes = left(form.htmlcodes, 3000);
 
         queryExecute(

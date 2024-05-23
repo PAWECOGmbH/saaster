@@ -509,7 +509,7 @@ $(document).ready(function(){
 });
 
 
-/* SEO Balken für Frontend-Mapping + Modal*/
+/* (Frontend-Mapping + Modal) form.htmlcodes encoding */
 $(document).ready(function() {
     const maxPixels = {
         metatitle: 580,
@@ -589,9 +589,26 @@ $(document).ready(function() {
                     updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
                 });
             });
-        }
+        } else if (targetId && targetId.includes('htmlcodes')) {
+			const modal = $(e.target);
+			const textareas = modal.find('textarea');
+	
+			textareas.each(function() {
+				const textarea = $(this);
+				modal.find('form').on('submit', function() {
+					textarea.val(btoa(textarea.val())); // Encode the HTML content to Base64
+				});
+			});
+		}
     });
 });
+
+function encodeHTMLContent() {
+	var textarea = document.getElementById('htmlcodes');
+	textarea.value = btoa(textarea.value);
+	return true;
+}
+
 
 
 

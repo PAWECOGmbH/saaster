@@ -103,8 +103,13 @@ component displayname="translate" accessors="true" {
         cfquery(name="local.qContent" datasource=application.datasource ) {
             writeOutput("SELECT #variables.thisField# as myField FROM #variables.thisTable# WHERE #variables.thisPrimKey# = #variables.thisID#");
         }
-
-        writeOutput("<p>#local.qContent.myField#</p>");
+        if(variables.thisField eq "strhtmlcodes"){
+            local.modalParagraph = toString(binaryDecode(local.qContent.myField, "base64"));
+            local.modalParagraph = htmlEditFormat(local.modalParagraph);
+            writeOutput("<p>#modalParagraph#</p>");
+        } else {
+            writeOutput("<p>#local.qContent.myField#</p>");
+        }
 
         return;
 

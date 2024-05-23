@@ -168,7 +168,7 @@
                                                 </tr>
                                             </form>
                                             <cfoutput query="qFrontendMappings">
-                                                <form action="#application.mainURL#/sysadm/mappings" method="post">
+                                                <form action="#application.mainURL#/sysadm/mappings" method="post" onsubmit="encodeHTMLContent()">
                                                     <input type="hidden" name="edit_mapping_frontend" value="#qFrontendMappings.intFrontendMappingsID#">
                                                     <tr>
                                                         <td></td>
@@ -188,9 +188,6 @@
                                                                 </span>
                                                             </div>
                                                         </td>
-
-
-
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="metatitle" value="#HTMLEditFormat(qFrontendMappings.strMetatitle)#" class="form-control" id="input#qFrontendMappings.intFrontendMappingsID#" maxlength="255">
@@ -219,12 +216,9 @@
                                                                 <div id="progressbarDesc#qFrontendMappings.intFrontendMappingsID#" class="progress-text"></div>
                                                             </div>
                                                         </td>
-
-
-
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <textarea type="text" name="htmlcodes"  class="form-control mappings-frontend-textareaheight" maxlength="3000">#qFrontendMappings.strhtmlcodes#</textarea>
+                                                                <textarea type="text" name="htmlcodes" id="htmlcodes" class="form-control mappings-frontend-textareaheight" maxlength="3000">#HTMLEditFormat(qFrontendMappings.strhtmlcodes)#</textarea>
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate HTML Codes" data-bs-original-title="Translate HTML Codes"></i></a>
                                                                 </span>
