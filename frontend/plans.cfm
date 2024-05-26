@@ -9,10 +9,16 @@
 
     objPlans = new backend.core.com.plans();
 
+    // Check if the groupID is coming via URL
+    local.groupID = 0;
+    if (structKeyExists(url, "g") and isNumeric(url.g) and url.g gt 0) {
+        local.groupID = url.g;
+    }
+
     if (structKeyExists(session, "customer_id")) {
-        groupStruct = objPlans.prepareForGroupID(customerID=session.customer_id);
+        groupStruct = objPlans.prepareForGroupID(customerID=session.customer_id, groupID=local.groupID);
     } else {
-        groupStruct = objPlans.prepareForGroupID(ipAddress=session.usersIP);
+        groupStruct = objPlans.prepareForGroupID(ipAddress=session.usersIP, groupID=local.groupID);
     }
 
     hasPlans = true;

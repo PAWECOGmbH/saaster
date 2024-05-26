@@ -23,10 +23,7 @@
         include template="/backend/core/handler/book_module.cfm";
     }
 
+    location url="#application.mainURL#/dashboard" addtoken=false;
+
 
 </cfscript>
-
-
-<!--- Include the payment services --->
-<cfinclude template="/backend/core/handler/payment.cfm">
-
