@@ -117,6 +117,13 @@ if (structKeyExists(url, "add")) {
                 logWrite("payrexx", "error", "Payment method could not be added [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #url.psp#]");
             }
 
+            // If there is a plan to pay, charge right now
+            if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
+                bookingPath = session.redirect;
+                structDelete(session, "redirect");
+                location url="#bookingPath#" addtoken=false;
+            }
+
             location url="#application.mainURL#/account-settings/payment" addtoken=false;
 
         } else {

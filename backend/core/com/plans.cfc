@@ -37,15 +37,13 @@ component displayname="plans" output="false" {
     }
 
 
-    // Prepare for group id according ip or customer account
-    public struct function prepareForGroupID(numeric customerID, string ipAddress) {
+    // Prepare for group id according directly input, ip or customer account
+    public struct function prepareForGroupID(numeric customerID, string ipAddress, numeric groupID) {
 
         local.prepareStruct = structNew();
         local.thisCountryID = 0;
         local.thisGroupID = 0;
         local.thisCurrencyID = 0;
-
-        local.objCurrency = new backend.core.com.currency();
 
         // Get the country of the customer, if exists
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
@@ -72,19 +70,29 @@ component displayname="plans" output="false" {
 
         }
 
-        local.qCheckGroup = queryExecute (
-            options = {datasource = application.datasource},
-            params = {
-                countryID: {type: "numeric", value: local.thisCountryID}
-            },
-            sql = "
-                SELECT intPlanGroupID
-                FROM plan_groups
-                WHERE intCountryID = :countryID
-            "
-        )
-        if (local.qCheckGroup.recordCount) {
-            local.thisGroupID = local.qCheckGroup.intPlanGroupID;
+        // Get the groupID directly, if defined
+        if (structKeyExists(arguments, "groupID") and arguments.groupID gt 0) {
+
+            local.thisGroupID = arguments.groupID;
+
+        // If not, get the groupID via country
+        } else {
+
+            local.qCheckGroup = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    countryID: {type: "numeric", value: local.thisCountryID}
+                },
+                sql = "
+                    SELECT intPlanGroupID
+                    FROM plan_groups
+                    WHERE intCountryID = :countryID
+                "
+            )
+            if (local.qCheckGroup.recordCount) {
+                local.thisGroupID = local.qCheckGroup.intPlanGroupID;
+            }
+
         }
 
         // We didn't find a group corresponding to the country, so we need to get group without country
@@ -109,13 +117,23 @@ component displayname="plans" output="false" {
 
         }
 
-        // Get the currency of the country
+        // If there is a customer session and the customer already has a valid plan, overwrite the groupID
+        if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
+            local.currentPlan = getCurrentPlan(arguments.customerID);
+            if (local.currentPlan.planID gt 0) {
+                local.thisGroupID = local.currentPlan.planID;
+            }
+        }
+
+        // Set a default currency
+        local.objCurrency = new backend.core.com.currency();
+        local.thisCurrencyID = local.objCurrency.getCurrency().id;
+
+        // If the countryID has been determined, set the currencyID via the country
         if (local.thisCountryID gt 0) {
             local.currID = local.objCurrency.getCurrencyOfCountry(local.thisCountryID).currencyID;
             if (local.currID gt 0) {
                 local.thisCurrencyID = local.currID;
-            } else {
-                local.thisCurrencyID = local.objCurrency.getCurrency().id;
             }
         }
 
@@ -899,9 +917,12 @@ component displayname="plans" output="false" {
 
 
     // For first registered customers: set the default plan, if defined
-    public void function setDefaultPlan(required numeric customerID, required numeric groupID) {
+    public void function setDefaultPlan(required numeric customerID, required numeric groupID, numeric itsSysadmin) {
 
-        if (arguments.customerID gt 0 and arguments.groupID gt 0) {
+        // Set the default plan only if its not a sysadmin
+        local.itsSysadmin = structKeyExists(arguments, "itsSysadmin") ? arguments.itsSysadmin : 0;
+
+        if (arguments.customerID gt 0 and arguments.groupID gt 0 and local.itsSysadmin eq 0) {
 
             // Check whether we have already a booked plan
             local.checkBooking = getCurrentPlan(arguments.customerID);

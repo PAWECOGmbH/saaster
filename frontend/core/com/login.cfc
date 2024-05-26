@@ -70,19 +70,24 @@ component displayname="login" output="false" {
 
                     local.returnStruct['loginCorrect'] = true;
 
-                    // Init plan object
-                    local.objPlans = new backend.core.com.plans();
-
-                    // Get plan group
-                    local.planGroup = local.objPlans.prepareForGroupID(local.qCheckLogin.intCustomerID, session.usersIP);
-
-                    // Set the default plan, if defined
-                    local.objPlans.setDefaultPlan(local.qCheckLogin.intCustomerID, local.planGroup.groupID);
-
+                    // If a redirect exists
+                    local.insertDefaultPlan = true;
                     if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
                         local.returnStruct['redirect'] = session.redirect;
+                        if (findNoCase("plan=", session.redirect)) {
+                            local.insertDefaultPlan = false;
+                        }
                     } else {
                         local.returnStruct['redirect'] = "#application.mainURL#/dashboard";
+                    }
+
+                    // Set the default plan only if the user hasn't choosed a plan via frontend
+                    if (local.insertDefaultPlan) {
+
+                        local.objPlans = new backend.core.com.plans();
+                        local.planGroup = local.objPlans.prepareForGroupID(local.qCheckLogin.intCustomerID, session.usersIP);
+                        local.objPlans.setDefaultPlan(local.qCheckLogin.intCustomerID, local.planGroup.groupID, local.qCheckLogin.blnSysAdmin);
+
                     }
 
 
