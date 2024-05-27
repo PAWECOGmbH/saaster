@@ -508,3 +508,95 @@ $(document).ready(function(){
 
 });
 
+
+// Frontend-Mapping + Modal
+$(document).ready(function() {
+    const maxPixels = {
+        metatitle: 580,
+        metadescription: 1000
+    };
+
+    function updatePixelCount(inputId, progressId, progressBarId, maxPixels, fontSettings) {
+        const input = document.getElementById(inputId);
+        const progress = document.getElementById(progressId);
+        const progressbar = document.getElementById(progressBarId);
+        const text = input.value;
+        const pixels = getTextWidth(text, fontSettings);
+        const percentage = (pixels / maxPixels) * 100;
+        progress.style.width = percentage + '%';
+
+        progressbar.textContent = pixels + ' px / ' + maxPixels + ' px';
+
+        if (percentage <= (200 / maxPixels) * 100) {
+            progress.style.backgroundColor = 'orange';
+        } else if (percentage > 100) {
+            progress.style.backgroundColor = 'red';
+        } else {
+            progress.style.backgroundColor = 'green';
+        }
+    }
+
+    function getTextWidth(text, fontSettings) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.font = fontSettings;
+        return Math.round(context.measureText(text).width);
+    }
+
+    $('[id^=input]').each(function() {
+        const id = $(this).attr('id').replace('input', '');
+        const maxPixelValue = id.includes('Desc') ? maxPixels.metadescription : maxPixels.metatitle;
+        const fontSettings = id.includes('Desc') ? '400 14px Arial, sans-serif' : '400 20px Roboto, HelveticaNeue, Arial, sans-serif';
+        updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue, fontSettings);
+
+        $(this).on('input', function() {
+            updatePixelCount(`input${id}`, `progress${id}`, `progressbar${id}`, maxPixelValue, fontSettings);
+        });
+    });
+
+    // Event listener for modal shown
+    $(document).on('shown.bs.modal', '.modal', function (e) {
+        const targetId = $(e.relatedTarget).data('bs-target');
+
+        if (targetId && (targetId.includes('frontend_metatitle') || targetId.includes('frontend_metadescription'))) {
+            const modal = $(e.target);
+            const textareas = modal.find('textarea');
+
+            textareas.each(function() {
+                const textarea = $(this);
+                const textareaId = textarea.attr('id') || `textarea${Date.now() + Math.random().toString(36).substr(2, 9)}`;
+                textarea.attr('id', textareaId); // Ensure textarea has an ID
+                const progressId = `progress${textareaId}`;
+                const progressbarId = `progressbar${textareaId}`;
+                const maxPixelValue = targetId.includes('metadescription') ? maxPixels.metadescription : maxPixels.metatitle;
+                const fontSettings = targetId.includes('metadescription') ? '400 14px Arial, sans-serif' : '400 20px Roboto, HelveticaNeue, Arial, sans-serif';
+
+                // Add progress bar HTML dynamically
+                if (!document.getElementById(progressId)) {
+                    textarea.after(`
+                        <div class="d-flex mt-2">
+                            <div class="progress-bar" style="flex-grow: 1;">
+                                <div id="${progressId}" class="progress"></div>
+                            </div>
+                            <div id="${progressbarId}" class="progress-text" style="margin-left: 10px;">0 px / ${maxPixelValue} px</div>
+                        </div>
+                    `);
+                }
+
+                updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
+
+                textarea.on('input', function() {
+                    updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
+                });
+            });
+        }
+    });
+});
+
+
+
+
+
+
+
+

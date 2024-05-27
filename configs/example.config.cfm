@@ -43,6 +43,11 @@ variables.requesttimeout = 60;
 variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg type will not work for image file upload
 variables.documentsFileTypes = ["pdf"];
 
+// Default meta tags
+variables.metaTitle = "The Saaster Company Ltd.";
+variables.metaDescription = "This is a demo application using Saaster as a base software";
+variables.metaHTML = "";
+
 
 // ####################################
 //  API SETTINGS
