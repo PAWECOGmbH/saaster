@@ -174,7 +174,7 @@
                                                         <td></td>
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
-                                                                <input type="text" name="mapping" value="#HTMLEditFormat(qFrontendMappings.strMapping)#" class="form-control" maxlength="255"> 
+                                                                <input type="text" name="mapping" value="#HTMLEditFormat(qFrontendMappings.strMapping)#" class="form-control" maxlength="255">
                                                                 <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_mapping_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate mapping" data-bs-original-title="Translate mapping"></i></a>
                                                                 </span>
@@ -183,9 +183,9 @@
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="path" value="#HTMLEditFormat(qFrontendMappings.strPath)#" class="form-control" maxlength="255">
-                                                                <span class="input-group-text">
+                                                                <!--- <span class="input-group-text">
                                                                     <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate path" data-bs-original-title="Translate path"></i></a>
-                                                                </span>
+                                                                </span> --->
                                                             </div>
                                                         </td>
                                                         <td class="mappings-frontend-td-align">

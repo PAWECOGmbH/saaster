@@ -38,8 +38,17 @@ component displayname="globalFunctions" output="false" {
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, 1, 1, 1
+                    SELECT strPath, 0, 0, 0
                     FROM frontend_mappings
+                    WHERE strMapping = :strMapping
+                    UNION
+                    SELECT
+                    (
+                        SELECT strPath
+                        FROM frontend_mappings
+                        WHERE intFrontendMappingsID = frontend_mappings_trans.intFrontendMappingsID
+                    ) as strPath, 0, 0, 0
+                    FROM frontend_mappings_trans
                     WHERE strMapping = :strMapping
                     LIMIT 1
                 "
