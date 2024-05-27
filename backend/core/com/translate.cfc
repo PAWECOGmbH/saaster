@@ -89,7 +89,9 @@ component displayname="translate" accessors="true" {
             cfquery(name="local.qContent" datasource=application.datasource ) {
                 writeOutput("SELECT #variables.thisField# as fieldContent FROM #local.transTable# WHERE #variables.thisPrimKey# = #variables.thisID# AND intLanguageID = '#local.getLng.intLanguageID#'");
             }
-            writeOutput("#local.qContent.fieldContent#</textarea>");
+            local.replacedCode = replace(local.qContent.fieldContent, "invalidTag", "meta", "all");
+            local.replacedCode = replaceList(local.replacedCode, "<,>", "&lt;,&gt;");
+            writeOutput("#local.replacedCode#</textarea>");
         }
 
         return;
@@ -103,13 +105,10 @@ component displayname="translate" accessors="true" {
         cfquery(name="local.qContent" datasource=application.datasource ) {
             writeOutput("SELECT #variables.thisField# as myField FROM #variables.thisTable# WHERE #variables.thisPrimKey# = #variables.thisID#");
         }
-        if(variables.thisField eq "strhtmlcodes"){
-            local.modalParagraph = toString(binaryDecode(local.qContent.myField, "base64"));
-            local.modalParagraph = htmlEditFormat(local.modalParagraph);
-            writeOutput("<p>#modalParagraph#</p>");
-        } else {
-            writeOutput("<p>#local.qContent.myField#</p>");
-        }
+
+        local.replacedCode = replaceList(local.qContent.myField, "<,>", "&lt;,&gt;");
+        local.replacedCode = replace(local.replacedCode, "#chr(13)#", "<br />", "all");
+        writeOutput(local.replacedCode);
 
         return;
 

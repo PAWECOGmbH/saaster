@@ -37,6 +37,10 @@ component displayname="globalFunctions" output="false" {
                     SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
+                    UNION
+                    SELECT strPath, 1, 1, 1
+                    FROM frontend_mappings
+                    WHERE strMapping = :strMapping
                     LIMIT 1
                 "
             )
@@ -68,6 +72,10 @@ component displayname="globalFunctions" output="false" {
                     SELECT strPath
                     FROM custom_mappings
                     WHERE strPath = :thisPath
+                    UNION
+                    SELECT strPath
+                    FROM frontend_mappings
+                    WHERE strMapping = :thisPath
                     LIMIT 1
                 "
             )

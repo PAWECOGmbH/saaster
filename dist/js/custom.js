@@ -524,7 +524,7 @@ $(document).ready(function() {
         const pixels = getTextWidth(text, fontSettings);
         const percentage = (pixels / maxPixels) * 100;
         progress.style.width = percentage + '%';
-        
+
         progressbar.textContent = pixels + ' px / ' + maxPixels + ' px';
 
         if (percentage <= (200 / maxPixels) * 100) {
@@ -557,7 +557,7 @@ $(document).ready(function() {
     // Event listener for modal shown
     $(document).on('shown.bs.modal', '.modal', function (e) {
         const targetId = $(e.relatedTarget).data('bs-target');
-        
+
         if (targetId && (targetId.includes('frontend_metatitle') || targetId.includes('frontend_metadescription'))) {
             const modal = $(e.target);
             const textareas = modal.find('textarea');
@@ -589,25 +589,9 @@ $(document).ready(function() {
                     updatePixelCount(textareaId, progressId, progressbarId, maxPixelValue, fontSettings);
                 });
             });
-        } else if (targetId && targetId.includes('htmlcodes')) {
-			const modal = $(e.target);
-			const textareas = modal.find('textarea');
-	
-			textareas.each(function() {
-				const textarea = $(this);
-				modal.find('form').on('submit', function() {
-					textarea.val(btoa(textarea.val())); // Encode the HTML content to Base64
-				});
-			});
-		}
+        }
     });
 });
-
-function encodeHTMLContent() {
-	var textarea = document.getElementById('htmlcodes');
-	textarea.value = btoa(textarea.value);
-	return true;
-}
 
 
 

@@ -16,14 +16,14 @@ if (structKeyExists(form, "modal_lng")) {
     table = form.table;
     key = form.key;
 
-    if(referer eq "/sysadmin/mappings##frontend" and field neq "strhtmlcodes"){
+    /* if(referer eq "/sysadmin/mappings##frontend" and field neq "strhtmlcodes"){
         loop list=form.fieldnames index="i" {
             if (listFirst(i, "_") eq "text") {
                 text_value = evaluate(i);
                 text_value = application.objGlobal.cleanUpText(text_value);
                 form[i] = text_value;
             }
-        }    
+        }
     } else if (referer eq "/sysadmin/mappings##frontend" and field eq "strhtmlcodes"){
         loop list=form.fieldnames index="i" {
             if (listFirst(i, "_") eq "text") {
@@ -33,7 +33,7 @@ if (structKeyExists(form, "modal_lng")) {
                 form[i] = text_value;
             }
         }
-    }
+    } */
 
     try {
 
@@ -149,7 +149,7 @@ if (structKeyExists(form, "edit_language")) {
         param name="form.lng_en" default="";
         param name="form.lng_own" default="";
         param name="form.iso" default="";
-        
+
         chooseable = structKeyExists(form, "chooseable") ? 1 : 0;
 
         queryExecute(

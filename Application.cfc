@@ -58,6 +58,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
         application.objSysadmin = new backend.core.com.sysadmin();
+        application.objMeta = new backend.core.com.meta();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -192,6 +193,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         getAlert = application.objGlobal.getAlert;
         getLayout = application.layoutStruct;
         logWrite = application.objLog.logWrite;
+        getMeta = application.objMeta.getMeta;
 
 
         // Is there a redirect coming in url?
