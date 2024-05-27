@@ -509,7 +509,7 @@ $(document).ready(function(){
 });
 
 
-/* (Frontend-Mapping + Modal) form.htmlcodes encoding */
+// Frontend-Mapping + Modal
 $(document).ready(function() {
     const maxPixels = {
         metatitle: 580,
