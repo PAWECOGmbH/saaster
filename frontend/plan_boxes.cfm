@@ -156,12 +156,12 @@
                             </cfif>
 
                             <!--- Button monthly --->
-                            <div class="text-center my-4 monthly <cfif i.recommended>btn-green</cfif>">
+                            <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
                                 <a href="#application.mainURL#/register?redirect=#redirectLinkM#" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                             <!--- Button yearly --->
-                            <div style="display: none;" class="text-center my-4 yearly <cfif i.recommended>btn-green</cfif>">
+                            <div style="display: none;" class="text-center my-4 price_box yearly <cfif i.recommended>btn-green</cfif>">
                                 <a href="#application.mainURL#/register?redirect=#redirectLinkY#" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 

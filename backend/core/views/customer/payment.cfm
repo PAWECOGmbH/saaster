@@ -4,9 +4,41 @@
     objPayrexx = new backend.core.com.payrexx();
     getWebhook = objPayrexx.getWebhook(customerID=session.customer_id, status='authorized', default='', includingFailed='yes');
 
-    // The user has canceled the Payrexx payment, make log]
+    // The user has canceled the payment process
     if (structKeyExists(url, "cancel")) {
-        logWrite("user", "info", "The user has canceled the Payrexx payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
+        // If the user is coming from registration process, set the default plan
+        if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
+
+            objBook = new backend.core.com.book();
+            codeToDecrypt = listLast(session.redirect, "=");
+
+            if (len(trim(codeToDecrypt)) gt 100) {
+
+                // We need to search the groupID
+                getPlanData = objBook.decryptBookingLink(codeToDecrypt);
+                objPlans = new backend.core.com.plans();
+                planGroupID = objPlans.getPlanDetail(getPlanData.planID).planGroupID;
+
+                // Set the default plan
+                setPlan = objPlans.setDefaultPlan(session.customer_id, planGroupID);
+
+                // Save plan into a session
+                application.objCustomer.setProductSessions(session.customer_id, session.lng);
+
+                // Destroy redirect session
+                structDelete(session, "redirect");
+
+                logWrite("user", "info", "The user has canceled the payment process, the default plan has been set [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
+                location url="#application.mainURL#/dashboard" addtoken="false";
+
+            }
+
+        }
+
+        logWrite("user", "info", "The user has canceled the payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
     }
 
 </cfscript>
@@ -98,7 +130,7 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
 

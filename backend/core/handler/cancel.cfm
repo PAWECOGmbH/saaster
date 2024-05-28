@@ -100,7 +100,7 @@ if (structKeyExists(form, "delete")) {
         param name="form.email" default="";
         param name="form.password" default="";
 
-        objUserLogin = application.objUser.checkLogin(argumentCollection = form);
+        objUserLogin = new frontend.core.com.login().checkLogin(argumentCollection = form);
 
         if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
 
