@@ -121,7 +121,7 @@ component displayname="plans" output="false" {
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
             local.currentPlan = getCurrentPlan(arguments.customerID);
             if (local.currentPlan.planID gt 0) {
-                local.thisGroupID = local.currentPlan.planID;
+                local.thisGroupID = getPlanDetail(local.currentPlan.planID).planGroupID;
             }
         }
 
