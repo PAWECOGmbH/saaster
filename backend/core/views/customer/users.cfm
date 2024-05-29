@@ -59,17 +59,31 @@
                                     <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-end">
-                                        <cfset canEdit = true>
-                                        <cfif session.superadmin>
-                                            <cfif qUser.blnSysAdmin>
-                                                <cfset canEdit = false>
-                                            </cfif>
-                                        <cfelseif session.admin>
-                                            <cfif qUser.blnSuperAdmin>
-                                                <cfset canEdit = false>
-                                            </cfif>
+                                        <!--- <cfdump var="#session.SYSADMIN#">
+                                        <cfdump var="#session.SUPERADMIN#">
+                                        <cfdump var="#session.ADMIN#"> --->
+                                        <!--- <cfdump var="#session#"> --->
+                                        <!--- <cfdump var="#qUser#"> --->
+                                        <!--- <cfdump var="#qUser.blnSysAdmin#">
+                                        <cfdump var="#qUser.blnSuperAdmin#">
+                                        <cfdump var="#qUser.blnAdmin#"> --->
+                                        <cfset edit = 0>
+                                        <cfif (qUser.strEmail[1] eq qUser.strEmail and session.sysadmin) or qUser.strEmail[1] eq session.user_email > <!--- if its yours or ur sysadmin(firstentry=adminUser) --->
+                                            <cfset edit = 1>
                                         </cfif>
-                                        <cfif canEdit and qUser.intUserID[1] neq qUser.intUserID or session.sysadmin>
+                                        <cfif qUser.strEmail[1] neq qUser.strEmail and qUser.strEmail[1] eq session.user_email> <!--- if its yours and not first --->
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif qUser.strEmail[1] neq qUser.strEmail and session.sysadmin>  <!--- if admin and not first --->
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif qUser.strEmail[1] neq qUser.strEmail and session.superadmin> <!--- if sysadmin and not first --->
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif qUser.strEmail[1] neq qUser.strEmail and session.admin> <!--- if sysadmin and not first --->
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif edit><!--- if first entry and you are sysadmin or accountowner edit=true --->
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
