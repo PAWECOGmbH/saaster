@@ -71,7 +71,7 @@
                                                 <cfset canEdit = false>
                                             </cfif>
                                         </cfif>
-                                        <cfif canEdit or session.sysadmin>
+                                        <cfif canEdit and qUser.intUserID[1] neq qUser.intUserID or session.sysadmin and qUser.intUserID[1] neq qUser.intUserID>
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
