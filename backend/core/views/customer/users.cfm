@@ -3,8 +3,6 @@
     qUser = application.objUser.getAllUsers(session.customer_id);
 </cfscript>
 
-
-
 <cfoutput>
 <div class="page-wrapper">
     <div class="#getLayout.layoutPage#">
@@ -71,7 +69,7 @@
                                                 <cfset canEdit = false>
                                             </cfif>
                                         </cfif>
-                                        <cfif canEdit and qUser.intUserID[1] neq qUser.intUserID or session.sysadmin and qUser.intUserID[1] neq qUser.intUserID>
+                                        <cfif canEdit and qUser.intUserID[1] neq qUser.intUserID or session.sysadmin>
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
