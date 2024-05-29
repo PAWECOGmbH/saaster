@@ -59,14 +59,6 @@
                                     <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-end">
-                                        <!--- <cfdump var="#session.SYSADMIN#">
-                                        <cfdump var="#session.SUPERADMIN#">
-                                        <cfdump var="#session.ADMIN#"> --->
-                                        <!--- <cfdump var="#session#"> --->
-                                        <!--- <cfdump var="#qUser#"> --->
-                                        <!--- <cfdump var="#qUser.blnSysAdmin#">
-                                        <cfdump var="#qUser.blnSuperAdmin#">
-                                        <cfdump var="#qUser.blnAdmin#"> --->
                                         <cfset edit = 0>
                                         <cfif (qUser.strEmail[1] eq qUser.strEmail and session.sysadmin) or qUser.strEmail[1] eq session.user_email > <!--- if its yours or ur sysadmin(firstentry=adminUser) --->
                                             <cfset edit = 1>
