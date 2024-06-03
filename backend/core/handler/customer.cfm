@@ -80,10 +80,13 @@ if (structKeyExists(form, "edit_company_btn")) {
     structDelete(session, "billing_address");
     structDelete(session, "billing_info");
     structDelete(session, "filledData");
-
-    location url="#application.mainURL#/account-settings/company" addtoken="false";
-
-
+    
+    if(structKeyExists(form, "after_registration")){
+        location url="#application.mainURL#/dashboard" addtoken="false";
+    }else{
+        location url="#application.mainURL#/account-settings/company" addtoken="false";
+    }
+    
 }
 
 

@@ -85,6 +85,7 @@
                                 </select>
                             </div>
                         </cfif>
+                        <input type="boolean" name="after_registration" hidden>
                         <div>
                             <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
                         </div>
