@@ -28,7 +28,6 @@
                 #session.alert#
             </cfif>
         </div>
-        <cfdump var="#qUser#">
         <div class="row">
             <div class="col-md-12 col-lg-12">
                 <div class="card">
@@ -76,7 +75,7 @@
                                             <cfset edit = 1>
                                         </cfif>
                                         <!--- standard permission handling end --->
-                                        
+
                                         <cfif qUser.strEmail eq session.user_email> <!--- edit your account --->
                                             <cfset edit = 1>
                                         </cfif>
