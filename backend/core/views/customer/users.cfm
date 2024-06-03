@@ -47,6 +47,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                               
                             <cfloop query="qUser">
                                 <tr>
                                     <cfif not len(trim(qUser.strPhoto))>
@@ -61,17 +62,28 @@
                                     <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-end">
-                                        <cfset canEdit = true>
-                                        <cfif session.superadmin>
-                                            <cfif qUser.blnSysAdmin>
-                                                <cfset canEdit = false>
-                                            </cfif>
-                                        <cfelseif session.admin>
-                                            <cfif qUser.blnSuperAdmin>
-                                                <cfset canEdit = false>
-                                            </cfif>
+
+                                        <cfset edit = 0>
+                                        <!--- standard permission handling --->
+                                        <cfif session.sysadmin>
+                                            <cfset edit = 1>
                                         </cfif>
-                                        <cfif canEdit or session.sysadmin>
+                                        <cfif session.superadmin and !qUser.blnSysAdmin>
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif session.admin and !qUser.blnSysAdmin and !qUser.blnSuperAdmin>
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <!--- standard permission handling end --->
+
+                                        <cfif qUser.strEmail eq session.user_email> <!--- edit your account --->
+                                            <cfset edit = 1>
+                                        </cfif>
+                                        <cfif qUser.strEmail[1] neq session.user_email and qUser.strEmail[1] eq qUser.strEmail and !session.sysadmin> <!--- nobody edits first entry --->
+                                            <cfset edit = 0>
+                                        </cfif>
+                                      
+                                        <cfif edit>
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
