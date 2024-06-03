@@ -83,9 +83,9 @@
                 <div class="col-lg-4">
                     <label class="form-label text-end">Number of test days *</label>
                     <cfif qPlan.blnFree>
-                        <input type="text" class="form-control text-end" value="#qPlan.intNumTestDays#" disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
+                        <input type="number" class="form-control text-end" value="#qPlan.intNumTestDays#" disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
                     <cfelse>
-                        <input type="text" class="form-control text-end" name="test_days" autocomplete="off" maxlength="10" value="#qPlan.intNumTestDays#" placeholder="30" required>
+                        <input type="number" class="form-control text-end" name="test_days" autocomplete="off" maxlength="10" value="#qPlan.intNumTestDays#" placeholder="30" required>
                     </cfif>
                     <small class="form-hint">
                         Enter 0 if you don't want to provide any test days.
@@ -93,7 +93,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="form-label text-end">Maximum users *</label>
-                    <input type="text" class="form-control text-end" name="max_users" autocomplete="off" maxlength="10" value="#qPlan.intMaxUsers#" placeholder="0" required>
+                    <input type="number" class="form-control text-end" name="max_users" autocomplete="off" maxlength="10" value="#qPlan.intMaxUsers#" placeholder="0" required>
                     <small class="form-hint">
                         Enter 0 if you don't want to use the user limit.
                     </small>

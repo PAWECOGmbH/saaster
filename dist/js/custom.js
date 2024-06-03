@@ -331,68 +331,6 @@ $(document).ready(function(){
 
 
 	});
-
-	let in1 = document.getElementById('otc-1'),
-    ins = document.querySelectorAll('input[type="number"]'),
-	 splitNumber = function(e) {
-		let data = e.data || e.target.value;
-		if ( ! data ) return;
-		if ( data.length === 1 ) return;
-
-		popuNext(e.target, data);
-	},
-	popuNext = function(el, data) {
-		el.value = data[0];
-		data = data.substring(1);
-		if ( el.nextElementSibling && data.length ) {
-			popuNext(el.nextElementSibling, data);
-		}
-	};
-
-	ins.forEach(function(input) {
-		input.addEventListener('keyup', function(e){
-			if (e.keyCode === 16 || e.keyCode == 9 || e.keyCode == 224 || e.keyCode == 18 || e.keyCode == 17) {
-				return;
-			}
-
-			if ( (e.keyCode === 8 || e.keyCode === 37) && this.previousElementSibling && this.previousElementSibling.tagName === "INPUT" ) {
-				this.previousElementSibling.select();
-			} else if (e.keyCode !== 8 && this.nextElementSibling) {
-				this.nextElementSibling.select();
-			}
-
-			if ( e.target.value.length > 1 ) {
-				splitNumber(e);
-			}
-		});
-
-		input.addEventListener('focus', function(e) {
-			if ( this === in1 ) return;
-
-			if ( in1.value == '' ) {
-				in1.focus();
-			}
-
-			if ( this.previousElementSibling.value == '' ) {
-				this.previousElementSibling.focus();
-			}
-		});
-	});
-
-	in1.addEventListener('input', splitNumber);
-
-	$('input[name="mfa_6"]').keyup(function(){
-		if(validateCode()){
-			$("#mfa_form").submit();
-		}
-	});
-
-	$("#mfa_form input").on("paste", function(){
-		setTimeout(function() {
-			$("#mfa_form").submit();
-		});
-	});
-
 });
 
 function generateUUID()
@@ -418,39 +356,6 @@ $( '#keygen' ).on('click',function()
 {
 	$( '#apiKey' ).val( generateUUID() );
 });
-
-function validateCode()
-{
-	mfacode1 = $("#otc-1").val();
-	mfacode2 = $("#otc-2").val();
-	mfacode3 = $("#otc-3").val();
-	mfacode4 = $("#otc-4").val();
-	mfacode5 = $("#otc-5").val();
-	mfacode6 = $("#otc-6").val();
-	if(mfacode1.length != '' && mfacode2.length != '' && mfacode3.length != '' && mfacode4.length != '' && mfacode5.length != '' && mfacode6.length != ''){
-		return true;
-	} else {
-		return false;
-	}
-}
-
-function validateInput(input) {
-
-	input.value = input.value.replace(/\s/g, '');
-
-	if (input.value.length > 1) {
-		input.value = input.value.slice(0, 1);
-	}
-}
-
-function onlyDigits(event) {
-	var charCode = (event.which) ? event.which : event.keyCode;
-	if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-		event.preventDefault();
-		return false;
-	}
-	return true;
-}
 
 $(document).ready(function(){
 
@@ -593,10 +498,83 @@ $(document).ready(function() {
     });
 });
 
+//Mfa
+document.addEventListener('DOMContentLoaded', function() {
+    const mfaInputs = document.querySelectorAll('.mfa-input');
+
+    mfaInputs.forEach(function(input, index) {
+        input.addEventListener('input', function(e) {
+            if (this.value.length > 1) {
+                this.value = this.value.slice(0, 1); // Ensure only one digit
+            }
+
+            if (this.value.length === 1 && index < mfaInputs.length - 1) {
+                mfaInputs[index + 1].focus(); // Move to the next input
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            handleKeyDown(e, this, index);
+        });
+
+        input.addEventListener('focus', function(e) {
+            // Ensure that focus moves to the first empty input field
+            for (let i = 0; i < mfaInputs.length; i++) {
+                if (mfaInputs[i].value === '') {
+                    mfaInputs[i].focus();
+                    break;
+                }
+            }
+        });
+    });
+
+    document.getElementById('mfa_form').addEventListener('paste', function(e) {
+        let paste = (e.clipboardData || window.clipboardData).getData('text');
+        paste = paste.slice(0, mfaInputs.length);
+        mfaInputs.forEach((input, index) => {
+            input.value = paste[index] || '';
+        });
+
+        if (paste.length === mfaInputs.length) {
+            e.preventDefault();
+            this.submit();
+        }
+    });
+
+    function validateCode() {
+        return Array.from(mfaInputs).every(input => input.value.length === 1);
+    }
+
+    mfaInputs[mfaInputs.length - 1].addEventListener('input', function() {
+        if (validateCode()) {
+            document.getElementById('mfa_form').submit();
+        }
+    });
+});
+
+function handleKeyDown(e, input, index) {
+    const mfaInputs = document.querySelectorAll('.mfa-input');
+    if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+        mfaInputs[index - 1].focus(); // Move to the previous input
+        mfaInputs[index - 1].value = ''; // Clear the previous input value
+    }
+}
 
 
+function validateInput(input) {
+    input.value = input.value.replace(/\s/g, '');
 
+    if (input.value.length > 1) {
+        input.value = input.value.slice(0, 1);
+    }
+}
 
-
-
+function onlyDigits(event) {
+    var charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
+}
 
