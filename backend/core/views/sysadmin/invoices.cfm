@@ -230,6 +230,9 @@
                                                         </button>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.intInvoiceID#">Edit invoice</a>
+                                                            <cfif qInvoices.intPaymentStatusID neq 2>
+                                                                <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&open&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Reopen invoice</a>
+                                                            </cfif>
                                                             <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Send invoice by email</a>
                                                             <cfif qInvoices.intPaymentStatusID eq 1 or qInvoices.intPaymentStatusID eq 2>
                                                                 <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
