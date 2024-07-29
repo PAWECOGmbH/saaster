@@ -335,6 +335,7 @@ component displayname="globalFunctions" output="false" {
             local.makeUnique = true;
             local.fileName = '';
             local.fileNameOrig = '';
+            local.isImage = false;
 
             // Set a default for all possible arguments
             if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
@@ -385,74 +386,98 @@ component displayname="globalFunctions" output="false" {
 
             // Upload the file now
             try {
-                uploadTheFile = FileUpload(
-                    fileField = arguments.uploadArgs.fileNameOrig,
-                    destination = arguments.uploadArgs.filepath,
-                    nameConflict = local.nameConflict/* ,
-                    accept = local.acceptFileTypesList */
+                local.uploadedFile = fileUpload(
+                    fileField = local.fileNameOrig,
+                    destination = local.filePath,
+                    nameConflict = local.nameConflict
                 )
-                // Second check of uploaded file. Mimetype could be spoofed.
-                if (not listFindNoCase(local.allowedFileTypesList, uploadTheFile.serverFileExt)) {
-                    local.argsReturnValue['message'] = 'msgFileUploadError';
-                    return local.argsReturnValue;
-                }
-            } catch (any e) {
+            } catch (e) {
                 local.argsReturnValue['message'] = e.message;
                 return local.argsReturnValue;
             }
 
-            local.fileSizeInKB = uploadTheFile.filesize/1000;
-            local.uploadedFileNameOrig = uploadTheFile.serverfile;
-            local.uploadedFilePathOrig = uploadTheFile.serverdirectory & '\' & local.uploadedFileNameOrig;
+            // Get the file name
+            local.originalFileName = local.uploadedFile.clientfilename;
+
+            // Get the file name with extension
+            local.originalFileNameExt = local.uploadedFile.serverfile;
+
+            // Get the path of the file
+            local.originalFilePath = local.uploadedFile.serverdirectory;
+
+            // Get the file extension
+            local.originalFileExt = local.uploadedFile.serverFileExt;
+
+            // Get file path and name with extension
+            local.originalFile = local.originalFilePath & "/" & local.originalFileNameExt;
+
+            // Get the size of the file
+            local.fileSizeInKB = local.uploadedFile.filesize/1000;
+
+            // Is it an image?
+            if (IsImageFile(local.originalFile)) {
+                local.isImage = true;
+            }
+
+            // Security (only file ext. configured in cofig.cfm)
+            if (not listFindNoCase(local.allowedFileTypesList, local.originalFileExt)) {
+                if (fileExists(local.originalFile)) {
+                    FileDelete(local.originalFile);
+                }
+                local.argsReturnValue['message'] = 'msgFileUploadError';
+                return local.argsReturnValue;
+            }
 
             // File too large? If yes, delete it and send message
             if (len(trim(local.maxSize)) and local.maxSize lt local.fileSizeInKB) {
-
-                FileDelete(local.uploadedFilePathOrig);
+                if (fileExists(local.originalFile)) {
+                    FileDelete(local.originalFile);
+                }
                 local.argsReturnValue['message'] = 'msgFileTooLarge';
                 return local.argsReturnValue;
-
             }
 
-            // Do we have to rename the file? If not, we will beautify it by ourself
+            // Rename the file to a unique name
+            local.tempFileName = createUUID();
+            local.tempFile = local.originalFilePath & "/" & local.tempFileName & "." & local.originalFileExt;
+            cffile(action="rename", source=local.originalFile, destination=local.tempFile);
+
+            // Do we have to rename the file (config.cfm)?
             if (len(trim(local.fileName))) {
 
-                local.newFileName = local.fileName  & '.' & uploadTheFile.serverfileext;
-                local.newFilePath = uploadTheFile.serverdirectory & '\' & local.newFileName;
-                cffile(action="rename", source=local.uploadedFilePathOrig, destination=local.newFilePath);
-                local.argsReturnValue['fileName'] = local.newFileName;
+                local.newFile = local.originalFilePath & "/" & local.fileName & "." & local.originalFileExt;
+                cffile(action="rename", source=local.tempFile, destination=local.newFile);
+                local.argsReturnValue['fileName'] = local.newFile;
 
+
+            // If not, we will beautify it by ourself
             } else {
 
                 // Beautify the file name (using sql function)
-                getBeautyName = queryExecute(
+                local.getBeautyName = queryExecute(
                     options = {datasource = application.datasource},
                     params = {
-                        stringToChange: {type = "nvarchar", value = uploadTheFile.serverfilename}
+                        stringToChange: {type = "nvarchar", value = local.originalFileName}
                     },
                     sql = "
                         SELECT beautify(:stringToChange) as newName;
                     "
                 )
 
-                local.newFileName = getBeautyName.newName  & '.' & uploadTheFile.serverfileext;
-                local.newFilePath = uploadTheFile.serverdirectory & '\' & local.newFileName;
-                try {
-                cffile(action="rename", source=local.uploadedFilePathOrig, destination=local.newFilePath);
-                } catch (any e){
-
-                }
-                local.argsReturnValue['fileName'] = local.newFileName;
+                local.newFile = local.originalFilePath & "/" & local.getBeautyName.newName & "." & local.originalFileExt;
+                cffile(action="rename", source=local.tempFile, destination=local.newFile);
+                local.argsReturnValue['fileName'] = local.newFile;
 
             }
 
+
             // If image, do we have to resize it?
-            if (IsImageFile(local.newFilePath)) {
+            if (local.isImage) {
 
                 if (len(trim(local.maxWidth)) or len(trim(local.maxHeight))) {
 
                     // Reading the image size
-                    cfimage(action="info", source=local.newFilePath, structname="imageInfo");
+                    cfimage(action="info", source=local.newFile, structname="imageInfo");
 
                     local.imageWidth = imageInfo.width;
                     local.imageHeight = imageInfo.height;
@@ -479,8 +504,8 @@ component displayname="globalFunctions" output="false" {
                     // Resize the image
                     if (isNumeric(local.newImageWidth) or isNumeric(local.newImageHeight)) {
 
-                        cfimage(action="resize", source=local.newFilePath, overwrite="true", height=local.newImageHeight, width=local.newImageWidth, name="myNewFile");
-                        cfimage(action="write", source=myNewFile, destination=local.newFilePath, overwrite="true");
+                        cfimage(action="resize", source=local.newFile, overwrite="true", height=local.newImageHeight, width=local.newImageWidth, name="myNewFile");
+                        cfimage(action="write", source=myNewFile, destination=local.newFile, overwrite="true");
 
                     }
 
