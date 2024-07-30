@@ -447,7 +447,7 @@ component displayname="globalFunctions" output="false" {
 
                 local.newFile = local.originalFilePath & "/" & local.fileName & "." & local.originalFileExt;
                 cffile(action="rename", source=local.tempFile, destination=local.newFile);
-                local.argsReturnValue['fileName'] = local.newFile;
+                local.argsReturnValue['fileName'] = local.fileName & "." & local.originalFileExt;
 
 
             // If not, we will beautify it by ourself
@@ -466,7 +466,7 @@ component displayname="globalFunctions" output="false" {
 
                 local.newFile = local.originalFilePath & "/" & local.getBeautyName.newName & "." & local.originalFileExt;
                 cffile(action="rename", source=local.tempFile, destination=local.newFile);
-                local.argsReturnValue['fileName'] = local.newFile;
+                local.argsReturnValue['fileName'] = local.fileName & "." & local.originalFileExt;
 
             }
 
