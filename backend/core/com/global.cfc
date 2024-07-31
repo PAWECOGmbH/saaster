@@ -37,6 +37,19 @@ component displayname="globalFunctions" output="false" {
                     SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
+                    UNION
+                    SELECT strPath, 0, 0, 0
+                    FROM frontend_mappings
+                    WHERE strMapping = :strMapping
+                    UNION
+                    SELECT
+                    (
+                        SELECT strPath
+                        FROM frontend_mappings
+                        WHERE intFrontendMappingsID = frontend_mappings_trans.intFrontendMappingsID
+                    ) as strPath, 0, 0, 0
+                    FROM frontend_mappings_trans
+                    WHERE strMapping = :strMapping
                     LIMIT 1
                 "
             )
@@ -68,6 +81,10 @@ component displayname="globalFunctions" output="false" {
                     SELECT strPath
                     FROM custom_mappings
                     WHERE strPath = :thisPath
+                    UNION
+                    SELECT strPath
+                    FROM frontend_mappings
+                    WHERE strMapping = :thisPath
                     LIMIT 1
                 "
             )
@@ -293,6 +310,25 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    // Beauify string (ex. for url or file names)
+    public string function beautifyString(required string stringToChange) {
+
+        // Beautify the string using an sql function
+        local.qBeautify = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                stringToChange: {type = "nvarchar", value = arguments.stringToChange}
+            },
+            sql = "
+                SELECT beautify(:stringToChange) as changedString;
+            "
+        )
+
+        return local.qBeautify.changedString;
+
+    }
+
+
     // Uploading a file such as a pdf or an image
     public struct function uploadFile(required struct uploadArgs, required array allowedFileTypes) {
 
@@ -318,6 +354,7 @@ component displayname="globalFunctions" output="false" {
             local.makeUnique = true;
             local.fileName = '';
             local.fileNameOrig = '';
+            local.isImage = false;
 
             // Set a default for all possible arguments
             if (structKeyExists(arguments.uploadArgs, "filePath") and len(trim(arguments.uploadArgs.filePath))) {
@@ -368,69 +405,123 @@ component displayname="globalFunctions" output="false" {
 
             // Upload the file now
             try {
-                uploadTheFile = FileUpload(
-                    fileField = arguments.uploadArgs.fileNameOrig,
-                    destination = arguments.uploadArgs.filepath,
-                    nameConflict = local.nameConflict/* ,
-                    accept = local.acceptFileTypesList */
+                local.uploadedFile = fileUpload(
+                    fileField = local.fileNameOrig,
+                    destination = local.filePath,
+                    nameConflict = local.nameConflict
                 )
-                // Second check of uploaded file. Mimetype could be spoofed.
-                if (not listFindNoCase(local.allowedFileTypesList, uploadTheFile.serverFileExt)) {
-                    local.argsReturnValue['message'] = 'msgFileUploadError';
-                    return local.argsReturnValue;
-                }
-            } catch (any e) {
+            } catch (e) {
                 local.argsReturnValue['message'] = e.message;
                 return local.argsReturnValue;
             }
 
-            local.fileSizeInKB = uploadTheFile.filesize/1000;
-            local.uploadedFileNameOrig = uploadTheFile.serverfile;
-            local.uploadedFilePathOrig = uploadTheFile.serverdirectory & '\' & local.uploadedFileNameOrig;
+            // Create a uuid in order to handle the file
+            local.fileUUID = createUUID() & "." & local.uploadedFile.serverFileExt;
+
+            // Get the file name
+            local.originalFileName = local.uploadedFile.clientfilename;
+
+            // Get the file name with extension
+            local.originalFileNameExt = local.uploadedFile.serverfile;
+
+            // Get the path of the file
+            local.originalFilePath = local.uploadedFile.serverdirectory;
+
+            // Get the file extension
+            local.originalFileExt = local.uploadedFile.serverFileExt;
+
+            // Get file path and name with extension
+            local.originalFile = local.originalFilePath & "/" & local.originalFileNameExt;
+
+            // Get the size of the file
+            local.fileSizeInKB = local.uploadedFile.filesize/1000;
+
+            // Is it an image?
+            if (IsImageFile(local.originalFile)) {
+                local.isImage = true;
+            }
+
+            // Security (only file ext. configured in config.cfm)
+            if (not listFindNoCase(local.allowedFileTypesList, local.originalFileExt)) {
+                if (fileExists(local.originalFile)) {
+                    FileDelete(local.originalFile);
+                }
+                local.argsReturnValue['message'] = 'msgFileExtForbidden';
+                return local.argsReturnValue;
+            }
 
             // File too large? If yes, delete it and send message
             if (len(trim(local.maxSize)) and local.maxSize lt local.fileSizeInKB) {
-
-                FileDelete(local.uploadedFilePathOrig);
+                if (fileExists(local.originalFile)) {
+                    FileDelete(local.originalFile);
+                }
                 local.argsReturnValue['message'] = 'msgFileTooLarge';
                 return local.argsReturnValue;
-
             }
 
-            // Do we have to rename the file? If not, we will beautify it by ourself
+            // If fileName is defined, the developer is responsible for the correct file name
             if (len(trim(local.fileName))) {
 
-                local.newFileName = local.fileName  & '.' & uploadTheFile.serverfileext;
-                local.newFilePath = uploadTheFile.serverdirectory & '\' & local.newFileName;
-                cffile(action="rename", source=local.uploadedFilePathOrig, destination=local.newFilePath);
-                local.argsReturnValue['fileName'] = local.newFileName;
+                // Add the path to the new file name
+                local.newFilePath = local.originalFilePath & "/" & local.fileName & "." & local.originalFileExt;
 
+                // Rename the file now
+                cffile(action="rename", source=local.originalFile, destination=local.newFilePath);
+
+                // New file name
+                local.newFileName = local.fileName & "." & local.originalFileExt;
+
+
+            // Otherwise we will change the filename using a beautifier
             } else {
 
-                // Beautify the file name (using sql function)
-                getBeautyName = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        stringToChange: {type = "nvarchar", value = uploadTheFile.serverfilename}
-                    },
-                    sql = "
-                        SELECT beautify(:stringToChange) as newName;
-                    "
-                )
+                // Rename the file into the uuid
+                cffile(action="rename", source=local.originalFile, destination=local.originalFilePath & "/" & local.fileUUID);
 
-                local.newFileName = getBeautyName.newName  & '.' & uploadTheFile.serverfileext;
-                local.newFilePath = uploadTheFile.serverdirectory & '\' & local.newFileName;
-                try {
-                cffile(action="rename", source=local.uploadedFilePathOrig, destination=local.newFilePath);
-                } catch (any e){
+                // We beautify the file name so that all systems can read it
+                local.beautifiedString = beautifyString(local.originalFileName);
+
+                // New file name
+                local.newFileName = local.beautifiedString & "." & local.originalFileExt;
+
+                // Add the path to the new file name
+                local.newFilePath = local.originalFilePath & "/" & local.newFileName;
+
+                // Does the file exist already?
+                if (fileExists(local.newFilePath)) {
+
+                    // Only execute if the developer has set makeunique to true
+                    if (local.makeUnique) {
+
+                        // Set a short unique uuid
+                        local.shortUUID = left(getUUID(), 10);
+
+                        local.newFilePath = local.originalFilePath & "/" & local.beautifiedString & "-" & local.shortUUID & "." & local.originalFileExt;
+
+                        // New file name
+                        local.newFileName = local.beautifiedString & "-" & local.shortUUID & "." & local.originalFileExt;
+
+                    }
 
                 }
-                local.argsReturnValue['fileName'] = local.newFileName;
+
+                // As Windows locks files for a short time after the first rename, we have to wait until they have been released
+                if (checkFileExists(local.originalFilePath & "/" & local.fileUUID)) {
+
+                    // Rename the file into the cleaned string
+                    cffile(action="rename", source=local.originalFilePath & "/" & local.fileUUID, destination=local.newFilePath);
+
+                }
+
 
             }
 
+            // Return the file name
+            local.argsReturnValue['fileName'] = local.newFileName;
+
+
             // If image, do we have to resize it?
-            if (IsImageFile(local.newFilePath)) {
+            if (local.isImage) {
 
                 if (len(trim(local.maxWidth)) or len(trim(local.maxHeight))) {
 
@@ -481,6 +572,20 @@ component displayname="globalFunctions" output="false" {
             return local.argsReturnValue;
 
         }
+
+    }
+
+
+    // Check if a file exists
+    private boolean function checkFileExists(required string filePath) {
+
+        loop from=1 to=100000 index="local.i" {
+            if (fileExists(arguments.filePath)) {
+                return true;
+            }
+        }
+
+        return false;
 
     }
 

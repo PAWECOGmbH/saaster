@@ -17,7 +17,7 @@
 	</div>
 	<cfinclude template="/backend/core/views/footer.cfm">
 	<cfinclude template="/backend/core/views/js.cfm">
-	<cfif structKeyExists(session, "filledData")>
+	<cfif structKeyExists(session, "filledData") and not structKeyExists(session, "redirect")>
 		<cfinclude template="/backend/core/views/fill_data_modal.cfm">
 		<script type="text/javascript">
 			$(window).on('load', function() {

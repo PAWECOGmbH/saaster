@@ -1,4 +1,7 @@
 <cfscript>
+    if (structKeyExists(session, "user_id") and session.user_id gt 0) {
+        location url="#application.mainURL#/dashboard" addtoken="false";
+    }
     param name="session.step" default="1";
     param name="session.first_name" default="";
     param name="session.name" default="";

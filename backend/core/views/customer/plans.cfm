@@ -108,7 +108,7 @@
                                                         <cfif i.onRequest>
                                                             <p><a href="#i.bookingLinkM#" target="_blank">#i.buttonName#</a></p>
                                                         <cfelse>
-                                                            <p><a href="#application.mainURL#/plans" target="_blank">#getTrans('txtInformation')#</a></p>
+                                                            <p><a href="#application.mainURL#/plans?g=#planDetail.planGroupID#" target="_blank">#getTrans('txtInformation')#</a></p>
                                                         </cfif>
                                                     </div>
                                                 </div>
@@ -195,6 +195,6 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>

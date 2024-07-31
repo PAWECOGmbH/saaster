@@ -364,3 +364,37 @@ input::-webkit-inner-spin-button {
 .no-max-width{
     max-width: revert;
 }
+
+.mappings-frontend-td-align{
+    vertical-align: top!important;
+}
+.mappings-frontend-textareaheight{
+   height: 36px;     
+
+}
+.input-container {
+    margin-bottom: 20px;
+}
+.progress-bar {
+    margin-top: 15px;
+    margin-right: 5px;
+    width: 100%;
+    background-color: #ddd;
+    height: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.progress {
+    height: 100%;
+    width: 0;
+    background-color: green;
+    text-align: right;
+    line-height: 20px;
+    color: white;
+    border-radius: 5px;
+}
+.progress-text{
+    margin-top: 10px;
+    font-size: 9px;
+    white-space: nowrap;
+}
