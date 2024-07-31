@@ -310,6 +310,25 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    // Beauify string (ex. for url or file names)
+    public string function beautifyString(required string stringToChange) {
+
+        // Beautify the string using an sql function
+        local.qBeautify = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                stringToChange: {type = "nvarchar", value = arguments.stringToChange}
+            },
+            sql = "
+                SELECT beautify(:stringToChange) as changedString;
+            "
+        )
+
+        return local.qBeautify.changedString;
+
+    }
+
+
     // Uploading a file such as a pdf or an image
     public struct function uploadFile(required struct uploadArgs, required array allowedFileTypes) {
 
@@ -396,6 +415,9 @@ component displayname="globalFunctions" output="false" {
                 return local.argsReturnValue;
             }
 
+            // Create a uuid in order to handle the file
+            local.fileUUID = createUUID() & "." & local.uploadedFile.serverFileExt;
+
             // Get the file name
             local.originalFileName = local.uploadedFile.clientfilename;
 
@@ -419,12 +441,12 @@ component displayname="globalFunctions" output="false" {
                 local.isImage = true;
             }
 
-            // Security (only file ext. configured in cofig.cfm)
+            // Security (only file ext. configured in config.cfm)
             if (not listFindNoCase(local.allowedFileTypesList, local.originalFileExt)) {
                 if (fileExists(local.originalFile)) {
                     FileDelete(local.originalFile);
                 }
-                local.argsReturnValue['message'] = 'msgFileUploadError';
+                local.argsReturnValue['message'] = 'msgFileExtForbidden';
                 return local.argsReturnValue;
             }
 
@@ -437,38 +459,65 @@ component displayname="globalFunctions" output="false" {
                 return local.argsReturnValue;
             }
 
-            // Rename the file to a unique name
-            local.tempFileName = createUUID();
-            local.tempFile = local.originalFilePath & "/" & local.tempFileName & "." & local.originalFileExt;
-            cffile(action="rename", source=local.originalFile, destination=local.tempFile);
-
-            // Do we have to rename the file (config.cfm)?
+            // If fileName is defined, the developer is responsible for the correct file name
             if (len(trim(local.fileName))) {
 
-                local.newFile = local.originalFilePath & "/" & local.fileName & "." & local.originalFileExt;
-                cffile(action="rename", source=local.tempFile, destination=local.newFile);
-                local.argsReturnValue['fileName'] = local.fileName & "." & local.originalFileExt;
+                // Add the path to the new file name
+                local.newFilePath = local.originalFilePath & "/" & local.fileName & "." & local.originalFileExt;
+
+                // Rename the file now
+                cffile(action="rename", source=local.originalFile, destination=local.newFilePath);
+
+                // New file name
+                local.newFileName = local.fileName & "." & local.originalFileExt;
 
 
-            // If not, we will beautify it by ourself
+            // Otherwise we will change the filename using a beautifier
             } else {
 
-                // Beautify the file name (using sql function)
-                local.getBeautyName = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        stringToChange: {type = "nvarchar", value = local.originalFileName}
-                    },
-                    sql = "
-                        SELECT beautify(:stringToChange) as newName;
-                    "
-                )
+                // Rename the file into the uuid
+                cffile(action="rename", source=local.originalFile, destination=local.originalFilePath & "/" & local.fileUUID);
 
-                local.newFile = local.originalFilePath & "/" & local.getBeautyName.newName & "." & local.originalFileExt;
-                cffile(action="rename", source=local.tempFile, destination=local.newFile);
-                local.argsReturnValue['fileName'] = local.fileName & "." & local.originalFileExt;
+                // We beautify the file name so that all systems can read it
+                local.beautifiedString = beautifyString(local.originalFileName);
+
+                // New file name
+                local.newFileName = local.beautifiedString & "." & local.originalFileExt;
+
+                // Add the path to the new file name
+                local.newFilePath = local.originalFilePath & "/" & local.newFileName;
+
+                // Does the file exist already?
+                if (fileExists(local.newFilePath)) {
+
+                    // Only execute if the developer has set makeunique to true
+                    if (local.makeUnique) {
+
+                        // Set a short unique uuid
+                        local.shortUUID = left(getUUID(), 10);
+
+                        local.newFilePath = local.originalFilePath & "/" & local.beautifiedString & "-" & local.shortUUID & "." & local.originalFileExt;
+
+                        // New file name
+                        local.newFileName = local.beautifiedString & "-" & local.shortUUID & "." & local.originalFileExt;
+
+                    }
+
+                }
+
+                // As Windows locks files for a short time after the first rename, we have to wait until they have been released
+                if (checkFileExists(local.originalFilePath & "/" & local.fileUUID)) {
+
+                    // Rename the file into the cleaned string
+                    cffile(action="rename", source=local.originalFilePath & "/" & local.fileUUID, destination=local.newFilePath);
+
+                }
+
 
             }
+
+            // Return the file name
+            local.argsReturnValue['fileName'] = local.newFileName;
 
 
             // If image, do we have to resize it?
@@ -477,7 +526,7 @@ component displayname="globalFunctions" output="false" {
                 if (len(trim(local.maxWidth)) or len(trim(local.maxHeight))) {
 
                     // Reading the image size
-                    cfimage(action="info", source=local.newFile, structname="imageInfo");
+                    cfimage(action="info", source=local.newFilePath, structname="imageInfo");
 
                     local.imageWidth = imageInfo.width;
                     local.imageHeight = imageInfo.height;
@@ -504,8 +553,8 @@ component displayname="globalFunctions" output="false" {
                     // Resize the image
                     if (isNumeric(local.newImageWidth) or isNumeric(local.newImageHeight)) {
 
-                        cfimage(action="resize", source=local.newFile, overwrite="true", height=local.newImageHeight, width=local.newImageWidth, name="myNewFile");
-                        cfimage(action="write", source=myNewFile, destination=local.newFile, overwrite="true");
+                        cfimage(action="resize", source=local.newFilePath, overwrite="true", height=local.newImageHeight, width=local.newImageWidth, name="myNewFile");
+                        cfimage(action="write", source=myNewFile, destination=local.newFilePath, overwrite="true");
 
                     }
 
@@ -523,6 +572,20 @@ component displayname="globalFunctions" output="false" {
             return local.argsReturnValue;
 
         }
+
+    }
+
+
+    // Check if a file exists
+    private boolean function checkFileExists(required string filePath) {
+
+        loop from=1 to=100000 index="local.i" {
+            if (fileExists(arguments.filePath)) {
+                return true;
+            }
+        }
+
+        return false;
 
     }
 
