@@ -11,7 +11,14 @@
 </cfscript>
 
 <cfoutput>
-
+<cfif len(trim(variables.reCAPTCHA_site_key))>
+     <script src="https://www.google.com/recaptcha/api.js"></script>
+     <script>
+        function onSubmit(token) {
+            document.getElementById("submit_form").submit();
+        }
+    </script>
+</cfif>
 <div class="page page-center">
     <div class="container-tight py-4">
         <cfif session.step eq 1>
@@ -55,11 +62,14 @@
                             </cfloop>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-check">
                             <input type="checkbox" class="form-check-input" required>
                             <span class="form-check-label"><a href="##" data-bs-toggle="modal" data-bs-target="##privacy_policy">#getTrans('txtAgreePolicy')#</a></span>
                         </label>
+                    </div>
+                    <div class="mb-4">
+                        <div class="g-recaptcha" data-sitekey="#variables.reCAPTCHA_site_key#"></div>
                     </div>
                     <div class="form-footer">
                         <button id="submit_button" type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>

@@ -222,5 +222,25 @@ component displayname="customer" output="false" {
     }
 
 
+    public boolean function verifyGoogleToken(required string googleToken, required string secretKey) {
+
+        local.secretKey = arguments.secretKey;
+        local.result = {};
+
+        cfhttp(
+            url="https://www.google.com/recaptcha/api/siteverify",
+            method="post",
+            result="local.result") {
+            cfhttpparam(type="formfield", name="secret", value=local.secretKey);
+            cfhttpparam(type="formfield", name="response", value=arguments.googleToken);
+            cfhttpparam(type="formfield", name="remoteip", value=cgi.remote_addr);
+        };
+
+        local.response = deserializeJson(local.result.fileContent);
+        return local.response.success;
+
+    }
+
+
 
 }
