@@ -99,11 +99,23 @@ if (structKeyExists(form, 'login_btn')) {
 if (structKeyExists(form, 'register_btn')) {
 
     // Google ReCaptcha
-    if (StructKeyExists(form, "g-recaptcha-response")) {
+    if (len(trim(variables.reCAPTCHA_site_key))) {
 
-        isValid = objRegister.verifyGoogleToken(form["g-recaptcha-response"], variables.reCAPTCHA_secret);
+        captchaSuccess = false;
 
-        if (!isValid) {
+        if (StructKeyExists(form, "g-recaptcha-response")) {
+
+            isValid = objRegister.verifyGoogleToken(form["g-recaptcha-response"], variables.reCAPTCHA_secret);
+
+            if (isValid) {
+
+                captchaSuccess = true;
+
+            }
+
+        }
+
+        if (!captchaSuccess) {
 
             getAlert('msgCaptchaFailed', 'warning');
             logWrite("user", "warning", "Captcha verification failed [E-Mail: #form.email#]");
