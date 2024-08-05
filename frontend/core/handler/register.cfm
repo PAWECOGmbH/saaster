@@ -10,7 +10,6 @@ if (structKeyExists(form, 'login_btn')) {
     param name="form.password" default="";
 
     objUserLogin = new frontend.core.com.login().checkLogin(argumentCollection = form);
-    objRegister = new frontend.core.com.register();
 
     if (isStruct(objUserLogin)) {
 
@@ -98,6 +97,21 @@ if (structKeyExists(form, 'login_btn')) {
 
 // Register new user step 1
 if (structKeyExists(form, 'register_btn')) {
+
+    // Google ReCaptcha
+    if (StructKeyExists(form, "g-recaptcha-response")) {
+
+        isValid = objRegister.verifyGoogleToken(form["g-recaptcha-response"], variables.reCAPTCHA_secret);
+
+        if (!isValid) {
+
+            getAlert('msgCaptchaFailed', 'warning');
+            logWrite("user", "warning", "Captcha verification failed [E-Mail: #form.email#]");
+            location url="#application.mainURL#/register" addtoken="false";
+
+        }
+
+    }
 
     param name="form.first_name" default="";
     param name="form.name" default="";
