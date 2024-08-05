@@ -111,6 +111,13 @@ variables.payrexxPSPs = "";
 
 
 // ####################################
+//  GOOGLE RECAPTCHA V2
+// ####################################
+variables.reCAPTCHA_site_key = "";
+variables.reCAPTCHA_secret = "";
+
+
+// ####################################
 //  Footer text variable
 // ####################################
 
