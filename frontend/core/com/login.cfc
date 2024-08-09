@@ -70,18 +70,49 @@ component displayname="login" output="false" {
 
                     local.returnStruct['loginCorrect'] = true;
 
-                    // If a redirect exists
-                    local.insertDefaultPlan = true;
-                    if (structKeyExists(session, "redirect") and len(trim(session.redirect))) {
-                        local.returnStruct['redirect'] = session.redirect;
-                        if (findNoCase("plan=", session.redirect)) {
-                            local.insertDefaultPlan = false;
+
+                    /* Handling for default plan an redirects */
+
+                    // Defaults
+                    local.insertDefaultPlan = false;
+
+                    // Check for a redirect
+                    local.redirectTo = structKeyExists(session, "redirect") and len(trim(session.redirect)) ? session.redirect : "";
+
+                    // Check redirect from plans
+                    local.redirectFromPlans = structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect) ? true : false;
+
+                    // Check the current plan
+                    local.checkPlan = new backend.core.com.plans(language=local.qCheckLogin.strLanguage).getCurrentPlan(local.qCheckLogin.intCustomerID);
+                    local.hasPlan = local.checkPlan.planID gt 0 ? true : false;
+
+                    // In case the customer hasn't a plan yet
+                    if (!local.hasPlan) {
+
+                        // Activate the default plan only if there is no redirect from plans (frontend)
+                        if (!local.redirectFromPlans) {
+                            local.insertDefaultPlan = true;
                         }
+
+                    // In case the customer has a plan already
+                    } else {
+
+                        // If the customer has clicked a plan in frontend, we need to delete the redirect
+                        if (local.redirectFromPlans) {
+                             structDelete(session, "redirect");
+                             local.redirectTo = "#application.mainURL#/account-settings/plans";
+                        }
+
+                    }
+
+                    // Set the redirect
+                    if (len(trim(local.redirectTo))) {
+                        local.returnStruct['redirect'] = local.redirectTo;
                     } else {
                         local.returnStruct['redirect'] = "#application.mainURL#/dashboard";
                     }
 
-                    // Set the default plan only if the user hasn't choosed a plan via frontend
+                    // Set the default plan if needed
                     if (local.insertDefaultPlan) {
 
                         local.objPlans = new backend.core.com.plans();
