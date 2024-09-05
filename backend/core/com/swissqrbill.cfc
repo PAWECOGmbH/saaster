@@ -130,6 +130,15 @@ component displayname="swissqrbill" output="false" {
 
     private string function buildHTML() {
 
+        if (len(trim(variables.qrData.billerReferenceFormatted))) {
+            local.referenceNumberCode = "
+                <p class='subtitle'>Referenz</p>
+                <p class='text'>" & variables.qrData.billerReferenceFormatted & "</p>
+            ";
+        } else {
+            local.referenceNumberCode = "";
+        }
+
         local.html = "
 
         <html>
@@ -268,8 +277,7 @@ component displayname="swissqrbill" output="false" {
                                 " & variables.qrData.billerStreet & "<br />
                                 " & variables.qrData.billerZIPCity & "
                             </p>
-                            <p class='subtitle'>Referenz</p>
-                            <p class='text'>" & variables.qrData.billerReferenceFormatted & "</p>
+                            #local.referenceNumberCode#
                             <p class='subtitle'>Zahlbar durch</p>
                             <p class='text'>
                                 " & variables.qrData.debtorName & "<br />
@@ -317,8 +325,7 @@ component displayname="swissqrbill" output="false" {
                                     " & variables.qrData.billerStreet & "<br />
                                     " & variables.qrData.billerZIPCity & "
                                 </p>
-                                <p class='subtitle'>Referenz</p>
-                                <p class='text'>" & variables.qrData.billerReferenceFormatted & "</p>
+                                #local.referenceNumberCode#
                                 <p class='subtitle'>Zusätzliche Informationen</p>
                                 <p class='text'>" & variables.qrData.invoiceAddText & "</p>
                                 <p class='subtitle'>Zahlbar durch</p>
@@ -375,10 +382,10 @@ component displayname="swissqrbill" output="false" {
         }
 
         // Validate reference number
-        if (structKeyExists(arguments.qrData, "billerQrReference") and len(trim(arguments.qrData.billerQrReference))) {
+        if (structKeyExists(arguments.qrData, "billerQrReference")) {
             local.reference = formatReference(arguments.qrData.billerQrReference);
         } else {
-            local.errorMessage = "QR reference is not defined or empty!";
+            local.errorMessage = "QR reference is not defined!";
         }
 
         // Validate biller
