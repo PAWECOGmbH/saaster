@@ -299,7 +299,7 @@ if (url.pass eq variables.schedulePassword) {
                     notiStruct['userID'] = 0;
                     notiStruct['title_var'] = "titCouldNotCharge";
                     notiStruct['descr_var'] = "msgCouldNotCharge";
-                    notiStruct['link'] = "account-settings/invoice/" & invoiceID;
+                    notiStruct['link'] = application.mainURL & "/account-settings/invoice/" & invoiceID;
                     notiStruct['linktext_var'] = "txtPayInvoice";
                     application.objNotifications.insertNotification(notiStruct);
 
@@ -455,7 +455,7 @@ if (url.pass eq variables.schedulePassword) {
                     notiStruct['userID'] = 0;
                     notiStruct['title_var'] = "titCouldNotCharge";
                     notiStruct['descr_var'] = "msgCouldNotCharge";
-                    notiStruct['link'] = "account-settings/invoice/" & invoiceID;
+                    notiStruct['link'] = application.mainURL & "/account-settings/invoice/" & invoiceID;
                     notiStruct['linktext_var'] = "txtPayInvoice";
                     application.objNotifications.insertNotification(notiStruct);
 
