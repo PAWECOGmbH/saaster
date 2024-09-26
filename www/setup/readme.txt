@@ -1,0 +1,1 @@
+After you have successfully run the setup routine, delete the setup folder from your production environment
