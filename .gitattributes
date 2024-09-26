@@ -1,3 +1,0 @@
-.gitattributes merge=ours
-config/example.config.cfm merge=ours
-config/example.env merge=ours

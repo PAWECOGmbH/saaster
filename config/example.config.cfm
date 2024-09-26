@@ -6,13 +6,6 @@ include template="setup.cfm";
 
 
 // ####################################
-// DATABASE SETTINGS
-// ####################################
-
-variables.datasource = "saaster";
-
-
-// ####################################
 //  SERVER SETTINGS
 // ####################################
 
@@ -20,7 +13,7 @@ variables.datasource = "saaster";
 variables.environment = "dev" // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
-variables.mainURL = "http://localhost:8080";
+variables.mainURL = "http://localhost:8085";
 
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "saaster2024";

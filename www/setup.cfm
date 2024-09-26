@@ -1,11 +1,11 @@
 <cfscript>
-    this.datasources["saaster"] = {
+    this.datasources["saaster_dev"] = {
 		class: "com.mysql.cj.jdbc.Driver",
 		bundleName: "com.mysql.cj",
 		bundleVersion: "8.4.0",
-		connectionString: "jdbc:mysql://mysql8:3306/saaster?characterEncoding=UTF-8&serverTimezone=Etc/UTC&maxReconnects=3&allowMultiQueries=true",
+		connectionString: "jdbc:mysql://mysql_dev:3306/mysql_database?characterEncoding=UTF-8&serverTimezone=Etc/UTC&maxReconnects=3&allowMultiQueries=true",
 		username: "root",
-		password: "encrypted:7ee10ae4170baece63b1b9df0d7f101f36f3a741836a52e8caf5153d4a3508c7",
+		password: "encrypted:1b0e4cb3e71cee3db00ec826396e1c6b6268659da807bde426d2c793e9ef9517239a533165a2515a",
 
 		// optional settings
 		connectionLimit:-1, // default:-1
@@ -23,4 +23,7 @@
 		, lifeTimespan: createTimeSpan(0,0,4,0)
 		, idleTimespan: createTimeSpan(0,0,1,0)
 	}];
+
+	variables.datasource = "saaster_dev";
+
 </cfscript>
