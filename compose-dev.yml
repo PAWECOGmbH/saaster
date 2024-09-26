@@ -1,0 +1,72 @@
+services:
+  lucee:
+    build: .
+    ports:
+      - "${DEV_PORT}:80"
+    restart: always
+    container_name: lucee6
+    environment:
+      - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
+    volumes:
+      - ./www:/var/www
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - saaster_net
+
+  mysql:
+    depends_on:
+      - lucee
+    image: mysql:8.1
+    restart: always
+    container_name: mysql8
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_volume:/var/lib/mysql
+    networks:
+      - saaster_net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u root --password=$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      retries: 10
+
+  flyway:
+    image: flyway/flyway:latest
+    environment:
+      - FLYWAY_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      - FLYWAY_USER=root
+      - FLYWAY_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+      - FLYWAY_VALIDATE_MIGRATION_NAMING=true
+    command: -locations=filesystem:/flyway/sql migrate
+    volumes:
+      - ./config/db/init:/flyway/sql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - saaster_net
+
+  inbucket:
+    container_name: inbucket
+    image: inbucket/inbucket
+    restart: always
+    ports:
+      - "9000:9000"
+      - "2500:2500"
+      - "1100:1100"
+    networks:
+      - saaster_net
+
+volumes:
+  db_volume:
+    name: db_volume
+
+networks:
+  saaster_net:
+    driver: bridge

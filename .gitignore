@@ -1,0 +1,13 @@
+### Test files ###
+www/test.*
+
+### Userdata folder ###
+www/userdata/**
+
+### Config files ###
+config.cfm
+.env
+
+### Log files ###
+www/logs
+.history

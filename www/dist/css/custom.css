@@ -1,0 +1,400 @@
+a {
+    outline: none;
+}
+
+.dropify-message>.file-icon>p {
+    font-size: 20px;
+}
+
+.fa_icon {
+    border: 0;
+    background: none;
+}
+
+.bottom_line {
+    border-bottom: 1px solid black;
+}
+
+.loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url('../img/loader.gif') 50% 50% no-repeat rgb(249, 249, 249);
+    opacity: .8;
+}
+
+#checkall tr:hover {
+    background: #eee;
+    cursor: pointer;
+}
+
+.plan-cards>ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.plan-cards>ul li::before {
+    font-family: "FontAwesome";
+    content: "\f00c";
+    padding: 0 10px 0 0;
+    color: green;
+    font-size: large;
+}
+
+.plan_price {
+    font-size: 270%;
+    font-weight: 600;
+}
+
+.currency {
+    font-size: 60%;
+}
+
+.trumbowyg-box,
+.trumbowyg-editor {
+    min-height: 150px;
+}
+
+.badge {
+    font-size: 70%;
+    font-weight: normal;
+    padding: 4px 5px;
+}
+
+.no-border {
+    border: none;
+}
+
+table.planFeatures {
+    width: 100%;
+}
+
+table.planFeatures>th,
+td {
+    padding: 15px;
+}
+
+th.planName {
+    font-size: 20px;
+}
+
+td.feat {
+    text-align: left;
+}
+
+td.category {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+td.feature {
+    font-size: 14px;
+}
+
+.content-td-head {
+    border: 1px solid #cccccc;
+    border-left: none;
+    padding: 25px 15px;
+}
+
+.content-td-body {
+    border: 1px solid #cccccc;
+    border-right: none;
+}
+
+.planName,
+.categoryName {
+    border-bottom: 1px #000000 solid;
+}
+
+.categoryName {
+    padding-top: 50px;
+}
+
+.allPlans {
+    font-size: 0px
+}
+
+.categorie1 .allPlans {
+    font-size: 0.875rem;
+}
+
+.feat {
+    width: 30%;
+}
+
+.has-toggle-input label,
+.has-toggle-input.radio label {
+    display: block;
+    float: left;
+    padding: 5px 10px;
+    margin: auto auto auto -1px;
+    background: #f4f4f4;
+    color: #444;
+    /* border: 1px #d0d0d0 solid; */
+    line-height: normal;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.has-toggle-input label.active {
+    background: #1d60b0;
+    border-color: #1d60b0;
+    color: white;
+    font-weight: bolder;
+}
+
+.has-toggle-input label:first-of-type {
+    margin-left: auto;
+}
+
+.has-toggle-input label:last-of-type {}
+
+.toggleradio {
+    width: 15%;
+    margin: 0 auto;
+}
+
+.bottom_line textarea {
+    height: 36px;
+}
+
+.widget-options{
+    position: absolute;
+    top:0;
+    right: 0;
+    padding:3px 10px;
+    background-color: #000;
+    color:#fff;
+    z-index: 100;
+    display: none;
+  }
+
+.trans-btn {
+    margin-top: 27px;
+}
+
+.trans-arrow-box {
+    font-size: 32px;
+    text-align: center;
+}
+
+.trans-arrow {
+    margin-top: 20px;
+}
+
+.trans-submit-btn {
+    padding-top: 20px;
+}
+
+.invoices-sort {
+    display: flex;
+}
+
+.invoices-sort-label {
+    min-width: 100px;
+    margin-top: 8px;
+}
+
+div.dashboard div.card-header label.form-check {
+    margin: 0;
+    padding: 0;
+}
+
+.widget-disabled {
+    opacity: 0.5;
+}
+
+.ui-state-highlight {
+    background: #eee;
+}
+
+.widget-placeholder {
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
+}
+
+.trans-text pre {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.trans-container {
+    display: flex;
+    align-items: center;
+}
+
+.trans-text {
+    width: 750px;
+}
+
+.trans-link {
+    padding-left: 10px;
+}
+
+.form-select:focus-visible{color: inherit !important;}
+
+.avatar {
+    object-fit: cover;
+}
+@media (max-width: 768px){
+    .dropdown-toggle:after{
+        display: none;
+    }
+    .nav-link-icon, .nav-link-icon span{
+        font-size: 25px;
+    }
+    .navbar-expand-md .navbar-collapse .navbar-nav .nav-link{
+        padding-top: 1.0rem;
+        padding-bottom: 1.0rem;
+    }
+    .dropdown-header{
+        padding-left: 2rem;
+    }
+    .dropdown-menu[data-bs-popper]{
+        left: auto;
+        right: 0;
+    }
+    .lng-dropdown{
+        margin-top: 15px !important;
+    }
+}
+
+.navbar-dark {
+    box-shadow: inset 0 -1px 0 0 rgba(98, 105, 118, 0.16);
+}
+
+.list-group-item-action:hover, .list-group-item-action:focus {
+    color: #000;
+}
+
+.otc {
+	position: relative;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.otc fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.otc fieldset div {
+	display: flex;
+	align-items: center;
+}
+
+.otc legend {
+	margin: 0 auto 1em;
+	color: #5555FF;
+}
+.otc input:active,
+.otc input:focus{
+    border-color: #a4cdfd;
+    outline: none;
+}
+.otc input::selection{
+    background-color: transparent;
+    color: #206bc4;
+    border-color: #a4cdfd;
+}
+
+.otc input[type="number"] {
+	width: 12%;
+	line-height: 1;
+	margin: .1em;
+	padding: 8px 0 4px;
+	font-size: 2.65em;
+	text-align: center;
+	appearance: textfield;
+	-webkit-appearance: textfield;
+	border: 2px solid #a4cdfd;
+	color: #206bc4;
+	border-radius: 4px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 2 group of 3 items */
+.otc input[type="number"]:nth-child(n+4) {
+	order: 2;
+}
+.otc div.mb-3::before {
+	content: '';
+	height: 2px;
+	width: 24px;
+	margin: 0 .25em;
+	order: 1;
+	background: #a4cdfd;
+}
+
+/* From: https://gist.github.com/ffoodd/000b59f431e3e64e4ce1a24d5bb36034 */
+.otc label {
+	border: 0 !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	-webkit-clip-path: inset(50%) !important;
+	clip-path: inset(50%) !important;
+	height: 1px !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	white-space: nowrap !important;
+}
+
+.no-margin{
+    margin: 0;
+}
+
+.color-width{
+    width: 5rem;
+}
+
+.no-max-width{
+    max-width: revert;
+}
+
+.mappings-frontend-td-align{
+    vertical-align: top!important;
+}
+.mappings-frontend-textareaheight{
+   height: 36px;     
+
+}
+.input-container {
+    margin-bottom: 20px;
+}
+.progress-bar {
+    margin-top: 15px;
+    margin-right: 5px;
+    width: 100%;
+    background-color: #ddd;
+    height: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.progress {
+    height: 100%;
+    width: 0;
+    background-color: green;
+    text-align: right;
+    line-height: 20px;
+    color: white;
+    border-radius: 5px;
+}
+.progress-text{
+    margin-top: 10px;
+    font-size: 9px;
+    white-space: nowrap;
+}
