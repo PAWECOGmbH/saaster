@@ -1,0 +1,62 @@
+services:
+  lucee:
+    build: .
+    ports:
+      - "${LUCEE_PORT}:80"
+    restart: always
+    container_name: ${COMPOSE_PROJECT_NAME}
+    environment:
+      - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
+    volumes:
+      - ./www:/var/www
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - npm_network
+
+  mysql:
+    depends_on:
+      - lucee
+    image: mysql:8.1
+    restart: always
+    container_name: ${MYSQL_HOST}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_volume:/var/lib/mysql
+    networks:
+      - npm_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u root --password=${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      retries: 10
+
+  flyway:
+    image: flyway/flyway:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_flyway
+    environment:
+      - FLYWAY_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      - FLYWAY_USER=${MYSQL_USER}
+      - FLYWAY_PASSWORD=${MYSQL_PASSWORD}
+      - FLYWAY_BASELINE_ON_MIGRATE=true
+      - FLYWAY_VALIDATE_MIGRATION_NAMING=true
+    command: -X -locations=filesystem:/flyway/sql migrate
+    volumes:
+      - ./config/db/init:/flyway/sql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - npm_network
+
+volumes:
+  db_volume:
+    name: ${COMPOSE_PROJECT_NAME}_db_volume
+
+networks:
+  npm_network:
+    external: true
