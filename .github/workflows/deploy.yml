@@ -1,0 +1,36 @@
+name: Deploy via Rsync
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Deploy to server via rsync
+        uses: Burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete --exclude-from='.gitignore'
+          path: ./
+          remote_path: ${{ secrets.STAGING_REMOTE_PATH }}
+          remote_host: ${{ secrets.STAGING_HOST }}
+          remote_user: ${{ secrets.STAGING_USER }}
+          remote_key: ${{ secrets.STAGING_KEY }}
+          remote_key_pass: ${{ secrets.STAGING_KEY_PASS }}
+
+      - name: Run Flyway Migrations
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_KEY }}
+          passphrase: ${{ secrets.STAGING_KEY_PASS }}
+          script: |
+            docker start ${{ secrets.STAGING_FLYWAY_CONTAINER_NAME }} || true
+            docker exec -i ${{ secrets.STAGING_FLYWAY_CONTAINER_NAME }} flyway migrate

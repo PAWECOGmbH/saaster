@@ -48,8 +48,8 @@ variables.metaHTML = "";
 // ####################################
 //  API SETTINGS
 // ####################################
-variables.apiSecret = "YourExtremlySafeSecret";
-variables.apiReloadPassword = "password";
+variables.apiSecret = "";
+variables.apiReloadPassword = "";
 
 
 // ####################################
@@ -63,13 +63,13 @@ variables.appName = "SaaSTER";
 variables.appOwner = "The SaaSTER Company ltd.";
 
 // From which e-mail address should the system e-mails be sent?
-variables.fromEmail = "SaaSTER Company <info@saaster.io>";
+variables.fromEmail = "SaaSTER Company <info@yourdomain.com>";
 
 // Enter the email address of the administrator
-variables.toEmail = "info@saaster.io";
+variables.toEmail = "info@yourdomain.com";
 
 // Enter an email address for error messages
-variables.errorEmail = "error@paweco.ch";
+variables.errorEmail = "error@yourdomain.com";
 
 
 // ####################################
@@ -89,29 +89,29 @@ variables.usersIP = "146.70.62.238"; // DE
 variables.payrexxAPIurl = "https://api.payrexx.com/v1.0/";
 
 // Your personal Payrexx instance
-variables.payrexxAPIinstance = "paweco";
+variables.payrexxAPIinstance = "";
 
 // Your API key from Payrexx
-variables.payrexxAPIkey = "HzEVu4Ugo12ut6neuVYvSzgAz7xjpJ";
+variables.payrexxAPIkey = "";
 
 // Look and feel of your payment page (id from Payrexx)
-variables.payrexxDesignID = "84aa8f6e";
+variables.payrexxDesignID = "";
 
 // Webhook directory for developing environment
-variables.payrexxWebhookDev = "https://www.paweco.ch/payrexx/test.json";
+variables.payrexxWebhookDev = "";
 
 // The webhook password that is specified in the url variable
-variables.payrexxWebhookPassword = "payrexxSaaster2024";
+variables.payrexxWebhookPassword = "";
 
 // PSP IDs (comma separated list without spaces)
-variables.payrexxPSPs = "26";
+variables.payrexxPSPs = "";
 
 
 // ####################################
 //  GOOGLE RECAPTCHA V2
 // ####################################
-variables.reCAPTCHA_site_key = "6LeK5B8qAAAAAM4fCg3g4JA7M_V6YwRLRpV1mq9j";
-variables.reCAPTCHA_secret = "6LeK5B8qAAAAAJ48QPxsXKmeG867CFK8rf0y7LQj";
+variables.reCAPTCHA_site_key = "";
+variables.reCAPTCHA_secret = "";
 
 
 // ####################################
