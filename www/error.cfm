@@ -1,14 +1,14 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-        <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-        <title>Error</title>
-        <link href="./dist/css/tabler.min.css" rel="stylesheet"/>
-    </head>
-
     <cfoutput>
+        <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+            <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+            <title>Error</title>
+            <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" />
+        </head>
+
         <cfparam  name="darkTheme" default="">
 
         <cfif getLayout.layoutBody neq "">
