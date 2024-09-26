@@ -1,7 +1,0 @@
-compose-dev.yml merge=ours
-www/setup.cfm merge=ours
-www/userdata/ merge=ours
-db/dev/ merge=ours
-.gitattributes merge=ours
-config/example.config.cfm merge=ours
-config/example.env merge=ours
