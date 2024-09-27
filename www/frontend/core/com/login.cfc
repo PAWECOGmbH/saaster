@@ -23,17 +23,25 @@ component displayname="login" output="false" {
                         WHERE intUserID = users.intUserID AND blnStandard = 1
                         LIMIT 1
                     ) AS intCustomerID,
-                    (   SELECT customers.blnActive
-                        FROM customer_user INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
-                        WHERE blnStandard = 1 AND intUserID = users.intUserID
-                        LIMIT 1
+                    (   SELECT
+                            CASE
+                                WHEN EXISTS (
+                                    SELECT 1
+                                    FROM customer_user
+                                    INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
+                                    WHERE customer_user.blnStandard = 1
+                                    AND customer_user.intUserID = users.intUserID
+                                    LIMIT 1
+                                )
+                                THEN 1
+                                ELSE 0
+                            END
                     ) AS tenant_active
                 FROM users
                 WHERE strEmail = :thisEmail
             "
 
         )
-
 
         if (local.qCheckLogin.recordCount) {
 
