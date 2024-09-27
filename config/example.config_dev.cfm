@@ -1,13 +1,8 @@
 
 <cfscript>
 
-// Setup Lucee
+// Lucee setup for dev environment
 include template="setup.cfm";
-
-
-// ####################################
-//  SERVER SETTINGS
-// ####################################
 
 // Environment
 variables.environment = "dev" // "dev" or "prod"

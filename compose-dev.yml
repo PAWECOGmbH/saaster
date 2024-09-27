@@ -58,12 +58,19 @@ services:
       - "9000:9000"
       - "2500:2500"
       - "1100:1100"
+    volumes:
+      - inbucket_welcomepage:/config
+      - inbucket_data:/storage
     networks:
       - saaster_net
 
 volumes:
   db_volume:
-    name: db_volume
+    name: ${COMPOSE_PROJECT_NAME}_db_volume
+  inbucket_welcomepage:
+    name: inbucket_welcomepage
+  inbucket_data:
+    name: inbucket_data
 
 networks:
   saaster_net:
