@@ -19,3 +19,4 @@ api/taffy/examples
 
 ### Log files ###
 *.log
+*.history
