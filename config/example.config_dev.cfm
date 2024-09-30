@@ -122,7 +122,7 @@ cfsavecontent (variable="variables.footerText") {
 //  Email settings
 // ####################################
 
-//  Generel
+//  General
 variables.mailMaxWidthContent = 660;
 variables.fontFamily = "Arial, Helvetica, sans-serif";
 variables.mailbodyBGColor = "f4f4f4";
