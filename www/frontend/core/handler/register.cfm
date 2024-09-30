@@ -458,7 +458,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                 #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
                 #getTrans('txtResetPassword')#
                 <br><br>
-                <a href='#application.mainURL#/logincheck?p=#newUUID#'style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('titResetPassword')#</a>
+                <a class='mail-btn' href='#application.mainURL#/logincheck?p=#newUUID#' target='_blank'>#getTrans('titResetPassword')#</a>
 
                 <br><br>
                 #getTrans('txtRegards')#<br>
