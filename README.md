@@ -1,3 +1,6 @@
+⚠️ The Docker structure is currently being reworked. Please be patient as the updated setup will be available soon. It's recommended to avoid making changes until the new structure is in place.
+
+<!---
 <div align="center">
 <img src="https://www.saaster.io/images/saaster-logo.png" height="100"/>
 </div>
@@ -149,5 +152,8 @@ You can access it under: `/setup/mockdata/index.cfm`
 - [Bootstrap](https://github.com/twbs/bootstrap/blob/main/LICENSE)
 - [MockDataCFC](https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE)
 - [Fontawesome](https://fontawesome.com/v4/license/)
+
 - [jquery](https://github.com/jquery/jquery)
 - [taffy](https://github.com/atuttle/Taffy)
+
+--->
