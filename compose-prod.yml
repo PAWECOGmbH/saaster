@@ -1,12 +1,14 @@
 services:
   lucee:
-    build: .
+    image: ${LUCEE_IMAGE}
     ports:
       - "${LUCEE_PORT}:80"
     restart: always
     container_name: ${COMPOSE_PROJECT_NAME}
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
+      - UMASK=0000
+    working_dir: /var/www
     volumes:
       - ./www:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
@@ -40,8 +42,8 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}_flyway
     environment:
       - FLYWAY_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
-      - FLYWAY_USER=${MYSQL_USER}
-      - FLYWAY_PASSWORD=${MYSQL_PASSWORD}
+      - FLYWAY_USER=root
+      - FLYWAY_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - FLYWAY_BASELINE_ON_MIGRATE=true
       - FLYWAY_VALIDATE_MIGRATION_NAMING=true
     command: -X -locations=filesystem:/flyway/sql migrate

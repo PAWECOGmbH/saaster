@@ -1,7 +1,7 @@
 
 component displayname="user" output="false" {
 
-    variables.getTrans = application.objLanguage.getTrans;   
+    variables.getTrans = application.objLanguage.getTrans;
 
 
     // Change users password
@@ -445,7 +445,7 @@ component displayname="user" output="false" {
                     echo("
                         #variables.getTrans('titHello')# #local.qUser.toName#<br><br>
                         #local.invitationMail#<br><br>
-                        <a href='#application.mainURL#/logincheck?u=#local.thisUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#variables.getTrans('formSignIn')#</a><br><br>
+                        <a class='mail-btn' href='#application.mainURL#/logincheck?u=#local.thisUUID#' target='_blank'>#variables.getTrans('formSignIn')#</a><br><br>
 
                         #variables.getTrans('txtRegards')#<br>
                         #variables.getTrans('txtYourTeam')#<br>
@@ -546,7 +546,7 @@ component displayname="user" output="false" {
                 echo("
                     #variables.getTrans('titHello')# #local.toName#<br><br>
                     #variables.getTrans('txtComfirmEmailChange')#<br><br>
-                    <a href='#application.mainURL#/account-settings/my-profile?c=#local.newUUID#&nMail=#arguments.useremail#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#variables.getTrans('btnActivate')#</a>
+                    <a class='mail-btn' href='#application.mainURL#/account-settings/my-profile?c=#local.newUUID#&nMail=#arguments.useremail#' target='_blank'>#variables.getTrans('btnActivate')#</a>
                     <br><br>
                     #variables.getTrans('txtRegards')#<br>
                     #variables.getTrans('txtYourTeam')#<br>

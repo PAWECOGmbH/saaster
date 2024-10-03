@@ -1,6 +1,9 @@
 
 <cfscript>
 
+// Datasource
+variables.datasource = "saaster_staging";
+
 // Environment
 variables.environment = "prod" // "dev" or "prod"
 
@@ -8,7 +11,7 @@ variables.environment = "prod" // "dev" or "prod"
 variables.mainURL = "https://staging.yourdomain.com";
 
 // Password for the Scheduler (url.pass)
-variables.schedulePassword = "saaster2024";
+variables.schedulePassword = "";
 
 
 // ####################################
@@ -16,7 +19,7 @@ variables.schedulePassword = "saaster2024";
 // ####################################
 
 // The name of your application.cfc / make sure its unique
-variables.applicationname = "saaster_dev";
+variables.applicationname = "saaster_staging";
 
 // Please use the timespan tag directly
 variables.sessiontimeout = createTimespan(00,03,00,00);
@@ -119,27 +122,25 @@ cfsavecontent (variable="variables.footerText") {
 //  Email settings
 // ####################################
 
-//  General
+//  Generel
 variables.mailMaxWidthContent = 660;
 variables.fontFamily = "Arial, Helvetica, sans-serif";
-variables.fontColorTitle = "464646";
-variables.fontColorSubtitle = "464646";
-variables.fontSizeTitle = 21;
-variables.fontSizeSubtitle = 16;
-variables.fontColorText = "464646";
+variables.mailbodyBGColor = "f4f4f4";
+variables.mailContentbgColor = "ffffff";
+variables.fontSizeTitle = 14;
+variables.fontColorText = "000000";
 variables.fontSizeText = 14;
-variables.fontColorTextSmall = "b2b2b2";
-variables.fontSizeTextSmall = 12;
 
 //  Header
-variables.headerBGColor = "f4f4f4";
-variables.headerFontColor = "464646";
+variables.headerBGColor = "206bc4";
+variables.headerFontColor = "ffffff";
 variables.headerFontSize = 14;
 
 //  Buttons
-variables.buttonBGColor = "feda00";
-variables.buttonFontColor = "016aac";
+variables.buttonBGColor = "206bc4";
+variables.buttonFontColor = "ffffff";
 variables.buttonFontSize = 14;
+
 
 
 </cfscript>
