@@ -1,6 +1,9 @@
 
 <cfscript>
 
+// Datasource
+variables.datasource = "saaster_prod";
+
 // Environment
 variables.environment = "prod" // "dev" or "prod"
 
