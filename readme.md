@@ -18,38 +18,34 @@ This branch is meant for contributors and developers to collaborate and improve 
 To set up the project for local development, follow these steps:
 
 Open a terminal and navigate to the desired folder where you want to set up the project.
-Clone the development branch by running the following command:
+Clone the development branch by running the following command:<br>
+```git clone https://github.com/PAWECOGmbH/saaster```<br>
 
-```git clone https://github.com/ptruessel/saaster```
+Navigate to the project folder:<br>
+```cd saaster```<br>
 
-Navigate to the project folder:
+Copy the config files:<br>
+```mv config/example.env .env```<br>
+```mv config/example.config.cfm www/config.cfm```<br>
 
-```cd saaster```
+Start the Docker containers:<br>
+```docker compose -f compose-dev.yml up -d```<br>
 
-Copy the config files:
-
-```mv config/example.env .env```
-```mv config/example.config.cfm www/config.cfm```
-
-Start the Docker containers:
-
-```docker compose -f compose-dev.yml up -d```
-
-Open your browser and visit http://localhost:8085 to see Saaster.
+Open your browser and visit http://localhost:8085 to see Saaster.<br><br>
 
 ## Load Test Data
 If you need to load test data for development purposes, you can find sample SQL files in the `config/db/dev/` folder.
-To load the data, use the following command:
+To load the data, use the following command:<br>
 
-```cat ./config/db/dev/create-sysadmin.sql | docker exec -i mysql_dev mysql -u root -pmysql_root_pass mysql_database```
-Make sure to change the SQL file name and update the MySQL credentials in the command if necessary.
+```cat ./config/db/dev/create-sysadmin.sql | docker exec -i mysql_dev mysql -u root -pmysql_root_pass mysql_database```<br><br>
+Make sure to change the SQL file name and update the MySQL credentials in the command if necessary.<br><br>
 
 ## Mockdata
 If you need some customers or invoices while developing, you can make use of the mockdata generator we implementet.
-You can access it under: `www/setup/mockdata/index.cfm`
+You can access it with: `http://localhost:8085/setup/mockdata/index.cfm`<br><br>
 
 
-## 🔗 Dependencies
+## Dependencies
 
 - [Tabler](https://github.com/tabler/tabler/blob/main/LICENSE)
 - [Dropify](https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md)

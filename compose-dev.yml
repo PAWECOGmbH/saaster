@@ -1,12 +1,14 @@
 services:
   lucee:
-    build: .
+    image: ${LUCEE_IMAGE}
     ports:
       - "${LUCEE_PORT}:80"
     restart: always
     container_name: ${COMPOSE_PROJECT_NAME}
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
+      - UMASK=0000
+    working_dir: /var/www
     volumes:
       - ./www:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
