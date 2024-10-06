@@ -60,7 +60,7 @@
         swissQrInvoice = true;
 
         qrStruct = objInvoices.setSwissQrInvoiceStruct(getInvoiceData.customerID, getInvoiceData.amountOpen, getInvoiceData.currency, getInvoiceData.number);
-        swissQrSlip = new backend.core.com.swissqrbill().generateSwissBill(qrStruct, "variable");        
+        swissQrSlip = new backend.core.com.swissqrbill().generateSwissBill(qrStruct, "variable");
 
     }
 
@@ -77,9 +77,9 @@
             <tr>
                 <td align="right" height="100" valign="top">
                     <cfif len(trim(sysAdminData.logo))>
-                        <img alt="Logo" src="#application.mainURL#/userdata/images/logos/#sysAdminData.logo#" style="display: block; max-width: 180px; font-size: 16px;" border="0">
+                        <img alt="Logo" src="#expandPath('/userdata/images/logos/#sysAdminData.logo#')#" style="max-width: 180px; font-size: 16px;" border="0">
                     <cfelse>
-                        <img alt="Logo" src="#application.mainURL#/dist/img/logo.png" style="display: block; max-width: 180px; font-size: 16px;" border="0">
+                        <img alt="Logo" src="#expandPath('/dist/img/logo.png')#" style="max-width: 180px; font-size: 16px;" border="0">
                     </cfif>
                 </td>
             </tr>
@@ -239,7 +239,7 @@
 <cfelse>
 
     <cftry>
-    
+
         <cfdocument
             name="invoice"
             pageType="A4"
@@ -277,7 +277,7 @@
             </cfoutput>
             <cfabort>
         </cfcatch>
-        
+
     </cftry>
 
 </cfif>
