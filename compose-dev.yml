@@ -48,7 +48,7 @@ services:
       - FLYWAY_VALIDATE_MIGRATION_NAMING=true
     command: -locations=filesystem:/flyway/${COMPOSE_PROJECT_NAME} migrate
     volumes:
-      - config/db/init:/flyway/${COMPOSE_PROJECT_NAME}
+      - ./config/db/init:/flyway/${COMPOSE_PROJECT_NAME}
     depends_on:
       mysql:
         condition: service_healthy
