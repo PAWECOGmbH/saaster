@@ -4,7 +4,7 @@ services:
     ports:
       - "${LUCEE_PORT}:80"
     restart: always
-    container_name: ${COMPOSE_PROJECT_NAME}
+    container_name: ${COMPOSE_PROJECT_NAME}_lucee
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
       - UMASK=0000
@@ -20,27 +20,30 @@ services:
       - lucee
     image: mysql:8.1
     restart: always
-    container_name: mysql_dev
+    container_name: ${MYSQL_CONTAINER_NAME}
     ports:
       - "${MYSQL_PORT}:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=mysql_root_pass
-      - MYSQL_DATABASE=mysql_database
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - db_volume:/var/lib/mysql
     networks:
       - saaster_net
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u root --password=mysql_root_pass || exit 1"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u root --password=${MYSQL_ROOT_PASSWORD} || exit 1"]
       interval: 10s
       retries: 10
 
   flyway:
     image: flyway/flyway:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_flyway
     environment:
-      - FLYWAY_URL=jdbc:mysql://mysql_dev:3306/mysql_database?useSSL=false&allowPublicKeyRetrieval=true
+      - FLYWAY_URL=jdbc:mysql://${MYSQL_CONTAINER_NAME}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
       - FLYWAY_USER=root
-      - FLYWAY_PASSWORD=mysql_root_pass
+      - FLYWAY_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - FLYWAY_BASELINE_ON_MIGRATE=true
       - FLYWAY_VALIDATE_MIGRATION_NAMING=true
     command: -locations=filesystem:/flyway/sql migrate
@@ -53,13 +56,13 @@ services:
       - saaster_net
 
   inbucket:
-    container_name: inbucket
     image: inbucket/inbucket
+    container_name: ${INBUCKET_CONTAINER_NAME}
     restart: always
     ports:
-      - "9000:9000"
-      - "2500:2500"
-      - "1100:1100"
+      - "${INBUCKET_WEB_PORT}:9000"
+      - "${INBUCKET_SMTP_PORT}:2500"
+      - "${INBUCKET_POP3_PORT}:1100"
     volumes:
       - inbucket_welcomepage:/config
       - inbucket_data:/storage
@@ -70,9 +73,9 @@ volumes:
   db_volume:
     name: ${COMPOSE_PROJECT_NAME}_db_volume
   inbucket_welcomepage:
-    name: inbucket_welcomepage
+    name: ${COMPOSE_PROJECT_NAME}_inbucket_welcomepage
   inbucket_data:
-    name: inbucket_data
+    name: ${COMPOSE_PROJECT_NAME}_inbucket_data
 
 networks:
   saaster_net:
