@@ -49,9 +49,6 @@ component displayname="plans" output="false" {
         if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
 
             local.thisCountryID = application.objCustomer.getCustomerData(arguments.customerID).countryID;
-            if (!len(local.thisCountryID)) {
-                local.thisCountryID = 0;
-            }
 
         }
 

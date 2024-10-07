@@ -108,13 +108,11 @@ component displayname="invoices" output="false" {
 
         try {
 
-            local.dbType = len(local.userID) ? "numeric" : "varchar";
-
-            queryExecute(
+             queryExecute(
                 options = {datasource = application.datasource, result="getNewID"},
                 params = {
                     customerID: {type: "numeric", value: local.customerID},
-                    userID: {type: #local.dbType#, value: local.userID},
+                    userID: {type: "numeric", value: local.userID},
                     invoiceNumber: {type: "numeric", value: local.invoiceNumber},
                     prefix: {type: "nvarchar", value: local.prefix},
                     title: {type: "nvarchar", value: local.title},
@@ -130,7 +128,7 @@ component displayname="invoices" output="false" {
                 },
                 sql = "
                     INSERT INTO invoices (intCustomerID, intUserID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
-                    VALUES (:customerID, COALESCE(NULLIF(:userID, ''), NULL), :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
+                    VALUES (:customerID, :userID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
                 "
             )
 
@@ -1485,7 +1483,7 @@ component displayname="invoices" output="false" {
                     #getTrans('titHello', local.customerData.language)#  #local.invoicePerson#<br><br>
                     #getTrans('msgThanksForPurchaseFindInvoice', local.customerData.language)#<br><br>
                     #getTrans('txtDownloadInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
                     <br><br>
                     #getTrans('txtRegards', local.customerData.language)#<br>
                     #getTrans('txtYourTeam', local.customerData.language)#<br>
@@ -1564,7 +1562,7 @@ component displayname="invoices" output="false" {
                 echo("
                     #getTrans('titHello', local.customerData.language)# #local.invoicePerson#<br><br>
                     #getTrans('txtPleasePayInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
                     <br><br>
                     #getTrans('txtRegards', local.customerData.language)#<br>
                     #getTrans('txtYourTeam', local.customerData.language)#<br>

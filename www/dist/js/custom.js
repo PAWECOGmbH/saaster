@@ -195,6 +195,33 @@ $(document).ready(function(){
 		});
 	});
 
+	// Load trumbowyg editor small
+	$('.editor_small').each(function(index, element){
+		var $this = $(element);
+		$this.trumbowyg({
+			btns: [
+				['bold', 'italic'], ['link'], ['fontsize'], ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'], ['unorderedList', 'orderedList']
+			],
+            plugins: {
+                allowTagsFromPaste: {
+                    allowedTags: ['p']
+                },
+                fontsize: {
+                    sizeList: [
+                        '14px',
+                        '16px',
+                        '18px',
+                        '20px',
+                        '22px',
+                        '24px',
+                        '26px'
+                    ],
+                    allowCustomSize: false
+                }
+            }
+		});
+	});
+
 	// Change plan prices
 	$('.radio-toggle').toggleInput();
 	$('.form-check-label').click(function() {
@@ -594,8 +621,66 @@ $(document).ready(function() {
 });
 
 
+// Edit the date on "to"-field
+function editDateField(uniqueId) {
+
+    var dateField = $('#date-field-' + uniqueId);
+    var originalDate = dateField.text().trim();
+    var parts = originalDate.split('.');
+    var formattedDate = parts[2] + '-' + ('0' + parts[1]).slice(-2) + '-' + ('0' + parts[0]).slice(-2);
+
+    dateField.html('<input type="date" style="width: 100%; box-sizing: border-box; text-align: center;" id="date-input-' + uniqueId + '" value="' + formattedDate + '" />');
+
+    var dateInput = $('#date-input-' + uniqueId);
+    dateInput.focus();
+
+    dateInput.on('blur', function() {
+        var updatedDate = $(this).val().trim();
+
+        var parts = updatedDate.split('-');
+        var displayDate = parts[2] + '.' + parts[1] + '.' + parts[0];
+
+        dateField.text(displayDate);
+        $('#hidden-date-' + uniqueId).val(updatedDate);
+        $('#date-form-' + uniqueId).submit();
+
+    });
+
+    dateInput.on('keypress', function(e) {
+        if (e.which == 13) { // Enter key
+            $(this).blur();
+        }
+    });
+
+}
 
 
+function validateWorkload(inputId) {
+    var input = document.getElementById(inputId);
+    var value = parseInt(input.value);
+
+    if (isNaN(value)) {
+        input.setCustomValidity('Bitte geben Sie eine Zahl ein.');
+    } else if (value < 10 || value > 100) {
+        input.setCustomValidity('Bitte geben Sie eine Zahl zwischen 10 und 100 ein.');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+
+const NavBarToggler = document.querySelector(".navbar-toggler");
+const Overlay = document.querySelector(".opacity");
+
+NavBarToggler.addEventListener("click", () => {
+    if (!Overlay.classList.contains("active")) {
+        Overlay.classList.add("active");
+        document.querySelector("body").style.overflowY = "hidden";
+    } else {
+        Overlay.classList.remove("active");
+        document.querySelector("body").style.overflowY = "auto"; // Reset overflow property
+    }
+});
 
 
 

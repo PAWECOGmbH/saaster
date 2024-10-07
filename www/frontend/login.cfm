@@ -14,49 +14,46 @@
 <cfoutput>
 
 
-<div class="page page-center">
+<div class="row page-center login-page py-4">
 
-    <div class="container-tight py-4">
-
-        <div class="text-center mb-4">
-            <cfif len(trim(getSysadminData.logo))>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
-            <cfelse>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
-            </cfif>
-        </div>
+    <div class="container-tight py-4 px-3">
 
         <form id="submit_form" class="card card-md" method="post" action="#application.mainURL#/logincheck">
             <input type="hidden" name="login_btn">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">#getTrans('formSignIn')#</h2>
+            <div class="card-body login-head">
+                <h2 class="mb-2">Stellensuche Login</h2>
                 <cfif structKeyExists(session, "alert")>
-                    #session.alert#
+                    <div class="mb-3">#session.alert#</div>
                 </cfif>
-                <div class="mb-3">
-                    <label class="form-label">#getTrans('formEmailAddress')#</label>
-                    <input type="email" name="email" class="form-control" value="#session.email#" required autofocus>
+                <div class="mt-4 mb-4">
+                    <label class="form-label pb-2 fs-3">#getTrans('formEmailAddress')#</label>
+                    <input type="email" name="email" placeholder="#getTrans('formEnterEmail')#" class="form-control" value="#session.email#" required autofocus>
                 </div>
-                <div class="mb-2">
-                    <label class="form-label">#getTrans('formPassword')#</label>
+                <div class="mb-4">
+                    <label class="form-label pb-2 fs-3">#getTrans('formPassword')#</label>
                     <div class="input-group input-group-flat">
-                        <input type="password" name="password" class="form-control" required>
+                        <input type="password" name="password" placeholder="#getTrans('formPassword2')#" class="form-control" required>
+                    </div>
+
+                    <div class="text-left mt-3 mb-4 fg-pass">
+                         #getTrans('formForgotPassword')# <a href="#application.mainURL#/password">#getTrans('formReset')#</a>
                     </div>
                 </div>
                 <div class="form-footer">
-                    <button type="submit" id="sumbit_button" class="btn btn-primary w-100">#getTrans('formSignIn')#</button>
+                    <button type="submit" id="sumbit_button" class="btn btn-submit login-btn btn-pill fs-2 text-white w-100">#getTrans('formSignIn')#</button>
                 </div>
             </div>
-            <div class="text-center mt-2">
-                #getTrans('formRegisterText')# <a href="#application.mainURL#/register">#getTrans('formSignUp')#</a>
-            </div>
-            <div class="text-center mt-1 mb-4">
-                #getTrans('formForgotPassword')# <a href="#application.mainURL#/password">#getTrans('formReset')#</a>
+            <div class="hr-text px-3 mb-3">#getTrans('txtOr')#</div>
+            <div class="text-center mt-2 mb-4 fs-3 fg-pass">
+                #getTrans('formRegisterText')#<br />
+                <a href="/plans?g=1">Registrierung für Arbeitgeber</a><br />
+                <a href="/plans?g=2">Registrierung für Fachkräfte</a>
             </div>
 
         </form>
 
     </div>
+
 </div>
 
 </cfoutput>

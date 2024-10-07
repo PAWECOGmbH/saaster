@@ -34,6 +34,7 @@ component displayname="login" output="false" {
 
         )
 
+
         if (local.qCheckLogin.recordCount) {
 
             if (local.qCheckLogin.strPasswordHash eq hash(arguments.password & local.qCheckLogin.strPasswordSalt, 'SHA-512')) {

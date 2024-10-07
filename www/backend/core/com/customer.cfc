@@ -299,7 +299,7 @@ component displayname="customer" output="false" {
                     INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intUserID = :userID
-                    GROUP BY customers.intCustomerID, customer_user.blnStandard, users.blnSuperAdmin, users.blnAdmin
+                    GROUP BY customers.intCustomerID
                     ORDER BY customer_user.blnStandard DESC
                 "
             )

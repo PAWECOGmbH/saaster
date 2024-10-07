@@ -26,9 +26,9 @@
             <table class="table table-vcenter table-mobile-md card-table">
                 <thead>
                     <tr>
-                        <th width="35%">Date (UTC)</th>
+                        <th width="30%">Date (UTC)</th>
                         <th width="30%">Payment type</th>
-                        <th width="25%" class="text-end">Amount #currency#</th>
+                        <th width="30%" class="text-end">Amount #currency#</th>
                         <th width="10%" class="text-center"></th>
                     </tr>
                 </thead>

@@ -16,9 +16,14 @@
 
 <!--- Trumbowyg editor --->
 <script src="/dist/trumbowyg/trumbowyg.min.js"></script>
+<script src="/dist/trumbowyg/plugins/allowtagsfrompaste/trumbowyg.allowtagsfrompaste.min.js"></script>
+<script src="/dist/trumbowyg/plugins/fontsize/trumbowyg.fontsize.min.js"></script>
 
 <!--- Toggleinput JS --->
 <script src="/dist/js/jquery.toggleinput.js"></script>
+
+<!--- Tom select --->
+<script src="/dist/js/tom-select.base.min.js"></script>
 
 <!--- Custom JS --->
 <script src="/dist/js/custom.js"></script>

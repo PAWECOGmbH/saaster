@@ -2,7 +2,7 @@
 <cfscript>
 
 // Datasource
-variables.datasource = "saaster";
+variables.datasource = "stellensuche";
 
 // Environment
 variables.environment = "prod" // "dev" or "prod"
