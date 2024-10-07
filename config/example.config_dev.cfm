@@ -1,14 +1,14 @@
 
 <cfscript>
 
-// Lucee setup for dev environment
-include template="setup.cfm";
+// Datasource
+variables.datasource = "saaster_dev";
 
 // Environment
 variables.environment = "dev" // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
-variables.mainURL = "http://localhost:8085";
+variables.mainURL = "http://localhost:8080";
 
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "saaster2024";
