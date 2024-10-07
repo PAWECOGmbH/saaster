@@ -19,41 +19,34 @@
         }
     </script>
 </cfif>
-<div class="page page-center">
+<div class="row page-center login-page">
     <div class="container-tight py-4">
         <cfif session.step eq 1>
-            <div class="text-center mb-4">
-                <cfif len(trim(getSysadminData.logo))>
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
-                <cfelse>
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
-                </cfif>
-            </div>
             <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck?reinit=3">
                 <input type="hidden" name="register_btn">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">#getTrans('formSignUp')#</h2>
+                <div class="card-body login-head">
+                    <h2 class="card-head text-left mb-4">Stellensuche Registrierung</h2>
                     <cfif structKeyExists(session, "alert")>
-                        #session.alert#
+                        <div class="mb-3">#session.alert#</div>
                     </cfif>
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formFirstName')# *</label>
-                        <input type="text" name="first_name" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required autofocus>
+                    <div class="mb-4">
+                         <label class="form-label pb-2 fs-3">#getTrans('formFirstName')# <span style="color: red;">*</span></label>
+                        <input type="text" name="first_name" placeholder="#getTrans('formEnterFirstName')#" class="form-control" value="#session.first_name#" minlength="3" maxlenght="100" required autofocus>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formName')# *</label>
-                        <input type="text" name="name" class="form-control" value="#session.name#"  minlength="3" maxlenght="100" required>
+                    <div class="mb-4">
+                         <label class="form-label pb-2 fs-3">#getTrans('formName')# <span style="color: red;">*</span></label>
+                        <input type="text" name="name" placeholder="#getTrans('formEnterName')#" class="form-control" value="#session.name#"  minlength="3" maxlenght="100" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formCompanyName')#</label>
-                        <input type="text" name="company" class="form-control" value="#session.company#" minlength="5" maxlenght="100">
+                    <div class="mb-4">
+                         <label class="form-label pb-2 fs-3">#getTrans('formEmailAddress')# <span style="color: red;">*</span></label>
+                        <input type="email" name="email" placeholder="#getTrans('formEnterEmail')#" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formEmailAddress')# *</label>
-                        <input type="email" name="email" class="form-control" value="#session.email#" minlength="5" maxlenght="100" required>
+                    <div class="mb-4">
+                        <label class="form-label pb-2 fs-3">#getTrans('formCompanyName')# <span class="text-muted">(für Arbeitgeber zwingend)</span></label>
+                        <input type="text" name="company" placeholder="#getTrans('formEnterCompanyName')#" class="form-control" value="#session.company#" minlength="5" maxlenght="100">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formLanguage')#</label>
+                    <div class="mb-4">
+                        <label class="form-label pb-2 fs-3">#getTrans('formLanguage')#</label>
                         <select name="language" class="form-select">
                             <cfloop list="#application.allLanguages#" index="i">
                                 <cfset lngIso = listfirst(i,"|")>
@@ -65,16 +58,16 @@
                     <div class="mb-4">
                         <label class="form-check">
                             <input type="checkbox" class="form-check-input" required>
-                            <span class="form-check-label"><a href="##" data-bs-toggle="modal" data-bs-target="##privacy_policy">#getTrans('txtAgreePolicy')#</a></span>
+                            <span class="form-check-label"><a href="##" data-bs-toggle="modal" data-bs-target="##privacy_policy" style='padding-left: 8px;'> #getTrans('txtAgreePolicy')#</a></span>
                         </label>
                     </div>
                     <div class="mb-4">
                         <div class="g-recaptcha" data-sitekey="#variables.reCAPTCHA_site_key#"></div>
                     </div>
-                    <div class="form-footer">
-                        <button id="submit_button" type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
+                    <div class="form-footer text-center mt-4">
+                        <button id="submit_button" type="submit" class="btn btn-submit btn-pill text-white w-full"  style="font-size: 18px;">#getTrans('titCreateNewAccount')#</button>
                     </div>
-                    <div class="text-center text-muted mt-4">
+                    <div class="text-center mt-4 fg-pass fs-3">
                         #getTrans('formAlreadyHaveAccount')# <a href="#application.mainURL#/login">#getTrans('formSignIn')#</a>
                     </div>
                 </div>
@@ -99,7 +92,7 @@
                         <input type="password" name="password2" class="form-control" placeholder="#getTrans('formPassword2')#" required message="#getTrans('alertEnterPassword2')#" maxlenght="100" minlength="8">
                     </div>
                     <div class="form-footer">
-                        <button type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
+                        <button type="submit" class="btn btn-submit fs-3 btn-pill text-white">#getTrans('titCreateNewAccount')#</button>
                     </div>
 
                 </div>
@@ -107,20 +100,19 @@
         </cfif>
     </div>
 </div>
+
 <div id="privacy_policy" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-    <form action="step3.cfm" method="post">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">#getTrans('titlePrivacyPolicy')#</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    #getTrans('txtPrivacyPolicy')#
-                </div>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">#getTrans('titlePrivacyPolicy')#</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                #getTrans('txtPrivacyPolicy')#
             </div>
         </div>
-    </form>
+    </div>
 </div>
 </cfoutput>
 <cfset structDelete(session, "alert") />

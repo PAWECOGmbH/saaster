@@ -45,18 +45,22 @@
 
 
 <cfoutput>
-<div class="page page-center">
-    <div class="container py-4">
+<div class="page-center w-100">
+        <div class="w-100">
+            <cfinclude template="plan_hero.cfm">
+        </div>
+    <div class="container mx-auto w-100 max-w-payment">
         <cfif structKeyExists(session, "alert")>
             #session.alert#
         </cfif>
         <cfif hasPlans>
-            <div class="text-center mb-4">
-                <cfinclude template="plan_boxes.cfm">
+            <div class="">
+              <!---  <cfinclude template="plan_boxes.cfm"> --->
+                <cfinclude template="plan_temp.cfm">
             </div>
-            <div class="text-center mb-4">
+            <!--- <div class="text-center mb-4">
                 <cfinclude template="plan_features.cfm">
-            </div>
+            </div> --->
         </cfif>
     </div>
 </div>

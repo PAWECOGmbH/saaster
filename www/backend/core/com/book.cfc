@@ -486,15 +486,12 @@ component displayname="book" output="false" {
             // If there is a new plan or new module
             if (local.itsFirstProduct) {
 
-                local.dbTypePlan = len(local.planID) ? "numeric" : "varchar";
-                local.dbTypeModule = len(local.moduleID) ? "numeric" : "varchar";
-
                 queryExecute (
                     options = {datasource = application.datasource, result="newID"},
                     params = {
                         customerID: {type: "numeric", value: arguments.customerID},
-                        planID: {type: #local.dbTypePlan#, value: local.planID},
-                        moduleID: {type: #local.dbTypeModule#, value: local.moduleID},
+                        planID: {type: "numeric", value: local.planID},
+                        moduleID: {type: "numeric", value: local.moduleID},
                         dateStart: {type: "date", value: local.startDate},
                         dateEnd: {type: "date", value: local.endDate},
                         recurring: {type: "varchar", value: local.recurring},
@@ -502,7 +499,7 @@ component displayname="book" output="false" {
                     },
                     sql = "
                         INSERT INTO bookings (intCustomerID, intPlanID, intModuleID, dteStartDate, dteEndDate, strRecurring, strStatus)
-                        VALUES (:customerID, COALESCE(NULLIF(:planID, ''), NULL), COALESCE(NULLIF(:moduleID, ''), NULL), :dateStart, :dateEnd, :recurring, :status)
+                        VALUES (:customerID, :planID, :moduleID, :dateStart, :dateEnd, :recurring, :status)
                     "
                 )
 

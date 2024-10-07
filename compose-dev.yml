@@ -46,9 +46,9 @@ services:
       - FLYWAY_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - FLYWAY_BASELINE_ON_MIGRATE=true
       - FLYWAY_VALIDATE_MIGRATION_NAMING=true
-    command: -locations=filesystem:/flyway/sql migrate
+    command: -locations=filesystem:/flyway/${COMPOSE_PROJECT_NAME} migrate
     volumes:
-      - ./config/db/init:/flyway/sql
+      - ./config/db/init:/flyway/${COMPOSE_PROJECT_NAME}
     depends_on:
       mysql:
         condition: service_healthy

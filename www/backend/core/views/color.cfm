@@ -9,7 +9,7 @@
     .btn-primary:hover,
     .btn-primary:active{
         --tblr-btn-hover-bg: #application.systemSettingStruct.settingColorPrimary# !important;
-        --tblr-btn-active-bg: #application.systemSettingStruct.settingColorPrimary# !important;    
+        --tblr-btn-active-bg: #application.systemSettingStruct.settingColorPrimary# !important;
         filter: brightness(110%) saturate(105%);
     }
     .btn-secondary{

@@ -37,8 +37,8 @@
                     <div class="card">
                         <ul class="nav nav-tabs" data-bs-toggle="tabs">
                             <li class="nav-item"><a href="##custom" class="nav-link active" data-bs-toggle="tab">Custom mappings</a></li>
-                            <li class="nav-item"><a href="##system" class="nav-link" data-bs-toggle="tab">System mappings</a></li>
                             <li class="nav-item"><a href="##frontend" class="nav-link" data-bs-toggle="tab">Frontend mappings</a></li>
+                            <li class="nav-item"><a href="##system" class="nav-link" data-bs-toggle="tab">System mappings</a></li>
                         </ul>
                     </div>
                     <div class="tab-content">
@@ -102,43 +102,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="system" class="card tab-pane show">
-                            <div class="card-body">
-                                <div class="card-title">System mappings</div>
-                                <p class="text-red">The following entries should never be changed, otherwise the system will no longer be updateable!</p>
-                                <div class="table-responsive">
-                                    <table class="table table-vcenter card-table">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Mapping</th>
-                                                <th>Path</th>
-                                                <th class="text-center">Only Admins</th>
-                                                <th class="text-center">Only SuperAdmins</th>
-                                                <th class="text-center">Only SysAdmins</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <cfoutput query="qSystemMappings">
-                                                <tr>
-                                                    <td></td>
-                                                    <td>#qSystemMappings.strMapping#</td>
-                                                    <td>#qSystemMappings.strPath#</td>
-                                                    <td class="text-center">#qSystemMappings.blnOnlyAdmin#</td>
-                                                    <td class="text-center">#qSystemMappings.blnOnlySuperAdmin#</td>
-                                                    <td class="text-center">#qSystemMappings.blnOnlySysAdmin#</td>
-                                                </tr>
-                                            </cfoutput>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-                        </div>
                         <div id="frontend" class="card tab-pane show">
                             <div class="card-body">
                                 <div class="card-title">Frontend mappings</div>
-                                <p>Here you can create your own Frontend mappings. These mappings are not affected by any system updates.</p>
+                                <p>Here you can create your own frontend mappings. These mappings are not affected by any system updates.</p>
+                                <p><b>Note:</b> The frontend mappings created by your application are not displayed in this list. Use the database instead.</p>
                                 <div class="table-responsive">
                                     <table class="table table-vcenter card-table">
                                         <thead>
@@ -160,9 +128,9 @@
                                                     <td class="bottom_line small">add<br>new</td>
                                                     <td class="bottom_line"><input type="text" name="mapping" class="form-control" required></td>
                                                     <td class="bottom_line"><input type="text" name="path" class="form-control" required></td>
-                                                    <td class="bottom_line"><input type="text" name="metatitle" class="form-control" required></td>
-                                                    <td class="bottom_line"><input type="text" name="metadescription" class="form-control" required></td>
-                                                    <td class="bottom_line"><input type="text" name="htmlcodes" class="form-control" required></td>
+                                                    <td class="bottom_line"><input type="text" name="metatitle" class="form-control"></td>
+                                                    <td class="bottom_line"><input type="text" name="metadescription" class="form-control"></td>
+                                                    <td class="bottom_line"><input type="text" name="htmlcodes" class="form-control"></td>
                                                     <td class="bottom_line"><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></td>
                                                     <td class="bottom_line"></td>
                                                 </tr>
@@ -183,9 +151,6 @@
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="path" value="#HTMLEditFormat(qFrontendMappings.strPath)#" class="form-control" maxlength="255">
-                                                                <!--- <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate path" data-bs-original-title="Translate path"></i></a>
-                                                                </span> --->
                                                             </div>
                                                         </td>
                                                         <td class="mappings-frontend-td-align">
@@ -239,6 +204,39 @@
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        </div>
+                        <div id="system" class="card tab-pane show">
+                            <div class="card-body">
+                                <div class="card-title">System mappings</div>
+                                <p class="text-red">The following entries should never be changed, otherwise the system will no longer be updateable!</p>
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter card-table">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Mapping</th>
+                                                <th>Path</th>
+                                                <th class="text-center">Only Admins</th>
+                                                <th class="text-center">Only SuperAdmins</th>
+                                                <th class="text-center">Only SysAdmins</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <cfoutput query="qSystemMappings">
+                                                <tr>
+                                                    <td></td>
+                                                    <td>#qSystemMappings.strMapping#</td>
+                                                    <td>#qSystemMappings.strPath#</td>
+                                                    <td class="text-center">#qSystemMappings.blnOnlyAdmin#</td>
+                                                    <td class="text-center">#qSystemMappings.blnOnlySuperAdmin#</td>
+                                                    <td class="text-center">#qSystemMappings.blnOnlySysAdmin#</td>
+                                                </tr>
+                                            </cfoutput>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                             </div>
                         </div>
                     </div>

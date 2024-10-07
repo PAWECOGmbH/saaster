@@ -1,0 +1,628 @@
+/* Standards */
+@media only screen and (min-width:768px) {
+    .navbar-collapse {
+        display: block;
+    }
+
+    .payment-container {
+        height: 70vh;
+
+    }
+}
+
+@media only screen and (min-width:991px) {
+    .navBar-width {
+        width: 100%;
+    }
+
+    .payment-container {
+        height: 70vh;
+
+    }
+
+    #navbarSupportedContent {
+        display: none !important;
+    }
+
+}
+
+/* Standards */
+@media only screen and (min-width: 1320px) {
+    .container {
+        max-width: 1450px !important;
+    }
+
+    .payment-container {
+        height: 70vh;
+
+    }
+
+}
+
+@media only screen and (max-width: 1020px) {
+    .container {
+        max-width: 100% !important;
+    }
+
+    .job-search-card {
+        padding: 20px !important;
+    }
+
+    .profile-pic {
+        border-radius: 20px;
+        height: auto;
+    }
+}
+
+@media only screen and (max-width:992px) {
+    .Navbar-mobile {
+        position: absolute;
+        top: 100px;
+        background-color: var(--secondary-color);
+        width: 100%;
+        left: 0;
+        padding: 20px 10px;
+    }
+
+    .Navbar-mobile .nav-item {
+        align-items: start;
+    }
+
+    .btn-flex .custom-btn-style {
+        width: 200px !important;
+    }
+
+    .cards-container .row .last-card-container {
+        margin-left: -0 !important;
+    }
+
+    .jb-container {
+        flex-direction: column;
+        row-gap: 20px;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 20px 30px;
+    }
+
+    .sidebar-detail-list span {
+        width: 25%;
+    }
+
+    .sidebar-detail-list iconify-icon {
+        width: 4%;
+    }
+
+    .profile-sidebar .sidebar-detail-list span {
+        width: auto;
+    }
+
+    .profile-sidebar .sidebar-detail-list iconify-icon {
+        width: 12%;
+    }
+
+    .payment-container {
+        flex-direction: column;
+        width: fit-content !important;
+        padding: 0 !important;
+    }
+
+    .payment-card:nth-child(2),
+    .payment-card:nth-child(3),
+    .payment-card:nth-child(4) {
+        border-top: 1px solid #BBBBBB;
+        border-left: none;
+    }
+
+    .price-hero h1 {
+        font-size: 48px;
+        line-height: 56px;
+    }
+
+    .job-search {
+        padding: 0 0 !important;
+        margin-top: 20px !important;
+    }
+
+    .searchClear a {
+        font-size: 14px;
+    }
+
+    .job-search-card {
+        flex-direction: column;
+    }
+
+    .search-filter {
+        max-width: 100%;
+    }
+
+    .search-form input {
+        height: 56px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+
+    .searchClear {
+        top: 32;
+        right: 8px;
+    }
+
+    .cancel {
+        font-size: 10px;
+    }
+
+    .hero-section {
+        padding: 30px 0 50px 0;
+    }
+
+    .hero-section .img {
+        width: 260px;
+        margin-bottom: -50px !important;
+        padding-top: 30px;
+    }
+
+    .cards-container .card-head h1,
+    .job-card-container h1 {
+        font-size: 28px;
+    }
+
+    .job-card-container h1 {
+        padding-bottom: 0;
+    }
+
+    .job-card {
+        padding: 26px 30px;
+    }
+
+    .job-card h1 {
+        font-size: 24px;
+    }
+
+    .job-card-container .button {
+        width: 100%;
+        margin: 20px 0 !important;
+    }
+
+    .link-head .email-letter {
+        width: 100%;
+        max-width: 500px;
+        padding-left: 20px;
+        padding-right: 54px;
+    }
+
+    .link-head .email-letter~button {
+        height: 55px !important;
+        margin-left: -60px !important;
+    }
+
+    .filter {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 49.2%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        background-color: var(--bg-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 1000px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+    }
+
+    .filter iconify-icon {
+        font-size: 20px;
+    }
+
+    .select-container {
+        position: absolute;
+        top: 60px;
+        opacity: 0;
+        visibility: hidden;
+        box-shadow: 0px 4px 49.5px 0px rgba(0, 0, 0, 0.065);
+        background-color: #fff;
+        border-radius: 1000px;
+        transition: all 120ms ease-in-out;
+    }
+
+    .select-container.selectOpen {
+        opacity: 1;
+        top: 80px;
+        visibility: visible;
+    }
+
+
+    .first-select::after {
+        display: none;
+    }
+
+    .select-wrapper {
+        padding: 10px 0;
+        width: 100%;
+        border-radius: 1000px;
+    }
+
+    .select-selected {
+        background-color: transparent;
+    }
+
+    .select-arrow {
+        right: 25px;
+    }
+
+    .select-options {
+        left: 0;
+    }
+
+    .select-container .h-auto:last-child .select-wrapper .select-options {
+        left: -20px;
+    }
+
+    .profile-card .job-btn {
+        width: 100%;
+    }
+
+    .profile-sidebar {
+        padding: 0;
+        padding-bottom: 30px;
+        margin-top: -20px !important;
+        width: 100%;
+    }
+
+    .payment-card {
+        padding: 30px 20px;
+    }
+
+    .cards-container .card h3 {
+        font-size: 20px;
+    }
+
+    .cards-container .card-head h2 {
+        font-size: 24px;
+    }
+}
+
+@media only screen and (max-width: 640px) {
+    .subtitle {
+        left: -50px;
+    }
+
+    .nav-logo {
+        height: 50px;
+    }
+
+    .row>* {
+        padding: 0 !important;
+    }
+
+    .flex__right .right-box iconify-icon {
+        font-size: 16px;
+    }
+
+    .flex__right .right-box p {
+        font-size: 14px;
+    }
+
+    .btn-flex .custom-btn-style {
+        padding: 10px 0 !important;
+        width: 100% !important;
+    }
+
+    .hero-txt h1 {
+        font-size: 36px;
+    }
+
+    .hero-txt p {
+        font-size: 20px !important;
+    }
+
+    .btn-submit {
+        width: 100%;
+    }
+
+    .hero-section .img {
+        width: 220px;
+        margin-bottom: -50px !important;
+        padding-top: 30px;
+    }
+
+    .link-head .email-letter~button {
+        width: 130px;
+        height: 55px !important;
+        margin-left: -60px !important;
+    }
+
+    .select-container {
+        flex-direction: column;
+        border-radius: 20px;
+        top: 50px;
+    }
+
+    .select-wrapper {
+        padding: 0 !important;
+    }
+
+    .select-wrapper::after {
+        display: none;
+    }
+
+    .select-arrow {
+        right: 11px;
+    }
+
+    .select-options {
+        width: 100%;
+    }
+
+    .select-container.selectOpen {
+        opacity: 1;
+        top: 70px;
+    }
+
+    .detail-job {
+        padding: 0 30px !important;
+    }
+
+    .controls .center-btn {
+        width: 50px;
+        height: 50px;
+    }
+
+    .controls .center-btn iconify-icon {
+        font-size: 24px;
+    }
+
+    .sidebar-detail-list span {
+        width: 100%;
+    }
+
+    .sidebar-detail-list iconify-icon {
+        width: auto;
+        margin-right: 10px;
+    }
+
+    .description h1 {
+        font-size: 22px;
+    }
+
+    .description-para p {
+        font-size: 16px;
+        padding-bottom: 13px;
+    }
+
+    .description .list-group li {
+        padding: 4px 0;
+        font-size: 16px;
+    }
+
+    .controls .bottom-controls {
+        bottom: 5px;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+    }
+
+    .profile-card {
+        padding: 30px 20px;
+    }
+
+    .profile-card .position {
+        font-size: 20px;
+        padding-top: 8px;
+    }
+
+    .profile-pic {
+        max-width: 100%;
+        border-radius: 20px;
+        height: auto;
+    }
+
+    .skills {
+        flex-direction: column;
+        justify-content: start !important;
+        align-items: start !important;
+        row-gap: 8px;
+    }
+
+    .profile-hero .job-btn {
+        width: 100%;
+    }
+
+    .profile-main-content .nav-tabs .nav-link {
+        font-size: 16px;
+        font-weight: 400;
+        padding: 10px 10px;
+        text-align: center;
+    }
+
+    .profile-main-content .nav-tabs .nav-item {
+        width: 50%;
+    }
+
+    .tab-content h1 {
+        font-size: 22px;
+        font-weight: 600;
+        padding-bottom: 8px;
+    }
+
+    .tab-content p {
+        font-size: 16px;
+    }
+
+    .tab-content ul li {
+        font-size: 16px;
+    }
+
+    .sub-details {
+        padding-top: 16px;
+    }
+
+    .link-head h2 {
+        padding-bottom: 10px;
+        font-size: 22px;
+    }
+
+    .link-head h2~ul li a,
+    .info a span {
+        font-size: 16px !important;
+    }
+
+    .social .link-head h2 {
+        font-size: 22px;
+        padding-top: 46px;
+    }
+
+    .wir {
+        font-size: 12px !important;
+        padding-right: 4px;
+    }
+
+    .payment-card h1 {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .price-hero p {
+        font-size: 18px;
+    }
+
+    .price-hero h1 {
+        font-size: 38px;
+        line-height: 44px;
+    }
+
+    .price-hero p {
+        padding-top: 18px;
+    }
+}
+
+/* header and title */
+@media (min-width: 50px) and (max-width: 1020px) {
+    .logo-mx {
+        margin-left: 20px!important;
+        padding-left: 0px!important;
+    }
+    .buttonBurger-me {
+        margin-right: 20px!important;
+    }
+    .buttonLogin-me{
+        margin-right: 20px!important;
+    }
+    .title-mx {
+        padding-right: 20px!important;
+        padding-left: 20px!important;
+        margin-right: 0px!important;
+        margin-left: 0px!important;
+    }
+}
+
+/* fuer Arbeitgeber + Fuehrungskraefte */
+@media (min-width: 1399px) and (max-width: 12000px){
+    .payment-card, .payment-container{
+        height:445px;
+    }
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height:510px!important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1399px){
+    .payment-card, .payment-container{
+        height:445px;
+    }
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height:510px!important;
+    }
+}
+@media (max-width: 992px){
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height: 1160px!important;
+    }
+    .payment-card, .payment-container{
+        height:820px;
+    }
+}
+
+@media (max-width: 992px){
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height: 960px!important;
+    }
+    .payment-card, .payment-container{
+        height:820px;
+    }
+}
+@media (max-width: 410px){
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height: 1000px!important;
+    }
+    .payment-card, .payment-container{
+        height:830px;
+    }
+}
+@media (max-width: 350px){
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height: 1100px!important;
+    }
+    .payment-card, .payment-container{
+        height:850px;
+    }
+}
+@media (max-width: 300px){
+    .arbeitgeber-payment-card, .arbeitgeber-payment-container{
+        height: 1300px!important;
+    }
+    .payment-card, .payment-container{
+        height:1000px;
+    }
+}
+
+@media (min-width: 1021px) and (max-width: 1400px){
+    .title-mx {
+        padding-right: 15px!important;
+        padding-left: 15px!important;
+        margin-right: 0px!important;
+        margin-left: 0px!important;
+    }  
+}
+@media (min-width: 1021px) and (max-width: 12000px){
+    .max-w-payment{
+        max-width: 960px !important;
+    }
+}
+@media (min-width: 1319px) and (max-width: 12000px){
+    .logo-mx {
+        margin-left: 15px!important;
+        padding-left: 0px!important;
+    }
+    .buttonBurger-me {
+        margin-right: 15px!important;
+    }
+    .buttonLogin-me{
+        margin-right: 15px!important;
+    }
+}
+@media (min-width: 1454px) and (max-width: 12000px){
+    .title-mx {
+        padding-right: 15px!important;
+        padding-left: 15px!important;
+        margin-right: auto !important;
+        margin-left: auto !important;
+        max-width: 1450px!important;
+    }  
+}
+
+/* Mobile nav */
+@media (max-width: 576px){
+    #navbarSupportedContent > div.custom-ui{
+        justify-content: center!important;
+    }
+    .image-container {
+        width: 100%;
+        align-self: flex-start!important;        
+        border-radius: 15px;
+        overflow: hidden;
+    }
+}

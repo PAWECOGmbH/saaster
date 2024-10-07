@@ -1,4 +1,3 @@
-
 <cfscript>
 
     if (structKeyExists(session, "customer_id") and session.customer_id gt 0 and session.superAdmin) {
@@ -10,7 +9,6 @@
 <cfoutput>
 
 <div class="mb-5">
-    <div class="form-label">#getTrans('titPayment')#</div>
     <div class="form-group radio-toggle has-toggle-input toggleradio mt-3">
         <div class="form-check">
             <label class="form-check-label active form-check form-check-inline monthly">
@@ -43,7 +41,7 @@
                         <div style="min-height: 50px;" class="price_box monthly">
                             <div class="fw-bold my-2 plan_price">
                                 <cfif i.onRequest>
-                                    #getTrans('txtOnRequest')#
+                                    #getTrans('txtOnRequest')# ASD
                                 <cfelse>
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#
@@ -64,7 +62,7 @@
                         <div style="min-height: 50px; display: none;" class="price_box yearly">
                             <div class="fw-bold my-2 plan_price">
                                 <cfif i.onRequest>
-                                    #getTrans('txtOnRequest')#
+                                    #getTrans('txtOnRequest')# ASD
                                 <cfelse>
                                     <cfif i.itsFree eq 1>
                                         #getTrans('txtFree')#

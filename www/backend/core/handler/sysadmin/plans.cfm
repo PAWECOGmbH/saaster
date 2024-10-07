@@ -15,18 +15,16 @@ if (structKeyExists(form, "new_group")) {
 
     try {
 
-        dbType = len(form.countryID) ? "numeric" : "varchar";
-
         queryExecute(
             options = {datasource = application.datasource},
             params = {
                 group_name: {type: "nvarchar", value: form.group_name},
-                cID: {type: #dbType#, value: form.countryID},
+                cID: {type: "numeric", value: form.countryID},
                 nextPrio: {type: "numeric", value: qNexPrio.nextPrio}
             },
             sql = "
                 INSERT INTO plan_groups (strGroupName, intCountryID, intPrio)
-                VALUES (:group_name, COALESCE(NULLIF(:cID, ''), NULL), :nextPrio)
+                VALUES (:group_name, :cID, :nextPrio)
             "
         )
 
@@ -50,19 +48,17 @@ if (structKeyExists(form, "edit_plangroup")) {
         param name="form.group_name" default="";
         param name="form.countryID" default="";
 
-        dbType = len(form.countryID) ? "numeric" : "varchar";
-
         queryExecute(
             options = {datasource = application.datasource},
             params = {
                 group_name: {type: "nvarchar", value: form.group_name},
-                cID: {type: #dbType#, value: form.countryID},
+                cID: {type: "numeric", value: form.countryID},
                 plangroupID: {type: "numeric", value: form.edit_plangroup}
             },
             sql = "
                 UPDATE plan_groups
                 SET strGroupName = :group_name,
-                    intCountryID = COALESCE(NULLIF(:cID, ''), NULL)
+                    intCountryID = :cID
                 WHERE intPlanGroupID = :plangroupID
             "
         )
@@ -196,7 +192,7 @@ if (structKeyExists(form, "edit_plan")) {
         desc = form.desc;
 
         recommended = structKeyExists(form, "recommended") ? 1 : 0;
-
+        
         if (structKeyExists(form, "free")) {
 
             free = 1;
