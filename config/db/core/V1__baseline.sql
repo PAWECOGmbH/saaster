@@ -1,0 +1,7 @@
+-- This file is intentionally left empty.
+-- It serves as the baseline version (V1) for Flyway migrations.
+-- Flyway uses this baseline to initialize the database versioning.
+-- Developers should not remove or modify this file. Future migrations
+-- will start from V2 onwards and will be applied in order.
+--
+-- Purpose: Ensure a clean starting point for Flyway without executing any SQL.

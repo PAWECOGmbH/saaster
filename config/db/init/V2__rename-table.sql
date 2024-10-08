@@ -1,1 +1,0 @@
-RENAME TABLE ss_indestries_ads TO ss_industries_ads;
