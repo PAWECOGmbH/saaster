@@ -18,7 +18,7 @@ CREATE TABLE `bookings`  (
   CONSTRAINT `frn_cb_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `frn_cb_modules` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `frn_cb_plans` FOREIGN KEY (`intPlanID`) REFERENCES `plans` (`intPlanID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 
 DROP TABLE IF EXISTS `countries`;
@@ -42,7 +42,7 @@ CREATE TABLE `countries`  (
   INDEX `_intLanguageID`(`intLanguageID`) USING BTREE,
   INDEX `_intTimezoneID`(`intTimezoneID`) USING BTREE,
   FULLTEXT INDEX `FulltextStrings`(`strCountryName`, `strLocale`, `strISO1`, `strISO2`, `strCurrency`, `strRegion`, `strSubRegion`)
-) ENGINE = InnoDB AUTO_INCREMENT = 251 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 
 INSERT INTO `countries` VALUES (1, 'Montenegro', 1, 'sr_ME', 'ME', 'MNE', 'EUR', 'Europe', 'Southeast Europe', 38, 'https://flagcdn.com/me.svg', 0, 0, 0);
@@ -321,7 +321,7 @@ CREATE TABLE `currencies`  (
   `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
   `blnActive` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`intCurrencyID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `currencies` VALUES (1, 'USD', 'US Dollar', 'US Dollar', '$', 1, 1, 1);
 INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
@@ -419,7 +419,7 @@ CREATE TABLE `invoice_status`  (
   `strColor` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`intPaymentStatusID`) USING BTREE,
   UNIQUE INDEX `_intPaymentStatusID`(`intPaymentStatusID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `invoice_status` VALUES (1, 'statInvoiceDraft', 'muted');
 INSERT INTO `invoice_status` VALUES (2, 'statInvoiceOpen', 'blue');
@@ -481,7 +481,7 @@ CREATE TABLE `languages`  (
   `blnChooseable` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`intLanguageID`) USING BTREE,
   UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `languages` VALUES (1, 'en', 'English', 'English', 1, 1, 1);
 INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
@@ -550,7 +550,7 @@ CREATE TABLE `notifications`  (
   PRIMARY KEY (`intNotificationID`) USING BTREE,
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
   CONSTRAINT `frn_noti_customer` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 DROP TABLE IF EXISTS `optin`;
 CREATE TABLE `optin`  (
@@ -752,71 +752,72 @@ CREATE TABLE `system_mappings`  (
   `blnOnlySysAdmin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`intSystemMappingID`) USING BTREE,
   UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 70 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
-INSERT INTO `system_mappings` VALUES (1, 'login', 'frontend/login.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (2, 'register', 'frontend/register.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (3, 'password', 'frontend/password.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (4, 'dashboard', 'views/dashboard.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (5, 'account-settings/my-profile', 'views/customer/my-profile.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (6, 'customer', 'handler/customer.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (7, 'global', 'handler/global.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (9, 'registration', 'handler/register.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (12, 'account-settings', 'views/customer/account-settings.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (13, 'account-settings/company', 'views/customer/company-edit.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (14, 'account-settings/tenants', 'views/customer/tenants.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (15, 'account-settings/users', 'views/customer/users.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (17, 'account-settings/reset-password', 'views/customer/reset-password.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (19, 'account-settings/user/new', 'views/customer/user_new.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (20, 'account-settings/user/edit', 'views/customer/user_edit.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (21, 'account-settings/tenant/new', 'views/customer/tenant_new.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (23, 'account-settings/invoices', 'views/invoices/invoices.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (25, 'account-settings/invoice', 'views/invoices/invoice.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (26, 'account-settings/modules', 'views/customer/modules.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (27, 'invoices', 'handler/invoices.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (29, 'sysadmin/mappings', 'views/sysadmin/mappings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (31, 'sysadmin/translations', 'views/sysadmin/translations.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (32, 'sysadmin/settings', 'views/sysadmin/settings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (33, 'user', 'handler/user.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (34, 'sysadmin/languages', 'views/sysadmin/languages.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (36, 'sysadmin/countries', 'views/sysadmin/countries.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (37, 'sysadmin/countries/import', 'views/sysadmin/country_import.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (39, 'sysadmin/modules', 'views/sysadmin/modules.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (41, 'sysadmin/modules/edit', 'views/sysadmin/module_edit.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (42, 'sysadmin/widgets', 'views/sysadmin/widgets.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (43, 'sysadm/mappings', 'handler/sysadmin/mappings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (44, 'sysadm/translations', 'handler/sysadmin/translations.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (45, 'sysadm/languages', 'handler/sysadmin/languages.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (46, 'sysadm/settings', 'handler/sysadmin/settings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (47, 'sysadm/countries', 'handler/sysadmin/countries.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (48, 'sysadm/modules', 'handler/sysadmin/modules.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (49, 'account-settings/invoice/print', 'views/invoices/print.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (50, 'sysadm/widgets', 'handler/sysadmin/widgets.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (51, 'sysadmin/plans', 'views/sysadmin/plans.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (52, 'sysadmin/currencies', 'views/sysadmin/currencies.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (53, 'sysadm/currencies', 'handler/sysadmin/currencies.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (54, 'sysadm/plans', 'handler/sysadmin/plans.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (55, 'sysadmin/plan/edit', 'views/sysadmin/plan_edit.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (56, 'sysadmin/plangroups', 'views/sysadmin/plan_groups.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (57, 'sysadmin/planfeatures', 'views/sysadmin/plan_features.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (58, 'plans', 'frontend/plans.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (59, 'sysadmin/invoices', 'views/sysadmin/invoices.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (60, 'sysadm/invoices', 'handler/sysadmin/invoices.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (61, 'sysadmin/invoice/edit', 'views/sysadmin/invoice_edit.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (62, 'sysadmin/customers', 'views/sysadmin/customers.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (63, 'sysadm/customers', 'handler/sysadmin/customers.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (64, 'sysadmin/customers/edit', 'views/sysadmin/customers_edit.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (65, 'sysadmin/customers/details', 'views/sysadmin/customers_details.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (66, 'sysadmin/system-settings', 'views/sysadmin/system_settings.cfm', 0, 0, 1);
-INSERT INTO `system_mappings` VALUES (67, 'book', 'frontend/book.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (68, 'cancel', 'handler/cancel.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (69, 'dashboard-settings', 'handler/dashboard.cfm', 0, 0, 0);
-INSERT INTO `system_mappings` VALUES (70, 'account-settings/plans', 'views/customer/plans.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (71, 'plan-settings', 'handler/plans.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (72, 'account-settings/payment', 'views/customer/payment.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (73, 'payment-settings', 'handler/payment.cfm', 0, 1, 0);
-INSERT INTO `system_mappings` VALUES (74, 'account-settings/settings', 'views/customer/settings.cfm', 1, 0, 0);
-INSERT INTO `system_mappings` VALUES (75, 'notifications', 'views/customer/notifications.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (1, 'dashboard', 'backend/core/views/dashboard.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (2, 'account-settings/my-profile', 'backend/core/views/customer/my-profile.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (3, 'customer', 'backend/core/handler/customer.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (4, 'global', 'backend/core/handler/global.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (5, 'logincheck', 'frontend/core/handler/register.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (6, 'account-settings', 'backend/core/views/customer/account-settings.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (7, 'account-settings/company', 'backend/core/views/customer/company-edit.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (8, 'account-settings/tenants', 'backend/core/views/customer/tenants.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (9, 'account-settings/users', 'backend/core/views/customer/users.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (10, 'account-settings/reset-password', 'backend/core/views/customer/reset-password.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (11, 'account-settings/user/new', 'backend/core/views/customer/user_new.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (12, 'account-settings/user/edit', 'backend/core/views/customer/user_edit.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (13, 'account-settings/tenant/new', 'backend/core/views/customer/tenant_new.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (14, 'account-settings/invoices', 'backend/core/views/invoices/invoices.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (15, 'account-settings/invoice', 'backend/core/views/invoices/invoice.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (16, 'account-settings/modules', 'backend/core/views/customer/modules.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (17, 'invoices', 'backend/core/handler/invoices.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (18, 'sysadmin/mappings', 'backend/core/views/sysadmin/mappings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (19, 'sysadmin/translations', 'backend/core/views/sysadmin/translations.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (20, 'sysadmin/settings', 'backend/core/views/sysadmin/settings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (21, 'user', 'backend/core/handler/user.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (22, 'sysadmin/languages', 'backend/core/views/sysadmin/languages.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (23, 'sysadmin/countries', 'backend/core/views/sysadmin/countries.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (24, 'sysadmin/countries/import', 'backend/core/views/sysadmin/country_import.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (25, 'sysadmin/modules', 'backend/core/views/sysadmin/modules.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (26, 'sysadmin/modules/edit', 'backend/core/views/sysadmin/module_edit.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (27, 'sysadmin/widgets', 'backend/core/views/sysadmin/widgets.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (28, 'sysadm/mappings', 'backend/core/handler/sysadmin/mappings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (29, 'sysadm/translations', 'backend/core/handler/sysadmin/translations.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (30, 'sysadm/languages', 'backend/core/handler/sysadmin/languages.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (31, 'sysadm/settings', 'backend/core/handler/sysadmin/settings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (32, 'sysadm/countries', 'backend/core/handler/sysadmin/countries.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (33, 'sysadm/modules', 'backend/core/handler/sysadmin/modules.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (34, 'account-settings/invoice/print', 'backend/core/views/invoices/print.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (35, 'sysadm/widgets', 'backend/core/handler/sysadmin/widgets.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (36, 'sysadmin/plans', 'backend/core/views/sysadmin/plans.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (37, 'sysadmin/currencies', 'backend/core/views/sysadmin/currencies.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (38, 'sysadm/currencies', 'backend/core/handler/sysadmin/currencies.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (39, 'sysadm/plans', 'backend/core/handler/sysadmin/plans.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (40, 'sysadmin/plan/edit', 'backend/core/views/sysadmin/plan_edit.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (41, 'sysadmin/plangroups', 'backend/core/views/sysadmin/plan_groups.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (42, 'sysadmin/planfeatures', 'backend/core/views/sysadmin/plan_features.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (43, 'sysadmin/invoices', 'backend/core/views/sysadmin/invoices.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (44, 'sysadm/invoices', 'backend/core/handler/sysadmin/invoices.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (45, 'sysadmin/invoice/edit', 'backend/core/views/sysadmin/invoice_edit.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (46, 'sysadmin/customers', 'backend/core/views/sysadmin/customers.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (47, 'sysadm/customers', 'backend/core/handler/sysadmin/customers.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (48, 'sysadmin/customers/edit', 'backend/core/views/sysadmin/customers_edit.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (49, 'sysadmin/customers/details', 'backend/core/views/sysadmin/customers_details.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (50, 'sysadmin/system-settings', 'backend/core/views/sysadmin/system_settings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (51, 'book', 'backend/core/handler/book.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (52, 'cancel', 'backend/core/handler/cancel.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (53, 'dashboard-settings', 'backend/core/handler/dashboard.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (54, 'account-settings/plans', 'backend/core/views/customer/plans.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (55, 'plan-settings', 'backend/core/handler/plans.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (56, 'account-settings/payment', 'backend/core/views/customer/payment.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (57, 'payment-settings', 'backend/core/handler/payment.cfm', 0, 1, 0);
+INSERT INTO `system_mappings` VALUES (58, 'account-settings/settings', 'backend/core/views/customer/settings.cfm', 1, 0, 0);
+INSERT INTO `system_mappings` VALUES (59, 'notifications', 'backend/core/views/notifications/overview.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (60, 'sysadm/api-settings', 'backend/core/handler/sysadmin/api_settings.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (61, 'sysadmin/api-settings', 'backend/core/views/sysadmin/api_settings.cfm', 0, 0, 0);
+INSERT INTO `system_mappings` VALUES (62, 'sysadmin/logs', 'backend/core/views/sysadmin/logs.cfm', 0, 0, 1);
+INSERT INTO `system_mappings` VALUES (63, 'sysadm/logs', 'backend/core/handler/sysadmin/logs.cfm', 0, 0, 1);
+
 
 DROP TABLE IF EXISTS `system_settings`;
 CREATE TABLE `system_settings`  (
@@ -826,7 +827,7 @@ CREATE TABLE `system_settings`  (
   `strDescription` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`intSystSettingID`) USING BTREE,
   UNIQUE INDEX `_intSystSettingID`(`intSystSettingID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `system_settings` VALUES (1, 'settingInvoiceNumberStart', '1000', 'New invoice: At which invoice number should the system start?');
 INSERT INTO `system_settings` VALUES (2, 'settingRoundFactor', '1', 'The rounding factor for invoice amounts. Note: Currently only 5 (0.05 Switzerland) or 1 (0.01 rest of the world) are available.');
@@ -834,6 +835,12 @@ INSERT INTO `system_settings` VALUES (3, 'settingStandardVatType', '3', 'Which v
 INSERT INTO `system_settings` VALUES (4, 'settingInvoicePrefix', 'INV-', 'Invoices can be preceded by a short prefix. Enter it here.');
 INSERT INTO `system_settings` VALUES (5, 'settingInvoiceNet', '1', 'Decide whether the invoices are issued \"net\" by default.');
 INSERT INTO `system_settings` VALUES (6, 'settingLayout', 'horizontal', 'Choose a layout you want to use');
+INSERT INTO `system_settings` VALUES (7, 'settingColorPrimary', '#206bc4', 'Choose a primary color:');
+INSERT INTO `system_settings` VALUES (8, 'settingColorSecondary', '#626976', 'Choose a secondary color:');
+INSERT INTO `system_settings` VALUES (9, 'settingSwissQrBill', '0', 'Do you want to activate the Swiss QR bill?');
+INSERT INTO `system_settings` VALUES (10, 'settingIBANnumber', '', 'Your IBAN number');
+INSERT INTO `system_settings` VALUES (11, 'settingQRreference', '', 'Your QR reference number');
+
 
 DROP TABLE IF EXISTS `system_translations`;
 CREATE TABLE `system_translations`  (
@@ -843,7 +850,7 @@ CREATE TABLE `system_translations`  (
   `strStringEN` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   PRIMARY KEY (`intSystTransID`) USING BTREE,
   UNIQUE INDEX `_strVariable`(`strVariable`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 255 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `system_translations` VALUES (1, 'alertAccountCreatedLogin', 'Ihr Account wurde erfolgreich erstellt. Bitte loggen Sie sich nun ein.', 'Your account has been successfully created. Please log in now.');
 INSERT INTO `system_translations` VALUES (2, 'alertChoosePassword', 'Bitte vergeben Sie sich ein starkes Passwort mit mindestens 8 Zeichen.', 'Please assign yourself a strong password with at least 8 characters.');
@@ -1045,7 +1052,7 @@ INSERT INTO `system_translations` VALUES (198, 'txtTest', 'Test', 'Test');
 INSERT INTO `system_translations` VALUES (199, 'txtTestUntil', 'Sie können testen bis zum Ablaufdatum', 'You can test until the expiry date');
 INSERT INTO `system_translations` VALUES (200, 'txtTestTimeExpired', 'Ihre Testzeit ist abgelaufen', 'Your test time has expired');
 INSERT INTO `system_translations` VALUES (201, 'txtCanceled', 'Gekündigt', 'Canceled');
-INSERT INTO `system_translations` VALUES (202, 'txtSubscriptionCanceled', 'Abonnement gekündigt. Ihre Daten werden nach dem Ablaufdatum gelöscht.', 'Subscription cancelled. Your data will be deleted after the expiry date.');
+INSERT INTO `system_translations` VALUES (202, 'txtSubscriptionCanceled', 'Abonnement gekündigt. Sie können es bis zum Ablaufdatum weiter nutzen.', 'Subscription cancelled. You can continue to use it until the expiry date.');
 INSERT INTO `system_translations` VALUES (203, 'txtRenewNow', 'Jetzt verlängern', 'Renew now');
 INSERT INTO `system_translations` VALUES (204, 'txtUpgradePlanNow', 'Plan jetzt upgraden!', 'Upgrade plan now!');
 INSERT INTO `system_translations` VALUES (205, 'txtCancelPlan', 'Plan kündigen', 'Cancel plan');
@@ -1053,7 +1060,7 @@ INSERT INTO `system_translations` VALUES (206, 'txtBookedOn', 'Gebucht am', 'Boo
 INSERT INTO `system_translations` VALUES (207, 'msgCancelPlanWarningText', 'Wenn Sie Ihr Anonnement kündigen, können Sie bis zum Ende der Laufzeit weiterarbeiten. Danach werden alle Daten dieses Plans gelöscht. Möchten Sie diesen Plan wirklich kündigen?', 'If you cancel your subscription, you can continue until the end of the term. After that, all data in this plan will be deleted. Do you really want to cancel this plan?');
 INSERT INTO `system_translations` VALUES (208, 'btnDontCancel', 'Nein, nicht kündigen!', 'No, do not cancel!');
 INSERT INTO `system_translations` VALUES (209, 'btnYesCancel', 'Ja, kündigen!', 'Yes, cancel!');
-INSERT INTO `system_translations` VALUES (210, 'msgCanceledSuccessful', 'Ihr Abonnement wurde erfolgreich gekündigt. Am Ende der Laufzeit werden Ihre Daten gelöscht.', 'Your subscription has been successfully cancelled. At the end of the term, your data will be deleted.');
+INSERT INTO `system_translations` VALUES (210, 'msgCanceledSuccessful', 'Ihr Abonnement wurde erfolgreich gekündigt.', 'Your subscription has been successfully cancelled.');
 INSERT INTO `system_translations` VALUES (211, 'txtExpiryDate', 'Ablaufdatum', 'Expiry date');
 INSERT INTO `system_translations` VALUES (212, 'btnRevokeCancellation', 'Kündigung zurückziehen', 'Revoke cancellation');
 INSERT INTO `system_translations` VALUES (213, 'msgRevokedSuccessful', 'Die Kündigung wurde erfolgreich zurückgezogen. Ihr Abonnement ist wieder aktiv.', 'The cancellation has been successfully revoked. Your subscription is active again.');
@@ -1113,7 +1120,6 @@ INSERT INTO `system_translations` VALUES (267,'btnAddPaymentMethod', 'Zahlungsar
 INSERT INTO `system_translations` VALUES (268,'btnRemovePaymentMethod', 'Zahlungsart entfernen', 'Remove payment method');
 INSERT INTO `system_translations` VALUES (269,'msgNeedOnePaymentType', 'Sie benötigen mindestens eine Zahlungsart. Erfassen Sie eine andere Zahlungsart, wenn Sie diese löschen möchten.', 'You need at least one payment method. Add another payment method if you want to delete it.');
 INSERT INTO `system_translations` VALUES (270,'msgPaymentMethodDeleted', 'Die Zahlungsart wurde erfolgreich gelöscht', 'The payment method has been deleted successfully');
-INSERT INTO `system_translations` VALUES (271,'msgWeDoNotCharge', 'Bitte beachten Sie, dass beim Hinzufügen einer neuen Zahlungsart der Betrag von 1.- in Ihrer Währung angezeigt wird. Dies dient lediglich zur Validierung Ihrer Zahlungsart und wird NICHT belastet.', 'Please note that when you add a new payment method, the amount of 1.- will be displayed in your currency. This is only to validate your payment method and will NOT be charged.');
 INSERT INTO `system_translations` VALUES (272,'msgPaymentMethodAdded', 'Die neue Zahlungsart wurde erfolgreich erfasst.', 'The new payment method has been added successfully.');
 INSERT INTO `system_translations` VALUES (273,'msgRemovePaymentMethod', 'Möchten Sie diese Zahlungsart wirklich entfernen?', 'Do you really want to remove this payment method?');
 INSERT INTO `system_translations` VALUES (274,'msgCannotCharge', 'Leider konnten wir die von Ihnen hinterlegte Standard-Zahlungsart nicht abbuchen. Bitte erfassen Sie eine neue Zahlungsart und entfernen Sie die nicht funktionierende Zahlungsart.', 'Unfortunately, we were unable to charge the default payment method you registered. Please enter a new payment method and remove the one that does not work.');
@@ -1139,21 +1145,41 @@ INSERT INTO `system_translations` VALUES (294,'txtDeleteAccount', 'Bitte bedenke
 INSERT INTO `system_translations` VALUES (295,'btnDeleteDefinitely', 'Definitiv löschen', 'Delete definitely');
 INSERT INTO `system_translations` VALUES (296,'btnTestNow', 'Jetzt testen', 'Test now');
 INSERT INTO `system_translations` VALUES (297,'txtEmailUpdated', 'Die E-Mail wurde aktualisiert!', 'The e-mail has been updated!');
-INSERT INTO `system_translations` VALUES (298,'txtNotificationStatus', 'Status(gelesen)', 'Status(read)');
-INSERT INTO `system_translations` VALUES (299,'txtNotificationTitle', 'Benachrichtigungs Titel', 'Notification title');
-INSERT INTO `system_translations` VALUES (300,'txtNotificationCreated', 'erstellt am', 'created');
-INSERT INTO `system_translations` VALUES (301,'titNotifications', 'Benachrichtigungen', 'Notifications');
-INSERT INTO `system_translations` VALUES (302,'txtShowAllNotifications', 'Alle Benachrichtigungen Anzeigen', 'Show all notifications');
-INSERT INTO `system_translations` VALUES (303,'txtNotificationDelete', 'Wollen Sie diese Benachrichtigung löschen?', 'Do you want to delete this notification?');
-INSERT INTO `system_translations` VALUES (304,'titDeleteNotification', 'Benachrichtigung löschen', 'Delete notification');
-INSERT INTO `system_translations` VALUES (305,'txtMultipleNotificationDelete', 'Wollen Sie die ausgewählten Benachrichtigungen löschen?', 'Do you want to delete the selected notifications?');
-INSERT INTO `system_translations` VALUES (306,'titMultipleNotificationDelete', 'Benachrichtigungen löschen', 'Delete notifications');
-INSERT INTO `system_translations` VALUES (307,'alertNotificationDeleted', 'Die Benachrichtigung wurde gelöscht.', 'The notification have been deleted.');
-INSERT INTO `system_translations` VALUES (308,'alertMultipleNotificationDeleted', 'Die Benachrichtigungen wurden gelöscht.', 'The notifications have been deleted.');
-INSERT INTO `system_translations` VALUES (309,'txtTechInform', 'Es tut uns leid, aber auf unserem Server ist ein interner Fehler aufgetreten. Der Techniker wurde informiert...', 'We are sorry, but our server encountered an internal error. The technician got informed...');
-INSERT INTO `system_translations` VALUES (310,'txtTakeBack', 'Bring mich zurück', 'Take me back');
-INSERT INTO `system_translations` VALUES (311,'titCycle', 'Zyklus', 'Cycle');
-INSERT INTO `system_translations` VALUES (312,'titPlan', 'Plan', 'Plan');
+INSERT INTO `system_translations` VALUES (298,'titNotifications', 'Meldungen', 'Notifications');
+INSERT INTO `system_translations` VALUES (299,'txtShowAllNotifications', 'Alle Meldungen anzeigen', 'Show all notifications');
+INSERT INTO `system_translations` VALUES (300,'txtNotificationDelete', 'Möchten Sie diese Meldung löschen?', 'Do you want to delete this notification?');
+INSERT INTO `system_translations` VALUES (301,'titDeleteNotification', 'Meldung löschen', 'Delete notification');
+INSERT INTO `system_translations` VALUES (302,'txtMultipleNotificationDelete', 'Möchten Sie die ausgewählten Meldungen löschen?', 'Do you want to delete the selected notifications?');
+INSERT INTO `system_translations` VALUES (303,'titMultipleNotificationDelete', 'Meldungen löschen', 'Delete notifications');
+INSERT INTO `system_translations` VALUES (304,'alertNotificationDeleted', 'Meldung gelöscht.', 'Notification deleted.');
+INSERT INTO `system_translations` VALUES (305,'alertMultipleNotificationDeleted', 'Meldungen gelöscht.', 'Notifications deleted.');
+INSERT INTO `system_translations` VALUES (306,'txtTechInform', 'Es tut uns leid, aber auf unserem Server ist ein interner Fehler aufgetreten. Der Techniker wurde informiert...', 'We are sorry, but our server encountered an internal error. The technician got informed...');
+INSERT INTO `system_translations` VALUES (307,'txtTakeBack', 'Bring mich zurück', 'Take me back');
+INSERT INTO `system_translations` VALUES (308,'titCycle', 'Zyklus', 'Cycle');
+INSERT INTO `system_translations` VALUES (309,'titPlan', 'Plan', 'Plan');
+INSERT INTO `system_translations` VALUES (310,'titDateTime', 'Datum/Zeit', 'Date/Time');
+INSERT INTO `system_translations` VALUES (311,'msgNoNotifications', 'Keine Meldungen vorhanden.', 'No messages available.');
+INSERT INTO `system_translations` VALUES (312,'titNotification', 'Meldung', 'Notification');
+INSERT INTO `system_translations` VALUES (313,'titStatus', 'Status', 'Status');
+INSERT INTO `system_translations` VALUES (314,'txtMarkAsRead', 'Als gelesen markieren', 'Mark as read');
+INSERT INTO `system_translations` VALUES (315,'txtSubjectMFA', 'Ihr Code für die Zwei-Faktor-Authentifizierung', 'Your multi-factor authentication code');
+INSERT INTO `system_translations` VALUES (316,'txtMfaCode', 'Nachfolgend finden Sie den Code für die Zwei-Faktor-Authentifizierung', 'Below is your multi-factor authentication code');
+INSERT INTO `system_translations` VALUES (317,'txtThreeTimeTry', 'Sie haben insgesamt drei Versuche, sich mit diesem Code anzumelden.', 'You have a total of three attempts to log in with this code.');
+INSERT INTO `system_translations` VALUES (318,'txtCodeValidity', 'Dieser Code ist nur für eine Stunde gültig.', 'This code is valid for one hour only.');
+INSERT INTO `system_translations` VALUES (319,'titMfa', 'Zwei-Faktor-Authentifizierung', 'Multi-factor authentication');
+INSERT INTO `system_translations` VALUES (320,'txtMfaLable', 'Zwei-Faktor-Authentifizierungs-Code', 'Multi-factor authentication code');
+INSERT INTO `system_translations` VALUES (321,'txtResendMfa', 'Code erneut senden', 'Resend code');
+INSERT INTO `system_translations` VALUES (322,'txtErrorMfaCode', 'Ihr Code ist nicht korrekt, bitte versuchen Sie es erneut!', 'Your code is incorrect, please try again!');
+INSERT INTO `system_translations` VALUES (323,'txtResendDone', 'Der Code wurde gesendet.', 'The code has been sent.');
+INSERT INTO `system_translations` VALUES (324,'txtmfaLead', 'Bitte geben Sie den per E-Mail erhaltenen Code ins Feld ein:', 'Please enter the code received by email into the field:');
+INSERT INTO `system_translations` VALUES (325,'titSysAdmin', 'Sysadmin', 'Sysadmin');
+INSERT INTO `system_translations` VALUES (326,'txtSetUserAsSysAdmin', 'Diesen Benutzer als Sysadmin festlegen', 'Set this user as sysadmin');
+INSERT INTO `system_translations` VALUES (327,'alertCantDeleteAccount', 'Sie haben einen oder mehrere Mandanten erstellt, welche keine eigenen Benutzer besitzen. Sie können Ihren Account erst löschen, wenn alle Mandanten mindestens einen eigenen Benutzer besitzen.', 'You have created one or more tenants that do not have their own users. You can only delete your account once all tenants have at least one user of their own.');
+INSERT INTO `system_translations` VALUES (328,'titCouldNotCharge', 'Ihre Zahlungsart kann nicht abgebucht werden', 'Your payment method cannot be charged');
+INSERT INTO `system_translations` VALUES (329,'msgCouldNotCharge', 'Leider konnten wir Ihre hinterlegte Zahlungsart nicht belasten. Damit Sie Ihr Produkt weiterhin nutzen können, begleichen Sie bitte die offene Rechnung und hinterlegen Sie bitte eine funktionierende Zahlungsart. Besten Dank!', 'Unfortunately, we were unable to charge your payment method. So that you can continue to use your product, please settle the outstanding invoice and enter a functioning payment method. Thank you very much!');
+INSERT INTO `system_translations` VALUES (330,'msgFileExtForbidden', 'Das Hochladen dieses Dateityps ist nicht erlaubt!', 'This file type is not allowed for upload!');
+INSERT INTO `system_translations` VALUES (331,'msgCaptchaFailed', 'Captcha-Überprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'Captcha verification failed. Please try again.');
+
 
 DROP TABLE IF EXISTS `timezones`;
 CREATE TABLE `timezones`  (
@@ -1164,7 +1190,7 @@ CREATE TABLE `timezones`  (
   PRIMARY KEY (`intTimeZoneID`) USING BTREE,
   UNIQUE INDEX `_intTimeZoneID`(`intTimeZoneID`) USING BTREE,
   INDEX `_strTimezone`(`strTimezone`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 85 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `timezones` VALUES (1, 'UTC-10:00', 'Hawaii', 'Pacific/Honolulu');
 INSERT INTO `timezones` VALUES (2, 'UTC-09:00', 'Alaska', 'America/Anchorage');
@@ -1287,6 +1313,9 @@ CREATE TABLE `users`  (
   `blnSuperAdmin` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'The super admin has access to all tenants. The first user of this project is automatically the super admin.',
   `blnSysAdmin` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'The sysadmin is the technical owner of this project',
   `strUUID` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `intMfaCode` int(11) NULL,
+  `dtmMfaDateTime` datetime DEFAULT NULL,
+  `blnMfa` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`intUserID`) USING BTREE,
   UNIQUE INDEX `_intUserID`(`intUserID`) USING BTREE,
   INDEX `_intCustomerID`(`intCustomerID`) USING BTREE,
@@ -1299,7 +1328,7 @@ CREATE TABLE `widget_ratio`  (
   `intSizeRatio` int(3) NOT NULL,
   `strDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`intRatioID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `widget_ratio` VALUES (1, 12, 'Full width (1/1)');
 INSERT INTO `widget_ratio` VALUES (2, 9, 'Three quarter width (3/4)');
@@ -1486,5 +1515,365 @@ WHERE intInvoiceID = NEW.intInvoiceID;
 DROP TRIGGER IF EXISTS `insertConnect`;
 CREATE TRIGGER `insertConnect` AFTER INSERT ON `users` FOR EACH ROW INSERT INTO customer_user (intCustomerID, intUserID, blnStandard)
 VALUES (NEW.intCustomerID, NEW.intUserID, 1);
+
+DROP TABLE IF EXISTS `api_management`;
+CREATE TABLE `api_management`  (
+  `intApiID` int(11) NOT NULL AUTO_INCREMENT,
+  `strApiName` varchar(100) NULL,
+  `strApiKeyHash` varchar(255) NULL,
+  `strApiKeySalt` varchar(255) NULL,
+  `dtmValidUntil` datetime(6) NULL,
+  PRIMARY KEY (`intApiID`)
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+DROP TABLE IF EXISTS `api_nonce`;
+CREATE TABLE `api_nonce`  (
+  `intNonceID` int(11) NOT NULL AUTO_INCREMENT,
+  `strNonceUUID` varchar(255) NOT NULL,
+  `dtmNonceCreated` datetime(6) NOT NULL,
+  `intCreatedBy` int(11) NOT NULL,
+  PRIMARY KEY (`intNonceID`)
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+DROP TABLE IF EXISTS `schedulecontrol`;
+CREATE TABLE `schedulecontrol` (
+    `intControlID` int NOT NULL AUTO_INCREMENT,
+    `strTaskName` varchar(20) NOT NULL,
+    `dtmStart` datetime NULL,
+    `dtmEnd` datetime NULL,
+    PRIMARY KEY (`intControlID`)
+);
+
+INSERT INTO `schedulecontrol` (strTaskName, dtmStart, dtmEnd)
+VALUES
+('task_01', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_02', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_03', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_04', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_05', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_06', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_07', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_08', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_09', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_10', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_11', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_12', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_13', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_14', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_15', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_16', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_17', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_18', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_19', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND)),
+('task_20', NOW(), DATE_ADD(NOW(), INTERVAL 1 SECOND));
+
+DROP TABLE IF EXISTS `scheduletasks`;
+CREATE TABLE `scheduletasks`  (
+  `intScheduletaskID` int NOT NULL AUTO_INCREMENT,
+  `strName` varchar(255) NULL,
+  `intModuleID` int NULL,
+  `dtmStartTime` datetime NULL,
+  `strPath` varchar(255) NULL,
+  `intIterationMinutes` int NOT NULL DEFAULT 5,
+  `blnActive` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`intScheduletaskID`),
+  UNIQUE INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intModuleID`(`intModuleID`),
+  CONSTRAINT `frn_sch_module` FOREIGN KEY (`intModuleID`) REFERENCES `modules` (`intModuleID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS `scheduler_01`;
+CREATE TABLE `scheduler_01`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_01` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_01` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_02`;
+CREATE TABLE `scheduler_02`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_02` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_02` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_03`;
+CREATE TABLE `scheduler_03`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_03` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_03` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_04`;
+CREATE TABLE `scheduler_04`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_04` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_04` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_05`;
+CREATE TABLE `scheduler_05`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_05` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_05` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_06`;
+CREATE TABLE `scheduler_06`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_06` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_06` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_07`;
+CREATE TABLE `scheduler_07`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_07` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_07` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_08`;
+CREATE TABLE `scheduler_08`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_08` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_08` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_09`;
+CREATE TABLE `scheduler_09`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_09` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_09` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_10`;
+CREATE TABLE `scheduler_10`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_10` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_10` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_11`;
+CREATE TABLE `scheduler_11`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_11` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_11` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_12`;
+CREATE TABLE `scheduler_12`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_12` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_12` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_13`;
+CREATE TABLE `scheduler_13`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_13` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_13` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_14`;
+CREATE TABLE `scheduler_14`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_14` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_14` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_15`;
+CREATE TABLE `scheduler_15`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_15` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_15` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_16`;
+CREATE TABLE `scheduler_16`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_16` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_16` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_17`;
+CREATE TABLE `scheduler_17`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_17` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_17` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_18`;
+CREATE TABLE `scheduler_18`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_18` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_18` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_19`;
+CREATE TABLE `scheduler_19`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_19` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_19` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+DROP TABLE IF EXISTS `scheduler_20`;
+CREATE TABLE `scheduler_20`  (
+  `intSchedulerID` int NOT NULL AUTO_INCREMENT,
+  `intScheduletaskID` int NOT NULL,
+  `intCustomerID` int NOT NULL,
+  `dtmLastRun` datetime NULL,
+  `dtmNextRun` datetime NULL,
+  PRIMARY KEY (`intSchedulerID`),
+  INDEX `_intScheduletaskID`(`intScheduletaskID`),
+  INDEX `_intCustomerID`(`intCustomerID`),
+  CONSTRAINT `frn_scheduler_sched_20` FOREIGN KEY (`intScheduletaskID`) REFERENCES `scheduletasks` (`intScheduletaskID`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `frn_scheduler_customers_20` FOREIGN KEY (`intCustomerID`) REFERENCES `customers` (`intCustomerID`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS `frontend_mappings`;
+CREATE TABLE `frontend_mappings` (
+  `intFrontendMappingsID` int(11) AUTO_INCREMENT,
+  `strMapping` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strPath` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strMetatitle` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strMetadescription` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strhtmlcodes` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`intFrontendMappingsID`) USING BTREE,
+  UNIQUE INDEX `_strMapping`(`strMapping`(255)) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+INSERT INTO `frontend_mappings` VALUES (1, 'login', 'frontend/login.cfm', '', '', '');
+INSERT INTO `frontend_mappings` VALUES (2, 'register', 'frontend/register.cfm', '', '', '');
+INSERT INTO `frontend_mappings` VALUES (3, 'password', 'frontend/password.cfm', '', '', '');
+INSERT INTO `frontend_mappings` VALUES (4, 'plans', 'frontend/plans.cfm', '', '', '');
+INSERT INTO `frontend_mappings` VALUES (5, 'mfa', 'frontend/mfa.cfm', '', '', '');
+
+DROP TABLE IF EXISTS `frontend_mappings_trans`;
+CREATE TABLE `frontend_mappings_trans` (
+  `intfrontend_mappings_transID` int(11) AUTO_INCREMENT,
+  `intFrontendMappingsID` int(11),
+  `strMapping` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strPath` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strMetatitle` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strMetadescription` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `strhtmlcodes` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `intLanguageID` int(11),
+  PRIMARY KEY (`intfrontend_mappings_transID`) USING BTREE,
+  UNIQUE INDEX `_strMapping`(`strMapping`(255)) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
 
 SET FOREIGN_KEY_CHECKS = 1;
