@@ -1,1 +1,0 @@
-ALTER TABLE `ss_ads` DROP FOREIGN KEY `frn_ads_mappings`;

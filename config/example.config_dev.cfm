@@ -2,16 +2,16 @@
 <cfscript>
 
 // Datasource
-variables.datasource = "saaster";
+variables.datasource = "saaster_dev";
 
 // Environment
-variables.environment = "prod" // "dev" or "prod"
+variables.environment = "dev" // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
-variables.mainURL = "https://www.yourdomain.com";
+variables.mainURL = "http://localhost:8080";
 
 // Password for the Scheduler (url.pass)
-variables.schedulePassword = "";
+variables.schedulePassword = "saaster2024";
 
 
 // ####################################
@@ -19,7 +19,7 @@ variables.schedulePassword = "";
 // ####################################
 
 // The name of your application.cfc / make sure its unique
-variables.applicationname = "saaster";
+variables.applicationname = "saaster_dev";
 
 // Please use the timespan tag directly
 variables.sessiontimeout = createTimespan(00,03,00,00);
@@ -122,7 +122,7 @@ cfsavecontent (variable="variables.footerText") {
 //  Email settings
 // ####################################
 
-//  Generel
+//  General
 variables.mailMaxWidthContent = 660;
 variables.fontFamily = "Arial, Helvetica, sans-serif";
 variables.mailbodyBGColor = "f4f4f4";
