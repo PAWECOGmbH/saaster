@@ -63,10 +63,10 @@ Access the Lucee admin interface:
 
 + <b>URL:</b> ```http://localhost:8080/lucee/admin/server.cfm```
 + <b>Steps:</b>
-  + Set up the database connection.
+  + Set up the database connection (<b>important:</b> Make sure to enable 'Allow Multiple Queries.') 
   + Configure SMTP (you can use Inbucket for local email handling).
   + Adjust any additional settings required for your development setup.
-
+ 
 <br>
 
 <b>8. Set up Saaster</b><br>
