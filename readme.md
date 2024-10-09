@@ -40,7 +40,7 @@ Copy the example environment file and modify the settings to match your local se
 ```
 mv config/example_dev.env .env
 ```
-Update the *.env* file with your configuration. You can also adopt the suggestions for the local environment.<br><br>
+Update the ```.env``` file with your configuration. You can also adopt the suggestions for the local environment.<br><br>
 
 
 <b>5. Set up the application configuration</b><br>
@@ -48,7 +48,9 @@ Copy the example configuration file and make any necessary changes:
 ```
 mv config/example.config_dev.cfm www/config.cfm
 ```
-Edit *www/config.cfm* to suit your development environment.
+Edit ```www/config.cfm``` to suit your development environment.<br>
+Note: If you change the ```config.cfm``` file after the first start of the application, you need to reload the application scope:<br>
+```http://localhost:8080?reinit=1```
 
 <br>
 
