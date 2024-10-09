@@ -1851,15 +1851,16 @@ CREATE TABLE `frontend_mappings` (
   `strMetatitle` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `strMetadescription` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `strhtmlcodes` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `blnCreatedByApp` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intFrontendMappingsID`) USING BTREE,
   UNIQUE INDEX `_strMapping`(`strMapping`(255)) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
-INSERT INTO `frontend_mappings` VALUES (1, 'login', 'frontend/login.cfm', '', '', '');
-INSERT INTO `frontend_mappings` VALUES (2, 'register', 'frontend/register.cfm', '', '', '');
-INSERT INTO `frontend_mappings` VALUES (3, 'password', 'frontend/password.cfm', '', '', '');
-INSERT INTO `frontend_mappings` VALUES (4, 'plans', 'frontend/plans.cfm', '', '', '');
-INSERT INTO `frontend_mappings` VALUES (5, 'mfa', 'frontend/mfa.cfm', '', '', '');
+INSERT INTO `frontend_mappings` VALUES (1, 'login', 'frontend/login.cfm', '', '', '', 0);
+INSERT INTO `frontend_mappings` VALUES (2, 'register', 'frontend/register.cfm', '', '', '', 0);
+INSERT INTO `frontend_mappings` VALUES (3, 'password', 'frontend/password.cfm', '', '', '', 0);
+INSERT INTO `frontend_mappings` VALUES (4, 'plans', 'frontend/plans.cfm', '', '', '', 0);
+INSERT INTO `frontend_mappings` VALUES (5, 'mfa', 'frontend/mfa.cfm', '', '', '', 0);
 
 DROP TABLE IF EXISTS `frontend_mappings_trans`;
 CREATE TABLE `frontend_mappings_trans` (
@@ -1872,7 +1873,8 @@ CREATE TABLE `frontend_mappings_trans` (
   `strhtmlcodes` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `intLanguageID` int,
   PRIMARY KEY (`intfrontend_mappings_transID`) USING BTREE,
-  UNIQUE INDEX `_strMapping`(`strMapping`(255)) USING BTREE
+  UNIQUE INDEX `_intFrontendMappingsID`(`intFrontendMappingsID`) USING BTREE,
+  CONSTRAINT `frn_fm_trans_fm` FOREIGN KEY (`intFrontendMappingsID`) REFERENCES `frontend_mappings` (`intFrontendMappingsID`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 
