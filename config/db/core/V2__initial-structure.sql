@@ -1,5 +1,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+SET sql_mode = '';
 
 DROP TABLE IF EXISTS `bookings`;
 CREATE TABLE `bookings`  (
