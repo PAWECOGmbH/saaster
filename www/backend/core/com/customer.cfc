@@ -294,12 +294,21 @@ component displayname="customer" output="false" {
                     userID: {type: "numeric", value: arguments.userID}
                 },
                 sql = "
-                    SELECT customer_user.blnStandard, customers.*, users.blnSuperAdmin, users.blnAdmin
+                    SELECT
+                        customer_user.blnStandard,
+                        customers.*,
+                        users.blnSuperAdmin,
+                        users.blnAdmin
                     FROM customer_user
                     INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intUserID = :userID
-                    GROUP BY customers.intCustomerID, customer_user.blnStandard, users.blnSuperAdmin, users.blnAdmin
+                    AND customer_user.intCustomerID =
+                    (
+                        SELECT MAX(cu2.intCustomerID)
+                        FROM customer_user cu2
+                        WHERE cu2.intUserID = customer_user.intUserID
+                    )
                     ORDER BY customer_user.blnStandard DESC
                 "
             )

@@ -4,7 +4,7 @@ services:
     ports:
       - "${LUCEE_PORT}:80"
     restart: always
-    container_name: ${COMPOSE_PROJECT_NAME}_lucee
+    container_name: ${LUCEE_CONTAINER_NAME}
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
       - UMASK=0000
@@ -39,7 +39,7 @@ services:
 
   flyway:
     image: flyway/flyway:latest
-    container_name: ${COMPOSE_PROJECT_NAME}_flyway
+    container_name: ${FLYWAY_CONTAINER_NAME}
     environment:
       - FLYWAY_URL=jdbc:mysql://${MYSQL_CONTAINER_NAME}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
       - FLYWAY_USER=root

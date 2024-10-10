@@ -108,13 +108,14 @@ component displayname="invoices" output="false" {
 
         try {
 
-            local.dbType = len(local.userID) ? "numeric" : "varchar";
+            local.sql_type_userID = isNumeric(local.userID) ? "numeric" : "null";
+            local.sql_type_bookingID = isNumeric(local.bookingID) ? "numeric" : "null";
 
             queryExecute(
                 options = {datasource = application.datasource, result="getNewID"},
                 params = {
                     customerID: {type: "numeric", value: local.customerID},
-                    userID: {type: #local.dbType#, value: local.userID},
+                    userID: {type: local.sql_type_userID, value: local.userID},
                     invoiceNumber: {type: "numeric", value: local.invoiceNumber},
                     prefix: {type: "nvarchar", value: local.prefix},
                     title: {type: "nvarchar", value: local.title},
@@ -126,11 +127,11 @@ component displayname="invoices" output="false" {
                     vatType: {type: "numeric", value: local.vatType},
                     paymentStatusID: {type: "numeric", value: local.paymentStatusID},
                     total_text: {type: "nvarchar", value: local.total_text},
-                    bookingID: {type: "numeric", value: local.bookingID},
+                    bookingID: {type: local.sql_type_bookingID, value: local.bookingID},
                 },
                 sql = "
                     INSERT INTO invoices (intCustomerID, intUserID, intInvoiceNumber, strPrefix, strInvoiceTitle, dtmInvoiceDate, dtmDueDate, strCurrency, blnIsNet, intVatType, strTotalText, intPaymentStatusID, strLanguageISO, intBookingID)
-                    VALUES (:customerID, COALESCE(NULLIF(:userID, ''), NULL), :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
+                    VALUES (:customerID, :userID, :invoiceNumber, :prefix, :title, :invoiceDate, :dueDate, :currency, :isNet, :vatType, :total_text, :paymentStatusID, :language, :bookingID)
                 "
             )
 
@@ -1485,7 +1486,7 @@ component displayname="invoices" output="false" {
                     #getTrans('titHello', local.customerData.language)#  #local.invoicePerson#<br><br>
                     #getTrans('msgThanksForPurchaseFindInvoice', local.customerData.language)#<br><br>
                     #getTrans('txtDownloadInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
                     <br><br>
                     #getTrans('txtRegards', local.customerData.language)#<br>
                     #getTrans('txtYourTeam', local.customerData.language)#<br>
@@ -1564,7 +1565,7 @@ component displayname="invoices" output="false" {
                 echo("
                     #getTrans('titHello', local.customerData.language)# #local.invoicePerson#<br><br>
                     #getTrans('txtPleasePayInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
+                    <a href='#local.dl_link#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
                     <br><br>
                     #getTrans('txtRegards', local.customerData.language)#<br>
                     #getTrans('txtYourTeam', local.customerData.language)#<br>
@@ -1626,7 +1627,7 @@ component displayname="invoices" output="false" {
             local.qrDataSet['qrSize'] = "300";
 
             // Path to the swiss cross logo (if desired)
-            local.qrDataSet['qrLogo'] = application.mainURL & "/dist/img/ch-cross.png";
+            local.qrDataSet['qrLogo'] = "/dist/img/ch-cross.png";
 
             // Set all the needed data
             local.qrDataSet['billerIBAN'] = application.objSysAdmin.getSystemSetting('settingIBANnumber').strDefaultValue;
