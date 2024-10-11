@@ -4,7 +4,7 @@ services:
     ports:
       - "${LUCEE_PORT}:80"
     restart: always
-    container_name: ${COMPOSE_PROJECT_NAME}
+    container_name: ${LUCEE_CONTAINER_NAME}
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
       - UMASK=0000
@@ -20,7 +20,7 @@ services:
       - lucee
     image: mysql:8.1
     restart: always
-    container_name: ${MYSQL_HOST}
+    container_name: ${MYSQL_CONTAINER_NAME}
     ports:
       - "${MYSQL_PORT}:3306"
     environment:
@@ -39,16 +39,17 @@ services:
 
   flyway:
     image: flyway/flyway:latest
-    container_name: ${COMPOSE_PROJECT_NAME}_flyway
+    container_name: ${FLYWAY_CONTAINER_NAME}
     environment:
-      - FLYWAY_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      - FLYWAY_URL=jdbc:mysql://${MYSQL_CONTAINER_NAME}:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
       - FLYWAY_USER=root
       - FLYWAY_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - FLYWAY_BASELINE_ON_MIGRATE=true
       - FLYWAY_VALIDATE_MIGRATION_NAMING=true
-    command: -X -locations=filesystem:/flyway/sql migrate
+      - FLYWAY_TABLE=flyway_${FLYWAY_DB_FOLDER}
+    command: -locations=filesystem:/flyway/${FLYWAY_DB_FOLDER} ${FLYWAY_MIGRATION_TYPE}
     volumes:
-      - ./config/db/init:/flyway/sql
+      - ./config/db/${FLYWAY_DB_FOLDER}:/flyway/${FLYWAY_DB_FOLDER}
     depends_on:
       mysql:
         condition: service_healthy

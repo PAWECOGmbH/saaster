@@ -7,14 +7,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `currencies`;
 CREATE TABLE `currencies`  (
-  `intCurrencyID` int(11) NOT NULL AUTO_INCREMENT,
+  `intCurrencyID` int NOT NULL AUTO_INCREMENT,
   `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `intPrio` int(11) NOT NULL,
-  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
-  `blnActive` tinyint(1) NOT NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
+  `blnDefault` tinyint NOT NULL DEFAULT 0,
+  `blnActive` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intCurrencyID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
@@ -31,13 +31,13 @@ INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `languages`;
 CREATE TABLE `languages`  (
-  `intLanguageID` int(11) NOT NULL AUTO_INCREMENT,
+  `intLanguageID` int NOT NULL AUTO_INCREMENT,
   `strLanguageISO` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strLanguageEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strLanguage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `intPrio` int(11) NOT NULL,
-  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
-  `blnChooseable` tinyint(1) NOT NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
+  `blnDefault` tinyint NOT NULL DEFAULT 0,
+  `blnChooseable` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intLanguageID`) USING BTREE,
   UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -57,18 +57,18 @@ INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `modules`;
 CREATE TABLE `modules`  (
-  `intModuleID` int(11) NOT NULL AUTO_INCREMENT,
+  `intModuleID` int NOT NULL AUTO_INCREMENT,
   `strModuleName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strShortDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `blnActive` tinyint(1) NOT NULL,
+  `blnActive` tinyint NOT NULL,
   `strTabPrefix` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strPicture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `blnBookable` tinyint(1) NOT NULL,
-  `intNumTestDays` int(11) NOT NULL,
+  `blnBookable` tinyint NOT NULL,
+  `intNumTestDays` int NOT NULL,
   `strSettingPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `blnFree` tinyint(1) NULL DEFAULT 0,
-  `intPrio` int(11) NOT NULL,
+  `blnFree` tinyint NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
   PRIMARY KEY (`intModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
@@ -85,9 +85,9 @@ INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your c
 -- ----------------------------
 DROP TABLE IF EXISTS `modules_trans`;
 CREATE TABLE `modules_trans`  (
-  `intModulTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intModuleID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
+  `intModulTransID` int NOT NULL AUTO_INCREMENT,
+  `intModuleID` int NOT NULL,
+  `intLanguageID` int NOT NULL,
   `strModuleName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strShortDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
@@ -111,15 +111,15 @@ INSERT INTO `modules_trans` VALUES (3, 3, 2, 'MailChimp API', 'Übertragen Sie I
 -- ----------------------------
 DROP TABLE IF EXISTS `modules_prices`;
 CREATE TABLE `modules_prices`  (
-  `intModulePriceID` int(11) NOT NULL AUTO_INCREMENT,
-  `intModuleID` int(11) NOT NULL,
-  `intCurrencyID` int(11) NOT NULL,
+  `intModulePriceID` int NOT NULL AUTO_INCREMENT,
+  `intModuleID` int NOT NULL,
+  `intCurrencyID` int NOT NULL,
   `decPriceMonthly` decimal(10, 2) NULL DEFAULT NULL,
   `decPriceYearly` decimal(10, 2) NULL DEFAULT NULL,
   `decPriceOneTime` decimal(10, 2) NULL DEFAULT NULL,
   `decVat` decimal(10, 2) NULL DEFAULT NULL,
-  `blnIsNet` tinyint(1) NOT NULL DEFAULT 1,
-  `intVatType` int(1) NOT NULL DEFAULT 1,
+  `blnIsNet` tinyint NOT NULL DEFAULT 1,
+  `intVatType` int NOT NULL DEFAULT 1,
   PRIMARY KEY (`intModulePriceID`) USING BTREE,
   INDEX `_intCurrencyID`(`intCurrencyID`) USING BTREE,
   INDEX `_intModuleID`(`intModuleID`) USING BTREE,
@@ -151,13 +151,13 @@ WHERE blnActive = 1;
 -- ----------------------------
 DROP TABLE IF EXISTS `custom_mappings`;
 CREATE TABLE `custom_mappings`  (
-  `intCustomMappingID` int(11) NOT NULL AUTO_INCREMENT,
+  `intCustomMappingID` int NOT NULL AUTO_INCREMENT,
   `strMapping` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `blnOnlyAdmin` tinyint(1) NOT NULL DEFAULT 0,
-  `blnOnlySuperAdmin` tinyint(1) NOT NULL DEFAULT 0,
-  `blnOnlySysAdmin` tinyint(1) NOT NULL DEFAULT 0,
-  `intModuleID` int(11) NULL DEFAULT NULL,
+  `blnOnlyAdmin` tinyint NOT NULL DEFAULT 0,
+  `blnOnlySuperAdmin` tinyint NOT NULL DEFAULT 0,
+  `blnOnlySysAdmin` tinyint NOT NULL DEFAULT 0,
+  `intModuleID` int NULL DEFAULT NULL,
   PRIMARY KEY (`intCustomMappingID`) USING BTREE,
   UNIQUE INDEX `_strMapping`(`strMapping`) USING BTREE,
   INDEX `_intModuleID`(`intModuleID`) USING BTREE,
