@@ -8,14 +8,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `currencies`;
 CREATE TABLE `currencies`  (
-  `intCurrencyID` int(11) NOT NULL AUTO_INCREMENT,
+  `intCurrencyID` int NOT NULL AUTO_INCREMENT,
   `strCurrencyISO` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencyEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrency` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strCurrencySign` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `intPrio` int(11) NOT NULL,
-  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
-  `blnActive` tinyint(1) NOT NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
+  `blnDefault` tinyint NOT NULL DEFAULT 0,
+  `blnActive` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intCurrencyID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
@@ -32,13 +32,13 @@ INSERT INTO `currencies` VALUES (2, 'EUR', 'Euro', 'Euro', '€', 2, 0, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `languages`;
 CREATE TABLE `languages`  (
-  `intLanguageID` int(11) NOT NULL AUTO_INCREMENT,
+  `intLanguageID` int NOT NULL AUTO_INCREMENT,
   `strLanguageISO` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strLanguageEN` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strLanguage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `intPrio` int(11) NOT NULL,
-  `blnDefault` tinyint(1) NOT NULL DEFAULT 0,
-  `blnChooseable` tinyint(1) NOT NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
+  `blnDefault` tinyint NOT NULL DEFAULT 0,
+  `blnChooseable` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intLanguageID`) USING BTREE,
   UNIQUE INDEX `_strLanguageISO`(`strLanguageISO`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -58,10 +58,10 @@ INSERT INTO `languages` VALUES (2, 'de', 'German', 'Deutsch', 2, 0, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `plan_groups`;
 CREATE TABLE `plan_groups`  (
-  `intPlanGroupID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanGroupID` int NOT NULL AUTO_INCREMENT,
   `strGroupName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `intCountryID` int(11) NULL DEFAULT NULL,
-  `intPrio` int(11) NOT NULL,
+  `intCountryID` int NULL DEFAULT NULL,
+  `intPrio` int NOT NULL,
   PRIMARY KEY (`intPlanGroupID`) USING BTREE,
   INDEX `_intCountryID`(`intCountryID`) USING BTREE,
   CONSTRAINT `frn_pg_countries` FOREIGN KEY (`intCountryID`) REFERENCES `countries` (`intCountryID`) ON DELETE RESTRICT ON UPDATE NO ACTION
@@ -77,9 +77,9 @@ INSERT INTO `plan_groups` VALUES (1, 'Pricing worldwide', NULL, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `plan_groups_trans`;
 CREATE TABLE `plan_groups_trans`  (
-  `intPlanGroupTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanGroupID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
+  `intPlanGroupTransID` int NOT NULL AUTO_INCREMENT,
+  `intPlanGroupID` int NOT NULL,
+  `intLanguageID` int NOT NULL,
   `strGroupName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`intPlanGroupTransID`) USING BTREE,
   INDEX `_intPlanGroupID`(`intPlanGroupID`) USING BTREE,
@@ -99,19 +99,19 @@ INSERT INTO `plan_groups_trans` VALUES (1, 1, 2, 'Preise weltweit');
 -- ----------------------------
 DROP TABLE IF EXISTS `plans`;
 CREATE TABLE `plans`  (
-  `intPlanID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanGroupID` int(11) NOT NULL,
+  `intPlanID` int NOT NULL AUTO_INCREMENT,
+  `intPlanGroupID` int NOT NULL,
   `strPlanName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strShortDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `strButtonName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strBookingLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `blnRecommended` tinyint(1) NULL DEFAULT 0,
-  `intMaxUsers` int(11) NULL DEFAULT NULL,
-  `intNumTestDays` int(11) NULL DEFAULT 0,
-  `blnFree` tinyint(1) NULL DEFAULT 0,
-  `blnDefaultPlan` tinyint(1) NULL DEFAULT 0,
-  `intPrio` int(11) NOT NULL,
+  `blnRecommended` tinyint NULL DEFAULT 0,
+  `intMaxUsers` int NULL DEFAULT NULL,
+  `intNumTestDays` int NULL DEFAULT 0,
+  `blnFree` tinyint NULL DEFAULT 0,
+  `blnDefaultPlan` tinyint NULL DEFAULT 0,
+  `intPrio` int NOT NULL,
   PRIMARY KEY (`intPlanID`) USING BTREE,
   INDEX `_intPlanGroupID`(`intPlanGroupID`) USING BTREE,
   CONSTRAINT `frn_plans_plan_group` FOREIGN KEY (`intPlanGroupID`) REFERENCES `plan_groups` (`intPlanGroupID`) ON DELETE CASCADE ON UPDATE NO ACTION
@@ -130,9 +130,9 @@ INSERT INTO `plans` VALUES (4, 1, 'Enterprise', 'Bis business for large companie
 -- ----------------------------
 DROP TABLE IF EXISTS `plans_trans`;
 CREATE TABLE `plans_trans`  (
-  `intPlanTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
+  `intPlanTransID` int NOT NULL AUTO_INCREMENT,
+  `intPlanID` int NOT NULL,
+  `intLanguageID` int NOT NULL,
   `strPlanName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strShortDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
@@ -161,12 +161,12 @@ INSERT INTO `plans_trans` VALUES (4, 4, 2, 'Enterprise', 'Großes Geschäft für
 -- ----------------------------
 DROP TABLE IF EXISTS `plan_features`;
 CREATE TABLE `plan_features`  (
-  `intPlanFeatureID` int(11) NOT NULL AUTO_INCREMENT,
+  `intPlanFeatureID` int NOT NULL AUTO_INCREMENT,
   `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `strDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `blnCategory` tinyint(1) NOT NULL DEFAULT 0,
+  `blnCategory` tinyint NOT NULL DEFAULT 0,
   `strVariable` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `intPrio` int(5) NOT NULL,
+  `intPrio` int NOT NULL,
   PRIMARY KEY (`intPlanFeatureID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
@@ -192,9 +192,9 @@ INSERT INTO `plan_features` VALUES (13, 'Early detection of hours going over bud
 -- ----------------------------
 DROP TABLE IF EXISTS `plan_features_trans`;
 CREATE TABLE `plan_features_trans`  (
-  `intPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanFeatureID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
+  `intPlanFeatTransID` int NOT NULL AUTO_INCREMENT,
+  `intPlanFeatureID` int NOT NULL,
+  `intLanguageID` int NOT NULL,
   `strFeatureName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `strDescription` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
   PRIMARY KEY (`intPlanFeatTransID`) USING BTREE,
@@ -227,10 +227,10 @@ INSERT INTO `plan_features_trans` VALUES (13, 4, 2, 'Benutzer', 'Walzer, schlech
 -- ----------------------------
 DROP TABLE IF EXISTS `plans_plan_features`;
 CREATE TABLE `plans_plan_features`  (
-  `intPlansPlanFeatID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanID` int(11) NOT NULL,
-  `intPlanFeatureID` int(11) NOT NULL,
-  `blnCheckmark` tinyint(1) NULL DEFAULT 0,
+  `intPlansPlanFeatID` int NOT NULL AUTO_INCREMENT,
+  `intPlanID` int NOT NULL,
+  `intPlanFeatureID` int NOT NULL,
+  `blnCheckmark` tinyint NULL DEFAULT 0,
   `strValue` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`intPlansPlanFeatID`) USING BTREE,
   INDEX `_intPlanID`(`intPlanID`) USING BTREE,
@@ -288,9 +288,9 @@ INSERT INTO `plans_plan_features` VALUES (40, 5, 13, 1, '');
 -- ----------------------------
 DROP TABLE IF EXISTS `plans_plan_features_trans`;
 CREATE TABLE `plans_plan_features_trans`  (
-  `intPlansPlanFeatTransID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlansPlanFeatID` int(11) NOT NULL,
-  `intLanguageID` int(11) NOT NULL,
+  `intPlansPlanFeatTransID` int NOT NULL AUTO_INCREMENT,
+  `intPlansPlanFeatID` int NOT NULL,
+  `intLanguageID` int NOT NULL,
   `strValue` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`intPlansPlanFeatTransID`) USING BTREE,
   INDEX `_intPlansPlanFeatID`(`intPlansPlanFeatID`) USING BTREE,
@@ -318,15 +318,15 @@ INSERT INTO `plans_plan_features_trans` VALUES (7, 33, 2, 'Unlimitiert');
 -- ----------------------------
 DROP TABLE IF EXISTS `plan_prices`;
 CREATE TABLE `plan_prices`  (
-  `intPlanPriceID` int(11) NOT NULL AUTO_INCREMENT,
-  `intPlanID` int(11) NOT NULL,
-  `intCurrencyID` int(11) NOT NULL,
+  `intPlanPriceID` int NOT NULL AUTO_INCREMENT,
+  `intPlanID` int NOT NULL,
+  `intCurrencyID` int NOT NULL,
   `decPriceMonthly` decimal(10, 2) NULL DEFAULT NULL,
   `decPriceYearly` decimal(10, 2) NULL DEFAULT NULL,
   `decVat` decimal(10, 2) NULL DEFAULT NULL,
-  `blnIsNet` tinyint(1) NOT NULL DEFAULT 1,
-  `intVatType` int(1) NOT NULL DEFAULT 1,
-  `blnOnRequest` tinyint(1) NOT NULL DEFAULT 0,
+  `blnIsNet` tinyint NOT NULL DEFAULT 1,
+  `intVatType` int NOT NULL DEFAULT 1,
+  `blnOnRequest` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`intPlanPriceID`) USING BTREE,
   INDEX `_intPlanID`(`intPlanID`) USING BTREE,
   INDEX `_intCurrencyID`(`intCurrencyID`) USING BTREE,

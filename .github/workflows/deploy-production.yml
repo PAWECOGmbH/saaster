@@ -1,0 +1,57 @@
+name: Deploy and Run Flyway Migrations production
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy_and_migrate:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to server via rsync
+        uses: Burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete --exclude-from='.gitignore'
+          path: ./
+          remote_path: ${{ secrets.PROD_REMOTE_PATH }}
+          remote_host: ${{ secrets.PROD_HOST }}
+          remote_user: ${{ secrets.PROD_USER }}
+          remote_key: ${{ secrets.PROD_KEY }}
+          remote_key_pass: ${{ secrets.PROD_KEY_PASS }}
+
+      - name: Run Flyway Migrations core
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_KEY }}
+          passphrase: ${{ secrets.PROD_KEY_PASS }}
+          script: |
+            docker run --rm \
+              --network npm_network \
+              --volume /path/to/config/db/core:/flyway/core:ro \
+              -e FLYWAY_URL="${{ secrets.PROD_DB_URL }}" \
+              -e FLYWAY_USER="${{ secrets.PROD_DB_USER }}" \
+              -e FLYWAY_PASSWORD="${{ secrets.PROD_DB_PASSWORD }}" \
+              flyway/flyway -locations=filesystem:/flyway/core -table=flyway_core migrate
+
+      - name: Run Flyway Migrations myapp
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_KEY }}
+          passphrase: ${{ secrets.PROD_KEY_PASS }}
+          script: |
+            docker run --rm \
+              --network npm_network \
+              --volume /path/to/config/db/myapp:/flyway/myapp:ro \
+              -e FLYWAY_URL="${{ secrets.PROD_DB_URL }}" \
+              -e FLYWAY_USER="${{ secrets.PROD_DB_USER }}" \
+              -e FLYWAY_PASSWORD="${{ secrets.PROD_DB_PASSWORD }}" \
+              flyway/flyway -locations=filesystem:/flyway/myapp -table=flyway_myapp migrate

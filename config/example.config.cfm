@@ -2,13 +2,13 @@
 <cfscript>
 
 // Datasource
-variables.datasource = "saaster_staging";
+variables.datasource = "saaster";
 
 // Environment
 variables.environment = "prod" // "dev" or "prod"
 
 // Enter the URL of your live project (incl. http:// or https://)
-variables.mainURL = "https://staging.yourdomain.com";
+variables.mainURL = "https://www.yourdomain.com";
 
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "";
@@ -19,7 +19,7 @@ variables.schedulePassword = "";
 // ####################################
 
 // The name of your application.cfc / make sure its unique
-variables.applicationname = "saaster_staging";
+variables.applicationname = "saaster";
 
 // Please use the timespan tag directly
 variables.sessiontimeout = createTimespan(00,03,00,00);

@@ -17,6 +17,12 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
     setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!
 
+    // Load java files
+    this.javaSettings = {
+        loadPaths = [expandPath("/dist/java")],
+        reloadOnChange = true
+    };
+
 
     public boolean function onApplicationStart() {
 
