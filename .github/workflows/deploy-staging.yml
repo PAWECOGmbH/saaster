@@ -1,4 +1,4 @@
-name: Deploy via Rsync
+name: Deploy and Run Flyway Migrations staging
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
       - staging
 
 jobs:
-  deploy:
+  deploy_and_migrate:
     runs-on: ubuntu-22.04
     steps:
 
       - name: Checkout the repository
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: Deploy to server via rsync
         uses: Burnett01/rsync-deployments@5.2
@@ -24,7 +24,7 @@ jobs:
           remote_key: ${{ secrets.STAGING_KEY }}
           remote_key_pass: ${{ secrets.STAGING_KEY_PASS }}
 
-      - name: Run Flyway Migrations
+      - name: Run Flyway Migrations core
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.STAGING_HOST }}
@@ -32,5 +32,26 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
           passphrase: ${{ secrets.STAGING_KEY_PASS }}
           script: |
-            docker start ${{ secrets.STAGING_FLYWAY_CONTAINER_NAME }} || true
-            docker exec -i ${{ secrets.STAGING_FLYWAY_CONTAINER_NAME }} flyway migrate
+            docker run --rm \
+              --network npm_network \
+              --volume /path/to/config/db/core:/flyway/core:ro \
+              -e FLYWAY_URL="${{ secrets.STAGING_DB_URL }}" \
+              -e FLYWAY_USER="${{ secrets.STAGING_DB_USER }}" \
+              -e FLYWAY_PASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" \
+              flyway/flyway -locations=filesystem:/flyway/core -table=flyway_core migrate
+
+      - name: Run Flyway Migrations myapp
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_KEY }}
+          passphrase: ${{ secrets.STAGING_KEY_PASS }}
+          script: |
+            docker run --rm \
+              --network npm_network \
+              --volume /path/to/config/db/myapp:/flyway/myapp:ro \
+              -e FLYWAY_URL="${{ secrets.STAGING_DB_URL }}" \
+              -e FLYWAY_USER="${{ secrets.STAGING_DB_USER }}" \
+              -e FLYWAY_PASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" \
+              flyway/flyway -locations=filesystem:/flyway/myapp -table=flyway_myapp migrate
