@@ -1,0 +1,25 @@
+name: Deploy and Run Flyway Migrations staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy_and_migrate:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to server via rsync
+        uses: Burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete --exclude-from='.gitignore'
+          path: ./
+          remote_path: ${{ secrets.STAGING_REMOTE_PATH }}
+          remote_host: ${{ secrets.STAGING_HOST }}
+          remote_user: ${{ secrets.STAGING_USER }}
+          remote_key: ${{ secrets.STAGING_KEY }}
+          remote_key_pass: ${{ secrets.STAGING_KEY_PASS }}
