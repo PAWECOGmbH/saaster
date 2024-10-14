@@ -28,13 +28,6 @@ if (structKeyExists(url, "switch")) {
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            // Is the needed data of the cutomer already filled out?
-            dataFilledIn = new frontend.core.com.register().checkFilledData(session.customer_id);
-
-            if (!dataFilledIn) {
-                session.filledData = false;
-            }
-
             logWrite("user", "info", "Tenant switched [CustomerID: #comingFromCustomerID#, UserID: #session.user_id#, to tenantID: #session.customer_id#]");
             location url="#application.mainURL#/dashboard" addtoken="no";
 
