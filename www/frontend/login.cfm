@@ -35,12 +35,12 @@
                 </cfif>
                 <div class="mb-3">
                     <label class="form-label">#getTrans('formEmailAddress')#</label>
-                    <input type="email" name="email" class="form-control" value="#session.email#" required autofocus>
+                    <input type="email" name="email" class="form-control" value="#session.email#" required <cfif not len(trim(session.email))>autofocus</cfif>>
                 </div>
                 <div class="mb-2">
                     <label class="form-label">#getTrans('formPassword')#</label>
                     <div class="input-group input-group-flat">
-                        <input type="password" name="password" class="form-control" required>
+                        <input type="password" name="password" class="form-control" required <cfif len(trim(session.email))>autofocus</cfif>>
                     </div>
                 </div>
                 <div class="form-footer">

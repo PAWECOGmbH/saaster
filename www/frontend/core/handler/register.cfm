@@ -36,17 +36,11 @@ if (structKeyExists(form, 'login_btn')) {
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            // Is the needed data of the cutomer already filled out?
-            dataFilledIn = objRegister.checkFilledData(session.customer_id);
-            if (!dataFilledIn) {
-                session.filledData = false;
-            }
-
-            objUserMfa = application.objCustomer.getUserDataByID(session.user_id);
+            objUser = application.objCustomer.getUserDataByID(session.user_id);
             blnresend = false;
             mfaUUID = application.objGlobal.getUUID();
 
-            if (objUserMfa.blnMfa){
+            if (objUser.blnMfa){
                 structDelete(session, 'user_id');
                 session.mfaCheckCount = 0;
                 objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
@@ -60,6 +54,23 @@ if (structKeyExists(form, 'login_btn')) {
                 loop array=filesToInlude item="path" {
                     include template=path;
                 }
+            }
+
+            // Is the needed data of the cutomer already filled out?
+            dataFilledIn = objRegister.checkFilledData(session.customer_id);
+            if (!dataFilledIn) {
+
+                // Set the sessions again in case it doesn't exist anymore
+                session.company = objUser.strCompanyName;
+                session.first_name = objUser.strFirstName;
+                session.name = objUser.strLastName;
+                session.email = objUser.strEmail;
+
+                // Send the customer to fill in the remaining data
+                session.step = 3;
+                getAlert('txtUpdateInformation', 'info');
+                location url="#application.mainURL#/register" addtoken="false";
+
             }
 
             structDelete(session, "alert");
@@ -257,7 +268,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
                 strUUID: {type: "nvarchar", value: url.u}
             },
             sql = "
-                SELECT strUUID, strLanguage
+                SELECT strUUID, strLanguage, strEmail
                 FROM users
                 WHERE strUUID = :strUUID
             "
@@ -268,6 +279,8 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
             session.step = 2;
             session.uuid = qCheckUser.strUUID;
             session.lng = qCheckUser.strLanguage;
+            session.email = qCheckUser.strEmail;
+
             getAlert('alertChoosePassword', 'info');
             logWrite("user", "info", "Register new user step 2: A user invited by the administrator has confirmed the opt-in email. [UUID: #url.u#]");
 
@@ -285,7 +298,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
 }
 
-// Register new user step 3 (create account)
+// Register new user step 3
 if (structKeyExists(form, 'create_account')) {
 
     param name="form.password" default="";
@@ -337,15 +350,17 @@ if (structKeyExists(form, 'create_account')) {
 
             if (insertCustomer.success) {
 
-                structDelete(session, "step");
-                structDelete(session, "first_name");
-                structDelete(session, "name");
-                structDelete(session, "company");
-                structDelete(session, "uuid");
+                // Set the sessions again in case it doesn't exist anymore
+                session.company = qCheckOptin.strCompanyName;
+                session.first_name = qCheckOptin.strFirstName;
+                session.name = qCheckOptin.strLastName;
+                session.email = qCheckOptin.strEmail;
 
-                getAlert('alertAccountCreatedLogin', 'success');
-                logWrite("user", "info", "Register new user step 3: Account created [E-Mail: #qCheckOptin.strEmail#]");
-                location url="#application.mainURL#/login" addtoken="false";
+                // Send the customer to fill in the remaining data
+                session.step = 3;
+                getAlert('txtUpdateInformation', 'info');
+                location url="#application.mainURL#/register" addtoken="false";
+
 
             } else {
 
@@ -367,7 +382,7 @@ if (structKeyExists(form, 'create_account')) {
                     strUUID: {type: "nvarchar", value: session.uuid}
                 },
                 sql = "
-                    SELECT strUUID
+                    SELECT strUUID, strEmail
                     FROM users
                     WHERE strUUID = :strUUID
                 "
@@ -379,6 +394,8 @@ if (structKeyExists(form, 'create_account')) {
                 setNewPassword = application.objUser.changePassword(form.password, qCheckUser.strUUID);
 
                 if (setNewPassword.success) {
+
+                    session.email = qCheckUser.strEmail;
 
                     getAlert('alertAccountCreatedLogin', 'success');
                     logWrite("user", "info", "Register new user step 3: A user invited by the administrator has set the password. [UUID: #qCheckUser.strUUID#]");
@@ -413,6 +430,85 @@ if (structKeyExists(form, 'create_account')) {
     }
 
 }
+
+
+// Fill in the remaining data
+if (structKeyExists(form, 'fill_remaining_data')) {
+
+
+    // If there is already a user session
+    if (structKeyExists(session, "customer_id")) {
+
+        updateCustomer = application.objCustomer.updateCustomer(form, session.customer_id);
+
+        structDelete(session, "step");
+        structDelete(session, "first_name");
+        structDelete(session, "name");
+        structDelete(session, "company");
+        structDelete(session, "email");
+
+        location url="#application.mainURL#/dashboard" addtoken="false";
+
+
+    // No session, its a new registration
+    } else {
+
+        if (structKeyExists(session, "uuid")) {
+
+            // Get the customerID of the new user
+            qGetCustomerID = queryExecute(
+
+                options = {datasource = application.datasource},
+                params = {
+                    strUUID: {type: "nvarchar", value: session.uuid}
+                },
+                sql = "
+                    SELECT intCustomerID
+                    FROM users
+                    WHERE strUUID = :strUUID
+                "
+            )
+
+            updateCustomer = application.objCustomer.updateCustomer(form, qGetCustomerID.intCustomerID);
+
+            if (updateCustomer.success) {
+
+                logWrite("user", "info", "Register new user: Account created [E-Mail: #session.email#]");
+
+                structDelete(session, "step");
+                structDelete(session, "first_name");
+                structDelete(session, "name");
+                structDelete(session, "company");
+                structDelete(session, "uuid");
+                structDelete(session, "email");
+
+                getAlert('alertAccountCreatedLogin', 'success');
+                location url="#application.mainURL#/login" addtoken="false";
+
+
+            } else {
+
+                session.step = 1;
+                getAlert('alertNotValidAnymore', 'warning');
+                logWrite("user", "warning", "Could not update the remaining data.");
+                location url="#application.mainURL#/login" addtoken="false";
+
+            }
+
+        } else {
+
+            session.step = 1;
+            getAlert('alertNotValidAnymore', 'warning');
+            logWrite("user", "warning", "Register new user: A user couldn't save the remaining data, because the opt-in e-mail wasn't valid anymore.");
+            location url="#application.mainURL#/register" addtoken="false";
+
+        }
+
+    }
+
+
+}
+
 
 // Reset the password step 1
 if (structKeyExists(form, "reset_pw_btn_1")) {
@@ -612,12 +708,6 @@ if (structKeyExists(form, 'mfa_btn')) {
         session.user_id = checkMfa.userid;
         logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
 
-        // Is the needed data of the cutomer already filled out?
-        dataFilledIn = objRegister.checkFilledData(session.customer_id);
-        if (!dataFilledIn) {
-            session.filledData = false;
-        }
-
         // Let's check whether there is a file we have to include coming from modules
         filesToInlude = application.objGlobal.getLoginIncludes(session.customer_id);
         if (!arrayIsEmpty(filesToInlude)) {
@@ -650,11 +740,11 @@ if (structKeyExists(form, 'mfa_btn')) {
 if (structKeyExists(url, 'resend')) {
 
     structDelete(session, 'user_id');
-    objUserMfa = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
+    objUser = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
 
-    if (objUserMfa.success eq true) {
+    if (objUser.success eq true) {
 
-        getAlert(objUserMfa.message, 'success');
+        getAlert(objUser.message, 'success');
         logWrite("user", "warning", "Login via MFA: New MFA code send to the user [E-Mail: #session.user_email#, UUID: #url.uuid#]");
         session.mfaCheckCount = 0;
         location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";

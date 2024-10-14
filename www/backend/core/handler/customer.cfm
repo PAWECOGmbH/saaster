@@ -79,7 +79,6 @@ if (structKeyExists(form, "edit_company_btn")) {
     structDelete(session, "billing_email");
     structDelete(session, "billing_address");
     structDelete(session, "billing_info");
-    structDelete(session, "filledData");
 
     location url="#application.mainURL#/account-settings/company" addtoken="false";
 
