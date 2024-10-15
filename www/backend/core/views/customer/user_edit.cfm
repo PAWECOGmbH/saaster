@@ -1,14 +1,38 @@
 <cfscript>
-    // Exception handling for sef and user id
+
+    // Read out the ID of the desired user
     param name="thiscontent.thisID" default=0 type="numeric";
     thisUserID = thiscontent.thisID;
 
+    // Check for a valid number
     if(not isNumeric(thisUserID) or thisUserID lte 0) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
+    // Only users with at least admin rights can access this page
+    if (thisUserID neq session.user_id and not session.superadmin) {
+        location url="#application.mainURL#/account-settings/users" addtoken="false";
+    }
+
+    // Determine authorisation
+    accessAllowed = application.objGlobal.checkTenantRange(thisUserID, session.customer_id);
+    if (not accessAllowed) {
+        location url="#application.mainURL#/account-settings/users" addtoken="false";
+    }
+
+    // If its the same user, send them to the profile
+    if (thisUserID eq session.user_id) {
+        location url="#application.mainURL#/account-settings/my-profile" addtoken="false";
+    }
+
+    // If its a main user its not allowed
+    qUsers = application.objUser.getAllUsers(session.customer_id);
+    if (qUsers.intUserID eq thisUserID and qUsers.mainUser eq 1) {
+        location url="#application.mainURL#/account-settings/users" addtoken="false";
+    }
+
     // Get the users data
-    qCustomer = application.objCustomer.getUserDataByID(thisUserID)
+    qCustomer = application.objCustomer.getUserDataByID(thisUserID);
     if(not qCustomer.recordCount){
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
@@ -210,7 +234,7 @@
             </div>
         </div>
     </div>
-    
+
 
 </div>
 </cfoutput>
