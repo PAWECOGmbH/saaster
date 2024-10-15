@@ -303,12 +303,6 @@ component displayname="customer" output="false" {
                     INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
                     WHERE customer_user.intUserID = :userID
-                    AND customer_user.intCustomerID =
-                    (
-                        SELECT MAX(cu2.intCustomerID)
-                        FROM customer_user cu2
-                        WHERE cu2.intUserID = customer_user.intUserID
-                    )
                     ORDER BY customer_user.blnStandard DESC
                 "
             )

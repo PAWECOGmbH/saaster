@@ -613,24 +613,22 @@ component displayname="globalFunctions" output="false" {
     }
 
 
-    // Check whether the user is in the range of the current tenant.
-    // doingUserID: The users id which is doing things like deleting or editing.
-    // customerID: The customerID from whom something must be done
-    public boolean function checkTenantRange(required numeric doingUserID, required numeric customerID) {
+    // Check whether the user is in the range of the current tenant
+    public boolean function checkTenantRange(required numeric userID, required numeric customerID) {
 
         local.isAllowed = false;
 
         local.qRange = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                doingUserID: {type: "numeric", value: arguments.doingUserID},
+                userID: {type: "numeric", value: arguments.userID},
                 customerID: {type: "numeric", value: arguments.customerID}
             },
             sql = "
                 SELECT intCustomerID
                 FROM customer_user
                 WHERE intCustomerID = :customerID
-                AND intUserID = :doingUserID
+                AND intUserID = :userID
             "
         )
 
