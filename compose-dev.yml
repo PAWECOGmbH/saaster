@@ -12,6 +12,7 @@ services:
     volumes:
       - ./www:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - userdata_volume:/var/www/userdata
     networks:
       - saaster_net
 
@@ -71,6 +72,8 @@ services:
       - saaster_net
 
 volumes:
+  userdata_volume:
+    name: ${COMPOSE_PROJECT_NAME}_userdata_volume
   db_volume:
     name: ${COMPOSE_PROJECT_NAME}_db_volume
   inbucket_welcomepage:

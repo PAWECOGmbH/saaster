@@ -362,10 +362,20 @@ component displayname="user" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT users.*
+                    SELECT users.*,
+                    IF
+                    (
+                        (
+                            SELECT MIN(customer_user.intUserID)
+                            FROM customer_user
+                            WHERE intCustomerID = customers.intCustomerID
+                        ) = customer_user.intUserID, 1, 0
+                    ) AS mainUser
                     FROM customer_user
                     INNER JOIN users ON customer_user.intUserID = users.intUserID
+                    INNER JOIN customers ON customer_user.intCustomerID = customers.intCustomerID
                     WHERE customer_user.intCustomerID = :customerID
+                    ORDER BY mainUser DESC, customer_user.intUserID
                 "
             )
 

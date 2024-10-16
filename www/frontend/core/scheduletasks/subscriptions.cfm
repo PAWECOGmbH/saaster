@@ -587,7 +587,7 @@ if (url.pass eq variables.schedulePassword) {
             UPDATE invoices
             SET intPaymentStatusID = 6
             WHERE intPaymentStatusID = 2
-            AND DATE(:dateToday) < DATE(:dateToday)
+            AND dtmDueDate < DATE(:dateToday)
         "
     )
 

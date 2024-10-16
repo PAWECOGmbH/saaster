@@ -3,8 +3,6 @@
     qUser = application.objUser.getAllUsers(session.customer_id);
 </cfscript>
 
-
-
 <cfoutput>
 <div class="page-wrapper">
     <div class="#getLayout.layoutPage#">
@@ -63,7 +61,7 @@
                                     <td class="text-end">
                                         <cfset canEdit = true>
                                         <cfif session.superadmin>
-                                            <cfif qUser.blnSysAdmin>
+                                            <cfif qUser.blnSysAdmin or qUser.mainUser eq 1>
                                                 <cfset canEdit = false>
                                             </cfif>
                                         <cfelseif session.admin>
@@ -82,10 +80,12 @@
                                                     <cfelse>
                                                         <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">#getTrans('btnEdit')#</a>
                                                     </cfif>
-                                                    <cfif qUser.intUserID neq session.user_id>
+                                                    <cfif qUser.intUserID neq session.user_id and qUser.mainUser eq 0>
                                                         <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                     </cfif>
-                                                    <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                    <cfif not len(qUser.strPasswordHash) and not len(qUser.strPasswordSalt)>
+                                                        <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                    </cfif>
                                                 </div>
                                             </div>
                                         </cfif>
@@ -99,7 +99,7 @@
             </div>
         </div>
     </div>
-    
+
 
 </div>
 </cfoutput>

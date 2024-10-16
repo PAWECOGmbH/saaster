@@ -159,8 +159,37 @@ component displayname="customer" output="false" {
 
                     SET @last_inserted_customer_id = LAST_INSERT_ID();
 
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strPasswordHash, strPasswordSalt, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin)
-                    VALUES (@last_inserted_customer_id, :dateNow, :dateNow, :first_name, :last_name, :email, :hash, :salt, :language, 1, 1, 1,
+                    INSERT INTO users
+                    (
+                        intCustomerID,
+                        dtmInsertDate,
+                        dtmMutDate,
+                        strFirstName,
+                        strLastName,
+                        strEmail,
+                        strPasswordHash,
+                        strPasswordSalt,
+                        strLanguage,
+                        blnActive,
+                        blnAdmin,
+                        blnSuperAdmin,
+                        blnSysAdmin,
+                        strUUID
+                    )
+                    VALUES
+                    (
+                        @last_inserted_customer_id,
+                        :dateNow,
+                        :dateNow,
+                        :first_name,
+                        :last_name,
+                        :email,
+                        :hash,
+                        :salt,
+                        :language,
+                        1,
+                        1,
+                        1,
                         IF(
                             (
                                 SELECT COUNT(intCustomerID)
@@ -169,7 +198,8 @@ component displayname="customer" output="false" {
                             ) > 0,
                             0,
                             1
-                        )
+                        ),
+                        :uuid
                     );
 
                     DELETE FROM optin WHERE strUUID = :uuid;

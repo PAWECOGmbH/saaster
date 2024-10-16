@@ -1,13 +1,23 @@
 <cfscript>
+
     if (structKeyExists(session, "user_id") and session.user_id gt 0) {
-        location url="#application.mainURL#/dashboard" addtoken="false";
+        if (!structKeyExists(session, "step")) {
+            location url="#application.mainURL#/dashboard" addtoken="false";
+        }
     }
+
     param name="session.step" default="1";
     param name="session.first_name" default="";
     param name="session.name" default="";
     param name="session.company" default="";
     param name="session.email" default="";
     getSysadminData = application.objSysadmin.getSysAdminData();
+
+    if (session.step eq 3) {
+        qCountries = application.objGlobal.getCountry(language=session.lng);
+        timeZones = new backend.core.com.time().getTimezones();
+    }
+
 </cfscript>
 
 <cfoutput>
@@ -21,14 +31,14 @@
 </cfif>
 <div class="page page-center">
     <div class="container-tight py-4">
+        <div class="text-center mb-4">
+            <cfif len(trim(getSysadminData.logo))>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
+            <cfelse>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+            </cfif>
+        </div>
         <cfif session.step eq 1>
-            <div class="text-center mb-4">
-                <cfif len(trim(getSysadminData.logo))>
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
-                <cfelse>
-                    <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
-                </cfif>
-            </div>
             <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck?reinit=3">
                 <input type="hidden" name="register_btn">
                 <div class="card-body">
@@ -80,9 +90,7 @@
                 </div>
             </form>
         <cfelseif session.step eq 2>
-            <div class="text-center mb-4">
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="36" alt="Logo"></a>
-            </div>
+
             <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck">
                 <input type="hidden" name="create_account">
                 <div class="card-body">
@@ -101,7 +109,61 @@
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
                     </div>
-
+                </div>
+            </form>
+        <cfelseif session.step eq 3>
+            <form class="card card-md" id="submit_form" method="post" action="#application.mainURL#/logincheck">
+                <input type="hidden" name="fill_remaining_data">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">#getTrans('txtUpdateInformation')#</h2>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formCompanyName')#</label>
+                        <input type="text" name="company" class="form-control" value="#HTMLEditFormat(session.company)#" minlength="3" maxlength="100" >
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formContactName')# *</label>
+                        <input type="text" name="contact" class="form-control" value="#HTMLEditFormat(session.first_name)# #HTMLEditFormat(session.name)#" minlength="3" maxlength="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formAddress')# *</label>
+                        <input type="text" name="address" class="form-control" value="" minlength="3" maxlength="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formAddress2')#</label>
+                        <input type="text" name="address2" class="form-control" value="" maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formZIP')# *</label>
+                        <input type="text" name="zip" class="form-control" value="" minlength="4" maxlength="10" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">#getTrans('formCity')# *</label>
+                        <input type="text" name="city" class="form-control" value="" minlength="3" maxlength="100" required>
+                    </div>
+                    <cfif qCountries.recordCount>
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('formCountry')# *</label>
+                            <select name="countryID" class="form-select" required>
+                                <option value=""></option>
+                                <cfloop query="qCountries">
+                                    <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                </cfloop>
+                            </select>
+                        </div>
+                    <cfelse>
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('titTimezone')# *</label>
+                            <select name="timezoneID" class="form-select" required>
+                                <option value=""></option>
+                                <cfloop array="#timeZones#" index="i">
+                                    <option value="#i.id#">#i.timezone# - #i.city# (#i.utc#)</option>
+                                </cfloop>
+                            </select>
+                        </div>
+                    </cfif>
+                    <div>
+                        <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
+                    </div>
                 </div>
             </form>
         </cfif>
