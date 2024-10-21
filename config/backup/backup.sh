@@ -3,8 +3,14 @@
 # Activates the automatic export of variables
 set -a
 
-# Load the .env file
-source ../../.env
+# Get the directory of the current script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Set the project root (assuming the script is two levels below the project root)
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+
+# Load the .env file from the project root
+source "$PROJECT_ROOT/.env"
 
 # Deactivates the automatic export of variables
 set +a
