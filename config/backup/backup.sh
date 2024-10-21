@@ -4,7 +4,7 @@
 set -a
 
 # Load the .env file
-source ../.env
+source ../../.env
 
 # Deactivates the automatic export of variables
 set +a
