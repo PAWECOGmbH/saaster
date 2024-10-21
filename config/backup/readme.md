@@ -8,8 +8,6 @@ By utilizing Docker Compose and shell scripts, the backup process is automated t
 
 **Structure**
 
-- .env: This file contains environment variables specifically for backup and restoration in the production environment. Variables like volume names, image versions, and SSH credentials are defined here.
-
 - compose-backup.yml: This file defines the container services needed to create backups. Each service performs a backup for the database, user data, or the Lucee image.
 
 - backup.sh: A shell script that automates the process of backing up the database, user data, and Lucee image. It uses Docker Compose and secure copying (SCP) to transfer backups to the designated backup server.
