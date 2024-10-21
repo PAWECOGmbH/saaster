@@ -1,0 +1,20 @@
+services:
+  db_backup:
+    image: alpine
+    volumes:
+      - ${COMPOSE_PROJECT_NAME}_db_volume:/volume
+      - /backup:/backup
+    command: tar -czf /backup/database.tar.gz -C /volume .
+
+  userdata_backup:
+    image: alpine
+    volumes:
+      - ${COMPOSE_PROJECT_NAME}_userdata_volume:/volume
+      - /backup:/backup
+    command: tar -czf /backup/userdata.tar.gz -C /volume .
+
+  lucee_image_backup:
+    image: alpine
+    volumes:
+      - /backup:/backup
+    command: docker save -o /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}.tar ${LUCEE_IMAGE}:${LUCEE_IMAGE_VERSION}
