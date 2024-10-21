@@ -4,16 +4,10 @@
 set -a
 
 # Load the .env file
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$PROJECT_ROOT/.env"
+source ../.env
 
 # Deactivates the automatic export of variables
 set +a
-
-# Checks whether the /backup folder exists and creates it if required
-if [ ! -d "/backup" ]; then
-    mkdir -p /backup
-fi
 
 # Backup database
 docker compose -f compose-backup.yml run db_backup
