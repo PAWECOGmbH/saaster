@@ -9,6 +9,11 @@ source ../.env
 # Deactivates the automatic export of variables
 set +a
 
+# Checks whether the /backup folder exists and creates it if required
+if [ ! -d "/backup" ]; then
+    mkdir -p /backup
+fi
+
 # Backup database
 docker compose -f compose-backup.yml run db_backup
 scp -i ${SSH_KEY_PATH} /backup/database.tar.gz ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}
