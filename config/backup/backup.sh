@@ -4,8 +4,7 @@
 set -a
 
 # Load the .env file
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$PROJECT_ROOT/.env"
+source ../.env
 
 # Deactivates the automatic export of variables
 set +a
