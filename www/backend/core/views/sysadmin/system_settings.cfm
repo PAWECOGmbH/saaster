@@ -197,7 +197,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="horizontal" class="form-imagecheck-input" #getLayout.horizontal#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal</p>
-                                                <img src="../dist/img/layout/horizontal.png" alt="Horizontal" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/horizontal.png" alt="Horizontal" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -205,7 +205,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="horizontalDark" class="form-imagecheck-input" #getLayout.horizontalDark#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Horizontal dark</p>
-                                                <img src="../dist/img/layout/horizontalDark.png" alt="Horizontal dark" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/horizontalDark.png" alt="Horizontal dark" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -213,7 +213,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="navbarSticky" class="form-imagecheck-input" #getLayout.navbarSticky#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar sticky</p>
-                                                <img src="../dist/img/layout/navbarSticky.png" alt="Navbar sticky" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/navbarSticky.png" alt="Navbar sticky" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -221,7 +221,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="condensed" class="form-imagecheck-input" #getLayout.condensed#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Condensed</p>
-                                                <img src="../dist/img/layout/condensed.png" alt="Condensed" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/condensed.png" alt="Condensed" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -229,7 +229,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="navbarDark" class="form-imagecheck-input" #getLayout.navbarDark#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar dark</p>
-                                                <img src="../dist/img/layout/navbarDark.png" alt="Navbar dark" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/navbarDark.png" alt="Navbar dark" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -237,7 +237,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="navbarOverlap" class="form-imagecheck-input" #getLayout.navbarOverlap#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Navbar overlap</p>
-                                                <img src="../dist/img/layout/navbarOverlap.png" alt="Navbar overlap" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/navbarOverlap.png" alt="Navbar overlap" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -245,7 +245,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="verticalTransparent" class="form-imagecheck-input" #getLayout.verticalTransparent#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical</p>
-                                                <img src="../dist/img/layout/verticalTransparent.png" alt="Vertical transparent" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/verticalTransparent.png" alt="Vertical transparent" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -253,7 +253,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="vertical" class="form-imagecheck-input" #getLayout.vertical#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Vertical dark</p>
-                                                <img src="../dist/img/layout/vertical.png" alt="Vertical" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/vertical.png" alt="Vertical" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -261,7 +261,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="rightVertical" class="form-imagecheck-input" #getLayout.rightVertical#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Right vertical</p>
-                                                <img src="../dist/img/layout/rightVertical.png" alt="Right vertical" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/rightVertical.png" alt="Right vertical" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -269,7 +269,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="combined" class="form-imagecheck-input" #getLayout.combined#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Combined</p>
-                                                <img src="../dist/img/layout/combined.png" alt="Combined" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/combined.png" alt="Combined" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -277,7 +277,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="fluid" class="form-imagecheck-input" #getLayout.fluid#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid</p>
-                                                <img src="../dist/img/layout/fluid.png" alt="Fluid" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/fluid.png" alt="Fluid" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -285,7 +285,7 @@
                                             <label class="form-imagecheck mb-2">
                                                 <input name="settingLayout" type="radio" value="fluidVertical" class="form-imagecheck-input" #getLayout.fluidVertical#/>
                                                 <span class="form-imagecheck-figure"><p style="margin:2px 30px; display:block;">Fluid vertical</p>
-                                                <img src="../dist/img/layout/fluidVertical.png" alt="Fluid vertical" class="form-imagecheck-image">
+                                                <img src="/backend/dist/img/layout/fluidVertical.png" alt="Fluid vertical" class="form-imagecheck-image">
                                                 </span>
                                             </label>
                                         </div>
@@ -302,7 +302,7 @@
         </div>
     </div>
 
-    
+
 
 </div>
 

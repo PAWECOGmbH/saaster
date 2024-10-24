@@ -33,9 +33,9 @@
     <div class="container-tight py-4">
         <div class="text-center mb-4">
             <cfif len(trim(getSysadminData.logo))>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
             <cfelse>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="/assets/img/logo.svg" height="80" alt="Logo"></a>
             </cfif>
         </div>
         <cfif session.step eq 1>

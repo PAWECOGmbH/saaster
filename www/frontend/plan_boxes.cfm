@@ -94,7 +94,7 @@
                                 <!--- If the user already has a plan, send him to the plan edit page --->
                                 <cfif structKeyExists(session.currentPlan, "planID") and session.currentPlan.planID gt 0>
 
-                                    <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+                                    <div class="text-center my-4">
                                         <a href="#application.mainURL#/account-settings/plans" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                     </div>
 
@@ -103,8 +103,8 @@
                                     <cfif i.itsFree eq 1>
 
                                         <!--- Button free --->
-                                        <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
-                                            <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                        <div class="text-center my-4">
+                                            <a href="#i.bookingLinkO#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                         </div>
 
                                     <cfelse>
@@ -112,19 +112,19 @@
                                         <cfif getWebhook.recordCount or i.testDays gt 0>
 
                                             <!--- Button monthly --->
-                                            <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                                <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                            <div class="text-center my-4 price_box monthly">
+                                                <a href="#i.bookingLinkM#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                             </div>
 
                                             <!--- Button yearly --->
-                                            <div style="display: none;" class="text-center price_box my-4 yearly <cfif i.recommended>btn-green</cfif>">
-                                                <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100 plan">#getTrans('btnActivate')#</a>
+                                            <div style="display: none;" class="text-center price_box my-4 yearly">
+                                                <a href="#i.bookingLinkY#" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                             </div>
 
                                         <cfelse>
 
                                             <!--- To the payment page in order to add a payment method  --->
-                                            <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+                                            <div class="text-center my-4">
                                                 <a href="#application.mainURL#/account-settings/payment" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                             </div>
 
@@ -136,7 +136,7 @@
 
                             <cfelse>
 
-                                <div class="text-center my-4 <cfif i.recommended>btn-green</cfif>">
+                                <div class="text-center my-4">
                                     <a href="#application.mainURL#/dashboard" rel="nofollow" class="btn w-100">#getTrans('btnActivate')#</a>
                                 </div>
 
@@ -156,13 +156,13 @@
                             </cfif>
 
                             <!--- Button monthly --->
-                            <div class="text-center my-4 price_box monthly <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register?redirect=#redirectLinkM#" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                            <div class="text-center my-4 price_box monthly">
+                                <a href="#application.mainURL#/register?redirect=#redirectLinkM#" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                             <!--- Button yearly --->
-                            <div style="display: none;" class="text-center my-4 price_box yearly <cfif i.recommended>btn-green</cfif>">
-                                <a href="#application.mainURL#/register?redirect=#redirectLinkY#" class="btn w-100 plan"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                            <div style="display: none;" class="text-center my-4 price_box yearly">
+                                <a href="#application.mainURL#/register?redirect=#redirectLinkY#" class="btn w-100"><cfif len(trim(i.buttonName))>#i.buttonName#<cfelse>#getTrans('btnActivate')#</cfif></a>
                             </div>
 
                         </cfif>

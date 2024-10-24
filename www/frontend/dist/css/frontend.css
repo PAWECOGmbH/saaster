@@ -1,0 +1,191 @@
+.currency {
+    font-size: 60%;
+}
+
+.plan-cards>ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.plan-cards>ul li::before {
+    font-family: "FontAwesome";
+    content: "\f00c";
+    padding: 0 10px 0 0;
+    color: green;
+    font-size: large;
+}
+
+.plan_price {
+    font-size: 270%;
+    font-weight: 600;
+}
+
+table.planFeatures {
+    width: 100%;
+}
+
+table.planFeatures>th,
+td {
+    padding: 15px;
+}
+
+th.planName {
+    font-size: 20px;
+}
+
+td.feat {
+    text-align: left;
+}
+
+td.category {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+td.feature {
+    font-size: 14px;
+}
+
+.content-td-head {
+    border: 1px solid #cccccc;
+    border-left: none;
+    padding: 25px 15px;
+}
+
+.content-td-body {
+    border: 1px solid #cccccc;
+    border-right: none;
+}
+
+.planName,
+.categoryName {
+    border-bottom: 1px #000000 solid;
+}
+
+.categoryName {
+    padding-top: 50px;
+}
+
+.allPlans {
+    font-size: 0px
+}
+
+.categorie1 .allPlans {
+    font-size: 0.875rem;
+}
+
+.feat {
+    width: 30%;
+}
+
+
+.has-toggle-input label,
+.has-toggle-input.radio label {
+    display: block;
+    float: left;
+    padding: 5px 10px;
+    margin: auto auto auto -1px;
+    background: #f4f4f4;
+    color: #444;
+    /* border: 1px #d0d0d0 solid; */
+    line-height: normal;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.has-toggle-input label.active {
+    background: #1d60b0;
+    border-color: #1d60b0;
+    color: white;
+    font-weight: bolder;
+}
+
+.has-toggle-input label:first-of-type {
+    margin-left: auto;
+}
+
+.toggleradio {
+    width: 15%;
+    margin: 0 auto;
+}
+
+
+.otc {
+	position: relative;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.otc fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.otc fieldset div {
+	display: flex;
+	align-items: center;
+}
+
+.otc legend {
+	margin: 0 auto 1em;
+	color: #5555FF;
+}
+.otc input:active,
+.otc input:focus{
+    border-color: #a4cdfd;
+    outline: none;
+}
+.otc input::selection{
+    background-color: transparent;
+    color: #206bc4;
+    border-color: #a4cdfd;
+}
+
+.otc input[type="number"] {
+	width: 12%;
+	line-height: 1;
+	margin: .1em;
+	padding: 8px 0 4px;
+	font-size: 2.65em;
+	text-align: center;
+	appearance: textfield;
+	-webkit-appearance: textfield;
+	border: 2px solid #a4cdfd;
+	color: #206bc4;
+	border-radius: 4px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 2 group of 3 items */
+.otc input[type="number"]:nth-child(n+4) {
+	order: 2;
+}
+.otc div.mb-3::before {
+	content: '';
+	height: 2px;
+	width: 24px;
+	margin: 0 .25em;
+	order: 1;
+	background: #a4cdfd;
+}
+
+/* From: https://gist.github.com/ffoodd/000b59f431e3e64e4ce1a24d5bb36034 */
+.otc label {
+	border: 0 !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	-webkit-clip-path: inset(50%) !important;
+	clip-path: inset(50%) !important;
+	height: 1px !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	white-space: nowrap !important;
+}

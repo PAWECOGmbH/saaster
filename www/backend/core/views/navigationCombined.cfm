@@ -20,7 +20,7 @@
                 <h1 class="#getLayout.layoutTitel#">
                     <cfif len(trim(getSysadminData.logo))>
                         <a href="#application.mainURL#/dashboard">
-                            <img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
+                            <img src="/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
                         </a>
                     <cfelse>
                         <a href="#application.mainURL#/dashboard">

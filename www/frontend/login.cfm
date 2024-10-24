@@ -20,9 +20,9 @@
 
         <div class="text-center mb-4">
             <cfif len(trim(getSysadminData.logo))>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="/userdata/images/logos/#getSysadminData.logo#" height="80" alt="Logo"></a>
             <cfelse>
-                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="#application.mainURL#/dist/img/logo.svg" height="80" alt="Logo"></a>
+                <a href="./" class="navbar-brand navbar-brand-autodark"><img src="/assets/img/logo.svg" height="80" alt="Logo"></a>
             </cfif>
         </div>
 
@@ -62,37 +62,6 @@
 </cfoutput>
 <cfset structDelete(session, "alert") />
 
-
-<!--- Disable Browser-back after logout --->
-<cfif structKeyExists(url, "logout")>
 <script>
-    (function (global) {
-        if(typeof (global) === "undefined") {
-            throw new Error("window is undefined");
-        }
-        var _hash = "!";
-        var noBackPlease = function () {
-            global.location.href += "#";
-
-            global.setTimeout(function () {
-                global.location.href += "!";
-            }, 50);
-        };
-        global.onhashchange = function () {
-            if (global.location.hash !== _hash) {
-                global.location.hash = _hash;
-            }
-        };
-        global.onload = function () {
-            noBackPlease();
-            document.body.onkeydown = function (e) {
-                var elm = e.target.nodeName.toLowerCase();
-                if (e.which === 8 && (elm !== 'input' && elm  !== 'textarea')) {
-                    e.preventDefault();
-                }
-                e.stopPropagation();
-            };
-        }
-    })(window);
+    var isLogout = <cfif structKeyExists(url, "logout")>true<cfelse>false</cfif>;
 </script>
-</cfif>

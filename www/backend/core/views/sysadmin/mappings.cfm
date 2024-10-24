@@ -37,8 +37,8 @@
                     <div class="card">
                         <ul class="nav nav-tabs" data-bs-toggle="tabs">
                             <li class="nav-item"><a href="##custom" class="nav-link active" data-bs-toggle="tab">Custom mappings</a></li>
-                            <li class="nav-item"><a href="##system" class="nav-link" data-bs-toggle="tab">System mappings</a></li>
                             <li class="nav-item"><a href="##frontend" class="nav-link" data-bs-toggle="tab">Frontend mappings</a></li>
+                            <li class="nav-item"><a href="##system" class="nav-link" data-bs-toggle="tab">System mappings</a></li>
                         </ul>
                     </div>
                     <div class="tab-content">
@@ -72,7 +72,11 @@
                                                     <td class="bottom_line text-center"><input type="radio" name="admin" value="admin" class="form-check-input"></td>
                                                     <td class="bottom_line text-center"><input type="radio" name="admin" value="superadmin" class="form-check-input"></td>
                                                     <td class="bottom_line text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input"></td>
-                                                    <td class="bottom_line text-end"><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></td>
+                                                    <td class="bottom_line text-end">
+                                                        <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-success">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </td>
                                                     <td class="bottom_line"></td>
                                                 </tr>
                                             </form>
@@ -92,8 +96,20 @@
                                                         <td class="text-center"><input type="radio" name="admin" value="admin" class="form-check-input" <cfif qCustomMappings.blnOnlyAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="superadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySuperAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySysAdmin eq 1>checked</cfif>></td>
-                                                        <td class="text-end"><cfif not len(disabled)><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></cfif></td>
-                                                        <td class="text-left"><cfif not len(disabled)><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon" style="font-size: 20px;"></cfif></td>
+                                                        <td class="text-end">
+                                                            <cfif not len(disabled)>
+                                                                <button type="submit" class="btn btn-x btn-icon btn-ghost-success">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                            </cfif>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <cfif not len(disabled)>
+                                                                <button type="submit" name="delete" class="btn btn-x w-50 btn-icon btn-ghost-danger">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </cfif>
+                                                        </td>
                                                     </tr>
                                                 </form>
                                             </cfloop>
@@ -163,7 +179,11 @@
                                                     <td class="bottom_line"><input type="text" name="metatitle" class="form-control" required></td>
                                                     <td class="bottom_line"><input type="text" name="metadescription" class="form-control" required></td>
                                                     <td class="bottom_line"><input type="text" name="htmlcodes" class="form-control" required></td>
-                                                    <td class="bottom_line"><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></td>
+                                                    <td class="bottom_line">
+                                                        <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-success">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </td>
                                                     <td class="bottom_line"></td>
                                                 </tr>
                                             </form>
@@ -183,9 +203,6 @@
                                                         <td class="mappings-frontend-td-align">
                                                             <div class="input-group input-group-flat">
                                                                 <input type="text" name="path" value="#HTMLEditFormat(qFrontendMappings.strPath)#" class="form-control" maxlength="255">
-                                                                <!--- <span class="input-group-text">
-                                                                    <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_path_#qFrontendMappings.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate path" data-bs-original-title="Translate path"></i></a>
-                                                                </span> --->
                                                             </div>
                                                         </td>
                                                         <td class="mappings-frontend-td-align">
@@ -224,8 +241,16 @@
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td class="text-end"><input type="submit" title="Save" value="&##xf00c" class="fa fa-input text-green fa_icon" style="font-size: 20px;"></td>
-                                                        <td class="text-left"><input type="submit" title="Delete" name="delete" value="&##xf00d" class="fa fa-input text-red fa_icon" style="font-size: 20px;"></td>
+                                                        <td class="text-end">
+                                                            <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-success">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <button type="submit" name="delete" class="btn btn-x w-50 btn-icon btn-ghost-danger">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 </form>
                                                 <cfset cgiPathTab = "#cgi.path_info###frontend">
