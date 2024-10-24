@@ -19,7 +19,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     // Load java files
     this.javaSettings = {
-        loadPaths = [expandPath("/dist/java")],
+        loadPaths = [expandPath("/assets/java")],
         reloadOnChange = true
     };
 

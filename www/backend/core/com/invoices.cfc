@@ -1627,7 +1627,7 @@ component displayname="invoices" output="false" {
             local.qrDataSet['qrSize'] = "300";
 
             // Path to the swiss cross logo (if desired)
-            local.qrDataSet['qrLogo'] = "/dist/img/ch-cross.png";
+            local.qrDataSet['qrLogo'] = "/assets/img/ch-cross.png";
 
             // Set all the needed data
             local.qrDataSet['billerIBAN'] = application.objSysAdmin.getSystemSetting('settingIBANnumber').strDefaultValue;

@@ -2,7 +2,7 @@
 www/test.*
 
 ### Userdata folder ###
-www/userdata/**
+www/userdata
 
 ### Config files ###
 config.cfm

@@ -79,7 +79,7 @@
                     <cfif len(trim(sysAdminData.logo))>
                         <img alt="Logo" src="#expandPath('/userdata/images/logos/#sysAdminData.logo#')#" style="max-width: 180px; font-size: 16px;" border="0">
                     <cfelse>
-                        <img alt="Logo" src="#expandPath('/dist/img/logo.png')#" style="max-width: 180px; font-size: 16px;" border="0">
+                        <img alt="Logo" src="#expandPath('/assets/img/logo.png')#" style="max-width: 180px; font-size: 16px;" border="0">
                     </cfif>
                 </td>
             </tr>
