@@ -696,7 +696,7 @@ component displayname="user" output="false" {
                 UUID: {type: "varchar", value: arguments.mfaUUID}
             },
             sql = "
-                SELECT intmfaCode, dtmMfaDateTime, intUserID
+                SELECT intmfaCode, dtmMfaDateTime, intUserID, intCustomerID
                 FROM users
                 WHERE strUUID = :UUID
             "
@@ -713,7 +713,8 @@ component displayname="user" output="false" {
                 local.argsReturnValue['uuid'] = arguments.mfaUUID;
                 local.argsReturnValue['success'] = false;
             } else {
-                local.argsReturnValue['userid'] = local.qGetUserMfa.intUserID;
+                local.argsReturnValue['userID'] = local.qGetUserMfa.intUserID;
+                local.argsReturnValue['customerID'] = local.qGetUserMfa.intCustomerID;
                 local.argsReturnValue['success'] = true;
             }
 

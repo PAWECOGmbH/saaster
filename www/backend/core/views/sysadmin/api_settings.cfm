@@ -25,7 +25,7 @@
                         <a href="##" data-bs-toggle="modal" data-bs-target="##api_new" class="btn btn-primary">
                             <i class="fas fa-plus pe-3"></i> New API
                         </a>
-                    </div> 
+                    </div>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -78,7 +78,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>                                    
+                                </div>
                             </cfif>
                         </div>
                     </div>
@@ -131,7 +131,7 @@
         </div>
     </cfoutput>
 
-    
+
 
 </div>
 

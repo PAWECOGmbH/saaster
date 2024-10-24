@@ -1,0 +1,209 @@
+.dropify-message>.file-icon>p {
+    font-size: 20px;
+}
+
+.currency {
+    font-size: 60%;
+}
+
+.bottom_line {
+    border-bottom: 1px solid black;
+}
+
+#checkall tr:hover {
+    background: #eee;
+    cursor: pointer;
+}
+
+.trumbowyg-box,
+.trumbowyg-editor {
+    min-height: 150px;
+}
+
+.badge {
+    font-size: 70%;
+    font-weight: normal;
+    padding: 4px 5px;
+}
+
+.no-border {
+    border: none;
+}
+
+.bottom_line textarea {
+    height: 36px;
+}
+
+.trans-btn {
+    margin-top: 27px;
+}
+
+.trans-arrow-box {
+    font-size: 32px;
+    text-align: center;
+}
+
+.trans-arrow {
+    margin-top: 20px;
+}
+
+.trans-submit-btn {
+    padding-top: 20px;
+}
+
+.invoices-sort {
+    display: flex;
+}
+
+.invoices-sort-label {
+    min-width: 100px;
+    margin-top: 8px;
+}
+
+div.dashboard div.card-header label.form-check {
+    margin: 0;
+    padding: 0;
+}
+
+.widget-disabled {
+    opacity: 0.5;
+}
+
+.ui-state-highlight {
+    background: #eee;
+}
+
+.widget-placeholder {
+	border: 1px dotted #bbb;
+	margin: 1em 1em 1em 1em;
+	height: 50px;
+    background-color:#f8f8f8;
+}
+
+.trans-text pre {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.trans-container {
+    display: flex;
+    align-items: center;
+}
+
+.trans-text {
+    width: 750px;
+}
+
+.trans-link {
+    padding-left: 10px;
+}
+
+.form-select:focus-visible{
+    color: inherit !important;
+}
+
+.avatar {
+    object-fit: cover;
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+    color: #000;
+}
+
+.no-margin{
+    margin: 0;
+}
+
+.color-width{
+    width: 5rem;
+}
+
+.no-max-width{
+    max-width: revert;
+}
+
+.mappings-frontend-td-align{
+    vertical-align: top!important;
+}
+
+.mappings-frontend-textareaheight{
+    height: 36px;
+
+ }
+
+ .progress-bar {
+    margin-top: 15px;
+    margin-right: 5px;
+    width: 100%;
+    background-color: #ddd;
+    height: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    width: 0;
+    background-color: green;
+    text-align: right;
+    line-height: 20px;
+    color: white;
+    border-radius: 5px;
+}
+.progress-text{
+    margin-top: 10px;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px){
+    .dropdown-toggle:after{
+        display: none;
+    }
+    .nav-link-icon, .nav-link-icon span{
+        font-size: 25px;
+    }
+    .navbar-expand-md .navbar-collapse .navbar-nav .nav-link{
+        padding-top: 1.0rem;
+        padding-bottom: 1.0rem;
+    }
+    .dropdown-header{
+        padding-left: 2rem;
+    }
+    .dropdown-menu[data-bs-popper]{
+        left: auto;
+        right: 0;
+    }
+    .lng-dropdown{
+        margin-top: 15px !important;
+    }
+}

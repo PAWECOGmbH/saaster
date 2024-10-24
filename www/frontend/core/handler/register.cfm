@@ -42,6 +42,7 @@ if (structKeyExists(form, 'login_btn')) {
 
             if (objUser.blnMfa){
                 structDelete(session, 'user_id');
+                structDelete(session, 'customer_id');
                 session.mfaCheckCount = 0;
                 objSendMfa = application.objUser.sendMfaCode(mfaUUID, blnresend, session.user_email, session.user_name);
                 logWrite("user", "info", "User got MFA by e-mail after login. [E-Mail: #session.user_email#]");
@@ -684,6 +685,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
 }
 
+// Check the MFA Code
 if (structKeyExists(form, 'mfa_btn')) {
 
     param name="form.mfa_1" default=0;
@@ -705,7 +707,9 @@ if (structKeyExists(form, 'mfa_btn')) {
 
     if (checkMfa.success eq true) {
 
-        session.user_id = checkMfa.userid;
+        session.user_id = checkMfa.userID;
+        session.customer_id = checkMfa.customerID;
+        structDelete(session, "alert");
         logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
 
         // Let's check whether there is a file we have to include coming from modules
@@ -737,17 +741,26 @@ if (structKeyExists(form, 'mfa_btn')) {
 
 }
 
+// Resend the MFA Code
 if (structKeyExists(url, 'resend')) {
 
-    structDelete(session, 'user_id');
-    objUser = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
+    if (structKeyExists(session, "user_email") and structKeyExists(session, "user_name")) {
 
-    if (objUser.success eq true) {
+        objUser = application.objUser.sendMfaCode(url.uuid, url.resend, session.user_email, session.user_name);
 
-        getAlert(objUser.message, 'success');
-        logWrite("user", "warning", "Login via MFA: New MFA code send to the user [E-Mail: #session.user_email#, UUID: #url.uuid#]");
+        if (objUser.success eq true) {
+
+            getAlert(objUser.message, 'success');
+            logWrite("user", "warning", "Login via MFA: New MFA code send to the user [E-Mail: #session.user_email#, UUID: #url.uuid#]");
+            session.mfaCheckCount = 0;
+            location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
+
+        }
+
+    } else {
+
         session.mfaCheckCount = 0;
-        location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
+        location url="#application.mainURL#/login" addtoken="false";
 
     }
 }
