@@ -768,7 +768,9 @@ if (structKeyExists(url, 'resend')) {
 // Logout and delete all sessions
 if (structKeyExists(url, "logout")) {
 
-    logWrite("user", "info", "User has logged out [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+    if (structKeyExists(session, "customer_id") and structKeyExists(session, "user_id")) {
+        logWrite("user", "info", "User has logged out [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+    }
 
     structClear(SESSION);
     onSessionStart();
