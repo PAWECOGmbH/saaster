@@ -106,8 +106,7 @@ component displayname="translate" accessors="true" {
             writeOutput("SELECT #variables.thisField# as myField FROM #variables.thisTable# WHERE #variables.thisPrimKey# = #variables.thisID#");
         }
 
-        local.replacedCode = replaceList(local.qContent.myField, "<,>", "&lt;,&gt;");
-        local.replacedCode = replace(local.replacedCode, "#chr(13)#", "<br />", "all");
+        local.replacedCode = replace(local.qContent.myField, "#chr(13)#", "<br />", "all");
         writeOutput(local.replacedCode);
 
         return;
