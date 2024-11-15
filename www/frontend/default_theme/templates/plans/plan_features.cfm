@@ -57,12 +57,7 @@
                                         <cfset thisPlanID = p.planID>
                                         <cfset featureContent = objPlans.getFeatureValue(thisPlanID, featureID)>
 
-
-
                                         <td>
-
-                                            <cfdump  var="#thisPlanID#">
-                                            <cfdump  var="#featureContent#">
 
                                             <cfif len(trim(featureContent.value))>
 
