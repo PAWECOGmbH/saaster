@@ -30,15 +30,15 @@ component displayname="globalFunctions" output="false" {
                     strMapping: {type: "nvarchar", value: local.sefString}
                 },
                 sql = "
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend
                     FROM system_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, 0, 0, 0
+                    SELECT strPath, 0, 0, 0, 1 as itsFrontend
                     FROM frontend_mappings
                     WHERE strMapping = :strMapping
                     UNION
@@ -47,7 +47,7 @@ component displayname="globalFunctions" output="false" {
                         SELECT strPath
                         FROM frontend_mappings
                         WHERE intFrontendMappingsID = frontend_mappings_trans.intFrontendMappingsID
-                    ) as strPath, 0, 0, 0
+                    ) as strPath, 0, 0, 0, 1 as itsFrontend
                     FROM frontend_mappings_trans
                     WHERE strMapping = :strMapping
                     LIMIT 1
@@ -55,7 +55,11 @@ component displayname="globalFunctions" output="false" {
             )
 
             if (local.qCheckSEF.recordCount) {
-                local.returnStruct['thisPath'] = local.qCheckSEF.strPath;
+                if (local.qCheckSEF.itsFrontend) {
+                    local.returnStruct['thisPath'] = "frontend/" & application.activeTheme & "/" & local.qCheckSEF.strPath;
+                } else {
+                    local.returnStruct['thisPath'] = local.qCheckSEF.strPath;
+                }
                 local.returnStruct['onlyAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlyAdmin);
                 local.returnStruct['onlySuperAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySuperAdmin);
                 local.returnStruct['onlySysAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySysAdmin);
