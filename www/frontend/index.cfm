@@ -1,31 +1,23 @@
 <cfoutput>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>#getMeta(cgi.path_info, session.lng).metaTtile#</title>
-    <meta name="description" content="#getMeta(cgi.path_info, session.lng).metaDescription#">
-    #getMeta(cgi.path_info, session.lng).metaHTML#
-    <cfinclude template="/frontend/css-include.cfm">
-</head>
-<body>
 
-<div class="page">
+    <!--- Include the header template for the active theme --->
+    <cfinclude template="#application.activeTheme#/templates/header.cfm">
 
-    <cfif fileExists(thiscontent.thisPath) or fileExists("/" & thiscontent.thisPath)>
+    <!--- Check if a specific content file exists (from frontend_mappings in the database) --->
+    <cfif fileExists(thiscontent.thisPath)>
+
+        <!--- Include the specific content file if it exists --->
         <cfinclude template="/#thiscontent.thisPath#">
+
+    <!--- If no specific file is found, load the default home page --->
     <cfelse>
-        <h1>SAASTER</h1>
-        <p><a href="./plans">Plans</a></p>
-        <p><a href="./login">Login page</a></p>
-        <p><a href="./register">Registration page</a></p>
+        <cfinclude template="#application.activeTheme#/templates/home.cfm">
     </cfif>
-</div>
 
-<cfinclude template="/frontend/js-include.cfm">
-
-</body>
-</html>
+    <!--- Include the footer template for the active theme --->
+    <cfinclude template="#application.activeTheme#/templates/footer.cfm">
 
 </cfoutput>
+
+<!--- Clear any existing alert messages in the session --->
+<cfset structDelete(session, "alert") />
