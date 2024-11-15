@@ -1,0 +1,5 @@
+/frontend/core/* merge=theirs
+/frontend/default_theme/* merge=theirs
+/frontend/index.cfm merge=ours
+/frontend/custom_theme/* merge=ours
+/backend/core/* merge=theirs
