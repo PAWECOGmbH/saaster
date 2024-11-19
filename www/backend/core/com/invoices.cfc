@@ -1459,13 +1459,8 @@ component displayname="invoices" output="false" {
             // Build the link in order to download the pdf without login
             local.dl_link = application.mainURL & "/account-settings/invoice/print?pdf=" & local.uuid;
 
-            // Get the invoicing email address
+            // Get the customer data
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
-            if (len(trim(local.customerData.billingEmail))) {
-                local.toEmail = local.customerData.billingEmail;
-            } else {
-                local.toEmail = local.customerData.email;
-            }
 
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
@@ -1494,8 +1489,8 @@ component displayname="invoices" output="false" {
                 ");
             }
 
-            // Send activation link
-            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.customerData.language)#" type="html" {
+            // Send invoice
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.customerData.language)#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1537,13 +1532,8 @@ component displayname="invoices" output="false" {
 
         try {
 
-            // Get the invoicing email address
+            // Get the customer data
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
-            if (len(trim(local.customerData.billingEmail))) {
-                local.toEmail = local.customerData.billingEmail;
-            } else {
-                local.toEmail = local.customerData.email;
-            }
 
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
@@ -1574,7 +1564,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send activation link
-            mail to="#local.toEmail#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1654,7 +1644,52 @@ component displayname="invoices" output="false" {
     }
 
 
+    public string function getInvoiceEmail(numeric userID, numeric customerID) {
 
+        local.userEmail;
+        local.customerEmail;
+        local.billingEmail;
+        local.invoiceEmail;
+
+        // Get data using the userID
+        if (structKeyExists(arguments, "userID") and arguments.userID gt 0) {
+
+            local.qUserData = application.objCustomer.getUserDataByID(arguments.userID);
+            local.userEmail = local.qUserData.strEmail;
+
+        // Get data using the customerID
+        } else if (structKeyExists(arguments, "customerID") and arguments.customerID gt 0) {
+
+            local.customerEmail = application.objCustomer.getCustomerData(arguments.customerID).email;
+            local.billingEmail = application.objCustomer.getCustomerData(arguments.customerID).billingEmail;
+            local.userEmail = application.objUser.getAllUsers(arguments.customerID).strEmail;
+
+        // Send back with error
+        } else {
+            return "Eighter the userID or the customerID must be passed in!";
+        }
+
+        // First, we check the billing address
+        if (application.objGlobal.checkEmail(local.billingEmail)) {
+            local.invoiceEmail = local.billingEmail;
+            return local.invoiceEmail;
+        }
+
+        //Second, check the customers email address
+        if (application.objGlobal.checkEmail(local.customerEmail)) {
+            local.invoiceEmail = local.customerEmail;
+        }
+
+        // If neighter the billing nor the customer email address is valid, return the users email address
+        if (!len(trim(local.billingEmail)) and !len(trim(local.customerEmail))) {
+
+            local.invoiceEmail = local.userEmail;
+
+        }
+
+        return local.invoiceEmail;
+
+    }
 
 
 
