@@ -41,18 +41,25 @@
     // ***** Plans
     objPlans = new backend.core.com.plans(currencyID=custCurrencyID);
 
-    // Get the group id of the customer
-    custGroupID = objPlans.prepareForGroupID(thisCustomerID);
+    // Get all plans grouped and ordered by groupID
+    arrPlans = objPlans.getPlans();
+    groupedPlans = {};
+    loop array=arrPlans item="plan" {
+        groupID = plan.planGroupID;
+        if (!structKeyExists(groupedPlans, groupID)) {
+            groupedPlans[groupID] = [];
+        }
+        arrayAppend(groupedPlans[groupID], plan);
+    }
+    sortedGroupIDs = structKeyArray(groupedPlans);
+    arraySort(sortedGroupIDs, "numeric", "asc");
 
-    // Get all plans using the group id
-    arrPlans = objPlans.getPlans(custGroupID.groupID);
 
     // Current plan the customer has booked
     currentPlan = objPlans.getCurrentPlan(thisCustomerID);
     planStatusText = objPlans.getPlanStatusAsText(currentPlan);
 
 </cfscript>
-
 
 
 <div class="page-wrapper">
@@ -289,116 +296,34 @@
 
                                             <div class="row">
 
-                                                <cfloop array="#arrPlans#" item="plan">
-                                                    <div class="col-lg-3 mb-3 mt-3">
-                                                        <div class="card">
-                                                            <div class="card-header">
-                                                                <ul class="nav nav-pills card-header-pills">
-                                                                    <li class="nav-item">
-                                                                        <cfif plan.planID eq currentPlan.planID>
-                                                                            <a class="btn btn-outline-#planStatusText.fontColor# disabled">#plan.planName#: #currentPlan.status#</a>
-                                                                        <cfelse>
-                                                                            <a class="btn btn-outline-info disabled">#plan.planName#</a>
-                                                                        </cfif>
-                                                                    </li>
-                                                                    <li class="nav-item ms-auto">
-                                                                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Action</a>
-                                                                        <div class="dropdown-menu">
-
-                                                                            <cfset checkBookingM = objBookPlan.checkBooking(customerID=thisCustomerID, bookingData=plan, recurring='monthly', makeBooking=false, makeInvoice=false, chargeInvoice=false)>
-                                                                            <cfset checkBookingY = objBookPlan.checkBooking(customerID=thisCustomerID, bookingData=plan, recurring='yearly', makeBooking=false, makeInvoice=false, chargeInvoice=false)>
-
-                                                                            <cfif currentPlan.planID eq plan.planID>
-
-                                                                                <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
-                                                                                    Edit period
-                                                                                </a>
-
-                                                                                <cfif currentPlan.status eq "test">
-                                                                                    <cfif plan.priceMonthly gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
-                                                                                            Make invoice for monthly cycle (#custCurrency# #lsCurrencyFormat(plan.priceMonthly, "none")#)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                    <cfif plan.priceYearly gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
-                                                                                            Make invoice for yearly cycle (#custCurrency# #lsCurrencyFormat(plan.priceYearly, "none")#)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                <cfelse>
-                                                                                    <cfif checkBookingM.amountToPay gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
-                                                                                            Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                    <cfif checkBookingY.amountToPay gt 0>
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
-                                                                                            Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                </cfif>
-
-                                                                                <cfif currentPlan.status eq "canceled">
-                                                                                    <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&revoke" class="dropdown-item">
-                                                                                        Revoke cancellation
-                                                                                    </a>
-                                                                                <cfelse>
-                                                                                    <cfif currentPlan.status neq "payment">
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&cancel" class="dropdown-item">
-                                                                                            Cancel at expiry date
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                </cfif>
-
-                                                                                <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&delete', 'Warning!', 'Please note that the customer can no longer use the plan after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
-                                                                                    Withdraw plan
-                                                                                </a>
-
+                                                <cfloop collection="#sortedGroupIDs#" item="groupID">
+                                                    <h3>Group #groupID#</h3>
+                                                    <cfloop array="#groupedPlans[groupID]#" item="plan">
+                                                        <div class="col-lg-3 mb-3 mt-3">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <ul class="nav nav-pills card-header-pills">
+                                                                        <li class="nav-item">
+                                                                            <cfif plan.planID eq currentPlan.planID>
+                                                                                <a class="btn btn-outline-#planStatusText.fontColor# disabled">#plan.planName#: #currentPlan.status#</a>
                                                                             <cfelse>
+                                                                                <a class="btn btn-outline-info disabled">#plan.planName#</a>
+                                                                            </cfif>
+                                                                        </li>
+                                                                        <li class="nav-item ms-auto">
+                                                                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" <cfif currentPlan.planGroupID gt 0 and currentPlan.planGroupID neq plan.planGroupID>style="cursor: not-allowed;" disabled</cfif>>Action</a>
+                                                                            <div class="dropdown-menu">
 
-                                                                                <cfif currentPlan.status eq "payment">
+                                                                                <cfset checkBookingM = objBookPlan.checkBooking(customerID=thisCustomerID, bookingData=plan, recurring='monthly', makeBooking=false, makeInvoice=false, chargeInvoice=false)>
+                                                                                <cfset checkBookingY = objBookPlan.checkBooking(customerID=thisCustomerID, bookingData=plan, recurring='yearly', makeBooking=false, makeInvoice=false, chargeInvoice=false)>
 
-                                                                                    <a class="dropdown-item">
-                                                                                        No action available (waiting for payment)
+                                                                                <cfif currentPlan.planID eq plan.planID>
+
+                                                                                    <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_period.cfm?b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#">
+                                                                                        Edit period
                                                                                     </a>
 
-                                                                                <cfelse>
-
-                                                                                    <cfif plan.itsFree>
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&c=#thisCustomerID#&p=#plan.planID#&free" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="There is no automatic refund if it is a downgrade!">
-                                                                                            Activate now (free)
-                                                                                        </a>
-                                                                                    </cfif>
-                                                                                    <cfif plan.testDays gt 0 and currentPlan.status neq "test" and currentPlan.status neq "free" and currentPlan.status neq "active">
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&test&c=#thisCustomerID#&p=#plan.planID#" class="dropdown-item" class="dropdown-item">
-                                                                                            Activate the test time (#plan.testDays# days)
-                                                                                        </a>
-                                                                                    </cfif>
-
-                                                                                    <cfif currentPlan.status eq "active" and !plan.itsFree>
-
-                                                                                        <cfif checkBookingM.amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
-                                                                                                Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
-                                                                                            </a>
-                                                                                        <cfelse>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
-                                                                                                Change to this plan monthly cycle (#checkBookingM.message.title#)
-                                                                                            </a>
-                                                                                        </cfif>
-
-                                                                                        <cfif checkBookingY.amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
-                                                                                                Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
-                                                                                            </a>
-                                                                                        <cfelse>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
-                                                                                                Change to this plan yearly cycle (#checkBookingY.message.title#)
-                                                                                            </a>
-                                                                                        </cfif>
-
-                                                                                    <cfelse>
-
+                                                                                    <cfif currentPlan.status eq "test">
                                                                                         <cfif plan.priceMonthly gt 0>
                                                                                             <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
                                                                                                 Make invoice for monthly cycle (#custCurrency# #lsCurrencyFormat(plan.priceMonthly, "none")#)
@@ -409,51 +334,136 @@
                                                                                                 Make invoice for yearly cycle (#custCurrency# #lsCurrencyFormat(plan.priceYearly, "none")#)
                                                                                             </a>
                                                                                         </cfif>
+                                                                                    <cfelse>
+                                                                                        <cfif checkBookingM.amountToPay gt 0>
+                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                                Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                        <cfif checkBookingY.amountToPay gt 0>
+                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                                Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                    </cfif>
+
+                                                                                    <cfif currentPlan.status eq "canceled">
+                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&revoke" class="dropdown-item">
+                                                                                            Revoke cancellation
+                                                                                        </a>
+                                                                                    <cfelse>
+                                                                                        <cfif currentPlan.status neq "payment">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&cancel" class="dropdown-item">
+                                                                                                Cancel at expiry date
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                    </cfif>
+
+                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&delete', 'Warning!', 'Please note that the customer can no longer use the plan after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                                                                        Withdraw plan
+                                                                                    </a>
+
+                                                                                <cfelse>
+
+                                                                                    <cfif currentPlan.status eq "payment">
+
+                                                                                        <a class="dropdown-item">
+                                                                                            No action available (waiting for payment)
+                                                                                        </a>
+
+                                                                                    <cfelse>
+
+                                                                                        <cfif plan.itsFree>
+                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&c=#thisCustomerID#&p=#plan.planID#&free" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="There is no automatic refund if it is a downgrade!">
+                                                                                                Activate now (free)
+                                                                                            </a>
+                                                                                        </cfif>
+                                                                                        <cfif plan.testDays gt 0 and currentPlan.status neq "test" and currentPlan.status neq "free" and currentPlan.status neq "active">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&test&c=#thisCustomerID#&p=#plan.planID#" class="dropdown-item" class="dropdown-item">
+                                                                                                Activate the test time (#plan.testDays# days)
+                                                                                            </a>
+                                                                                        </cfif>
+
+                                                                                        <cfif currentPlan.status eq "active" and !plan.itsFree>
+
+                                                                                            <cfif checkBookingM.amountToPay gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                                    Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
+                                                                                                </a>
+                                                                                            <cfelse>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                                    Change to this plan monthly cycle (#checkBookingM.message.title#)
+                                                                                                </a>
+                                                                                            </cfif>
+
+                                                                                            <cfif checkBookingY.amountToPay gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                                    Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
+                                                                                                </a>
+                                                                                            <cfelse>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                                    Change to this plan yearly cycle (#checkBookingY.message.title#)
+                                                                                                </a>
+                                                                                            </cfif>
+
+                                                                                        <cfelse>
+
+                                                                                            <cfif plan.priceMonthly gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
+                                                                                                    Make invoice for monthly cycle (#custCurrency# #lsCurrencyFormat(plan.priceMonthly, "none")#)
+                                                                                                </a>
+                                                                                            </cfif>
+                                                                                            <cfif plan.priceYearly gt 0>
+                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
+                                                                                                    Make invoice for yearly cycle (#custCurrency# #lsCurrencyFormat(plan.priceYearly, "none")#)
+                                                                                                </a>
+                                                                                            </cfif>
+
+                                                                                        </cfif>
 
                                                                                     </cfif>
 
                                                                                 </cfif>
 
-                                                                            </cfif>
-
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                            <cfif (plan.planID eq currentPlan.planID)>
-                                                                <div class="card-header p-3 small">
-                                                                    <cfif currentPlan.status eq "canceled">
-                                                                        Data deletion: #dateFormat(currentPlan.endDate, "yyyy-mm-dd")#
-                                                                    <cfelse>
-                                                                        Period: #dateFormat(currentPlan.startDate, "yyyy-mm-dd")# - #dateFormat(currentPlan.endDate, "yyyy-mm-dd")# (#currentPlan.recurring#)
-                                                                    </cfif>
-                                                                    <cfif structKeyExists(currentPlan, "nextPlan") and !structIsEmpty(currentPlan.nextPlan) and currentPlan.nextPlan.planID eq currentPlan.planID>
-                                                                        <br />
-                                                                        New plan: #currentPlan.nextPlan.planName# (#dateFormat(currentPlan.nextPlan.startDate, "yyyy-mm-dd")# <cfif isDate(currentPlan.nextPlan.endDate)>- #dateFormat(currentPlan.nextPlan.endDate, "yyyy-mm-dd")#</cfif> - #currentPlan.nextPlan.recurring#)
-                                                                    </cfif>
+                                                                            </div>
+                                                                        </li>
+                                                                    </ul>
                                                                 </div>
-                                                            <cfelse>
-                                                                <div class="card-header small p-3">
-                                                                    <cfif structKeyExists(currentPlan, "nextPlan") and !structIsEmpty(currentPlan.nextPlan) and currentPlan.nextPlan.planID eq plan.planID>
-                                                                        WAITING:
-                                                                        <br />
-                                                                        #dateFormat(currentPlan.nextPlan.startDate, "yyyy-mm-dd")# <cfif isDate(currentPlan.nextPlan.endDate)>- #dateFormat(currentPlan.nextPlan.endDate, "yyyy-mm-dd")#</cfif> (#currentPlan.nextPlan.recurring#)
-                                                                    <cfelse>
-                                                                        Not booked
-                                                                    </cfif>
-                                                                </div>
-                                                            </cfif>
-                                                            <div class="card-body">
-                                                                <div class="d-flex align-items-center">
+                                                                <cfif (plan.planID eq currentPlan.planID)>
+                                                                    <div class="card-header p-3 small">
+                                                                        <cfif currentPlan.status eq "canceled">
+                                                                            Data deletion: #dateFormat(currentPlan.endDate, "yyyy-mm-dd")#
+                                                                        <cfelse>
+                                                                            Period: #dateFormat(currentPlan.startDate, "yyyy-mm-dd")# - #dateFormat(currentPlan.endDate, "yyyy-mm-dd")# (#currentPlan.recurring#)
+                                                                        </cfif>
+                                                                        <cfif structKeyExists(currentPlan, "nextPlan") and !structIsEmpty(currentPlan.nextPlan) and currentPlan.nextPlan.planID eq currentPlan.planID>
+                                                                            <br />
+                                                                            New plan: #currentPlan.nextPlan.planName# (#dateFormat(currentPlan.nextPlan.startDate, "yyyy-mm-dd")# <cfif isDate(currentPlan.nextPlan.endDate)>- #dateFormat(currentPlan.nextPlan.endDate, "yyyy-mm-dd")#</cfif> - #currentPlan.nextPlan.recurring#)
+                                                                        </cfif>
+                                                                    </div>
+                                                                <cfelse>
+                                                                    <div class="card-header small p-3">
+                                                                        <cfif structKeyExists(currentPlan, "nextPlan") and !structIsEmpty(currentPlan.nextPlan) and currentPlan.nextPlan.planID eq plan.planID>
+                                                                            WAITING:
+                                                                            <br />
+                                                                            #dateFormat(currentPlan.nextPlan.startDate, "yyyy-mm-dd")# <cfif isDate(currentPlan.nextPlan.endDate)>- #dateFormat(currentPlan.nextPlan.endDate, "yyyy-mm-dd")#</cfif> (#currentPlan.nextPlan.recurring#)
+                                                                        <cfelse>
+                                                                            Not booked
+                                                                        </cfif>
+                                                                    </div>
+                                                                </cfif>
+                                                                <div class="card-body">
                                                                     <div class="d-flex align-items-center">
-                                                                        <div>
-                                                                            <div class="text-muted">#left(plan.shortdescription, 70)# <cfif len(plan.shortdescription) gt 70>...</cfif></div>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div>
+                                                                                <div class="text-muted">#left(plan.shortdescription, 70)# <cfif len(plan.shortdescription) gt 70>...</cfif></div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </cfloop>
                                                 </cfloop>
 
                                             </div>
@@ -620,7 +630,7 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
 
