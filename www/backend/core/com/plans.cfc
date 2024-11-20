@@ -575,7 +575,7 @@ component displayname="plans" output="false" {
                 languageID: {type: "numeric", value: variables.lngID}
             },
             sql = "
-                SELECT blnCheckmark,
+                SELECT blnCheckmark, intPlanFeatureID, intPlansPlanFeatID,
                 (
                     IF
                         (
@@ -606,11 +606,14 @@ component displayname="plans" output="false" {
         local.structFeatVal = structNew();
         local.structFeatVal['value'] = '';
         local.structFeatVal['checkmark'] = 0;
+        local.structFeatVal['id'] = 0;
+        local.structFeatVal['planFeatureID'] = 0;
 
         if (local.qFeatValue.recordCount) {
             local.structFeatVal['value'] = local.qFeatValue.strValue;
             local.structFeatVal['checkmark'] = local.qFeatValue.blnCheckmark;
-
+            local.structFeatVal['id'] = local.qFeatValue.intPlansPlanFeatID;
+            local.structFeatVal['planFeatureID'] = local.qFeatValue.intPlanFeatureID;
         }
 
         return local.structFeatVal;
