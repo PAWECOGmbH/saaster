@@ -774,8 +774,12 @@ if (structKeyExists(form, "edit_features")) {
                         "
                     )
                 }
+
                 if (thisField eq "text") {
+
                     thisText = evaluate("text_#thisFeatureID#");
+
+                    // Overwrite the text value
                     queryExecute(
                         options = {datasource = application.datasource},
                         params = {
@@ -790,6 +794,31 @@ if (structKeyExists(form, "edit_features")) {
                             AND intPlanFeatureID = :thisFeatureID
                         "
                     )
+
+                    // If text value is empty in the default language, empty in other languages too
+                    if (!len(thisText)) {
+
+                        queryExecute(
+                            options = {datasource = application.datasource},
+                            params = {
+                                planID: {type: "numeric", value: form.edit_features},
+                                thisFeatureID: {type: "numeric", value: thisFeatureID}
+                            },
+                            sql = "
+                                UPDATE plans_plan_features_trans
+                                SET strValue = ''
+                                WHERE intPlansPlanFeatID =
+                                (
+                                    SELECT intPlansPlanFeatID
+                                    FROM plans_plan_features
+                                    WHERE intPlanFeatureID = :thisFeatureID
+                                    AND intPlanID = :planID
+                                )
+                            "
+                        )
+
+                    }
+
                 }
 
             }

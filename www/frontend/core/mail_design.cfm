@@ -116,11 +116,11 @@
 									<table border="0" cellpadding="0" cellspacing="0" width="100%">
 										<tr>
 											<td bgcolor="###variables.mailbodyBGColor#" width="100%" align="left">
-												<a target="_blank">
+												<a href="#application.mainURL#" target="_blank">
 													<cfif len(trim(customerData.logo))>
-														<img alt="Logo" src="/userdata/images/logos/#customerData.logo#" width="200" style="display: block; width: 200px; font-size: 16px;" border="0">
+														<img alt="Logo" src="#application.mainURL#/userdata/images/logos/#customerData.logo#" width="200" style="display: block; width: 200px; font-size: 16px;" border="0">
 													<cfelse>
-														<img alt="Logo" src="/assets/img/logo.png" width="200" style="display: block; width: 200px; font-size: 16px;" border="0">
+														<img alt="Logo" src="#application.mainURL#/assets/img/logo.png" width="200" style="display: block; width: 200px; font-size: 16px;" border="0">
 													</cfif>
 												</a>
 											</td>
