@@ -150,14 +150,21 @@ component displayname="plans" output="false" {
 
 
     // Get plans using the groupID
-    public array function getPlans(required numeric planGroupID) {
+    public array function getPlans(numeric planGroupID) {
+
+        local.whereQuery;
+        local.planGroupID = 0;
+        if (structKeyExists(arguments, "planGroupID")) {
+            local.planGroupID = arguments.planGroupID;
+            local.whereQuery = "WHERE plans.intPlanGroupID = " & local.planGroupID;
+        }
 
         local.getPlan = queryExecute (
             options = {datasource = application.datasource},
             params = {
                 languageID: {type: "numeric", value: variables.lngID},
                 currencyID: {type: "numeric", value: variables.currencyID},
-                planGroupID: {type: "numeric", value: arguments.planGroupID}
+                planGroupID: {type: "numeric", value: local.planGroupID}
             },
             sql = "
                 SELECT
@@ -306,7 +313,7 @@ component displayname="plans" output="false" {
                 LEFT JOIN currencies ON 1=1
                 AND plan_prices.intCurrencyID = currencies.intCurrencyID
 
-                WHERE plans.intPlanGroupID = :planGroupID
+                #local.whereQuery#
 
                 ORDER BY plans.intPrio
 
@@ -626,6 +633,7 @@ component displayname="plans" output="false" {
 
         local.planStruct = structNew();
         local.planStruct['planID'] = 0;
+        local.planStruct['planGroupID'] = 0;
         local.planStruct['planName'] = "";
         local.planStruct['status'] = '';
         local.planStruct['maxUsers'] = 1;
@@ -651,7 +659,7 @@ component displayname="plans" output="false" {
                     SELECT  bookings.intBookingID, bookings.strRecurring, bookings.intPlanID, bookings.strStatus,
                             DATE_FORMAT(bookings.dteStartDate, '%Y-%m-%e') as dteStartDate,
                             DATE_FORMAT(bookings.dteEndDate, '%Y-%m-%e') as dteEndDate,
-                            plans.intMaxUsers, plans.blnFree,
+                            plans.intMaxUsers, plans.blnFree, plans.intPlanGroupID,
                             (
                                 IF
                                     (
@@ -708,6 +716,7 @@ component displayname="plans" output="false" {
                     if (local.qCurrentPlan.currentrow eq 1) {
 
                         local.planStruct['planID'] = local.qCurrentPlan.intPlanID;
+                        local.planStruct['planGroupID'] = local.qCurrentPlan.intPlanGroupID;
                         local.planStruct['planName'] = local.qCurrentPlan.strPlanName;
                         local.planStruct['status'] = local.qCurrentPlan.strStatus;
                         local.planStruct['maxUsers'] = local.qCurrentPlan.intMaxUsers;
@@ -726,6 +735,7 @@ component displayname="plans" output="false" {
 
                         // Append the second plan to the existing struct
                         local.nextPlan['planID'] = local.qCurrentPlan.intPlanID;
+                        local.planStruct['planGroupID'] = local.qCurrentPlan.intPlanGroupID;
                         local.nextPlan['planName'] = local.qCurrentPlan.strPlanName;
                         local.nextPlan['maxUsers'] = local.qCurrentPlan.intMaxUsers;
                         local.nextPlan['startDate'] = dateFormat(local.qCurrentPlan.dteStartDate, 'yyyy-mm-dd');
