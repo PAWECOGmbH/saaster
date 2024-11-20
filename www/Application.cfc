@@ -19,7 +19,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     // Load java files
     this.javaSettings = {
-        loadPaths = [expandPath("/dist/java")],
+        loadPaths = [expandPath("/assets/java")],
         reloadOnChange = true
     };
 
@@ -36,6 +36,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.errorMail = variables.errorEmail;
         application.mainURL = variables.mainURL;
         application.environment = variables.environment;
+        application.activeTheme = variables.activeTheme;
 
         // Payrexx initialising
         local.payrexxStruct = structNew();
@@ -55,6 +56,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objNotifications = new backend.core.com.notifications();
         application.objSysadmin = new backend.core.com.sysadmin();
         application.objMeta = new backend.core.com.meta();
+        application.objCoreUtil = new frontend.core.com.coreutility();
 
         // Save all choosable languages into a list
         local.qLanguages = queryExecute(
@@ -244,12 +246,23 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
             // Protect the 'backend' folder excluding the pdf print page
             if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
+
                 if (structKeyExists(url, "pdf")) {
+
                     location url="#application.mainURL#/backend/core/views/invoices/print.cfm?pdf=#url.pdf#" addtoken="false";
+
                 } else {
-                    getAlert('alertSessionExpired', 'warning');
-                    location url="#application.mainURL#/login" addtoken="false";
+
+                    // Redirect to the register form with plan redirect
+                    if (structKeyExists(url, "plan")) {
+                        location url="#application.mainURL#/register?redirect=book?plan=#url.plan#" addtoken="false";
+                    } else {
+                        getAlert('alertSessionExpired', 'warning');
+                        location url="#application.mainURL#/login" addtoken="false";
+                    }
+
                 }
+
             }
 
 

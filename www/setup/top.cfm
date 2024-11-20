@@ -11,5 +11,5 @@
 <div class="page page-center">
     <div class="container-tight py-4">
         <div class="text-center mb-4">
-            <img src="../dist/img/logo.svg" height="80" alt="Logo">
+            <img src="/assets/img/logo.svg" height="80" alt="Logo">
         </div>

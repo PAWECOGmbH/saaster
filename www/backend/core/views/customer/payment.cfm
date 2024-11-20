@@ -86,7 +86,7 @@
                                 <cfloop query="getWebhook">
                                     <div class="row align-items-center mb-4">
                                         <div class="col-lg-2 mb-2">
-                                            <img src="/dist/img/payments/card_#lcase(replace(getWebhook.strPaymentBrand,' ', '-', 'all'))#.svg" class="avatar-lg">
+                                            <img src="/assets/img/payments/card_#lcase(replace(getWebhook.strPaymentBrand,' ', '-', 'all'))#.svg" class="avatar-lg">
                                         </div>
                                         <div class="col-lg-2 mb-3">
                                             <div class="font-weight-medium">#getWebhook.strPaymentBrand#</div>

@@ -16,7 +16,6 @@
 		</cfif>
 	</div>
 	<cfinclude template="/backend/core/views/footer.cfm">
-	<cfinclude template="/backend/core/views/js.cfm">
 	<div id="dynModal" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
 		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
 			<div class="modal-content" id="dyn_modal-content">
@@ -24,6 +23,7 @@
 			</div>
 		</div>
 	</div>
+	<cfinclude template="/backend/core/views/js.cfm">
 </body>
 </html>
 <cfset structDelete(session, "alert") />
