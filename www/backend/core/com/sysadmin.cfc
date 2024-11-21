@@ -583,6 +583,7 @@ component displayname="sysadmin" output="false" {
             sql = "
                 SELECT *
                 FROM frontend_mappings
+                WHERE blnCreatedByApp = 0
             "
         );
 

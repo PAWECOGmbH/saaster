@@ -1,9 +1,5 @@
 <cfscript>
 
-    // This file is used in order to book plans or modules.
-    // It handles the call to the payment service provider as well as the response.
-    // The call only works with the corresponding JSON string that is Base64 formatted (url.plan or url.module).
-
     if (!structKeyExists(url, "plan") and !structKeyExists(url, "module")) {
         location url="#application.mainURL#" addtoken=false;
     }
