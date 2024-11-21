@@ -25,23 +25,23 @@ jobs:
           remote_key_pass: ${{ secrets.STAGING_KEY_PASS }}
 
       - name: Run Flyway migrations for core
-          uses: appleboy/ssh-action@v1.0.3
-          with:
-            host: ${{ secrets.STAGING_HOST }}
-            username: ${{ secrets.STAGING_USER }}
-            key: ${{ secrets.STAGING_KEY }}
-            passphrase: ${{ secrets.STAGING_KEY_PASS }}
-            script: |
-              export FLYWAY_DB_FOLDER=core
-              docker compose run --rm flyway || exit 1
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_KEY }}
+          passphrase: ${{ secrets.STAGING_KEY_PASS }}
+          script: |
+            export FLYWAY_DB_FOLDER=core
+            docker compose run --rm flyway || exit 1
 
-        - name: Run Flyway migrations for myapp
-          uses: appleboy/ssh-action@v1.0.3
-          with:
-            host: ${{ secrets.STAGING_HOST }}
-            username: ${{ secrets.STAGING_USER }}
-            key: ${{ secrets.STAGING_KEY }}
-            passphrase: ${{ secrets.STAGING_KEY_PASS }}
-            script: |
-              export FLYWAY_DB_FOLDER=myapp
-              docker compose run --rm flyway || exit 1
+      - name: Run Flyway migrations for myapp
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_KEY }}
+          passphrase: ${{ secrets.STAGING_KEY_PASS }}
+          script: |
+            export FLYWAY_DB_FOLDER=myapp
+            docker compose run --rm flyway || exit 1
