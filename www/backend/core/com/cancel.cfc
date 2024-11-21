@@ -28,6 +28,8 @@ component displayname="cancel" output="false" {
             "
         )
 
+
+
         if (local.qCheck.recordCount or session.sysadmin) {
             variables.isAllowed = true;
         } else {
@@ -160,6 +162,46 @@ component displayname="cancel" output="false" {
                     )
                     WHERE intCustomerID = :customerID
                     AND #variables.sqlField# = :thisID
+
+                "
+            )
+
+            local.argsReturnValue['message'] = "OK";
+            local.argsReturnValue['success'] = true;
+
+        } else {
+
+            local.argsReturnValue['message'] = application.objLanguage.getTrans('msgNoAccess');
+
+        }
+
+        return local.argsReturnValue;
+
+
+    }
+
+
+    // Cancel waiting plan
+    public struct function cancelWaitingPlan() {
+
+        local.argsReturnValue = structNew();
+        local.argsReturnValue['message'] = "";
+        local.argsReturnValue['success'] = false;
+
+        if (variables.isAllowed) {
+
+            queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    customerID: {type: "numeric", value: variables.customerID},
+                    planID: {type: "numeric", value: variables.thisID}
+                },
+                sql = "
+
+                    DELETE FROM bookings
+                    WHERE intCustomerID = :customerID
+                    AND intPlanID = :planID
+                    AND strStatus = 'waiting'
 
                 "
             )

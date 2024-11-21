@@ -42,10 +42,19 @@
     // Get more plan infos
     planDetails = objPlans.getPlanDetail(planID);
 
+    // Get plan group to compare with the current group
+    newPlanGroupID = planDetails.planGroupID;
+    oldPlanGroupID = session.currentPlan.planGroupID;
+
+    // If the user has reached another plan group than the one already booked, they will be redirected to the plans in the backend
+    if (oldPlanGroupID gt 0) {
+        if (newPlanGroupID neq oldPlanGroupID) {
+            location url="#application.mainURL#/account-settings/plans" addtoken=false;
+        }
+    }
+
     // First, get the booking details without a real booking
     checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=false, chargeInvoice=false);
-
-    local.payrexxFirst = false;
 
     // If the amount to pay is less or equal zero, book right now and save the plan into the session
     if (structKeyExists(checkBooking, "amountToPay") and checkBooking.amountToPay lte 0) {
