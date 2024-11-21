@@ -42,7 +42,12 @@
     <cfif structKeyExists(session.currentPlan, "nextPlan") and !structIsEmpty(session.currentPlan.nextPlan)>
 
         <dt class="col-5 mt-3">#getTrans('txtNewPlanName')#:</dt>
-        <dd class="col-7 mt-3">#session.currentPlan.nextPlan.planName#</dd>
+        <dd class="col-7 mt-3">
+            <div class="row">
+                <div class="col">#session.currentPlan.nextPlan.planName#</div>
+                <div class="col"><a href="#application.mainURL#/cancel?plan=#session.currentPlan.nextPlan.planID#&waitingPlan"><i class="fas fa-trash-alt me-1"></i> #getTrans('txtRemove')#</a></div>
+            </div>
+        </dd>
 
         <cfif session.currentPlan.nextPlan.recurring neq "onetime">
 

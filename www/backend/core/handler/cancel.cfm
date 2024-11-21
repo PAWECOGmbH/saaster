@@ -24,16 +24,35 @@ if (structKeyExists(url, "plan")) {
 
         } else {
 
-            cancelPlan = new backend.core.com.cancel(session.customer_id, url.plan, 'plan').cancel();
+            // Remove waiting plan
+            if (structKeyExists(url, "waitingPlan")) {
 
-            if (!cancelPlan.success) {
-                getAlert(cancelPlan.message, 'danger');
-                logWrite("user", "error", "Plan could not be cancelled! [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #cancelPlan.message#]");
-                location url="#application.mainURL#/account-settings" addtoken="false";
+                cancelWaitingPlan = new backend.core.com.cancel(session.customer_id, url.plan, 'plan').cancelWaitingPlan();
+
+                if (!cancelWaitingPlan.success) {
+                    getAlert(cancelWaitingPlan.message, 'danger');
+                    logWrite("user", "warning", "Waiting plan could not be deleted! [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+                    location url="#application.mainURL#/account-settings/plans" addtoken="false";
+                }
+
+                logWrite("user", "info", "Waiting plan deleted [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+
+
+            // Cancel plan
+            } else {
+
+                cancelPlan = new backend.core.com.cancel(session.customer_id, url.plan, 'plan').cancel();
+
+                if (!cancelPlan.success) {
+                    getAlert(cancelPlan.message, 'danger');
+                    logWrite("user", "error", "Plan could not be cancelled! [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #cancelPlan.message#]");
+                    location url="#application.mainURL#/account-settings" addtoken="false";
+                }
+
+                logWrite("user", "info", "Plan cancelled [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+                getAlert('msgCanceledSuccessful', 'info');
+
             }
-
-            logWrite("user", "info", "Plan cancelled [PlanID: #url.plan#, CustomerID: #session.customer_id#, UserID: #session.user_id#]");
-            getAlert('msgCanceledSuccessful', 'info');
 
         }
 
