@@ -364,10 +364,10 @@ component displayname="book" output="false" {
                         }
 
 
-                    } else {
+                    // From yearly to monthly
+                    } else if (local.currentProduct.recurring eq "yearly" and local.recurring eq "monthly") {
 
-
-                        // Define the start date (a downgrade begins at the end of the current plan)
+                        // Define the start date (it begins at the end of the current plan)
                         local.startDate = dateFormat(local.currentProduct.endDate, "yyyy-mm-dd");
 
                         // Define the end date
@@ -379,6 +379,13 @@ component displayname="book" output="false" {
                         local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate));
                         local.messageStruct['button'] = local.getTrans('btnYesDowngrade');
 
+
+                    // its the same plan they have clicked
+                    } else {
+
+                        local.startDate = session.currentPlan.startDate;
+                        local.endDate = session.currentPlan.endDate;
+                        local.status = session.currentPlan.status;
 
                     }
 
@@ -458,10 +465,12 @@ component displayname="book" output="false" {
                                 local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
                             } else if (local.recurring eq "yearly") {
                                 local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                            } else {
+                                // Set the end time to a date that will probably never be reached
+                                local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
                             }
 
                             local.status = "waiting";
-
 
                             local.messageStruct['title'] = local.getTrans('titDowngrade');
                             local.messageStruct['message'] = local.getTrans('txtYouAreDowngrading') & " " & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate));
@@ -522,7 +531,6 @@ component displayname="book" output="false" {
 
             // Change the plan or module
             } else {
-
 
                 // If the new status is waiting
                 if (local.status eq "waiting") {
