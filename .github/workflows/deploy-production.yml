@@ -34,7 +34,7 @@ jobs:
           script: |
             docker run --rm \
               --network npm_network \
-              --volume /path/to/config/db/core:/flyway/core:ro \
+              --volume ${{ secrets.PROD_REMOTE_PATH }}/config/db/core:/flyway/core:ro \
               -e FLYWAY_URL="${{ secrets.PROD_DB_URL }}" \
               -e FLYWAY_USER="${{ secrets.PROD_DB_USER }}" \
               -e FLYWAY_PASSWORD="${{ secrets.PROD_DB_PASSWORD }}" \
@@ -50,7 +50,7 @@ jobs:
           script: |
             docker run --rm \
               --network npm_network \
-              --volume /path/to/config/db/myapp:/flyway/myapp:ro \
+              --volume ${{ secrets.PROD_REMOTE_PATH }}/config/db/myapp:/flyway/myapp:ro \
               -e FLYWAY_URL="${{ secrets.PROD_DB_URL }}" \
               -e FLYWAY_USER="${{ secrets.PROD_DB_USER }}" \
               -e FLYWAY_PASSWORD="${{ secrets.PROD_DB_PASSWORD }}" \
