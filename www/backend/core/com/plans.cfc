@@ -174,6 +174,7 @@ component displayname="plans" output="false" {
                 COALESCE(plans.blnRecommended,0) as blnRecommended,
                 COALESCE(plans.intMaxUsers,0) as intMaxUsers,
                 COALESCE(plans.intNumTestDays,0) as intNumTestDays,
+                COALESCE(plans.blnTestDaysUpgrade,0) as blnTestDaysUpgrade,
                 COALESCE(plan_prices.decPriceMonthly,0) as decPriceMonthly,
                 COALESCE(plan_prices.decPriceYearly,0) as decPriceYearly,
                 COALESCE(plan_prices.blnOnRequest,0) as blnOnRequest,
@@ -342,7 +343,8 @@ component displayname="plans" output="false" {
                 local.structPlan['bookingLinkO'] = '';
                 local.structPlan['recommended'] = 0;
                 local.structPlan['maxUsers'] = 0;
-                local.structPlan['testDays'] = 0;
+                local.structPlan['testDaysUpgrade'] = 0;
+                local.structPlan['recommended'] = 0;
                 local.structPlan['priceMonthly'] = 0;
                 local.structPlan['priceYearly'] = 0;
                 local.structPlan['onRequest'] = 0;
@@ -380,6 +382,9 @@ component displayname="plans" output="false" {
                 }
                 if (isNumeric(local.getPlan.intNumTestDays)) {
                     local.structPlan['testDays'] = local.getPlan.intNumTestDays;
+                }
+                if (isBoolean(local.getPlan.blnTestDaysUpgrade)) {
+                    local.structPlan['testDaysUpgrade'] = local.getPlan.blnTestDaysUpgrade;
                 }
                 if (isNumeric(local.getPlan.decPriceMonthly)) {
                     local.structPlan['priceMonthly'] = local.getPlan.decPriceMonthly;

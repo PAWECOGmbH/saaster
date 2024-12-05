@@ -400,41 +400,59 @@ component displayname="book" output="false" {
                         // Define the start date
                         local.startDate = dateFormat(now(), "yyyy-mm-dd");
 
-                        // Define the end date
-                        if (local.recurring eq "monthly") {
-                            local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
-                            local.planPrice = local.bookingData.priceMonthly;
-                        } else if (local.recurring eq "yearly") {
-                            local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
-                            local.planPrice = local.bookingData.priceYearly;
-                        }
+                        // If the plan does provide test days and the test days also count for upgrades
+                        if (local.bookingData.testDays gt 0 and local.bookingData.testDaysUpgrade) {
 
-                        // If the product was booked via SysAdmin and we have to make an invoice, we must set the status to "payment"
-                        if (local.makeInvoice and !local.chargeInvoice) {
-                            local.status = "payment";
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.testDays, local.startDate), "yyyy-mm-dd");
+                            local.status = "test";
+                            local.recurring = "test";
+
+                            local.amountToPay = 0;
+
+                            local.messageStruct['title'] = local.getTrans('titUpgrade');
+                            local.messageStruct['message'] = local.getTrans('txtYouAreUpgrading');
+                            local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
+
+
                         } else {
-                            local.status = "active";
-                        }
 
-                        // Get the amount to pay
-                        local.calculateUpgrade = calculateUpgrade(arguments.customerID, local.newProductID, local.recurring);
-                        local.priceBeforeVat = local.calculateUpgrade.toPayNow ?: local.planPrice;
+                            // Define the end date
+                            if (local.recurring eq "monthly") {
+                                local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                                local.planPrice = local.bookingData.priceMonthly;
+                            } else if (local.recurring eq "yearly") {
+                                local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                                local.planPrice = local.bookingData.priceYearly;
+                            }
 
-                        local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
+                            // If the product was booked via SysAdmin and we have to make an invoice, we must set the status to "payment"
+                            if (local.makeInvoice and !local.chargeInvoice) {
+                                local.status = "payment";
+                            } else {
+                                local.status = "active";
+                            }
 
-                        local.messageStruct['title'] = local.getTrans('titUpgrade');
-                        local.messageStruct['message'] = local.getTrans('txtYouAreUpgrading');
-                        local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
+                            // Get the amount to pay
+                            local.calculateUpgrade = calculateUpgrade(arguments.customerID, local.newProductID, local.recurring);
+                            local.priceBeforeVat = local.calculateUpgrade.toPayNow ?: local.planPrice;
 
-                        // Set some invoice variables
-                        local.invoiceTitle = local.getTrans('titUpgrade') & ": " & local.productName;
-                        local.invoiceCurrency = local.bookingData.currency;
-                        local.invoiceLanguage = variables.language;
+                            local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
 
-                        if (local.recurring eq "onetime") {
-                            local.invoicePositionTitle = local.productName;
-                        } else {
-                            local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            local.messageStruct['title'] = local.getTrans('titUpgrade');
+                            local.messageStruct['message'] = local.getTrans('txtYouAreUpgrading');
+                            local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
+
+                            // Set some invoice variables
+                            local.invoiceTitle = local.getTrans('titUpgrade') & ": " & local.productName;
+                            local.invoiceCurrency = local.bookingData.currency;
+                            local.invoiceLanguage = variables.language;
+
+                            if (local.recurring eq "onetime") {
+                                local.invoicePositionTitle = local.productName;
+                            } else {
+                                local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            }
+
                         }
 
 

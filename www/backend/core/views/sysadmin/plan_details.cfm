@@ -1,12 +1,4 @@
 
-<cfscript>
-
-    objSysadmin = new backend.core.com.sysadmin();
-    qNonDefLng = objSysadmin.getNonDefLng();
-
-</cfscript>
-
-
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">
 <input type="hidden" name="edit_plan" value="#qPlan.intPlanID#">
@@ -60,24 +52,31 @@
                 </small>
             </div>
             <div class="row mb-4">
-                <div class="col-lg-12">
+                <div class="col-lg-6">
                     <label class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="free" <cfif qPlan.blnFree>checked</cfif>>
-                        <span class="form-check-label">Free plan</span>
+                        <span class="form-label">Free plan</span>
                     </label>
                     <small class="form-hint">
                         Activate this plan as "Free". All settings in the "Prices" tab then become ineffective.
                     </small>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-lg-4">
+                <div class="col-lg-6">
                     <label class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="recommended" <cfif qPlan.blnRecommended>checked</cfif>>
-                        <span class="form-check-label">Recommended</span>
+                        <span class="form-label">Recommended</span>
                     </label>
                     <small class="form-hint">
                         Mark this plan as "recommendation".
+                    </small>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-4">
+                    <label class="form-label text-end">Maximum users *</label>
+                    <input type="text" class="form-control text-end" name="max_users" autocomplete="off" maxlength="10" value="#qPlan.intMaxUsers#" placeholder="0" required>
+                    <small class="form-hint">
+                        Enter 0 if you don't want to use the user limit.
                     </small>
                 </div>
                 <div class="col-lg-4">
@@ -92,10 +91,19 @@
                     </small>
                 </div>
                 <div class="col-lg-4">
-                    <label class="form-label text-end">Maximum users *</label>
-                    <input type="text" class="form-control text-end" name="max_users" autocomplete="off" maxlength="10" value="#qPlan.intMaxUsers#" placeholder="0" required>
+                    <cfif qPlan.blnFree>
+                        <label class="form-check form-switch" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
+                            <input class="form-check-input" type="checkbox" name="test_days_upgrade" disabled>
+                            <span class="form-label">Test days upgrade</span>
+                        </label>
+                    <cfelse>
+                        <label class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="test_days_upgrade" <cfif qPlan.blnTestDaysUpgrade>checked</cfif>>
+                            <span class="form-label">Test days upgrade</span>
+                        </label>
+                    </cfif>
                     <small class="form-hint">
-                        Enter 0 if you don't want to use the user limit.
+                        Offer test days when upgrading from a free to a paid plan.
                     </small>
                 </div>
             </div>
