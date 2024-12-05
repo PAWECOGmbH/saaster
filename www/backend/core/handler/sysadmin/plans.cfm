@@ -195,12 +195,18 @@ if (structKeyExists(form, "edit_plan")) {
         max_users = form.max_users;
         desc = form.desc;
 
+        free = 0;
         recommended = structKeyExists(form, "recommended") ? 1 : 0;
+        test_days_upgrade = structKeyExists(form, "test_days_upgrade") ? 1 : 0;
+        if (test_days lte 0) {
+            test_days_upgrade = 0;
+        }
 
         if (structKeyExists(form, "free")) {
 
             free = 1;
             test_days = 0;
+            test_days_upgrade = 0;
 
             // Set all prices to 0
             queryExecute(
@@ -220,8 +226,6 @@ if (structKeyExists(form, "edit_plan")) {
                 "
             )
 
-        } else {
-            free = 0;
         }
 
         queryExecute(
@@ -236,6 +240,7 @@ if (structKeyExists(form, "edit_plan")) {
                 recommended: {type: "boolean", value: recommended},
                 free: {type: "boolean", value: free},
                 test_days: {type: "numeric", value: test_days},
+                test_days_upgrade: {type: "boolean", value: test_days_upgrade},
                 max_users: {type: "numeric", value: max_users},
                 planID: {type: "numeric", value: form.edit_plan}
             },
@@ -248,6 +253,7 @@ if (structKeyExists(form, "edit_plan")) {
                     strButtonName = :button_name,
                     strBookingLink = :booking_link,
                     intNumTestDays = :test_days,
+                    blnTestDaysUpgrade = :test_days_upgrade,
                     blnRecommended = :recommended,
                     blnFree = :free,
                     intMaxUsers = :max_users

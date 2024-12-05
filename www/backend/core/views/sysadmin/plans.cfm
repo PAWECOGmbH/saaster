@@ -64,7 +64,7 @@
                         <div class="card-body">
                             <p>
                                 <cfif qPlanGroups.recordCount>
-                                    Here you can configure your plans and prices. The <b>default plan</b> indicates that it will be activated immediately when a new registration is made.
+                                    Here you can configure your plans and prices. The <b>default plan</b> indicates that it will be activated immediately when a new registration is made without choosing a plan.
                                 <cfelse>
                                     <span class="text-red">You need at least one plan group before you can create plans. <a href="#application.mainURL#/sysadmin/plangroups"><i class="fas fa-long-arrow-alt-right"></i> Manage plan groups</a></span>
                                 </cfif>
@@ -154,7 +154,7 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
 

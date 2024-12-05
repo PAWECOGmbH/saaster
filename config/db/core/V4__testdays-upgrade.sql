@@ -1,0 +1,8 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+ALTER TABLE `plans`
+ADD COLUMN `blnTestDaysUpgrade` tinyint NULL DEFAULT 0 AFTER `intNumTestDays`;
+
+
+SET FOREIGN_KEY_CHECKS = 1;
