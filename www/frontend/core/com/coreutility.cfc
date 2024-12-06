@@ -1,6 +1,92 @@
 component displayname="coreutility" output="false" {
 
     /**
+     * Returns the paths to the CSS and JS files, including versions if available, preferring minified files.
+     */
+    public struct function getAssets(required string theme) {
+
+        local.result = {};
+        local.systemPath = expandPath("frontend/" & arguments.theme & "/");
+        local.wwwPath = application.mainURL & "/frontend/" & arguments.theme & "/";
+
+        // Standard CSS file
+        local.cssFile = local.wwwPath & "css/styles.css";
+
+        // Standard JS file
+        local.jsFile = local.wwwPath & "js/scripts.js";
+
+
+        // CSS handling
+        if (fileExists(local.systemPath & "css/styles.min.css")) {
+
+            // Minimized CSS file
+            local.cssFile = local.wwwPath & "css/styles.min.css";
+
+            // JSON file with the current version for the CSS
+            local.cssVFile = local.systemPath & "css/version.json";
+
+            if (fileExists(local.cssVFile)) {
+
+                // Read the JSON file
+                local.jsonFile = fileRead(local.cssVFile);
+
+                if (isJSON(local.jsonFile)) {
+
+                    // Extract the version number and append it to the css
+                    local.jsonContent = deserializeJSON(local.jsonFile);
+                    if (structKeyExists(local.jsonContent, "version")) {
+                        local.cssVersion = local.jsonContent.version;
+                        local.cssFile = local.cssFile & "?v=" & local.cssVersion;
+                    }
+
+                }
+
+            }
+
+        }
+
+        local.result["css"] = local.cssFile;
+
+
+        // JS handling
+        if (fileExists(local.systemPath & "js/scripts.min.js")) {
+
+            // Minimized JS file
+            local.jsFile = local.wwwPath & "js/scripts.min.js";
+
+            // JSON file with the current version for the CSS
+            local.jsVFile = local.systemPath & "js/version.json";
+
+            if (fileExists(local.jsVFile)) {
+
+                // Read the JSON file
+                local.jsonFile = fileRead(local.jsVFile);
+
+                if (isJSON(local.jsonFile)) {
+
+                    // Extract the version number and append it to the js
+                    local.jsonContent = deserializeJSON(local.jsonFile);
+                    if (structKeyExists(local.jsonContent, "version")) {
+                        local.jsVersion = local.jsonContent.version;
+                        local.jsFile = local.jsFile & "?v=" & local.jsVersion;
+                    }
+
+                }
+
+            }
+
+        }
+
+        local.result["js"] = local.jsFile;
+
+        return local.result;
+
+    }
+
+
+
+
+    /**
      * Prepares session data for the registration form and initializes default values if needed.
      */
     public struct function getRegisterSessionData() {
