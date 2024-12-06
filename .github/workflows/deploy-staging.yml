@@ -16,7 +16,7 @@ jobs:
       - name: Deploy to server via rsync
         uses: Burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --delete --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
+          switches: -avzr --checksum --delete --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
           path: ./
           remote_path: ${{ secrets.STAGING_REMOTE_PATH }}
           remote_host: ${{ secrets.STAGING_HOST }}
