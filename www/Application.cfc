@@ -79,6 +79,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         // Load layout setting struct and save it into the application scope
         application.layoutStruct = application.objLayout.layoutSetting(application.systemSettingStruct.settingLayout);
 
+        // Load JS and CSS path
+        application.assetFiles = application.objCoreUtil.getAssets(variables.activeTheme);
+
         ownApplicationStart();
 
         return true;
