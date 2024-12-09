@@ -1395,7 +1395,7 @@ component displayname="invoices" output="false" {
                     local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
                 }
             } else {
-
+                local.invoicePerson = local.customerData.contactPerson;
             }
 
             cfsavecontent(variable="local.addressBlock") {
