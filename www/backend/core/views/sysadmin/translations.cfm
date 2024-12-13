@@ -112,8 +112,22 @@
                     <div class="tab-content">
                         <div id="custom" class="card tab-pane show <cfif url.tr eq "custom">active</cfif>">
                             <div class="card-body">
-                                <div class="card-title">Custom translations</div>
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div class="card-title">Custom translations</div>
+
+                                    <a href="#application.mainURL#/backend/core/views/sysadmin/sql_code.cfm?sql_table=custom_translations"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Generate SQL Code for the table custom_translations"
+                                        class="text-decoration-none" target="_blank">
+                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                    </a>
+
+                                </div>
+
                                 <p>Here you can create your own translations (variables). These are used for system texts and are called with the function "getTrans()". These translations are not affected by any system updates.</p>
+
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <form action="#application.mainURL#/sysadmin/translations" method="post">
@@ -273,7 +287,22 @@
                         </div>
                         <div id="system" class="card tab-pane show <cfif url.tr eq "system">active</cfif>">
                             <div class="card-body">
-                                <div class="card-title">System translations</div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div class="card-title">System translations</div>
+
+                                    <a href="#application.mainURL#/backend/core/views/sysadmin/sql_code.cfm?sql_table=system_translations"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Generate SQL Code for the table system_translations"
+                                        class="text-decoration-none" target="_blank">
+                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                    </a>
+
+                                </div>
+
+
                                 <p class="text-red">The system translations are used by the developers of the saaster.io project. Users of the tool should only perform translations and not change any variables. Co-developers can request changes via Github.</p>
                                 <div class="row">
                                     <div class="col-lg-4">
@@ -392,7 +421,7 @@
                                     A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
                                 <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
-                                    
+
                                     <div class="col-lg-5">
                                         <label for="fromLang">From:</label>
                                         <select onchange="checkIfSame()" id="fromLang" name="fromLang" class="form-select" required>
@@ -439,7 +468,7 @@
                                             </span>
                                         </label>
                                     </div>
-                                    <div> 
+                                    <div>
                                         <br>
                                         <p>Choose what you would like to translate:</p>
                                         <label class="form-check">
@@ -487,6 +516,6 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
