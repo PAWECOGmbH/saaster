@@ -44,7 +44,22 @@
                     <div class="tab-content">
                         <div id="custom" class="card tab-pane show active">
                             <div class="card-body">
-                                <div class="card-title">Custom mappings</div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div class="card-title">Custom mappings</div>
+
+                                    <a href="#application.mainURL#/backend/core/views/sysadmin/sql_code.cfm?sql_table=custom_mappings&prim_key=strMapping"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Generate SQL Code for the table custom_mappings"
+                                        class="text-decoration-none" target="_blank">
+                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                    </a>
+
+                                </div>
+
+
                                 <p>Here you can create your own mappings. These mappings are not affected by any system updates.</p>
                                 <div class="table-responsive">
                                     <table class="table table-vcenter card-table">
@@ -153,7 +168,21 @@
                         </div>
                         <div id="frontend" class="card tab-pane show">
                             <div class="card-body">
-                                <div class="card-title">Frontend mappings</div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div class="card-title">Frontend mappings</div>
+
+                                    <a href="#application.mainURL#/backend/core/views/sysadmin/sql_code.cfm?sql_table=frontend_mappings&prim_key=strMapping"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Generate SQL Code for the table frontend_mappings"
+                                        class="text-decoration-none" target="_blank">
+                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                    </a>
+
+                                </div>
+
                                 <p>Here you can create your own Frontend mappings. These mappings are not affected by any system updates.</p>
                                 <div class="table-responsive">
                                     <table class="table table-vcenter card-table">

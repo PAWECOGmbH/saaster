@@ -102,4 +102,90 @@ component displayname="settings" output="false" {
 
     }
 
+
+    // This code generates an SQL script that formats all entries from the given table
+    public string function generateSqlCode(required string sqlTable, required string primKey) {
+
+        // Check if the table exists
+        local.checkSqlTable = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                table_name: {type: "string", value: arguments.sqlTable}
+            },
+            sql = "
+                SELECT COUNT(*) as cnt
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            "
+        )
+
+        if (local.checkSqlTable.cnt gt 0) {
+
+            local.getEntries = queryExecute(
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT *
+                    FROM #arguments.sqlTable#
+                "
+            )
+
+            if (local.getEntries.recordCount) {
+
+                // Get column list and remove the first entry
+                local.columns = local.getEntries.columnList;
+                local.columnsArray = listToArray(local.columns, ",");
+                arrayDeleteAt(local.columnsArray, 1); // Removes the first entry
+
+                // Create the filtered list of columns
+                local.filteredColumns = arrayToList(local.columnsArray, ", ");
+
+                // Generate the SQL statement
+                local.sqlOutput = "INSERT INTO #arguments.sqlTable# (" & local.filteredColumns & ") VALUES" & chr(10);
+
+                // Collect values
+                local.values = [];
+                for (local.row in local.getEntries) {
+                    local.valueRow = [];
+                    for (local.column in local.columnsArray) {
+                        local.value = "'" & replace(local.row[local.column], "'", "''", "all") & "'"; // Escaping
+                        arrayAppend(local.valueRow, local.value);
+                    }
+                    arrayAppend(local.values, "(" & arrayToList(local.valueRow, ", ") & ")");
+                }
+                local.sqlOutput &= arrayToList(local.values, "," & chr(10)) & chr(10);
+
+                // ON DUPLICATE KEY UPDATE Logic
+                local.updateClauses = [];
+                for (local.column in local.columnsArray) {
+                    if (local.column NEQ arguments.primKey) { // Exclude primary key
+                        arrayAppend(local.updateClauses, local.column & " = VALUES(" & local.column & ")");
+                    }
+                }
+                local.sqlOutput &= "ON DUPLICATE KEY UPDATE " & chr(10) & arrayToList(local.updateClauses, "," & chr(10)) & ";";
+
+                // Return with textarea
+                return '
+                    <textarea style="width: 100%; height: 800px;" readonly>' &
+                    local.sqlOutput &
+                    '</textarea>';
+
+            } else {
+
+                return "No entries in table " & arguments.sqlTable;
+
+            }
+
+
+
+        } else {
+
+            return "No table found!"
+
+        }
+
+
+
+
+    }
+
 }
