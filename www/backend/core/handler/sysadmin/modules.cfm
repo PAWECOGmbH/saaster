@@ -147,6 +147,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.desc" default="";
         param name="form.test_days" default="0";
         param name="form.path" default="";
+        param name="form.redirect" default="";
 
         mapping = "backend/modules/" & form.prefix & "/settings";
         path =  "backend/modules/" & form.prefix & "/settings.cfm";
@@ -235,6 +236,7 @@ if (structKeyExists(form, "edit_module")) {
                 moduleID: {type: "numeric", value: form.edit_module},
                 modulePath: {type: "varchar", value: mapping},
                 free: {type: "boolean", value: form.free},
+                redirect: {type: "nvarchar", value: form.redirect}
             },
             sql = "
                 UPDATE modules
@@ -246,7 +248,8 @@ if (structKeyExists(form, "edit_module")) {
                     blnBookable = :bookable,
                     intNumTestDays = :test_days,
                     strSettingPath = :modulePath,
-                    blnFree = :free
+                    blnFree = :free,
+                    strRedirectPath = :redirect
                 WHERE intModuleID = :moduleID
 
             "

@@ -8,14 +8,14 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     this.name = variables.applicationname;
     this.sessiontimeout = variables.sessiontimeout;
     this.pdf.type = variables.pdf_type;
-    setting requesttimeout = variables.requesttimeout;
+    this.requesttimeout = variables.requesttimeout;
 
     // Fixed values
     this.sessionmanagement = true;
     this.setdomaincookies = true;
-    processingdirective pageEncoding="utf-8";
+    this.processingdirective.pageEncoding = "utf-8";
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
-    setTimezone("UTC+00:00"); // Do NOT change the standard timezone!!!
+    this.timezone = "UTC+00:00"; // Do NOT change the standard timezone!!!
 
     // Load java files
     this.javaSettings = {
@@ -117,32 +117,37 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     public boolean function onRequestStart(required string TargetPage) {
 
-        // Reinit Application
-        if (structKeyExists(url, "reinit") and url.reinit eq 1) {
-            structClear(APPLICATION);
-            onApplicationStart();
-            application.langStruct = application.objLanguage.initLanguages();
-        }
+        // Check if the user is logged in as a sysadmin
+        if (structKeyExists(session, "sysadmin") and session.sysadmin) {
 
-        // Reinit Session
-        if (structKeyExists(url, "reinit") and url.reinit eq 2) {
-            structClear(SESSION);
-            onSessionStart();
-        }
+            // Reinit Application
+            if (structKeyExists(url, "reinit") and url.reinit eq 1) {
+                structClear(APPLICATION);
+                onApplicationStart();
+                application.langStruct = application.objLanguage.initLanguages();
+            }
 
-        // Reinit languages
-        if (structKeyExists(url, "reinit") and url.reinit eq 3) {
-            structDelete(session, "langStruct");
-            application.langStruct = application.objLanguage.initLanguages();
-        }
+            // Reinit Session
+            if (structKeyExists(url, "reinit") and url.reinit eq 2) {
+                structClear(SESSION);
+                onSessionStart();
+            }
 
-        // Reinit Session AND Application AND languages
-        if (structKeyExists(url, "reinit") and url.reinit eq 4) {
-            structClear(SESSION);
-            structClear(APPLICATION);
-            onApplicationStart();
-            onSessionStart();
-            application.langStruct = application.objLanguage.initLanguages();
+            // Reinit languages
+            if (structKeyExists(url, "reinit") and url.reinit eq 3) {
+                structDelete(session, "langStruct");
+                application.langStruct = application.objLanguage.initLanguages();
+            }
+
+            // Reinit Session AND Application AND languages
+            if (structKeyExists(url, "reinit") and url.reinit eq 4) {
+                structClear(SESSION);
+                structClear(APPLICATION);
+                onApplicationStart();
+                onSessionStart();
+                application.langStruct = application.objLanguage.initLanguages();
+            }
+
         }
 
 
@@ -166,7 +171,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
 
         // Change language
-        if (structKeyExists(url, "l")) {
+        if (structKeyExists(url, "l") and session.lng neq url.l) {
             qCheckLanguage = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -288,23 +293,27 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         if (application.environment eq "dev") {
 
-            writeOutput(arguments.exception);
+            dump(arguments.exception);
+            abort;
 
         } else {
 
-            // Send email with error
-            mail to="#application.errorMail#" from="#application.fromEmail#" subject="ERROR - #application.projectName#" type="html" {
-                writeOutput("<h2>An error occured!</h2>");
-                writeOutput(arguments.exception);
+            // Send email with error, but only if its not of type missinginclude (bots)
+            local.errPath = "/frontend/" & variables.activeTheme & "/templates/error/";
+            if (arguments.exception.type eq "missinginclude") {
+                location url=local.errPath & "404.cfm" addtoken="false";
+            } else {
+                mail to="#application.errorMail#" from="#application.fromEmail#" subject="ERROR - #application.projectName#" type="html" {
+                    writeOutput(arguments.exception);
+                }
+                location url=local.errPath & "error.cfm" addtoken="false";
             }
 
-            location url="/error.cfm" addtoken="false";
+
 
         }
 
     }
-
-    setting enablecfoutputonly = false;
 
 }
 
