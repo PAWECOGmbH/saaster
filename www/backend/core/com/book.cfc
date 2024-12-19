@@ -71,10 +71,9 @@ component displayname="book" output="false" {
         local.status = "";
         local.bookingID = 0;
         local.invoiceID = 0;
+        local.redirectPath = "";
 
         local.getTime = new backend.core.com.time(arguments.customerID);
-
-        local.argsReturnValue = structNew();
 
         local.messageStruct = structNew();
         local.messageStruct['title'] = "";
@@ -119,6 +118,7 @@ component displayname="book" output="false" {
             local.newProductID = local.bookingData.planID;
             local.planID = local.newProductID;
             local.moduleID = "";
+            local.redirectPath = "";
 
             // Are there modules included?
             if (structKeyExists(local.bookingData, "modulesIncluded")) {
@@ -155,6 +155,7 @@ component displayname="book" output="false" {
             local.newProductID = local.bookingData.moduleID;
             local.moduleID = local.newProductID;
             local.planID = "";
+            local.redirectPath = local.bookingData.redirectPath;
 
 
         // Neither plan nor module
@@ -827,6 +828,7 @@ component displayname="book" output="false" {
         local.argsReturnValue['bookingID'] = local.bookingID;
         local.argsReturnValue['invoiceID'] = local.invoiceID;
         local.argsReturnValue['success'] = true;
+        local.argsReturnValue['redirectPath'] = local.redirectPath;
 
         return local.argsReturnValue;
 
