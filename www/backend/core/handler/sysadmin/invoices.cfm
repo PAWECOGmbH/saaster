@@ -195,7 +195,7 @@ if (structKeyExists(form, "settings")) {
         invoiceID = form.settings;
 
         param name="form.title" default="";
-        param name="form.userID" default="";
+        param name="form.userID" default="0";
         param name="form.currency" default="";
         param name="form.invoice_date" default="";
         param name="form.due_date" default="";
@@ -222,7 +222,7 @@ if (structKeyExists(form, "settings")) {
         if (updInvoice.success) {
             getAlert('Update successful!');
         } else {
-            getAlert(updInvoice.message);
+            getAlert(updInvoice.message, "danger");
         }
 
         location url="#application.mainURL#/sysadmin/invoice/edit/#invoiceID#" addtoken="false";

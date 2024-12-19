@@ -159,7 +159,7 @@ component displayname="invoices" output="false" {
 
         local.objCurrency = new backend.core.com.currency();
 
-        local.userID = "";
+        local.userID = "0";
         local.title = "";
         local.invoiceDate = createODBCDate(now());
         local.dueDate = createODBCDate(now()+30);
@@ -212,7 +212,9 @@ component displayname="invoices" output="false" {
             local.total_text = "Total";
         }
 
-        try {
+        /* try { */
+
+
 
              queryExecute(
                 options = {datasource = application.datasource},
@@ -244,12 +246,12 @@ component displayname="invoices" output="false" {
             )
 
 
-        } catch (any e) {
+        /* } catch (any e) {
 
             local.argsReturnValue['message'] = e.message;
             return argsReturnValue;
 
-        }
+        } */
 
         // Recalculating
         local.recalc = recalculateInvoice(local.invoiceID);

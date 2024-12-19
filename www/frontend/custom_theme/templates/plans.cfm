@@ -5,13 +5,17 @@
 
     hasPlans = false;
 
-    if (structKeyExists(planData[1], "planGroupID") and planData[1].planGroupID gt 0) {
+    if (isArray(planData) and arrayLen(planData)) {
 
-        hasPlans = true;
+        if (structKeyExists(planData[1], "planGroupID") and planData[1].planGroupID gt 0) {
 
-        // Call the core function to retrieve features
-        objPlans = new backend.core.com.plans(language=session.lng);
-        planFeatures = objPlans.getPlanFeatures();
+            hasPlans = true;
+
+            // Call the core function to retrieve features
+            objPlans = new backend.core.com.plans(language=session.lng);
+            planFeatures = objPlans.getPlanFeatures();
+
+        }
 
     }
 

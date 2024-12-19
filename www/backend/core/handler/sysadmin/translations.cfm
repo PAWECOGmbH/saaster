@@ -29,23 +29,21 @@ if (structKeyExists(form, "new_variable")) {
 
     } else {
 
-        savecontent variable="mySQL" {
+        mySQL = "INSERT INTO custom_translations (strVariable";
 
-            writeOutput("INSERT INTO custom_translations (strVariable");
-
-            loop query = qAllLanguages {
-                writeOutput(",strString#qAllLanguages.strLanguageISO#");
-            }
-
-            writeOutput(") VALUES ('#form.variable#'");
-
-            loop query = qAllLanguages {
-                writeOutput(",'#evaluate('form.text_#qAllLanguages.strLanguageISO#')#'");
-            }
-
-            writeOutput(")");
-
+        for (i = 1; i <= qAllLanguages.recordCount; i++) {
+            mySQL &= ",strString" & qAllLanguages.strLanguageISO[i];
         }
+
+        mySQL &= ") VALUES ('" & replace(form.variable, "'", "''", "all") & "'";
+
+        for (i = 1; i <= qAllLanguages.recordCount; i++) {
+            languageISO = qAllLanguages.strLanguageISO[i];
+            dynamicValue = form["text_" & languageISO];
+            mySQL &= ",'" & replace(dynamicValue, "'", "''", "all") & "'";
+        }
+
+        mySQL &= ")";
 
         cfquery( datasource=application.datasource ) {
             writeOutput(mySQL);
@@ -88,15 +86,15 @@ if (structKeyExists(form, "edit_variable")) {
 
     if (isNumeric(form.edit_variable)) {
 
-        savecontent variable="mySQL" {
+        mySQL = "UPDATE custom_translations SET intCustTransID = intCustTransID";
 
-            writeOutput("UPDATE custom_translations SET intCustTransID = intCustTransID ");
-
-            loop query = qAllLanguages {
-                writeOutput(", strString#qAllLanguages.strLanguageISO# = '#evaluate('form.text_#qAllLanguages.strLanguageISO#')#' ");
-            }
-            writeOutput("WHERE intCustTransID = #form.edit_variable#");
+        for (i = 1; i <= qAllLanguages.recordCount; i++) {
+            languageISO = qAllLanguages.strLanguageISO[i];
+            dynamicValue = form["text_" & languageISO];
+            mySQL &= ", strString" & languageISO & " = '" & replace(dynamicValue, "'", "''", "all") & "'";
         }
+
+        mySQL &= " WHERE intCustTransID = " & val(form.edit_variable);
 
         cfquery( datasource=application.datasource ) {
             writeOutput(mySQL);
@@ -185,7 +183,7 @@ if (structKeyExists(form, "bulk_translate")) {
                 "
             )
 
-            loop query = getSysText { 
+            loop query = getSysText {
                 languageString = "strString" & form.fromLang;
                 translatedText = deeplTranslate(urlencodedformat(evaluate('getSysText.#languageString#')), form.fromLang, form.toLang)
 
@@ -214,7 +212,7 @@ if (structKeyExists(form, "bulk_translate")) {
                 "
             )
 
-            loop query = getCusText { 
+            loop query = getCusText {
                 languageString = "strString" & form.fromLang;
                 translatedText = deeplTranslate(urlencodedformat(evaluate('getCusText.#languageString#')), form.fromLang, form.toLang)
 
@@ -229,16 +227,16 @@ if (structKeyExists(form, "bulk_translate")) {
                         SET strString#form.toLang# = :transText
                         WHERE strVariable = :changedText
                     "
-                ) 
+                )
             }
         }
 
-        
+
         getAlert('The translation finished successfully!');
         location url="#application.mainURL#/sysadmin/translations?tr=bulk" addtoken="false";
 
         // Translate custom translations if selected
-        /* 
+        /*
         if(form.transTables){
 
             toTranslateStruct = {}
@@ -248,7 +246,7 @@ if (structKeyExists(form, "bulk_translate")) {
                 options = {datasource = application.datasource},
                 sql = "
                     SELECT table_name FROM information_schema.tables
-                    WHERE table_type = 'base table' 
+                    WHERE table_type = 'base table'
                     AND RIGHT(table_name, 6) = '_trans'
                 "
             )
@@ -260,14 +258,14 @@ if (structKeyExists(form, "bulk_translate")) {
                     lngISO: {type: "varchar", value: form.fromLang}
                 },
                 sql = "
-                    SELECT intLanguageID 
+                    SELECT intLanguageID
                     FROM languages
                     WHERE strLanguageISO = :lngISO
                 "
             )
 
-                
-            loop query = allTables { 
+
+            loop query = allTables {
 
                 getRowNames = queryExecute(
                     options = {datasource = application.datasource},
@@ -278,14 +276,14 @@ if (structKeyExists(form, "bulk_translate")) {
 
                 rowNames;
 
-                loop query = getRowNames { 
+                loop query = getRowNames {
                     if (FindNoCase("str",getRowNames.field)) {
                         rowNames &= getRowNames.field;
                         if(getRowNames.currentrow neq getRowNames.recordcount){
                             rowNames &= ',';
                         }
                     }
-                } 
+                }
 
                 dump(rowNames)
 
@@ -317,7 +315,7 @@ if (structKeyExists(form, "bulk_translate")) {
             }
 
             return false;
-        }   
+        }
     }
 }
 

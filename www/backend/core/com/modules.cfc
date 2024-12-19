@@ -86,6 +86,7 @@ component displayname="modules" output="false" {
             sql = "
                 SELECT modules.intModuleID, modules.strTabPrefix, modules.strPicture, modules.intNumTestDays,
                 modules.blnBookable, modules.intPrio, modules.blnActive, modules.strSettingPath, modules.blnFree,
+                modules.strRedirectPath,
                 currencies.strCurrencyISO, currencies.strCurrencySign, currencies.intCurrencyID,
                 COALESCE(modules_prices.blnIsNet,0) as blnIsNet,
                 COALESCE(modules_prices.decPriceMonthly,0) as decPriceMonthly,
@@ -183,6 +184,7 @@ component displayname="modules" output="false" {
             local.moduleStruct['currency'] = local.qModule.strCurrencyISO;
             local.moduleStruct['settingPath'] = local.qModule.strSettingPath;
             local.moduleStruct['testDays'] = local.qModule.intNumTestDays;
+            local.moduleStruct['redirectPath'] = local.qModule.strRedirectPath;
             if (len(trim(local.qModule.strCurrencySign))) {
                 local.moduleStruct['currencySign'] = local.qModule.strCurrencySign;
             } else {

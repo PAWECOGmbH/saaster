@@ -56,13 +56,17 @@
             session.currentModules = objModules.getBookedModules(session.customer_id);
             getAlert('msgModuleActivated');
             logWrite("user", "info", "A module has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#]");
-            location url="#application.mainURL#/account-settings/modules" addtoken=false;
+            if (structKeyExists(makeBooking, "redirectPath") and len(trim(makeBooking.redirectPath))) {
+                location url="#makeBooking.redirectPath#" addtoken="false";
+            } else {
+                location url="#application.mainURL#/account-settings/modules" addtoken="false";
+            }
 
         } else {
 
             getAlert(makeBooking.message, 'danger');
             logWrite("system", "error", "Could not book a module [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, ModuleID: #moduleID#, Error: #makeBooking.message#]");
-            location url="#application.mainURL#/account-settings/modules" addtoken=false;
+            location url="#application.mainURL#/account-settings/modules" addtoken="false";
 
         }
 

@@ -27,7 +27,7 @@ if (structKeyExists(form, "currencyID")) {
 
 
     getAlert('Setup done! Please register now with a sysadmin e-mail address.');
-    location url="#application.mainURL#/register?reinit=3" addtoken="false";
+    location url="#application.mainURL#/register" addtoken="false";
 
 
 } else {

@@ -13,8 +13,7 @@
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
     qUsers = application.objUser.getAllUsers(qInvoice.customerID);
 
-
-    if (isNumeric(qInvoice.userID)) {
+    if (isNumeric(qInvoice.userID) and qInvoice.userID gt 0) {
         qUser = application.objCustomer.getUserDataByID(qInvoice.userID);
         invoicePerson = qUser.strFirstName & " " & qUser.strLastName;
         invoicePersonID = qUser.intUserID;
@@ -202,7 +201,7 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
 

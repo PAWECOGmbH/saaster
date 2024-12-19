@@ -8,7 +8,7 @@
             #getTrans('formSignUp')#
         </div>
 
-        <form id="submit_form" method="post" action="#application.mainURL#/logincheck?reinit=3">
+        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">
             <input type="hidden" name="register_btn">
             <div class="card-body">
                 <cfif structKeyExists(session, "alert")>
