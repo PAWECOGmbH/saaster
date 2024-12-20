@@ -38,7 +38,7 @@ cd saaster
 <b>4. Configure environment variables</b><br>
 Copy the example environment file and modify the settings to match your local setup:
 ```
-mv config/example_dev.env .env
+mv config/example.env .env
 ```
 Update the ```.env``` file with your configuration. You can also adopt the suggestions for the local environment.<br><br>
 

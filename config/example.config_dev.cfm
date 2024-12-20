@@ -4,6 +4,9 @@
 // Datasource
 variables.datasource = "saaster_dev";
 
+// Theme (default_theme or custom_theme)
+variables.activeTheme = "custom_theme";
+
 // Environment
 variables.environment = "dev" // "dev" or "prod"
 
