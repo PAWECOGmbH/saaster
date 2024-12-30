@@ -185,6 +185,7 @@ if (structKeyExists(form, "edit_plan")) {
         param name="form.test_days" default="0";
         param name="form.max_users" default="0";
         param name="form.desc" default="";
+        param name="form.redirect" default="";
 
         groupID = form.groupID;
         plan_name = form.plan_name;
@@ -194,6 +195,7 @@ if (structKeyExists(form, "edit_plan")) {
         test_days = form.test_days;
         max_users = form.max_users;
         desc = form.desc;
+        redirect = form.redirect;
 
         free = 0;
         recommended = structKeyExists(form, "recommended") ? 1 : 0;
@@ -242,7 +244,8 @@ if (structKeyExists(form, "edit_plan")) {
                 test_days: {type: "numeric", value: test_days},
                 test_days_upgrade: {type: "boolean", value: test_days_upgrade},
                 max_users: {type: "numeric", value: max_users},
-                planID: {type: "numeric", value: form.edit_plan}
+                planID: {type: "numeric", value: form.edit_plan},
+                redirect: {type: "nvarchar", value: redirect}
             },
             sql = "
                 UPDATE plans
@@ -256,7 +259,8 @@ if (structKeyExists(form, "edit_plan")) {
                     blnTestDaysUpgrade = :test_days_upgrade,
                     blnRecommended = :recommended,
                     blnFree = :free,
-                    intMaxUsers = :max_users
+                    intMaxUsers = :max_users,
+                    strRedirectPath = :redirect
                 WHERE intPlanID = :planID
             "
         )
