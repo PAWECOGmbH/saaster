@@ -1,7 +1,7 @@
 <cfoutput>
 <div class="container py-3">
     <main>
-        <div class="row row-cols-1 row-cols-md-4 mb-3 text-center">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mb-3 text-center">
 
             <!--- Include of the boxes --->
             <cfloop array="#planData#" index="i">
