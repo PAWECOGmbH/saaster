@@ -168,7 +168,7 @@ component displayname="plans" output="false" {
             },
             sql = "
                 SELECT
-                plans.intPlanID, plans.intPlanGroupID, plans.blnFree,
+                plans.intPlanID, plans.intPlanGroupID, plans.blnFree, plans.strRedirectPath,
                 currencies.strCurrencyISO, currencies.strCurrencySign,
                 plan_prices.intCurrencyID,
                 COALESCE(plans.blnRecommended,0) as blnRecommended,
@@ -320,7 +320,7 @@ component displayname="plans" output="false" {
 
             "
         )
-
+        
         local.arrPlan = arrayNew(1);
 
         if (local.getPlan.recordCount) {
@@ -353,6 +353,7 @@ component displayname="plans" output="false" {
                 local.structPlan['vatType'] = 1;
                 local.structPlan['currency'] = '';
                 local.structPlan['currencySign'] = '';
+                local.structPlan['redirectPath'] = '';
 
                 if (len(trim(local.getPlan.strGroupName))) {
                     local.structPlan['groupName'] = local.getPlan.strGroupName;
@@ -412,10 +413,13 @@ component displayname="plans" output="false" {
                 } else {
                     local.structPlan['currencySign'] = local.getPlan.strCurrencyISO;
                 }
+                if (len(trim(local.getPlan.strRedirectPath))) {
+                    local.structPlan['redirectPath'] = local.getPlan.strRedirectPath;
+                }
 
                 // Get all the included modules of the current plan
                 structAppend(local.structPlan, getModulesIncluded(local.getPlan.intPlanID));
-
+                
 
                 local.objPrices = new backend.core.com.prices(
                     vat=local.getPlan.decVat,

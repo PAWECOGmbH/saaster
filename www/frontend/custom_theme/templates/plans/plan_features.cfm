@@ -61,9 +61,6 @@
 
                                         <td>
 
-                                            <cfdump  var="#thisPlanID#">
-                                            <cfdump  var="#featureContent#">
-
                                             <cfif len(trim(featureContent.value))>
 
                                                 <!--- Replace newlines with <br> --->

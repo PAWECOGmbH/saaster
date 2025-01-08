@@ -51,6 +51,18 @@
                     Leave empty if you want to use the default setting.
                 </small>
             </div>
+            <div class="mb-4">
+                <label class="form-label">Redirect after booking</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        root/
+                    </span>
+                    <input type="text" class="form-control" name="redirect" autocomplete="off" maxlength="255" value="#HTMLEditFormat(qPlan.strRedirectPath)#" placeholder="">
+                </div>
+                <small class="form-hint">
+                    Enter the path where the user should be redirected after booking. If empty, the user will be redirected to the system default.
+                </small>
+            </div>
             <div class="row mb-4">
                 <div class="col-lg-6">
                     <label class="form-check form-switch">

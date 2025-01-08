@@ -41,7 +41,7 @@
 
     // Get more plan infos
     planDetails = objPlans.getPlanDetail(planID);
-
+    
     // Get plan group to compare with the current group
     newPlanGroupID = planDetails.planGroupID;
     oldPlanGroupID = session.currentPlan.planGroupID;
@@ -55,12 +55,12 @@
 
     // First, get the booking details without a real booking
     checkBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=false, chargeInvoice=false);
-
+    
     // If the amount to pay is less or equal zero, book right now and save the plan into the session
     if (structKeyExists(checkBooking, "amountToPay") and checkBooking.amountToPay lte 0) {
 
         makeBooking = objBook.checkBooking(customerID=session.customer_id, bookingData=planDetails, recurring=recurring, makeBooking=true, chargeInvoice=false);
-
+        
         if (makeBooking.success) {
 
             // Set plans and modules as well as the custom settings into a session
@@ -68,8 +68,12 @@
 
             getAlert('msgPlanActivated');
             logWrite("user", "info", "A plan has been activated [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
-            location url="#application.mainURL#/account-settings" addtoken=false;
-
+            if (structKeyExists(makeBooking, "redirectPath") and len(trim(makeBooking.redirectPath))) {
+                location url="#makeBooking.redirectPath#" addtoken="false";
+            } else {
+                location url="#application.mainURL#/account-settings" addtoken="false";
+            }
+            
         } else {
 
             getAlert(makeBooking.message, 'danger');
@@ -80,13 +84,13 @@
 
 
     } else {
-
+        
         // If its the first login, the user hasn't a payment method, send to Payrexx first
         if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
 
             location url="#application.mainURL#/payment-settings?add=#session.customer_id#" addtoken=false;
 
-        }
+        } 
 
 
     }
@@ -101,7 +105,11 @@
 
         getAlert('msgThanksForPurchaseFindInvoice');
         logWrite("user", "info", "A booked plan has been paid [CustomerID: #session.customer_ID#, UserID: #session.user_ID#, PlanID: #planID#]");
-        location url="#application.mainURL#/account-settings" addtoken=false;
+        if (structKeyExists(makeBooking, "redirectPath") and len(trim(makeBooking.redirectPath))) {
+            location url="#makeBooking.redirectPath#" addtoken="false";
+        } else {
+            location url="#application.mainURL#/account-settings" addtoken="false";
+        }
 
     } else {
 
