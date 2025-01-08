@@ -212,8 +212,7 @@ component displayname="invoices" output="false" {
             local.total_text = "Total";
         }
 
-        /* try { */
-
+        try {
 
 
              queryExecute(
@@ -246,12 +245,12 @@ component displayname="invoices" output="false" {
             )
 
 
-        /* } catch (any e) {
+        } catch (any e) {
 
             local.argsReturnValue['message'] = e.message;
             return argsReturnValue;
 
-        } */
+        }
 
         // Recalculating
         local.recalc = recalculateInvoice(local.invoiceID);

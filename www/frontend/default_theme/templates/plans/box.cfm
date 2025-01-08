@@ -1,4 +1,3 @@
-
 <!--- Set the css class for recommended plan, if there is one --->
 <cfset recommClass1 = "">
 <cfset recommClass2 = "">
@@ -7,19 +6,18 @@
     <cfset recommClass2 = "text-bg-primary border-primary">
 </cfif>
 
-
 <cfoutput>
-<div class="col">
+<div class="col d-flex align-items-stretch">
 
-    <div class="card mb-4 rounded-3 shadow-sm #recommClass1#">
+    <div class="card mb-4 rounded-3 shadow-sm #recommClass1# d-flex flex-column">
 
         <div class="card-header py-3 #recommClass2#">
             <h4 class="my-0 fw-normal">#i.planName#</h4>
         </div>
 
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
 
-            <div class="row align-items-center mb-3">
+            <div class="row align-items-center mb-3 flex-grow-1">
 
                 <!--- Price on request --->
                 <cfif i.onRequest>
@@ -59,7 +57,7 @@
             </div>
 
             <!--- Longer description with optional check signs --->
-            <div class="planDescription text-start mb-4">
+            <div class="planDescription text-start mb-4 flex-grow-1">
                 #i.description#
             </div>
 
@@ -67,7 +65,7 @@
             <a type="button"
                 data-monthly="#i.bookingLinkM#"
                 data-yearly="#i.bookingLinkY#"
-                class="bookingButton w-100 btn btn-lg btn-outline-primary mb-3">
+                class="bookingButton w-100 btn btn-lg btn-outline-primary mt-auto mb-3">
                 #i.dynBookingButtonText#
             </a>
 
