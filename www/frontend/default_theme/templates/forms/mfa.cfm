@@ -1,6 +1,6 @@
 <cfoutput>
 
-<div class="container-sm py-4 px-3 mx-auto w-25">
+<div class="container py-4 px-3 mx-auto my-5" style="max-width: 500px;">
 
     <div class="card">
 

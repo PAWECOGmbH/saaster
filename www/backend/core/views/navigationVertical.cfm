@@ -74,8 +74,8 @@
                                 </span>
                             </a>
                             <div class="dropdown-menu">
-                                <cfif fileExists(expandPath('/modules/#i.moduleData.table_prefix#/navigation.cfm'))>
-                                    <cfinclude template="/modules/#i.moduleData.table_prefix#/navigation.cfm">
+                                <cfif fileExists(expandPath('backend/modules/#i.moduleData.table_prefix#/navigation.cfm'))>
+                                    <cfinclude template="/backend/modules/#i.moduleData.table_prefix#/navigation.cfm">
                                     <div class="dropdown-divider"></div>
                                 </cfif>
                                 <cfif len(trim(i.moduleData.settingPath))>
