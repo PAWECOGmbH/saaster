@@ -66,7 +66,7 @@
                         <span class="input-group-text">
                             root/
                         </span>
-                        <input type="text" class="form-control" name="redirect" autocomplete="off" maxlength="255" value="#qModule.strRedirectPath#" placeholder="">
+                        <input type="text" class="form-control" name="redirect" autocomplete="off" maxlength="255" value="#HTMLEditFormat(qModule.strRedirectPath)#" placeholder="">
                     </div>
                     <small class="form-hint">
                         Enter the path where the user should be redirected after booking. If empty, the user will be redirected to the system default.

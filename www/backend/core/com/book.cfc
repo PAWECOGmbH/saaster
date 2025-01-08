@@ -118,7 +118,7 @@ component displayname="book" output="false" {
             local.newProductID = local.bookingData.planID;
             local.planID = local.newProductID;
             local.moduleID = "";
-            local.redirectPath = "";
+            local.redirectPath = local.bookingData.redirectPath;
 
             // Are there modules included?
             if (structKeyExists(local.bookingData, "modulesIncluded")) {
