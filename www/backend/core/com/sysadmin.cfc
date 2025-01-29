@@ -562,6 +562,23 @@ component displayname="sysadmin" output="false" {
 
         return local.qCustomMappings;
     }
+    
+    public query function getCustomMappingByModuleID(required numeric customMappingID){
+
+        local.qCustomMappings = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customMappingID: {type: "numeric", value: arguments.customMappingID}
+            },
+            sql = "
+                SELECT *
+                FROM custom_mappings
+                WHERE intModuleID = :customMappingID
+            "
+        );
+
+        return local.qCustomMappings;
+    }
 
     public query function getSystemMappings(){
 

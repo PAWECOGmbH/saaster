@@ -27,7 +27,7 @@
                 <div class="mb-3">
                     <label class="form-label">Module name *</label>
                     <div class="input-group input-group-flat">
-                        <input type="text" class="form-control" name="module_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qModule.strModuleName)#" required>
+                        <input type="text" class="form-control" name="module_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qModule.strModuleName)#" required <cfif structKeyExists(variables, "blockRename")>#blockRename#</cfif>>
                         <span class="input-group-text">
                             <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##module_name_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
                         </span>
@@ -48,7 +48,7 @@
                         <div class="mb-3">
                             <small class="form-hint mb-3">The folder and files will be created after saving. The <i>navigation.cfm</i> file will help build the navigation.</small>
                             <label class="mb-1">Folder and table prefix *</label>
-                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
+                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required <cfif structKeyExists(variables, "blockRename")>#blockRename#</cfif>>
                             <small class="form-hint">
                                 Use the <b>same prefix</b> for your database tables and folder name.
                             </small>
