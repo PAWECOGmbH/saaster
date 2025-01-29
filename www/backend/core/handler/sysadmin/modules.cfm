@@ -270,13 +270,13 @@ if (structKeyExists(form, "edit_module")) {
         // Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...)
         createFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/navigation.cfm'))) {
-savecontent variable="naviContent" {
-writeOutput("
-<a href='' class='dropdown-item'>Your page 1</a>
-<a href='' class='dropdown-item'>Your page 2</a>
-<a href='' class='dropdown-item'>Your page 3</a>
-");
-}
+            savecontent variable="naviContent" {
+            writeOutput("
+            <a href='' class='dropdown-item'>Your page 1</a>
+            <a href='' class='dropdown-item'>Your page 2</a>
+            <a href='' class='dropdown-item'>Your page 3</a>
+            ");
+            }
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/navigation.cfm'), naviContent);
             } catch (any e) {
@@ -289,13 +289,13 @@ writeOutput("
         // Create the file for settings
         createSettingFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/settings.cfm'))) {
-savecontent variable="settingContent" {
-writeOutput("
-<cfscript>
-dump('Hello settings!');
-</cfscript>
-");
-}
+            savecontent variable="settingContent" {
+            writeOutput("
+            <cfscript>
+            dump('Hello settings!');
+            </cfscript>
+            ");
+            }
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/settings.cfm'), settingContent);
             } catch (any e) {
@@ -304,12 +304,12 @@ dump('Hello settings!');
             }
         }
 
-        // Create the file for the login inlude
+        // Create the file for the login include
         createLoginFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/login_include.cfm'))) {
-savecontent variable="loginContent" {
-writeOutput("<!--- This file will be included while users login --->");
-}
+            savecontent variable="loginContent" {
+            writeOutput("<!--- This file will be included while users login --->");
+            }
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/login_include.cfm'), loginContent);
             } catch (any e) {
@@ -382,24 +382,41 @@ if (structKeyExists(url, "delete_module")) {
     if (isNumeric(url.delete_module)) {
 
         // Delete picture first
-        qPicture = queryExecute(
+        qModuleToDelete = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 modulID: {type: "numeric", value: url.delete_module}
             },
             sql="
-                SELECT strPicture
+                SELECT *
                 FROM modules
                 WHERE intModuleID = :modulID
             "
         )
 
-        if (qPicture.recordCount and len(trim(qPicture.strPicture))) {
+        if (qModuleToDelete.recordCount and len(trim(qModuleToDelete.strPicture))) {
 
             // Delete picture using a function
-            application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qPicture.strPicture#"));
+            application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qModuleToDelete.strPicture#"));
 
         }
+
+        //Delete all folders and Files related to this module
+        if (directoryExists(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'))) {
+            directoryDelete(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'), true);
+        }
+
+        // Delete the modules_prices related to the module
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                modulID: {type: "numeric", value: url.delete_module}
+            },
+            sql="
+                DELETE FROM modules_prices
+                WHERE intModuleID = :modulID
+            "
+        )
 
         queryExecute(
             options = {datasource = application.datasource},
