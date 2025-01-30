@@ -270,13 +270,13 @@ if (structKeyExists(form, "edit_module")) {
         // Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...)
         createFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/navigation.cfm'))) {
-            savecontent variable="naviContent" {
-            writeOutput("
-            <a href='' class='dropdown-item'>Your page 1</a>
-            <a href='' class='dropdown-item'>Your page 2</a>
-            <a href='' class='dropdown-item'>Your page 3</a>
-            ");
-            }
+savecontent variable="naviContent" {
+writeOutput("
+<a href='' class='dropdown-item'>Your page 1</a>
+<a href='' class='dropdown-item'>Your page 2</a>
+<a href='' class='dropdown-item'>Your page 3</a>
+");
+}
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/navigation.cfm'), naviContent);
             } catch (any e) {
@@ -289,13 +289,13 @@ if (structKeyExists(form, "edit_module")) {
         // Create the file for settings
         createSettingFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/settings.cfm'))) {
-            savecontent variable="settingContent" {
-            writeOutput("
-            <cfscript>
-            dump('Hello settings!');
-            </cfscript>
-            ");
-            }
+savecontent variable="settingContent" {
+writeOutput("
+<cfscript>
+dump('Hello settings!');
+</cfscript>
+");
+}
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/settings.cfm'), settingContent);
             } catch (any e) {
@@ -307,9 +307,9 @@ if (structKeyExists(form, "edit_module")) {
         // Create the file for the login include
         createLoginFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/login_include.cfm'))) {
-            savecontent variable="loginContent" {
-            writeOutput("<!--- This file will be included while users login --->");
-            }
+savecontent variable="loginContent" {
+writeOutput("<!--- This file will be included while users login --->");
+}
             try {
                 fileWrite(expandPath('/backend/modules/#form.prefix#/login_include.cfm'), loginContent);
             } catch (any e) {
@@ -388,7 +388,7 @@ if (structKeyExists(url, "delete_module")) {
                 modulID: {type: "numeric", value: url.delete_module}
             },
             sql="
-                SELECT *
+                SELECT strTabPrefix, strPicture
                 FROM modules
                 WHERE intModuleID = :modulID
             "
