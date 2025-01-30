@@ -10,7 +10,7 @@
     }
 
     qModule = objSysadmin.getModule(thisModuleID);
-   
+
     if(not qModule.recordCount){
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";
     }
@@ -36,8 +36,8 @@
     //Disable renaming of the module after path creations. 
     //This way Module files are not doubled. 
     //User needs to create a new Module if he wants to change the path/name.
-    qCustomMappingByModuleID = objSysadmin.getCustomMappingByModuleID(thisModuleID);
-    if(len(trim(qCustomMappingByModuleID.strPath))){
+    qCustomMappingByModuleID = objSysadmin.getModule(thisModuleID);
+    if(len(trim(qCustomMappingByModuleID.strSettingPath))){
         blockRename = "readonly";
     } 
 
