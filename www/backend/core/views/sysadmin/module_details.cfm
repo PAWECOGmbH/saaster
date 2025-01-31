@@ -3,6 +3,7 @@
 
     allowedFileTypesList = fileList.allowedFileTypesList;
     acceptFileTypesList = fileList.acceptFileTypesList;
+    dump(qModule);
 </cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
@@ -27,7 +28,7 @@
                 <div class="mb-3">
                     <label class="form-label">Module name *</label>
                     <div class="input-group input-group-flat">
-                        <input type="text" class="form-control" name="module_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qModule.strModuleName)#" required <cfif structKeyExists(variables, "blockRename")>#blockRename# title="You cant change the name after creation. Create a new module instead."</cfif>>
+                        <input type="text" class="form-control" name="module_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qModule.strModuleName)#" required>
                         <span class="input-group-text">
                             <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##module_name_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
                         </span>
@@ -48,7 +49,7 @@
                         <div class="mb-3">
                             <small class="form-hint mb-3">The folder and files will be created after saving. The <i>navigation.cfm</i> file will help build the navigation.</small>
                             <label class="mb-1">Folder and table prefix *</label>
-                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required <cfif structKeyExists(variables, "blockRename")>#blockRename# title="You cant change the path after creation. Create a new module instead."</cfif>>
+                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required <cfif len(trim(qModule.strSettingPath))>disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" title="You cant change the path after creation. Create a new module instead."</cfif>>
                             <small class="form-hint">
                                 Use the <b>same prefix</b> for your database tables and folder name.
                             </small>

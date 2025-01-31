@@ -33,14 +33,6 @@
     
     getModal = new backend.core.com.translate();
 
-    //Disable renaming of the module after path creations. 
-    //This way Module files are not doubled. 
-    //User needs to create a new Module if he wants to change the path/name.
-    qCustomMappingByModuleID = objSysadmin.getModule(thisModuleID);
-    if(len(trim(qCustomMappingByModuleID.strSettingPath))){
-        blockRename = "readonly";
-    } 
-
 </cfscript>
 
 
