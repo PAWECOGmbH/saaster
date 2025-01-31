@@ -304,7 +304,7 @@ dump('Hello settings!');
             }
         }
 
-        // Create the file for the login inlude
+        // Create the file for the login include
         createLoginFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/login_include.cfm'))) {
 savecontent variable="loginContent" {
@@ -382,23 +382,28 @@ if (structKeyExists(url, "delete_module")) {
     if (isNumeric(url.delete_module)) {
 
         // Delete picture first
-        qPicture = queryExecute(
+        qModuleToDelete = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 modulID: {type: "numeric", value: url.delete_module}
             },
             sql="
-                SELECT strPicture
+                SELECT strTabPrefix, strPicture
                 FROM modules
                 WHERE intModuleID = :modulID
             "
         )
 
-        if (qPicture.recordCount and len(trim(qPicture.strPicture))) {
+        if (qModuleToDelete.recordCount and len(trim(qModuleToDelete.strPicture))) {
 
             // Delete picture using a function
-            application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qPicture.strPicture#"));
+            application.objGlobal.deleteFile(expandPath("/userdata/images/modules/#qModuleToDelete.strPicture#"));
 
+        }
+
+        //Delete all folders and Files related to this module
+        if (directoryExists(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'))) {
+            directoryDelete(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'), true);
         }
 
         queryExecute(
