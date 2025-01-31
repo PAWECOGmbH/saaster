@@ -406,18 +406,6 @@ if (structKeyExists(url, "delete_module")) {
             directoryDelete(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'), true);
         }
 
-        // Delete the modules_prices related to the module
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                modulID: {type: "numeric", value: url.delete_module}
-            },
-            sql="
-                DELETE FROM modules_prices
-                WHERE intModuleID = :modulID
-            "
-        )
-
         queryExecute(
             options = {datasource = application.datasource},
             params = {
