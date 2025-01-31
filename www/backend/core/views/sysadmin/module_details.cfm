@@ -3,7 +3,6 @@
 
     allowedFileTypesList = fileList.allowedFileTypesList;
     acceptFileTypesList = fileList.acceptFileTypesList;
-    dump(qModule);
 </cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
