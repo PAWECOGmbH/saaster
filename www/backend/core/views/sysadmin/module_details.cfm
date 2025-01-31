@@ -7,7 +7,11 @@
 </cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
-<input type="hidden" name="edit_module" value="#qModule.intModuleID#">
+    <input type="hidden" name="edit_module" value="#qModule.intModuleID#">
+    <!--- to not send empty and therefore deleting the prefix if field is disabled  --->
+    <cfif len(trim(qModule.strSettingPath))>
+        <input type="hidden" name="prefix" value="#qModule.strTabPrefix#">
+    </cfif>
     <div class="card-body">
         <div class="row">
             <div class="col-lg-6">
