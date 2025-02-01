@@ -149,7 +149,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.path" default="";
         param name="form.redirect" default="";
 
-        mapping = "backend/modules/" & form.prefix & "/settings";
+        mapping = "modules/" & form.prefix & "/settings";
         path =  "backend/modules/" & form.prefix & "/settings.cfm";
 
         // Is there already an entry in the custom mappings?

@@ -6,7 +6,11 @@
 </cfscript>
 <cfoutput>
 <form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
-<input type="hidden" name="edit_module" value="#qModule.intModuleID#">
+    <input type="hidden" name="edit_module" value="#qModule.intModuleID#">
+    <!--- to not send empty and therefore deleting the prefix if field is disabled  --->
+    <cfif len(trim(qModule.strSettingPath))>
+        <input type="hidden" name="prefix" value="#qModule.strTabPrefix#">
+    </cfif>
     <div class="card-body">
         <div class="row">
             <div class="col-lg-6">
@@ -48,15 +52,15 @@
                         <div class="mb-3">
                             <small class="form-hint mb-3">The folder and files will be created after saving. The <i>navigation.cfm</i> file will help build the navigation.</small>
                             <label class="mb-1">Folder and table prefix *</label>
-                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required>
+                            <input type="text" class="form-control" name="prefix" placeholder="prefix" autocomplete="off" maxlength="20" value="#HTMLEditFormat(qModule.strTabPrefix)#" required <cfif len(trim(qModule.strSettingPath))>disabled style="cursor: not-allowed;" data-bs-toggle="tooltip" title="You cant change the path after creation. Create a new module instead."</cfif>>
                             <small class="form-hint">
                                 Use the <b>same prefix</b> for your database tables and folder name.
                             </small>
                         </div>
                         <cfif len(trim(qModule.strSettingPath))>
                             Develop your module in: /backend/modules/#qModule.strTabPrefix#/<br />
-                            Settings file: /#qModule.strSettingPath#.cfm<br />
-                            Mapping: <a href="#application.mainURL#/backend/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/backend/modules/#qModule.strTabPrefix#/settings</a>
+                            Settings file: /backend/#qModule.strSettingPath#.cfm<br />
+                            Mapping: <a href="#application.mainURL#/modules/#qModule.strTabPrefix#/settings" target="_blank">#application.mainURL#/modules/#qModule.strTabPrefix#/settings</a>
                         </cfif>
                     </fieldset>
                 </div>
