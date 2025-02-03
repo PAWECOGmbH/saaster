@@ -42,7 +42,8 @@
         if (FindNoCase("@",searchTerm)){
             searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            /* AGAINST ('"paweco*"' IN BOOLEAN MODE) */
+            searchString = 'AGAINST (' & Chr(39) & Chr(34) & "#searchTerm#" & Chr(42) & Chr(34) & Chr(39) & ' IN BOOLEAN MODE)';
         }
 
         qTotalInvoices = objSysadmin.getTotalInvoicesSearch(searchString, searchTerm, invoice_start, session.status_sql, session.i_sort);

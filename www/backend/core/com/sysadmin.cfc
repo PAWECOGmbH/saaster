@@ -298,12 +298,21 @@ component displayname="sysadmin" output="false" {
                     customers.strEmail
                 )
                 #arguments.search#
+                GROUP BY 
+                    customers.intCustomerID
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
-
-        return local.qTotalCustomers;
+        if(local.qTotalCustomers.recordCount > 0){
+            return local.qTotalCustomers;
+        }else{
+            /* return 0 in a query */
+            local.simulatedQuery = QueryNew("totalCustomers", "integer");
+            QueryAddRow(simulatedQuery, 1);
+            QuerySetCell(simulatedQuery, "totalCustomers", 0);
+            return local.simulatedQuery;
+        }
     }
 
     public query function getTotalCustomers(){
@@ -420,13 +429,21 @@ component displayname="sysadmin" output="false" {
                     #arguments.search#
                     OR invoices.intInvoiceNumber = '#arguments.term#'
                 )
-
+                GROUP BY invoices.intInvoiceID
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
-
-        return local.qTotalInvoices;
+       
+        if(local.qTotalInvoices.recordCount > 0){
+            return local.qTotalInvoices;
+        }else{
+            /* return 0 in a query */
+            local.simulatedQuery = QueryNew("totalInvoices", "integer");
+            QueryAddRow(simulatedQuery, 1);
+            QuerySetCell(simulatedQuery, "totalInvoices", 0);
+            return local.simulatedQuery;
+        }
     }
 
     public query function getTotalInvoices(required string status){
