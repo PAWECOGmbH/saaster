@@ -9,6 +9,7 @@
 
     objInvoice = new backend.core.com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
+    qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
 
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
     qUsers = application.objUser.getAllUsers(qInvoice.customerID);
@@ -179,7 +180,27 @@
                                             <td style="border-top: 1px solid;" colspan="4"><b>#qInvoice.totaltext#</b></td>
                                             <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsCurrencyFormat(qInvoice.total, "none")#</b></td>
                                         </tr>
-                                        <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
+                                        <cfif ! qPayments.recordCount>
+                                            <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
+                                        </cfif>
+                                        <cfif qPayments.recordCount>
+                                            <cfloop query="qPayments">
+                                                <tr>
+                                                    <td style="border-top: 1px solid;"></td>
+                                                    <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                                    <td style="border-top: 1px solid;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
+                                                </tr>
+                                            </cfloop>
+                
+                                            <tr>
+                                                <td style="border-top: 1px solid ##ccc;"></td>
+                                                <td style="border-top: 1px solid ##ccc;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                                <td style="border-top: 1px solid ##ccc;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(qInvoice.amountOpen, "none")#</b></td>
+                                            </tr>
+                                        </cfif>
+                                        <cfif qPayments.recordCount>
+                                            <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
+                                        </cfif>
                                     </tbody>
                                 </table>
                             </div>
