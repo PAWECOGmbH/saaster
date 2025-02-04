@@ -29,7 +29,8 @@
         if (FindNoCase("@",searchTerm)){
             searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            /* AGAINST ('"paweco*"' IN BOOLEAN MODE) */
+            searchString = 'AGAINST (' & Chr(39) & Chr(34) & "#searchTerm#" & Chr(42) & Chr(34) & Chr(39) & ' IN BOOLEAN MODE)';
         }
 
         qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start, session.cust_sort);
