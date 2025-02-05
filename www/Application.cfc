@@ -117,6 +117,14 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     public boolean function onRequestStart(required string TargetPage) {
 
+        // For local development only,
+        // automatically reinitialize the application without using the reinit URL parameter
+        if (variables.environment eq "dev") {
+            structClear(APPLICATION);
+            onApplicationStart();
+            application.langStruct = application.objLanguage.initLanguages();
+        }
+
         // Check if the user is logged in as a sysadmin
         if (structKeyExists(session, "sysadmin") and session.sysadmin) {
 
@@ -166,7 +174,6 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
 
     public boolean function onRequest(required string TargetPage) {
-
         // Create SEF URL
         thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
 
