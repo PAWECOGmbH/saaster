@@ -109,7 +109,7 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getTotalCountriesSearch(required string search){
-        
+
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             sql = "
@@ -427,13 +427,14 @@ component displayname="sysadmin" output="false" {
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     #arguments.search#
                     OR invoices.intInvoiceNumber = '#arguments.term#'
+                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = '#arguments.term#'
                 )
                 GROUP BY invoices.intInvoiceID
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
-       
+
         if(local.qTotalInvoices.recordCount > 0){
             return local.qTotalInvoices;
         }else{
@@ -507,6 +508,7 @@ component displayname="sysadmin" output="false" {
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     #arguments.search#
                     OR invoices.intInvoiceNumber = '#arguments.term#'
+                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = '#arguments.term#'
                 )
 
                 ORDER BY #arguments.sort#
