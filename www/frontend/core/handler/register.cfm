@@ -182,11 +182,15 @@ if (structKeyExists(form, 'register_btn')) {
         optinValues.language = form.language;
         optinValues.newUUID = newUUID;
 
-        // Save the customer into the temporary table optin
+        // Save the customer into the temporary table optin - returns generated key and success true
         objUserRegister1 = objRegister.insertOptin(optinValues);
 
         if (objUserRegister1.success) {
-
+            if(structKeyExists(session, "sysadmin")){
+                isCustomer = true;
+            } else {
+                isCustomer = false;
+            }
             mailTitle = "#getTrans('subjectConfirmEmail')#";
             mailType = "html";
 
@@ -195,7 +199,7 @@ if (structKeyExists(form, 'register_btn')) {
                 echo("
                     #getTrans('titHello')# #form.first_name# #form.name#<br><br>
                     #getTrans('txtPleaseConfirmEmail')#<br><br>
-                    <a href='#application.mainURL#/logincheck?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
+                    <a href='#application.mainURL#/logincheck?u=#newUUID#&invited=#isCustomer#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
                     <br><br>
                     #getTrans('txtRegards')#<br>
                     #getTrans('txtYourTeam')#<br>
@@ -213,9 +217,18 @@ if (structKeyExists(form, 'register_btn')) {
             structDelete(session, "company");
             structDelete(session, "email");
 
-            getAlert('alertOptinSent', 'info');
-            logWrite("user", "info", "Register new user step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
-            location url="#application.mainURL#/login" addtoken="false";
+            
+            if (structKeyExists(session, "sysadmin") and session.sysadmin) {
+                //Admin created customer
+                getAlert('alertOptinSentByAdmin', 'info');
+                logWrite("user", "info", "Register new user by admin step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
+                location url="#application.mainURL#/dashboard" addtoken="false";
+            } else {
+                //Normal user created customer
+                getAlert('alertOptinSent', 'info');
+                logWrite("user", "info", "Register new user step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
+                location url="#application.mainURL#/login" addtoken="false";
+            }
 
         } else {
 
@@ -257,7 +270,11 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
         session.uuid = qCheckOptin.strUUID;
         session.lng = qCheckOptin.strLanguage;
         getAlert('alertChoosePassword', 'info');
-        logWrite("user", "info", "Register new user step 2: A user has confirmed the opt-in e-mail. [UUID: #url.u#]");
+        if (structKeyExists(url, 'invited') and url.invited eq "true"){
+            logWrite("user", "info", "Register new user step 2: A user invited by admin has confirmed the opt-in e-mail. [UUID: #url.u#]");
+        }else{
+            logWrite("user", "info", "Register new user step 2: A user has confirmed the opt-in e-mail. [UUID: #url.u#]");
+        }
 
     } else {
 

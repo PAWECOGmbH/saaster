@@ -86,6 +86,12 @@
                             <li class="breadcrumb-item active">Customers</li>
                         </ol>
                     </div>
+                    <!--- Button new customer --->
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                        <a href="##" data-bs-toggle="modal" data-bs-target="##customer_new" class="btn btn-primary">
+                            <i class="fas fa-plus pe-3"></i> New Customer
+                        </a>
+                    </div>
                 </div>
             </div>
             <cfif structKeyExists(session, "alert")>
@@ -259,3 +265,50 @@
     
 
 </div>
+
+<!--- Modal new customer --->
+<cfoutput>
+    <form action="#application.mainURL#/logincheck" method="post">
+    <input type="hidden" name="register_btn">
+        <div id="customer_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">New Customer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">First name *</label>
+                            <input type="text" class="form-control" id="first_name" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name *</label>
+                            <input type="text" name="name" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-Mail Address *</label>
+                            <input type="email" name="email" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('formLanguage')#</label>
+                            <select name="language" class="form-select">
+                                <cfloop list="#application.allLanguages#" index="i">
+                                    <cfset lngIso = listfirst(i,"|")>
+                                    <cfset lngName = listlast(i,"|")>
+                                    <option value="#lngIso#" <cfif lngIso eq session.lng>selected</cfif>>#lngName#</option>
+                                </cfloop>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Save Customer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </cfoutput>
