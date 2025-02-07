@@ -1,6 +1,6 @@
 <cfoutput>
 <div class="container-fluid">
-    <div class="py-4 mx-auto col-12 col-sm-8 col-md-5 col-lg-4 col-xl-4">
+    <div class="py-4 mx-auto col-12 col-sm-8 col-md-5 col-lg-4 col-xl-3">
 
         <div class="card wd-50">
 
