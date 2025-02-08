@@ -1123,6 +1123,24 @@ component displayname="sysadmin" output="false" {
     }
 
 
+    public void function stopScheduleControl(required numeric task) {
+
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                utcDate: {type: "datetime", value: now()}
+            },
+            sql = "
+                UPDATE schedulecontrol
+                SET dtmEnd =:utcDate,
+                    blnIsRunning = 0
+                WHERE strTaskName = 'task_#arguments.task#'
+            "
+        )
+
+    }
+
+
 
 
 }
