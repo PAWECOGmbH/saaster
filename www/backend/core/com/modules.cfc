@@ -484,7 +484,7 @@ component displayname="modules" output="false" {
 
                 loop query="local.qGetScheduleTask" {
 
-                    // We need to delete the value
+                    // If we need to delete the entries
                     if (local.whatsToDo eq "stop") {
 
                         loop from="1" to="20" index="local.i" {
@@ -508,13 +508,13 @@ component displayname="modules" output="false" {
 
                     }
 
-                    // We need to insert the value
+                    // If we need to insert the entries
                     if (local.whatsToDo eq "run") {
 
                         // Initialize variables to track the table with the fewest records
                         local.minRecords = 99999999;
-                        local.targetTable;
-                        local.sqlCount;
+                        local.targetTable = "";
+                        local.sqlCount = "";
 
                         // Generate the SQL for counting entries in each table and combine them using UNION
                         loop from="1" to="20" index="local.i" {
@@ -527,17 +527,17 @@ component displayname="modules" output="false" {
 
                             local.sqlCount &= "SELECT '" & local.tableName & "' AS tableName, COUNT(*) AS thisCount FROM " & local.tableName;
 
-                            // Execute the combined query
-                            local.qCount = queryExecute(sql=local.sqlCount, options={datasource: application.datasource});
+                        }
 
-                            // Iterate over the results to find the table with the fewest entries
-                            loop from="1" to="#local.qCount.recordCount#" index="local.j" {
-                                if (local.j eq 1 or local.qCount.thisCount[local.j] < local.minRecords) {
-                                    local.minRecords = local.qCount.thisCount[local.j];
-                                    local.targetTable = local.qCount.tableName[local.j];
-                                }
+                        // Execute the combined query
+                        local.qCount = queryExecute(sql=local.sqlCount, options={datasource: application.datasource});
+
+                        // Iterate over the results to find the table with the fewest entries
+                        loop from="1" to="#local.qCount.recordCount#" index="local.j" {
+                            if (local.qCount.thisCount[local.j] < local.minRecords) {
+                                local.minRecords = local.qCount.thisCount[local.j];
+                                local.targetTable = local.qCount.tableName[local.j];
                             }
-
                         }
 
                         // Now we have found the table with the fewest entries, so we insert the data record there
@@ -546,29 +546,54 @@ component displayname="modules" output="false" {
                             // Calculate next run
                             local.nextRun = application.objSysadmin.calcNextRun(local.qGetScheduleTask.dtmStartTime, local.qGetScheduleTask.intIterationMinutes);
 
-                            queryExecute (
-                                options = {datasource = application.datasource, result="checkInsert"},
-                                params = {
-                                    schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                                    customerID: {type: "numeric", value: arguments.customerID},
-                                    nextRun: {type: "datetime", value: local.nextRun}
-                                },
-                                sql = "
-                                    INSERT INTO #local.targetTable# (intScheduletaskID, intCustomerID, dtmLastRun, dtmNextRun)
-                                    SELECT :schedID, :customerID, NULL, :nextRun
-                                    FROM DUAL
-                                    WHERE NOT EXISTS (
+                            // Check if the combination already exists in any table
+                            local.exists = false;
+                            loop from="1" to="20" index="local.i" {
+                                local.tableName = "scheduler_#numberFormat(local.i, '00')#";
+                                local.qCheckExist = queryExecute(
+                                    options = {datasource = application.datasource},
+                                    params = {
+                                        schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
+                                        customerID: {type: "numeric", value: arguments.customerID}
+                                    },
+                                    sql = "
                                         SELECT 1
-                                        FROM #local.targetTable#
+                                        FROM #local.tableName#
                                         WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
-                                    )
-                                    LIMIT 1
-                                "
-                            )
+                                    "
+                                );
+                                if (local.qCheckExist.recordCount) {
+                                    local.exists = true;
+                                    break;
+                                }
+                            }
 
-                            // Maybe we have to update
-                            if (!checkInsert.recordCount) {
+                            if (!local.exists) {
 
+                                queryExecute (
+                                    options = {datasource = application.datasource, result="local.checkInsert"},
+                                    params = {
+                                        schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
+                                        customerID: {type: "numeric", value: arguments.customerID},
+                                        nextRun: {type: "datetime", value: local.nextRun}
+                                    },
+                                    sql = "
+                                        INSERT INTO #local.targetTable# (intScheduletaskID, intCustomerID, dtmLastRun, dtmNextRun)
+                                        SELECT :schedID, :customerID, NULL, :nextRun
+                                        FROM DUAL
+                                        WHERE NOT EXISTS (
+                                            SELECT 1
+                                            FROM #local.targetTable#
+                                            WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
+                                        )
+                                        LIMIT 1
+                                    "
+                                )
+
+
+                            } else {
+
+                                // Maybe we have to update
                                 queryExecute (
                                     options = {datasource = application.datasource},
                                     params = {
@@ -590,7 +615,6 @@ component displayname="modules" output="false" {
                     }
 
                 }
-
 
 
             // If the customerID is 0, we need to update
