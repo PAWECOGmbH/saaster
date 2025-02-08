@@ -21,7 +21,7 @@ if (url.pass eq variables.schedulePassword) {
     qRunning = queryExecute(
         options = {datasource = application.datasource},
         sql = "
-            SELECT TIMESTAMPDIFF(SECOND, dtmStart, dtmEnd) as seconds, dtmStart, dtmEnd
+            SELECT dtmStart, dtmEnd, blnIsRunning
             FROM schedulecontrol
             WHERE strTaskName = 'task_#url.task#'
         "
@@ -29,10 +29,10 @@ if (url.pass eq variables.schedulePassword) {
 
     if (qRunning.recordCount) {
 
-        // If seconds are in minus, the previous task is still running
-        if (qRunning.seconds gt 0) {
+        // Check if the scheduler is running
+        if (qRunning.blnIsRunning eq 0) {
 
-            // Update schedulecontrol: set starttime to now
+            // Update schedulecontrol
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -40,7 +40,8 @@ if (url.pass eq variables.schedulePassword) {
                 },
                 sql = "
                     UPDATE schedulecontrol
-                    SET dtmStart = :utcDate
+                    SET dtmStart = :utcDate,
+                        blnIsRunning = 1
                     WHERE strTaskName = 'task_#url.task#'
                 "
             )
@@ -56,6 +57,7 @@ if (url.pass eq variables.schedulePassword) {
                         scheduler_#url.task#.intScheduletaskID,
                         scheduler_#url.task#.intCustomerID,
                         scheduler_#url.task#.dtmNextRun,
+                        scheduler_#url.task#.dtmLastRun,
                         scheduletasks.strPath,
                         scheduletasks.intModuleID,
                         scheduletasks.intIterationMinutes,
@@ -71,7 +73,7 @@ if (url.pass eq variables.schedulePassword) {
             if (qGetTasks.recordCount) {
 
                 // Start time for log entries, based on dtmNextRun
-                local.baseTime = objTime.utc2local(qGetTasks.dtmNextRun);
+                baseTime = objTime.utc2local(qGetTasks.dtmNextRun);
 
                 // Make loop over all the tasks
                 loop query="qGetTasks" {
@@ -81,6 +83,11 @@ if (url.pass eq variables.schedulePassword) {
                         // Variables may be needed in the included file
                         variables.customerID = qGetTasks.intCustomerID;
                         variables.moduleID = qGetTasks.intModuleID;
+                        variables.lastRun = qGetTasks.dtmLastRun;
+
+                        param name="elapsedSeconds" default=0;
+                        param name="currentTime" default=now();
+                        lastRunSuccessful = true;
 
                         // Include the file
                         if (fileExists(expandPath("\#qGetTasks.strPath#"))) {
@@ -88,47 +95,61 @@ if (url.pass eq variables.schedulePassword) {
                             try {
 
                                 // Add the start tick count at the beginning of the task
-                                local.startTickCount = getTickCount();
+                                startTickCount = getTickCount();
 
                                 // Make start log
-                                objLogs.logWrite(type="scheduletask", level="info", message="Start running file #qGetTasks.strPath#", sendMail=false, date=local.baseTime);
+                                objLogs.logWrite(type="scheduletask", level="info", message="Start running file #qGetTasks.strPath#", sendMail=false, date=baseTime);
 
                                 // Include the given file
                                 include template="\#qGetTasks.strPath#";
 
                                 // Calculate the elapsed milliseconds since the task was started
-                                local.elapsedMilliseconds = getTickCount() - local.startTickCount;
+                                elapsedMilliseconds = getTickCount() - startTickCount;
 
                                 // Conversion to seconds
-                                local.elapsedSeconds = local.elapsedMilliseconds / 1000;
+                                elapsedSeconds = elapsedMilliseconds / 1000;
 
                                 // Adjust current time
-                                local.currentTime = dateAdd("s", local.elapsedSeconds, local.baseTime);
+                                currentTime = dateAdd("s", elapsedSeconds, baseTime);
 
 
                                 // Make end log
-                                objLogs.logWrite(type="scheduletask", level="info", message="Stop running file #qGetTasks.strPath#", sendMail=false, date=local.currentTime);
+                                objLogs.logWrite(type="scheduletask", level="info", message="Stop running file #qGetTasks.strPath#", sendMail=false, date=currentTime);
 
 
                             } catch(any e) {
+
+                                lastRunSuccessful = false;
+
+                                // Stop schedulecontrol
+                                application.objSysadmin.stopScheduleControl(url.task);
 
                                 // Decativate the schedule task
                                 application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                                 // Make log
-                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true, local.baseTime);
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true, baseTime);
 
                             }
 
 
                         } else {
 
+                            lastRunSuccessful = false;
+
                             // Decativate the schedule task
                             application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                             // Make log
-                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true, local.baseTime);
+                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true, baseTime);
 
+                        }
+
+                        // Only update the lastRun if the task was successful
+                        if (lastRunSuccessful) {
+                            lastRun = now();
+                        } else {
+                            lastRun = isDate(qGetTasks.dtmLastRun) ? qGetTasks.dtmLastRun : nullValue();
                         }
 
                         // Calculate next run
@@ -139,16 +160,28 @@ if (url.pass eq variables.schedulePassword) {
                             options = {datasource = application.datasource},
                             params = {
                                 scheduleID: {type: "numeric", value: qGetTasks.intScheduletaskID},
-                                utcDate: {type: "datetime", value: now()},
-                                nextRun: {type: "datetime", value: nextRun}
+                                utcDate: {type: "datetime", value: lastRun},
+                                nextRun: {type: "datetime", value: nextRun},
+                                elapsedSeconds: {type: "numeric", value: elapsedSeconds}
                             },
                             sql = "
                                 UPDATE scheduler_#url.task#
                                 SET dtmLastRun = :utcDate,
-                                    dtmNextRun = :nextRun
+                                    dtmNextRun = :nextRun,
+                                    intDuringSeconds = :elapsedSeconds
                                 WHERE intScheduleTaskID = :scheduleID
                             "
                         )
+
+                        // If the elapsedSeconds was longer than 3 minutes, make log and send an email
+                        if (elapsedSeconds gt 180) {
+
+                            // Make log
+                            objLogs.logWrite("scheduletask", "warning", "The task #qGetTasks.strPath# took longer than 3 minutes to run. It took #elapsedSeconds# seconds.", true, currentTime);
+
+                        }
+
+
 
                     } else {
 
@@ -156,7 +189,7 @@ if (url.pass eq variables.schedulePassword) {
                         application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                         // Make log
-                        objLogs.logWrite(type="scheduletask", level="warning", message="Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", sendMail=false, date=local.baseTime);
+                        objLogs.logWrite(type="scheduletask", level="warning", message="Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", sendMail=false, date=baseTime);
 
                     }
 
@@ -165,37 +198,22 @@ if (url.pass eq variables.schedulePassword) {
             }
 
 
-            // Update schedulecontrol: set end time to now plus one second
-            queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    utcDate: {type: "datetime", value: now()}
-                },
-                sql = "
-                    UPDATE schedulecontrol
-                    SET dtmEnd = DATE_ADD(:utcDate, INTERVAL 1 SECOND)
-                    WHERE strTaskName = 'task_#url.task#'
-                "
-            )
+            // Stop schedulecontrol (running = 0)
+            application.objSysadmin.stopScheduleControl(url.task);
 
 
         } else {
 
-            // If the difference is greater than 15 minutes, something went wrong -> correct it!
-            if (dateDiff("n", qRunning.dtmStart, now()) gt 15 or dateDiff("n", qRunning.dtmStart, now()) eq 0) {
+            // It could be, that the scheduler is still running, because the last run has stopped because of an error or something else
+            // Lets check if the scheduler is running for more than 10 minutes
+            if (dateDiff("n", qRunning.dtmStart, now()) gt 10) {
 
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        utcDate: {type: "datetime", value: now()}
-                    },
-                    sql = "
-                        UPDATE schedulecontrol
-                        SET dtmStart = :utcDate,
-                            dtmEnd = DATE_ADD(:utcDate, INTERVAL 1 SECOND)
-                        WHERE strTaskName = 'task_#url.task#'
-                    "
-                )
+                // Stop schedulecontrol (running = 0)
+                application.objSysadmin.stopScheduleControl(url.task);
+
+                // Make log
+                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# was running for more than 10 minutes. The scheduler has been stopped.");
+
 
             }
 
@@ -216,5 +234,6 @@ if (url.pass eq variables.schedulePassword) {
     objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (task_#url.task#.cfm) manually with wrong password. Passwort was: #url.pass#");
 
 }
+
 
 </cfscript>

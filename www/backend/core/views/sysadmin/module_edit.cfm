@@ -30,7 +30,7 @@
             scheduletasks = "show active";
             break;
     }
-
+    
     getModal = new backend.core.com.translate();
 
 </cfscript>
