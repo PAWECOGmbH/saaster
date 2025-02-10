@@ -22,6 +22,15 @@
                     <label class="form-label">#getTrans('formPassword2')#</label>
                     <input type="password" name="password2" class="form-control" placeholder="#getTrans('formPassword2')#" required message="#getTrans('alertEnterPassword2')#" maxlenght="100" minlength="8">
                 </div>
+                <!--- Privacy policy if invited by admin --->
+                <cfif (structKeyExists(url, 'invited') and url.invited eq "true")>
+                    <div class="mb-4">
+                        <label class="form-check">
+                            <input type="checkbox" class="form-check-input" required>
+                            <span class="form-check-label"><a href="##" data-bs-toggle="modal" data-bs-target="##privacy_policy">#getTrans('txtAgreePolicy')#</a></span>
+                        </label>
+                    </div>
+                </cfif>
                 <div class="form-footer">
                     <button type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
                 </div>

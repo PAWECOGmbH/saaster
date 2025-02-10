@@ -187,9 +187,9 @@ if (structKeyExists(form, 'register_btn')) {
 
         if (objUserRegister1.success) {
             if(structKeyExists(session, "sysadmin")){
-                isCustomer = true;
+                invited = true;
             } else {
-                isCustomer = false;
+                invited = false;
             }
             mailTitle = "#getTrans('subjectConfirmEmail')#";
             mailType = "html";
@@ -199,7 +199,7 @@ if (structKeyExists(form, 'register_btn')) {
                 echo("
                     #getTrans('titHello')# #form.first_name# #form.name#<br><br>
                     #getTrans('txtPleaseConfirmEmail')#<br><br>
-                    <a href='#application.mainURL#/logincheck?u=#newUUID#&invited=#isCustomer#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
+                    <a href='#application.mainURL#/logincheck?u=#newUUID#&invited=#invited#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
                     <br><br>
                     #getTrans('txtRegards')#<br>
                     #getTrans('txtYourTeam')#<br>
@@ -311,8 +311,11 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
         }
 
     }
-
-    location url="#application.mainURL#/register" addtoken="false";
+    if (structKeyExists(url, 'invited') and url.invited eq "true"){
+        location url="#application.mainURL#/register?invited=true" addtoken="false";
+    }else{
+        location url="#application.mainURL#/register" addtoken="false";
+    }
 
 }
 
