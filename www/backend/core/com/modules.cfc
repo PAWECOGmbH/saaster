@@ -617,7 +617,7 @@ component displayname="modules" output="false" {
                 }
 
 
-            // If the customerID is 0, we need to update
+            // If the customerID is 0, we need to update the next run
             } else {
 
                 // Calculate next run

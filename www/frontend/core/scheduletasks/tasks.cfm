@@ -81,9 +81,9 @@ if (url.pass eq variables.schedulePassword) {
                     if (len(trim(qGetTasks.strPath))) {
 
                         // Variables may be needed in the included file
-                        variables.customerID = qGetTasks.intCustomerID;
-                        variables.moduleID = qGetTasks.intModuleID;
-                        variables.lastRun = qGetTasks.dtmLastRun;
+                        customerID = qGetTasks.intCustomerID;
+                        moduleID = qGetTasks.intModuleID;
+                        lastRun = qGetTasks.dtmLastRun;
 
                         param name="elapsedSeconds" default=0;
                         param name="currentTime" default=now();
@@ -107,7 +107,7 @@ if (url.pass eq variables.schedulePassword) {
                                 elapsedMilliseconds = getTickCount() - startTickCount;
 
                                 // Conversion to seconds
-                                elapsedSeconds = elapsedMilliseconds / 1000;
+                                elapsedSeconds = round(elapsedMilliseconds / 1000);
 
                                 // Adjust current time
                                 currentTime = dateAdd("s", elapsedSeconds, baseTime);
@@ -148,8 +148,6 @@ if (url.pass eq variables.schedulePassword) {
                         // Only update the lastRun if the task was successful
                         if (lastRunSuccessful) {
                             lastRun = now();
-                        } else {
-                            lastRun = isDate(qGetTasks.dtmLastRun) ? qGetTasks.dtmLastRun : nullValue();
                         }
 
                         // Calculate next run
@@ -160,7 +158,7 @@ if (url.pass eq variables.schedulePassword) {
                             options = {datasource = application.datasource},
                             params = {
                                 scheduleID: {type: "numeric", value: qGetTasks.intScheduletaskID},
-                                utcDate: {type: "datetime", value: lastRun},
+                                utcDate: {type: "datetime", value: isDate(lastRun) ? lastRun : nullValue()},
                                 nextRun: {type: "datetime", value: nextRun},
                                 elapsedSeconds: {type: "numeric", value: elapsedSeconds}
                             },
