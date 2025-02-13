@@ -220,7 +220,7 @@ if (structKeyExists(form, 'register_btn')) {
             
             if (structKeyExists(session, "sysadmin") and session.sysadmin) {
                 //Admin created customer
-                getAlert('alertOptinSentByAdmin', 'info');
+                getAlert('We sent the Customer an email to the address you provided. The Customer needs to click on the link contained in the email to confirm his email address.', 'info');
                 logWrite("user", "info", "Register new user by admin step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
                 location url="#application.mainURL#/dashboard" addtoken="false";
             } else {
