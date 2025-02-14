@@ -10,7 +10,7 @@ objTime = new backend.core.com.time(1);
 param name="url.task" default="01";
 if (!isNumeric(url.task)) {
     // Make log
-    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler task_xx manually and did not send the url.task as numeric. The value for url.task was: #url.task#");
+    objLogs.logWrite("scheduletask", "warning", "Invalid url.task value: #url.task#");
     abort;
 }
 
@@ -20,10 +20,13 @@ if (url.pass eq variables.schedulePassword) {
 
     qRunning = queryExecute(
         options = {datasource = application.datasource},
+        params = {
+            taskName: {type: "string", value: "task_" & url.task}
+        },
         sql = "
             SELECT dtmStart, dtmEnd, blnIsRunning
             FROM schedulecontrol
-            WHERE strTaskName = 'task_#url.task#'
+            WHERE strTaskName = :taskName
         "
     )
 
@@ -36,17 +39,19 @@ if (url.pass eq variables.schedulePassword) {
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    utcDate: {type: "datetime", value: now()}
+                    utcDate: {type: "datetime", value: now()},
+                    taskName: {type: "string", value: "task_" & url.task}
                 },
                 sql = "
                     UPDATE schedulecontrol
                     SET dtmStart = :utcDate,
                         blnIsRunning = 1
-                    WHERE strTaskName = 'task_#url.task#'
+                    WHERE strTaskName = :taskName
                 "
             )
 
             // Get all tasks that have to be executed
+            taskTable = "scheduler_" & urlEncodedFormat(url.task);
             qGetTasks = queryExecute(
                 options = {datasource = application.datasource},
                 params = {
@@ -54,19 +59,20 @@ if (url.pass eq variables.schedulePassword) {
                 },
                 sql = "
                     SELECT
-                        scheduler_#url.task#.intScheduletaskID,
-                        scheduler_#url.task#.intCustomerID,
-                        scheduler_#url.task#.dtmNextRun,
-                        scheduler_#url.task#.dtmLastRun,
+                        #taskTable#.intScheduletaskID,
+                        #taskTable#.intCustomerID,
+                        #taskTable#.dtmNextRun,
+                        #taskTable#.dtmLastRun,
                         scheduletasks.strPath,
                         scheduletasks.intModuleID,
                         scheduletasks.intIterationMinutes,
                         scheduletasks.dtmStartTime
-                    FROM scheduler_#url.task#
+                    FROM #taskTable#
                     INNER JOIN scheduletasks
-                    ON scheduler_#url.task#.intScheduletaskID = scheduletasks.intScheduletaskID
+                    ON #taskTable#.intScheduletaskID = scheduletasks.intScheduletaskID
                     AND scheduletasks.blnActive = 1
-                    AND scheduler_#url.task#.dtmNextRun < :utcDate
+                    AND #taskTable#.dtmNextRun < :utcDate
+                    ORDER BY #taskTable#.dtmNextRun
                 "
             )
 
@@ -98,7 +104,7 @@ if (url.pass eq variables.schedulePassword) {
                                 startTickCount = getTickCount();
 
                                 // Make start log
-                                objLogs.logWrite(type="scheduletask", level="info", message="Start running file #qGetTasks.strPath#", sendMail=false, date=baseTime);
+                                objLogs.logWrite("scheduletask", "info", "Start running file #qGetTasks.strPath#", false);
 
                                 // Include the given file
                                 include template="\#qGetTasks.strPath#";
@@ -114,21 +120,21 @@ if (url.pass eq variables.schedulePassword) {
 
 
                                 // Make end log
-                                objLogs.logWrite(type="scheduletask", level="info", message="Stop running file #qGetTasks.strPath#", sendMail=false, date=currentTime);
+                                objLogs.logWrite("scheduletask", "info", "Stop running file #qGetTasks.strPath#", false);
 
 
-                            } catch(any e) {
+                            }  catch(any e) {
 
                                 lastRunSuccessful = false;
 
                                 // Stop schedulecontrol
                                 application.objSysadmin.stopScheduleControl(url.task);
 
-                                // Decativate the schedule task
+                                // Deactivate the schedule task
                                 application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                                 // Make log
-                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true, baseTime);
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true);
 
                             }
 
@@ -141,7 +147,7 @@ if (url.pass eq variables.schedulePassword) {
                             application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                             // Make log
-                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true, baseTime);
+                            objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true);
 
                         }
 
@@ -154,31 +160,23 @@ if (url.pass eq variables.schedulePassword) {
                         nextRun = application.objSysadmin.calcNextRun(qGetTasks.dtmStartTime, qGetTasks.intIterationMinutes);
 
                         // Update scheduler
+                        sql_type_utcDate = isDate(lastRun) ? "datetime" : "null";
                         queryExecute(
                             options = {datasource = application.datasource},
                             params = {
                                 scheduleID: {type: "numeric", value: qGetTasks.intScheduletaskID},
-                                utcDate: {type: "datetime", value: isDate(lastRun) ? lastRun : nullValue()},
+                                utcDate: {type: sql_type_utcDate, value: lastRun},
                                 nextRun: {type: "datetime", value: nextRun},
                                 elapsedSeconds: {type: "numeric", value: elapsedSeconds}
                             },
                             sql = "
-                                UPDATE scheduler_#url.task#
+                                UPDATE #taskTable#
                                 SET dtmLastRun = :utcDate,
                                     dtmNextRun = :nextRun,
                                     intDuringSeconds = :elapsedSeconds
                                 WHERE intScheduleTaskID = :scheduleID
                             "
                         )
-
-                        // If the elapsedSeconds was longer than 3 minutes, make log and send an email
-                        if (elapsedSeconds gt 180) {
-
-                            // Make log
-                            objLogs.logWrite("scheduletask", "warning", "The task #qGetTasks.strPath# took longer than 3 minutes to run. It took #elapsedSeconds# seconds.", true, currentTime);
-
-                        }
-
 
 
                     } else {
@@ -187,7 +185,7 @@ if (url.pass eq variables.schedulePassword) {
                         application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                         // Make log
-                        objLogs.logWrite(type="scheduletask", level="warning", message="Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", sendMail=false, date=baseTime);
+                        objLogs.logWrite("scheduletask", "warning", "Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", false);
 
                     }
 
@@ -202,16 +200,17 @@ if (url.pass eq variables.schedulePassword) {
 
         } else {
 
-            // It could be, that the scheduler is still running, because the last run has stopped because of an error or something else
-            // Lets check if the scheduler is running for more than 10 minutes
-            if (dateDiff("n", qRunning.dtmStart, now()) gt 10) {
-
-                // Stop schedulecontrol (running = 0)
-                application.objSysadmin.stopScheduleControl(url.task);
+            // It could be that the scheduler has still the flag running true. Maybe the last run has stopped because of an error.
+            // Check if the scheduler still has the flag running true after one hour. If yes, make a log and send an email
+            if (dateDiff("n", qRunning.dtmStart, now()) gt 60) {
 
                 // Make log
-                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# was running for more than 10 minutes. The scheduler has been stopped.");
+                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# has still the flag running true after one hour. Please check the scheduler!", true);
 
+            } else {
+
+                // Make log
+                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# is still running. The scheduler has not been started again.");
 
             }
 
@@ -229,7 +228,7 @@ if (url.pass eq variables.schedulePassword) {
 } else {
 
     // Make log
-    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (task_#url.task#.cfm) manually with wrong password. Passwort was: #url.pass#");
+    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (task_#url.task#.cfm) manually with wrong password. Password was: #url.pass#");
 
 }
 
