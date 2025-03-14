@@ -1624,14 +1624,35 @@ component displayname="invoices" output="false" {
             local.qrDataSet['billerIBAN'] = application.objSysAdmin.getSystemSetting('settingIBANnumber').strDefaultValue;
             local.qrDataSet['billerQrReference'] = application.objSysAdmin.getSystemSetting('settingQRreference').strDefaultValue;
 
+            // Biler
             local.qrDataSet['billerName'] = len(trim(local.billerData.companyName)) ? local.billerData.companyName : local.billerData.strContactPerson; // Company or Pre- and Lastname
-            local.qrDataSet['billerStreetAndNumber'] = local.billerData.address; // Street and number
-            local.qrDataSet['billerZipAndCity'] = local.billerData.zip & " " & local.billerData.city; // ZIP and City
+
+            // Separate house number from street
+            local.street = reReplace(local.billerData.address, "\d+.*", "", "all");
+            local.qrDataSet['billerStreet'] = trim(local.street); // Street
+
+            // Separate street from house number
+            local.houseNumber = reReplace(local.billerData.address, "^[^\d]*", "", "all");
+            local.qrDataSet['billerStreetNumber'] = trim(local.houseNumber); // House number
+
+            local.qrDataSet['billerZip'] = local.billerData.zip; // ZIP
+            local.qrDataSet['billerCity'] = local.billerData.city; // City
             local.qrDataSet['billerCountryIso'] =  "CH"; // Only CH possible because its Swiss bill
 
+
+            // Debtor
             local.qrDataSet['debtorName'] = len(trim(local.deptorData.companyName)) ? local.deptorData.companyName : local.deptorData.contactPerson; // Company or Pre- and Lastname
-            local.qrDataSet['debtorStreetAndNumber'] = local.deptorData.address; // Street and number
-            local.qrDataSet['debtorZipAndCity'] = local.deptorData.zip & " " & local.deptorData.city; // ZIP and City
+
+            // Separate house number from street
+            local.street = reReplace(local.deptorData.address, "\d+.*", "", "all");
+            local.qrDataSet['debtorStreet'] = trim(local.street); // Street
+
+            // Separate street from house number
+            local.houseNumber = reReplace(local.deptorData.address, "^[^\d]*", "", "all");
+            local.qrDataSet['debtorStreetNumber'] = trim(local.houseNumber); // House number
+
+            local.qrDataSet['debtorZip'] = local.deptorData.zip; // ZIP
+            local.qrDataSet['debtorCity'] = local.deptorData.city; // City
             local.qrDataSet['debtorCountryIso'] = len(trim(local.deptorData.countryISO)) ? local.deptorData.countryISO : "CH"; // Country in ISO format (2 digits)
 
             local.qrDataSet['invoiceAmount'] = arguments.amount; // Amount (xxx.xx)
