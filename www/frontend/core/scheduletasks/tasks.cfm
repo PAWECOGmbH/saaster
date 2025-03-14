@@ -103,9 +103,6 @@ if (url.pass eq variables.schedulePassword) {
                                 // Add the start tick count at the beginning of the task
                                 startTickCount = getTickCount();
 
-                                // Make start log
-                                objLogs.logWrite("scheduletask", "info", "Start running file #qGetTasks.strPath#", false);
-
                                 // Include the given file
                                 include template="\#qGetTasks.strPath#";
 
@@ -119,10 +116,6 @@ if (url.pass eq variables.schedulePassword) {
                                 currentTime = dateAdd("s", elapsedSeconds, baseTime);
 
 
-                                // Make end log
-                                objLogs.logWrite("scheduletask", "info", "Stop running file #qGetTasks.strPath#", false);
-
-
                             }  catch(any e) {
 
                                 lastRunSuccessful = false;
@@ -134,7 +127,12 @@ if (url.pass eq variables.schedulePassword) {
                                 application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                                 // Make log
-                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", true);
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", false);
+
+                                // Send email to the developer with the error dump
+                                cfmail(subject="Error in included scheduletask file", to="#application.errorMail#", from="#application.fromEmail#" type="html" ) {
+                                    dump(e);
+                                }
 
                             }
 
