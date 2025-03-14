@@ -7,6 +7,7 @@ component displayname="swissqrbill" output="false" {
         variables.returnStruct['success'] = true;
         variables.returnStruct['message'] = "OK";
 
+
         return this;
 
     }
@@ -143,6 +144,7 @@ component displayname="swissqrbill" output="false" {
 
         <html>
             <head>
+                <meta charset='UTF-8'>
                 <title>Swiss QR-Bill</title>
                 <style>
                     /* Generell */
@@ -274,15 +276,15 @@ component displayname="swissqrbill" output="false" {
                             <p class='text'>
                                 " & variables.qrData.billerIBANformatted & "<br />
                                 " & variables.qrData.billerName & "<br />
-                                " & variables.qrData.billerStreet & "<br />
-                                " & variables.qrData.billerZIPCity & "
+                                " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
+                                " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
                             </p>
                             #local.referenceNumberCode#
                             <p class='subtitle'>Zahlbar durch</p>
                             <p class='text'>
                                 " & variables.qrData.debtorName & "<br />
-                                " & variables.qrData.debtorStreet & "<br />
-                                " & variables.qrData.debtorZIPCity & "
+                                " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
+                                " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
                             </p>
                         </div>
                         <div class='money'>
@@ -322,8 +324,8 @@ component displayname="swissqrbill" output="false" {
                                 <p class='text'>
                                     " & variables.qrData.billerIBANFormatted & "<br />
                                     " & variables.qrData.billerName & "<br />
-                                    " & variables.qrData.billerStreet & "<br />
-                                    " & variables.qrData.billerZIPCity & "
+                                    " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
+                                    " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
                                 </p>
                                 #local.referenceNumberCode#
                                 <p class='subtitle'>Zusätzliche Informationen</p>
@@ -331,8 +333,8 @@ component displayname="swissqrbill" output="false" {
                                 <p class='subtitle'>Zahlbar durch</p>
                                 <p class='text'>
                                     " & variables.qrData.debtorName & "<br />
-                                    " & variables.qrData.debtorStreet & "<br />
-                                    " & variables.qrData.debtorZIPCity & "
+                                    " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
+                                    " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
                                 </p>
                             </div>
                         </div>
@@ -394,15 +396,25 @@ component displayname="swissqrbill" output="false" {
         } else {
             local.errorMessage = "Please provide the account holder!";
         }
-        if (structKeyExists(arguments.qrData, "billerStreetAndNumber") and len(trim(arguments.qrData.billerStreetAndNumber))) {
-            local.qrData["billerStreet"] = left(trim(arguments.qrData.billerStreetAndNumber), 70);
+        if (structKeyExists(arguments.qrData, "billerStreet") and len(trim(arguments.qrData.billerStreet))) {
+            local.qrData["billerStreet"] = left(trim(arguments.qrData.billerStreet), 70);
         } else {
-            local.errorMessage = "Biller street and number is not defined or empty!";
+            local.errorMessage = "Biller street is not defined or empty!";
         }
-        if (structKeyExists(arguments.qrData, "billerZipAndCity") and len(trim(arguments.qrData.billerZipAndCity))) {
-            local.qrData["billerZIPCity"] = left(trim(arguments.qrData.billerZipAndCity), 70);
+        if (structKeyExists(arguments.qrData, "billerStreetNumber") and len(trim(arguments.qrData.billerStreetNumber))) {
+            local.qrData["billerStreetNumber"] = left(trim(arguments.qrData.billerStreetNumber), 5);
         } else {
-            local.errorMessage = "Biller ZIP and/or city is not defined or empty!";
+            local.qrData["billerStreetNumber"] = "";
+        }
+        if (structKeyExists(arguments.qrData, "billerZip") and len(trim(arguments.qrData.billerZip))) {
+            local.qrData["billerZip"] = left(trim(arguments.qrData.billerZip), 4);
+        } else {
+            local.errorMessage = "Biller ZIP is not defined or empty!";
+        }
+        if (structKeyExists(arguments.qrData, "billerCity") and len(trim(arguments.qrData.billerCity))) {
+            local.qrData["billerCity"] = left(trim(arguments.qrData.billerCity), 70);
+        } else {
+            local.errorMessage = "Biller city is not defined or empty!";
         }
         if (structKeyExists(arguments.qrData, "billerCountryIso") and len(trim(arguments.qrData.billerCountryIso))) {
             local.qrData["billerCountry"] = left(trim(arguments.qrData.billerCountryIso), 2);
@@ -416,15 +428,25 @@ component displayname="swissqrbill" output="false" {
         } else {
             local.errorMessage = "Please provide the debtor name!";
         }
-        if (structKeyExists(arguments.qrData, "debtorStreetAndNumber") and len(trim(arguments.qrData.debtorStreetAndNumber))) {
-            local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreetAndNumber), 70);
+        if (structKeyExists(arguments.qrData, "debtorStreet") and len(trim(arguments.qrData.debtorStreet))) {
+            local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreet), 70);
         } else {
-            local.errorMessage = "Debtor street and number is not defined or empty!";
+            local.errorMessage = "Debtor street is not defined or empty!";
         }
-        if (structKeyExists(arguments.qrData, "debtorZipAndCity") and len(trim(arguments.qrData.debtorZipAndCity))) {
-            local.qrData["debtorZIPCity"] = left(trim(arguments.qrData.debtorZipAndCity), 70);
+        if (structKeyExists(arguments.qrData, "debtorStreetNumber") and len(trim(arguments.qrData.debtorStreetNumber))) {
+            local.qrData["debtorStreetNumber"] = left(trim(arguments.qrData.debtorStreetNumber), 5);
         } else {
-            local.errorMessage = "Debtor ZIP and/or city is not defined or empty!";
+            local.qrData["debtorStreetNumber"] = "";
+        }
+        if (structKeyExists(arguments.qrData, "debtorZip") and len(trim(arguments.qrData.debtorZip))) {
+            local.qrData["debtorZip"] = left(trim(arguments.qrData.debtorZip), 4);
+        } else {
+            local.errorMessage = "Debtor ZIP is not defined or empty!";
+        }
+        if (structKeyExists(arguments.qrData, "debtorCity") and len(trim(arguments.qrData.debtorCity))) {
+            local.qrData["debtorCity"] = left(trim(arguments.qrData.debtorCity), 70);
+        } else {
+            local.errorMessage = "Debtor city is not defined or empty!";
         }
         if (structKeyExists(arguments.qrData, "debtorCountryIso") and len(trim(arguments.qrData.debtorCountryIso))) {
             local.qrData["debtorCountry"] = left(trim(arguments.qrData.debtorCountryIso), 2)
@@ -641,11 +663,11 @@ component displayname="swissqrbill" output="false" {
 
     }
 
-    private string function formatAmount(required numeric amount, string output="qrcode") {
+    private number function formatAmount(required numeric amount, string output="qrcode") {
 
         // Prepare for qr code
         if (arguments.output eq "qrcode") {
-            local.formattedAmount = numberFormat(arguments.amount, "___.__");
+            local.formattedAmount = numberFormat(arguments.amount, "_.__");
 
         // Prepare for PDF
         } else {
@@ -672,26 +694,32 @@ component displayname="swissqrbill" output="false" {
 
     private string function generateQrDataString() {
 
+        local.oneBreak = chr(13) & chr(10);
+
         // Generate the data string for the QR code
         local.dataString = "";
-        local.dataString = "SPC" & chr(13) & chr(10) & "0200" & chr(13) & chr(10) & "1" & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerIBANclean & chr(13) & chr(10);
-        local.dataString &= "K" & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerName & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerStreet & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerZIPCity & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerCountry & chr(13) & chr(10);
-        local.dataString &= chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10); // 7 spaces
-        local.dataString &= variables.qrData.invoiceAmountQRCode & chr(13) & chr(10);
-        local.dataString &= variables.qrData.invoiceCurrency & chr(13) & chr(10);
-        local.dataString &= "K" & chr(13) & chr(10);
-        local.dataString &= variables.qrData.debtorName & chr(13) & chr(10);
-        local.dataString &= variables.qrData.debtorStreet & chr(13) & chr(10);
-        local.dataString &= variables.qrData.debtorZIPCity & chr(13) & chr(10) & chr(13) & chr(10) & chr(13) & chr(10);
-        local.dataString &= variables.qrData.debtorCountry & chr(13) & chr(10);
-        local.dataString &= variables.qrData.transactionType & chr(13) & chr(10);
-        local.dataString &= variables.qrData.billerReferenceClean & chr(13) & chr(10);
-        local.dataString &= variables.qrData.invoiceAddText & chr(13) & chr(10);
+        local.dataString = "SPC" & local.oneBreak & "0200" & local.oneBreak & "1" & local.oneBreak;
+        local.dataString &= variables.qrData.billerIBANclean & local.oneBreak;
+        local.dataString &= "S" & local.oneBreak;
+        local.dataString &= variables.qrData.billerName & local.oneBreak;
+        local.dataString &= variables.qrData.billerStreet & local.oneBreak;
+        local.dataString &= variables.qrData.billerStreetNumber & local.oneBreak;
+        local.dataString &= variables.qrData.billerZIP & local.oneBreak;
+        local.dataString &= variables.qrData.billerCity & local.oneBreak;
+        local.dataString &= variables.qrData.billerCountry & local.oneBreak;
+        local.dataString &= local.oneBreak & local.oneBreak & local.oneBreak & local.oneBreak & local.oneBreak & local.oneBreak & local.oneBreak; // 7 breaks
+        local.dataString &= variables.qrData.invoiceAmountQRCode & local.oneBreak;
+        local.dataString &= variables.qrData.invoiceCurrency & local.oneBreak;
+        local.dataString &= "S" & local.oneBreak;
+        local.dataString &= variables.qrData.debtorName & local.oneBreak;
+        local.dataString &= variables.qrData.debtorStreet & local.oneBreak;
+        local.dataString &= variables.qrData.debtorStreetNumber & local.oneBreak;
+        local.dataString &= variables.qrData.debtorZIP & local.oneBreak
+        local.dataString &= variables.qrData.debtorCity & local.oneBreak
+        local.dataString &= variables.qrData.debtorCountry & local.oneBreak;
+        local.dataString &= variables.qrData.transactionType & local.oneBreak;
+        local.dataString &= variables.qrData.billerReferenceClean & local.oneBreak;
+        local.dataString &= variables.qrData.invoiceAddText & local.oneBreak;
         local.dataString &= "EPD";
 
         return local.dataString;
