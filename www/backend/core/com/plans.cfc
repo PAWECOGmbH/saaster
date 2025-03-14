@@ -320,7 +320,7 @@ component displayname="plans" output="false" {
 
             "
         )
-        
+
         local.arrPlan = arrayNew(1);
 
         if (local.getPlan.recordCount) {
@@ -419,7 +419,7 @@ component displayname="plans" output="false" {
 
                 // Get all the included modules of the current plan
                 structAppend(local.structPlan, getModulesIncluded(local.getPlan.intPlanID));
-                
+
 
                 local.objPrices = new backend.core.com.prices(
                     vat=local.getPlan.decVat,
@@ -758,6 +758,11 @@ component displayname="plans" output="false" {
 
                 // Get all the included modules of the current plan
                 structAppend(local.planStruct, getModulesIncluded(local.qCurrentPlan.intPlanID));
+
+            } else {
+
+                // If we do not have any plans, set maxUsers to 99999 (unlimited)
+                local.planStruct['maxUsers'] = 99999;
 
             }
 
