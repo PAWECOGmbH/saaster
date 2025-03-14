@@ -45,8 +45,8 @@ component displayname="log" {
 
         // Send log by e-mail, if desired
         if (structKeyExists(arguments, "sendMail") and arguments.sendMail) {
-            cfmail(subject="#ucase(arguments.level)# in #application.projectName#", to="#application.errorMail#", from="#application.fromEmail#" ) {
-                writeOutput("#local.logEntry#");
+            cfmail(subject="#ucase(arguments.level)# in #application.projectName#", to="#application.errorMail#", from="#application.fromEmail#" type="html" ) {
+                dump(local.logEntry);
             }
         }
 
