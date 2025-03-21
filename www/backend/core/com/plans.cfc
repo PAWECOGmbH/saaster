@@ -323,7 +323,7 @@ component displayname="plans" output="false" {
 
         local.arrPlan = arrayNew(1);
 
-        if (local.getPlan.recordCount) {
+        if (local.getPlan.recordCount and local.getPlan.intPlanID gt 0) {
 
             cfloop( query = local.getPlan ) {
 
