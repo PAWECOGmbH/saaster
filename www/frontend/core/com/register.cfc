@@ -91,14 +91,6 @@ component displayname="customer" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
-        param name="local.company_name" default="";
-        param name="local.first_name" default="";
-        param name="local.last_name" default="";
-        param name="local.email" default="";
-        param name="local.language" default="";
-        param name="local.password" default=""; //(the password must be hashed already!)
-        param name="local.uuid" default="";
-
         local.company_name = '';
         local.first_name = '';
         local.last_name = '';
@@ -132,7 +124,6 @@ component displayname="customer" output="false" {
         if (structKeyExists(arguments.customerStruct, "strUUID")) {
             local.uuid = trim(arguments.customerStruct.strUUID);
         }
-
 
 
         try {

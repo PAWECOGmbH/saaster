@@ -3,7 +3,6 @@
 
 // This file gets executed from the scheduler every 2 minutes
 
-setting requesttimeout = 1000;
 objLogs = application.objLog;
 objTime = new backend.core.com.time(1);
 

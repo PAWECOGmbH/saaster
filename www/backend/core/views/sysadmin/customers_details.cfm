@@ -14,7 +14,6 @@
     // Customers currency
     custCurrency = getCustomer.currencyStruct.iso;
     custCurrencyID = new backend.core.com.currency().getCurrency(custCurrency).id;
-
     if (!isStruct(getCustomer) or structIsEmpty(getCustomer)) {
         location url="#application.mainURL#/sysadmin/customers" addtoken="false";
     }
