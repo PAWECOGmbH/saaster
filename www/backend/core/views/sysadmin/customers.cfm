@@ -61,11 +61,16 @@
 
         qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start, session.cust_sort);
     }else {
-        
+
         qCustomers = objSysadmin.getCustomer(cust_start, session.cust_sort);
     }
 
     cntCountries = application.objGlobal.getCountry().recordCount;
+
+    qCountries = application.objGlobal.getCountry();
+    if (!qCountries.recordCount) {
+        timeZones = new backend.core.com.time().getTimezones();
+    }
 
 </cfscript>
 
@@ -85,6 +90,12 @@
                             <li class="breadcrumb-item">Sysadmin</li>
                             <li class="breadcrumb-item active">Customers</li>
                         </ol>
+                    </div>
+                    <!--- Button new customer --->
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                        <a href="##" data-bs-toggle="modal" data-bs-target="##customer_new" class="btn btn-primary">
+                            <i class="fas fa-plus pe-3"></i> New customer
+                        </a>
                     </div>
                 </div>
             </div>
@@ -256,6 +267,82 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>
+
+<!--- Modal new customer --->
+<cfoutput>
+    <form action="#application.mainURL#/sysadm/customers" method="post">
+        <input type="hidden" name="add_customer">
+        <div id="customer_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add new customer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Company *</label>
+                            <input type="text" name="company" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">First name *</label>
+                            <input type="text" name="first_name" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last name *</label>
+                            <input type="text" name="last_name" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-Mail address *</label>
+                            <input type="email" name="email" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password *</label>
+                            <input type="text" name="password" class="form-control" autocomplete="off" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">#getTrans('formLanguage')#</label>
+                            <select name="language" class="form-select">
+                                <cfloop list="#application.allLanguages#" index="i">
+                                    <cfset lngIso = listfirst(i,"|")>
+                                    <cfset lngName = listlast(i,"|")>
+                                    <option value="#lngIso#" <cfif lngIso eq session.lng>selected</cfif>>#lngName#</option>
+                                </cfloop>
+                            </select>
+                        </div>
+                        <cfif qCountries.recordCount>
+                            <div class="mb-3">
+                                <label class="form-label">#getTrans('formCountry')# *</label>
+                                <select name="countryID" class="form-select" required>
+                                    <option value=""></option>
+                                    <cfloop query="qCountries">
+                                        <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                    </cfloop>
+                                </select>
+                            </div>
+                        <cfelse>
+                            <div class="mb-3">
+                                <label class="form-label">#getTrans('titTimezone')# *</label>
+                                <select name="timezoneID" class="form-select" required>
+                                    <option value=""></option>
+                                    <cfloop array="#timeZones#" index="i">
+                                        <option value="#i.id#">#i.timezone# - #i.city# (#i.utc#)</option>
+                                    </cfloop>
+                                </select>
+                            </div>
+                        </cfif>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Save customer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </cfoutput>
