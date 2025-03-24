@@ -12,7 +12,6 @@ services:
     volumes:
       - ./www:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
-      - ./config/nginx/custom.conf:/etc/nginx/custom.conf
       - userdata_volume:/var/www/userdata
     networks:
       - npm_network
