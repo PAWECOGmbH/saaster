@@ -11,7 +11,3 @@ config.cfm
 ### Log files ###
 www/logs
 .history
-
-### NGINX files ###
-config/nginx/*
-!config/nginx/.gitkeep
