@@ -42,10 +42,9 @@ mv config/example.env .env
 ```
 Update the ```.env``` file with your configuration. You can also adopt the suggestions for the local environment.<br><br>
 
-<b>5. Configure custom NGINX settings</b><br>
-Copy the example config file for your own NGINX settings:
+<b>5. Copy the NGINX base settings</b><br>
 ```
-mv config/example.custom.conf config/nginx/custom.conf
+mv config/example.base.conf config/nginx/base.conf
 ```
 
 <b>6. Set up the application configuration</b><br>
@@ -70,10 +69,10 @@ Access the Lucee admin interface:
 
 + <b>URL:</b> ```http://localhost:8080/lucee/admin/server.cfm```
 + <b>Steps:</b>
-  + Set up the database connection (<b>important:</b> Make sure to enable 'Allow Multiple Queries.') 
+  + Set up the database connection (<b>important:</b> Make sure to enable 'Allow Multiple Queries.')
   + Configure SMTP (you can use Inbucket for local email handling).
   + Adjust any additional settings required for your development setup.
- 
+
 <br>
 
 <b>9. Set up Saaster</b><br>
@@ -152,7 +151,7 @@ We welcome contributions from developers to help improve Saaster. Whether it's f
    	Implement your changes and commit them with a clear and concise commit message:<br>
   	```git add .```<br>
   	```git commit -m "Add feature description"```
-  	
+
 5.	<b>Push your branch</b><br>
 	Push your branch to your forked repository:<br>
 	```git push origin feature/your-feature-name```
