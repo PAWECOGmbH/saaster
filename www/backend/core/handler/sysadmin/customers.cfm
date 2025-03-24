@@ -17,7 +17,7 @@
         param name="form.billing_address" default="";
         param name="form.billing_info" default="";
 
-        // Check whether the email is valid 
+        // Check whether the email is valid
         checkEmail = application.objGlobal.checkEmail(form.email);
         if (!checkEmail) {
             getAlert('alertEnterEmail', 'warning');
@@ -45,6 +45,7 @@
 
     }
 
+    // Edit user
     if (structKeyExists(form, "edit_user")) {
         param name="form.customer_id" default="";
         param name="form.user_id " default="";
@@ -115,4 +116,116 @@
 
         location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id#" addtoken="false";
     }
+
+    // Add new customer
+    if (structKeyExists(form, "add_customer")) {
+
+        customerStruct = {};
+        customerStruct['strCompanyName'] = form.company;
+        customerStruct['strFirstName'] = form.first_name;
+        customerStruct['strLastName'] = form.last_name;
+        customerStruct['strEmail'] = form.email;
+        customerStruct['strLanguage'] = form.language;
+        customerStruct['password'] = form.password;
+
+        checkEmail = application.objGlobal.checkEmail(form.email);
+
+        if (checkEmail) {
+
+            // Check for already registered email
+            qCheckDouble = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    strEmail = {type: "nvarchar", value: form.email}
+                },
+                sql = "
+                    SELECT intUserID
+                    FROM users
+                    WHERE strEmail = :strEmail
+                "
+            );
+
+            if (qCheckDouble.recordCount) {
+                getAlert('This e-mail address is already in use!', 'warning');
+                location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+            }
+
+            // Hash and salt the password
+            hashedStruct = application.objGlobal.generateHash(form.password);
+            customerStruct['hash'] = hashedStruct.thisHash;
+            customerStruct['salt'] = hashedStruct.thisSalt;
+
+            // Save the customer into the db
+            objRegister = new frontend.core.com.register();
+            insertCustomer = objRegister.insertCustomer(customerStruct);
+            if (insertCustomer.success) {
+
+                qNewUser = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        strEmail = {type: "nvarchar", value: form.email}
+                    },
+                    sql = "
+                        SELECT intCustomerID
+                        FROM users
+                        WHERE strEmail = :strEmail
+                    "
+                );
+
+                newCustomerID = qNewUser.intCustomerID;
+
+                // Update country or timezone
+                if (structKeyExists(form, "countryID") and isNumeric(form.countryID)) {
+
+                    queryExecute(
+                        options = {datasource = application.datasource},
+                        params = {
+                            intCustomerID: {type: "numeric", value: newCustomerID},
+                            intCountryID: {type: "numeric", value: form.countryID}
+                        },
+                        sql = "
+                            UPDATE customers
+                            SET intCountryID = :intCountryID
+                            WHERE intCustomerID = :intCustomerID
+                        "
+                    )
+
+                } else {
+
+                    queryExecute(
+                        options = {datasource = application.datasource},
+                        params = {
+                            intCustomerID: {type: "numeric", value: newCustomerID},
+                            intTimeZoneID: {type: "numeric", value: form.timezoneID}
+                        },
+                        sql = "
+                            UPDATE customers
+                            SET intTimeZoneID = :intTimeZoneID
+                            WHERE intCustomerID = :intCustomerID
+                        "
+                    )
+
+                }
+
+                getAlert('The new customer has been added.', 'success');
+
+
+            } else {
+
+                getAlert(insertCustomer.message, 'danger');
+
+            }
+
+            location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+
+
+
+        }
+
+
+
+    }
+
+
+
 </cfscript>

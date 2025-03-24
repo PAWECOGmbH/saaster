@@ -42,8 +42,12 @@ mv config/example.env .env
 ```
 Update the ```.env``` file with your configuration. You can also adopt the suggestions for the local environment.<br><br>
 
+<b>5. Copy the NGINX base settings</b><br>
+```
+mv config/example.base.conf config/nginx/base.conf
+```
 
-<b>5. Set up the application configuration</b><br>
+<b>6. Set up the application configuration</b><br>
 Copy the example configuration file and make any necessary changes:
 ```
 mv config/example.config_dev.cfm www/config.cfm
@@ -54,24 +58,24 @@ Note: If you change the ```config.cfm``` file after the first start of the appli
 
 <br>
 
-<b>6. Start the containers</b><br>
+<b>7. Start the containers</b><br>
 Use Docker Compose to start the development environment:
 ```
 docker compose -f compose-dev.yml up
 ```
 
-<b>7. Configure Lucee</b><br>
+<b>8. Configure Lucee</b><br>
 Access the Lucee admin interface:
 
 + <b>URL:</b> ```http://localhost:8080/lucee/admin/server.cfm```
 + <b>Steps:</b>
-  + Set up the database connection (<b>important:</b> Make sure to enable 'Allow Multiple Queries.') 
+  + Set up the database connection (<b>important:</b> Make sure to enable 'Allow Multiple Queries.')
   + Configure SMTP (you can use Inbucket for local email handling).
   + Adjust any additional settings required for your development setup.
- 
+
 <br>
 
-<b>8. Set up Saaster</b><br>
+<b>9. Set up Saaster</b><br>
 Run the setup script to initialize Saaster:
 
 + <b>URL:</b> ```http://localhost:8080/setup/index.cfm```
@@ -147,7 +151,7 @@ We welcome contributions from developers to help improve Saaster. Whether it's f
    	Implement your changes and commit them with a clear and concise commit message:<br>
   	```git add .```<br>
   	```git commit -m "Add feature description"```
-  	
+
 5.	<b>Push your branch</b><br>
 	Push your branch to your forked repository:<br>
 	```git push origin feature/your-feature-name```
@@ -175,14 +179,5 @@ For more information or if you're unsure about something, feel free to open an i
 - [Fontawesome](https://fontawesome.com/v4/license/)
 - [jquery](https://github.com/jquery/jquery)
 - [taffy](https://github.com/atuttle/Taffy)
-
-
-
-
-
-
-
-
-
 
 
