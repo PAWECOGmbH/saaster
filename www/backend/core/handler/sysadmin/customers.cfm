@@ -174,8 +174,8 @@
 
                 newCustomerID = qNewUser.intCustomerID;
 
-                // Update country or tinezone
-                if (len(trim(form.countryID))) {
+                // Update country or timezone
+                if (structKeyExists(form, "countryID") and isNumeric(form.countryID)) {
 
                     queryExecute(
                         options = {datasource = application.datasource},
