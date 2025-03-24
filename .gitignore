@@ -13,4 +13,5 @@ www/logs
 .history
 
 ### NGINX files ###
-config/nginx
+config/nginx/*
+!config/nginx/.gitkeep
