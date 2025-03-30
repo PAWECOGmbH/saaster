@@ -1,48 +1,91 @@
 #!/bin/bash
 
-# Enable automatic export of variables
 set -a
 
-# Load the .env file from the project root
+# --------------------------------------
+# CONFIGURATION
+# --------------------------------------
+
+LOGFILE="/var/log/backup-cron.log"
+echo "[BACKUP START] $(date)" | tee -a $LOGFILE
+
+# Load environment variables from .env
 source "$(dirname "$0")/../../.env"
 
-# Dynamically generate volume names based on the project
+# Setup volume names and timestamp
 DB_VOLUME="${COMPOSE_PROJECT_NAME}_db_volume"
 USERDATA_VOLUME="${COMPOSE_PROJECT_NAME}_userdata_volume"
-
-# Date format for versioning (e.g., 20241022_2300)
 TIMESTAMP=$(date +"%Y%m%d_%H%M")
 
-# Check if the /backup folder exists and create it if necessary
-if [ ! -d "/backup" ]; then
-    mkdir -p /backup
-fi
+# Ensure local backup directory exists
+mkdir -p /backup
 
 # Create remote directories if they don't exist
-ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} "mkdir -p ${REMOTE_BACKUP_PATH}/db ${REMOTE_BACKUP_PATH}/userdata ${REMOTE_BACKUP_PATH}/lucee"
+ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} \
+  "mkdir -p ${REMOTE_BACKUP_PATH}/{db,userdata,lucee}" >> $LOGFILE 2>&1
 
-# Backup database volume and store in the remote db directory
-docker run --rm -v ${DB_VOLUME}:/volume -v /backup:/backup alpine sh -c "tar -czf /backup/database_${TIMESTAMP}.tar.gz -C /volume ."
-scp -i ${SSH_KEY_PATH} /backup/database_${TIMESTAMP}.tar.gz ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/db/
+# --------------------------------------
+# DATABASE BACKUP
+# --------------------------------------
 
-# Backup userdata volume and store in the remote userdata directory
-docker run --rm -v ${USERDATA_VOLUME}:/volume -v /backup:/backup alpine sh -c "tar -czf /backup/userdata_${TIMESTAMP}.tar.gz -C /volume ."
-scp -i ${SSH_KEY_PATH} /backup/userdata_${TIMESTAMP}.tar.gz ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/userdata/
+echo "[DB] Creating archive..." | tee -a $LOGFILE
+docker run --rm -v ${DB_VOLUME}:/volume -v /backup:/backup alpine sh -c \
+  "tar -czf /backup/database_${TIMESTAMP}.tar.gz -C /volume ." >> $LOGFILE 2>&1
 
-# Backup Lucee image and store in the remote lucee directory
-docker save -o /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar ${LUCEE_IMAGE}:${LUCEE_IMAGE_VERSION}
-scp -i ${SSH_KEY_PATH} /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/lucee/
+echo "[DB] Uploading to remote..." >> $LOGFILE
+scp -i ${SSH_KEY_PATH} /backup/database_${TIMESTAMP}.tar.gz \
+  ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/db/ >> $LOGFILE 2>&1
 
-# Rotate backups: Keep only the latest 30 backups per type
+# Verify and delete local backup if transfer succeeded
+ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} \
+  "[ -f ${REMOTE_BACKUP_PATH}/db/database_${TIMESTAMP}.tar.gz ]" \
+  && { echo "[DB] Remote verified, deleting local file" | tee -a $LOGFILE; rm /backup/database_${TIMESTAMP}.tar.gz; } \
+  || echo "[DB] Remote file missing – NOT deleted" | tee -a $LOGFILE
 
-# For database backups
-ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} "cd ${REMOTE_BACKUP_PATH}/db && ls -tp | grep -v '/$' | tail -n +31 | xargs -I {} rm -- {}"
+# --------------------------------------
+# USERDATA BACKUP
+# --------------------------------------
 
-# For userdata backups
-ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} "cd ${REMOTE_BACKUP_PATH}/userdata && ls -tp | grep -v '/$' | tail -n +31 | xargs -I {} rm -- {}"
+echo "[USERDATA] Creating archive..." | tee -a $LOGFILE
+docker run --rm -v ${USERDATA_VOLUME}:/volume -v /backup:/backup alpine sh -c \
+  "tar -czf /backup/userdata_${TIMESTAMP}.tar.gz -C /volume ." >> $LOGFILE 2>&1
 
-# For Lucee image backups
-ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} "cd ${REMOTE_BACKUP_PATH}/lucee && ls -tp | grep -v '/$' | tail -n +31 | xargs -I {} rm -- {}"
+echo "[USERDATA] Uploading to remote..." | tee -a $LOGFILE
+scp -i ${SSH_KEY_PATH} /backup/userdata_${TIMESTAMP}.tar.gz \
+  ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/userdata/ >> $LOGFILE 2>&1
 
-# Disable automatic export of variables
+ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} \
+  "[ -f ${REMOTE_BACKUP_PATH}/userdata/userdata_${TIMESTAMP}.tar.gz ]" \
+  && { echo "[USERDATA] Remote verified, deleting local file" | tee -a $LOGFILE; rm /backup/userdata_${TIMESTAMP}.tar.gz; } \
+  || echo "[USERDATA] Remote file missing – NOT deleted" | tee -a $LOGFILE
+
+# --------------------------------------
+# LUCEE IMAGE BACKUP
+# --------------------------------------
+
+echo "[LUCEE] Saving Docker image..." | tee -a $LOGFILE
+docker save -o /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar \
+  ${LUCEE_IMAGE}:${LUCEE_IMAGE_VERSION} >> $LOGFILE 2>&1
+
+echo "[LUCEE] Uploading to remote..." | tee -a $LOGFILE
+scp -i ${SSH_KEY_PATH} /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar \
+  ${SERVER_USER}@${SERVER_IP}:${REMOTE_BACKUP_PATH}/lucee/ >> $LOGFILE 2>&1
+
+ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} \
+  "[ -f ${REMOTE_BACKUP_PATH}/lucee/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar ]" \
+  && { echo "[LUCEE] Remote verified, deleting local file" | tee -a $LOGFILE; rm /backup/image_${LUCEE_IMAGE}_${LUCEE_IMAGE_VERSION}_${TIMESTAMP}.tar; } \
+  || echo "[LUCEE] Remote file missing – NOT deleted" | tee -a $LOGFILE
+
+# --------------------------------------
+# REMOTE ROTATION
+# --------------------------------------
+
+echo "[ROTATE] Cleaning up old remote backups..." | tee -a $LOGFILE
+for folder in db userdata lucee; do
+  ssh -i ${SSH_KEY_PATH} ${SERVER_USER}@${SERVER_IP} \
+    "cd ${REMOTE_BACKUP_PATH}/$folder && ls -tp | grep -v '/$' | tail -n +31 | xargs -I {} rm -- {}" >> $LOGFILE 2>&1
+done
+
+echo "[BACKUP DONE] $(date)" | tee -a $LOGFILE
+
 set +a
