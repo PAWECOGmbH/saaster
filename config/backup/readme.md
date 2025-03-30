@@ -36,6 +36,7 @@ This will:
 -   Backup the **user data volume**.
 -   Backup the **Lucee image**.
 -   Securely transfer all backups to the remote backup server.
+-   Backups are only deleted locally if the remote transfer was successful.
 
 Each backup will be **timestamped** in the format `YYYYMMDD_HHMM`, ensuring you can differentiate between multiple backup versions.
 
@@ -60,11 +61,15 @@ To perform a restore, you need to specify which backup you want to restore by us
 - To list all available backups on the remote server:
  `bash restore.sh --list`
 
+ - After each restore, the downloaded backup file is automatically deleted from the `/restore/` folder to keep the system clean.
+
 
 ## **Automating Backups**
 
 To automate the backup process, you can set up a **cron job** to run the backup script at regular intervals (e.g., daily). For example, to run the backup every night at midnight, add the following entry to your crontab:
 `0 0 * * * /path/to/your/project/config/backup/backup.sh`
+Backup logs are written to /var/log/backup-cron.log
+You can review this log to verify execution and spot issues.
 
 
 ## **Notes**
@@ -72,3 +77,6 @@ To automate the backup process, you can set up a **cron job** to run the backup 
 -   These backups are intended for the **production** and **staging** environments. Ensure that the environment variables in the `.env` file are correctly configured before running any backups or restores.
 -   The backup script automatically **rotates** backups, keeping only the **latest 30 backups** per backup type (database, user data, Lucee image) by removing older backups on the remote server.
 -   Always ensure that your **SSH keys** and **server information** are secure, as they are used for transferring backups between the production or staging environment and the remote server.
+-   Locally created backup files are deleted only if the remote copy exists to prevent data loss.
+-   Backups on the remote server are rotated automatically: only the latest 30 backups per type are kept.
+-   The restore script stops immediately if any step fails, ensuring that incomplete restores do not go unnoticed.

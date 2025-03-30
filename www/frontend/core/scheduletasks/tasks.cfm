@@ -122,11 +122,8 @@ if (url.pass eq variables.schedulePassword) {
                                 // Stop schedulecontrol
                                 application.objSysadmin.stopScheduleControl(url.task);
 
-                                // Deactivate the schedule task
-                                application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
-
                                 // Make log
-                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task, the task has been deactivated [File: #qGetTasks.strPath#, Error: #e.message#]", false);
+                                objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task [File: #qGetTasks.strPath#, Error: #e.message#]", false);
 
                                 // Send email to the developer with the error dump
                                 cfmail(subject="Error in included scheduletask file", to="#application.errorMail#", from="#application.fromEmail#" type="html" ) {
