@@ -44,7 +44,7 @@ Update the ```.env``` file with your configuration. You can also adopt the sugge
 
 <b>5. Copy the NGINX base settings</b><br>
 ```
-mv config/example.base.conf config/nginx/base.conf
+mv config/example.base.conf config/nginx/conf.d/base.conf
 ```
 
 <b>6. Set up the application configuration</b><br>
