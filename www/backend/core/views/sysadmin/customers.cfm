@@ -143,11 +143,11 @@
                                     <table class="table table-vcenter table-mobile-md card-table">
                                         <thead>
                                             <tr>
-                                                <th width="30%">Company</th>
+                                                <th width="20%">Company</th>
                                                 <th width="20%">Contact</th>
                                                 <th width="20%">City</th>
                                                 <th width="20%">Phone</th>
-                                                <th width="5%"></th>
+                                                <th width="15%"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -189,6 +189,9 @@
                                                         <div class="btn-list flex-nowrap">
                                                             <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomers.intCustomerID#" class="btn">
                                                                 Edit
+                                                            </a>
+                                                            <a href="#application.mainURL#/sysadm/customers?logincustomer=#qCustomers.intCustomerID#" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Login as customer" onclick="return confirm('You are about to leave your sysadmin session and log in as this customer. Do you want to proceed?')">
+                                                                Login
                                                             </a>
                                                         </div>
                                                     </td>
