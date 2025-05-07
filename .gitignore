@@ -11,3 +11,6 @@ config.cfm
 ### Log files ###
 www/logs
 .history
+
+### NGINX configs ###
+config/nginx/conf.d/*.conf
