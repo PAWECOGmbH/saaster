@@ -8,7 +8,6 @@
 if (application.environment eq "dev") {
 
     cfhttp( url=variables.payrexxWebhookDev, result="httpRes", method="GET" ) {}
-
     if (isJSON(httpRes.filecontent)) {
         jsonData = deSerializeJSON(httpRes.filecontent);
     } else {
@@ -34,12 +33,17 @@ if (application.environment eq "dev") {
     }
 
     jsonData = getHttpRequestData().content;
+    if (!isJSON(jsonData)) {
+        logWrite("payrexx", "warning", "jsonData is not of type JSON!");
+        abort;
+    }
+
     jsonData = deSerializeJSON(jsonData);
 
 }
 
 
-if (structKeyExists(jsonData, "transaction")) {
+if (isStruct(jsonData) and structKeyExists(jsonData, "transaction")) {
 
     webhookData = jsonData.transaction;
 
@@ -64,128 +68,135 @@ if (structKeyExists(jsonData, "transaction")) {
             customerID = listFirst(webhookData.referenceId, "@");
             projectName = listLast(webhookData.referenceId, "@");
         }
-        if (structKeyExists(webhookData, "id")) {
-            internTransID = webhookData.id;
-        }
-        if (structKeyExists(webhookData, "invoice")) {
-            invoiceData = webhookData.invoice;
-            if (structKeyExists(invoiceData, "paymentRequestId") and isNumeric(invoiceData.paymentRequestId)) {
-                gatewayID = invoiceData.paymentRequestId;
+
+        if (isNumeric(customerID) and customerID gt 0) {
+
+            if (structKeyExists(webhookData, "id")) {
+                internTransID = webhookData.id;
             }
-        }
-        if (structKeyExists(webhookData, "amount") and isNumeric(webhookData.amount) and webhookData.amount gt 0) {
-            paymentAmount = numberFormat(webhookData.amount/100, "__.__");
-        }
-        if (structKeyExists(webhookData, "time") and isDate(webhookData.time)) {
-            objTime = new backend.core.com.time();
-            dateTime = objTime.local2utc(webhookData.time, "Europe/Zurich");
-        }
-        if (structKeyExists(webhookData, "status")) {
-            status = webhookData.status;
-        }
-        if (structKeyExists(webhookData, "lang")) {
-            language = webhookData.lang;
-        }
-        if (structKeyExists(webhookData, "psp")) {
-            serviceProvider = webhookData.psp;
-        }
-        if (structKeyExists(webhookData, "pspId") and isNumeric(webhookData.pspId) and webhookData.pspId gt 0) {
-            serviceProviderID = webhookData.pspId;
-        }
-        if (structKeyExists(webhookData, "payrexxFee") and isNumeric(webhookData.pspId) and webhookData.pspId gt 0) {
-            payrexxFee = numberFormat(webhookData.payrexxFee/100, "__.__");
-        }
-        if (structKeyExists(webhookData, "payment")) {
-            if (structKeyExists(webhookData.payment, "brand")) {
-                paymentBrand = webhookData.payment.brand;
-                paymentBrand = left(uCase(paymentBrand), 1) & right(paymentBrand, len(paymentBrand) -1);
+            if (structKeyExists(webhookData, "invoice")) {
+                invoiceData = webhookData.invoice;
+                if (structKeyExists(invoiceData, "paymentRequestId") and isNumeric(invoiceData.paymentRequestId)) {
+                    gatewayID = invoiceData.paymentRequestId;
+                }
             }
-            if (structKeyExists(webhookData.payment, "cardNumber")) {
-                cardNumber = webhookData.payment.cardNumber;
+            if (structKeyExists(webhookData, "amount") and isNumeric(webhookData.amount) and webhookData.amount gt 0) {
+                paymentAmount = numberFormat(webhookData.amount/100, "_.__");
             }
-        }
-
-        // Is there already a default payment method?
-        getWebhook = new backend.core.com.payrexx().getWebhook(customerID, 'authorized', 1);
-        if (getWebhook.recordCount) {
-            default = 0;
-        } else {
-            default = 1;
-        }
-
-        // Insert only if it's the correct webhook
-        if (projectName eq variables.applicationname) {
-
-            try {
-
-                queryExecute(
-
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: customerID},
-                        transID: {type: "numeric", value: internTransID},
-                        gatewayID: {type: "numeric", value: gatewayID},
-                        paymentAmount: {type: "decimal", value: paymentAmount, scale: 2},
-                        dateTime: {type: "datetime", value: dateTime},
-                        status: {type: "varchar", value: status},
-                        language: {type: "varchar", value: language},
-                        serviceProvider: {type: "varchar", value: serviceProvider},
-                        serviceProviderID: {type: "numeric", value: serviceProviderID},
-                        payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
-                        paymentBrand: {type: "nvarchar", value: paymentBrand},
-                        cardNumber: {type: "varchar", value: cardNumber},
-                        default: {type: "boolean", value: default}
-                    },
-                    sql = "
-                        INSERT INTO payrexx
-                        (
-                            intCustomerID,
-                            dtmTimeUTC,
-                            intGatewayID,
-                            intTransactionID,
-                            strStatus,
-                            strLanguage,
-                            strPSP,
-                            intPSPID,
-                            decAmount,
-                            decPayrexxFee,
-                            strPaymentBrand,
-                            strCardNumber,
-                            blnDefault
-                        )
-                        VALUES (
-                            :customerID,
-                            :dateTime,
-                            :gatewayID,
-                            :transID,
-                            :status,
-                            :language,
-                            :serviceProvider,
-                            :serviceProviderID,
-                            :paymentAmount,
-                            :payrexxFee,
-                            :paymentBrand,
-                            :cardNumber,
-                            :default
-                        )
-
-                    "
-                )
-
-                logWrite("payrexx", "info", "Webhook data successfully saved [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#]");
-
-
-            } catch (any e) {
-
-                logWrite("payrexx", "error", "Could not insert the webhook data into the payrexx table. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, Error: #e.message#]", true);
-
+            if (structKeyExists(webhookData, "time") and isDate(webhookData.time)) {
+                objTime = new backend.core.com.time();
+                dateTime = objTime.local2utc(webhookData.time, "Europe/Zurich");
+            }
+            if (structKeyExists(webhookData, "status")) {
+                status = webhookData.status;
+            }
+            if (structKeyExists(webhookData, "lang")) {
+                language = webhookData.lang;
+            }
+            if (structKeyExists(webhookData, "psp")) {
+                serviceProvider = webhookData.psp;
+            }
+            if (structKeyExists(webhookData, "pspId") and isNumeric(webhookData.pspId) and webhookData.pspId gt 0) {
+                serviceProviderID = webhookData.pspId;
+            }
+            if (structKeyExists(webhookData, "payrexxFee") and isNumeric(webhookData.pspId) and webhookData.pspId gt 0) {
+                payrexxFee = numberFormat(webhookData.payrexxFee/100, "_.__");
+            }
+            if (structKeyExists(webhookData, "payment")) {
+                if (structKeyExists(webhookData.payment, "brand")) {
+                    paymentBrand = webhookData.payment.brand;
+                    paymentBrand = left(uCase(paymentBrand), 1) & right(paymentBrand, len(paymentBrand) -1);
+                }
+                if (structKeyExists(webhookData.payment, "cardNumber")) {
+                    cardNumber = webhookData.payment.cardNumber;
+                }
             }
 
-        } else {
+            // Is there already a default payment method?
+            getWebhook = new backend.core.com.payrexx().getWebhook(customerID, 'authorized', 1);
+            if (getWebhook.recordCount) {
+                default = 0;
+            } else {
+                default = 1;
+            }
 
-            logWrite("payrexx", "warning", "Webhook could not be inserted because the application name does not match the project name. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, projectName: #projectName#, applicationName: #variables.applicationname#]");
+            // Insert only if it's the correct webhook
+            if (projectName eq variables.applicationname) {
+
+                try {
+
+                    queryExecute(
+
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: customerID},
+                            transID: {type: "numeric", value: internTransID},
+                            gatewayID: {type: "numeric", value: gatewayID},
+                            paymentAmount: {type: "decimal", value: paymentAmount, scale: 2},
+                            dateTime: {type: "datetime", value: dateTime},
+                            status: {type: "varchar", value: status},
+                            language: {type: "varchar", value: language},
+                            serviceProvider: {type: "varchar", value: serviceProvider},
+                            serviceProviderID: {type: "numeric", value: serviceProviderID},
+                            payrexxFee: {type: "decimal", value: payrexxFee, scale: 2},
+                            paymentBrand: {type: "nvarchar", value: paymentBrand},
+                            cardNumber: {type: "varchar", value: cardNumber},
+                            default: {type: "boolean", value: default}
+                        },
+                        sql = "
+                            INSERT INTO payrexx
+                            (
+                                intCustomerID,
+                                dtmTimeUTC,
+                                intGatewayID,
+                                intTransactionID,
+                                strStatus,
+                                strLanguage,
+                                strPSP,
+                                intPSPID,
+                                decAmount,
+                                decPayrexxFee,
+                                strPaymentBrand,
+                                strCardNumber,
+                                blnDefault
+                            )
+                            VALUES (
+                                :customerID,
+                                :dateTime,
+                                :gatewayID,
+                                :transID,
+                                :status,
+                                :language,
+                                :serviceProvider,
+                                :serviceProviderID,
+                                :paymentAmount,
+                                :payrexxFee,
+                                :paymentBrand,
+                                :cardNumber,
+                                :default
+                            )
+
+                        "
+                    )
+
+                    logWrite("payrexx", "info", "Webhook data successfully saved [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#]");
+
+
+                } catch (any e) {
+
+                    logWrite("payrexx", "error", "Could not insert the webhook data into the payrexx table. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, Error: #e.message#]", true);
+
+                }
+
+            } else {
+
+                logWrite("payrexx", "warning", "Webhook could not be inserted because the application name does not match the project name. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, projectName: #projectName#, applicationName: #variables.applicationname#]");
+
+            }
 
         }
+
+
 
     } else {
 

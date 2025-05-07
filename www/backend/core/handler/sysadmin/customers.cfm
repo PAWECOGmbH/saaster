@@ -222,7 +222,53 @@
 
         }
 
+    }
 
+
+    // Login as a customer
+    if (structKeyExists(url, "logincustomer") and isNumeric(url.logincustomer)) {
+
+        if (session.sysadmin) {
+
+            // Get customer data
+            qCustomer = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    intCustomerID: {type: "numeric", value: url.logincustomer}
+                },
+                sql = "
+                    SELECT *
+                    FROM users
+                    WHERE intCustomerID = :intCustomerID
+                    AND blnSuperAdmin = 1
+                    LIMIT 1
+                "
+            );
+
+            if (qCustomer.recordCount) {
+
+                // Overwrite session data
+                session.user_id = qCustomer.intUserID;
+                session.customer_id = qCustomer.intCustomerID;
+                session.user_name = qCustomer.strFirstName & " " & qCustomer.strLastName;
+                session.user_email = qCustomer.strEmail;
+                session.last_login = qCustomer.dtmLastLogin;
+                session.admin = 1;
+                session.superadmin = 1;
+                session.sysadmin = 0;
+                session.supportLogin = 1;
+
+                // Set plans and modules as well as the custom settings into a session
+                application.objCustomer.setProductSessions(session.customer_id, session.lng);
+
+                // Go to dashboard
+                location url="#application.mainURL#/dashboard" addtoken="false";
+
+            }
+
+        }
+
+        location url="#application.mainURL#/sysadmin/customers" addtoken="false";
 
     }
 

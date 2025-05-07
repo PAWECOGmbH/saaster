@@ -71,6 +71,12 @@
                             #getTrans('txtLogout')#
                         </a>
 
+                        <cfif structKeyExists(session, "supportLogin") and session.supportLogin>
+                            <a class="dropdown-item" href="#application.mainURL#/customer?sysadmin">
+                                Return to SysAdmin
+                            </a>
+                        </cfif>
+
                     </div>
 
                 </div>

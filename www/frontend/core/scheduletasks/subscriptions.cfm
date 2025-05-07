@@ -372,7 +372,7 @@ if (url.pass eq variables.schedulePassword) {
                 invoiceStruct['bookingID'] = qRenewBookings.intBookingID;
                 invoiceStruct['customerID'] = qRenewBookings.intCustomerID;
                 invoiceStruct['title'] = getTrans('titRenewal') & " " & moduleData.name;
-                invoiceStruct['currency'] = lastInvoice.invoiceCurrency;
+                invoiceStruct['currency'] = currency;
                 invoiceStruct['isNet'] = moduleData.isNet;
                 invoiceStruct['vatType'] = moduleData.vatType;
                 invoiceStruct['paymentStatusID'] = 2;

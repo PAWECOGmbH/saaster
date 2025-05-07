@@ -340,6 +340,47 @@ if (structKeyExists(url, "change_tenant")) {
 
 }
 
+// Get back to the sysadmin view
+if (structKeyExists(url, "sysadmin")) {
+
+    if (structKeyExists(session, "supportLogin") and session.supportLogin) {
+
+        // Get sysadmin data
+        qCustomer = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM users
+                WHERE blnSysAdmin = 1
+                LIMIT 1
+            "
+        );
+
+        if (qCustomer.recordCount) {
+
+            // Overwrite session data
+            session.user_id = qCustomer.intUserID;
+            session.customer_id = qCustomer.intCustomerID;
+            session.user_name = qCustomer.strFirstName & " " & qCustomer.strLastName;
+            session.user_email = qCustomer.strEmail;
+            session.last_login = qCustomer.dtmLastLogin;
+            session.admin = 1;
+            session.superadmin = 1;
+            session.sysadmin = 1;
+            session.supportLogin = 0;
+
+            // Set plans and modules as well as the custom settings into a session
+            application.objCustomer.setProductSessions(session.customer_id, session.lng);
+
+            // Go to dashboard
+            location url="#application.mainURL#/dashboard" addtoken="false";
+
+        }
+
+    }
+
+}
+
 logWrite("user", "warning", "Access attempt to handler/customer.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 location url="#application.mainURL#/dashboard" addtoken="false";
 
