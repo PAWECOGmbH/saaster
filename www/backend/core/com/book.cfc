@@ -928,9 +928,9 @@ component displayname="book" output="false" {
 
         // Make log
         if (local.moduleID gt 0) {
-            application.objLog.logWrite("user", "info", "A module has been updated [CustomerID: #local.customerID#, ModuleID: #local.moduleID#, Recurring: #local.recurring#, Status: #local.status#]");
+            application.objLog.logWrite("scheduletask", "info", "A booking for a module has been updated [CustomerID: #local.customerID#, ModuleID: #local.moduleID#, Recurring: #local.recurring#, Status: #local.status#]");
         } else {
-            application.objLog.logWrite("user", "info", "A plan has been updated [CustomerID: #local.customerID#, PlanID: #local.planID#, Recurring: #local.recurring#, Status: #local.status#]");
+            application.objLog.logWrite("scheduletask", "info", "A booking for a plan has been updated [CustomerID: #local.customerID#, PlanID: #local.planID#, Recurring: #local.recurring#, Status: #local.status#]");
         }
 
         return local.qBooking.intBookingID;
@@ -1019,6 +1019,86 @@ component displayname="book" output="false" {
 
         return local.upgradeStruct;
 
+
+    }
+
+
+    // Send an email to the customer after a module or plan has expired
+    public void function sendExpiredEmail(required numeric customerID, numeric moduleID=0, numeric planID=0) {
+
+        local.getTrans = application.objLanguage.getTrans;
+
+        // Get customer data
+        local.qCustomer = queryExecute (
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT strEmail, strFirstName, strLastName, strLanguage
+                FROM users
+                WHERE intCustomerID = :customerID
+                AND blnSuperAdmin = 1
+                AND blnActive = 1
+            "
+        )
+
+        if (local.qCustomer.recordCount) {
+
+            // Expired email for a module
+            if (arguments.moduleID gt 0) {
+
+                local.objModule = new backend.core.com.modules(language=local.qCustomer.strLanguage);
+                local.moduleData = local.objModule.getModuleData(arguments.moduleID);
+                local.moduleName = local.moduleData.name;
+
+                variables.mailTitle = local.getTrans('titTestPhaseExpired', local.qCustomer.strLanguage) & ": " & local.moduleName;
+                local.mailText = replace(getTrans('msgModuleExpiredPurchase', local.qCustomer.strLanguage), '@modulname@', local.moduleName);
+                local.logText = "Expiration email for the module has been sent to the customer";
+
+            }
+
+            // Expired email for a plan
+            else if (arguments.planID gt 0) {
+
+                local.objPlan = new backend.core.com.plans(language=local.qCustomer.strLanguage);
+                local.planData = local.objPlan.getPlanDetail(arguments.planID);
+                local.planName = local.planData.planName;
+
+                variables.mailTitle = local.getTrans('titTestPhaseExpired', local.qCustomer.strLanguage) & ": " & local.planName;
+                local.mailText = replace(getTrans('msgPlanExpiredPurchase', local.qCustomer.strLanguage), '@planname@', local.planName);
+                local.logText = "Expiration email for the plan has been sent to the customer";
+
+            }
+
+        }
+
+        variables.mailType = "html";
+
+        cfsavecontent (variable = "variables.mailContent") {
+            echo("
+                #getTrans('titHello', local.qCustomer.strLanguage)#  #local.qCustomer.strFirstName# #local.qCustomer.strLastName#<br><br>
+                #local.mailText#<br><br>
+                <a class='mail-btn' href='#application.mainURL#/login' target='_blank'>Login</a>
+                <br><br>
+                #getTrans('txtRegards', local.qCustomer.strLanguage)#<br>
+                #getTrans('txtYourTeam', local.qCustomer.strLanguage)#<br>
+                #application.appOwner#
+            ");
+        }
+
+        // Send email
+        loop query=local.qCustomer {
+
+            mail to="#local.qCustomer.strEmail#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
+                include template="/config.cfm";
+                include template="/frontend/core/mail_design.cfm";
+            }
+
+            // Make Log
+            application.objLog.logWrite("scheduletask", "info", local.logText & " [CustomerID: #arguments.customerID#, Email: #local.qCustomer.strEmail#, ModuleID: #arguments.moduleID#, PlanID: #arguments.planID#]");
+
+        }
 
     }
 
