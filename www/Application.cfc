@@ -119,11 +119,11 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         // For local development only,
         // automatically reinitialize the application without using the reinit URL parameter
-        if (variables.environment eq "dev") {
+        /* if (variables.environment eq "dev") {
             structClear(APPLICATION);
             onApplicationStart();
             application.langStruct = application.objLanguage.initLanguages();
-        }
+        } */
 
         // Check if the user is logged in as a sysadmin
         if (structKeyExists(session, "sysadmin") and session.sysadmin) {

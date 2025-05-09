@@ -554,23 +554,27 @@ if (url.pass eq variables.schedulePassword) {
             }
 
 
-        // Set expired plans or modules to "expired"
-        } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd")) {
+        // Set expired test phases to "expired" if its not already done
+        } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd") and qRenewBookings.strStatus eq "test") {
 
             // Update booking table
             updateStruct = structNew();
             updateStruct['bookingID'] = qRenewBookings.intBookingID;
             updateStruct['status'] = "expired";
 
-            updateBooking = objBook.updateBooking(updateStruct);
-
-            // Make log
-            objLogs.logWrite("scheduletask", "info", "A plan or module has been set to expired [BookingID: CustomerID: #qRenewBookings.intBookingID#, #qRenewBookings.intCustomerID#]");
+            objBook.updateBooking(updateStruct);
 
             // Update scheduletasks
             if (qRenewBookings.intModuleID gt 0) {
                 objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
             }
+
+            // Send expired email to customer
+            local.moduleID = len(qRenewBookings.intModuleID) ? qRenewBookings.intModuleID : 0;
+            local.planID = len(qRenewBookings.intPlanID) ? qRenewBookings.intPlanID : 0;
+
+            objBook.sendExpiredEmail(qRenewBookings.intCustomerID, local.moduleID, local.planID);
+
 
         }
 
