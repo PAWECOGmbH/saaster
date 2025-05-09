@@ -119,7 +119,7 @@ if (url.pass eq variables.schedulePassword) {
 
                                 lastRunSuccessful = false;
 
-                                // Stop schedulecontrol
+                                // Set the last run to the current time and 'runnning' to false
                                 application.objSysadmin.stopScheduleControl(url.task);
 
                                 // Make log
