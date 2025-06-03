@@ -149,51 +149,6 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.path" default="";
         param name="form.redirect" default="";
 
-        mapping = "modules/" & form.prefix & "/settings";
-        path =  "backend/modules/" & form.prefix & "/settings.cfm";
-
-        // Is there already an entry in the custom mappings?
-        qMappings = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                mapping: {type: "varchar", value: mapping}
-            },
-            sql = "
-                SELECT intModuleID
-                FROM custom_mappings
-                WHERE strMapping = :mapping
-            "
-        )
-
-        try {
-
-            if (!qMappings.recordCount) {
-
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        mapping: {type: "varchar", value: mapping},
-                        thispath: {type: "varchar", value: path},
-                        admin: {type: "boolean", value: 1},
-                        superadmin: {type: "boolean", value: 0},
-                        sysadmin: {type: "boolean", value: 0},
-                        moduleID: {type: "numeric", value: form.edit_module}
-                    },
-                    sql = "
-                        INSERT INTO custom_mappings (strMapping, strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, intModuleID)
-                        VALUES (:mapping, :thispath, :admin, :superadmin, :sysadmin, :moduleID)
-                    "
-                )
-
-            }
-
-        } catch (any e) {
-
-            getAlert(e.message, 'danger');
-            location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
-
-        }
-
         if (structKeyExists(form, "free")) {
 
             form.free = 1;
@@ -234,7 +189,6 @@ if (structKeyExists(form, "edit_module")) {
                 test_days: {type: "numeric", value: form.test_days},
                 description: {type: "nvarchar", value: form.desc},
                 moduleID: {type: "numeric", value: form.edit_module},
-                modulePath: {type: "varchar", value: mapping},
                 free: {type: "boolean", value: form.free},
                 redirect: {type: "nvarchar", value: form.redirect}
             },
@@ -247,7 +201,6 @@ if (structKeyExists(form, "edit_module")) {
                     strTabPrefix = :prefix,
                     blnBookable = :bookable,
                     intNumTestDays = :test_days,
-                    strSettingPath = :modulePath,
                     blnFree = :free,
                     strRedirectPath = :redirect
                 WHERE intModuleID = :moduleID
@@ -267,7 +220,8 @@ if (structKeyExists(form, "edit_module")) {
         }
 
 
-        // Create the file for the navigation (the savecontent must be completely to the left, otherwise we have spaces...)
+        // Create the file for the navigation
+        // ############## > The savecontent tag must be completely to the left, otherwise we have spaces!
         createFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/navigation.cfm'))) {
 savecontent variable="naviContent" {
@@ -275,6 +229,8 @@ writeOutput("
 <a href='' class='dropdown-item'>Your page 1</a>
 <a href='' class='dropdown-item'>Your page 2</a>
 <a href='' class='dropdown-item'>Your page 3</a>
+<div class='dropdown-divider'></div>
+<a href='' class='dropdown-item'>Settings</a>
 ");
 }
             try {
@@ -286,25 +242,8 @@ writeOutput("
         }
 
 
-        // Create the file for settings
-        createSettingFileSuccess = true;
-        if (!fileExists(expandPath('/backend/modules/#form.prefix#/settings.cfm'))) {
-savecontent variable="settingContent" {
-writeOutput("
-<cfscript>
-dump('Hello settings!');
-</cfscript>
-");
-}
-            try {
-                fileWrite(expandPath('/backend/modules/#form.prefix#/settings.cfm'), settingContent);
-            } catch (any e) {
-                createSettingFileSuccess = false;
-                getAlert(e.message, 'danger');
-            }
-        }
-
         // Create the file for the login include
+        // ############## > The savecontent tag must be completely to the left, otherwise we have spaces!
         createLoginFileSuccess = true;
         if (!fileExists(expandPath('/backend/modules/#form.prefix#/login_include.cfm'))) {
 savecontent variable="loginContent" {
@@ -318,7 +257,7 @@ writeOutput("<!--- This file will be included while users login --->");
             }
         }
 
-        if (picSuccess and createFolderSuccess and createSettingFileSuccess and createLoginFileSuccess) {
+        if (picSuccess and createFolderSuccess and createLoginFileSuccess) {
             getAlert('Module saved.');
         }
 
@@ -401,11 +340,19 @@ if (structKeyExists(url, "delete_module")) {
 
         }
 
-        //Delete all folders and Files related to this module
-        if (directoryExists(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'))) {
-            directoryDelete(expandPath('/backend/modules/#qModuleToDelete.strTabPrefix#'), true);
-        }
+        // Delete the paths in custom_mappings
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                modulID: {type: "numeric", value: url.delete_module}
+            },
+            sql="
+                DELETE FROM custom_mappings
+                WHERE intModuleID = :modulID
+            "
+        )
 
+        // Delete the module
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -417,7 +364,7 @@ if (structKeyExists(url, "delete_module")) {
             "
         )
 
-        getAlert('Module deleted');
+        getAlert('Module deleted. Please note that the folders and files of the module are not deleted automatically. You can do this manually.', 'warning');
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";
 
     }
