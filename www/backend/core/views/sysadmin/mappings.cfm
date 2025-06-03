@@ -96,34 +96,25 @@
                                                 </tr>
                                             </form>
                                             <cfloop query="qCustomMappings">
-                                                <cfif qCustomMappings.intModuleID gt 0>
-                                                    <cfset disabled = "disabled">
-                                                <cfelse>
-                                                    <cfset disabled = "">
-                                                </cfif>
                                                 <form action="#application.mainURL#/sysadm/mappings" method="post">
                                                     <input type="hidden" name="edit_mapping" value="#qCustomMappings.intCustomMappingID#">
                                                     <tr>
                                                         <td></td>
-                                                        <td><input type="text" name="mapping" value="#qCustomMappings.strMapping#" class="form-control" #disabled#></td>
-                                                        <td><input type="text" name="path" value="#qCustomMappings.strPath#" class="form-control" #disabled#></td>
+                                                        <td><input type="text" name="mapping" value="#qCustomMappings.strMapping#" class="form-control"></td>
+                                                        <td><input type="text" name="path" value="#qCustomMappings.strPath#" class="form-control"></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="public" class="form-check-input" <cfif !qCustomMappings.blnOnlyAdmin and !qCustomMappings.blnOnlySuperAdmin and !qCustomMappings.blnOnlySysAdmin>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="admin" class="form-check-input" <cfif qCustomMappings.blnOnlyAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="superadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySuperAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySysAdmin eq 1>checked</cfif>></td>
                                                         <td class="text-end">
-                                                            <cfif not len(disabled)>
-                                                                <button type="submit" class="btn btn-x btn-icon btn-ghost-success">
-                                                                    <i class="fas fa-check"></i>
-                                                                </button>
-                                                            </cfif>
+                                                            <button type="submit" class="btn btn-x btn-icon btn-ghost-success">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
                                                         </td>
                                                         <td class="text-left">
-                                                            <cfif not len(disabled)>
-                                                                <button type="submit" name="delete" class="btn btn-x w-50 btn-icon btn-ghost-danger">
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
-                                                            </cfif>
+                                                            <button type="submit" name="delete" class="btn btn-x w-50 btn-icon btn-ghost-danger">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 </form>
