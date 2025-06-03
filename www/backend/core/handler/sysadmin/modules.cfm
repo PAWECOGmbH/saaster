@@ -364,7 +364,7 @@ if (structKeyExists(url, "delete_module")) {
             "
         )
 
-        getAlert('Module deleted. Please note that the folders and files of the module are not deleted automatically. You have to do this manually!', 'warning');
+        getAlert('Module deleted. Please note that the folders and files of the module are not deleted automatically. You can do this manually.', 'warning');
         location url="#application.mainURL#/sysadmin/modules" addtoken="false";
 
     }
