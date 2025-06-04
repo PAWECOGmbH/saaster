@@ -94,6 +94,7 @@ component displayname="modules" output="false" {
                 COALESCE(modules_prices.decPriceOneTime,0) as decPriceOneTime,
                 COALESCE(modules_prices.decVat,0) as decVat,
                 COALESCE(modules_prices.intVatType,0) as intVatType,
+                COALESCE(modules_prices.intDurationDays,0) as intDurationDays,
                 IF(
                     LENGTH(
                             (
@@ -178,6 +179,7 @@ component displayname="modules" output="false" {
             local.moduleStruct['priceMonthly'] = local.qModule.decPriceMonthly;
             local.moduleStruct['priceYearly'] = local.qModule.decPriceYearly;
             local.moduleStruct['priceOnetime'] = local.qModule.decPriceOneTime;
+            local.moduleStruct['durationDays'] = local.qModule.intDurationDays;
             local.moduleStruct['vat'] = local.qModule.decVat;
             local.moduleStruct['vatType'] = local.qModule.intVatType;
             local.moduleStruct['currencyID'] = local.qModule.intCurrencyID;
@@ -264,11 +266,11 @@ component displayname="modules" output="false" {
             // bookingLinkO: onetime
 
             local.objBook = new backend.core.com.book();
-            local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "monthly", "module");
+            local.bookingStringM = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "monthly", "module", local.qModule.intDurationDays);
             local.moduleStruct['bookingLinkM'] = application.mainURL & "/book?module=" & local.bookingStringM;
-            local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "yearly", "module");
+            local.bookingStringY = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "yearly", "module", local.qModule.intDurationDays);
             local.moduleStruct['bookingLinkY'] = application.mainURL & "/book?module=" & local.bookingStringY;
-            local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "onetime", "module");
+            local.bookingStringO = local.objBook.init('module').createBookingLink(local.qModule.intModuleID, variables.lngID, variables.currencyID, "onetime", "module", local.qModule.intDurationDays);
             local.moduleStruct['bookingLinkO'] = application.mainURL & "/book?module=" & local.bookingStringO;
 
         }

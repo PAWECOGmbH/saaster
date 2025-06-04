@@ -120,6 +120,7 @@ CREATE TABLE `modules_prices`  (
   `decVat` decimal(10, 2) NULL DEFAULT NULL,
   `blnIsNet` tinyint NOT NULL DEFAULT 1,
   `intVatType` int NOT NULL DEFAULT 1,
+  `intDurationDays` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`intModulePriceID`) USING BTREE,
   INDEX `_intCurrencyID`(`intCurrencyID`) USING BTREE,
   INDEX `_intModuleID`(`intModuleID`) USING BTREE,
@@ -130,18 +131,18 @@ CREATE TABLE `modules_prices`  (
 -- ----------------------------
 -- Records of modules_prices
 -- ----------------------------
-INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType)
-SELECT '1', intCurrencyID, '0.00', '0.00', '0.00', '0.00', '0', '3'
+INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType, intDurationDays)
+SELECT '1', intCurrencyID, '0.00', '0.00', '0.00', '0.00', '0', '3', '0'
 FROM currencies
 WHERE blnActive = 1;
 
-INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType)
-SELECT '2', intCurrencyID, '29.00', '290.00', '0.00', '0.00', '0', '3'
+INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType, intDurationDays)
+SELECT '2', intCurrencyID, '29.00', '290.00', '0.00', '0.00', '0', '3', '0'
 FROM currencies
 WHERE blnActive = 1;
 
-INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType)
-SELECT '3', intCurrencyID, '0.00', '0.00', '29.00', '0.00', '0', '3'
+INSERT INTO `modules_prices` (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType, intDurationDays)
+SELECT '3', intCurrencyID, '0.00', '0.00', '29.00', '0.00', '0', '3', '0'
 FROM currencies
 WHERE blnActive = 1;
 

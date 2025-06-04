@@ -59,8 +59,8 @@ if (structKeyExists(form, "new_module")) {
                     invoiceNet: {type: "boolean", value: invoiceNet},
                 },
                 sql = "
-                    INSERT INTO modules_prices (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType)
-                    VALUES (:moduleID, :currencyID, 0, 0, 0, 0, :invoiceNet, :standardVatType)
+                    INSERT INTO modules_prices (intModuleID, intCurrencyID, decPriceMonthly, decPriceYearly, decPriceOneTime, decVat, blnIsNet, intVatType, intDurationDays)
+                    VALUES (:moduleID, :currencyID, 0, 0, 0, 0, :invoiceNet, :standardVatType, 0)
                 "
             )
 
@@ -146,6 +146,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.pic" default="";
         param name="form.desc" default="";
         param name="form.test_days" default="0";
+        param name="form.duration_days" default="0";
         param name="form.path" default="";
         param name="form.redirect" default="";
 
@@ -205,6 +206,20 @@ if (structKeyExists(form, "edit_module")) {
                     strRedirectPath = :redirect
                 WHERE intModuleID = :moduleID
 
+            "
+        )
+
+        // Update runtime days for all currencies
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                duration: {type: "numeric", value: form.duration_days},
+                moduleID: {type: "numeric", value: form.edit_module}
+            },
+            sql = "
+                UPDATE modules_prices
+                SET intDurationDays = :duration
+                WHERE intModuleID = :moduleID
             "
         )
 
@@ -396,7 +411,7 @@ if (structKeyExists(form, "edit_prices")) {
             thisCurrencyID = listLast(f, "_");
             thisField = listFirst(f, "_");
 
-            if (thisField eq "pricemonthly" or thisField eq "priceyearly" or thisField eq "onetime") {
+            if (thisField eq "pricemonthly" or thisField eq "priceyearly" or thisField eq "onetime" or thisField eq "duration") {
 
                 // Look whether we find an entry in the table
                 qCheckPrice = queryExecute(
@@ -422,8 +437,8 @@ if (structKeyExists(form, "edit_prices")) {
                             thisCurrencyID: {type: "numeric", value: thisCurrencyID}
                         },
                         sql = "
-                            INSERT INTO modules_prices (intModuleID, intCurrencyID)
-                            VALUES (:moduleID, :thisCurrencyID)
+                            INSERT INTO modules_prices (intModuleID, intCurrencyID, intDurationDays)
+                            VALUES (:moduleID, :thisCurrencyID, 0)
                         "
                     )
 
@@ -432,6 +447,7 @@ if (structKeyExists(form, "edit_prices")) {
                 pricemonthly = 0;
                 priceyearly = 0;
                 onetime = 0;
+                duration = 0;
 
                 if (thisField eq "onetime") {
                     onetime = evaluate("onetime_#thisCurrencyID#");
@@ -449,6 +465,26 @@ if (structKeyExists(form, "edit_prices")) {
                             sql = "
                                 UPDATE modules_prices
                                 SET decPriceOneTime = :onetime
+                                WHERE intModuleID = :moduleID
+                                AND intCurrencyID = :thisCurrencyID
+                            "
+                        )
+                    }
+                }
+
+                if (thisField eq "duration") {
+                    duration = evaluate("duration_#thisCurrencyID#");
+                    if (isNumeric(duration)) {
+                        queryExecute(
+                            options = {datasource = application.datasource},
+                            params = {
+                                moduleID: {type: "numeric", value: form.edit_prices},
+                                thisCurrencyID: {type: "numeric", value: thisCurrencyID},
+                                duration: {type: "numeric", value: duration}
+                            },
+                            sql = "
+                                UPDATE modules_prices
+                                SET intDurationDays = :duration
                                 WHERE intModuleID = :moduleID
                                 AND intCurrencyID = :thisCurrencyID
                             "

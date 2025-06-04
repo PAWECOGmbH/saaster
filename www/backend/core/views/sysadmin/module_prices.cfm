@@ -19,7 +19,8 @@
                             <th width="25%">Currency</th>
                             <th width="25%" class="text-end">One time pricing</th>
                             <th width="25%" class="text-end">Price monthly</th>
-                            <th width="25%" class="text-end">Price yearly</th>
+                            <th width="20%" class="text-end">Price yearly</th>
+                            <th width="15%" class="text-end">Runtime days</th>
                         </tr>
                         <cfloop query="qPrices">
                             <tr>
@@ -32,6 +33,9 @@
                                 </td>
                                 <td align="right">
                                     <input type="text" name="priceyearly_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceYearly, '__.__'))#" maxlength="10">
+                                </td>
+                                <td align="right">
+                                    <input type="text" name="duration_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#qPrices.intDurationDays#" maxlength="10">
                                 </td>
                             </tr>
                         </cfloop>

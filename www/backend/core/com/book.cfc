@@ -15,7 +15,7 @@ component displayname="book" output="false" {
 
 
     // Create and encrypt booking link
-    public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string recurring) {
+    public string function createBookingLink(required numeric thisID, required numeric lngID, required numeric currencyID, string recurring, numeric durationDays=0) {
 
         local.argsJSon = {};
         if(variables.type eq "module") {
@@ -30,6 +30,9 @@ component displayname="book" output="false" {
         }
         local.argsJSon['lngID'] = arguments.lngID;
         local.argsJSon['currencyID'] = arguments.currencyID;
+        if (arguments.durationDays gt 0) {
+            local.argsJSon['durationDays'] = arguments.durationDays;
+        }
         local.urlEncoded = URLEncodedFormat(serializeJSON(local.argsJSon));
         local.base64Link = toBase64(local.urlEncoded);
 
@@ -186,8 +189,11 @@ component displayname="book" output="false" {
                         local.recurring = "onetime";
                         local.status = "free";
 
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        if (structKeyExists(local.bookingData, "durationDays") && local.bookingData.durationDays gt 0) {
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+                        } else {
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        }
 
                 } else {
 
@@ -199,8 +205,11 @@ component displayname="book" output="false" {
                         local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        if (structKeyExists(local.bookingData, "durationDays") && local.bookingData.durationDays gt 0) {
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+                        } else {
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        }
                         if (structKeyExists(local.bookingData, "priceOnetime")) {
                             local.priceBeforeVat = local.bookingData.priceOnetime;
                         } else {
@@ -262,8 +271,11 @@ component displayname="book" output="false" {
                         local.recurring = "onetime";
                         local.status = "free";
 
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        if (structKeyExists(local.bookingData, "durationDays") && local.bookingData.durationDays gt 0) {
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+                        } else {
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        }
 
                     }
 
@@ -276,8 +288,11 @@ component displayname="book" output="false" {
                         local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        if (structKeyExists(local.bookingData, "durationDays") && local.bookingData.durationDays gt 0) {
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+                        } else {
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                        }
                         if (structKeyExists(local.bookingData, "priceOnetime")) {
                             local.priceBeforeVat = local.bookingData.priceOnetime;
                         } else {
@@ -485,8 +500,11 @@ component displayname="book" output="false" {
                             } else if (local.recurring eq "yearly") {
                                 local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
                             } else {
-                                // Set the end time to a date that will probably never be reached
-                                local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                                if (structKeyExists(local.bookingData, "durationDays") && local.bookingData.durationDays gt 0) {
+                                    local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+                                } else {
+                                    local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                                }
                             }
 
                             local.status = "waiting";

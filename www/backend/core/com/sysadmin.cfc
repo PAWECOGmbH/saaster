@@ -616,7 +616,12 @@ component displayname="sysadmin" output="false" {
                 thisModuleID: {type: "numeric", value: arguments.modulID}
             },
             sql = "
-                SELECT *
+                SELECT modules.*, (
+                    SELECT intDurationDays
+                    FROM modules_prices mp
+                    WHERE mp.intModuleID = modules.intModuleID
+                    LIMIT 1
+                ) as intDurationDays
                 FROM modules
                 WHERE intModuleID = :thisModuleID
             "

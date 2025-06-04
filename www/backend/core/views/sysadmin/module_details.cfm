@@ -93,6 +93,13 @@
                                 Enter 0 if you don't want to provide any test days.
                             </small>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Runtime days</label>
+                            <input type="text" class="form-control text-end" name="duration_days" autocomplete="off" maxlength="10" value="#qModule.intDurationDays#" placeholder="0">
+                            <small class="form-hint">
+                                Enter 0 for unlimited runtime when module is booked once.
+                            </small>
+                        </div>
                     </div>
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">

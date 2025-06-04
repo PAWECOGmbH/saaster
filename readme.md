@@ -169,6 +169,12 @@ For more information or if you're unsure about something, feel free to open an i
 
 <br><br>
 
+### Module runtime
+
+Modules can define a runtime in days for one-time bookings. Set the desired duration in the admin area when editing module prices. If the value is greater than zero the booking will automatically expire after the specified number of days.
+
+<br>
+
 ## Dependencies
 
 - [Tabler](https://github.com/tabler/tabler/blob/main/LICENSE)
