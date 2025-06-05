@@ -86,7 +86,7 @@ component displayname="book" output="false" {
 
         local.modulesIncluded = arrayNew(1);
 
-        local.objPrices = new backend.core.com.prices(vat=bookingData.vat, vat_type=bookingData.vatType, isnet=bookingData.isNet);
+        local.objPrices = new backend.core.com.prices(vat=local.bookingData.vat, vat_type=local.bookingData.vatType, isnet=local.bookingData.isNet);
 
 
         if (structKeyExists(local.bookingData, "currencyID") and isNumeric(local.bookingData.currencyID)) {
@@ -183,11 +183,11 @@ component displayname="book" output="false" {
                 // Is it a free product?
                 if (local.bookingData.itsFree) {
 
-                        local.recurring = "onetime";
-                        local.status = "free";
+                    local.recurring = "onetime";
+                    local.status = "free";
 
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+                    // Set the end time to a date that will probably never be reached
+                    local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
 
                 } else {
 
@@ -199,13 +199,22 @@ component displayname="book" output="false" {
                         local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
-                        if (structKeyExists(local.bookingData, "priceOnetime")) {
-                            local.priceBeforeVat = local.bookingData.priceOnetime;
+
+                        // If its a limited product (only modules)
+                        if (structKeyExists(local.bookingData, "durationDays") and local.bookingData.durationDays gt 0) {
+
+                            // Define the end date
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+
                         } else {
-                            local.priceBeforeVat = 0;
+
+                            // Set the end time to a date that will probably never be reached
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+
                         }
+
+                        local.priceBeforeVat = local.bookingData.priceOnetime ?: 0;
+
                     }
 
                     local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
@@ -276,13 +285,22 @@ component displayname="book" output="false" {
                         local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
-                        // Set the end time to a date that will probably never be reached
-                        local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
-                        if (structKeyExists(local.bookingData, "priceOnetime")) {
-                            local.priceBeforeVat = local.bookingData.priceOnetime;
+
+                        // If its a limited product (only modules)
+                        if (structKeyExists(local.bookingData, "durationDays") and local.bookingData.durationDays gt 0) {
+
+                            // Define the end date
+                            local.endDate = dateFormat(dateAdd("d", local.bookingData.durationDays, local.startDate), "yyyy-mm-dd");
+
                         } else {
-                            local.priceBeforeVat = 0;
+
+                            // Set the end time to a date that will probably never be reached
+                            local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
+
                         }
+
+                        local.priceBeforeVat = local.bookingData.priceOnetime ?: 0;
+
                     }
 
                     local.amountToPay = local.objPrices.getPriceData(local.priceBeforeVat).priceAfterVAT;
@@ -389,7 +407,6 @@ component displayname="book" output="false" {
                         local.status = session.currentPlan.status;
 
                     }
-
 
 
                 } else {

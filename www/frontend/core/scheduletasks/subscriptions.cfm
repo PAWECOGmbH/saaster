@@ -176,6 +176,9 @@ if (url.pass eq variables.schedulePassword) {
         "
     )
 
+    dump(qRenewBookings);
+    //abort;
+
     loop query=qRenewBookings {
 
         // Renew plans or modules
@@ -555,25 +558,68 @@ if (url.pass eq variables.schedulePassword) {
 
 
         // Set expired test phases to "expired" if its not already done
-        } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd") and qRenewBookings.strStatus eq "test") {
+        } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd") and (qRenewBookings.strStatus eq "test" or qRenewBookings.strRecurring eq "onetime")) {
 
-            // Update booking table
-            updateStruct = structNew();
-            updateStruct['bookingID'] = qRenewBookings.intBookingID;
-            updateStruct['status'] = "expired";
+            // Delete a module that has expired according to the duration days
+            if (qRenewBookings.intModuleID gt 0 and qRenewBookings.strRecurring eq "onetime") {
 
-            objBook.updateBooking(updateStruct);
+                qModule = queryExecute (
+                    options = {datasource = application.datasource},
+                    params = {
+                        moduleID: {type: "numeric", value: qRenewBookings.intModuleID}
+                    },
+                    sql = "
+                        SELECT intDurationDays, intModuleID
+                        FROM modules
+                        WHERE intModuleID = :moduleID
+                        AND intDurationDays > 0
+                    "
+                )
 
-            // Update scheduletasks
-            if (qRenewBookings.intModuleID gt 0) {
-                objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
+                if (qModule.recordCount) {
+
+                    queryExecute (
+                        options = {datasource = application.datasource},
+                        params = {
+                            bookingID: {type: "numeric", value: qRenewBookings.intBookingID},
+                            moduleID: {type: "numeric", value: qModule.intModuleID}
+                        },
+                        sql = "
+                            DELETE FROM bookings
+                            WHERE intBookingID = :bookingID
+                            AND intModuleID = :moduleID
+                        "
+                    )
+
+                    // Make log
+                    objLogs.logWrite("scheduletask", "info", "A module has been deleted because it expired according to its duration days [CustomerID: #qRenewBookings.intCustomerID#, ModuleID: #qModule.intModuleID#]");
+
+                    objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='delete');
+
+                }
+
+
+            } else {
+
+                // Update booking table
+                updateStruct = structNew();
+                updateStruct['bookingID'] = qRenewBookings.intBookingID;
+                updateStruct['status'] = "expired";
+
+                objBook.updateBooking(updateStruct);
+
+                // Update scheduletasks
+                if (qRenewBookings.intModuleID gt 0) {
+                    objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
+                }
+
+                // Send expired email to customer
+                local.moduleID = len(qRenewBookings.intModuleID) ? qRenewBookings.intModuleID : 0;
+                local.planID = len(qRenewBookings.intPlanID) ? qRenewBookings.intPlanID : 0;
+
+                objBook.sendExpiredEmail(qRenewBookings.intCustomerID, local.moduleID, local.planID);
+
             }
-
-            // Send expired email to customer
-            local.moduleID = len(qRenewBookings.intModuleID) ? qRenewBookings.intModuleID : 0;
-            local.planID = len(qRenewBookings.intPlanID) ? qRenewBookings.intPlanID : 0;
-
-            objBook.sendExpiredEmail(qRenewBookings.intCustomerID, local.moduleID, local.planID);
 
 
         }
