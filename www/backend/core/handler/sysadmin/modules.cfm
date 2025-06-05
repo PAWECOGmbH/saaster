@@ -146,6 +146,7 @@ if (structKeyExists(form, "edit_module")) {
         param name="form.pic" default="";
         param name="form.desc" default="";
         param name="form.test_days" default="0";
+        param name="form.duration_days" default="0";
         param name="form.path" default="";
         param name="form.redirect" default="";
 
@@ -187,6 +188,7 @@ if (structKeyExists(form, "edit_module")) {
                 active: {type: "boolean", value: active},
                 bookable: {type: "boolean", value: bookable},
                 test_days: {type: "numeric", value: form.test_days},
+                duration_days: {type: "numeric", value: form.duration_days},
                 description: {type: "nvarchar", value: form.desc},
                 moduleID: {type: "numeric", value: form.edit_module},
                 free: {type: "boolean", value: form.free},
@@ -201,6 +203,7 @@ if (structKeyExists(form, "edit_module")) {
                     strTabPrefix = :prefix,
                     blnBookable = :bookable,
                     intNumTestDays = :test_days,
+                    intDurationDays = :duration_days,
                     blnFree = :free,
                     strRedirectPath = :redirect
                 WHERE intModuleID = :moduleID
