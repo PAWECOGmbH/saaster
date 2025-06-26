@@ -176,9 +176,6 @@ if (url.pass eq variables.schedulePassword) {
         "
     )
 
-    dump(qRenewBookings);
-    //abort;
-
     loop query=qRenewBookings {
 
         // Renew plans or modules
