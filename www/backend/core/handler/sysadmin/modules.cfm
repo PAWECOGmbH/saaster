@@ -355,7 +355,47 @@ if (structKeyExists(url, "delete_module")) {
             "
         )
 
-        // Delete the module
+        // Get all bookings of the module
+        qBookings = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                modulID: {type: "numeric", value: url.delete_module}
+            },
+            sql="
+                SELECT intBookingID
+                FROM bookings
+                WHERE intModuleID = :modulID
+            "
+        )
+
+        // Loop through all bookings and update the invoices to set the intBookingID to 0
+        loop query="qBookings" {
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    bookingID: {type: "numeric", value=qBookings.intBookingID}
+                },
+                sql="
+                    UPDATE invoices
+                    SET intBookingID = 0
+                    WHERE intBookingID = :bookingID
+                "
+            )
+        }
+
+        // Delete all bookings of the module
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                modulID: {type: "numeric", value: url.delete_module}
+            },
+            sql="
+                DELETE FROM bookings
+                WHERE intModuleID = :modulID
+            "
+        )
+
+        // Delete the module itself
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -912,7 +952,7 @@ if (structKeyExists(url, "booking")) {
     }
 
 
-    // Delete the module (the booking)
+    // Withdraw the module booking
     if (structKeyExists(url, "delete")) {
 
         deleteModule = new backend.core.com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);

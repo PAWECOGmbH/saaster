@@ -30,15 +30,15 @@ component displayname="globalFunctions" output="false" {
                     strMapping: {type: "nvarchar", value: local.sefString}
                 },
                 sql = "
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, 0 as intModuleID
                     FROM system_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, intModuleID
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, 0, 0, 0, 1 as itsFrontend
+                    SELECT strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID
                     FROM frontend_mappings
                     WHERE strMapping = :strMapping
                     UNION
@@ -47,7 +47,7 @@ component displayname="globalFunctions" output="false" {
                         SELECT strPath
                         FROM frontend_mappings
                         WHERE intFrontendMappingsID = frontend_mappings_trans.intFrontendMappingsID
-                    ) as strPath, 0, 0, 0, 1 as itsFrontend
+                    ) as strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID
                     FROM frontend_mappings_trans
                     WHERE strMapping = :strMapping
                     LIMIT 1
@@ -55,6 +55,29 @@ component displayname="globalFunctions" output="false" {
             )
 
             if (local.qCheckSEF.recordCount) {
+
+                // Check if the path is coming from a module
+                if (local.qCheckSEF.intModuleID gt 0 and structKeyExists(session, "customer_id") and session.customer_id gt 0) {
+
+                    // We have to check if the module is active for the current customer
+                    local.moduleStatus = application.objModules.getModuleStatus(session.customer_id, local.qCheckSEF.intModuleID);
+
+                    // Overwrite the flag 'noaccess' generally to true (if its not a SysAdmin)
+                    if (!session.sysadmin) {
+                        local.returnStruct['noaccess'] = true;
+                    }
+
+                    // If the module is active, we can set 'noaccess' to false
+                    if (isStruct(local.moduleStatus) and !structIsEmpty(local.moduleStatus)) {
+                        if (structKeyExists(local.moduleStatus, "status")) {
+                            if (local.moduleStatus.status eq "free" or local.moduleStatus.status eq "test" or local.moduleStatus.status eq "active") {
+                                local.returnStruct['noaccess'] = false;
+                            }
+                        }
+                    }
+
+                }
+
                 if (local.qCheckSEF.itsFrontend) {
                     local.returnStruct['thisPath'] = "frontend/" & application.activeTheme & "/" & local.qCheckSEF.strPath;
                 } else {
