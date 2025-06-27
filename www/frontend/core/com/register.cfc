@@ -199,6 +199,19 @@ component displayname="customer" output="false" {
 
             );
 
+            // Send notification email to sysadmin
+            if (application.objSysAdmin.getSystemSetting('settingMailNewRegistrations').strDefaultValue eq 1) {
+
+                mail to="#application.toEmail#" from="#application.fromEmail#" subject="#application.projectName#: A new customer has registered" type="html" {
+                    writeOutput("
+                        A new customer has successfully registered on #application.projectName#. <br><br>
+                        <strong>Company:</strong> #local.company_name#<br>
+                        <strong>Contact:</strong> #local.first_name# #local.last_name#<br>
+                        <strong>Email:</strong> #local.email#");
+                }
+
+            }
+
             local.argsReturnValue['message'] = "OK";
             local.argsReturnValue['success'] = true;
 
