@@ -123,15 +123,6 @@ div.dashboard div.card-header label.form-check {
     max-width: revert;
 }
 
-.mappings-frontend-td-align{
-    vertical-align: top!important;
-}
-
-.mappings-frontend-textareaheight{
-    height: 36px;
-
- }
-
  .progress-bar {
     margin-top: 15px;
     margin-right: 5px;

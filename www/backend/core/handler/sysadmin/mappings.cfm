@@ -10,7 +10,7 @@ if (structKeyExists(form, "new_mapping")) {
         getAltert('Something went wrong!', 'danger');
     }
 
-    location url="#application.mainURL#/sysadmin/mappings" addtoken="false";
+    location url="#application.mainURL#/sysadmin/mappings?mapping=custom" addtoken="false";
 
 }
 
@@ -35,7 +35,7 @@ if (structKeyExists(form, "edit_mapping")) {
 
     }
 
-    location url="#application.mainURL#/sysadmin/mappings" addtoken="false";
+    location url="#application.mainURL#/sysadmin/mappings?mapping=custom" addtoken="false";
 
 }
 
@@ -48,12 +48,13 @@ if (structKeyExists(form, "new_mapping_frontend")) {
         getAltert('Something went wrong!', 'danger');
     }
 
-    location url="#application.mainURL#/sysadmin/mappings##frontend" addtoken="false";
+    location url="#application.mainURL#/sysadmin/mappings?mapping=frontend" addtoken="false";
 
 }
 
 
 if(structKeyExists(form, "edit_mapping_frontend")) {
+
     if (structKeyExists(form, "delete")) {
 
         deleteFrontendMapping = objMapping.deleteFrontendMapping(form.edit_mapping_frontend);
@@ -62,17 +63,23 @@ if(structKeyExists(form, "edit_mapping_frontend")) {
             getAlert("Could not delete the mapping!", "danger");
         }
 
+        location url="#application.mainURL#/sysadmin/mappings?mapping=frontend" addtoken="false";
+
     } else {
+
+        // Decode the 'htmlcodes' field from base64 and convert it to UTF-8 string format.
+        if (structKeyExists(form, "htmlcodes")) {
+            form.htmlcodes = toString(binaryDecode( form.htmlcodes, "base64" ), "utf-8");
+        }
 
         editFrontendMapping = objMapping.editFrontendMapping(form, form.edit_mapping_frontend);
 
-        if (structIsEmpty(editFrontendMapping)) {
-            getAltert('Something went wrong!', 'danger');
-        }
+        getAlert('Frontend mapping updated successfully!', 'success');
+        location url="#application.mainURL#/sysadmin/mapping/edit?mappingID=#form.edit_mapping_frontend#" addtoken="false";
 
     }
 
-    location url="#application.mainURL#/sysadmin/mappings##frontend" addtoken="false";
 }
 
 </cfscript>
+
