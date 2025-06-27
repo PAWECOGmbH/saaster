@@ -141,10 +141,13 @@
                                         Contact person
                                     </div>
                                     <div>
-                                        E-mail
+                                        Email
                                     </div>
                                     <div>
                                         Phone
+                                    </div>
+                                    <div>
+                                        Registered at
                                     </div>
                                 </div>
                                 <div class="me-5 d-flex flex-column ps-3">
@@ -155,7 +158,10 @@
                                         #getCustomer.email#
                                     </div>
                                     <div>
-                                        #getCustomer.phone#
+                                        #getCustomer.phone#&nbsp;
+                                    </div>
+                                    <div>
+                                        #lsDateFormat(getCustomer.insertDate)#
                                     </div>
                                 </div>
                             </div>

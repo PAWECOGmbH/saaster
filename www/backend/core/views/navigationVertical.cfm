@@ -66,9 +66,6 @@
                     <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and i.moduleStatus.status neq "payment" and not listFind(moduleList, i.moduleID)>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
-                                <!--- <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                    <i class="fas fa-user-cog"></i>
-                                </span> --->
                                 <span class="nav-link-title">
                                     #i.moduleData.name#
                                 </span>
@@ -77,9 +74,6 @@
                                 <cfif fileExists(expandPath('backend/modules/#i.moduleData.table_prefix#/navigation.cfm'))>
                                     <cfinclude template="/backend/modules/#i.moduleData.table_prefix#/navigation.cfm">
                                     <div class="dropdown-divider"></div>
-                                </cfif>
-                                <cfif len(trim(i.moduleData.settingPath))>
-                                    <a href="#application.mainURL#/#i.moduleData.settingPath#" class="dropdown-item">#getTrans('txtSettings')#</a>
                                 </cfif>
                             </div>
                         </li>
@@ -180,33 +174,33 @@
         </ul>
 
         <!--- User menu --->
-            <div class="nav-item dropdown d-none d-sm-none d-md-none d-lg-inline-block">
+        <div class="nav-item dropdown d-none d-sm-none d-md-none d-lg-inline-block">
 
-            <cfoutput>
-                <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-                    <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
-                    <div class="d-none d-lg-block d-xl-block ps-2 newclass">
-                        <div>#session.user_name#</div>
-                    </div>
+        <cfoutput>
+            <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
+                <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
+                <div class="d-none d-lg-block d-xl-block ps-2 newclass">
+                    <div>#session.user_name#</div>
+                </div>
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+
+                <a class="dropdown-item" href="#application.mainURL#/account-settings">
+                    #getTrans('txtAccountSettings')#
+                </a>
+                <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
+                    #getTrans('txtMyProfile')#
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#application.mainURL#/global?logout">
+                    #getTrans('txtLogout')#
                 </a>
 
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-
-                    <a class="dropdown-item" href="#application.mainURL#/account-settings">
-                        #getTrans('txtAccountSettings')#
-                    </a>
-                    <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
-                        #getTrans('txtMyProfile')#
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#application.mainURL#/global?logout">
-                        #getTrans('txtLogout')#
-                    </a>
-
-                </div>
-            </cfoutput>
-
             </div>
+        </cfoutput>
+
+        </div>
 
     </div>
 

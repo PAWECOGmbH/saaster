@@ -172,6 +172,8 @@ function disableButtonsAndRedirect(buttonClass, url) {
 
         // Disable the button to prevent further clicks
         $(obj).addClass('disabled');
+        $(obj).prop('disabled', true); // <-- really deactivate
+        $(obj).css('pointer-events', 'none'); // also for links
     });
 
     // Redirect the user to the specified URL

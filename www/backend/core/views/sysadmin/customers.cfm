@@ -127,6 +127,12 @@
                                     <select class="form-select" name="sort" onchange="this.form.submit()">
                                         <option value="strCompanyName ASC" <cfif session.cust_sort eq "strCompanyName ASC">selected</cfif>>Customer name A -> Z</option>
                                         <option value="strCompanyName DESC" <cfif session.cust_sort eq "strCompanyName DESC">selected</cfif>>Customer name Z -> A</option>
+                                        <option value="strContactPerson ASC" <cfif session.cust_sort eq "strContactPerson ASC">selected</cfif>>Contact name A -> Z</option>
+                                        <option value="strContactPerson DESC" <cfif session.cust_sort eq "strContactPerson DESC">selected</cfif>>Contact name Z -> A</option>
+                                        <option value="strCity ASC" <cfif session.cust_sort eq "strCity ASC">selected</cfif>>City A -> Z</option>
+                                        <option value="strCity DESC" <cfif session.cust_sort eq "strCity DESC">selected</cfif>>City Z -> A</option>
+                                        <option value="dtmInsertDate DESC" <cfif session.cust_sort eq "dtmInsertDate DESC">selected</cfif>>Registered (newest first)</option>
+                                        <option value="dtmInsertDate ASC" <cfif session.cust_sort eq "dtmInsertDate ASC">selected</cfif>>Registered (oldest first)</option>
                                     </select>
                                 </div>
                             </div>
@@ -143,11 +149,12 @@
                                     <table class="table table-vcenter table-mobile-md card-table">
                                         <thead>
                                             <tr>
-                                                <th width="20%">Company</th>
+                                                <th width="25%">Company</th>
                                                 <th width="20%">Contact</th>
-                                                <th width="20%">City</th>
-                                                <th width="20%">Phone</th>
-                                                <th width="15%"></th>
+                                                <th width="15%">City</th>
+                                                <th width="15%">Phone</th>
+                                                <th width="10%">Registered</th>
+                                                <th width="15%">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -167,7 +174,7 @@
                                                             <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
                                                                     <cfif len(trim(qCustomers.strCompanyName))>
-                                                                        <div class="font-weight-medium">#qCustomers.strCompanyName#</div>
+                                                                        <div class="font-weight-medium">#qCustomers.strCompanyName# <cfif qCustomers.intCustomerID eq session.customer_id>(SysAdmin)</cfif></div>
                                                                     <cfelse>
                                                                         <div class="font-weight-medium">#qCustomers.strContactPerson# (Private)</div>
                                                                     </cfif>
@@ -185,14 +192,19 @@
                                                     <td data-label="Phone">
                                                         #qCustomers.strPhone#
                                                     </td>
+                                                    <td data-label="Registered">
+                                                        #lsDateFormat(qCustomers.dtmInsertDate)#
+                                                    </td>
                                                     <td>
                                                         <div class="btn-list flex-nowrap">
                                                             <a href="#application.mainURL#/sysadmin/customers/edit/#qCustomers.intCustomerID#" class="btn">
                                                                 Edit
                                                             </a>
-                                                            <a href="#application.mainURL#/sysadm/customers?logincustomer=#qCustomers.intCustomerID#" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Login as customer" onclick="return confirm('You are about to leave your sysadmin session and log in as this customer. Do you want to proceed?')">
-                                                                Login
-                                                            </a>
+                                                            <cfif qCustomers.intCustomerID neq session.customer_id>
+                                                                <a href="#application.mainURL#/sysadm/customers?logincustomer=#qCustomers.intCustomerID#" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Login as customer" onclick="return confirm('You are about to leave your sysadmin session and log in as this customer. Do you want to proceed?')">
+                                                                    Login
+                                                                </a>
+                                                            </cfif>
                                                         </div>
                                                     </td>
                                                 </tr>

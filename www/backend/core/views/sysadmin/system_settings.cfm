@@ -26,9 +26,9 @@
     qSwissQrBill = objSysadmin.getSystemSetting('settingSwissQrBill');
     qSwissQrIBAN = objSysadmin.getSystemSetting('settingIBANnumber');
     qSwissQrRef = objSysadmin.getSystemSetting('settingQRreference');
+    infoMailNewRegistrations = objSysadmin.getSystemSetting('settingMailNewRegistrations');
     customerData = application.objSysAdmin.getSysAdminData();
     countryData = application.objCustomer.getUserDataByID(customerData.customerID);
-
 
 </cfscript>
 
@@ -66,6 +66,23 @@
                     </div>
                     <form action="#application.mainURL#/sysadm/settings" method="post">
                         <input type="hidden" name="edit_sysadmin_settings">
+                        <div class="card-body">
+
+                            <h3>Generel settings</h3>
+                            <div class="border align-baseline p-3">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <p>#infoMailNewRegistrations.strDescription#</p>
+                                        <select name="#infoMailNewRegistrations.strSettingVariable#" class="form-select w-50">
+                                            <option value="0" <cfif infoMailNewRegistrations.strDefaultValue eq 0>selected</cfif>>No</option>
+                                            <option value="1" <cfif infoMailNewRegistrations.strDefaultValue eq 1>selected</cfif>>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
                         <div class="card-body">
 
                             <h3>Invoice settings</h3>

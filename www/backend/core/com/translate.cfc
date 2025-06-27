@@ -102,14 +102,19 @@ component displayname="translate" accessors="true" {
     // Get the text which has to be translated
     public string function textToTranslate() {
 
-        cfquery(name="local.qContent" datasource=application.datasource ) {
-            writeOutput("SELECT #variables.thisField# as myField FROM #variables.thisTable# WHERE #variables.thisPrimKey# = #variables.thisID#");
-        }
+        local.qContent = queryExecute(
+            "
+                SELECT #variables.thisField# AS myField
+                FROM   #variables.thisTable#
+                WHERE  #variables.thisPrimKey# = :id
+            ",
+            { id: { value: variables.thisID, cfsqltype: "cf_sql_integer" } },
+            { datasource: application.datasource }
+        );
 
-        local.replacedCode = replace(local.qContent.myField, "#chr(13)#", "<br />", "all");
-        writeOutput(local.replacedCode);
-
-        return;
+        return "<pre><code class=""language-html"">"
+            &   encodeForHTML( local.qContent.myField )
+            & "</code></pre>";
 
     }
 

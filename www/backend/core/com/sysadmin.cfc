@@ -594,18 +594,37 @@ component displayname="sysadmin" output="false" {
         return local.qSystemMappings;
     }
 
-    public query function getFrontendMappings(){
+    public query function getFrontendMappings(numeric mappingID){
 
-        local.qSystemMappings = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM frontend_mappings
-                WHERE blnCreatedByApp = 0
-            "
-        );
+        if (structKeyExists(arguments, "mappingID")) {
 
-        return local.qSystemMappings;
+            local.qFrontendMappings = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    mappingID: {type: "numeric", value: arguments.mappingID}
+                },
+                sql = "
+                    SELECT *
+                    FROM frontend_mappings
+                    WHERE intFrontendMappingsID = :mappingID
+                "
+            );
+
+        } else {
+
+            local.qFrontendMappings = queryExecute (
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT *
+                    FROM frontend_mappings
+                    ORDER BY intFrontendMappingsID DESC
+                "
+            );
+
+        }
+
+        return local.qFrontendMappings;
+
     }
 
     public query function getModule(required numeric modulID){

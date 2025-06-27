@@ -66,8 +66,10 @@ CREATE TABLE `modules`  (
   `strPicture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `blnBookable` tinyint NOT NULL,
   `intNumTestDays` int NOT NULL,
+  `intDurationDays` int NOT NULL DEFAULT 0,
   `strSettingPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `blnFree` tinyint NULL DEFAULT 0,
+  `strRedirectPath` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `intPrio` int NOT NULL,
   PRIMARY KEY (`intModuleID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
@@ -75,9 +77,9 @@ CREATE TABLE `modules`  (
 -- ----------------------------
 -- Records of modules
 -- ----------------------------
-INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, 'backend/modules/todo/settings', 1, 1);
-INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, 'backend/modules/easyerp/settings', 0, 2);
-INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, 'backend/modules/mailchimp/settings', 0, 3);
+INSERT INTO `modules` VALUES (1, 'Free Todo list app', 'Let your tasks be done', '<p>With this small but powerful tool for task management, you always have all your tasks under control. Simply click on \"Activate\" and get started :-)<br></p>', 1, 'todo', '', 1, 0, 0, 'backend/modules/todo/settings', 1, '', 1);
+INSERT INTO `modules` VALUES (2, 'Easy ERP', 'Manage your contacts using Easy CRM', '<p>Manage your contacts easily with Easy ERP. Many features are included here, such as:<br><br>- Create and manage contacts<br>- Customer history<br>- Acquisition<br>- Appointment management<br>- and much more...<br></p>', 1, 'easyerp', '', 1, 30, 0, 'backend/modules/easyerp/settings', 0, '', 2);
+INSERT INTO `modules` VALUES (3, 'MailChimp API', 'Automatically transfer your customers to MailChimp', '<p>With the newsletter marketing tool MailChimp, you serve all your customers with a newsletter. Connect your account with MailChimp and let this module take care of the synchronisation.</p>', 1, 'mailchimp', '', 1, 10, 0, 'backend/modules/mailchimp/settings', 0, '', 3);
 
 
 -- ----------------------------
