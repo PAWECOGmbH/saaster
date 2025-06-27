@@ -116,8 +116,8 @@ component displayname="mappings" output="false" {
         if (structKeyExists(arguments.mappingData, "metaDescription") and len(trim(arguments.mappingData.metaDescription))) {
             local.metaDescription = application.objGlobal.cleanUpText(arguments.mappingData.metaDescription, 3000);
         }
-        if (structKeyExists(arguments.mappingData, "metaHTML") and len(trim(arguments.mappingData.metaHTML))) {
-            local.metaHTML = application.objGlobal.cleanUpText(arguments.mappingData.metaHTML, 3000);
+        if (structKeyExists(arguments.mappingData, "htmlcodes") and len(trim(arguments.mappingData.htmlcodes))) {
+            local.metaHTML = arguments.mappingData.htmlcodes;
         }
 
         // If stringForUrlSlug is specified, we generate the URL slug from it
