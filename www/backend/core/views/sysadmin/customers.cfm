@@ -1,6 +1,6 @@
 <cfscript>
     param name="session.cust_search" default="" type="string";
-    param name="session.cust_sort" default="intPrio" type="string";
+    param name="session.cust_sort" default="strCompanyName ASC" type="string";
     param name="session.customers_page" default=1 type="numeric";
 
     objSysadmin = new backend.core.com.sysadmin();
@@ -111,7 +111,7 @@
                             <div class="col-lg-4">
                                 <label class="form-label">Search for customer:</label>
                                 <div class="input-group mb-2">
-                                    <input type="text" name="search" class="form-control" minlength="1" placeholder="Search for…">
+                                    <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
                                     <button class="btn bg-green-lt" type="submit">Go!</button>
                                     <cfif len(trim(searchTerm))>
                                         <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
@@ -176,7 +176,7 @@
                                                                     <cfif len(trim(qCustomers.strCompanyName))>
                                                                         <div class="font-weight-medium">#qCustomers.strCompanyName# <cfif qCustomers.intCustomerID eq session.customer_id>(SysAdmin)</cfif></div>
                                                                     <cfelse>
-                                                                        <div class="font-weight-medium">#qCustomers.strContactPerson# (Private)</div>
+                                                                        <div class="font-weight-medium">-</div>
                                                                     </cfif>
                                                                 </div>
                                                             </a>
