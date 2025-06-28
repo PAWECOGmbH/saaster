@@ -104,9 +104,25 @@ component displayname="cancel" output="false" {
 
     }
 
-    // Delete module (only possible via SysAdmin)
+    // Withdraw module (only possible via SysAdmin)
     public boolean function delete(required numeric bookingID, required numeric moduleID, required numeric customerID) {
 
+        // First, set intBookingID in invoices to 0
+        queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: arguments.bookingID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                UPDATE invoices
+                SET intBookingID = 0
+                WHERE intBookingID = :bookingID
+                AND intCustomerID = :customerID
+            "
+        )
+
+        // Then delete the booking
         queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -115,14 +131,9 @@ component displayname="cancel" output="false" {
                 customerID: {type: "numeric", value: arguments.customerID}
             },
             sql = "
-
                 DELETE FROM bookings
                 WHERE intCustomerID = :customerID
-                AND intModuleID = :moduleID;
-
-                DELETE FROM invoices
-                WHERE intBookingID = :bookingID;
-
+                AND intModuleID = :moduleID
             "
         )
 

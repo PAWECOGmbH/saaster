@@ -332,11 +332,35 @@ component displayname="sysadmin" output="false" {
 
         local.entries = 10;
 
+        // Sorting logic dependent on arguments.sort
+        switch (arguments.sort){
+            case "strCompanyName ASC":
+                local.orderClause = "
+                    CASE
+                        WHEN customers.strCompanyName IS NULL OR customers.strCompanyName = '' THEN 1
+                        ELSE 0
+                    END,
+                    customers.strCompanyName ASC";
+                break;
+
+                case "strCompanyName DESC":
+                    local.orderClause = "
+                        CASE
+                            WHEN customers.strCompanyName IS NULL OR customers.strCompanyName = '' THEN 1
+                            ELSE 0
+                        END,
+                        customers.strCompanyName DESC";
+                    break;
+
+            default:
+                local.orderClause = arguments.sort;
+        }
+
         local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
-                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
+                customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone, customers.dtmInsertDate
                 FROM customers
 
                 INNER JOIN users
@@ -353,31 +377,58 @@ component displayname="sysadmin" output="false" {
                     customers.strEmail
                 )
                 #arguments.search#
-                ORDER BY #arguments.sort#
+                ORDER BY #local.orderClause#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
 
         return local.qCustomers;
+
     }
 
     public query function getCustomer(required numeric start, required string sort){
 
         local.entries = 10;
 
+        // Sorting logic dependent on arguments.sort
+        switch (arguments.sort){
+            case "strCompanyName ASC":
+                local.orderClause = "
+                    CASE
+                        WHEN customers.strCompanyName IS NULL OR customers.strCompanyName = '' THEN 1
+                        ELSE 0
+                    END,
+                    customers.strCompanyName ASC";
+                break;
+
+                case "strCompanyName DESC":
+                    local.orderClause = "
+                        CASE
+                            WHEN customers.strCompanyName IS NULL OR customers.strCompanyName = '' THEN 1
+                            ELSE 0
+                        END,
+                        customers.strCompanyName DESC";
+                    break;
+
+            default:
+                local.orderClause = arguments.sort;
+        }
+
         local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
             sql = "
                 SELECT customers.*, countries.strCountryName
                 FROM customers
-                LEFT JOIN countries ON countries.intCountryID = customers.intCountryID
+                LEFT JOIN countries
+                ON countries.intCountryID = customers.intCountryID
                 WHERE customers.blnActive = 1
-                ORDER BY #arguments.sort#
+                ORDER BY #local.orderClause#
                 LIMIT #arguments.start#, #local.entries#
             "
         );
 
         return local.qCustomers;
+
     }
 
     public query function getTotalInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
@@ -594,18 +645,37 @@ component displayname="sysadmin" output="false" {
         return local.qSystemMappings;
     }
 
-    public query function getFrontendMappings(){
+    public query function getFrontendMappings(numeric mappingID){
 
-        local.qSystemMappings = queryExecute (
-            options = {datasource = application.datasource},
-            sql = "
-                SELECT *
-                FROM frontend_mappings
-                WHERE blnCreatedByApp = 0
-            "
-        );
+        if (structKeyExists(arguments, "mappingID")) {
 
-        return local.qSystemMappings;
+            local.qFrontendMappings = queryExecute (
+                options = {datasource = application.datasource},
+                params = {
+                    mappingID: {type: "numeric", value: arguments.mappingID}
+                },
+                sql = "
+                    SELECT *
+                    FROM frontend_mappings
+                    WHERE intFrontendMappingsID = :mappingID
+                "
+            );
+
+        } else {
+
+            local.qFrontendMappings = queryExecute (
+                options = {datasource = application.datasource},
+                sql = "
+                    SELECT *
+                    FROM frontend_mappings
+                    ORDER BY intFrontendMappingsID DESC
+                "
+            );
+
+        }
+
+        return local.qFrontendMappings;
+
     }
 
     public query function getModule(required numeric modulID){

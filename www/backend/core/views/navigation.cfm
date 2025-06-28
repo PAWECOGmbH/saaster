@@ -21,7 +21,7 @@
                     <!--- SysAdmin stuff --->
                     <cfif structKeyExists(session, "sysadmin") and session.sysadmin>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                                 <span class="nav-link-icon d-none d-sm-none d-md-none d-lg-inline-block">
                                     <i class="fas fa-user-cog"></i>
                                 </span>
@@ -46,10 +46,18 @@
                                 <a href="#application.mainURL#/sysadmin/languages" class="dropdown-item">Languages</a>
                                 <a href="#application.mainURL#/sysadmin/currencies" class="dropdown-item">Currencies</a>
                                 <a href="#application.mainURL#/sysadmin/countries" class="dropdown-item">Countries</a>
-                                <a href="#application.mainURL#/sysadmin/mappings" class="dropdown-item">Mappings</a>
+                                <div class="dropend">
+                                    <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                                        Mappings
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a href="#application.mainURL#/sysadmin/mappings?mapping=custom" class="dropdown-item">Custom mappings</a>
+                                        <a href="#application.mainURL#/sysadmin/mappings?mapping=frontend" class="dropdown-item">Frontend mappings</a>
+                                        <a href="#application.mainURL#/sysadmin/mappings?mapping=system" class="dropdown-item">System mappings</a>
+                                    </div>
+                                </div>
                                 <a href="#application.mainURL#/sysadmin/translations" class="dropdown-item">Translations</a>
                                 <a href="#application.mainURL#/sysadmin/logs" class="dropdown-item">Logfiles</a>
-
                             </div>
                             </cfoutput>
                         </li>
@@ -65,7 +73,7 @@
                         <cfloop array="#session.currentModules#" index="i">
                             <cfif structKeyExists(i.moduleData, "name") and i.moduleStatus.status neq "expired" and i.moduleStatus.status neq "payment" and not listFind(moduleList, i.moduleID)>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="##navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                                         <span class="nav-link-title">
                                             #i.moduleData.name#
                                         </span>
@@ -73,11 +81,6 @@
                                     <div class="dropdown-menu">
                                         <cfif fileExists(expandPath('backend/modules/#i.moduleData.table_prefix#/navigation.cfm'))>
                                             <cfinclude template="/backend/modules/#i.moduleData.table_prefix#/navigation.cfm">
-                                            <div class="dropdown-divider"></div>
-                                        </cfif>
-                                        <cfif len(trim(i.moduleData.settingPath))>
-
-                                            <a href="#application.mainURL#/#i.moduleData.settingPath#" class="dropdown-item">#getTrans('txtSettings')#</a>
                                         </cfif>
                                     </div>
                                 </li>
