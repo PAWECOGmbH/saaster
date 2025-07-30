@@ -10,9 +10,9 @@
 //  - Renewing modules
 //  - Delete after cancellation
 //  - Set status for expired plans
+//  - Check for filled schedule tables of modules
 //  - Check open invoices (overdue)
 //  - Delete logfiles older than 30 days
-//
 
 setting requesttimeout = 1000;
 
@@ -29,8 +29,8 @@ if (url.pass eq variables.schedulePassword) {
     objLogs = application.objLog;
 
 
-    // First round: look for "waiting" plans or modules
-    // ################################################
+    // Look for "waiting" plans or modules
+    // ###################################
 
     qWaiting = queryExecute(
         options = {datasource = application.datasource},
@@ -158,8 +158,8 @@ if (url.pass eq variables.schedulePassword) {
 
 
 
-    // Second round: expired plans and modules
-    // ########################################
+    // Check expired plans and modules
+    // ###############################
 
     qRenewBookings = queryExecute(
         options = {datasource = application.datasource},
@@ -624,7 +624,30 @@ if (url.pass eq variables.schedulePassword) {
     }
 
 
+
+    // Check for filled schedule tables of modules
+    // We do this for security reasons so that all customers are always in the schedule tables
+    // #######################################################################################
+
+    qModules = queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+
+        },
+        sql = "
+            SELECT intModuleID, strStatus, intCustomerID
+            FROM bookings
+            WHERE intModuleID > 0
+        "
+    )
+
+    loop query=qModules {
+        objModules.distributeScheduler(moduleID=qModules.intModuleID, customerID=qModules.intCustomerID, status=qModules.strStatus);
+    }
+
+
     // Check open invoices and change status
+    // #####################################
     queryExecute (
         options = {datasource = application.datasource},
         params = {
@@ -640,6 +663,7 @@ if (url.pass eq variables.schedulePassword) {
 
 
     // Delete logfiles older than 30 days or empty folders
+    // ###################################################
     objLogs.deleteOldLogfiles();
 
 
