@@ -124,7 +124,7 @@ if (structKeyExists(url, "add")) {
                 location url="#bookingPath#" addtoken=false;
             }
 
-            location url="#application.mainURL#/account-settings/payment" addtoken=false;8
+            location url="#application.mainURL#/account-settings/payment" addtoken=false;
 
         } else {
 
