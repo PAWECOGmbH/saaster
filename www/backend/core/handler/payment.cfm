@@ -124,13 +124,13 @@ if (structKeyExists(url, "add")) {
                 location url="#bookingPath#" addtoken=false;
             }
 
-            location url="#application.mainURL#/account-settings/payment" addtoken=false;
+            location url="#application.mainURL#/account-settings/payment" addtoken=false;8
 
         } else {
 
             paymentStruct = structNew();
             paymentStruct['skipResultPage'] = true;
-            paymentStruct['referenceId'] = session.customer_id & "@" & application.applicationname; // In order to recive the correct webhook, we need to pass the project name
+            paymentStruct['referenceId'] = session.customer_id & "@" & variables.applicationname; // In order to recive the correct webhook, we need to pass the project name
             paymentStruct['currency'] = objCurrency.getCurrency().iso;
             paymentStruct['successRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=success";
             paymentStruct['failedRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=failed";
