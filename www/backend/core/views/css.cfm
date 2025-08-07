@@ -12,6 +12,12 @@
 
 <!--- Trumbowyg Plugin --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/trumbowyg/ui/trumbowyg.min.css" />
+<cfif thiscontent.thisPath eq "backend/core/views/sysadmin/blog_posts_edit.cfm">
+    <link rel="stylesheet" href="/backend/dist/trumbowyg/plugins/table/ui/trumbowyg.table.min.css">
+</cfif>
+
+<!--- Tom Select --->
+<link rel="stylesheet" type="text/css" href="/backend/dist/css/tom-select.css" />
 
 <!--- Customized CSS --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/css/backend.css" />

@@ -299,7 +299,7 @@ component displayname="sysadmin" output="false" {
                 )
                 #arguments.search#
                 GROUP BY customers.intCustomerID
-                ORDER BY #arguments.sort#
+                ORDER BY customers.#arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
         );

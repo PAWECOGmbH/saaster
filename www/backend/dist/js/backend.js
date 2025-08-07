@@ -596,6 +596,44 @@ $(document).ready(function() {
     });
 
     /**
+     * Initializes the Trumbowyg WYSIWYG editor on all elements with the class 'trumboblog'.
+     *
+     * This editor instance includes additional buttons for image insertion, file upload, and other formatting options
+     * tailored for blog post editing. It also includes a plugin for handling image uploads via AJAX.
+     */
+    $('.trumboblog').each(function(index, element) {
+        var $this = $(element);
+
+        $this.trumbowyg({
+            btns: [
+                ['viewHTML'],
+                ['historyUndo', 'historyRedo'],
+                ['foreColor', 'backColor'],
+                ['bold', 'italic', 'underline', 'strikethrough', 'fontsize', 'formatting'],
+                ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+                ['unorderedList', 'orderedList'],
+                ['link'],
+                ['noembed'],
+                ['insertImage', 'upload'],
+                ['table'],
+                ['horizontalRule'],
+                ['removeformat'],
+                ['fullscreen']
+            ],
+            plugins: {
+                upload: {
+                    serverPath: '/backend/core/handler/sysadmin/blog_image_upload.cfm',
+                    fileFieldName: 'image'
+                },
+                allowTagsFromPaste: {
+                    allowedTags: ['h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'ul', 'li', 'ol', 'strong', 'em', 'a', 'img'],
+                }
+            }
+        });
+    });
+
+
+    /**
      * Initializes the Dropify plugin on all input elements with the class 'dropify'.
      *
      * Dropify provides a customizable and user-friendly file input field for uploading pictures or files.
