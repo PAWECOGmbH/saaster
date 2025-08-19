@@ -573,33 +573,53 @@ $(document).ready(function() {
 
     });
 
+    
     /**
-     * Initializes the Hugerte WYSIWYG editor on all elements with the class 'editor'.
+     * Initializes the Hugerte WYSIWYG editor on all elements with the class 'editor'(for the small editor) and one with the class 'big-editor'(for the big editor).
      *
      * Hugerte is a modern, customizable editor. This code initializes Hugerte on each '.editor' element.
      */
     // create the base options object
     const opts = {
-    selector: '.editor',
-    menubar: true,
-    statusbar: true,
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-        'preview', 'anchor',
-        'searchreplace', 'visualblocks', 'code', 'fullscreen',
-        'insertdatetime', 'media', 'table', 'help', 'wordcount'
-    ],
-    toolbar:
-        'undo redo | formatselect | ' +
-        'bold italic backcolor | alignleft aligncenter ' +
-        'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat'
+        selector: '.editor',
+        menubar: false,
+        statusbar: false,
+        z_index: 2000,
+        plugins: [
+            'lists',     // unordered/ordered lists
+            'link',      // insert/edit links
+            'code'       // view HTML source
+        ],
+        toolbar:
+            'undo redo | formatselect | ' +
+            'bold italic | alignleft aligncenter alignright alignjustify | ' +
+            'bullist numlist | link | code'
     };
+
+    const optsBig = {
+        selector: '.big-editor',
+        menubar: true,
+        statusbar: true,
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+            'preview', 'anchor',
+            'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'help', 'wordcount'
+        ],
+        toolbar:
+            'undo redo | formatselect | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat'
+    };
+
 
     // add conditional properties
     if (document.querySelector('.theme-dark')) {
     opts.skin = 'oxide-dark';
     opts.content_css = 'dark';
+    optsBig.skin = 'oxide-dark';
+    optsBig.content_css = 'dark';
     }
     
     document.querySelectorAll('.editor').forEach(function(element) {
@@ -607,6 +627,29 @@ $(document).ready(function() {
             window.hugerte.init(opts);
         }
     });
+    document.querySelectorAll('.big-editor').forEach(function(element) {
+        if (window.hugerte && typeof window.hugerte.init === 'function') {
+            window.hugerte.init(optsBig);
+        }
+    });
+
+    // Disable Bootstrap's focus trap on all Tabler/Bootstrap modals with 
+    // classes "modal modal-blur fade". 
+    // This is required so that nested editor dialogs (e.g., Hugerte link dialog) 
+    // can receive focus inside a modal without Bootstrap snapping focus back.
+    $(document).on('show.bs.modal', '.modal.modal-blur.fade', function () {
+    $(this).attr('data-bs-focus', 'false');
+    });
+
+    // Clean up stray Hugerte/TinyMCE UI when a Bootstrap/Tabler modal closes.
+    // Without this, floating elements like overflow menus (⋯), context menus, or dialogs
+    // remain in the DOM if the parent modal is dismissed, leaving "ghost" UI visible.
+    // This ensures all `.tox-*` overlays are removed when the bootstrap-modal is hidden.
+    $(document).on('hidden.bs.modal', '.modal.modal-blur.fade', function () {
+    $('.tox-dialog, .tox-pop, .tox-menu, .tox-toolbar__overflow').remove();
+    });
+
+
     /**
      * Initializes the Dropify plugin on all input elements with the class 'dropify'.
      *
