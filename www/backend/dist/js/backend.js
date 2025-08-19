@@ -574,27 +574,39 @@ $(document).ready(function() {
     });
 
     /**
-     * Initializes the Trumbowyg WYSIWYG editor on all elements with the class 'editor'.
+     * Initializes the Hugerte WYSIWYG editor on all elements with the class 'editor'.
      *
-     * Trumbowyg is a lightweight, customizable editor. This code configures it with specific toolbar
-     * buttons like bold, italic, link, formatting, and alignment options.
+     * Hugerte is a modern, customizable editor. This code initializes Hugerte on each '.editor' element.
      */
-    $('.editor').each(function(index, element) {
-        var $this = $(element);  // The current editor element
+    // create the base options object
+    const opts = {
+    selector: '.editor',
+    menubar: true,
+    statusbar: true,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+        'preview', 'anchor',
+        'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    toolbar:
+        'undo redo | formatselect | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat'
+    };
 
-        // Initialize the Trumbowyg editor with custom toolbar options
-        $this.trumbowyg({
-            btns: [
-                ['viewHTML'],                    // Toggle HTML view
-                ['bold', 'italic'],              // Basic formatting options
-                ['link'],                        // Insert/edit a link
-                ['formatting'],                  // Heading, subheading, etc.
-                ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],  // Text alignment options
-                ['unorderedList', 'orderedList'] // Bullet points and numbered lists
-            ]
-        });
+    // add conditional properties
+    if (document.querySelector('.theme-dark')) {
+    opts.skin = 'oxide-dark';
+    opts.content_css = 'dark';
+    }
+    
+    document.querySelectorAll('.editor').forEach(function(element) {
+        if (window.hugerte && typeof window.hugerte.init === 'function') {
+            window.hugerte.init(opts);
+        }
     });
-
     /**
      * Initializes the Dropify plugin on all input elements with the class 'dropify'.
      *

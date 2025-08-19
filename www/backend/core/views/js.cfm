@@ -19,8 +19,8 @@
 <!--- Searching in a select --->
 <script src="/backend/dist/js/search_select.js"></script>
 
-<!--- Trumbowyg editor --->
-<script src="/backend/dist/trumbowyg/trumbowyg.min.js"></script>
+<!--- hugerte editor --->
+<script src="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/hugerte.min.js"></script>
 
 <!--- Toggleinput JS --->
 <script src="/backend/dist/js/jquery.toggleinput.js"></script>

@@ -10,8 +10,9 @@
 <!--- Sweetalert --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/css/sweetalert.css" />
 
-<!--- Trumbowyg Plugin --->
-<link rel="stylesheet" type="text/css" href="/backend/dist/trumbowyg/ui/trumbowyg.min.css" />
+<!--- hugerte Plugin --->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/skins/ui/hugerte-5/skin.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/skins/content/default/content.min.css">
 
 <!--- Customized CSS --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/css/backend.css" />
