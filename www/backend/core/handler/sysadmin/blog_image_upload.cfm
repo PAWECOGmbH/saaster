@@ -1,7 +1,7 @@
 
 <!---
-This file is used to handle image uploads for blog posts via the Trumbowyg editor.
-It accepts POST requests with a file field named 'image' and uploads the image to
+This file is used to handle image uploads for blog posts via the hugerte editor.
+It accepts POST requests with a file field named 'file' and uploads the image to
 a structured directory based on the current date.
 It returns a JSON response with the success status and the URL of the uploaded image.
  --->
@@ -10,9 +10,9 @@ It returns a JSON response with the success status and the URL of the uploaded i
 
 <cfscript>
 
-    // Only accept POST requests with a file field named 'image'
+    // Only accept POST requests with a file field named 'file'
 
-    if (structKeyExists(form, "image")) {
+    if (structKeyExists(form, "file")) {
 
         allowedFileTypes = ["jpg", "jpeg", "png", "gif", "webp"];
 
@@ -31,19 +31,18 @@ It returns a JSON response with the success status and the URL of the uploaded i
 
         uploadArgs = {
             filePath: absPath,
-            fileNameOrig: "image",
+            fileNameOrig: "file",
             makeUnique: true
         };
 
         globalObj = new backend.core.com.global();
         result = globalObj.uploadFile(uploadArgs, allowedFileTypes);
-
+        
         if (result.success) {
-            imageUrl = relPath & "/" & result.fileName;
-            writeOutput(serializeJSON({
-                'success': true,
-                'file': imageUrl
-            }));
+                imageUrl = relPath & "/" & result.fileName;
+                writeOutput(serializeJSON({
+                    'location': imageUrl
+                }));
         } else {
             writeOutput(serializeJSON({
                 'success': false,
@@ -56,5 +55,6 @@ It returns a JSON response with the success status and the URL of the uploaded i
             'message': "No file uploaded."
         }));
     }
+    
 
 </cfscript>

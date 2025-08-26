@@ -19,18 +19,8 @@
 <!--- Searching in a select --->
 <script src="/backend/dist/js/search_select.js"></script>
 
-<!--- Trumbowyg editor --->
-<script src="/backend/dist/trumbowyg/trumbowyg.min.js"></script>
-<cfif thiscontent.thisPath eq "backend/core/views/sysadmin/blog_posts_edit.cfm">
-    <script src="/backend/dist/trumbowyg/plugins/upload/trumbowyg.upload.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/fontsize/trumbowyg.fontsize.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/colors/trumbowyg.colors.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/history/trumbowyg.history.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/noembed/trumbowyg.noembed.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/table/trumbowyg.table.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/template/trumbowyg.template.min.js"></script>
-    <script src="/backend/dist/trumbowyg/plugins/allowtagsfrompaste/trumbowyg.allowtagsfrompaste.min.js"></script>
-</cfif>
+<!--- hugerte editor --->
+<script src="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/hugerte.min.js"></script>
 
 <!--- Toggleinput JS --->
 <script src="/backend/dist/js/jquery.toggleinput.js"></script>

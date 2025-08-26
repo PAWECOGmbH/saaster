@@ -250,7 +250,7 @@
                             <div class="mb-3">
                                 <div class="mb-3">
                                     <label class="form-label">Content <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##post_content_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post content"></i></a></label>
-                                    <textarea class="form-control trumboblog" name="content" style="height: 800px;">#qPost.strPostContent#</textarea>
+                                    <textarea class="form-control big-editor" name="content" style="height: 800px;">#qPost.strPostContent#</textarea>
                                 </div>
                             </div>
                         </div>
