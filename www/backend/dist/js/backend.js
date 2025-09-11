@@ -573,7 +573,7 @@ $(document).ready(function() {
 
     });
 
-    
+
     /**
      * Initializes the Hugerte WYSIWYG editor on all elements with the class 'editor'(for the small editor) and one with the class 'big-editor'(for the big editor).
      *
@@ -585,6 +585,7 @@ $(document).ready(function() {
         menubar: false,
         statusbar: false,
         z_index: 2000,
+        dialog: { appendTo: document.body },
         plugins: [
             'lists',     // unordered/ordered lists
             'link',      // insert/edit links
@@ -601,6 +602,7 @@ $(document).ready(function() {
         menubar: true,
         statusbar: true,
         z_index: 2000,
+        dialog: { appendTo: document.body },
         automatic_uploads: true,
         images_upload_url: '/backend/core/handler/sysadmin/blog_image_upload.cfm',
         file_picker_types: 'image',
@@ -641,7 +643,7 @@ $(document).ready(function() {
     optsBig.skin = 'oxide-dark';
     optsBig.content_css = 'dark';
     }
-    
+
     document.querySelectorAll('.editor').forEach(function(element) {
         if (window.hugerte && typeof window.hugerte.init === 'function') {
             window.hugerte.init(opts);
@@ -653,9 +655,9 @@ $(document).ready(function() {
         }
     });
 
-    // Disable Bootstrap's focus trap on all Tabler/Bootstrap modals with 
-    // classes "modal modal-blur fade". 
-    // This is required so that nested editor dialogs (e.g., Hugerte link dialog) 
+    // Disable Bootstrap's focus trap on all Tabler/Bootstrap modals with
+    // classes "modal modal-blur fade".
+    // This is required so that nested editor dialogs (e.g., Hugerte link dialog)
     // can receive focus inside a modal without Bootstrap snapping focus back.
     $(document).on('show.bs.modal', '.modal.modal-blur.fade', function () {
     $(this).attr('data-bs-focus', 'false');
@@ -668,6 +670,13 @@ $(document).ready(function() {
     $(document).on('hidden.bs.modal', '.modal.modal-blur.fade', function () {
     $('.tox-dialog, .tox-pop, .tox-menu, .tox-toolbar__overflow').remove();
     });
+
+    // Fix: Allow focus inside Hugerte dialogs even when inside a Bootstrap modal
+    document.addEventListener('focusin', function (e) {
+        if (e.target.closest('.tox-dialog, .tox-menu, .tox-pop')) {
+            e.stopImmediatePropagation(); // prevents Bootstrap from intercepting the focus
+        }
+    }, true);
 
     /**
      * Initializes the Dropify plugin on all input elements with the class 'dropify'.
