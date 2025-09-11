@@ -137,5 +137,5 @@
 #getModal.args('plans', 'strPlanName', qPlan.intPlanID, 100).openModal('plan_name', cgi.path_info, 'Translate plan name')#
 #getModal.args('plans', 'strShortDescription', qPlan.intPlanID).openModal('short_desc', cgi.path_info, 'Translate short description')#
 #getModal.args('plans', 'strButtonName', qPlan.intPlanID, 50).openModal('button_name', cgi.path_info, 'Translate button name')#
-#getModal.args('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 1)#
+#getModal.args('plans', 'strDescription', qPlan.intPlanID).openModal('desc', cgi.path_info, 'Translate description', 'editor')#
 </cfoutput>

@@ -25,5 +25,8 @@
 <!--- Toggleinput JS --->
 <script src="/backend/dist/js/jquery.toggleinput.js"></script>
 
+<!--- Tom Select --->
+<script src="/backend/dist/js/tom-select.complete.min.js"></script>
+
 <!--- Custom JS for the backend --->
 <script src="/backend/dist/js/backend.js"></script>
