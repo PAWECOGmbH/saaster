@@ -173,11 +173,12 @@ For more information or if you're unsure about something, feel free to open an i
 
 - [Tabler](https://github.com/tabler/tabler/blob/main/LICENSE)
 - [Dropify](https://github.com/JeremyFagis/dropify/blob/master/LICENCE.md)
-- [Trumbowyg](https://github.com/Alex-D/Trumbowyg/blob/develop/LICENSE)
+- [Hugerte](https://github.com/hugerte/hugerte/blob/main/LICENSE.TXT)
 - [Bootstrap](https://github.com/twbs/bootstrap/blob/main/LICENSE)
 - [MockDataCFC](https://github.com/Ortus-Solutions/MockDataCFC/blob/development/LICENSE)
 - [Fontawesome](https://fontawesome.com/v4/license/)
 - [jquery](https://github.com/jquery/jquery)
 - [taffy](https://github.com/atuttle/Taffy)
+
 
 
