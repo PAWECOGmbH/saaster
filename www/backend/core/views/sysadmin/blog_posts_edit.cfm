@@ -269,7 +269,7 @@
 #getModal.args('blog_posts', 'strButtonText', qPost.intBlogPostID).openModal('button_text', cgi.path_info, 'Translate button text')#
 #getModal.args('blog_posts', 'strPostTitle', qPost.intBlogPostID).openModal('post_title', cgi.path_info, 'Translate post title')#
 #getModal.args('blog_posts', 'strPostIntro', qPost.intBlogPostID).openModal('post_intro', cgi.path_info, 'Translate post intro')#
-#getModal.args('blog_posts', 'strPostContent', qPost.intBlogPostID).openModal('post_content', cgi.path_info, 'Translate post content', 'trumboblog')#
+#getModal.args('blog_posts', 'strPostContent', qPost.intBlogPostID).openModal('post_content', cgi.path_info, 'Translate post content', 'big-editor')#
 </cfoutput>
 
 <script>

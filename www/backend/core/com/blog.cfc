@@ -81,7 +81,7 @@ component displayname="blogposts" output="false" {
             sql = "
                 SELECT COUNT(intBlogPostID) as totalPosts
                 FROM blog_posts
-                WHERE MATCH (strTitle, strPreviewText, strButtonText, strContent)
+                WHERE MATCH (strPreviewTitle, strPreviewText, strPostTitle, strPostIntro, strPostContent)
                 #arguments.search#
             "
         );
@@ -120,6 +120,26 @@ component displayname="blogposts" output="false" {
         );
 
         return local.qPosts;
+
+    }
+
+    public query function getPostsSearch(required string search, required numeric start, required string sort) {
+
+        local.entries = 10;
+
+        local.qTotalPosts = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT *
+                FROM blog_posts
+                WHERE MATCH (strPreviewTitle, strPreviewText, strPostTitle, strPostIntro, strPostContent)
+                #arguments.search#
+                ORDER BY #arguments.sort#
+                LIMIT #arguments.start#, #local.entries#
+            "
+        );
+
+        return local.qTotalPosts;
 
     }
 
