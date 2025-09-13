@@ -260,7 +260,7 @@ component displayname="frontendBlog" output="false" {
             local.tocHTML = "<div class=""toc-container""><ul class=""toc-list"">";
             for (local.item in tocItems) {
                 local.cls = item.tag;
-                local.tocHTML &= '<li class="toc-item #local.cls#"><a href="##' & local.item.anchor & '">' & encodeForHTML(local.item.text) & '</a></li>';
+                local.tocHTML &= '<li class="toc-item #local.cls#"><a href="##' & local.item.anchor & '">' & local.item.text & '</a></li>';
             }
             local.tocHTML &= "</ul></div>";
             local.result['toc'] = local.tocHTML;
