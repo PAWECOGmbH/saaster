@@ -5,6 +5,9 @@ www/test.*
 www/userdata
 
 ### Config files ###
+### Log files ###
+logs/*
+filebrowser.db
 config.cfm
 .env
 
