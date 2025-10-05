@@ -1,0 +1,26 @@
+[mysqld]
+# MEMORY & CACHING
+innodb_buffer_pool_size = 2G
+innodb_buffer_pool_instances = 2
+innodb_redo_log_capacity = 512M
+tmp_table_size = 64M
+max_heap_table_size = 64M
+sort_buffer_size = 4M
+read_rnd_buffer_size = 4M
+join_buffer_size = 4M
+
+# CONNECTION & TIMEOUTS
+max_connections = 100
+wait_timeout = 300
+interactive_timeout = 300
+connect_timeout = 10
+
+# INNODB IO THREADS
+innodb_flush_log_at_trx_commit = 2
+innodb_io_capacity = 200
+innodb_read_io_threads = 4
+innodb_write_io_threads = 4
+
+# FILEBROWSER MOUNT LOCATION
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log

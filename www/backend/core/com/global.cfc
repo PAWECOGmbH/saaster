@@ -79,7 +79,32 @@ component displayname="globalFunctions" output="false" {
                 }
 
                 if (local.qCheckSEF.itsFrontend) {
+
                     local.returnStruct['thisPath'] = "frontend/" & application.activeTheme & "/" & local.qCheckSEF.strPath;
+
+                    // Remove all url variables and append each as a struct value to the struct
+                    if (find("?", local.returnStruct['thisPath'])) {
+
+                        // Split path and query string
+                        local.pathParts = listToArray(local.returnStruct['thisPath'], "?");
+                        local.returnStruct['thisPath'] = local.pathParts[1];
+                        local.returnStruct['urlVariables'] = {};
+
+                        if (arrayLen(local.pathParts) > 1) {
+                            local.queryString = local.pathParts[2];
+                            local.pairs = listToArray(local.queryString, "&");
+                            for (local.i = 1; local.i <= arrayLen(local.pairs); local.i++) {
+                                local.pair = local.pairs[local.i];
+                                local.eqPos = find("=", local.pair);
+                                if (local.eqPos) {
+                                    local.key = left(local.pair, local.eqPos - 1);
+                                    local.value = mid(local.pair, local.eqPos + 1, len(local.pair) - local.eqPos);
+                                    local.returnStruct['urlVariables'][local.key] = local.value;
+                                }
+                            }
+                        }
+                    }
+
                 } else {
                     local.returnStruct['thisPath'] = local.qCheckSEF.strPath;
                 }

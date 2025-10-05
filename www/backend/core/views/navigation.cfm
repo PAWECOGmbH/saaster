@@ -38,6 +38,7 @@
                                 <a href="#application.mainURL#/sysadmin/plans" class="dropdown-item">Plans</a>
                                 <a href="#application.mainURL#/sysadmin/modules" class="dropdown-item">Modules</a>
                                 <a href="#application.mainURL#/sysadmin/widgets" class="dropdown-item">Widgets</a>
+                                <a href="#application.mainURL#/sysadmin/blog-posts" class="dropdown-item">Blog posts</a>
                                 <div class="dropdown-divider"></div>
 
                                 <span class="dropdown-header">System</span>

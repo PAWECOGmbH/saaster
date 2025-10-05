@@ -17,10 +17,10 @@ component displayname="translate" accessors="true" {
 
 
     // Open a modal
-    public string function openModal(required string modalName, required string redirect, string modalTitle, boolean itsEditor) {
+    public string function openModal(required string modalName, required string redirect, string modalTitle, string editorClass) {
 
         param name="arguments.modalTitle" default="Translate content";
-        param name="arguments.itsEditor" default=0;
+        local.editorClass = structKeyExists(arguments, "editorClass") ? arguments.editorClass : "";
 
         local.transTable = variables.thisTable & "_trans";
 
@@ -44,7 +44,7 @@ component displayname="translate" accessors="true" {
             <div class='modal-body'>")
 
             writeOutput(textToTranslate());
-            writeOutput(transFields(arguments.itsEditor));
+            writeOutput(transFields(local.editorClass));
 
             writeOutput("
             </div>
@@ -64,11 +64,9 @@ component displayname="translate" accessors="true" {
     }
 
 
-    private string function transFields(boolean itsEditor) {
+    private string function transFields(string editorClass) {
 
-        param name="arguments.itsEditor" default=0;
-
-        local.itsEditor = "";
+        local.editorClass = structKeyExists(arguments, "editorClass") ? arguments.editorClass : "";
         local.transTable = variables.thisTable & "_trans";
 
         // Loop over existing languages exept the default language
@@ -76,14 +74,11 @@ component displayname="translate" accessors="true" {
 
 
         loop query = local.getLng {
-            if (arguments.itsEditor eq 1) {
-                local.itsEditor = "editor";
-            }
             writeOutput("<div class='hr-text hr-text-left my-3 mt-4'>#local.getLng.strLanguageEN#</div>");
             if (isNumeric(variables.maxLength)) {
-                writeOutput("<textarea class='form-control #local.itsEditor#'  name='text_#local.getLng.strLanguageISO#' maxlength='#variables.maxLength#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
+                writeOutput("<textarea class='form-control #local.editorClass#'  name='text_#local.getLng.strLanguageISO#' maxlength='#variables.maxLength#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
             } else {
-                writeOutput("<textarea class='form-control #local.itsEditor#' name='text_#local.getLng.strLanguageISO#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
+                writeOutput("<textarea class='form-control #local.editorClass#' name='text_#local.getLng.strLanguageISO#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
             }
 
             cfquery(name="local.qContent" datasource=application.datasource ) {
