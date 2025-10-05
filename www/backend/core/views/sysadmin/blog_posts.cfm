@@ -169,14 +169,14 @@
 
                                     <!--- First Page --->
                                     <li class="page-item <cfif session.p_page eq 1>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=1" tabindex="-1" aria-disabled="true">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=1" tabindex="-1" aria-disabled="true">
                                             <i class="fas fa-angle-double-left"></i>
                                         </a>
                                     </li>
 
                                     <!--- Prev arrow --->
                                     <li class="page-item <cfif session.p_page eq 1>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.p_page-1#" tabindex="-1" aria-disabled="true">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#session.p_page-1#" tabindex="-1" aria-disabled="true">
                                             <i class="fas fa-angle-left"></i>
                                         </a>
                                     </li>
@@ -192,20 +192,20 @@
                                         <cfloop index="j" from="#session.p_page#" to="#blockPage#">
                                             <cfif not blockPage gt pages>
                                                 <li class="page-item <cfif session.p_page eq j>active</cfif>">
-                                                    <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                    <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#j#">#j#</a>
                                                 </li>
                                             </cfif>
                                         </cfloop>
                                     <cfelseif blockPage lt 5>
                                         <cfloop index="j" from="1" to="#pages#">
                                             <li class="page-item <cfif session.p_page eq j>active</cfif>">
-                                                <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#j#">#j#</a>
                                             </li>
                                         </cfloop>
                                     <cfelse>
                                         <cfloop index="j" from="#pages - 4#" to="#pages#">
                                             <li class="page-item <cfif session.p_page eq j>active</cfif>">
-                                                <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#j#">#j#</a>
+                                                <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#j#">#j#</a>
                                             </li>
                                         </cfloop>
                                     </cfif>
@@ -213,14 +213,14 @@
 
                                     <!--- Next arrow --->
                                     <li class="page-item <cfif session.p_page gte pages>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.p_page+1#">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#session.p_page+1#">
                                             <i class="fas fa-angle-right"></i>
                                         </a>
                                     </li>
 
                                     <!--- Last Page --->
                                     <li class="page-item <cfif session.p_page gte pages>disabled</cfif>">
-                                        <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#pages#">
+                                        <a class="page-link" href="#application.mainURL#/sysadmin/blog-posts?page=#pages#">
                                             <i class="fas fa-angle-double-right"></i>
                                         </a>
                                     </li>
