@@ -163,7 +163,7 @@
                                 </cfif>
                                 <tr>
                                     <td style="border-top: 1px solid;"></td>
-                                    <td style="border-top: 1px solid;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
+                                    <td style="border-top: 1px solid;" colspan="4"><b><cfif getInvoiceData.vatType eq 1>#getTrans('txtTotalIncl')#<cfelse>#getTrans('txtTotalExcl')#</cfif></b></td>
                                     <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                                 </tr>
                                 <cfif qPayments.recordCount>
