@@ -52,10 +52,11 @@ component displayname="invoices" output="false" {
         local.isNet = application.objSettings.getSetting('settingInvoiceNet');
         local.paymentStatusID = 1;
         local.vatType = application.objSettings.getSetting('settingStandardVatType');
-        local.language = application.objLanguage.getDefaultLanguage().iso;
+        local.language = "en";
 
         if (structKeyExists(invoiceData, "customerID") and isNumeric(invoiceData.customerID)) {
             local.customerID = invoiceData.customerID;
+            local.language = application.objCustomer.getCustomerData(local.customerID).language;
         } else {
             local.argsReturnValue['message'] = "No customerID found!";
             return local.argsReturnValue;
@@ -1428,7 +1429,7 @@ component displayname="invoices" output="false" {
         local.returnValue['message'] = "";
 
         getTrans = application.objLanguage.getTrans;
-
+                
         local.invoiceID = arguments.invoiceID;
 
         // Get invoice data
@@ -1471,27 +1472,33 @@ component displayname="invoices" output="false" {
                 } else {
                     local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
                 }
+                // If person is set use language of the person, not the company
+                if(structKeyExists(local.userData, "strLanguage") and len(trim(local.userData.strLanguage))) {
+                    local.invoiceLanguage = local.userData.strLanguage;
+                }
+            } else {
+                    local.invoiceLanguage = local.customerData.language;
             }
 
-            variables.mailTitle = getTrans('titInvoiceReady', local.customerData.language);
+            variables.mailTitle = getTrans('titInvoiceReady', local.invoiceLanguage);
             variables.mailType = "html";
 
             cfsavecontent (variable = "variables.mailContent") {
 
                 echo("
-                    #getTrans('titHello', local.customerData.language)#  #local.invoicePerson#<br><br>
-                    #getTrans('msgThanksForPurchaseFindInvoice', local.customerData.language)#<br><br>
-                    #getTrans('txtDownloadInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
+                    #getTrans('titHello', local.invoiceLanguage)#  #local.invoicePerson#<br><br>
+                    #getTrans('msgThanksForPurchaseFindInvoice', local.invoiceLanguage)#<br><br>
+                    #getTrans('txtDownloadInvoice', local.invoiceLanguage)#<br><br>
+                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.invoiceLanguage)#</a>
                     <br><br>
-                    #getTrans('txtRegards', local.customerData.language)#<br>
-                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #getTrans('txtRegards', local.invoiceLanguage)#<br>
+                    #getTrans('txtYourTeam', local.invoiceLanguage)#<br>
                     #application.appOwner#
                 ");
             }
 
             // Send invoice
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.customerData.language)#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.invoiceLanguage)#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1544,22 +1551,28 @@ component displayname="invoices" output="false" {
                 } else {
                     local.invoicePerson = local.userData.strFirstName & " " & local.userData.strLastName;
                 }
+                // If person is set use language of the person, not company
+                if(structKeyExists(local.userData, "strLanguage") and len(trim(local.userData.strLanguage))) {
+                    local.invoiceLanguage = local.userData.strLanguage;
+                }
+            } else {
+                    local.invoiceLanguage = local.customerData.language;
             }
 
             // Build the link to the invoice (incl. redirect)
             local.dl_link = application.mainURL & "/account-settings/invoice/" & local.invoiceID & "?redirect=" & urlEncodedFormat("account-settings/invoice/#local.invoiceID#?del_redirect");
 
-            variables.mailTitle = getTrans('titInvoice', local.customerData.language) & " | " & local.invoiceData.title;
+            variables.mailTitle = getTrans('titInvoice', local.invoiceLanguage) & " | " & local.invoiceData.title;
             variables.mailType = "html";
 
             cfsavecontent (variable = "variables.mailContent") {
                 echo("
-                    #getTrans('titHello', local.customerData.language)# #local.invoicePerson#<br><br>
-                    #getTrans('txtPleasePayInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
+                    #getTrans('titHello', local.invoiceLanguage)# #local.invoicePerson#<br><br>
+                    #getTrans('txtPleasePayInvoice', local.invoiceLanguage)#<br><br>
+                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.invoiceLanguage)#</a>
                     <br><br>
-                    #getTrans('txtRegards', local.customerData.language)#<br>
-                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #getTrans('txtRegards', local.invoiceLanguage)#<br>
+                    #getTrans('txtYourTeam', local.invoiceLanguage)#<br>
                     #application.appOwner#
                 ");
             }
