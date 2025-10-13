@@ -1422,7 +1422,7 @@ component displayname="invoices" output="false" {
 
 
     // Send invoice by e-mail
-    public any function sendInvoice(required numeric invoiceID) {
+    public struct function sendInvoice(required numeric invoiceID) {
 
         local.returnValue = structNew();
         local.returnValue['success'] = false;
