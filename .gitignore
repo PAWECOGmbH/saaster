@@ -7,10 +7,10 @@ www/userdata
 ### Config files ###
 config.cfm
 .env
+config/nginx/conf.d/*.conf
 
 ### Log files ###
+logs/*
 www/logs
+filebrowser.db
 .history
-
-### NGINX configs ###
-config/nginx/conf.d/*.conf

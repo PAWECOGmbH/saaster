@@ -58,7 +58,7 @@ if (url.pass eq variables.schedulePassword) {
                 },
                 sql = "
                     SELECT
-                        #taskTable#.intScheduletaskID,
+                        #taskTable#.intSchedulerID,
                         #taskTable#.intCustomerID,
                         #taskTable#.dtmNextRun,
                         #taskTable#.dtmLastRun,
@@ -137,9 +137,6 @@ if (url.pass eq variables.schedulePassword) {
 
                             lastRunSuccessful = false;
 
-                            // Decativate the schedule task
-                            application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
-
                             // Make log
                             objLogs.logWrite("scheduletask", "error", "File not found, the schedule task has been deactivated [File: #qGetTasks.strPath#]", true);
 
@@ -158,7 +155,7 @@ if (url.pass eq variables.schedulePassword) {
                         queryExecute(
                             options = {datasource = application.datasource},
                             params = {
-                                scheduleID: {type: "numeric", value: qGetTasks.intScheduletaskID},
+                                scheduleID: {type: "numeric", value: qGetTasks.intSchedulerID},
                                 utcDate: {type: sql_type_utcDate, value: lastRun},
                                 nextRun: {type: "datetime", value: nextRun},
                                 elapsedSeconds: {type: "numeric", value: elapsedSeconds}
@@ -168,15 +165,12 @@ if (url.pass eq variables.schedulePassword) {
                                 SET dtmLastRun = :utcDate,
                                     dtmNextRun = :nextRun,
                                     intDuringSeconds = :elapsedSeconds
-                                WHERE intScheduleTaskID = :scheduleID
+                                WHERE intSchedulerID = :scheduleID
                             "
                         )
 
 
                     } else {
-
-                        // Decativate the schedule task
-                        application.objSysadmin.deactivateTask(qGetTasks.intScheduletaskID);
 
                         // Make log
                         objLogs.logWrite("scheduletask", "warning", "Empty path in schedule task. The schedule task has been deactivated [ModuleID: #qGetTasks.intModuleID#]", false);
@@ -195,11 +189,26 @@ if (url.pass eq variables.schedulePassword) {
         } else {
 
             // It could be that the scheduler has still the flag running true. Maybe the last run has stopped because of an error.
-            // Check if the scheduler still has the flag running true after one hour. If yes, make a log and send an email
-            if (dateDiff("n", qRunning.dtmStart, now()) gt 60) {
+            // Check if the scheduler still has the flag running true after a half hour. If yes, make a log and send an email
+            if (dateDiff("n", qRunning.dtmStart, now()) gt 30) {
+
+                // Update schedulecontrol
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        utcDate: {type: "datetime", value: now()},
+                        taskName: {type: "string", value: "task_" & url.task}
+                    },
+                    sql = "
+                        UPDATE schedulecontrol
+                        SET dtmEnd = :utcDate,
+                            blnIsRunning = 0
+                        WHERE strTaskName = :taskName
+                    "
+                )
 
                 // Make log
-                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# has still the flag running true after one hour. Please check the scheduler!", true);
+                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# has still the flag running true after one hour. The scheduler has been updated to 0.", true);
 
             } else {
 

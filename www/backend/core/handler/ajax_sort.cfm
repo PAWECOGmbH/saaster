@@ -32,6 +32,9 @@ if (structKeyExists(url, "plans")) {
 if (structKeyExists(url, "planfeatures")) {
     thisTable = "plan_features";
 }
+if (structKeyExists(url, "blog_categories")) {
+    thisTable = "blog_categories";
+}
 
 param name="response" default="ok";
 

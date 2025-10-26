@@ -232,7 +232,7 @@
 
 <form action="#application.mainURL#/sysadm/invoices" method="post">
 <input type="hidden" name="new_position" value="#thisInvoiceID#">
-<div id="position_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
+<div id="position_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false' data-bs-focus="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">

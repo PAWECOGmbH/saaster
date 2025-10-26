@@ -137,5 +137,5 @@
 </form>
 #getModal.args('modules', 'strModuleName', qModule.intModuleID).openModal('module_name', cgi.path_info, 'Translate description')#
 #getModal.args('modules', 'strShortDescription', qModule.intModuleID).openModal('short_desc', cgi.path_info, 'Translate description')#
-#getModal.args('modules', 'strDescription', qModule.intModuleID).openModal('desc', cgi.path_info, 'Translate description', 1)#
+#getModal.args('modules', 'strDescription', qModule.intModuleID).openModal('desc', cgi.path_info, 'Translate description', 'editor')#
 </cfoutput>
