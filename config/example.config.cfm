@@ -34,7 +34,7 @@ variables.pdf_type = "classic";
 variables.requesttimeout = 6000;
 
 // Set allowed image file types
-variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"]; // Svg and webp will not work for image file upload
+variables.imageFileTypes = ["jpeg","png","jpg","gif","bmp"];
 variables.documentsFileTypes = ["pdf", "zip", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "csv", "mp4", "mov", "mp3"];
 
 // Default meta tags

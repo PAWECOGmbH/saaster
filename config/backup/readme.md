@@ -1,82 +1,259 @@
-
 # Backup for the Production and Staging Environments
 
-**Purpose**
+## Purpose
 
-This directory contains the necessary configurations and scripts for backing up and restoring the **database**, **user data**, and the **Lucee image** in the **production** and **staging** environments. The backup and restore processes are automated using Docker and shell scripts to ensure consistency, reliability, and minimal manual intervention.
+This directory contains the scripts and configuration required to back up and restore the **database**, **user data**, and the **Lucee Docker image** in the **production** and **staging** environments.
 
-Note: These scripts are not intended for use in the **development** environment.
+The backup and restore processes are automated using Docker and shell scripts to ensure consistency, reliability, and minimal manual work.
 
+> These scripts are **not** intended for the **development** environment.
 
-## **Structure**
+Backup and restore support two modes, controlled by the `.env` variable `BACKUP_MODE`:
 
--   **backup.sh**: A shell script that automates the process of creating backups for the **database volume**, **user data volume**, and **Lucee image**. Each backup is timestamped to ensure that multiple versions can be maintained. The script also uses `scp` to transfer the backups securely to a remote server.
-
--   **restore.sh**: A shell script that automates the process of restoring backups from the remote server. It retrieves the backups for the **database**, **user data**, and **Lucee image**, and restores them to the appropriate Docker volumes.
-
--   **.env**: Contains environment variables required for the backup and restore processes, such as volume names, SSH key, server IP, and remote paths. The backup does not have its own `.env` file; instead, it uses the `.env` file from the main project.
-
-## **Usage**
-
-### **Backup**
-
-To create a backup of the **database**, **user data**, and **Lucee image**, follow these steps:
-
-1.  Ensure that the `.env` file is correctly configured with your **production** or **staging** environment settings (e.g., volume names, remote server path, SSH keys, and server IP).
-
-2.  Navigate to the `config/backup/` directory:
-    `cd config/backup/`
-
-3. Run the backup script:
-`bash backup.sh`
-
-This will:
-
--   Backup the **database volume**.
--   Backup the **user data volume**.
--   Backup the **Lucee image**.
--   Securely transfer all backups to the remote backup server.
--   Backups are only deleted locally if the remote transfer was successful.
-
-Each backup will be **timestamped** in the format `YYYYMMDD_HHMM`, ensuring you can differentiate between multiple backup versions.
-
-### **Restore**
-
-To restore from a backup, first navigate to the `config/backup/` directory:
-`cd config/backup/`
-
-Then, if you run the restore script without any parameters:
-`bash restore.sh`
-
-It will display a list of available options, such as:
-Usage: restore.sh [--db [TIMESTAMP]] [--userdata [TIMESTAMP]] [--lucee-image [TIMESTAMP]] [--list]
-
-To perform a restore, you need to specify which backup you want to restore by using one of the following options:
- - To restore the **latest** backup for the **database**:
- `bash restore.sh --db`
-
- - To restore a **specific** database backup by **timestamp**:
- `bash restore.sh --db 20241019_2300`
-
-- To list all available backups on the remote server:
- `bash restore.sh --list`
-
- - After each restore, the downloaded backup file is automatically deleted from the `/restore/` folder to keep the system clean.
+- `BACKUP_MODE=ssh` – Backups are sent to a normal SSH server with full shell access.
+- `BACKUP_MODE=sftp` – Backups are sent to an SFTP-only target (e.g. Hetzner Storage Box, usually on port 23).
 
 
-## **Automating Backups**
+## Structure
 
-To automate the backup process, you can set up a **cron job** to run the backup script at regular intervals (e.g., daily). For example, to run the backup every night at midnight, add the following entry to your crontab:
-`0 0 * * * /path/to/your/project/config/backup/backup.sh`
-Backup logs are written to /var/log/backup-cron.log
-You can review this log to verify execution and spot issues.
+### Entry scripts
+
+- **backup.sh**  
+  Main entry point for creating backups.
+  - Loads the project `.env` from the repository root.
+  - Reads `BACKUP_MODE` (`ssh` or `sftp`).
+  - Delegates to:
+    - `backup_ssh.sh` in SSH mode, or
+    - `backup_sftp.sh` in SFTP mode.
+
+- **restore.sh**  
+  Main entry point for restoring backups.
+  - Loads the project `.env`.
+  - Reads `BACKUP_MODE` (`ssh` or `sftp`).
+  - Delegates to:
+    - `restore_ssh.sh` in SSH mode, or
+    - `restore_sftp.sh` in SFTP mode.
 
 
-## **Notes**
+### Backup scripts
 
--   These backups are intended for the **production** and **staging** environments. Ensure that the environment variables in the `.env` file are correctly configured before running any backups or restores.
--   The backup script automatically **rotates** backups, keeping only the **latest 30 backups** per backup type (database, user data, Lucee image) by removing older backups on the remote server.
--   Always ensure that your **SSH keys** and **server information** are secure, as they are used for transferring backups between the production or staging environment and the remote server.
--   Locally created backup files are deleted only if the remote copy exists to prevent data loss.
--   Backups on the remote server are rotated automatically: only the latest 30 backups per type are kept.
--   The restore script stops immediately if any step fails, ensuring that incomplete restores do not go unnoticed.
+- **backup_ssh.sh**  
+  Creates timestamped backups and transfers them to a remote SSH server via `scp`:
+  - **Database volume**
+  - **User data volume**
+  - **Lucee Docker image** (via `docker save`)
+
+  Files are stored in subfolders under `REMOTE_BACKUP_PATH` on the remote server:
+
+  - `${REMOTE_BACKUP_PATH}/db`
+  - `${REMOTE_BACKUP_PATH}/userdata`
+  - `${REMOTE_BACKUP_PATH}/lucee`
+
+- **backup_sftp.sh**  
+  Functionally equivalent to the SSH variant, but tailored for SFTP-only targets, such as Hetzner Storage Box:
+  - Creates tar archives for:
+    - **Database volume** (`database_YYYYMMDD_HHMM.tar.gz`)
+    - **User data volume** (`userdata_YYYYMMDD_HHMM.tar.gz`)
+    - **Lucee Docker image** (`image_<LUCEE_IMAGE>_<LUCEE_IMAGE_VERSION>_YYYYMMDD_HHMM.tar`)
+  - Uploads files using `scp`/SFTP with:
+    - `SSH_KEY_PATH`
+    - `SERVER_USER`
+    - `SERVER_HOST`
+    - `SERVER_PORT`
+  - Stores files under:
+    - `${REMOTE_BACKUP_PATH}/db`
+    - `${REMOTE_BACKUP_PATH}/userdata`
+    - `${REMOTE_BACKUP_PATH}/lucee`
+  - Performs **remote rotation**:
+    - Only the last `MAX_BACKUPS` backups per folder are kept; older files are deleted via SFTP batch commands.
+  - Writes backup logs to: `/var/log/backup-cron.log`
+
+
+### Restore scripts
+
+- **restore_ssh.sh / restore_sftp.sh**
+
+  Both scripts offer the same CLI and behavior, but use different protocols under the hood:
+
+  - **Database restore**
+    - Downloads the selected `database_*.tar.gz` archive from `${REMOTE_BACKUP_PATH}/db`
+    - Extracts contents into the database volume using a temporary Alpine container
+    - Restarts the MySQL container (`MYSQL_CONTAINER_NAME`)
+
+  - **User data restore**
+    - Downloads the selected `userdata_*.tar.gz` archive from `${REMOTE_BACKUP_PATH}/userdata`
+    - Extracts contents into the userdata volume
+    - Restarts the Lucee container (`LUCEE_CONTAINER_NAME`)
+
+  - **Lucee image restore**
+    - Downloads the selected `image_<LUCEE_IMAGE>_<LUCEE_IMAGE_VERSION>_*.tar` from `${REMOTE_BACKUP_PATH}/lucee`
+    - Loads it via `docker load`
+
+  - **Automatic latest selection**
+    - If you do **not** pass a timestamp, the scripts will automatically select the **newest** file based on the lexicographically last filename (timestamps in `YYYYMMDD_HHMM`).
+
+  - **Listing**
+    - `--list` prints all available backups in the three folders (`db`, `userdata`, `lucee`) on the remote server.
+
+
+### Environment variables (`.env`)
+
+The backup/restore scripts use the main project `.env` (in the repository root). Relevant variables include:
+
+- Project / volumes:
+  - `COMPOSE_PROJECT_NAME`
+- Mode:
+  - `BACKUP_MODE` (`ssh` or `sftp`)
+- Backup retention:
+  - `MAX_BACKUPS`
+- Remote target:
+  - `REMOTE_BACKUP_PATH`
+  - `SERVER_USER`
+  - `SERVER_HOST`
+  - `SERVER_PORT`
+  - `SSH_KEY_PATH`
+- Docker / containers:
+  - `LUCEE_IMAGE`, `LUCEE_IMAGE_VERSION`
+  - `MYSQL_CONTAINER_NAME`
+  - `LUCEE_CONTAINER_NAME`
+
+There is **no separate `.env`** for the backup – everything is driven by the main project `.env` file.
+
+
+## Usage
+
+### 1. Creating a backup
+
+To create a backup of the **database**, **user data**, and the **Lucee image**:
+
+1. Make sure your project `.env` is correctly configured for the **staging** or **production** environment, including:
+   - volume names (via `COMPOSE_PROJECT_NAME`)
+   - `BACKUP_MODE` (`ssh` or `sftp`)
+   - `REMOTE_BACKUP_PATH`
+   - `SERVER_USER`, `SERVER_HOST`, `SERVER_PORT`
+   - `SSH_KEY_PATH`
+   - container names and image names
+
+2. Change into the backup directory:
+
+   ```bash
+   cd config/backup/
+   ```
+
+3. Run the backup:
+
+   ```bash
+   bash backup.sh
+   ```
+
+The script will:
+
+- Read `BACKUP_MODE` from `.env`
+- Create backups for:
+  - database volume
+  - userdata volume
+  - Lucee Docker image
+- Name all backups with a timestamp, e.g. `YYYYMMDD_HHMM`
+- Upload the files to the configured remote server
+- Remove local backup files **only if** the corresponding file exists on the remote side (upload verification)
+
+
+### 2. Restoring from a backup
+
+1. Change into the backup directory:
+
+   ```bash
+   cd config/backup/
+   ```
+
+2. Run the restore script without arguments to see usage:
+
+   ```bash
+   bash restore.sh
+   ```
+
+   Example output:
+
+   ```text
+   Usage:
+     restore.sh --db [TIMESTAMP]
+     restore.sh --userdata [TIMESTAMP]
+     restore.sh --lucee-image [TIMESTAMP]
+     restore.sh --list
+   ```
+
+3. Examples:
+
+   - **Restore the latest database backup:**
+
+     ```bash
+     bash restore.sh --db
+     ```
+
+   - **Restore a specific database backup by timestamp:**
+
+     ```bash
+     bash restore.sh --db 20241019_2300
+     ```
+
+   - **Restore the latest userdata backup:**
+
+     ```bash
+     bash restore.sh --userdata
+     ```
+
+   - **Restore the latest Lucee image backup:**
+
+     ```bash
+     bash restore.sh --lucee-image
+     ```
+
+   - **List available backups on the remote server:**
+
+     ```bash
+     bash restore.sh --list
+     ```
+
+For each restore:
+
+- The selected file is downloaded to `/restore/`
+- The archive is extracted or loaded
+- The corresponding container (MySQL or Lucee) is restarted when required
+- The temporary file in `/restore/` is deleted afterwards to keep the filesystem clean
+
+
+## Automating backups
+
+To automate the backup process, you can configure a cron job on the server.
+
+Example: run the backup every night at 02:00:
+
+```cron
+0 2 * * * /path/to/your/project/config/backup/backup.sh
+```
+
+Backup logs are written to:
+
+```text
+/var/log/backup-cron.log
+```
+
+You can use this log file to verify that the backups ran successfully and to troubleshoot problems.
+
+
+## Notes and guarantees
+
+- These scripts are designed for **staging** and **production** environments.
+- Always double-check your `.env` before running backup or restore.
+- The scripts use:
+  - `set -e` and
+  - an `ERR` trap in the restore scripts  
+  so the process aborts immediately on the first error. This avoids “half-finished” restores.
+- Remote backups are **rotated automatically**:
+  - Only the latest `MAX_BACKUPS` files per type (`db`, `userdata`, `lucee`) are kept.
+- Transfer modes:
+  - **SSH mode** (`BACKUP_MODE=ssh`): uses standard SSH/`scp` towards a server where you have full shell access.
+  - **SFTP mode** (`BACKUP_MODE=sftp`): uses SFTP/`scp` towards an SFTP-only environment (e.g. Hetzner Storage Box, typically port 23, no custom scripts on the remote side).
+- In both modes:
+  - Local backup files are only deleted after a successful presence check on the remote destination.
+  - When no timestamp is provided, the restore scripts will always pick the **most recent** backup file based on its name.

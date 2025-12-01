@@ -911,4 +911,95 @@ component displayname="globalFunctions" output="false" {
 
     }
 
+    // Get MIME types from file extensions
+    public array function getMimeTypes(required array extensions) {
+
+        // Extended MIME type list, covers many common file types
+        local.mimeMap = {
+
+            // Images
+            "jpeg": "image/jpeg",
+            "jpg": "image/jpeg",
+            "png": "image/png",
+            "gif": "image/gif",
+            "bmp": "image/bmp",
+            "webp": "image/webp",
+            "svg": "image/svg+xml",
+            "ico": "image/x-icon",
+            "tiff": "image/tiff",
+            "jfif": "image/jpeg",
+
+            // Documents
+            "pdf": "application/pdf",
+            "zip": "application/zip",
+            "rar": "application/x-rar-compressed",
+            "7z": "application/x-7z-compressed",
+            "tar": "application/x-tar",
+            "gz": "application/gzip",
+            "doc": "application/msword",
+            "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "ppt": "application/vnd.ms-powerpoint",
+            "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "xls": "application/vnd.ms-excel",
+            "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "csv": "text/csv",
+            "txt": "text/plain",
+            "rtf": "application/rtf",
+            "odt": "application/vnd.oasis.opendocument.text",
+            "ods": "application/vnd.oasis.opendocument.spreadsheet",
+            "odp": "application/vnd.oasis.opendocument.presentation",
+            "json": "application/json",
+            "xml": "application/xml",
+            "html": "text/html",
+            "htm": "text/html",
+            "md": "text/markdown",
+            "yaml": "text/yaml",
+            "yml": "text/yaml",
+
+            // Audio
+            "mp3": "audio/mpeg",
+            "wav": "audio/wav",
+            "ogg": "audio/ogg",
+            "flac": "audio/flac",
+            "aac": "audio/aac",
+            "m4a": "audio/mp4",
+            "wma": "audio/x-ms-wma",
+
+            // Video
+            "mp4": "video/mp4",
+            "mov": "video/quicktime",
+            "avi": "video/x-msvideo",
+            "wmv": "video/x-ms-wmv",
+            "mkv": "video/x-matroska",
+            "webm": "video/webm",
+            "flv": "video/x-flv",
+            "3gp": "video/3gpp",
+            "mpeg": "video/mpeg",
+
+            // Other common types
+            "apk": "application/vnd.android.package-archive",
+            "dmg": "application/x-apple-diskimage",
+            "iso": "application/x-iso9660-image",
+            "psd": "image/vnd.adobe.photoshop",
+            "ai": "application/postscript",
+            "eps": "application/postscript",
+            "ttf": "font/ttf",
+            "otf": "font/otf",
+            "woff": "font/woff",
+            "woff2": "font/woff2",
+            "eot": "application/vnd.ms-fontobject"
+        };
+
+        local.mimeTypes = [];
+
+        for (local.ext in arguments.extensions) {
+            if (structKeyExists(local.mimeMap, local.ext)) {
+                arrayAppend(local.mimeTypes, local.mimeMap[local.ext]);
+            }
+        }
+
+        return local.mimeTypes;
+
+    }
+
 }
