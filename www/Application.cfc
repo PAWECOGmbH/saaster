@@ -20,9 +20,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     // Load java files
     this.javaSettings = {
         loadPaths = [expandPath("/assets/java")],
-        reloadOnChange = false,
-        loadColdFusionClassPath = true,
-        shared = true
+        reloadOnChange = false
     };
 
 
