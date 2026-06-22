@@ -198,9 +198,9 @@ if (url.pass eq variables.schedulePassword) {
             getTime = new backend.core.com.time(qRenewBookings.intCustomerID);
             startDate = dateFormat(now(), "yyyy-mm-dd");
             if (qRenewBookings.strRecurring eq "monthly") {
-                endDate = dateFormat(dateAdd("m", 1, startDate), "yyyy-mm-dd");
+                endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, startDate)), "yyyy-mm-dd");
             } else if (qRenewBookings.strRecurring eq "yearly") {
-                endDate = dateFormat(dateAdd("yyyy", 1, startDate), "yyyy-mm-dd");
+                endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, startDate)), "yyyy-mm-dd");
             }
 
 

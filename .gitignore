@@ -7,6 +7,7 @@ www/userdata
 ### Config files ###
 config.cfm
 .env
+.env.local
 config/nginx/conf.d/*.conf
 
 ### Log files ###
