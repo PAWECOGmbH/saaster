@@ -12,7 +12,6 @@
 
 <!--- hugerte Plugin --->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/skins/ui/hugerte-5/skin.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hugerte@1.0.9/skins/content/default/content.min.css">
 
 <!--- Tom Select --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/css/tom-select.css" />

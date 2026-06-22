@@ -147,6 +147,12 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
                 onSessionStart();
             }
 
+        } else if (structKeyExists(url, "reinit")) {
+
+            writeOutput("Unauthorized reinit attempt by IP");
+            structDelete(url, "reinit");
+            abort;
+
         }
 
 
@@ -154,7 +160,11 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         local.browserLocale = application.objLanguage.getBrowserLng(cgi.http_accept_language).code;
 
         // Set customers locale using his browser
-        setLocale(application.objLanguage.toLocale(language=local.browserLocale));
+        try {
+            setLocale(application.objLanguage.toLocale(language=local.browserLocale));
+        } catch (any e) {
+            setLocale("english (united states)");
+        }
 
         // Custom code
         ownRequestStart();
