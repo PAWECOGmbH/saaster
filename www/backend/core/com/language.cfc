@@ -198,158 +198,75 @@ component displayname="language" output="false" {
 
 
     // Convert the language code of the browser into the locale of CF
-    public string function toLocale(string language) {
+    public string function toLocale(required string language) {
 
-        if (structKeyExists(arguments, "language")) {
+        // normalize
+        var l = lcase(trim(arguments.language ?: ""));
 
-            switch(arguments.language) {
-
-                case "nl_BE":
-                    local.locale = "Dutch (Belgian)";
-                    break;
-
-                case value="nl_NK":
-                    local.locale = "Dutch (Standard)";
-                    break;
-
-                case value="en_AU":
-                    local.locale = "English (Australian)";
-                    break;
-
-                case value="en_CA":
-                    local.locale = "English (Canadian)";
-                    break;
-
-                case value="en_GB":
-                    local.locale = "English (UK)";
-                    break;
-
-                case value="en_NZ":
-                    local.locale = "English (New Zealand)";
-                    break;
-
-                case value="en":
-                    local.locale = "English (US)";
-                    break;
-
-                case value="en_US":
-                    local.locale = "English (US)";
-                    break;
-
-                case value="fr_BE":
-                    local.locale = "French (Belgian)";
-                    break;
-
-                case value="fr_CA":
-                    local.locale = "French (Canadian)";
-                    break;
-
-                case value="fr":
-                    local.locale = "French (Standard)";
-                    break;
-
-                case value="fr_CH":
-                    local.locale = "French (Swiss)";
-                    break;
-
-                case value="de_AT":
-                    local.locale = "German (Austrian)";
-                    break;
-
-                case value="de_DE":
-                    local.locale = "German (Germany)";
-                    break;
-
-                case value="de":
-                    local.locale = "German (Standard)";
-                    break;
-
-                case value="de_CH":
-                    local.locale = "German (Swiss)";
-                    break;
-
-                case value="it_IT":
-                    local.locale = "Italian (Standard)";
-                    break;
-
-                case value="it_CH":
-                    local.locale = "Italian (Swiss)";
-                    break;
-
-                case value="no_NO":
-                    local.locale = "Norwegian (Bokmal)";
-                    break;
-
-                case value="no_NO@nynorsk":
-                    local.locale = "Norwegian (Nynorsk)";
-                    break;
-
-                case value="pl_PL":
-                    local.locale = "Polish (Poland)";
-                    break;
-
-                case value="pt_BR":
-                    local.locale = "Portuguese (Brazilian)";
-                    break;
-
-                case value="pt_PT":
-                    local.locale = "Portuguese (Standard)";
-                    break;
-
-                case value="es_MX":
-                    local.locale = "Spanish (Mexican)";
-                    break;
-
-                case value="es_ES":
-                    local.locale = "Spanish (Standard)";
-                    break;
-
-                case value="ru":
-                    local.locale = "ru_RU";
-                    break;
-
-                case value="ru_RU":
-                    local.locale = "ru_RU";
-                    break;
-
-                case value="sv_SE":
-                    local.locale = "Swedish";
-                    break;
-
-                case value="ja_JP":
-                    local.locale = "Japanese";
-                    break;
-
-                case value="ko_KR":
-                    local.locale = "Korean";
-                    break;
-
-                case value="zh":
-                    local.locale = "Chinese (China)";
-                    break;
-
-                case value="zh_HK":
-                    local.locale = "Chinese (Hong Kong)";
-                    break;
-
-                case value="zh_TW":
-                    local.locale = "Chinese (Taiwan)";
-                    break;
-
-                default:
-                   local.locale = "English (US)";
-                   break;
-            }
-
-
-        } else {
-
-            local.locale = "English (US)";
-
+        if (!len(l)) {
+            return "english (united states)";
         }
 
-        return local.locale;
+        // Accept-Language uses hyphen, switch uses underscore
+        l = replace(l, "-", "_", "all");
 
+        // Handle display-name variants that slip through
+        if (l eq "spanish (mexican)") {
+            return "spanish (mexico)";
+        }
+
+        switch (l) {
+            case "nl_be": return "dutch (belgium)";
+            case "nl_nl":
+            case "nl_nk": return "dutch (netherlands)";
+
+            case "en_au": return "english (australia)";
+            case "en_ca": return "english (canada)";
+            case "en_gb": return "english (united kingdom)";
+            case "en_nz": return "english (new zealand)";
+            case "en":
+            case "en_us": return "english (united states)";
+
+            case "fr_be": return "french (belgium)";
+            case "fr_ca": return "french (canada)";
+            case "fr":    return "french (france)";
+            case "fr_ch": return "french (switzerland)";
+
+            case "de_at": return "german (austria)";
+            case "de_de":
+            case "de":    return "german (germany)";
+            case "de_ch": return "german (switzerland)";
+
+            case "it_it": return "italian (italy)";
+            case "it_ch": return "italian (switzerland)";
+
+            case "no_no": return "norwegian (norway)";
+            case "no_no@nynorsk": return "norwegian (norway, nynorsk)";
+
+            case "pl_pl": return "polish (poland)";
+
+            case "pt_br": return "portuguese (brazil)";
+            case "pt_pt": return "portuguese (portugal)";
+
+            case "es_mx": return "spanish (mexico)";
+            case "es_es": return "spanish (spain)";
+            case "es_ar": return "spanish (argentina)";
+            case "es_cl": return "spanish (chile)";
+            case "es_co": return "spanish (colombia)";
+            case "es":    return "spanish (spain)";
+
+            case "ru":
+            case "ru_ru": return "russian (russia)";
+
+            case "sv_se": return "swedish (sweden)";
+            case "ja_jp": return "japanese (japan)";
+            case "ko_kr": return "korean (south korea)";
+            case "zh":    return "chinese (china)";
+            case "zh_hk": return "chinese (hong kong sar china)";
+            case "zh_tw": return "chinese (taiwan)";
+
+            default: return "english (united states)";
+        }
     }
 
 }
