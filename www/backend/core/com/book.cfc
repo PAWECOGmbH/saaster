@@ -193,10 +193,10 @@ component displayname="book" output="false" {
 
                     // Define the end date
                     if (local.recurring eq "monthly") {
-                        local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, local.startDate)), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceMonthly;
                     } else if (local.recurring eq "yearly") {
-                        local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, local.startDate)), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
 
@@ -279,10 +279,10 @@ component displayname="book" output="false" {
 
                     // Define the end date
                     if (local.recurring eq "monthly") {
-                        local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, local.startDate)), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceMonthly;
                     } else if (local.recurring eq "yearly") {
-                        local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, local.startDate)), "yyyy-mm-dd");
                         local.priceBeforeVat = local.bookingData.priceYearly;
                     } else if (local.recurring eq "onetime") {
 
@@ -351,7 +351,7 @@ component displayname="book" output="false" {
                         local.startDate = dateFormat(now(), "yyyy-mm-dd");
 
                         // Define the end date
-                        local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, local.startDate)), "yyyy-mm-dd");
                         local.productPrice = local.bookingData.priceYearly;
 
                         // Get the diffrence to pay today
@@ -390,7 +390,7 @@ component displayname="book" output="false" {
                         local.startDate = dateFormat(local.currentProduct.endDate, "yyyy-mm-dd");
 
                         // Define the end date
-                        local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                        local.endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, local.startDate)), "yyyy-mm-dd");
 
                         local.status = "waiting";
 
@@ -436,10 +436,10 @@ component displayname="book" output="false" {
 
                             // Define the end date
                             if (local.recurring eq "monthly") {
-                                local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                                local.endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, local.startDate)), "yyyy-mm-dd");
                                 local.planPrice = local.bookingData.priceMonthly;
                             } else if (local.recurring eq "yearly") {
-                                local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                                local.endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, local.startDate)), "yyyy-mm-dd");
                                 local.planPrice = local.bookingData.priceYearly;
                             }
 
@@ -498,9 +498,9 @@ component displayname="book" output="false" {
 
                             // Define the end date
                             if (local.recurring eq "monthly") {
-                                local.endDate = dateFormat(dateAdd("m", 1, local.startDate), "yyyy-mm-dd");
+                                local.endDate = dateFormat(dateAdd("d", -1, dateAdd("m", 1, local.startDate)), "yyyy-mm-dd");
                             } else if (local.recurring eq "yearly") {
-                                local.endDate = dateFormat(dateAdd("yyyy", 1, local.startDate), "yyyy-mm-dd");
+                                local.endDate = dateFormat(dateAdd("d", -1, dateAdd("yyyy", 1, local.startDate)), "yyyy-mm-dd");
                             } else {
                                 // Set the end time to a date that will probably never be reached
                                 local.endDate = dateFormat(createDate(3000, 1, 1), "yyyy-mm-dd");
