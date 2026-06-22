@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>#getMeta(cgi.path_info, session.lng).metaTtile#</title>
-    <meta name="description" content="#getMeta(cgi.path_info, session.lng).metaDescription#">
-    #getMeta(cgi.path_info, session.lng).metaHTML#
+    <title>#getMeta(cgi.path_info).metaTitle#</title>
+    <meta name="description" content="#getMeta(cgi.path_info).metaDescription#">
+    #getMeta(cgi.path_info).metaHTML#
     <link rel="icon" type="image/png" href="/frontend/#application.activeTheme#/images/favicon.png">
     <cfinclude template="../css/css-include.cfm">
 </head>
