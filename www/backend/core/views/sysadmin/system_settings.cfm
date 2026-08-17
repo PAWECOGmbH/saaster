@@ -27,6 +27,7 @@
     qSwissQrIBAN = objSysadmin.getSystemSetting('settingIBANnumber');
     qSwissQrRef = objSysadmin.getSystemSetting('settingQRreference');
     infoMailNewRegistrations = objSysadmin.getSystemSetting('settingMailNewRegistrations');
+    dashboardEditable = objSysadmin.getSystemSetting('settingDashboardEditable');
     customerData = application.objSysAdmin.getSysAdminData();
     countryData = application.objCustomer.getUserDataByID(customerData.customerID);
 
@@ -76,6 +77,23 @@
                                         <select name="#infoMailNewRegistrations.strSettingVariable#" class="form-select w-50">
                                             <option value="0" <cfif infoMailNewRegistrations.strDefaultValue eq 0>selected</cfif>>No</option>
                                             <option value="1" <cfif infoMailNewRegistrations.strDefaultValue eq 1>selected</cfif>>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <h3>Dashboard settings</h3>
+                            <div class="border align-baseline p-3">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <p>#dashboardEditable.strDescription#</p>
+                                        <select name="#dashboardEditable.strSettingVariable#" class="form-select w-50">
+                                            <option value="0" <cfif dashboardEditable.strDefaultValue eq 0>selected</cfif>>No</option>
+                                            <option value="1" <cfif dashboardEditable.strDefaultValue eq 1>selected</cfif>>Yes</option>
                                         </select>
                                     </div>
                                 </div>
