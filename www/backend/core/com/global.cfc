@@ -10,10 +10,49 @@ component displayname="globalFunctions" output="false" {
         local.returnStruct['onlySuperAdmin'] = false;
         local.returnStruct['onlySysAdmin'] = false;
         local.returnStruct['noaccess'] = false;
+        local.returnStruct['navSlugs'] = {};
+        local.returnStruct['langSlugs'] = {};
+
+        // Language prefix detection runs first so navSlugs is built with the correct language
+        if (len(trim(arguments.sef_string))) {
+            local.sefString = arguments.sef_string;
+            local.firstSegment = listFirst(local.sefString, '/');
+            if (len(local.firstSegment) eq 2 and structKeyExists(session, 'lng') and local.firstSegment neq session.lng) {
+                local.qLngPrefix = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = { iso: {type: "varchar", value: local.firstSegment} },
+                    sql = "SELECT COUNT(*) as cnt FROM languages WHERE strLanguageISO = :iso"
+                );
+                if (local.qLngPrefix.cnt gt 0) {
+                    session.lng = lCase(local.firstSegment);
+                    application.langStruct = application.objLanguage.initLanguages();
+                    if (structKeyExists(session, "customer_id")) {
+                        application.objCustomer.setProductSessions(session.customer_id, session.lng);
+                    }
+                }
+            }
+        }
+
+        // Build language-aware slug lookup — runs on every request with the now-correct session.lng
+        local.qNavSlugs = queryExecute(
+            options = {datasource = application.datasource},
+            params = { iso: {type: "varchar", value: session.lng} },
+            sql = "
+                SELECT fm.strPath,
+                       COALESCE(NULLIF(fmt.strMapping, ''), fm.strMapping) AS slug
+                FROM frontend_mappings fm
+                LEFT JOIN frontend_mappings_trans fmt
+                    ON fmt.intFrontendMappingsID = fm.intFrontendMappingsID
+                    AND fmt.intLanguageID = (SELECT intLanguageID FROM languages WHERE strLanguageISO = :iso)
+            "
+        );
+        loop query = local.qNavSlugs {
+            local.returnStruct['navSlugs'][local.qNavSlugs.strPath] = local.qNavSlugs.slug;
+        }
 
         if (len(trim(arguments.sef_string))) {
 
-            local.sefString = arguments.sef_string;
+            // local.sefString already set above during language detection
 
             // If the last part of the sef string is a number, remove it
             if (isNumeric(listLast(local.sefString, "/"))) {
@@ -30,15 +69,15 @@ component displayname="globalFunctions" output="false" {
                     strMapping: {type: "nvarchar", value: local.sefString}
                 },
                 sql = "
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, 0 as intModuleID
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, 0 as intModuleID, 0 as intFrontendMappingsID
                     FROM system_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, intModuleID
+                    SELECT strPath, blnOnlyAdmin, blnOnlySuperAdmin, blnOnlySysAdmin, 0 as itsFrontend, intModuleID, 0 as intFrontendMappingsID
                     FROM custom_mappings
                     WHERE strMapping = :strMapping
                     UNION
-                    SELECT strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID
+                    SELECT strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID, intFrontendMappingsID
                     FROM frontend_mappings
                     WHERE strMapping = :strMapping
                     UNION
@@ -47,7 +86,7 @@ component displayname="globalFunctions" output="false" {
                         SELECT strPath
                         FROM frontend_mappings
                         WHERE intFrontendMappingsID = frontend_mappings_trans.intFrontendMappingsID
-                    ) as strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID
+                    ) as strPath, 0, 0, 0, 1 as itsFrontend, 0 as intModuleID, intFrontendMappingsID
                     FROM frontend_mappings_trans
                     WHERE strMapping = :strMapping
                     LIMIT 1
@@ -67,10 +106,26 @@ component displayname="globalFunctions" output="false" {
                         local.returnStruct['noaccess'] = true;
                     }
 
-                    // If the module is active, we can set 'noaccess' to false
+                    // If the module is active, we can set 'noaccess' to false.
+                    // Access is granted for any booking still within its
+                    // start/end window, regardless of strStatus - a canceled
+                    // booking ('test' or 'active' status flipped to
+                    // 'canceled') still keeps access until dteEndDate, it
+                    // just won't renew. Checking the status label alone
+                    // (the old 'free'/'test'/'active' allowlist) incorrectly
+                    // cut off access the instant a customer canceled, even
+                    // though the account settings page told them access
+                    // continues until the end date.
                     if (isStruct(local.moduleStatus) and !structIsEmpty(local.moduleStatus)) {
                         if (structKeyExists(local.moduleStatus, "status")) {
-                            if (local.moduleStatus.status eq "free" or local.moduleStatus.status eq "test" or local.moduleStatus.status eq "active") {
+                            if (local.moduleStatus.status eq "free") {
+                                local.returnStruct['noaccess'] = false;
+                            } else if (
+                                structKeyExists(local.moduleStatus, "startDate") and structKeyExists(local.moduleStatus, "endDate")
+                                and isDate(local.moduleStatus.startDate) and isDate(local.moduleStatus.endDate)
+                                and dateFormat(local.moduleStatus.startDate, "yyyy-mm-dd") lte dateFormat(now(), "yyyy-mm-dd")
+                                and dateFormat(local.moduleStatus.endDate, "yyyy-mm-dd") gte dateFormat(now(), "yyyy-mm-dd")
+                            ) {
                                 local.returnStruct['noaccess'] = false;
                             }
                         }
@@ -111,6 +166,75 @@ component displayname="globalFunctions" output="false" {
                 local.returnStruct['onlyAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlyAdmin);
                 local.returnStruct['onlySuperAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySuperAdmin);
                 local.returnStruct['onlySysAdmin'] = trueFalseFormat(local.qCheckSEF.blnOnlySysAdmin);
+
+                // Build language switcher slugs for the current page
+                if (local.qCheckSEF.intFrontendMappingsID gt 0) {
+                    local.qLangSlugs = queryExecute(
+                        options = {datasource = application.datasource},
+                        params = { id: {type: "numeric", value: local.qCheckSEF.intFrontendMappingsID} },
+                        sql = "
+                            SELECT l.strLanguageISO, fmt.strMapping AS slug
+                            FROM frontend_mappings_trans fmt
+                            INNER JOIN languages l ON l.intLanguageID = fmt.intLanguageID
+                            WHERE fmt.intFrontendMappingsID = :id
+                              AND fmt.strMapping IS NOT NULL AND fmt.strMapping != ''
+                              AND l.blnChooseable = 1
+                            UNION
+                            SELECT SUBSTRING_INDEX(fm.strMapping, '/', 1) AS strLanguageISO,
+                                   fm.strMapping AS slug
+                            FROM frontend_mappings fm
+                            INNER JOIN languages l ON l.strLanguageISO = SUBSTRING_INDEX(fm.strMapping, '/', 1)
+                            WHERE fm.intFrontendMappingsID = :id
+                              AND LOCATE('/', fm.strMapping) > 0
+                              AND CHAR_LENGTH(SUBSTRING_INDEX(fm.strMapping, '/', 1)) = 2
+                              AND l.blnChooseable = 1
+                        "
+                    );
+                    loop query = local.qLangSlugs {
+                        local.returnStruct['langSlugs'][lCase(local.qLangSlugs.strLanguageISO)] = local.qLangSlugs.slug;
+                    }
+                }
+
+            } else if (!find('/', local.sefString) and len(local.sefString) eq 2) {
+
+                // Bare 2-char language code (e.g. /en, /de) — treat as language-prefixed home page
+                local.qHomeLang = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = { iso: {type: "varchar", value: local.sefString} },
+                    sql = "SELECT strLanguageISO FROM languages WHERE strLanguageISO = :iso AND blnChooseable = 1 LIMIT 1"
+                );
+                if (local.qHomeLang.recordCount) {
+                    local.qChooseableLangs = queryExecute(
+                        options = {datasource = application.datasource},
+                        sql = "SELECT strLanguageISO FROM languages WHERE blnChooseable = 1"
+                    );
+                    loop query=local.qChooseableLangs {
+                        local.returnStruct['langSlugs'][lCase(local.qChooseableLangs.strLanguageISO)] = lCase(local.qChooseableLangs.strLanguageISO);
+                    }
+                }
+
+            } else if (!find('/', local.sefString) and len(local.sefString) gt 2) {
+
+                // No match for a bare slug — look for its canonical language-prefixed version (301 redirect target)
+                local.qCanonical = queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        slug: {type: "varchar", value: local.sefString},
+                        lng:  {type: "varchar", value: session.lng}
+                    },
+                    sql = "
+                        SELECT strMapping
+                        FROM frontend_mappings
+                        WHERE SUBSTRING_INDEX(strMapping, '/', -1) = :slug
+                          AND LOCATE('/', strMapping) > 0
+                        ORDER BY (SUBSTRING_INDEX(strMapping, '/', 1) = :lng) DESC
+                        LIMIT 1
+                    "
+                );
+                if (local.qCanonical.recordCount) {
+                    local.returnStruct['redirect301'] = local.qCanonical.strMapping;
+                }
+
             }
 
         } else {

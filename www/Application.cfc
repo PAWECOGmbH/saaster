@@ -63,7 +63,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         local.qLanguages = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT CONCAT(strLanguageISO, '|', strLanguage) as lang
+                SELECT CONCAT(LOWER(strLanguageISO), '|', strLanguage) as lang
                 FROM languages
                 WHERE blnChooseable = 1
                 ORDER BY intPrio
@@ -99,7 +99,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         local.checkLng = findNoCase(local.browserLng, application.allLanguages);
 
         // Save the language into the session
-        session.lng = local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso;
+        session.lng = lCase(local.checkLng ? local.browserLng : application.objLanguage.getDefaultLanguage().iso);
 
         if (application.environment eq "dev") {
             session.usersIP = variables.usersIP;
