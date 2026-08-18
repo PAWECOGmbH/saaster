@@ -1279,7 +1279,6 @@ component displayname="invoices" output="false" {
 
         local.objPayrexx = new backend.core.com.payrexx();
         local.objInvoice = new backend.core.com.invoices();
-        local.objNoti = new backend.core.com.notifications();
 
         local.qOpenInvoices = queryExecute(
             options = {datasource = application.datasource},
@@ -1291,11 +1290,12 @@ component displayname="invoices" output="false" {
                         payrexx.intTransactionID, payrexx.intPayrexxID, payrexx.strPaymentBrand
                 FROM invoices INNER JOIN payrexx ON invoices.intCustomerID = payrexx.intCustomerID
                 WHERE invoices.intInvoiceID = :invoiceID
-                AND payrexx.blnFailed = 0
                 AND payrexx.strStatus = 'authorized'
-                ORDER BY payrexx.blnDefault DESC
+                ORDER BY payrexx.blnDefault DESC, payrexx.blnFailed ASC, payrexx.dtmTimeUTC DESC
             "
         )
+
+        local.failureMessages = [];
 
         // Loop over all registered cards until the amount could be charged (default first)
         loop query="local.qOpenInvoices" {
@@ -1303,7 +1303,7 @@ component displayname="invoices" output="false" {
             local.paymentStruct = structNew();
             local.paymentStruct['amount'] = local.qOpenInvoices.decTotalPrice * 100;
             local.paymentStruct['purpose'] = local.qOpenInvoices.strInvoiceTitle;
-            local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID & "@" & application.projectname; // In order to recive the correct webhook, we need to pass the project name
+            local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID & "@" & createUUID() & "@" & getApplicationMetadata().name;
 
             // Try to charge over Payrexx
             local.charge = local.objPayrexx.callPayrexx(local.paymentStruct, "POST", "Transaction", local.qOpenInvoices.intTransactionID);
@@ -1321,6 +1321,20 @@ component displayname="invoices" output="false" {
 
                 local.insPayment = local.objInvoice.insertPayment(local.payment);
 
+                // A successful charge also rehabilitates payment methods that were
+                // marked as failed by the old all-or-nothing error handling.
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        payrexxID: {type: "numeric", value: local.qOpenInvoices.intPayrexxID}
+                    },
+                    sql = "
+                        UPDATE payrexx
+                        SET blnFailed = 0
+                        WHERE intPayrexxID = :payrexxID
+                    "
+                );
+
                 local.returnValue['invoiceID'] = arguments.invoiceID;
                 local.returnValue['success'] = true;
                 local.returnValue['message'] = "Charged successfully!";
@@ -1330,33 +1344,26 @@ component displayname="invoices" output="false" {
 
             } else {
 
-                // If not success, we have to disable the card and make a notification
-                queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        payrexxID: {type: "numeric", value: local.qOpenInvoices.intPayrexxID}
-                    },
-                    sql = "
-                        UPDATE payrexx
-                        SET blnFailed = 1
-                        WHERE intPayrexxID = :payrexxID
-                    "
-                )
+                local.failureMessage = structKeyExists(local.charge, "message")
+                    ? local.charge.message
+                    : "Payrexx rejected the charge.";
+                arrayAppend(local.failureMessages, local.qOpenInvoices.strPaymentBrand & ": " & local.failureMessage);
 
-                // Notification
-                local.notiStruct = structNew();
-                local.notiStruct['customerID'] = local.qOpenInvoices.intCustomerID;
-                local.notiStruct['title_var'] = 'titChargingNotPossible';
-                local.notiStruct['descr_var'] = 'txtChargingNotPossible';
-                local.notiStruct['linktext_var'] = 'titPaymentSettings';
-                local.notiStruct['link'] = '#application.mainURL#/account-settings/payment';
-                local.objNoti.insertNotification(local.notiStruct);
+                // A timeout, invalid response or server error has an unknown outcome.
+                // Trying another card could create a duplicate charge.
+                if (structKeyExists(local.charge, "requestOutcomeUnknown") and local.charge.requestOutcomeUnknown) {
+                    break;
+                }
 
             }
 
         }
 
 
+
+        if (arrayLen(local.failureMessages)) {
+            local.returnValue.message = arrayToList(local.failureMessages, "; ");
+        }
 
         return local.returnValue;
 

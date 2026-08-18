@@ -8,72 +8,88 @@ if (structKeyExists(url, "del")) {
 
         objPayrexx = new backend.core.com.payrexx();
 
-        // Get the entries
-        getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+        selectedPaymentMethod = queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID: {type: "numeric", value: session.customer_id},
+                id: {type: "numeric", value: url.del}
+            },
+            sql = "
+                SELECT intPayrexxID, intTransactionID, blnDefault
+                FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND strStatus = 'authorized'
+                AND intPayrexxID = :id
+            "
+        );
 
-        if (getWebhook.recordCount) {
+        // Enforce the same rule on the server that is shown in the UI.
+        paymentMethodCount = queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID: {type: "numeric", value: session.customer_id}
+            },
+            sql = "
+                SELECT COUNT(*) AS methodCount
+                FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND strStatus = 'authorized'
+            "
+        );
 
-            // Delete reserved transaction on Payrexx
-            payload = structNew();
-            deleteTransaction = objPayrexx.callPayrexx(payload, 'DEL', 'Transaction', getWebhook.intTransactionID);
-
-            // Delete the entry in the table payrexx
-            queryExecute(
-                options: {datasource = application.datasource},
-                params: {
-                    customerID: {type: "numeric", value: session.customer_id},
-                    id: {type: "numeric", value: url.del}
-                },
-                sql = "
-                    DELETE FROM payrexx
-                    WHERE intCustomerID = :customerID
-                    AND intPayrexxID = :id
-                "
-            )
-
-            // Check for default entry
-            local.qCheckDefault = queryExecute(
-                options: {datasource = application.datasource},
-                params: {
-                    customerID: {type: "numeric", value: session.customer_id}
-                },
-                sql = "
-                    SELECT *
-                    FROM payrexx
-                    WHERE intCustomerID = :customerID
-                    AND blnDefault = 1
-                "
-            )
-
-            // If there is no other default entry, make one
-            if (!local.qCheckDefault.recordCount) {
-                queryExecute(
-                    options: {datasource = application.datasource},
-                    params: {
-                        customerID: {type: "numeric", value: session.customer_id},
-                        id: {type: "numeric", value: url.del}
-                    },
-                    sql = "
-                       UPDATE payrexx
-                       SET blnDefault = 1
-                       WHERE intCustomerID = :customerID
-                       LIMIT 1
-                    "
-                )
-            }
-
-
-            getAlert('msgPaymentMethodDeleted', 'success');
-            logWrite("user", "info", "Payment method deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
-            location url="#application.mainURL#/account-settings/payment" addtoken="false";
-
-        } else {
+        if (!selectedPaymentMethod.recordCount or paymentMethodCount.methodCount lte 1) {
 
             getAlert('msgNeedOnePaymentType', 'info');
             logWrite("user", "warning", "Payment method could not be deleted, one is needed [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
             location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
         }
+
+        // Delete the selected token on Payrexx, not an unrelated newest token.
+        deleteTransaction = objPayrexx.callPayrexx({}, 'DEL', 'Transaction', selectedPaymentMethod.intTransactionID);
+        if (!structKeyExists(deleteTransaction, "status") or deleteTransaction.status neq "success") {
+            paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+            paymentErrorMessage = session.lng eq "de"
+                ? "Die Zahlungsart konnte bei Payrexx nicht entfernt werden: #deleteTransaction.message# (Referenz: #paymentErrorReference#)."
+                : "The payment method could not be removed from Payrexx: #deleteTransaction.message# (reference: #paymentErrorReference#).";
+            getAlert(encodeForHTML(paymentErrorMessage), 'danger');
+            logWrite("payrexx", "error", "Payment method could not be deleted on Payrexx [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, TransactionID: #selectedPaymentMethod.intTransactionID#, HTTP status: #deleteTransaction.httpStatus#, Error: #deleteTransaction.message#]", true);
+            location url="#application.mainURL#/account-settings/payment" addtoken="false";
+        }
+
+        queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID: {type: "numeric", value: session.customer_id},
+                id: {type: "numeric", value: selectedPaymentMethod.intPayrexxID}
+            },
+            sql = "
+                DELETE FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND intPayrexxID = :id
+            "
+        );
+
+        if (selectedPaymentMethod.blnDefault) {
+            queryExecute(
+                options: {datasource = application.datasource},
+                params: {
+                    customerID: {type: "numeric", value: session.customer_id}
+                },
+                sql = "
+                    UPDATE payrexx
+                    SET blnDefault = 1
+                    WHERE intCustomerID = :customerID
+                    AND strStatus = 'authorized'
+                    ORDER BY blnFailed ASC, dtmTimeUTC DESC
+                    LIMIT 1
+                "
+            );
+        }
+
+        getAlert('msgPaymentMethodDeleted', 'success');
+        logWrite("user", "info", "Payment method deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#, TransactionID: #selectedPaymentMethod.intTransactionID#]");
+        location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
     }
 
@@ -95,27 +111,120 @@ if (structKeyExists(url, "add")) {
             // If success, we try to get the webhook data
             if (url.psp eq "success") {
 
-                // If we are in dev mode, call the JSON data from the given server
-                if (application.environment eq "dev") {
-                    include template="/frontend/core/handler/payrexx_webhook.cfm";
+                // Only accept the webhook belonging to the gateway just created.
+                // A generic "latest authorized" lookup can mistake an old card for the new one.
+                if (structKeyExists(session, "payrexxPendingGatewayID") and isNumeric(session.payrexxPendingGatewayID)) {
+                    getWebhook = objPayrexx.getWebhook(
+                        customerID=session.customer_id,
+                        status='authorized',
+                        gatewayID=session.payrexxPendingGatewayID
+                    );
+                } else {
+                    getWebhook = queryNew("intPayrexxID");
                 }
 
-                // Get the webhook data
-                getWebhook = objPayrexx.getWebhook(session.customer_id, 'authorized');
+                // The browser may return before the asynchronous webhook arrives.
+                // Verify the expected Gateway via the authenticated API and import
+                // its authorized transaction immediately when possible.
+                if (
+                    !getWebhook.recordCount
+                    and structKeyExists(session, "payrexxPendingGatewayID")
+                    and isNumeric(session.payrexxPendingGatewayID)
+                ) {
+                    gatewayResponse = objPayrexx.callPayrexx(
+                        payload={},
+                        method="GET",
+                        object="Gateway",
+                        thisID=session.payrexxPendingGatewayID
+                    );
+                    authorizedTransaction = {};
+
+                    if (
+                        gatewayResponse.status eq "success"
+                        and structKeyExists(gatewayResponse, "data")
+                        and isArray(gatewayResponse.data)
+                        and arrayLen(gatewayResponse.data)
+                        and structKeyExists(gatewayResponse.data[1], "id")
+                        and gatewayResponse.data[1].id eq session.payrexxPendingGatewayID
+                        and structKeyExists(gatewayResponse.data[1], "invoices")
+                        and isArray(gatewayResponse.data[1].invoices)
+                    ) {
+                        for (gatewayInvoice in gatewayResponse.data[1].invoices) {
+                            if (structKeyExists(gatewayInvoice, "transactions") and isArray(gatewayInvoice.transactions)) {
+                                for (gatewayTransaction in gatewayInvoice.transactions) {
+                                    if (
+                                        structKeyExists(gatewayTransaction, "status")
+                                        and gatewayTransaction.status eq "authorized"
+                                    ) {
+                                        authorizedTransaction = duplicate(gatewayTransaction);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!structIsEmpty(authorizedTransaction)) {
+                        authorizedTransaction.invoice = {
+                            paymentRequestId: session.payrexxPendingGatewayID
+                        };
+                        request.payrexxWebhookPayload = {
+                            transaction: authorizedTransaction
+                        };
+                        structDelete(request, "payrexxWebhookError");
+                        include template="/frontend/core/handler/payrexx_webhook.cfm";
+                        structDelete(request, "payrexxWebhookPayload");
+
+                        getWebhook = objPayrexx.getWebhook(
+                            customerID=session.customer_id,
+                            status="authorized",
+                            gatewayID=session.payrexxPendingGatewayID
+                        );
+                    } else if (
+                        gatewayResponse.status neq "success"
+                        and
+                        structKeyExists(gatewayResponse, "message")
+                        and len(trim(gatewayResponse.message))
+                    ) {
+                        request.payrexxWebhookError = gatewayResponse.message;
+                    } else {
+                        request.payrexxWebhookError = "The expected Gateway does not contain an authorized transaction yet.";
+                    }
+                }
 
                 // If there is no data from the webhook, send the customer back and try again
                 if (getWebhook.recordCount) {
                     getAlert('msgPaymentMethodAdded', 'success');
                     logWrite("user", "info", "Payment method added [CustomerID: #session.customer_id#, UserID: #session.user_id#, TransactionID: #getWebhook.intTransactionID#, paymentType: #getWebhook.strPaymentBrand#]");
                 } else {
-                    getAlert('alertErrorOccured', 'warning');
-                    logWrite("payrexx", "error", "Payment method could not be added [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: No entry in webhook]");
+                    paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+                    pendingGatewayID = structKeyExists(session, "payrexxPendingGatewayID")
+                        ? session.payrexxPendingGatewayID
+                        : "unknown";
+                    webhookError = structKeyExists(request, "payrexxWebhookError")
+                        ? request.payrexxWebhookError
+                        : "Payrexx returned successfully, but no authorized webhook matching the gateway was stored.";
+                    paymentErrorMessage = session.lng eq "de"
+                        ? "Payrexx hat den Vorgang abgeschlossen, aber die Zahlungsart wurde noch nicht synchronisiert. Bitte laden Sie die Seite in einigen Sekunden neu. Gateway-ID: #pendingGatewayID#, Referenz: #paymentErrorReference#."
+                        : "Payrexx completed the process, but the payment method has not been synchronized yet. Please reload the page in a few seconds. Gateway ID: #pendingGatewayID#, reference: #paymentErrorReference#.";
+                    if (structKeyExists(request, "payrexxWebhookError")) {
+                        paymentErrorMessage &= session.lng eq "de"
+                            ? " Technischer Grund: #request.payrexxWebhookError#"
+                            : " Technical reason: #request.payrexxWebhookError#";
+                    }
+                    getAlert(encodeForHTML(paymentErrorMessage), 'warning');
+                    logWrite("payrexx", "error", "Payment method could not be added [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, GatewayID: #pendingGatewayID#, Error: #webhookError#]");
                 }
 
             } else {
-                getAlert('alertErrorOccured', 'warning');
-                logWrite("payrexx", "error", "Payment method could not be added [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #url.psp#]");
+                paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+                paymentErrorMessage = session.lng eq "de"
+                    ? "Payrexx hat die Erfassung abgebrochen oder abgelehnt (Status: #url.psp#). Referenz: #paymentErrorReference#."
+                    : "Payrexx cancelled or rejected the payment method setup (status: #url.psp#). Reference: #paymentErrorReference#.";
+                getAlert(encodeForHTML(paymentErrorMessage), 'warning');
+                logWrite("payrexx", "error", "Payment method could not be added [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #url.psp#]");
             }
+
+            structDelete(session, "payrexxPendingGatewayID");
 
             // If there is a plan to pay, charge right now
             if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
@@ -130,7 +239,7 @@ if (structKeyExists(url, "add")) {
 
             paymentStruct = structNew();
             paymentStruct['skipResultPage'] = true;
-            paymentStruct['referenceId'] = session.customer_id & "@" & variables.applicationname; // In order to recive the correct webhook, we need to pass the project name
+            paymentStruct['referenceId'] = session.customer_id & "@" & createUUID() & "@" & getApplicationMetadata().name;
             paymentStruct['currency'] = objCurrency.getCurrency().iso;
             paymentStruct['successRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=success";
             paymentStruct['failedRedirectUrl'] = "#application.mainURL#/payment-settings?add=#session.customer_id#&psp=failed";
@@ -139,6 +248,7 @@ if (structKeyExists(url, "add")) {
             paymentStruct['purpose'] = "Validation test";
             paymentStruct['amount'] = 0;
             paymentStruct['preAuthorization'] = true;
+            paymentStruct['chargeOnAuthorization'] = false;
 
             // Are there any specific PSPs defined?
             if (len(trim(variables.payrexxPSPs))) {
@@ -152,6 +262,7 @@ if (structKeyExists(url, "add")) {
             if (payrexxRespond.status eq "success") {
 
                 gatewayData = payrexxRespond.data[1];
+                session.payrexxPendingGatewayID = gatewayData.id;
 
                 // Build link to the payment terminal with the choosen language
                 if (len(trim(variables.payrexxAPIinstance))) {
@@ -166,8 +277,12 @@ if (structKeyExists(url, "add")) {
 
             } else {
 
-                getAlert(payrexxRespond.message, 'danger');
-                logWrite("payrexx", "error", "Could not call Payrexx [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #payrexxRespond.message#]", true);
+                paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+                paymentErrorMessage = session.lng eq "de"
+                    ? "Payrexx konnte nicht gestartet werden: #payrexxRespond.message# (Referenz: #paymentErrorReference#)."
+                    : "Payrexx could not be started: #payrexxRespond.message# (reference: #paymentErrorReference#).";
+                getAlert(encodeForHTML(paymentErrorMessage), 'danger');
+                logWrite("payrexx", "error", "Could not call Payrexx [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, HTTP status: #payrexxRespond.httpStatus#, Error: #payrexxRespond.message#]", true);
                 location url="#application.mainURL#/account-settings/payment" addtoken="false";
 
             }
@@ -184,6 +299,31 @@ if (structKeyExists(url, "default")) {
 
     if (isNumeric(url.default) and url.default gt 0) {
 
+        selectedPaymentMethod = queryExecute(
+            options: {datasource = application.datasource},
+            params: {
+                customerID: {type: "numeric", value: session.customer_id},
+                id: {type: "numeric", value: url.default}
+            },
+            sql = "
+                SELECT intPayrexxID
+                FROM payrexx
+                WHERE intCustomerID = :customerID
+                AND intPayrexxID = :id
+                AND strStatus = 'authorized'
+            "
+        );
+
+        if (!selectedPaymentMethod.recordCount) {
+            paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+            paymentErrorMessage = session.lng eq "de"
+                ? "Die gewählte Zahlungsart wurde nicht gefunden oder ist nicht autorisiert. Referenz: #paymentErrorReference#."
+                : "The selected payment method was not found or is not authorized. Reference: #paymentErrorReference#.";
+            getAlert(encodeForHTML(paymentErrorMessage), 'warning');
+            logWrite("payrexx", "warning", "Default payment method could not be changed [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, PaymentMethodID: #url.default#]");
+            location url="#application.mainURL#/account-settings/payment" addtoken="false";
+        }
+
         queryExecute(
             options: {datasource = application.datasource},
             params: {
@@ -197,7 +337,8 @@ if (structKeyExists(url, "default")) {
                 WHERE intCustomerID = :customerID;
 
                 UPDATE payrexx
-                SET blnDefault = 1
+                SET blnDefault = 1,
+                    blnFailed = 0
                 WHERE intCustomerID = :customerID
                 AND intPayrexxID = :id
 
@@ -256,8 +397,12 @@ if (structKeyExists(url, "pay")) {
 
                 } else {
 
-                    getAlert('alertErrorOccured', 'warning');
-                    logWrite("payrexx", "error", "Pay invoice: Payment method could not be charged [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: No entry in webhook]");
+                    paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+                    paymentErrorMessage = session.lng eq "de"
+                        ? "Die Zahlung wurde von Payrexx noch nicht bestätigt. Bitte prüfen Sie die Rechnung erneut. Referenz: #paymentErrorReference#."
+                        : "The payment has not yet been confirmed by Payrexx. Please check the invoice again. Reference: #paymentErrorReference#.";
+                    getAlert(encodeForHTML(paymentErrorMessage), 'warning');
+                    logWrite("payrexx", "error", "Pay invoice: No confirmed webhook entry found [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #url.pay#]");
 
                 }
 
@@ -304,8 +449,12 @@ if (structKeyExists(url, "pay")) {
 
             } else {
 
-                getAlert('txtChargingNotPossible', 'warning');
-                logWrite("payrexx", "error", "Pay invoice: Invoice could not be paid [CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #chargeNow.message#]");
+                paymentErrorReference = uCase(left(replace(createUUID(), "-", "", "all"), 8));
+                paymentErrorMessage = session.lng eq "de"
+                    ? "Die Rechnung konnte nicht über die hinterlegten Zahlungsarten belastet werden: #chargeNow.message# (Referenz: #paymentErrorReference#)."
+                    : "The invoice could not be charged using the saved payment methods: #chargeNow.message# (reference: #paymentErrorReference#).";
+                getAlert(encodeForHTML(paymentErrorMessage), 'warning');
+                logWrite("payrexx", "error", "Pay invoice: Invoice could not be paid [Reference: #paymentErrorReference#, CustomerID: #session.customer_id#, UserID: #session.user_id#, Error: #chargeNow.message#]");
 
             }
 
