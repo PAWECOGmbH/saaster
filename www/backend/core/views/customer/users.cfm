@@ -60,6 +60,7 @@
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-end">
                                         <cfset canEdit = true>
+                                        <cfset canDelete = false>
                                         <cfif session.superadmin>
                                             <cfif qUser.blnSysAdmin or qUser.mainUser eq 1>
                                                 <cfset canEdit = false>
@@ -69,22 +70,35 @@
                                                 <cfset canEdit = false>
                                             </cfif>
                                         </cfif>
-                                        <cfif canEdit or session.sysadmin>
+                                        <cfif qUser.intUserID neq session.user_id>
+                                            <cfif session.sysadmin>
+                                                <cfset canDelete = qUser.mainUser eq 0>
+                                            <cfelseif session.superadmin>
+                                                <cfset canDelete = not qUser.blnSysAdmin>
+                                            <cfelseif session.admin>
+                                                <cfset canDelete = not qUser.blnSuperAdmin and qUser.mainUser eq 0>
+                                            </cfif>
+                                        </cfif>
+                                        <cfif canEdit or canDelete or session.sysadmin>
                                             <div class="btn-list flex-nowrap">
                                                 <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                     #getTrans('blnAction')#
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                    <cfif qUser.intUserID neq session.user_id>
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/user/edit/#qUser.intUserID#">#getTrans('btnEdit')#</a>
-                                                    <cfelse>
-                                                        <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">#getTrans('btnEdit')#</a>
+                                                    <cfif canEdit or session.sysadmin>
+                                                        <cfif qUser.intUserID neq session.user_id>
+                                                            <a class="dropdown-item" href="#application.mainURL#/account-settings/user/edit/#qUser.intUserID#">#getTrans('btnEdit')#</a>
+                                                        <cfelse>
+                                                            <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">#getTrans('btnEdit')#</a>
+                                                        </cfif>
                                                     </cfif>
-                                                    <cfif qUser.intUserID neq session.user_id and qUser.mainUser eq 0>
+                                                    <cfif canDelete>
                                                         <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                     </cfif>
-                                                    <cfif not len(qUser.strPasswordHash) and not len(qUser.strPasswordSalt)>
-                                                        <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                    <cfif canEdit or session.sysadmin>
+                                                        <cfif not len(qUser.strPasswordHash) and not len(qUser.strPasswordSalt)>
+                                                            <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                        </cfif>
                                                     </cfif>
                                                 </div>
                                             </div>

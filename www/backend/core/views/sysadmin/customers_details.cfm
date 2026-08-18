@@ -203,7 +203,6 @@
                                                                     <cfset counter = 1>
                                                                     <cfloop query="qUsers">
                                                                         <form id="user_form_#counter#" method="post" action="#application.mainURL#/sysadm/customers">
-                                                                            <input type="hidden" name="edit_user" value="">
                                                                             <input type="hidden" name="user_id" value="#qUsers.intUserID#">
                                                                             <input type="hidden" name="customer_id" value="#thisCustomerID#">
                                                                             <tr>
@@ -220,7 +219,18 @@
                                                                                     <input class="form-control" name="email" value="#qUsers.strEmail#">
                                                                                 </td>
                                                                                 <td>
-                                                                                    <button type="submit" id="submit_button" class="btn btn-primary">Save</button>
+                                                                                    <div class="btn-list flex-nowrap">
+                                                                                        <button type="submit" name="edit_user" value="1" class="btn btn-primary">Save</button>
+                                                                                        <cfif qUsers.recordCount gt 1 and qUsers.intUserID neq session.user_id>
+                                                                                            <button
+                                                                                                type="submit"
+                                                                                                name="delete_user"
+                                                                                                value="1"
+                                                                                                class="btn btn-danger"
+                                                                                                onclick="return confirm('#encodeForJavaScript(getTrans("txtDeleteUserConfirmText"))#');"
+                                                                                            >#getTrans('btnDelete')#</button>
+                                                                                        </cfif>
+                                                                                    </div>
                                                                                 </td>
                                                                             </tr>
                                                                         </form>
