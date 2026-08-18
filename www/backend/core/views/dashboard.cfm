@@ -38,6 +38,11 @@
     }
 
     qUserWidgets = objWidget.getUserWidgets(session.user_id);
+    dashboardEditable = !structKeyExists(application.systemSettingStruct, "settingDashboardEditable") or application.systemSettingStruct.settingDashboardEditable eq 1;
+
+    if (!dashboardEditable) {
+        session.dashboardedit = 0;
+    }
 
 </cfscript>
 
@@ -128,7 +133,7 @@
 
             </div>
 
-            <cfif qUserWidgets.recordcount>
+            <cfif qUserWidgets.recordcount and dashboardEditable>
 
                 <div class="row mt-4">
                     <div class="col text-center">

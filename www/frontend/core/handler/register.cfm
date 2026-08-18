@@ -1,5 +1,9 @@
-
+﻿
 <cfscript>
+    local.urlLogin    = application.mainURL & "/" & thiscontent.navSlugs['templates/login.cfm'];
+    local.urlRegister = application.mainURL & "/" & thiscontent.navSlugs['templates/register.cfm'];
+    local.urlPassword = application.mainURL & "/" & thiscontent.navSlugs['templates/password.cfm'];
+    local.urlMfa      = application.mainURL & "/" & thiscontent.navSlugs['templates/mfa.cfm'];
 
 objRegister = new frontend.core.com.register();
 
@@ -70,7 +74,7 @@ if (structKeyExists(form, 'login_btn')) {
                 // Send the customer to fill in the remaining data
                 session.step = 3;
                 getAlert('txtUpdateInformation', 'info');
-                location url="#application.mainURL#/register" addtoken="false";
+                location url="#local.urlRegister#" addtoken="false";
 
             }
 
@@ -86,11 +90,11 @@ if (structKeyExists(form, 'login_btn')) {
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
                 getAlert('msgAccountDisabledByAdmin', 'warning');
                 logWrite("user", "warning", "User tried to login but account is not active [E-mail: #form.email#]");
-                location url="#application.mainURL#/login" addtoken="false";
+                location url="#local.urlLogin#" addtoken="false";
             } else {
                 getAlert('alertWrongLogin', 'warning');
                 logWrite("user", "warning", "Unsuccessful login try [E-mail: #form.email#]");
-                location url="#application.mainURL#/login" addtoken="false";
+                location url="#local.urlLogin#" addtoken="false";
             }
 
         }
@@ -101,7 +105,7 @@ if (structKeyExists(form, 'login_btn')) {
 
         getAlert('alertErrorOccured', 'danger');
         logWrite("system", "error", "Error on login try!", true);
-        location url="#application.mainURL#/login" addtoken="false";
+        location url="#local.urlLogin#" addtoken="false";
 
     }
 
@@ -131,7 +135,7 @@ if (structKeyExists(form, 'register_btn')) {
 
             getAlert('msgCaptchaFailed', 'warning');
             logWrite("user", "warning", "Captcha verification failed [E-Mail: #form.email#]");
-            location url="#application.mainURL#/register" addtoken="false";
+            location url="#local.urlRegister#" addtoken="false";
 
         }
 
@@ -169,7 +173,7 @@ if (structKeyExists(form, 'register_btn')) {
         if (qCheckDouble.recordCount) {
             getAlert('alertHasAccountAlready', 'warning');
             logWrite("user", "warning", "Register new user step 1: E-Mail already registered [E-Mail: #form.email#]");
-            location url="#application.mainURL#/login" addtoken="false";
+            location url="#local.urlLogin#" addtoken="false";
         }
 
         newUUID = application.objGlobal.getUUID();
@@ -215,13 +219,13 @@ if (structKeyExists(form, 'register_btn')) {
 
             getAlert('alertOptinSent', 'info');
             logWrite("user", "info", "Register new user step 1: Opt-in e-mail sent [E-Mail: #form.email#]");
-            location url="#application.mainURL#/login" addtoken="false";
+            location url="#local.urlLogin#" addtoken="false";
 
         } else {
 
             getAlert(objUserRegister1.message, 'danger');
             logWrite("system", "error", "Register new user step 1: Registration failed [E-Mail: #form.email#, Error: #objUserRegister1.message#]");
-            location url="#application.mainURL#/register" addtoken="false";
+            location url="#local.urlRegister#" addtoken="false";
 
         }
 
@@ -229,7 +233,7 @@ if (structKeyExists(form, 'register_btn')) {
 
         getAlert('alertEnterEmail', 'warning');
         logWrite("user", "warning", "Register new user step 1: Could not register, wrong email format. [E-Mail: #form.email#]");
-        location url="#application.mainURL#/register" addtoken="false";
+        location url="#local.urlRegister#" addtoken="false";
 
     }
 
@@ -295,7 +299,7 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
     }
 
-    location url="#application.mainURL#/register" addtoken="false";
+    location url="#local.urlRegister#" addtoken="false";
 
 }
 
@@ -311,13 +315,13 @@ if (structKeyExists(form, 'create_account')) {
             session.step = 2;
             getAlert('alertPasswordsNotSame', 'warning');
             logWrite("user", "warning", "Register new user step 3: The passwords don't match");
-            location url="#application.mainURL#/register" addtoken="false";
+            location url="#local.urlRegister#" addtoken="false";
         }
     } else {
         session.step = 2;
         getAlert('alertChoosePassword', 'warning');
         logWrite("user", "warning", "Register new user step 3: The password fields are empty");
-        location url="#application.mainURL#/register" addtoken="false";
+        location url="#local.urlRegister#" addtoken="false";
     }
 
     // Is there a valid uuid?
@@ -360,7 +364,7 @@ if (structKeyExists(form, 'create_account')) {
                 // Send the customer to fill in the remaining data
                 session.step = 3;
                 getAlert('txtUpdateInformation', 'info');
-                location url="#application.mainURL#/register" addtoken="false";
+                location url="#local.urlRegister#" addtoken="false";
 
 
             } else {
@@ -368,7 +372,7 @@ if (structKeyExists(form, 'create_account')) {
                 session.step = 1;
                 getAlert(insertCustomer.message, 'danger');
                 logWrite("system", "error", "Register new user step 3: Could not create account [E-Mail: #qCheckOptin.strEmail#, Error: #insertCustomer.message#]");
-                location url="#application.mainURL#/register" addtoken="false";
+                location url="#local.urlRegister#" addtoken="false";
 
             }
 
@@ -400,14 +404,14 @@ if (structKeyExists(form, 'create_account')) {
 
                     getAlert('alertAccountCreatedLogin', 'success');
                     logWrite("user", "info", "Register new user step 3: A user invited by the administrator has set the password. [UUID: #qCheckUser.strUUID#]");
-                    location url="#application.mainURL#/login" addtoken="false";
+                    location url="#local.urlLogin#" addtoken="false";
 
                 } else {
 
                     session.step = 1;
                     getAlert('alertNotValidAnymore', 'warning');
                     logWrite("user", "warning", "Register new user step 3: A user invited by the administrator couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: #qCheckUser.strUUID#]");
-                    location url="#application.mainURL#/register" addtoken="false";
+                    location url="#local.urlRegister#" addtoken="false";
 
                 }
 
@@ -417,7 +421,7 @@ if (structKeyExists(form, 'create_account')) {
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
             logWrite("user", "warning", "Register new user step 3: A user couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: #session.uuid#]");
-            location url="#application.mainURL#/register" addtoken="false";
+            location url="#local.urlRegister#" addtoken="false";
 
         }
 
@@ -426,7 +430,7 @@ if (structKeyExists(form, 'create_account')) {
         session.step = 1;
         getAlert('alertNotValidAnymore', 'warning');
         logWrite("user", "warning", "Register new user step 3: A user couldn't set the password, because the opt-in e-mail wasn't valid anymore. [UUID: none]");
-        location url="#application.mainURL#/register" addtoken="false";
+        location url="#local.urlRegister#" addtoken="false";
 
     }
 
@@ -484,7 +488,7 @@ if (structKeyExists(form, 'fill_remaining_data')) {
                 structDelete(session, "email");
 
                 getAlert('alertAccountCreatedLogin', 'success');
-                location url="#application.mainURL#/login" addtoken="false";
+                location url="#local.urlLogin#" addtoken="false";
 
 
             } else {
@@ -492,7 +496,7 @@ if (structKeyExists(form, 'fill_remaining_data')) {
                 session.step = 1;
                 getAlert('alertNotValidAnymore', 'warning');
                 logWrite("user", "warning", "Could not update the remaining data.");
-                location url="#application.mainURL#/login" addtoken="false";
+                location url="#local.urlLogin#" addtoken="false";
 
             }
 
@@ -501,7 +505,7 @@ if (structKeyExists(form, 'fill_remaining_data')) {
             session.step = 1;
             getAlert('alertNotValidAnymore', 'warning');
             logWrite("user", "warning", "Register new user: A user couldn't save the remaining data, because the opt-in e-mail wasn't valid anymore.");
-            location url="#application.mainURL#/register" addtoken="false";
+            location url="#local.urlRegister#" addtoken="false";
 
         }
 
@@ -578,7 +582,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
     }
 
     getAlert('alertIfAccountFoundEmail', 'info');
-    location url="#application.mainURL#/login" addtoken="false";
+    location url="#local.urlLogin#" addtoken="false";
 
 }
 
@@ -604,13 +608,13 @@ if (structKeyExists(url, "p")) {
         logWrite("user", "info", "The user has clicked the link to reset the password. The link was valid. [UserID: #qCheckUUID.intUserID#, UUID: #url.p#]");
         session.step = 2;
         session.uuid = url.p;
-        location url="#application.mainURL#/password" addtoken="false";
+        location url="#local.urlPassword#" addtoken="false";
 
     } else {
 
         getAlert('alertNotValidAnymore', 'warning');
         logWrite("user", "warning", "The user has clicked the link to reset the password. The link was not valid anymore. [UserID: #qCheckUUID.intUserID#, UUID: #url.p#]");
-        location url="#application.mainURL#/password" addtoken="false";
+        location url="#local.urlPassword#" addtoken="false";
 
     }
 
@@ -630,7 +634,7 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
     } else {
         getAlert('alertNotValidAnymore', 'warning');
         logWrite("user", "warning", "Reset password: The user tried to reset the password, but the session has expired.");
-        location url="#application.mainURL#/password" addtoken="false";
+        location url="#local.urlPassword#" addtoken="false";
     }
 
     // Check passwords first
@@ -639,14 +643,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         if (not form.password eq form.password2) {
             getAlert('alertPasswordsNotSame', 'warning');
             logWrite("user", "warning", "Reset password: The user tried to reset the password, but the passwords don't match. [UUID: #thisResetUUID#]");
-            location url="#application.mainURL#/password" addtoken="false";
+            location url="#local.urlPassword#" addtoken="false";
         }
 
     } else {
 
         getAlert('alertChoosePassword', 'warning');
         logWrite("user", "warning", "Reset password: The user tried to reset the password, but the password fields are empty. [UUID: #thisResetUUID#]");
-        location url="#application.mainURL#/password" addtoken="false";
+        location url="#local.urlPassword#" addtoken="false";
 
     }
 
@@ -673,13 +677,13 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
 
         getAlert('alertPasswordResetSuccess', 'success');
         logWrite("user", "info", "Reset password: The user has successfully reset the password [UUID: #thisResetUUID#]");
-        location url="#application.mainURL#/login" addtoken="false";
+        location url="#local.urlLogin#" addtoken="false";
 
     } else {
 
         getAlert(changePassword.message, 'danger');
         logWrite("system", "error", "Reset password: Could not reset the password [UUID: #thisResetUUID#, Error: #changePassword.message#]");
-        location url="#application.mainURL#/password" addtoken="false";
+        location url="#local.urlPassword#" addtoken="false";
 
     }
 
@@ -735,7 +739,7 @@ if (structKeyExists(form, 'mfa_btn')) {
             session.mfaCheckCount++;
         }
 
-        location url="#application.mainURL#/mfa?uuid=#checkMfa.uuid#" addtoken="false";
+        location url="#local.urlMfa#?uuid=#checkMfa.uuid#" addtoken="false";
 
     }
 
@@ -753,14 +757,14 @@ if (structKeyExists(url, 'resend')) {
             getAlert(objUser.message, 'success');
             logWrite("user", "warning", "Login via MFA: New MFA code send to the user [E-Mail: #session.user_email#, UUID: #url.uuid#]");
             session.mfaCheckCount = 0;
-            location url="#application.mainURL#/mfa?uuid=#url.uuid#" addtoken="false";
+            location url="#local.urlMfa#?uuid=#url.uuid#" addtoken="false";
 
         }
 
     } else {
 
         session.mfaCheckCount = 0;
-        location url="#application.mainURL#/login" addtoken="false";
+        location url="#local.urlLogin#" addtoken="false";
 
     }
 }
@@ -775,7 +779,7 @@ if (structKeyExists(url, "logout")) {
     structClear(SESSION);
     onSessionStart();
 
-    location url="#application.mainURL#/login?logout" addtoken="no";
+    location url="#local.urlLogin#?logout" addtoken="no";
 }
 
 logWrite("user", "warning", "Access attempt to frontend/core/handler/register.cfm without method");

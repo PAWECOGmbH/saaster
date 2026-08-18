@@ -45,10 +45,88 @@
 
     }
 
+    // Delete user
+    if (structKeyExists(form, "delete_user")) {
+        param name="form.customer_id" default="0";
+        param name="form.user_id" default="0";
+
+        if (
+            !isNumeric(form.customer_id)
+            or form.customer_id lte 0
+            or !isNumeric(form.user_id)
+            or form.user_id lte 0
+        ) {
+            getAlert('No user found!', 'danger');
+            logWrite("system", "warning", "Sysadmin user deletion received invalid IDs [Sysadmin UserID: #session.user_id#, CustomerID: #form.customer_id#, UserID to delete: #form.user_id#]");
+            location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+        }
+
+        userToDelete = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: form.customer_id},
+                userID: {type: "numeric", value: form.user_id}
+            },
+            sql = "
+                SELECT DISTINCT users.intUserID, users.strPhoto
+                FROM users
+                INNER JOIN customer_user ON customer_user.intUserID = users.intUserID
+                WHERE customer_user.intCustomerID = :customerID
+                AND users.intUserID = :userID
+            "
+        );
+
+        customerUserCount = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: form.customer_id}
+            },
+            sql = "
+                SELECT COUNT(DISTINCT intUserID) AS userCount
+                FROM customer_user
+                WHERE intCustomerID = :customerID
+            "
+        );
+
+        if (
+            !userToDelete.recordCount
+            or userToDelete.intUserID eq session.user_id
+            or customerUserCount.userCount lte 1
+        ) {
+            getAlert('This user cannot be deleted.', 'danger');
+            logWrite("user", "warning", "Sysadmin was not allowed to delete user [Sysadmin UserID: #session.user_id#, CustomerID: #form.customer_id#, UserID to delete: #form.user_id#, Customer user count: #customerUserCount.userCount#]");
+            location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id###users" addtoken="false";
+        }
+
+        queryExecute(
+            options = {datasource = application.datasource, result = "deleteUserResult"},
+            params = {
+                userID: {type: "numeric", value: userToDelete.intUserID}
+            },
+            sql = "
+                DELETE FROM users
+                WHERE intUserID = :userID
+            "
+        );
+
+        if (deleteUserResult.recordCount) {
+            if (len(trim(userToDelete.strPhoto))) {
+                application.objGlobal.deleteFile(expandPath("/userdata/images/users/#userToDelete.strPhoto#"));
+            }
+            getAlert('msgUserDeleted', 'success');
+            logWrite("user", "info", "Sysadmin deleted user [Sysadmin UserID: #session.user_id#, CustomerID: #form.customer_id#, UserID deleted: #form.user_id#]");
+        } else {
+            getAlert('No user found!', 'danger');
+            logWrite("system", "warning", "Sysadmin user deletion did not match a database row [Sysadmin UserID: #session.user_id#, CustomerID: #form.customer_id#, UserID to delete: #form.user_id#]");
+        }
+
+        location url="#application.mainURL#/sysadmin/customers/details/#form.customer_id###users" addtoken="false";
+    }
+
     // Edit user
     if (structKeyExists(form, "edit_user")) {
         param name="form.customer_id" default="";
-        param name="form.user_id " default="";
+        param name="form.user_id" default="";
         param name="form.email" default="";
 
         // Check whether the email is valid

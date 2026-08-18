@@ -1,6 +1,12 @@
 ﻿<cfscript>
 
 actionSuccess = false;
+dashboardEditable = !structKeyExists(application.systemSettingStruct, "settingDashboardEditable") or application.systemSettingStruct.settingDashboardEditable eq 1;
+
+if (!dashboardEditable) {
+    session.dashboardedit = 0;
+    location url="#application.mainURL#/dashboard" addtoken="false";
+}
 
 //=== Set Dashboard Edit Mode ================
 
