@@ -53,7 +53,7 @@ if (structKeyExists(form, "new_variable")) {
 
     getAlert('Variable added successfully.', 'success');
     session.search = form.variable;
-    location url="#application.mainURL#/sysadmin/translations" addtoken="false";
+    location url="#application.mainURL#/sysadmin/translations?reinit=3" addtoken="false";
 
 }
 
@@ -74,7 +74,7 @@ if (structKeyExists(url, "delete_trans")) {
 
         getAlert('Translation deleted', 'success');
         structDelete(session, "search");
-        location url="#application.mainURL#/sysadmin/translations" addtoken="false";
+        location url="#application.mainURL#/sysadmin/translations?reinit=3" addtoken="false";
 
     }
 
@@ -101,7 +101,7 @@ if (structKeyExists(form, "edit_variable")) {
         }
 
         getAlert('Translation saved!', 'success');
-        location url="#application.mainURL#/sysadmin/translations" addtoken="false";
+        location url="#application.mainURL#/sysadmin/translations?reinit=3" addtoken="false";
     }
 
 }
@@ -126,7 +126,7 @@ if (structKeyExists(form, "edit_syst_variable")) {
         }
 
         getAlert('Translation saved!', 'success');
-        location url="#application.mainURL#/sysadmin/translations?tr=system" addtoken="false";
+        location url="#application.mainURL#/sysadmin/translations?tr=system&reinit=3" addtoken="false";
     }
 
 }
@@ -233,7 +233,7 @@ if (structKeyExists(form, "bulk_translate")) {
 
 
         getAlert('The translation finished successfully!');
-        location url="#application.mainURL#/sysadmin/translations?tr=bulk" addtoken="false";
+        location url="#application.mainURL#/sysadmin/translations?tr=bulk&reinit=3" addtoken="false";
 
         // Translate custom translations if selected
         /*

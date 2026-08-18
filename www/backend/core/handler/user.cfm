@@ -404,6 +404,44 @@ if (structKeyExists(url, "delete")) {
         location url="#application.mainURL#/account-settings/users" addtoken="false";
     }
 
+    // Apply the same role rules as the user overview. Super admins may delete
+    // other super admins, including the current tenant's first user, but never
+    // themselves or a system administrator.
+    mainUserCheck = queryExecute(
+        options = {datasource = application.datasource},
+        params = {
+            customerID: {type: "numeric", value: getUserData.intCustomerID},
+            userID: {type: "numeric", value: getUserData.intUserID}
+        },
+        sql = "
+            SELECT
+                IF(MIN(intUserID) = :userID, 1, 0) AS blnMainUser,
+                (SELECT blnSysAdmin FROM users WHERE intUserID = :userID) AS blnSysAdmin
+            FROM customer_user
+            WHERE intCustomerID = :customerID
+        "
+    );
+
+    deleteAllowed = false;
+    targetIsMainUser = mainUserCheck.recordCount and mainUserCheck.blnMainUser;
+    targetIsSysAdmin = mainUserCheck.recordCount and mainUserCheck.blnSysAdmin;
+
+    if (getUserData.intUserID neq session.user_id) {
+        if (session.sysadmin) {
+            deleteAllowed = !targetIsMainUser;
+        } else if (session.superadmin) {
+            deleteAllowed = !targetIsSysAdmin;
+        } else if (session.admin) {
+            deleteAllowed = !getUserData.blnSuperAdmin and !targetIsSysAdmin and !targetIsMainUser;
+        }
+    }
+
+    if (!deleteAllowed) {
+        getAlert('msgNoAccess', 'danger');
+        logWrite("user", "warning", "Not allowed to delete user [CustomerID: #session.customer_id#, UserID: #session.user_id#, UserID to delete: #url.delete#]");
+        location url="#application.mainURL#/account-settings/users" addtoken="false";
+    }
+
     // Delete users photo
     if (len(trim(getUserData.strPhoto))) {
 

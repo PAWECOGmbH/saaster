@@ -11,7 +11,7 @@ component displayname="payrexx" output="false" {
 
 
     // Get the webhook data
-    public query function getWebhook(required numeric customerID, required string status, any default, string includingFailed) {
+    public query function getWebhook(required numeric customerID, required string status, any default, string includingFailed, numeric gatewayID) {
 
         if (structKeyExists(arguments, "default") and isBoolean(arguments.default)) {
             local.sql_default = "AND blnDefault = " & arguments.default;
@@ -25,12 +25,20 @@ component displayname="payrexx" output="false" {
         }
 
 
+        local.queryParams = {
+            customerID: {type: "numeric", value: arguments.customerID},
+            status: {type: "varchar", value: arguments.status}
+        };
+        if (structKeyExists(arguments, "gatewayID") and arguments.gatewayID gt 0) {
+            local.sql_gateway = "AND intGatewayID = :gatewayID";
+            local.queryParams.gatewayID = {type: "numeric", value: arguments.gatewayID};
+        } else {
+            local.sql_gateway = "";
+        }
+
         local.qWebhook = queryExecute(
             options: {datasource = application.datasource},
-            params: {
-                customerID = {type: "numeric", value: arguments.customerID},
-                status = {type: "varchar", value: arguments.status}
-            },
+            params: local.queryParams,
             sql = "
                 SELECT *
                 FROM payrexx
@@ -38,6 +46,7 @@ component displayname="payrexx" output="false" {
                 AND strStatus = :status
                 #local.sql_default#
                 #local.sql_failed#
+                #local.sql_gateway#
                 ORDER BY dtmTimeUTC DESC
             "
         )
@@ -53,6 +62,13 @@ component displayname="payrexx" output="false" {
         local.method = "GET";
         local.object = "SignatureCheck";
         local.thisID = "";
+        local.errorResponse = {
+            status: "error",
+            message: "Payrexx could not be reached.",
+            httpStatus: 0,
+            transportError: true,
+            requestOutcomeUnknown: true
+        };
 
         if (structKeyExists(arguments, "method")) {
             local.method = arguments.method;
@@ -66,67 +82,103 @@ component displayname="payrexx" output="false" {
 
         local.apiSignature = makeAPISignature(arguments.payload);
 
-        switch (local.method) {
+        try {
+            switch (local.method) {
 
-            case "GET":
+                case "GET":
 
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
-                }
+                    if (isNumeric(local.thisID)) {
+                        local.callingURL = variables.payrexxAPIurl & local.object & "/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
+                    } else {
+                        local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance & "&" & local.apiSignature;
+                    }
 
-                cfhttp( url=local.callingURL, result="httpRes", method="GET" ) {};
+                    cfhttp( url=local.callingURL, result="httpRes", method="GET", timeout=20 ) {};
 
-                break;
-
-
-            case "POST":
-
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
-                }
-
-                local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
-
-                cfhttp( url=local.callingURL, result="httpRes", method="POST" ) {
-                    cfhttpparam( name="Content-Type", type="header", value="application/json" );
-                    cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
-                    cfhttpparam( type="body", value=local.bodyString );
-                }
-
-                break;
+                    break;
 
 
-            case "DEL":
+                case "POST":
 
-                if (isNumeric(local.thisID)) {
-                    local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
-                } else {
-                    local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
-                }
+                    if (isNumeric(local.thisID)) {
+                        local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
+                    } else {
+                        local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                    }
 
-                local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
+                    local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
 
-                cfhttp( url=local.callingURL, result="httpRes", method="DELETE" ) {
-                    cfhttpparam( name="Content-Type", type="header", value="application/json" );
-                    cfhttpparam( name="Accept", type="header", value="application/x-www-form-urlencoded" );
-                    cfhttpparam( type="body", value=local.bodyString );
-                }
+                    cfhttp( url=local.callingURL, result="httpRes", method="POST", timeout=20 ) {
+                        cfhttpparam( name="Content-Type", type="header", value="application/x-www-form-urlencoded" );
+                        cfhttpparam( name="Accept", type="header", value="application/json" );
+                        cfhttpparam( type="body", value=local.bodyString );
+                    }
 
-                break;
+                    break;
 
+
+                case "DEL":
+
+                    if (isNumeric(local.thisID)) {
+                        local.callingURL = variables.payrexxAPIurl & local.object &"/" & local.thisID & "/?instance=" &  variables.payrexxAPIinstance;
+                    } else {
+                        local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
+                    }
+
+                    local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
+
+                    cfhttp( url=local.callingURL, result="httpRes", method="DELETE", timeout=20 ) {
+                        cfhttpparam( name="Content-Type", type="header", value="application/x-www-form-urlencoded" );
+                        cfhttpparam( name="Accept", type="header", value="application/json" );
+                        cfhttpparam( type="body", value=local.bodyString );
+                    }
+
+                    break;
+
+                default:
+                    local.errorResponse.message = "Unsupported Payrexx request method: " & local.method;
+                    local.errorResponse.requestOutcomeUnknown = false;
+                    return local.errorResponse;
+            }
+        } catch (any e) {
+            local.errorResponse.message = "Payrexx request failed: " & e.message;
+            return local.errorResponse;
         }
 
-        if (httpRes.status_text eq "OK" and isJSON(httpRes.filecontent)) {
-            local.respond = deserializeJSON(httpRes.filecontent);
-        } else {
-            local.respond = httpRes.errordetail;
+        local.httpStatus = 0;
+        if (structKeyExists(httpRes, "statusCode") and isNumeric(listFirst(httpRes.statusCode, " "))) {
+            local.httpStatus = int(listFirst(httpRes.statusCode, " "));
         }
 
-        return deserializeJSON(httpRes.filecontent);
+        if (!structKeyExists(httpRes, "fileContent") or !isJSON(httpRes.fileContent)) {
+            local.errorResponse.httpStatus = local.httpStatus;
+            local.errorResponse.message = structKeyExists(httpRes, "errorDetail") and len(trim(httpRes.errorDetail))
+                ? httpRes.errorDetail
+                : "Payrexx returned an invalid response.";
+            return local.errorResponse;
+        }
+
+        local.respond = deserializeJSON(httpRes.fileContent);
+        if (!isStruct(local.respond)) {
+            local.errorResponse.httpStatus = local.httpStatus;
+            local.errorResponse.message = "Payrexx returned an unexpected response.";
+            return local.errorResponse;
+        }
+
+        local.respond.httpStatus = local.httpStatus;
+        local.respond.transportError = false;
+        local.respond.requestOutcomeUnknown = local.httpStatus gte 500;
+
+        if (!structKeyExists(local.respond, "status")) {
+            local.respond.status = "error";
+        }
+        if (!structKeyExists(local.respond, "message")) {
+            local.respond.message = local.respond.status eq "success"
+                ? "Payrexx request completed successfully."
+                : "Payrexx rejected the request.";
+        }
+
+        return local.respond;
 
     }
 
