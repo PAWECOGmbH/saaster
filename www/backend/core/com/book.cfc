@@ -858,7 +858,11 @@ component displayname="book" output="false" {
     // Update the desired booking
     public numeric function updateBooking(required struct bookingData) {
 
-        if (!structKeyExists(arguments.bookingData, "bookingID")) {
+        if (
+            !structKeyExists(arguments.bookingData, "bookingID")
+            or !isNumeric(arguments.bookingData.bookingID)
+            or arguments.bookingData.bookingID lte 0
+        ) {
             return 0;
         }
 
@@ -877,11 +881,16 @@ component displayname="book" output="false" {
             "
         )
 
+        // The booking may already have been removed by another request or the scheduler.
+        if (!local.qBooking.recordCount) {
+            return 0;
+        }
+
         local.customerID = local.qBooking.intCustomerID;
         local.planID = local.qBooking.intPlanID;
         local.moduleID = local.qBooking.intModuleID;
-        local.dateStart = local.qBooking.dteStartDate;
-        local.dateEnd = local.qBooking.dteEndDate;
+        local.dateStart = local.qBooking.dteStartDate[1] ?: "";
+        local.dateEnd = local.qBooking.dteEndDate[1] ?: "";
         local.recurring = local.qBooking.strRecurring;
         local.status = local.qBooking.strStatus;
 
@@ -904,6 +913,20 @@ component displayname="book" output="false" {
             local.status = arguments.bookingData.status;
         }
 
+        // Nullable database dates need an explicit NULL flag in Lucee 6.
+        // Reject malformed values instead of silently clearing a booking period.
+        loop list="dateStart,dateEnd" index="local.dateField" {
+            if (
+                !isDate(local[local.dateField])
+                and (!isSimpleValue(local[local.dateField]) or len(trim(local[local.dateField])))
+            ) {
+                throw(
+                    type="InvalidBookingDate",
+                    message="Invalid #local.dateField# for booking #local.bookingID#."
+                );
+            }
+        }
+
         local.sql_type_planID = isNumeric(local.planID) ? "numeric" : "null";
         local.sql_type_moduleID = isNumeric(local.moduleID) ? "numeric" : "null";
 
@@ -913,8 +936,8 @@ component displayname="book" output="false" {
                 bookingID: {type: "numeric", value: local.bookingID},
                 planID: {type: local.sql_type_planID, value: local.planID},
                 moduleID: {type: local.sql_type_moduleID, value: local.moduleID},
-                dateStart: {type: "date", value: local.dateStart},
-                dateEnd: {type: "date", value: local.dateEnd},
+                dateStart: {type: "date", value: local.dateStart, null: !isDate(local.dateStart)},
+                dateEnd: {type: "date", value: local.dateEnd, null: !isDate(local.dateEnd)},
                 recurring: {type: "varchar", value: local.recurring},
                 status: {type: "varchar", value: local.status}
             },
