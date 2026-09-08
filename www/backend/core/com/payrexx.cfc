@@ -125,12 +125,15 @@ component displayname="payrexx" output="false" {
                         local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
                     }
 
-                    local.bodyString = structToQueryString(arguments.payload) & "&" & local.apiSignature;
+                    // Payrexx expects DELETE parameters (including the signature) in the URL.
+                    local.queryString = structToQueryString(arguments.payload);
+                    if (len(local.queryString)) {
+                        local.callingURL &= "&" & local.queryString;
+                    }
+                    local.callingURL &= "&" & local.apiSignature;
 
                     cfhttp( url=local.callingURL, result="httpRes", method="DELETE", timeout=20 ) {
-                        cfhttpparam( name="Content-Type", type="header", value="application/x-www-form-urlencoded" );
                         cfhttpparam( name="Accept", type="header", value="application/json" );
-                        cfhttpparam( type="body", value=local.bodyString );
                     }
 
                     break;
