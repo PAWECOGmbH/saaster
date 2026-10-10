@@ -16,6 +16,10 @@ variables.mainURL = "https://www.yourdomain.com";
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "";
 
+// Minutes a scheduler shard (tasks.cfm?task=NN) may be held by one run before the next
+// run is allowed to take it over. Must be longer than your longest legitimate shard run.
+variables.scheduleLeaseMinutes = 60;
+
 
 // ####################################
 //  APPLICATION SETTINGS

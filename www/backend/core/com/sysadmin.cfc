@@ -1193,20 +1193,123 @@ component displayname="sysadmin" output="false" {
     }
 
 
+    // Unconditional release of a shard. Kept for backwards compatibility;
+    // tasks.cfm uses claimScheduleControl() / releaseScheduleControl() instead.
     public void function stopScheduleControl(required numeric task) {
 
         queryExecute(
             options = {datasource = application.datasource},
             params = {
+                utcDate: {type: "datetime", value: now()},
+                taskName: {type: "string", value: "task_" & arguments.task}
+            },
+            sql = "
+                UPDATE schedulecontrol
+                SET dtmEnd = :utcDate,
+                    blnIsRunning = 0,
+                    strRunToken = NULL
+                WHERE strTaskName = :taskName
+            "
+        )
+
+    }
+
+
+    // Claim a scheduler shard (task_01..task_20) for one run.
+    // The claim is a single atomic UPDATE: it succeeds if the shard is idle, or if the
+    // previous run has held the shard longer than the lease (stale run that was killed,
+    // or a zombie request Lucee could not stop). The returned struct contains the run
+    // token the caller needs to release the shard again, and whether a stale lease was
+    // taken over so the caller can log it.
+    public struct function claimScheduleControl(required string task, required numeric leaseMinutes) {
+
+        local.result = {
+            "claimed": false,
+            "takenOver": false,
+            "runToken": "",
+            "staleSince": ""
+        };
+
+        local.taskName = "task_" & arguments.task;
+        local.runToken = createUUID();
+        local.staleBefore = dateAdd("n", -arguments.leaseMinutes, now());
+
+        // Read the current state first, only used for logging a takeover
+        local.qControl = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                taskName: {type: "string", value: local.taskName}
+            },
+            sql = "
+                SELECT dtmStart, blnIsRunning
+                FROM schedulecontrol
+                WHERE strTaskName = :taskName
+            "
+        );
+
+        if (!local.qControl.recordCount) {
+            return local.result;
+        }
+
+        queryExecute(
+            options = {datasource = application.datasource, result = "local.claimResult"},
+            params = {
+                taskName: {type: "string", value: local.taskName},
+                runToken: {type: "string", value: local.runToken},
+                utcDate: {type: "datetime", value: now()},
+                staleBefore: {type: "datetime", value: local.staleBefore}
+            },
+            sql = "
+                UPDATE schedulecontrol
+                SET dtmStart = :utcDate,
+                    blnIsRunning = 1,
+                    strRunToken = :runToken
+                WHERE strTaskName = :taskName
+                AND (
+                    blnIsRunning = 0
+                    OR blnIsRunning IS NULL
+                    OR dtmStart IS NULL
+                    OR dtmStart < :staleBefore
+                )
+            "
+        );
+
+        if (local.claimResult.recordCount eq 1) {
+            local.result["claimed"] = true;
+            local.result["runToken"] = local.runToken;
+            if (local.qControl.blnIsRunning eq 1) {
+                local.result["takenOver"] = true;
+                local.result["staleSince"] = local.qControl.dtmStart;
+            }
+        }
+
+        return local.result;
+
+    }
+
+
+    // Release a shard, but only if this run still owns it. A run that lost its lease
+    // to a takeover must not clear the flag of the run that replaced it.
+    public boolean function releaseScheduleControl(required string task, required string runToken) {
+
+        queryExecute(
+            options = {datasource = application.datasource, result = "local.releaseResult"},
+            params = {
+                taskName: {type: "string", value: "task_" & arguments.task},
+                runToken: {type: "string", value: arguments.runToken},
                 utcDate: {type: "datetime", value: now()}
             },
             sql = "
                 UPDATE schedulecontrol
-                SET dtmEnd =:utcDate,
-                    blnIsRunning = 0
-                WHERE strTaskName = 'task_#arguments.task#'
+                SET dtmEnd = :utcDate,
+                    blnIsRunning = 0,
+                    strRunToken = NULL
+                WHERE strTaskName = :taskName
+                AND strRunToken = :runToken
             "
-        )
+        );
+
+        return local.releaseResult.recordCount eq 1;
 
     }
 
