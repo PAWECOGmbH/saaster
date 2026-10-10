@@ -125,14 +125,14 @@ component displayname="payrexx" output="false" {
                         local.callingURL = variables.payrexxAPIurl & local.object & "/?instance=" &  variables.payrexxAPIinstance;
                     }
 
-                    // Payrexx expects DELETE parameters (including the signature) in the URL.
+                    // Legacy Payrexx APIs do not authenticate DELETE signatures from the URL.
                     local.queryString = structToQueryString(arguments.payload);
                     if (len(local.queryString)) {
                         local.callingURL &= "&" & local.queryString;
                     }
-                    local.callingURL &= "&" & local.apiSignature;
 
-                    cfhttp( url=local.callingURL, result="httpRes", method="DELETE", timeout=20 ) {
+                    cfhttp( url=local.callingURL, result="httpRes", method="DELETE", timeout=20, redirect=false ) {
+                        cfhttpparam( name="X-API-KEY", type="header", value=variables.payrexxAPIkey );
                         cfhttpparam( name="Accept", type="header", value="application/json" );
                     }
 

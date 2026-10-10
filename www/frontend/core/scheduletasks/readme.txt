@@ -27,3 +27,19 @@ https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=19&pass=xxxx
 https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=20&pass=xxxx
 
 xxxx = password from config.cfm
+
+How a shard run (tasks.cfm?task=NN) protects itself:
+
+- Each run claims its row in the table "schedulecontrol" with a unique run token (lease).
+  While the lease is held, further calls for the same shard log a warning and exit.
+- The lease expires after variables.scheduleLeaseMinutes (config.cfm, default 60). Only then
+  may a new run take the shard over. A takeover is logged and sent by email, because it means
+  the previous run was killed or is still running as a zombie (Lucee cannot reliably stop a
+  request that exceeded the request timeout). Set the lease longer than your longest
+  legitimate shard run.
+- Before a task file is included, its row in scheduler_NN is claimed by advancing dtmNextRun.
+  A zombie and the run that replaced it therefore never execute the same row twice.
+- Only the owner of the run token releases the shard. A run that lost its lease logs this
+  and leaves the flag to the newer run.
+- A task that runs longer than its own interval is logged as a warning (type "scheduletask").
+  Those tasks are the reason for overrunning shards and must be fixed in the module.
