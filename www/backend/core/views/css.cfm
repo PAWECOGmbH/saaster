@@ -1,5 +1,5 @@
 <!--- Main Tabler CSS --->
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css" />
 
 <!--- Dropify --->
 <link rel="stylesheet" type="text/css" href="/backend/dist/css/dropify.min.css" />

@@ -95,7 +95,7 @@
                 #session.alert#
             </cfif>
             <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
-                <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
+                <h4 class="alert-heading">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
                 <div class="text-muted">This can take a couple of minutes.</div>
             </div>
         </div>
@@ -225,7 +225,7 @@
                                                                             <p></p>
                                                                             <cfloop query="qLanguages">
                                                                                 <div class="mb-3">
-                                                                                    <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
+                                                                                    <div class="hr-text hr-text-start my-2">#qLanguages.strLanguageEN#</div>
                                                                                     <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                 </div>
                                                                             </cfloop>
@@ -264,7 +264,7 @@
                                                                 </div>
                                                                 <cfloop query="qLanguages">
                                                                     <div class="mb-3">
-                                                                        <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
+                                                                        <div class="hr-text hr-text-start my-2">#qLanguages.strLanguageEN#</div>
                                                                         <textarea oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
                                                                     </div>
                                                                 </cfloop>
@@ -385,7 +385,7 @@
                                                                                 <p></p>
                                                                                 <cfloop query="qLanguages">
                                                                                     <div class="mb-3">
-                                                                                        <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
+                                                                                        <div class="hr-text hr-text-start my-2">#qLanguages.strLanguageEN#</div>
                                                                                         <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
                                                                                     </div>
                                                                                 </cfloop>

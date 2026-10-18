@@ -1,8 +1,8 @@
-<!--- Tabler JavaScripts --->
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
-
 <!--- Main jQuery --->
 <script src="/backend/dist/js/jquery-3.6.0.min.js"></script>
+
+<!--- Tabler JavaScripts (incl. Bootstrap 5.3; loaded after jQuery so the jQuery plugin bridge is registered) --->
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
 
 <!--- Drag'n'drop jQuery --->
 <script src="/backend/dist/js/jquery-ui.min.js"></script>

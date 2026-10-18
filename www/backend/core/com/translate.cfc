@@ -74,7 +74,7 @@ component displayname="translate" accessors="true" {
 
 
         loop query = local.getLng {
-            writeOutput("<div class='hr-text hr-text-left my-3 mt-4'>#local.getLng.strLanguageEN#</div>");
+            writeOutput("<div class='hr-text hr-text-start my-3 mt-4'>#local.getLng.strLanguageEN#</div>");
             if (isNumeric(variables.maxLength)) {
                 writeOutput("<textarea class='form-control #local.editorClass#'  name='text_#local.getLng.strLanguageISO#' maxlength='#variables.maxLength#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
             } else {

@@ -637,7 +637,7 @@ $(document).ready(function() {
 
 
     // add conditional properties
-    if (document.querySelector('.theme-dark')) {
+    if (document.querySelector('[data-bs-theme="dark"], .theme-dark')) {
     opts.skin = 'oxide-dark';
     opts.content_css = 'dark';
     optsBig.skin = 'oxide-dark';
