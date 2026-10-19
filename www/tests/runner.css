@@ -1,0 +1,280 @@
+:root {
+    color-scheme: light;
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --accent: #2f5bea;
+    --accent-soft: #eef2ff;
+    --pass: #16a34a;
+    --fail: #dc2626;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.page {
+    max-width: 1120px;
+    margin: 24px auto;
+    padding: 0 16px 24px;
+    display: grid;
+    gap: 16px;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+h1,
+h2 {
+    margin: 0 0 8px;
+}
+
+h1 {
+    font-size: 22px;
+}
+
+h2 {
+    font-size: 16px;
+}
+
+.subtle {
+    margin: 0;
+    color: var(--muted);
+}
+
+.form-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.help-text {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+.help-text code,
+.subtle code {
+    background: #eef2f7;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-size: 11px;
+}
+
+select,
+input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    color: inherit;
+}
+
+select[multiple] {
+    min-height: 220px;
+}
+
+.selection-panel {
+    display: grid;
+    gap: 12px;
+}
+
+.row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.status-idle {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.status-running {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.status-pass {
+    background: #dcfce7;
+    color: var(--pass);
+}
+
+.status-fail {
+    background: #fee2e2;
+    color: var(--fail);
+}
+
+.summary-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.summary-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    background: #f9fafb;
+}
+
+.summary-item .label {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.summary-item .value {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.environment-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.environment-item .label {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.environment-item .value {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 2px;
+    word-break: break-all;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.numeric {
+    text-align: right;
+    width: 80px;
+}
+
+.bundle-row-failed {
+    background: #fef2f2;
+    box-shadow: inset 3px 0 0 #fecaca;
+}
+
+.failure-row td {
+    background: #fff7f7;
+}
+
+.failure-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.failure-list .spec-name {
+    font-weight: 600;
+}
+
+.failure-list .spec-message {
+    color: var(--fail);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.failure-list .spec-origin {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.text-pass {
+    color: var(--pass);
+}
+
+.text-fail {
+    color: var(--fail);
+}
+
+pre {
+    margin: 0;
+    padding: 10px;
+    background: #111827;
+    color: #f9fafb;
+    border-radius: 8px;
+    overflow: auto;
+    max-height: 280px;
+    font-size: 12px;
+}
+
+.hidden {
+    display: none;
+}
