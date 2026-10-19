@@ -209,6 +209,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         getLayout = application.layoutStruct;
         logWrite = application.objLog.logWrite;
         getMeta = application.objMeta.getMeta;
+        csrfToken = application.objGlobal.csrfToken;
+        csrfField = application.objGlobal.csrfField;
+        csrfParam = application.objGlobal.csrfParam;
 
 
         // Is there a redirect coming in url?
@@ -286,6 +289,44 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
             // If someone is trying to call a .cfm file directly
             if (thiscontent.noaccess) {
                 location url="#application.mainURL#" addtoken="false";
+            }
+
+        }
+
+        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links)
+        if (reFindNoCase("^/?(backend|frontend)/core/handler/", thiscontent.thisPath)) {
+
+            local.stateChangingGet = false;
+            for (local.urlKey in url) {
+                if (reFindNoCase("^(delete|del_|remove_|revoke|noti_del|invit)", local.urlKey)) {
+                    local.stateChangingGet = true;
+                    break;
+                }
+            }
+
+            if (reFindNoCase("/handler/cancel.cfm$", thiscontent.thisPath)) {
+                local.stateChangingGet = true;
+            }
+
+            if ((cgi.request_method eq "POST" or local.stateChangingGet) and !application.objGlobal.csrfVerify()) {
+
+                logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
+
+                local.reqHeaders = getHTTPRequestData(false).headers;
+                if (structKeyExists(local.reqHeaders, "X-Requested-With") and local.reqHeaders["X-Requested-With"] eq "XMLHttpRequest") {
+                    header statuscode="403" statustext="Forbidden";
+                    writeOutput("Invalid CSRF token");
+                    abort;
+                }
+
+                getAlert('msgCsrfInvalid', 'danger');
+
+                if (structKeyExists(session, "user_id")) {
+                    location url="#application.mainURL#/dashboard" addtoken="false";
+                } else {
+                    location url="#application.mainURL#/login" addtoken="false";
+                }
+
             }
 
         }

@@ -62,12 +62,12 @@
                         <div class="card-header" style="display: block;">
                             <div class="row mt-2">
                                 <div class="col-lg-6">
-                                    <h3 class="card-title">Title: #qInvoice.title#</h3>
+                                    <h3 class="card-title">Title: #encodeForHTML(qInvoice.title)#</h3>
                                     <p>
                                     <cfif len(trim(qCustomer.companyName))>
-                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.companyName#</a><cfif invoicePersonID gt 0> - </cfif>
+                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.companyName)#</a><cfif invoicePersonID gt 0> - </cfif>
                                     <cfelseif len(trim(qCustomer.contactPerson)) and invoicePersonID eq 0>
-                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.contactPerson#</a></p>
+                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.contactPerson)#</a></p>
                                     </cfif>
                                     <cfif invoicePersonID gt 0>
                                         <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#invoicePerson#</a>
@@ -154,7 +154,7 @@
                                                 <td valign="top" class="text-end">
                                                     <cfif qInvoice.paymentstatusID eq 1>
                                                         <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
-                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&#csrfParam()#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
                                                     </cfif>
                                                 </td>
                                             </tr>
@@ -187,7 +187,7 @@
                                             <cfloop query="qPayments">
                                                 <tr>
                                                     <td style="border-top: 1px solid;"></td>
-                                                    <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                                    <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                                     <td style="border-top: 1px solid;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                                 </tr>
                                             </cfloop>
@@ -230,7 +230,7 @@
 
 <cfoutput>
 
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="new_position" value="#thisInvoiceID#">
 <div id="position_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false' data-bs-focus="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -290,7 +290,7 @@
 <cfloop array="#qInvoice.positions#" index="pos">
 <div id="pos_#pos.invoicePosID#" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <form action="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#" method="post">
+        <form action="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#" method="post">#csrfField()#
         <input type="hidden" name="edit_position" value="#pos.invoicePosID#">
             <div class="modal-content">
                 <div class="modal-header">
@@ -348,7 +348,7 @@
 </cfloop>
 
 
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="settings" value="#thisInvoiceID#">
 <div id="settings" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -367,7 +367,7 @@
                     <select name="userID" class="form-select">
                         <option value=""></option>
                         <cfloop query="qUsers">
-                            <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#qUsers.strFirstName# #qUsers.strLastName#</option>
+                            <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#encodeForHTML(qUsers.strFirstName)# #encodeForHTML(qUsers.strLastName)#</option>
                         </cfloop>
                     </select>
                 </div>

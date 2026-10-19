@@ -55,7 +55,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings/invoices">#getTrans('titInvoices')#</a></li>
-                            <li class="breadcrumb-item active">#getInvoiceData.title#</li>
+                            <li class="breadcrumb-item active">#encodeForHTML(getInvoiceData.title)#</li>
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
@@ -91,7 +91,7 @@
                         <div class="col-12 mt-5">
                             <p><b>#getTrans('titInvoice')# #getInvoiceData.number#</b></p>
                             <hr class="my-1">
-                            <p class="mt-2 h3">#getInvoiceData.title#</p>
+                            <p class="mt-2 h3">#encodeForHTML(getInvoiceData.title)#</p>
                             <hr class="my-1">
                         </div>
 
@@ -170,7 +170,7 @@
                                     <cfloop query="qPayments">
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
-                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                             <td style="border-top: 1px solid;" class="text-end pr-0">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                         </tr>
 

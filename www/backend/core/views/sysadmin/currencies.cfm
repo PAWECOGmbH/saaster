@@ -60,20 +60,20 @@
                                         <tr id="sort_#qCurrencies.intCurrencyID#">
                                             <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
                                             <td class="text-center">#qCurrencies.intPrio#</td>
-                                            <td>#qCurrencies.strCurrencyEN#</td>
-                                            <td>#qCurrencies.strCurrency#</td>
-                                            <td class="text-center">#qCurrencies.strCurrencyISO#</td>
-                                            <td class="text-center">#qCurrencies.strCurrencySign#</td>
+                                            <td>#encodeForHTML(qCurrencies.strCurrencyEN)#</td>
+                                            <td>#encodeForHTML(qCurrencies.strCurrency)#</td>
+                                            <td class="text-center">#encodeForHTML(qCurrencies.strCurrencyISO)#</td>
+                                            <td class="text-center">#encodeForHTML(qCurrencies.strCurrencySign)#</td>
                                             <td class="text-center">#yesNoFormat(qCurrencies.blnDefault)#</td>
                                             <td class="text-center">#yesNoFormat(qCurrencies.blnActive)#</td>
                                             <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##cur_#qCurrencies.intCurrencyID#">Edit</a></td>
-                                            <td><cfif !qCurrencies.blnDefault><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/currencies?delete_currency=#qCurrencies.intCurrencyID#', 'Delete currency', 'If you delete a currency, all variables, translations and contents in tables with this currency will also be deleted. Do you really want to delete this currency irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></cfif></td>
+                                            <td><cfif !qCurrencies.blnDefault><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/currencies?delete_currency=#qCurrencies.intCurrencyID#&#csrfParam()#', 'Delete currency', 'If you delete a currency, all variables, translations and contents in tables with this currency will also be deleted. Do you really want to delete this currency irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></cfif></td>
                                         </tr>
                                         
                                         <div id="cur_#qCurrencies.intCurrencyID#" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                                 
-                                                <form action="#application.mainURL#/sysadm/currencies" method="post">
+                                                <form action="#application.mainURL#/sysadm/currencies" method="post">#csrfField()#
                                                     <input type="hidden" name="edit_currency" value="#qCurrencies.intCurrencyID#">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -94,7 +94,7 @@
                                                                     <div class="mb-2">
                                                                         <label class="form-label">ISO code</label>
                                                                         <div class="input-group input-group-flat w-50">
-                                                                            <input type="text" class="form-control" name="iso" autocomplete="off" value="#qCurrencies.strCurrencyISO#" maxlength="3" required>
+                                                                            <input type="text" class="form-control" name="iso" autocomplete="off" value="#encodeForHTML(qCurrencies.strCurrencyISO)#" maxlength="3" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -144,7 +144,7 @@
                                     </tbody>
                                     <div id="cur_new" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                            <form action="#application.mainURL#/sysadm/currencies" method="post">
+                                            <form action="#application.mainURL#/sysadm/currencies" method="post">#csrfField()#
                                                 <input type="hidden" name="new_currency">
                                                 <div class="modal-content">
                                                     <div class="modal-header">

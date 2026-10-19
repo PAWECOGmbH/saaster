@@ -60,16 +60,16 @@
                                         <tbody id="dragndrop_body">
                                             <cfloop query="qWidgets">
                                                 <tr>
-                                                    <td>#qWidgets.strWidgetName#</td>
-                                                    <td>#qWidgets.strFilePath#</td>
-                                                    <td class="text-center">#qWidgets.strDescription#</td>
+                                                    <td>#encodeForHTML(qWidgets.strWidgetName)#</td>
+                                                    <td>#encodeForHTML(qWidgets.strFilePath)#</td>
+                                                    <td class="text-center">#encodeForHTML(qWidgets.strDescription)#</td>
                                                     <td class="text-center">#yesNoFormat(qWidgets.blnActive)#</td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##widget_#qWidgets.intWidgetID#">Edit</a></td>
-                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/widgets?delete_widget=#qWidgets.intWidgetID#', 'Delete widget', 'If you delete a widget, the widgets activated by clients on their dashboards will also be removed. Do you really want to delete?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/widgets?delete_widget=#qWidgets.intWidgetID#&#csrfParam()#', 'Delete widget', 'If you delete a widget, the widgets activated by clients on their dashboards will also be removed. Do you really want to delete?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
                                                 <div id="widget_#qWidgets.intWidgetID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                                     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                        <form action="#application.mainURL#/sysadm/widgets" method="post">
+                                                        <form action="#application.mainURL#/sysadm/widgets" method="post">#csrfField()#
                                                         <input type="hidden" name="edit_widget" value="#qWidgets.intWidgetID#">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
@@ -94,7 +94,7 @@
                                                                             <label class="form-label">Widget ratio</label>
                                                                             <select name="ratioID" class="form-select">
                                                                                 <cfloop query="qWidgetRatio">
-                                                                                    <option value="#qWidgetRatio.intRatioID#" <cfif qWidgetRatio.intRatioID eq qWidgets.intRatioID>selected</cfif>>#qWidgetRatio.strDescription#</option>
+                                                                                    <option value="#qWidgetRatio.intRatioID#" <cfif qWidgetRatio.intRatioID eq qWidgets.intRatioID>selected</cfif>>#encodeForHTML(qWidgetRatio.strDescription)#</option>
                                                                                 </cfloop>
                                                                             </select>
                                                                         </div>
@@ -119,7 +119,7 @@
                                                                             <label class="form-check-label mb-2">... display only with these <b>plans</b>:</label>
                                                                             <select name="planList" class="form-select" multiple>
                                                                                 <cfloop query="qPlans">
-                                                                                    <option value="#qPlans.intPlanID#" <cfif listFind(qWidgets.planList, qPlans.intPlanID)>selected</cfif>>#qPlans.strPlanName#</option>
+                                                                                    <option value="#qPlans.intPlanID#" <cfif listFind(qWidgets.planList, qPlans.intPlanID)>selected</cfif>>#encodeForHTML(qPlans.strPlanName)#</option>
                                                                                 </cfloop>
                                                                             </select>
                                                                         </div>
@@ -127,7 +127,7 @@
                                                                             <label class="form-check-label mb-2">... display only with these <b>modules</b>:</label>
                                                                             <select name="moduleList" class="form-select" multiple>
                                                                                 <cfloop query="qModules">
-                                                                                    <option value="#qModules.intModuleID#" <cfif listFind(qWidgets.moduleList, qModules.intModuleID)>selected</cfif>>#qModules.strModuleName#</option>
+                                                                                    <option value="#qModules.intModuleID#" <cfif listFind(qWidgets.moduleList, qModules.intModuleID)>selected</cfif>>#encodeForHTML(qModules.strModuleName)#</option>
                                                                                 </cfloop>
                                                                             </select>
                                                                         </div>
@@ -151,7 +151,7 @@
                                     </cfif>
                                     <div id="widget_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                            <form action="#application.mainURL#/sysadm/widgets" method="post">
+                                            <form action="#application.mainURL#/sysadm/widgets" method="post">#csrfField()#
                                             <input type="hidden" name="new_widget">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -176,7 +176,7 @@
                                                                 <label class="form-label">Widget ratio</label>
                                                                 <select name="ratioID" class="form-select">
                                                                     <cfloop query="qWidgetRatio">
-                                                                        <option value="#qWidgetRatio.intRatioID#">#qWidgetRatio.strDescription#</option>
+                                                                        <option value="#qWidgetRatio.intRatioID#">#encodeForHTML(qWidgetRatio.strDescription)#</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>
@@ -201,7 +201,7 @@
                                                                 <label class="form-check-label mb-2">... display only with these <b>plans</b>:</label>
                                                                 <select name="planList" class="form-select" multiple>
                                                                     <cfloop query="qPlans">
-                                                                        <option value="#qPlans.intPlanID#">#qPlans.strPlanName#</option>
+                                                                        <option value="#qPlans.intPlanID#">#encodeForHTML(qPlans.strPlanName)#</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>
@@ -209,7 +209,7 @@
                                                                 <label class="form-check-label mb-2">... display only with these <b>modules</b>:</label>
                                                                 <select name="moduleList" class="form-select" multiple>
                                                                     <cfloop query="qModules">
-                                                                        <option value="#qModules.intModuleID#">#qModules.strModuleName#</option>
+                                                                        <option value="#qModules.intModuleID#">#encodeForHTML(qModules.strModuleName)#</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>

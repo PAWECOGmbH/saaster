@@ -57,7 +57,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/plans">Plans</a></li>
-                            <li class="breadcrumb-item active">#qPlan.strPlanName#</li>
+                            <li class="breadcrumb-item active">#encodeForHTML(qPlan.strPlanName)#</li>
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 text-end">
@@ -80,7 +80,7 @@
                         <div class="card-header" style="display: block;">
                             <div class="row mt-2">
                                 <div class="col-lg-6">
-                                    <h3 >Configure plan "#qPlan.strPlanName#" in group "#qPlan.strGroupName#"</h3>
+                                    <h3 >Configure plan "#encodeForHTML(qPlan.strPlanName)#" in group "#encodeForHTML(qPlan.strGroupName)#"</h3>
                                 </div>
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">

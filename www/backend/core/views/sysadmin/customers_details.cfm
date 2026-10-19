@@ -75,9 +75,9 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
                             <li class="breadcrumb-item active">
                                 <cfif len(trim(getCustomer.companyName))>
-                                    #getCustomer.companyName#
+                                    #encodeForHTML(getCustomer.companyName)#
                                 <cfelse>
-                                    #getCustomer.contactPerson# (Private)
+                                    #encodeForHTML(getCustomer.contactPerson)# (Private)
                                 </cfif>
                             </li>
                         </ol>
@@ -101,7 +101,7 @@
                             <div class="d-flex">
                                 <cfif len(trim(getCustomer.logo))>
                                     <div>
-                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomer.logo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#getCustomer.companyName#">
+                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomer.logo#" style="margin-right:20px" class="avatar avatar-xl mr-3 align-self-center" alt="#encodeForHTML(getCustomer.companyName)#">
                                     </div>
                                 <cfelse>
                                     <cfif len(trim(getCustomer.companyName))>
@@ -116,11 +116,11 @@
                                 </cfif>
                                 <cfif len(trim(getCustomer.companyName))>
                                     <div class="align-self-center">
-                                        <h2>#getCustomer.companyName#</h2>
+                                        <h2>#encodeForHTML(getCustomer.companyName)#</h2>
                                     </div>
                                 <cfelse>
                                     <div class="align-self-center">
-                                        <h2>#getCustomer.contactPerson# (Private)</h2>
+                                        <h2>#encodeForHTML(getCustomer.contactPerson)# (Private)</h2>
                                     </div>
                                 </cfif>
                             </div>
@@ -152,7 +152,7 @@
                                 </div>
                                 <div class="me-5 d-flex flex-column ps-3">
                                     <div>
-                                        #getCustomer.contactPerson#
+                                        #encodeForHTML(getCustomer.contactPerson)#
                                     </div>
                                     <div>
                                         #getCustomer.email#
@@ -202,21 +202,21 @@
                                                                 <tbody>
                                                                     <cfset counter = 1>
                                                                     <cfloop query="qUsers">
-                                                                        <form id="user_form_#counter#" method="post" action="#application.mainURL#/sysadm/customers">
+                                                                        <form id="user_form_#counter#" method="post" action="#application.mainURL#/sysadm/customers">#csrfField()#
                                                                             <input type="hidden" name="user_id" value="#qUsers.intUserID#">
                                                                             <input type="hidden" name="customer_id" value="#thisCustomerID#">
                                                                             <tr>
                                                                                 <td>
-                                                                                    <input class="form-control" name="salutation" value="#qUsers.strSalutation#">
+                                                                                    <input class="form-control" name="salutation" value="#encodeForHTML(qUsers.strSalutation)#">
                                                                                 </td>
                                                                                 <td>
-                                                                                    <input class="form-control" name="first_name" value="#qUsers.strFirstName#">
+                                                                                    <input class="form-control" name="first_name" value="#encodeForHTML(qUsers.strFirstName)#">
                                                                                 </td>
                                                                                 <td>
-                                                                                    <input class="form-control" name="last_name" value="#qUsers.strLastName#">
+                                                                                    <input class="form-control" name="last_name" value="#encodeForHTML(qUsers.strLastName)#">
                                                                                 </td>
                                                                                 <td>
-                                                                                    <input class="form-control" name="email" value="#qUsers.strEmail#">
+                                                                                    <input class="form-control" name="email" value="#encodeForHTML(qUsers.strEmail)#">
                                                                                 </td>
                                                                                 <td>
                                                                                     <div class="btn-list flex-nowrap">
@@ -652,7 +652,7 @@
 
 
 <cfoutput>
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="new_invoice" value="#thisCustomerID#">
     <div id="invoice_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">

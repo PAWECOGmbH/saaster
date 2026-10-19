@@ -66,18 +66,18 @@
                                                     <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strContactPerson,2)#</div>
                                                 </cfif>
                                             <cfelse>
-                                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
+                                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                             </cfif>
                                         </td>
                                         <td>
                                             <cfif len(trim(qTenants.strCompanyName))>
-                                                #qTenants.strCompanyName#
+                                                #encodeForHTML(qTenants.strCompanyName)#
                                             <cfelse>
-                                                #qTenants.strContactPerson# (#getTrans('formContactName')#)
+                                                #encodeForHTML(qTenants.strContactPerson)# (#getTrans('formContactName')#)
                                             </cfif>
-                                            <!--- #qTenants.strCompanyName# --->
+                                            <!--- #encodeForHTML(qTenants.strCompanyName)# --->
                                         </td>
-                                        <td>#qTenants.strContactPerson#</td>
+                                        <td>#encodeForHTML(qTenants.strContactPerson)#</td>
                                         <td class="text-center"><cfif qTenants.blnStandard><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                         <td class="text-center"><cfif qTenants.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                         <td class="text-end">
@@ -92,7 +92,7 @@
                                                         </cfif>
                                                             <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                         <cfif qTenants.intCustomerID neq session.customer_id>
-                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#&#csrfParam()#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                         </cfif>
                                                     </div>
                                                 </cfif>
@@ -171,11 +171,11 @@
                                         <cfif not len(trim(qTenants.strLogo))>
                                             <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strCompanyName,2)#</div>
                                         <cfelse>
-                                            <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
+                                            <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                         </cfif>
                                     </td>
-                                    <td>#qTenants.strCompanyName#</td>
-                                    <td>#qTenants.strContactPerson#</td>
+                                    <td>#encodeForHTML(qTenants.strCompanyName)#</td>
+                                    <td>#encodeForHTML(qTenants.strContactPerson)#</td>
                                     <td class="text-center"><cfif qTenants.blnStandard><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qTenants.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-end">
@@ -190,7 +190,7 @@
                                                     </cfif>
                                                         <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                     <cfif qTenants.intCustomerID neq session.customer_id>
-                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#&#csrfParam()#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                     </cfif>
                                                 </div>
                                             </cfif>

@@ -94,11 +94,11 @@
         </cfif>
         <div class="row">
             <div class="col-lg-12">
-                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
+                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">#csrfField()#
                     <input type="hidden" name="edit_profile_btn">
                     <input type="hidden" name="customerID" value="#session.customer_id#">
                     <input type="hidden" name="userID" value="#thisUserID#">
-                    <input type="hidden" name="language" value="#qCustomer.strLanguage#">
+                    <input type="hidden" name="language" value="#encodeForHTML(qCustomer.strLanguage)#">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titEditUser')#</h3>
                     </div>
@@ -202,7 +202,7 @@
                                                         </div>
                                                         <div class="form-selectgroup-label-content d-flex align-items-center">
                                                             <cfif len(trim(qTenants.strLogo))>
-                                                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" style="margin-right:20px" class="avatar me-3" alt="#qTenants.strCompanyName#">
+                                                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar me-3" alt="#encodeForHTML(qTenants.strCompanyName)#">
                                                             <cfelse>
                                                                 <cfif len(trim(qTenants.strCompanyName))>
                                                                     <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strCompanyName,2)#</div>
@@ -212,9 +212,9 @@
                                                             </cfif>
                                                             <div>
                                                                 <cfif len(trim(qTenants.strCompanyName))>
-                                                                    <div class="font-weight-medium">#qTenants.strCompanyName#</div>
+                                                                    <div class="font-weight-medium">#encodeForHTML(qTenants.strCompanyName)#</div>
                                                                 <cfelse>
-                                                                    <div class="font-weight-medium">#qTenants.strContactPerson# (#getTrans('formContactName')#)</div>
+                                                                    <div class="font-weight-medium">#encodeForHTML(qTenants.strContactPerson)# (#getTrans('formContactName')#)</div>
                                                                 </cfif>
                                                             </div>
                                                         </div>

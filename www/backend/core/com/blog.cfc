@@ -78,11 +78,14 @@ component displayname="blogposts" output="false" {
 
         local.qTotalPosts = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT COUNT(intBlogPostID) as totalPosts
                 FROM blog_posts
                 WHERE MATCH (strPreviewTitle, strPreviewText, strPostTitle, strPostIntro, strPostContent)
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
             "
         );
 
@@ -107,6 +110,9 @@ component displayname="blogposts" output="false" {
 
     public query function getPosts(required numeric start, required string sort){
 
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["dtmCreated ASC", "dtmCreated DESC", "dtmUpdated ASC", "dtmUpdated DESC", "strTitle ASC", "strTitle DESC"], "dtmCreated DESC");
+
         local.entries = 10;
 
         local.qPosts = queryExecute(
@@ -125,15 +131,21 @@ component displayname="blogposts" output="false" {
 
     public query function getPostsSearch(required string search, required numeric start, required string sort) {
 
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["dtmCreated ASC", "dtmCreated DESC", "dtmUpdated ASC", "dtmUpdated DESC", "strTitle ASC", "strTitle DESC"], "dtmCreated DESC");
+
         local.entries = 10;
 
         local.qTotalPosts = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT *
                 FROM blog_posts
                 WHERE MATCH (strPreviewTitle, strPreviewText, strPostTitle, strPostIntro, strPostContent)
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "

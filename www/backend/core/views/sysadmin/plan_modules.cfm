@@ -7,7 +7,7 @@
 </cfscript>
 
 <cfoutput>
-<form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">
+<form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">#csrfField()#
 <input type="hidden" name="plan_modules" value="#qPlan.intPlanID#">
     <cfif qModules.recordCount>
         <div class="row">
@@ -26,10 +26,10 @@
                                             <span class="form-selectgroup-check"></span>
                                         </div>
                                         <div class="form-selectgroup-label-content d-flex align-items-center">
-                                            <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#qModules.strPicture#)"></span>
+                                            <span class="avatar me-3" style="background-image: url(#application.mainURL#/userdata/images/modules/#encodeForHTML(qModules.strPicture)#)"></span>
                                             <div>
-                                                <div class="font-weight-medium">#qModules.strModuleName#</div>
-                                                <div class="text-muted">#qModules.strShortDescription#</div>
+                                                <div class="font-weight-medium">#encodeForHTML(qModules.strModuleName)#</div>
+                                                <div class="text-muted">#encodeForHTML(qModules.strShortDescription)#</div>
                                             </div>
                                         </div>
                                     </div>

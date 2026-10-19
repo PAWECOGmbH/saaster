@@ -8,7 +8,7 @@
             #getTrans('formSignIn')#
         </div>
 
-        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">
+        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">#csrfField()#
             <input type="hidden" name="login_btn">
             <div class="card-body">
                 <cfif structKeyExists(session, "alert")>
@@ -16,7 +16,7 @@
                 </cfif>
                 <div class="mb-3">
                     <label class="form-label">#getTrans('formEmailAddress')#</label>
-                    <input type="email" name="email" class="form-control" value="#session.email#" required <cfif not len(trim(session.email))>autofocus</cfif>>
+                    <input type="email" name="email" class="form-control" value="#encodeForHTML(session.email)#" required <cfif not len(trim(session.email))>autofocus</cfif>>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">#getTrans('formPassword')#</label>
