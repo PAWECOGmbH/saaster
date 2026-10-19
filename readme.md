@@ -125,6 +125,20 @@ After configuring Lucee and Saaster, you may want to create a custom Docker imag
 
 <br><br>
 
+## Testing
+Saaster comes with a [TestBox](https://www.ortussolutions.com/products/testbox) test workspace in ```www/tests```. The specs run inside your local Lucee container against a dedicated test database (```saaster_test_db```), never against your development database. With the dev stack running, set it up once from the repository root:
+```
+bash www/tests/bin/install_test_dependencies.sh
+bash www/tests/bin/prepare_test_db.sh
+```
+Then run the specs in the browser at ```http://localhost:8080/tests/runner.cfm``` or from the shell:
+```
+bash www/tests/bin/run_tests.sh "reporter=mintext"
+```
+The test application only starts when ```config.cfm``` is set to ```variables.environment = "dev"```. Details and how to write your own specs: [www/tests/README.md](www/tests/README.md)
+
+<br><br>
+
 ## Live Setup
 For production deployment, Saaster can be run on an Ubuntu server using Docker. This setup ensures a stable and scalable environment. A detailed guide on how to configure the server, set up Docker, and deploy Saaster in a live environment can be found in the official documentation:
 
@@ -162,7 +176,7 @@ We welcome contributions from developers to help improve Saaster. Whether it's f
 
 ### Guidelines
 + <b>Code style:</b> Follow the existing code style of the project.
-+ <b>Testing:</b> Ensure that your changes do not break any existing functionality. Add tests where applicable.
++ <b>Testing:</b> Ensure that your changes do not break any existing functionality. Run the test suite (see [Testing](#testing)) and add specs where applicable.
 + <b>Documentation:</b> If your changes affect functionality, please update the relevant documentation.
 
 For more information or if you're unsure about something, feel free to open an issue or ask for guidance on an existing one.

@@ -1,6 +1,5 @@
 ### Test files ###
 www/test.*
-/tests/payment-regression/
 
 ### Userdata folder ###
 www/userdata
