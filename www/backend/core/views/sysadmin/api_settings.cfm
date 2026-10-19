@@ -62,7 +62,7 @@
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            #qApiUser.strApiName#
+                                                            #encodeForHTML(qApiUser.strApiName)#
                                                         </td>
                                                         <td>
                                                             <cfset untilDate = LSDateTimeFormat( qApiUser.dtmValidUntil, "dd.mm.yyyy")>
@@ -88,7 +88,7 @@
 
         <div id="api_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                <form action="#application.mainURL#/sysadm/api-settings" method="post" style="width: 100%;">
+                <form action="#application.mainURL#/sysadm/api-settings" method="post" style="width: 100%;">#csrfField()#
                     <input type="hidden" name="new_api">
                     <div class="modal-content">
                         <div class="modal-header">

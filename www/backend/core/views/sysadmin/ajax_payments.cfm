@@ -15,7 +15,7 @@
 
 <cfoutput>
 
-<form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">
+<form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">#csrfField()#
     <input type="hidden" name="payments" value="#thisInvoiceID#">
     <div class="modal-header">
         <h5 class="modal-title">Payments</h5>
@@ -47,7 +47,7 @@
                 <cfloop query="qPayments">
                     <tr>
                         <td>#lsDateFormat(qPayments.dtmPayDate)#</td>
-                        <td>#qPayments.strPaymentType#</td>
+                        <td>#encodeForHTML(qPayments.strPaymentType)#</td>
                         <td class="text-end">#lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                         <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2 cursor-pointer"></i></td>
                     </tr>

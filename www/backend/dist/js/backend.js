@@ -1,4 +1,15 @@
 /**
+ * CSRF protection: send the session token (from the <meta name="csrf-token"> tag in head.cfm)
+ * as request header on every AJAX call that changes state (everything except GET/HEAD/OPTIONS).
+ */
+$(document).ajaxSend(function (event, xhr, settings) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    if (token && !/^(GET|HEAD|OPTIONS)$/i.test(settings.type || 'GET')) {
+        xhr.setRequestHeader('X-CSRF-Token', token);
+    }
+});
+
+/**
  * Displays a SweetAlert popup with dynamic content and button actions.
  *
  * @param {string} type - The type of alert ('warning', 'info', etc.).

@@ -70,7 +70,7 @@
 <cfsavecontent variable="invoiceData">
     <cfoutput>
     <head>
-        <title>#getInvoiceData.title#</title>
+        <title>#encodeForHTML(getInvoiceData.title)#</title>
     </head>
     <body style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
         <table width="100%" border="0">
@@ -95,7 +95,7 @@
             </tr>
             <tr>
                 <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px; font-size: 12px;">
-                    <b>#getInvoiceData.title#</b>
+                    <b>#encodeForHTML(getInvoiceData.title)#</b>
                 </td>
             </tr>
             <tr>
@@ -174,7 +174,7 @@
                             <cfloop query="qPayments">
                                 <tr>
                                     <td style="border-top: 1px solid; padding: 5px 0;"></td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                     <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                 </tr>
                             </cfloop>
@@ -199,7 +199,7 @@
     <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
         <tr>
             <td align="center">
-                <b>#sysAdminData.companyName#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
+                <b>#encodeForHTML(sysAdminData.companyName)#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
                 #getTrans('formEmailAddress')#: #sysAdminData.email# |
                 #getTrans('formPhone')#: #sysAdminData.phone# |
                 #getTrans('formWebsite')#: #sysAdminData.website#

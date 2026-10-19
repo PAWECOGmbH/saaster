@@ -66,14 +66,14 @@
                                             <cfloop query="qPlanFeatures">
                                                 <tr <cfif qPlanFeatures.recordCount gt 1>id="sort_#qPlanFeatures.intPlanFeatureID#"</cfif>>
                                                     <td class="move text-center"><cfif qPlanFeatures.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
-                                                    <td><cfif qPlanFeatures.blnCategory eq 1><span class="h3">#qPlanFeatures.strFeatureName#</span><cfelse>#qPlanFeatures.strFeatureName#</cfif>  <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featurename_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate feature"></i></a></td>
-                                                    <td><cfif len(qPlanFeatures.strDescription) gt 80>#left(qPlanFeatures.strDescription, 76)# ...<cfelse>#qPlanFeatures.strDescription#</cfif> <cfif len(qPlanFeatures.strDescription)><a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featuredesc_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></cfif></td>
+                                                    <td><cfif qPlanFeatures.blnCategory eq 1><span class="h3">#encodeForHTML(qPlanFeatures.strFeatureName)#</span><cfelse>#encodeForHTML(qPlanFeatures.strFeatureName)#</cfif>  <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featurename_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate feature"></i></a></td>
+                                                    <td><cfif len(qPlanFeatures.strDescription) gt 80>#encodeForHTML(left(qPlanFeatures.strDescription, 76))# ...<cfelse>#encodeForHTML(qPlanFeatures.strDescription)#</cfif> <cfif len(qPlanFeatures.strDescription)><a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featuredesc_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></cfif></td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##feature_#qPlanFeatures.intPlanFeatureID#">Edit</a></td>
-                                                    <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_feature=#qPlanFeatures.intPlanFeatureID#', 'Delete feature', 'Do you really want to delete this feature irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_feature=#qPlanFeatures.intPlanFeatureID#&#csrfParam()#', 'Delete feature', 'Do you really want to delete this feature irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
                                                 <div id="feature_#qPlanFeatures.intPlanFeatureID#" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                                                        <form action="#application.mainURL#/sysadm/plans" method="post">
+                                                        <form action="#application.mainURL#/sysadm/plans" method="post">#csrfField()#
                                                         <input type="hidden" name="edit_feature" value="#qPlanFeatures.intPlanFeatureID#">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
@@ -87,7 +87,7 @@
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Description</label>
-                                                                        <textarea class="form-control" name="description" rows="3">#qPlanFeatures.strDescription#</textarea>
+                                                                        <textarea class="form-control" name="description" rows="3">#encodeForHTML(qPlanFeatures.strDescription)#</textarea>
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Category</label>
@@ -155,7 +155,7 @@
                                 </cfif>
 
                                 <!--- Modal for new group --->
-                                <form action="#application.mainURL#/sysadm/plans" method="post">
+                                <form action="#application.mainURL#/sysadm/plans" method="post">#csrfField()#
                                 <div id="feature_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                                         <input type="hidden" name="new_feature">

@@ -1126,4 +1126,68 @@ component displayname="globalFunctions" output="false" {
 
     }
 
+
+
+    // Returns the sort value only if it is in the list of allowed ORDER BY expressions, otherwise the default
+    public string function safeOrderBy(required string sort, required array allowed, required string defaultSort) {
+
+        for (local.item in arguments.allowed) {
+            if (compareNoCase(trim(arguments.sort), local.item) eq 0) {
+                return local.item;
+            }
+        }
+
+        return arguments.defaultSort;
+
+    }
+
+
+    // CSRF: token for the current session
+    public string function csrfToken() {
+
+        return CSRFGenerateToken();
+
+    }
+
+
+    // CSRF: hidden input field for forms
+    public string function csrfField() {
+
+        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '">';
+
+    }
+
+
+    // CSRF: url parameter for links that change state (e.g. delete links)
+    public string function csrfParam() {
+
+        return 'csrf_token=' & CSRFGenerateToken();
+
+    }
+
+
+    // CSRF: verifies the token sent via form field, url parameter or request header
+    public boolean function csrfVerify() {
+
+        local.token = "";
+
+        if (structKeyExists(form, "csrf_token") and len(trim(form.csrf_token))) {
+            local.token = form.csrf_token;
+        } else if (structKeyExists(url, "csrf_token") and len(trim(url.csrf_token))) {
+            local.token = url.csrf_token;
+        } else {
+            local.headers = getHTTPRequestData(false).headers;
+            if (structKeyExists(local.headers, "X-CSRF-Token") and len(trim(local.headers["X-CSRF-Token"]))) {
+                local.token = local.headers["X-CSRF-Token"];
+            }
+        }
+
+        if (!len(local.token)) {
+            return false;
+        }
+
+        return CSRFVerifyToken(local.token);
+
+    }
+
 }

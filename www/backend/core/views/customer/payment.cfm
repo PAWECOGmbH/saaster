@@ -89,8 +89,8 @@
                                             <img src="/assets/img/payments/card_#lcase(replace(getWebhook.strPaymentBrand,' ', '-', 'all'))#.svg" class="avatar-lg">
                                         </div>
                                         <div class="col-lg-2 mb-3">
-                                            <div class="font-weight-medium">#getWebhook.strPaymentBrand#</div>
-                                            <div class="text-muted">#getWebhook.strCardNumber#</div>
+                                            <div class="font-weight-medium">#encodeForHTML(getWebhook.strPaymentBrand)#</div>
+                                            <div class="text-muted">#encodeForHTML(getWebhook.strCardNumber)#</div>
                                         </div>
                                         <div class="col-lg-3 mb-3">
                                             <label class="form-check form-switch">

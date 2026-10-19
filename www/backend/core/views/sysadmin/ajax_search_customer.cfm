@@ -8,7 +8,7 @@
 <div class="mt-2">
     <cfoutput query="qCustomer">
         <div class="bg-azure-lt py-2 ps-2 mb-1 cursor-pointer">
-            <a onclick="intoTf('#qCustomer.customerName#, #qCustomer.strZIP# #qCustomer.strCity#', #qCustomer.intCustomerID#), hideResult();">#qCustomer.customerName#, #qCustomer.strZIP# #qCustomer.strCity#</a>
+            <a onclick="intoTf('#encodeForJavaScript(qCustomer.customerName & ', ' & qCustomer.strZIP & ' ' & qCustomer.strCity)#', #int(qCustomer.intCustomerID)#), hideResult();">#encodeForHTML(qCustomer.customerName)#, #encodeForHTML(qCustomer.strZIP)# #encodeForHTML(qCustomer.strCity)#</a>
         </div>
     </cfoutput>
 </div>

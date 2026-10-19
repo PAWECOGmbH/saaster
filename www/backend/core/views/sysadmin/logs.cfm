@@ -56,7 +56,7 @@
             <div class="row">
                 <div class="col-lg-12 mb-3">
                     <div class="card">
-                        <form action="#application.mainURL#/sysadmin/logs" method="post">
+                        <form action="#application.mainURL#/sysadmin/logs" method="post">#csrfField()#
                             <div class="col-lg-12 p-3">
                                 <p class="text-info">Note: The log files will be deleted automatically after 30 days!</p>
                                 <div class="row">
@@ -106,7 +106,7 @@
                                             <th width="5%"></th>
                                         </tr>
                                     </thead>
-                                    <form action="#application.mainURL#/sysadm/logs" method="post">
+                                    <form action="#application.mainURL#/sysadm/logs" method="post">#csrfField()#
                                         <input type="hidden" name="del_logs">
                                         <tbody>
                                             <cfloop query="qLogfiles">

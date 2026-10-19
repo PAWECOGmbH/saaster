@@ -27,6 +27,42 @@ if (structKeyExists(form, "edit_profile_btn")) {
     if (structKeyExists(form, "customerID")) {
         thisCustomerID = form.customerID;
     }
+
+    // IDs coming from the form must not be trusted: the acting user needs access to the
+    // tenant, and the user being edited must belong to that tenant (sysadmins are exempt)
+    if (!(structKeyExists(session, "sysadmin") and session.sysadmin)) {
+
+        accessDenied = false;
+
+        if (!isNumeric(thisUserID) or !isNumeric(thisCustomerID)) {
+            accessDenied = true;
+        } else if (!application.objGlobal.checkTenantRange(session.user_id, thisCustomerID)) {
+            accessDenied = true;
+        } else if (thisUserID neq session.user_id) {
+            if (!(structKeyExists(session, "admin") and session.admin) or !application.objGlobal.checkTenantRange(thisUserID, thisCustomerID)) {
+                accessDenied = true;
+            }
+        }
+
+        if (accessDenied) {
+            getAlert('msgNoAccess', 'danger');
+            logWrite("user", "warning", "User edit: tried to edit a user outside the own tenant range [CustomerID: #session.customer_id#, UserID: #session.user_id#, target UserID: #thisUserID#, target CustomerID: #thisCustomerID#]");
+            location url="#application.mainURL#/account-settings/users" addtoken="false";
+        }
+
+        // Only tenants the acting user has access to may be assigned
+        if (len(trim(form.tenantID))) {
+            allowedTenants = "";
+            for (tenantToCheck in listToArray(form.tenantID)) {
+                if (isNumeric(tenantToCheck) and application.objGlobal.checkTenantRange(session.user_id, tenantToCheck)) {
+                    allowedTenants = listAppend(allowedTenants, tenantToCheck);
+                }
+            }
+            form.tenantID = allowedTenants;
+        }
+
+    }
+
     if (form.admin eq 1 or form.admin eq "on") {
         form.admin = 1;
     } else {

@@ -40,9 +40,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qTotalInvoices = objSysadmin.getTotalInvoicesSearch(searchString, searchTerm, invoice_start, session.status_sql, session.i_sort);
@@ -110,7 +110,7 @@
                             <h3 class="card-title">Invoices overview #searchTerm#</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">
+                            <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">#csrfField()#
                                 <div class="row">
                                     <div class="col-lg-8">
                                         <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
@@ -219,9 +219,9 @@
                                                 <td>#qInvoices.invoiceNumber#</td>
                                                 <td>#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
-                                                <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#left(qInvoices.strInvoiceTitle, 25)# ...<cfelse>#qInvoices.strInvoiceTitle#</cfif></td>
-                                                <td><cfif len(qInvoices.customerName) gt 25>#left(qInvoices.customerName, 25)# ...<cfelse>#qInvoices.customerName#</cfif></td>
-                                                <td>#qInvoices.strCurrency#</td>
+                                                <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#encodeForHTML(left(qInvoices.strInvoiceTitle, 25))# ...<cfelse>#encodeForHTML(qInvoices.strInvoiceTitle)#</cfif></td>
+                                                <td><cfif len(qInvoices.customerName) gt 25>#left(qInvoices.customerName, 25)# ...<cfelse>#encodeForHTML(qInvoices.customerName)#</cfif></td>
+                                                <td>#encodeForHTML(qInvoices.strCurrency)#</td>
                                                 <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
                                                 <td class="text-end">
                                                     <div class="btn-list flex-nowrap float-end">
@@ -325,7 +325,7 @@
 
 
 <cfoutput>
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="new_invoice" id="customer_id">
     <div id="invoice_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">

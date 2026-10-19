@@ -54,7 +54,7 @@
                     <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                         <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
                         <div class="d-none d-xl-block ps-2 newclass">
-                            <div>#session.user_name#</div>
+                            <div>#encodeForHTML(session.user_name)#</div>
                         </div>
                     </a>
 
