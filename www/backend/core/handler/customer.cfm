@@ -358,6 +358,9 @@ if (structKeyExists(url, "sysadmin")) {
 
         if (qCustomer.recordCount) {
 
+            // Switching the logged-in user gets a new session ID (protection against session fixation)
+            sessionRotate();
+
             // Overwrite session data
             session.user_id = qCustomer.intUserID;
             session.customer_id = qCustomer.intCustomerID;

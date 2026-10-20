@@ -352,6 +352,63 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    /*
+        Password hashing with Argon2id (OWASP recommendation: 19 MiB memory, 2 iterations,
+        1 lane). The result is a self-describing string ("$argon2id$v=19$m=19456,t=2,p=1$salt$hash")
+        stored in users.strPasswordHash; strPasswordSalt stays empty for these hashes.
+
+        generateHash() above is NOT for passwords any more - it stays for API keys, which
+        are long random values where a fast hash is fine.
+    */
+    variables.argon2Params = { variant: "argon2id", parallelism: 1, memoryKB: 19456, iterations: 2 };
+
+    public string function hashPassword(required string password) {
+        return GenerateArgon2Hash(
+            arguments.password,
+            variables.argon2Params.variant,
+            variables.argon2Params.parallelism,
+            variables.argon2Params.memoryKB,
+            variables.argon2Params.iterations
+        );
+    }
+
+    /*
+        Checks a password against the stored hash. Understands both Argon2 hashes and the
+        legacy format (hex SHA-512 of password & salt). "needsRehash" is true when the
+        password was correct but the hash is legacy or uses weaker parameters - the caller
+        should then store hashPassword(password), so every user is migrated on the next login.
+    */
+    public struct function verifyPassword(required string password, required string storedHash, string storedSalt = "") {
+
+        local.result = { valid: false, needsRehash: false };
+
+        if (!len(arguments.storedHash)) {
+            return local.result;
+        }
+
+        if (left(arguments.storedHash, 7) eq "$argon2") {
+            try {
+                local.result.valid = Argon2CheckHash(arguments.password, arguments.storedHash);
+            } catch (any e) {
+                local.result.valid = false;
+            }
+            local.result.needsRehash = local.result.valid and !findNoCase(
+                "$#variables.argon2Params.variant#$v=19$m=#variables.argon2Params.memoryKB#,t=#variables.argon2Params.iterations#,p=#variables.argon2Params.parallelism#$",
+                arguments.storedHash
+            );
+            return local.result;
+        }
+
+        // Legacy: SHA-512 with salt
+        if (len(arguments.storedSalt)) {
+            local.result.valid = compare(lCase(arguments.storedHash), lCase(hash(arguments.password & arguments.storedSalt, "SHA-512"))) eq 0;
+            local.result.needsRehash = local.result.valid;
+        }
+
+        return local.result;
+    }
+
+
     // Email validating
     public boolean function checkEmail(thisEmail) {
 
@@ -579,14 +636,24 @@ component displayname="globalFunctions" output="false" {
                 local.nameConflict = "overwrite";
             }
 
-            // Upload the file now
+            /*
+                Security: the upload first lands in a private temporary folder outside the
+                webroot. Only after the extension and size checks passed is it moved into
+                the target folder (usually below /userdata, which the web server serves).
+                A forbidden file - e.g. a .cfm - is therefore never reachable by URL, not
+                even for the moment between upload and check.
+            */
+            local.tempDir = getTempDirectory() & "saaster-uploads/" & createUUID();
+
             try {
+                directoryCreate(local.tempDir, true);
                 local.uploadedFile = fileUpload(
                     fileField = local.fileNameOrig,
-                    destination = local.filePath,
-                    nameConflict = local.nameConflict
+                    destination = local.tempDir,
+                    nameConflict = "makeunique"
                 )
             } catch (e) {
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = e.message;
                 return local.argsReturnValue;
             }
@@ -597,43 +664,47 @@ component displayname="globalFunctions" output="false" {
             // Get the file name
             local.originalFileName = local.uploadedFile.clientfilename;
 
-            // Get the file name with extension
-            local.originalFileNameExt = local.uploadedFile.serverfile;
-
-            // Get the path of the file
-            local.originalFilePath = local.uploadedFile.serverdirectory;
-
             // Get the file extension
             local.originalFileExt = local.uploadedFile.serverFileExt;
 
-            // Get file path and name with extension
-            local.originalFile = local.originalFilePath & "/" & local.originalFileNameExt;
+            // The uploaded file inside the temporary folder
+            local.tempFile = local.uploadedFile.serverdirectory & "/" & local.uploadedFile.serverfile;
 
             // Get the size of the file
             local.fileSizeInKB = local.uploadedFile.filesize/1000;
 
-            // Is it an image?
-            if (IsImageFile(local.originalFile)) {
-                local.isImage = true;
-            }
-
-            // Security (only file ext. configured in config.cfm)
+            // Security (only the allowed file extensions)
             if (not listFindNoCase(local.allowedFileTypesList, local.originalFileExt)) {
-                if (fileExists(local.originalFile)) {
-                    FileDelete(local.originalFile);
-                }
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = 'msgFileExtForbidden';
                 return local.argsReturnValue;
             }
 
             // File too large? If yes, delete it and send message
             if (len(trim(local.maxSize)) and local.maxSize lt local.fileSizeInKB) {
-                if (fileExists(local.originalFile)) {
-                    FileDelete(local.originalFile);
-                }
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = 'msgFileTooLarge';
                 return local.argsReturnValue;
             }
+
+            // Is it an image?
+            if (IsImageFile(local.tempFile)) {
+                local.isImage = true;
+            }
+
+            // Checks passed: move the file into the target folder under a neutral uuid name
+            local.originalFilePath = local.filePath;
+            local.originalFile = local.filePath & "/" & local.fileUUID;
+
+            try {
+                fileMove(local.tempFile, local.originalFile);
+            } catch (e) {
+                removeUploadTempDir(local.tempDir);
+                local.argsReturnValue['message'] = e.message;
+                return local.argsReturnValue;
+            }
+
+            removeUploadTempDir(local.tempDir);
 
             // If fileName is defined, the developer is responsible for the correct file name
             if (len(trim(local.fileName))) {
@@ -651,8 +722,7 @@ component displayname="globalFunctions" output="false" {
             // Otherwise we will change the filename using a beautifier
             } else {
 
-                // Rename the file into the uuid
-                cffile(action="rename", source=local.originalFile, destination=local.originalFilePath & "/" & local.fileUUID);
+                // The file already carries the uuid name (see the move above)
 
                 // We beautify the file name so that all systems can read it
                 local.beautifiedString = beautifyString(local.originalFileName);
@@ -753,6 +823,18 @@ component displayname="globalFunctions" output="false" {
 
 
     // Check if a file exists
+    // Removes the private temporary folder of an upload (see uploadFile), whatever is left in it.
+    private void function removeUploadTempDir(required string tempDir) {
+        try {
+            if (directoryExists(arguments.tempDir)) {
+                directoryDelete(arguments.tempDir, true);
+            }
+        } catch (any e) {
+            // A leftover temp folder is harmless; it is outside the webroot.
+        }
+    }
+
+
     private boolean function checkFileExists(required string filePath) {
 
         loop from=1 to=100000 index="local.i" {

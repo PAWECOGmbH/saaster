@@ -13,11 +13,27 @@ if (structKeyExists(form, 'login_btn')) {
     param name="form.email" default="";
     param name="form.password" default="";
 
+    // Too many failed attempts for this address or IP? Then refuse before checking the password.
+    loginThrottle = new backend.core.com.loginthrottle();
+    clientIP = loginThrottle.clientIP();
+
+    if (loginThrottle.isBlocked(form.email, clientIP)) {
+        getAlert('msgTooManyLoginAttempts', 'warning');
+        logWrite("user", "warning", "Login refused, too many failed attempts [E-mail: #form.email#, IP: #clientIP#]");
+        location url="#local.urlLogin#" addtoken="false";
+    }
+
     objUserLogin = new frontend.core.com.login().checkLogin(argumentCollection = form);
 
     if (isStruct(objUserLogin)) {
 
         if (objUserLogin.loginCorrect) {
+
+            // New session ID after a successful login (protection against session fixation)
+            sessionRotate();
+
+            // The address may try again freely
+            loginThrottle.reset(form.email);
 
             session.user_id = objUserLogin.user_id;
             session.customer_id = objUserLogin.customer_id;
@@ -85,6 +101,9 @@ if (structKeyExists(form, 'login_btn')) {
 
 
         } else {
+
+            // Count the failed attempt (wrong password, unknown address or disabled account)
+            loginThrottle.registerFailure(form.email, clientIP);
 
             // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
@@ -345,10 +364,10 @@ if (structKeyExists(form, 'create_account')) {
 
             customerStruct = QueryRowData(qCheckOptin, 1);
 
-            // Hash and salt the password
-            hashedStruct = application.objGlobal.generateHash(form.password);
-            StructInsert(customerStruct, "hash", hashedStruct.thisHash);
-            StructInsert(customerStruct, "salt", hashedStruct.thisSalt);
+            // Hash the password (Argon2id, the salt is part of the hash string)
+            passwordHash = application.objGlobal.hashPassword(form.password);
+            StructInsert(customerStruct, "hash", passwordHash);
+            StructInsert(customerStruct, "salt", "");
 
             // Save the customer into the db
             insertCustomer = objRegister.insertCustomer(customerStruct);
@@ -710,6 +729,9 @@ if (structKeyExists(form, 'mfa_btn')) {
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
 
     if (checkMfa.success eq true) {
+
+        // New session ID once the second factor is confirmed (protection against session fixation)
+        sessionRotate();
 
         session.user_id = checkMfa.userID;
         session.customer_id = checkMfa.customerID;

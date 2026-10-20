@@ -228,10 +228,10 @@
                 location url="#application.mainURL#/sysadmin/customers" addtoken="false";
             }
 
-            // Hash and salt the password
-            hashedStruct = application.objGlobal.generateHash(form.password);
-            customerStruct['hash'] = hashedStruct.thisHash;
-            customerStruct['salt'] = hashedStruct.thisSalt;
+            // Hash the password (Argon2id, the salt is part of the hash string)
+            passwordHash = application.objGlobal.hashPassword(form.password);
+            customerStruct['hash'] = passwordHash;
+            customerStruct['salt'] = "";
 
             // Save the customer into the db
             objRegister = new frontend.core.com.register();
@@ -324,6 +324,9 @@
             );
 
             if (qCustomer.recordCount) {
+
+                // Switching the logged-in user gets a new session ID (protection against session fixation)
+                sessionRotate();
 
                 // Overwrite session data
                 session.user_id = qCustomer.intUserID;

@@ -73,15 +73,17 @@ component output="false" hint="Creates test data and removes it again." {
         boolean active = true,
         boolean admin = false,
         boolean superAdmin = false,
-        boolean sysAdmin = false
+        boolean sysAdmin = false,
+        string passwordHash = "",
+        string passwordSalt = ""
     ) {
         var userEmail = len(trim(arguments.email)) ? trim(arguments.email) : uniqueEmail("user");
 
         queryExecute(
             "INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strFirstName, strLastName, strEmail, strLanguage,
-                                blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID)
+                                blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, strPasswordHash, strPasswordSalt)
              VALUES (:customerID, UTC_TIMESTAMP(), UTC_TIMESTAMP(), :firstName, :lastName, :email, :language,
-                     :active, :admin, :superAdmin, :sysAdmin, :uuid)",
+                     :active, :admin, :superAdmin, :sysAdmin, :uuid, :passwordHash, :passwordSalt)",
             {
                 customerID: { type: "numeric", value: arguments.customerID },
                 firstName: { type: "varchar", value: arguments.firstName },
@@ -92,7 +94,9 @@ component output="false" hint="Creates test data and removes it again." {
                 admin: { type: "bit", value: arguments.admin or arguments.superAdmin },
                 superAdmin: { type: "bit", value: arguments.superAdmin },
                 sysAdmin: { type: "bit", value: arguments.sysAdmin },
-                uuid: { type: "varchar", value: createUUID() }
+                uuid: { type: "varchar", value: createUUID() },
+                passwordHash: { type: "varchar", value: arguments.passwordHash },
+                passwordSalt: { type: "varchar", value: arguments.passwordSalt }
             },
             { datasource: application.datasource, result: "local.insertResult" }
         );

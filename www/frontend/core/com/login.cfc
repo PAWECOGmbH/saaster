@@ -36,7 +36,26 @@ component displayname="login" output="false" {
 
         if (local.qCheckLogin.recordCount) {
 
-            if (local.qCheckLogin.strPasswordHash eq hash(arguments.password & local.qCheckLogin.strPasswordSalt, 'SHA-512')) {
+            local.passwordCheck = application.objGlobal.verifyPassword(arguments.password, local.qCheckLogin.strPasswordHash, local.qCheckLogin.strPasswordSalt);
+
+            // Migrate legacy (SHA-512) or weaker hashes to the current Argon2id settings on a successful login
+            if (local.passwordCheck.valid and local.passwordCheck.needsRehash) {
+                queryExecute(
+                    options = {datasource = application.datasource},
+                    params = {
+                        userID: {type: "numeric", value: local.qCheckLogin.intUserID},
+                        passwordHash: {type: "nvarchar", value: application.objGlobal.hashPassword(arguments.password)}
+                    },
+                    sql = "
+                        UPDATE users
+                        SET strPasswordHash = :passwordHash,
+                            strPasswordSalt = ''
+                        WHERE intUserID = :userID
+                    "
+                )
+            }
+
+            if (local.passwordCheck.valid) {
 
                 if (local.qCheckLogin.blnActive and local.qCheckLogin.tenant_active) {
 
@@ -131,6 +150,10 @@ component displayname="login" output="false" {
             }
 
         }else {
+
+            // Unknown e-mail: still spend the time of a real password check, so the response
+            // time does not reveal which addresses are registered.
+            application.objGlobal.hashPassword(arguments.password);
 
             local.returnStruct['redirect'] = "#application.mainURL#/login";
 

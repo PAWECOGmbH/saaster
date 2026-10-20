@@ -28,57 +28,52 @@ if (structKeyExists(form, "edit_profile_btn")) {
         thisCustomerID = form.customerID;
     }
 
-    // IDs coming from the form must not be trusted: the acting user needs access to the
-    // tenant, and the user being edited must belong to that tenant (sysadmins are exempt)
-    if (!(structKeyExists(session, "sysadmin") and session.sysadmin)) {
+    // IDs and roles coming from the form must not be trusted. The rules live in user.cfc
+    // (canEditUser, allowedRoles) and mirror the user forms; sysadmins are exempt from
+    // the tenant checks.
+    actor = application.objUser.actorFromSession();
+    accessDenied = !isNumeric(thisUserID) or !isNumeric(thisCustomerID);
+    isSelf = !accessDenied and thisUserID eq session.user_id;
+    targetFacts = accessDenied ? { exists: false } : application.objUser.getRoleFacts(thisUserID);
 
-        accessDenied = false;
+    if (!targetFacts.exists) {
+        accessDenied = true;
+    } else if (!actor.sysadmin) {
+        if (!application.objGlobal.checkTenantRange(session.user_id, thisCustomerID)) {
+            accessDenied = true;
+        } else if (!isSelf) {
+            targetFacts.inTenantRange = application.objGlobal.checkTenantRange(thisUserID, thisCustomerID);
+            accessDenied = !application.objUser.canEditUser(actor, targetFacts);
+        }
+    }
 
-        if (!isNumeric(thisUserID) or !isNumeric(thisCustomerID)) {
-            accessDenied = true;
-        } else if (!application.objGlobal.checkTenantRange(session.user_id, thisCustomerID)) {
-            accessDenied = true;
-        } else if (thisUserID neq session.user_id) {
-            if (!(structKeyExists(session, "admin") and session.admin) or !application.objGlobal.checkTenantRange(thisUserID, thisCustomerID)) {
-                accessDenied = true;
+    if (accessDenied) {
+        getAlert('msgNoAccess', 'danger');
+        logWrite("user", "warning", "User edit: access denied [CustomerID: #session.customer_id#, UserID: #session.user_id#, target UserID: #thisUserID#, target CustomerID: #thisCustomerID#]");
+        location url="#application.mainURL#/account-settings/users" addtoken="false";
+    }
+
+    // Only tenants the acting user has access to may be assigned
+    if (!actor.sysadmin and len(trim(form.tenantID))) {
+        allowedTenants = "";
+        for (tenantToCheck in listToArray(form.tenantID)) {
+            if (isNumeric(tenantToCheck) and application.objGlobal.checkTenantRange(session.user_id, tenantToCheck)) {
+                allowedTenants = listAppend(allowedTenants, tenantToCheck);
             }
         }
-
-        if (accessDenied) {
-            getAlert('msgNoAccess', 'danger');
-            logWrite("user", "warning", "User edit: tried to edit a user outside the own tenant range [CustomerID: #session.customer_id#, UserID: #session.user_id#, target UserID: #thisUserID#, target CustomerID: #thisCustomerID#]");
-            location url="#application.mainURL#/account-settings/users" addtoken="false";
-        }
-
-        // Only tenants the acting user has access to may be assigned
-        if (len(trim(form.tenantID))) {
-            allowedTenants = "";
-            for (tenantToCheck in listToArray(form.tenantID)) {
-                if (isNumeric(tenantToCheck) and application.objGlobal.checkTenantRange(session.user_id, tenantToCheck)) {
-                    allowedTenants = listAppend(allowedTenants, tenantToCheck);
-                }
-            }
-            form.tenantID = allowedTenants;
-        }
-
+        form.tenantID = allowedTenants;
     }
 
-    if (form.admin eq 1 or form.admin eq "on") {
-        form.admin = 1;
-    } else {
-        form.admin = 0;
-    }
-    if (form.superadmin eq 1 or form.superadmin eq "on") {
-        form.superadmin = 1;
-        form.admin = 1;
-    } else {
-        form.superadmin = 0;
-    }
-    if (form.active eq 1 or form.active eq "on") {
-        form.active = 1;
-    } else {
-        form.active = 0;
-    }
+    // Roles the actor may not change keep their current value; nobody changes the own roles
+    roles = application.objUser.allowedRoles(
+        actor = actor,
+        requested = { admin: form.admin, superadmin: form.superadmin, active: form.active },
+        current = targetFacts,
+        isSelf = isSelf
+    );
+    form.admin = roles.admin ? 1 : 0;
+    form.superadmin = roles.superadmin ? 1 : 0;
+    form.active = roles.active ? 1 : 0;
 
     if (form.mfa eq 1 or form.mfa eq "on") {
         form.mfa = 1;
@@ -165,26 +160,24 @@ if (structKeyExists(form, "user_new_btn")) {
     param name="form.active" default="0";
     param name="form.language" default=session.lng;
 
-    if (form.admin eq 1 or form.admin eq "on") {
-        form.admin = 1;
-    } else {
-        form.admin = 0;
+    // Only admins create users, and only roles the actor holds can be granted
+    // (rules in user.cfc: canCreateUser, allowedRoles).
+    actor = application.objUser.actorFromSession();
+
+    if (!application.objUser.canCreateUser(actor)) {
+        getAlert('msgNoAccess', 'danger');
+        logWrite("user", "warning", "User new: access denied, no admin rights [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+        location url="#application.mainURL#/dashboard" addtoken="false";
     }
-    if (form.superadmin eq 1 or form.superadmin eq "on") {
-        form.superadmin = 1;
-    } else {
-        form.superadmin = 0;
-    }
-    if (form.active eq 1 or form.active eq "on") {
-        form.active = 1;
-    } else {
-        form.active = 0;
-    }
-    if (form.sysadmin eq 1 or form.sysadmin eq "on") {
-        form.sysadmin = 1;
-    } else {
-        form.sysadmin = 0;
-    }
+
+    roles = application.objUser.allowedRoles(
+        actor = actor,
+        requested = { admin: form.admin, superadmin: form.superadmin, sysadmin: form.sysadmin, active: form.active }
+    );
+    form.admin = roles.admin ? 1 : 0;
+    form.superadmin = roles.superadmin ? 1 : 0;
+    form.sysadmin = roles.sysadmin ? 1 : 0;
+    form.active = roles.active ? 1 : 0;
 
     session.salutation = form.salutation;
     session.first_name = form.first_name;
