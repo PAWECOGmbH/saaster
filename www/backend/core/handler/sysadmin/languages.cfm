@@ -16,6 +16,17 @@ if (structKeyExists(form, "modal_lng")) {
     table = form.table;
     key = form.key;
 
+    // Table and column names cannot be bound as SQL parameters - only names that really exist pass
+    if (!application.objGlobal.isKnownColumn(table, field) or !application.objGlobal.isKnownColumn(table, key) or !application.objGlobal.isKnownColumn(table, "intLanguageID")) {
+        getAlert('Unknown table or field.', 'danger');
+        location url="#application.mainURL#/sysadmin/languages" addtoken="false";
+    }
+
+    // Only paths of this application as target of the redirect
+    if (left(referer, 1) neq "/" or left(referer, 2) eq "//") {
+        referer = "/sysadmin/languages";
+    }
+
     try {
 
         loop list=form.fieldnames index="i" {
@@ -164,6 +175,12 @@ if (structKeyExists(form, "new_language")) {
     param name="form.lng_en" default="";
     param name="form.lng_own" default="";
     param name="form.iso" default="";
+
+    // The ISO code becomes part of a column name (strString<ISO>) - only two letters are allowed
+    if (!reFind("^[A-Za-z]{2}$", form.iso)) {
+        getAlert('The ISO code must consist of exactly two letters.', 'warning');
+        location url="#application.mainURL#/sysadmin/languages" addtoken="false";
+    }
 
     chooseable = structKeyExists(form, "chooseable") ? 1 : 0;
 

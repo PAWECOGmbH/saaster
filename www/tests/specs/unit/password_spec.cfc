@@ -84,6 +84,26 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        describe("isValidPassword (password policy)", () => {
+
+            it("requires at least 8 characters", () => {
+                expect(globalObj.passwordMinLength()).toBe(8);
+                expect(globalObj.isValidPassword("1234567")).toBeFalse();
+                expect(globalObj.isValidPassword("12345678")).toBeTrue();
+            });
+
+            it("rejects an empty or blank password", () => {
+                expect(globalObj.isValidPassword("")).toBeFalse();
+                expect(globalObj.isValidPassword("          ")).toBeFalse();
+            });
+
+            it("rejects absurdly long input", () => {
+                expect(globalObj.isValidPassword(repeatString("x", 256))).toBeTrue();
+                expect(globalObj.isValidPassword(repeatString("x", 257))).toBeFalse();
+            });
+
+        });
+
         describe("verifyPassword without a password", () => {
 
             // Invited users have no password yet - nobody may log in as them.

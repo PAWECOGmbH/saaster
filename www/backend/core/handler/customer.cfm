@@ -343,16 +343,20 @@ if (structKeyExists(url, "change_tenant")) {
 // Get back to the sysadmin view
 if (structKeyExists(url, "sysadmin")) {
 
-    if (structKeyExists(session, "supportLogin") and session.supportLogin) {
+    if (structKeyExists(session, "supportLogin") and session.supportLogin and structKeyExists(session, "supportOriginUserID")) {
 
-        // Get sysadmin data
+        // Back to the sysadmin who started the support login - and only if that user still is an active sysadmin
         qCustomer = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: session.supportOriginUserID}
+            },
             sql = "
                 SELECT *
                 FROM users
-                WHERE blnSysAdmin = 1
-                LIMIT 1
+                WHERE intUserID = :userID
+                AND blnSysAdmin = 1
+                AND blnActive = 1
             "
         );
 
@@ -371,6 +375,7 @@ if (structKeyExists(url, "sysadmin")) {
             session.superadmin = 1;
             session.sysadmin = 1;
             session.supportLogin = 0;
+            structDelete(session, "supportOriginUserID");
 
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);

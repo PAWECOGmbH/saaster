@@ -139,6 +139,12 @@ if (structKeyExists(form, "bulk_translate")) {
     param name="form.fromLang" default=0;
     param name="form.toLang" default=0;
 
+    // The language codes become part of column names (strString<ISO>) - only two letters are allowed
+    if (!reFind("^[A-Za-z]{2}$", form.fromLang) or !reFind("^[A-Za-z]{2}$", form.toLang)) {
+        form.fromLang = 0;
+        form.toLang = 0;
+    }
+
     param name="form.transSys" default=0;
     param name="form.transCus" default=0;
     /* param name="form.transTables" default=1; */

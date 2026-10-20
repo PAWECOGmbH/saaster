@@ -36,7 +36,7 @@
                         <div class="col-lg-5 pb-3 pe-4">
                             <cfif !qFeatures.blnCategory>
                                 <div class="input-group input-group-flat">
-                                    <input type="text" name="text_#qFeatures.currID#" class="form-control" autocomplete="off" value="#trim(qFeatures.strValue)#" maxlength="100">
+                                    <input type="text" name="text_#qFeatures.currID#" class="form-control" autocomplete="off" value="#encodeForHTML(trim(qFeatures.strValue))#" maxlength="100">
                                     <cfif len(trim(qFeatures.strValue))>
                                         <span class="input-group-text">
                                             <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##value_#qFeatures.intPlansPlanFeatID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate value"></i></a>

@@ -113,6 +113,21 @@ The spec reads the sources as text and compares them with the registry in both d
 
 To see only the open gaps: run with `labels=csrf-gap` (they are skipped, so they show up in the skipped count).
 
+## Security specs
+
+Next to the behaviour specs of the single rules (`csrf_spec`, `user_roles_spec`, `password_spec`, `login_throttle_spec`, `token_expiry_spec`, ...) a few specs guard the codebase as a whole:
+
+| Spec | What it checks |
+| --- | --- |
+| `integration/sql_registry_spec` | Every value written into SQL directly (not bound) is listed in `support/sql_registry.cfc` with the reason why it is safe. A new interpolation turns it red until it is bound as a parameter or reviewed and listed. |
+| `integration/sql_injection_spec` | Real payloads: injected sort values fall back to the default, quotes in search terms stay data, a forged tenant list cannot widen the DELETE in `updateUser()`. |
+| `integration/output_encoding_spec` | Database fields in the core views, the themes and the frontend core are written with `encodeForHTML()`. Exceptions sit in an allowlist with their reason. Also renders the invoice address block with markup in the customer data. |
+| `integration/upload_spec` | Real multipart uploads through `support/upload_probe.cfm`: allowed files are stored, forbidden or too large files leave nothing behind. |
+| `integration/nginx_spec` | Security headers on every kind of response, no script execution below `/userdata`. Skipped without nginx in front of Lucee. |
+| `unit/security_wiring_spec` | The handlers still call the security rules in the right branch and order (CSRF, login throttle, session rotation, password policy, token purposes, role checks, support login, sorting endpoint). |
+
+`support/security_scanner.cfc` reads the sources for these specs - nothing is executed.
+
 ## Files
 
 | Path | Purpose |
@@ -123,5 +138,5 @@ To see only the open gaps: run with `labels=csrf-gap` (they are skipped, so they
 | `box.json` | Pinned TestBox version |
 | `config/testing.json.example` | Template for the generated, git-ignored `testing.json` |
 | `bin/` | Install, prepare, reset, migrate and run scripts |
-| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, form registry and scanner |
+| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, upload probe, form and SQL registries, scanners |
 | `specs/` | The specs |

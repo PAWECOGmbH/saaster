@@ -374,6 +374,13 @@ if (structKeyExists(form, "change_pw_btn")) {
         location url="#application.mainURL#/account-settings/reset-password" addtoken="false";
     }
 
+    // Password policy (global.cfc::isValidPassword)
+    if (!application.objGlobal.isValidPassword(form.password)) {
+        getAlert('alertChoosePassword', 'warning');
+        logWrite("user", "warning", "User tried to change passwords. The password does not meet the password policy. [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+        location url="#application.mainURL#/account-settings/reset-password" addtoken="false";
+    }
+
     newUUID = application.objGlobal.getUUID();
 
     queryExecute(
@@ -384,7 +391,8 @@ if (structKeyExists(form, "change_pw_btn")) {
         },
         sql = "
             UPDATE users
-            SET strUUID = :strUUID
+            SET strUUID = :strUUID,
+                dtmUUIDCreated = UTC_TIMESTAMP()
             WHERE intUserID = :intUserID
         "
     )

@@ -228,6 +228,12 @@
                 location url="#application.mainURL#/sysadmin/customers" addtoken="false";
             }
 
+            // Password policy (global.cfc::isValidPassword)
+            if (!application.objGlobal.isValidPassword(form.password)) {
+                getAlert('The password must have at least #application.objGlobal.passwordMinLength()# characters.', 'warning');
+                location url="#application.mainURL#/sysadmin/customers" addtoken="false";
+            }
+
             // Hash the password (Argon2id, the salt is part of the hash string)
             passwordHash = application.objGlobal.hashPassword(form.password);
             customerStruct['hash'] = passwordHash;
@@ -327,6 +333,9 @@
 
                 // Switching the logged-in user gets a new session ID (protection against session fixation)
                 sessionRotate();
+
+                // Remember who started the support login, so the way back leads to exactly this sysadmin
+                session.supportOriginUserID = session.user_id;
 
                 // Overwrite session data
                 session.user_id = qCustomer.intUserID;

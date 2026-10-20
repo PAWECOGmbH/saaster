@@ -13,6 +13,15 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     // Fixed values
     this.sessionmanagement = true;
     this.setdomaincookies = true;
+
+    // Session cookie: never readable by JavaScript, not sent along with cross-site requests, and
+    // only sent over HTTPS when the application runs on HTTPS (mainURL in config.cfm). Locally on
+    // http the Secure flag would stop the browser from sending the cookie at all.
+    this.sessionCookie = {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: left(lCase(trim(variables.mainURL)), 8) eq "https://"
+    };
     this.processingdirective.pageEncoding = "utf-8";
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
     this.timezone = "UTC+00:00"; // Do NOT change the standard timezone!!!

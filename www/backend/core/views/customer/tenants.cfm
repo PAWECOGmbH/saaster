@@ -61,9 +61,9 @@
                                         <td>
                                             <cfif not len(trim(qTenants.strLogo))>
                                                 <cfif len(trim(qTenants.strCompanyName))>
-                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strCompanyName,2)#</div>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
                                                 <cfelse>
-                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strContactPerson,2)#</div>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
                                                 </cfif>
                                             <cfelse>
                                                 <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
@@ -169,7 +169,7 @@
                                 <tr>
                                     <td>
                                         <cfif not len(trim(qTenants.strLogo))>
-                                            <div style="margin-right:20px" class="avatar avatar-md brround">#left(qTenants.strCompanyName,2)#</div>
+                                            <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
                                         <cfelse>
                                             <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                         </cfif>

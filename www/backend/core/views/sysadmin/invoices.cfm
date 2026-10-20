@@ -14,7 +14,8 @@
 
     // Status
     if(structKeyExists(form, 'status')){
-        session.status = form.status;
+        // The status ID ends up in the SQL of the invoice list - whole numbers only
+        session.status = isValid("integer", form.status) ? int(form.status) : 0;
         if (session.status gt 0) {
             session.status_sql = "AND invoices.intPaymentStatusID = #session.status#";
         }else {
@@ -220,7 +221,7 @@
                                                 <td>#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
                                                 <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#encodeForHTML(left(qInvoices.strInvoiceTitle, 25))# ...<cfelse>#encodeForHTML(qInvoices.strInvoiceTitle)#</cfif></td>
-                                                <td><cfif len(qInvoices.customerName) gt 25>#left(qInvoices.customerName, 25)# ...<cfelse>#encodeForHTML(qInvoices.customerName)#</cfif></td>
+                                                <td><cfif len(qInvoices.customerName) gt 25>#encodeForHTML(left(qInvoices.customerName, 25))# ...<cfelse>#encodeForHTML(qInvoices.customerName)#</cfif></td>
                                                 <td>#encodeForHTML(qInvoices.strCurrency)#</td>
                                                 <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
                                                 <td class="text-end">

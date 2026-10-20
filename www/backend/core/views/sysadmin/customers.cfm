@@ -166,9 +166,9 @@
                                                                 <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qCustomers.strLogo)#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#encodeForHTML(qCustomers.strCompanyName)#">
                                                             <cfelse>
                                                                 <cfif len(trim(qCustomers.strCompanyName))>
-                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#encodeForHTML(left(qCustomers.strCompanyName,2))#</div>
                                                                 <cfelse>
-                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strContactPerson,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#encodeForHTML(left(qCustomers.strContactPerson,2))#</div>
                                                                 </cfif>
                                                             </cfif>
                                                             <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">

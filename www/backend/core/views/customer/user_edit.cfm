@@ -205,9 +205,9 @@
                                                                 <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar me-3" alt="#encodeForHTML(qTenants.strCompanyName)#">
                                                             <cfelse>
                                                                 <cfif len(trim(qTenants.strCompanyName))>
-                                                                    <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strCompanyName,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar me-3">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
                                                                 <cfelse>
-                                                                    <div style="margin-right:20px" class="avatar me-3">#left(qTenants.strContactPerson,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar me-3">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
                                                                 </cfif>
                                                             </cfif>
                                                             <div>

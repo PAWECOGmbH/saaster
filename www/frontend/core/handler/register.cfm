@@ -216,7 +216,7 @@ if (structKeyExists(form, 'register_btn')) {
             cfsavecontent (variable = "mailContent") {
 
                 echo("
-                    #getTrans('titHello')# #form.first_name# #form.name#<br><br>
+                    #getTrans('titHello')# #encodeForHTML(form.first_name)# #encodeForHTML(form.name)#<br><br>
                     #getTrans('txtPleaseConfirmEmail')#<br><br>
                     <a href='#application.mainURL#/logincheck?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
                     <br><br>
@@ -261,18 +261,8 @@ if (structKeyExists(form, 'register_btn')) {
 // Coming from double opt-in mail (also for new users added by the admin)
 if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
-    qCheckOptin = queryExecute(
-
-        options = {datasource = application.datasource},
-        params = {
-           strUUID: {type: "nvarchar", value: url.u}
-        },
-        sql = "
-            SELECT strUUID, strLanguage
-            FROM optin
-            WHERE strUUID = :strUUID
-        "
-    )
+    // Registration opt-in - only while the link is valid (register.cfc::getValidOptin)
+    qCheckOptin = objRegister.getValidOptin(url.u);
 
     if (qCheckOptin.recordCount) {
 
@@ -284,19 +274,8 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
     } else {
 
-        // Check whether its added by admin
-        qCheckUser = queryExecute(
-
-            options = {datasource = application.datasource},
-            params = {
-                strUUID: {type: "nvarchar", value: url.u}
-            },
-            sql = "
-                SELECT strUUID, strLanguage, strEmail
-                FROM users
-                WHERE strUUID = :strUUID
-            "
-        )
+        // Check whether its added by admin - only while the invitation is valid
+        qCheckUser = application.objUser.getUserByValidToken(url.u, "invitation");
 
         if (qCheckUser.recordCount) {
 
@@ -340,6 +319,14 @@ if (structKeyExists(form, 'create_account')) {
         session.step = 2;
         getAlert('alertChoosePassword', 'warning');
         logWrite("user", "warning", "Register new user step 3: The password fields are empty");
+        location url="#local.urlRegister#" addtoken="false";
+    }
+
+    // Password policy (global.cfc::isValidPassword)
+    if (!application.objGlobal.isValidPassword(form.password)) {
+        session.step = 2;
+        getAlert('alertChoosePassword', 'warning');
+        logWrite("user", "warning", "Register new user step 3: The password does not meet the password policy");
         location url="#local.urlRegister#" addtoken="false";
     }
 
@@ -563,7 +550,8 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             },
             sql="
                 UPDATE users
-                SET strUUID = :strUUID
+                SET strUUID = :strUUID,
+                    dtmUUIDCreated = UTC_TIMESTAMP()
                 WHERE intUserID = :intUserID
             "
         );
@@ -575,7 +563,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
         cfsavecontent (variable = "variables.mailContent") {
 
             echo("
-                #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
+                #getTrans('titHello')# #encodeForHTML(qCheckUser.strFirstName)# #encodeForHTML(qCheckUser.strLastName)#<br><br>
                 #getTrans('txtResetPassword')#
                 <br><br>
                 <a class='mail-btn' href='#application.mainURL#/logincheck?p=#newUUID#' target='_blank'>#getTrans('titResetPassword')#</a>
@@ -608,18 +596,8 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 // Confirm the password reset
 if (structKeyExists(url, "p")) {
 
-    // Is the link valid?
-    qCheckUUID = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            strUUID: {type: "nvarchar", value: url.p}
-        },
-        sql="
-            SELECT intUserID
-            FROM users
-            WHERE strUUID = :strUUID
-        "
-    );
+    // Is the link valid? Reset links expire (user.cfc::tokenLifetimeHours)
+    qCheckUUID = application.objUser.getUserByValidToken(url.p, "reset");
 
     if (qCheckUUID.recordCount) {
 
@@ -656,6 +634,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         location url="#local.urlPassword#" addtoken="false";
     }
 
+    // The link may have expired while the form was open
+    if (!application.objUser.getUserByValidToken(thisResetUUID, "reset").recordCount) {
+        structDelete(session, "uuid");
+        getAlert('alertNotValidAnymore', 'warning');
+        logWrite("user", "warning", "Reset password: The reset link has expired. [UUID: #thisResetUUID#]");
+        location url="#local.urlPassword#" addtoken="false";
+    }
+
     // Check passwords first
     if (len(trim(form.password)) and len(trim(form.password2))) {
 
@@ -671,6 +657,13 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         logWrite("user", "warning", "Reset password: The user tried to reset the password, but the password fields are empty. [UUID: #thisResetUUID#]");
         location url="#local.urlPassword#" addtoken="false";
 
+    }
+
+    // Password policy (global.cfc::isValidPassword)
+    if (!application.objGlobal.isValidPassword(form.password)) {
+        getAlert('alertChoosePassword', 'warning');
+        logWrite("user", "warning", "Reset password: The new password does not meet the password policy. [UUID: #thisResetUUID#]");
+        location url="#local.urlPassword#" addtoken="false";
     }
 
 

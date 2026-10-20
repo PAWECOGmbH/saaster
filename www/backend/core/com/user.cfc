@@ -98,7 +98,8 @@ component displayname="user" output="false" {
             local.active = arguments.userStruct.active;
         }
         if (structKeyExists(arguments.userStruct, "tenantID")) {
-            local.tenantID = arguments.userStruct.tenantID;
+            // The IDs end up in an IN (...) clause - keep whole numbers only
+            local.tenantID = arrayToList(listToArray(arguments.userStruct.tenantID).filter((tenant) => isValid("integer", trim(tenant))).map((tenant) => int(trim(tenant))));
         }
         if (structKeyExists(arguments.userStruct, "mfa")) {
             local.mfa = arguments.userStruct.mfa;
@@ -330,8 +331,8 @@ component displayname="user" output="false" {
                     sysadmin: {type: "integer", value: local.sysadmin}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
+                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
                 "
 
             )
@@ -431,7 +432,8 @@ component displayname="user" output="false" {
                         },
                         sql = "
                             UPDATE users
-                            SET strUUID = :newUUID
+                            SET strUUID = :newUUID,
+                                dtmUUIDCreated = UTC_TIMESTAMP()
                             WHERE intUserID = :userID
                         "
                     )
@@ -542,7 +544,8 @@ component displayname="user" output="false" {
                 },
                 sql = "
                     UPDATE users
-                    SET strUUID = :uuID
+                    SET strUUID = :uuID,
+                        dtmUUIDCreated = UTC_TIMESTAMP()
                     WHERE intUserID = :userID
                 "
             )
@@ -643,7 +646,8 @@ component displayname="user" output="false" {
                 UPDATE users
                 SET intMfaCode = :authcode,
                 dtmMfaDateTime = :mfaDateTime,
-                strUUID = :strUUID
+                strUUID = :strUUID,
+                dtmUUIDCreated = UTC_TIMESTAMP()
                 WHERE strEmail = :strEmail;
             "
         )
@@ -730,22 +734,46 @@ component displayname="user" output="false" {
 
 
     // Get users data using a UUID
+    // The user behind a link to confirm a changed e-mail address - only while the link is valid.
     public query function getOptinUser(required string userUUID){
+        return getUserByValidToken(arguments.userUUID, "emailchange", "*");
+    }
 
-        local.qOptinUser = queryExecute(
 
+    /*
+        Links sent by e-mail carry the token from users.strUUID. They expire:
+        the lifetime depends on what the link is for. dtmUUIDCreated is set
+        wherever a token is issued.
+    */
+    public numeric function tokenLifetimeHours(required string purpose) {
+        switch (arguments.purpose) {
+            case "reset":       return 2;     // password reset
+            case "emailchange": return 24;    // confirm a changed e-mail address
+            case "invitation":  return 168;   // invitation by an admin (7 days)
+        }
+        throw(type = "Saaster.UnknownTokenPurpose", message = "Unknown token purpose [#arguments.purpose#].");
+    }
+
+    // The user a token belongs to, or an empty query if the token is unknown or expired.
+    public query function getUserByValidToken(required string token, required string purpose, string columns = "intUserID, intCustomerID, strEmail, strLanguage, strUUID") {
+
+        if (!len(trim(arguments.token))) {
+            return queryNew("intUserID");
+        }
+
+        return queryExecute(
             options = {datasource = application.datasource},
             params = {
-            strUUID: {type: "nvarchar", value: arguments.userUUID}
+                token: {type: "nvarchar", value: arguments.token},
+                hours: {type: "numeric", value: tokenLifetimeHours(arguments.purpose)}
             },
             sql = "
-                SELECT *
+                SELECT #arguments.columns#
                 FROM users
-                WHERE strUUID = :strUUID
+                WHERE strUUID = :token
+                AND dtmUUIDCreated >= UTC_TIMESTAMP() - INTERVAL :hours HOUR
             "
-        )
-
-        return local.qOptinUser;
+        );
     }
 
 

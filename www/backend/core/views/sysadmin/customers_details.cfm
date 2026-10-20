@@ -106,11 +106,11 @@
                                 <cfelse>
                                     <cfif len(trim(getCustomer.companyName))>
                                         <div class="avatar avatar-xl me-3 align-self-center">
-                                            #left(getCustomer.companyName,2)#
+                                            #encodeForHTML(left(getCustomer.companyName,2))#
                                         </div>
                                     <cfelse>
                                         <div class="avatar avatar-xl me-3 align-self-center">
-                                            #left(getCustomer.contactPerson,2)#
+                                            #encodeForHTML(left(getCustomer.contactPerson,2))#
                                         </div>
                                     </cfif>
                                 </cfif>

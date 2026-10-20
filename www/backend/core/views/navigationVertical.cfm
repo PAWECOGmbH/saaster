@@ -112,7 +112,7 @@
                                                         #encodeForHTML(qTenants.strCompanyName)#
                                                     </cfif>
                                                 <cfelse>
-                                                    <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strCompanyName,2)#</div>
+                                                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
                                                     <cfif (len(qTenants.strCompanyName) gt 12)>
                                                         <div class="d-none d-lg-inline-block">#qTenants.strCompanyName.left(12)#..</div>
                                                         <div class="d-lg-none">#encodeForHTML(qTenants.strCompanyName)#</div>
@@ -125,7 +125,7 @@
                                                     <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center" alt="#encodeForHTML(qTenants.strContactPerson)#">
                                                     #qTenants.strContactPerson.left(12)#
                                                 <cfelse>
-                                                    <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strContactPerson,2)#</div>
+                                                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
                                                     <span class="nav-link-title">#encodeForHTML(qTenants.strContactPerson)#</span>
                                                 </cfif>
                                             </cfif>

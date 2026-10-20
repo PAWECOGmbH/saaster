@@ -101,8 +101,8 @@ component output="false" hint="Creates test data and removes it again." {
             { datasource: application.datasource, result: "local.insertResult" }
         );
 
+        // The trigger insertConnect on users already links the user to its customer as standard tenant.
         var userID = local.insertResult.generatedKey;
-        grantTenant(userID, arguments.customerID, true);
 
         return {
             "userID": userID,

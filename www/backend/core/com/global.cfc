@@ -373,6 +373,25 @@ component displayname="globalFunctions" output="false" {
     }
 
     /*
+        Password policy for every place where a password is set (registration, reset,
+        change, customer created by the sysadmin). The forms say "at least 8 characters";
+        this enforces it on the server. The upper limit only protects the hashing from
+        absurdly long input.
+    */
+    variables.passwordPolicy = { minLength: 8, maxLength: 256 };
+
+    public numeric function passwordMinLength() {
+        return variables.passwordPolicy.minLength;
+    }
+
+    public boolean function isValidPassword(required string password) {
+        return len(arguments.password) gte variables.passwordPolicy.minLength
+            and len(arguments.password) lte variables.passwordPolicy.maxLength
+            and len(trim(arguments.password)) gt 0;
+    }
+
+
+    /*
         Checks a password against the stored hash. Understands both Argon2 hashes and the
         legacy format (hex SHA-512 of password & salt). "needsRehash" is true when the
         password was correct but the hash is legacy or uses weaker parameters - the caller
@@ -1208,6 +1227,35 @@ component displayname="globalFunctions" output="false" {
 
     }
 
+
+
+    /*
+        True if the table exists in the application database and has this column.
+        For the few places that must build table or column names into SQL from request
+        data (they cannot be bound as parameters): only names that really exist pass.
+    */
+    public boolean function isKnownColumn(required string tableName, required string columnName) {
+        if (!reFind("^[A-Za-z_][A-Za-z0-9_]{0,63}$", arguments.tableName) or !reFind("^[A-Za-z_][A-Za-z0-9_]{0,63}$", arguments.columnName)) {
+            return false;
+        }
+
+        local.qColumn = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                tableName: {type: "varchar", value: arguments.tableName},
+                columnName: {type: "varchar", value: arguments.columnName}
+            },
+            sql = "
+                SELECT COUNT(*) AS cnt
+                FROM information_schema.columns
+                WHERE table_schema = DATABASE()
+                AND table_name = :tableName
+                AND column_name = :columnName
+            "
+        );
+
+        return local.qColumn.cnt gt 0;
+    }
 
 
     // Returns the sort value only if it is in the list of allowed ORDER BY expressions, otherwise the default
