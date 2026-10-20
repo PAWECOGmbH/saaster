@@ -36,6 +36,29 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        /*
+            Regression: the tenant actions in handler/customer.cfm only checked the
+            tenant range. The route is open to admins, so an admin without super admin
+            rights could create, delete and deactivate tenants by calling the handler
+            directly, although the tenant pages are super admin only.
+        */
+        describe("canManageTenants", () => {
+
+            it("allows super admins and system administrators", () => {
+                expect(users.canManageTenants(actor(admin = true, superadmin = true))).toBeTrue();
+                expect(users.canManageTenants(actor(sysadmin = true))).toBeTrue();
+            });
+
+            it("denies an admin without super admin rights", () => {
+                expect(users.canManageTenants(actor(admin = true))).toBeFalse();
+            });
+
+            it("denies a user without admin rights", () => {
+                expect(users.canManageTenants(actor())).toBeFalse();
+            });
+
+        });
+
         describe("canEditUser (another user)", () => {
 
             it("allows a super admin to edit a user of an own tenant", () => {

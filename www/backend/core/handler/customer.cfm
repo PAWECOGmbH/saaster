@@ -196,6 +196,19 @@ if (structKeyExists(url, "del_logo")) {
 }
 
 
+// Tenant actions (new, delete, activate/deactivate) are for super admins only. The route
+// "customer" itself is open to admins, so the role is checked here (user.cfc::canManageTenants).
+if (structKeyExists(form, "new_tenant_btn") or structKeyExists(url, "delete") or structKeyExists(url, "change_tenant")) {
+
+    if (!application.objUser.canManageTenants(application.objUser.actorFromSession())) {
+        getAlert('msgNoAccess', 'danger');
+        logWrite("user", "warning", "Tenant action denied, no super admin rights [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
+        location url="#application.mainURL#/dashboard" addtoken="false";
+    }
+
+}
+
+
 // New tenant
 if (structKeyExists(form, "new_tenant_btn")) {
 

@@ -803,6 +803,12 @@ component displayname="user" output="false" {
         return arguments.actor.sysadmin or arguments.actor.admin or arguments.actor.superadmin;
     }
 
+    // Creating, deleting, activating and deactivating tenants is for super admins
+    // (the tenant pages account-settings/tenants and tenant/new are super admin only).
+    public boolean function canManageTenants(required struct actor) {
+        return arguments.actor.sysadmin or arguments.actor.superadmin;
+    }
+
     /*
         Editing ANOTHER user (the own profile is always allowed).
         target: { inTenantRange, mainUser, sysadmin } - inTenantRange means the target

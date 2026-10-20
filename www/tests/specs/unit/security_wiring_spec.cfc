@@ -117,6 +117,27 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        describe("Tenant actions (backend/core/handler/customer.cfm)", () => {
+
+            var source = scanner.readSource("backend/core/handler/customer.cfm");
+            var guard = find("objUser.canManageTenants(", source);
+
+            it("check canManageTenants before any tenant action", () => {
+                expect(guard).toBeGT(0);
+                for (var trigger in ["structKeyExists(form, ""new_tenant_btn"")) {", "structKeyExists(url, ""delete"")) {", "structKeyExists(url, ""change_tenant"")) {"]) {
+                    var branch = find("if (" & trigger, source);
+                    expect(branch).toBeGT(0, "Branch not found: " & trigger);
+                    expect(guard).toBeLT(branch, "The role check must come before: " & trigger);
+                }
+            });
+
+            it("guard all three triggers", () => {
+                var condition = mid(source, 1, guard);
+                expect(condition).toInclude("structKeyExists(form, ""new_tenant_btn"") or structKeyExists(url, ""delete"") or structKeyExists(url, ""change_tenant"")");
+            });
+
+        });
+
         describe("Support login", () => {
 
             it("remembers the sysadmin and rotates the session ID when logging in as a customer", () => {
