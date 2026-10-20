@@ -66,7 +66,7 @@
 
                                 <div class="col-lg-5">
 
-                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">1</span> #getTrans('titYourPlan')#:</h2>
+                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">1</span> #getTrans('titYourPlan')#:</h2>
 
                                     <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column mb-3">
                                     <cfloop array="#planArray#" index="i">
@@ -123,7 +123,7 @@
 
                                 <div class="col-lg-6">
 
-                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">2</span> #getTrans('titBillingCycle')#:</h2>
+                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">2</span> #getTrans('titBillingCycle')#:</h2>
 
                                     <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column mb-3">
 
@@ -158,7 +158,7 @@
 
                                     </div>
 
-                                    <h2 class="mb-4 mt-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">3</span> #getTrans('titOrderSummary')#:</h2>
+                                    <h2 class="mb-4 mt-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">3</span> #getTrans('titOrderSummary')#:</h2>
 
                                     <div class="card">
 

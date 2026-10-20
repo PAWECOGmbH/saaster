@@ -48,9 +48,9 @@
         s_badge_custom = "";
 
         if(qCustomResults.recordCount){
-            s_badge_custom = "<span class='mx-2 badge bg-green'>#qCustomResults.recordCount#</span>";
+            s_badge_custom = "<span class='mx-2 badge bg-green text-green-fg'>#qCustomResults.recordCount#</span>";
         }else {
-            s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
+            s_badge_custom = "<span class='mx-2 badge bg-red text-red-fg'>0</span>";
         }
 
         qSystemResults = objSysadmin.searchSystemTranslations(session.search);
@@ -58,9 +58,9 @@
         s_badge_system = "";
 
         if(qSystemResults.recordCount){
-            s_badge_system = "<span class='mx-2 badge bg-green'>#qSystemResults.recordCount#</span>";
+            s_badge_system = "<span class='mx-2 badge bg-green text-green-fg'>#qSystemResults.recordCount#</span>";
         }else {
-            s_badge_system = "<span class='mx-2 badge bg-red'>0</span>";
+            s_badge_system = "<span class='mx-2 badge bg-red text-red-fg'>0</span>";
         }
 
         // Create getModal object

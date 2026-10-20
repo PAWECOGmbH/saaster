@@ -1066,7 +1066,7 @@ component displayname="invoices" output="false" {
     public string function getInvoiceStatusBadge(required string language, required string color, required string variable) {
 
         cfsavecontent (variable="local.htmlForBadge") {
-            echo("<span class='badge bg-#arguments.color#'>#application.objLanguage.getTrans(arguments.variable, arguments.language)#</span>")
+            echo("<span class='badge bg-#arguments.color# text-#arguments.color#-fg'>#application.objLanguage.getTrans(arguments.variable, arguments.language)#</span>")
         }
 
         return local.htmlForBadge;

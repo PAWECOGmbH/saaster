@@ -73,9 +73,9 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <cfif isDate(i.read)>
-                                                        <div class="badge bg-green"></div>
+                                                        <div class="badge bg-green text-green-fg"></div>
                                                     <cfelse>
-                                                        <div class="badge bg-red"></div>
+                                                        <div class="badge bg-red text-red-fg"></div>
                                                     </cfif>
                                                 </td>
                                                 <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/global?page=#url.page#&noti_del=#i.notiID#&#csrfParam()#', '#getTrans("titDeleteNotification")#', '#getTrans("txtNotificationDelete")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a></td>
