@@ -287,11 +287,11 @@
                                                                                     <div class="dropdown-menu dropdown-menu-end">
                                                                                         <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#invoice.invoiceID#">Edit invoice</a>
                                                                                         <a class="dropdown-item" href="#application.mainURL#/account-settings/invoice/print/#invoice.invoiceID#" target="_blank">Print invoice</a>
-                                                                                        <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#invoice.invoiceID#&email&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Send invoice by e-mail</a>
+                                                                                        <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#invoice.invoiceID#&email&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Send invoice by e-mail</a>
                                                                                         <cfif invoice.invoiceStatusID eq 1 or invoice.invoiceStatusID eq 2>
-                                                                                            <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#invoice.invoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Cancel invoice</a>
+                                                                                            <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#invoice.invoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Cancel invoice</a>
                                                                                         </cfif>
-                                                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?i=#invoice.invoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#invoice.invoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
                                                                                     </div>
                                                                                 </div>
                                                                             </td>
@@ -340,41 +340,41 @@
 
                                                                                     <cfif currentPlan.status eq "test">
                                                                                         <cfif plan.priceMonthly gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
                                                                                                 Make invoice for monthly cycle (#custCurrency# #lsCurrencyFormat(plan.priceMonthly, "none")#)
                                                                                             </a>
                                                                                         </cfif>
                                                                                         <cfif plan.priceYearly gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
                                                                                                 Make invoice for yearly cycle (#custCurrency# #lsCurrencyFormat(plan.priceYearly, "none")#)
                                                                                             </a>
                                                                                         </cfif>
                                                                                     <cfelse>
                                                                                         <cfif checkBookingM.amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
                                                                                                 Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
                                                                                             </a>
                                                                                         </cfif>
                                                                                         <cfif checkBookingY.amountToPay gt 0>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
                                                                                                 Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
                                                                                             </a>
                                                                                         </cfif>
                                                                                     </cfif>
 
                                                                                     <cfif currentPlan.status eq "canceled">
-                                                                                        <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&revoke" class="dropdown-item">
+                                                                                        <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&revoke" class="dropdown-item">
                                                                                             Revoke cancellation
                                                                                         </a>
                                                                                     <cfelse>
                                                                                         <cfif currentPlan.status neq "payment">
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&cancel" class="dropdown-item">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&cancel" class="dropdown-item">
                                                                                                 Cancel at expiry date
                                                                                             </a>
                                                                                         </cfif>
                                                                                     </cfif>
 
-                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&delete', 'Warning!', 'Please note that the customer can no longer use the plan after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                                                                    <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?#csrfParam()#&booking&b=#currentPlan.bookingID#&c=#thisCustomerID#&p=#plan.planID#&delete', 'Warning!', 'Please note that the customer can no longer use the plan after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
                                                                                         Withdraw plan
                                                                                     </a>
 
@@ -389,12 +389,12 @@
                                                                                     <cfelse>
 
                                                                                         <cfif plan.itsFree>
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&c=#thisCustomerID#&p=#plan.planID#&free" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="There is no automatic refund if it is a downgrade!">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&c=#thisCustomerID#&p=#plan.planID#&free" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="There is no automatic refund if it is a downgrade!">
                                                                                                 Activate now (free)
                                                                                             </a>
                                                                                         </cfif>
                                                                                         <cfif plan.testDays gt 0 and currentPlan.status neq "test" and currentPlan.status neq "free" and currentPlan.status neq "active">
-                                                                                            <a href="#application.mainURL#/sysadm/plans?booking&test&c=#thisCustomerID#&p=#plan.planID#" class="dropdown-item" class="dropdown-item">
+                                                                                            <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&test&c=#thisCustomerID#&p=#plan.planID#" class="dropdown-item" class="dropdown-item">
                                                                                                 Activate the test time (#plan.testDays# days)
                                                                                             </a>
                                                                                         </cfif>
@@ -402,21 +402,21 @@
                                                                                         <cfif currentPlan.status eq "active" and !plan.itsFree>
 
                                                                                             <cfif checkBookingM.amountToPay gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
                                                                                                     Make invoice for "#checkBookingM.message.title#" monthly (#custCurrency# #lsCurrencyFormat(checkBookingM.amountToPay, "none")#)
                                                                                                 </a>
                                                                                             <cfelse>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingM.message.message#">
                                                                                                     Change to this plan monthly cycle (#checkBookingM.message.title#)
                                                                                                 </a>
                                                                                             </cfif>
 
                                                                                             <cfif checkBookingY.amountToPay gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
                                                                                                     Make invoice for "#checkBookingY.message.title#" yearly (#custCurrency# #lsCurrencyFormat(checkBookingY.amountToPay, "none")#)
                                                                                                 </a>
                                                                                             <cfelse>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&change&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="#checkBookingY.message.message#">
                                                                                                     Change to this plan yearly cycle (#checkBookingY.message.title#)
                                                                                                 </a>
                                                                                             </cfif>
@@ -424,12 +424,12 @@
                                                                                         <cfelse>
 
                                                                                             <cfif plan.priceMonthly gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=monthly" class="dropdown-item">
                                                                                                     Make invoice for monthly cycle (#custCurrency# #lsCurrencyFormat(plan.priceMonthly, "none")#)
                                                                                                 </a>
                                                                                             </cfif>
                                                                                             <cfif plan.priceYearly gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/plans?booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/plans?#csrfParam()#&booking&invoice&c=#thisCustomerID#&p=#plan.planID#&r=yearly" class="dropdown-item">
                                                                                                     Make invoice for yearly cycle (#custCurrency# #lsCurrencyFormat(plan.priceYearly, "none")#)
                                                                                                 </a>
                                                                                             </cfif>
@@ -529,7 +529,7 @@
                                                                                 <div class="dropdown-menu">
                                                                                     <cfif listFind(currentModuleList, module.moduleID) and moduleStatus.status neq "expired">
                                                                                         <cfif moduleStatus.status eq "canceled">
-                                                                                            <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&revoke" class="dropdown-item">
+                                                                                            <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&revoke" class="dropdown-item">
                                                                                                 Revoke cancellation
                                                                                             </a>
                                                                                         <cfelse>
@@ -537,7 +537,7 @@
                                                                                                 Edit period
                                                                                             </a>
                                                                                             <cfif moduleStatus.status neq "payment">
-                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&cancel" class="dropdown-item">
                                                                                                     Cancel at expiry date
                                                                                                 </a>
                                                                                             </cfif>
@@ -546,22 +546,22 @@
                                                                                             <cfif moduleStatus.recurring eq "monthly">
                                                                                                 <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='yearly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
                                                                                                 <cfif amountToPay gt 0>
-                                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                    <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
                                                                                                         Make invoice for change to yearly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
                                                                                                     </a>
                                                                                                 <cfelse>
-                                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                    <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
                                                                                                         Change to yearly cycle (Changed after exiry date)
                                                                                                     </a>
                                                                                                 </cfif>
                                                                                             <cfelseif moduleStatus.recurring eq "yearly">
                                                                                                 <cfset amountToPay = objBookModule.checkBooking(customerID=thisCustomerID, bookingData=module, recurring='monthly', makeBooking=false, makeInvoice=false, chargeInvoice=false).amountToPay>
                                                                                                 <cfif amountToPay gt 0>
-                                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                    <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
                                                                                                         Make invoice for change to monthly cycle (#custCurrency# #lsCurrencyFormat(amountToPay, "none")#)
                                                                                                     </a>
                                                                                                 <cfelse>
-                                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                    <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&change&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
                                                                                                         Change to monthly cycle (Changed after exiry date)
                                                                                                     </a>
                                                                                                 </cfif>
@@ -572,30 +572,30 @@
                                                                                             <cfif module.testDays gt 0>
                                                                                                 <cfif structKeyExists(moduleStatus, "status") and (moduleStatus.status eq "expired" or moduleStatus.status eq "test")>
                                                                                                 <cfelse>
-                                                                                                    <a href="#application.mainURL#/sysadm/modules?booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
+                                                                                                    <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
                                                                                                         Activate the test time (#module.testDays# days)
                                                                                                     </a>
                                                                                                 </cfif>
                                                                                             </cfif>
                                                                                             <cfif module.priceMonthly gt 0 and module.priceYearly gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=monthly" class="dropdown-item">
                                                                                                     Make invoice monthly cycle (#custCurrency# #lsCurrencyFormat(module.priceMonthlyAfterVAT, "none")#)
                                                                                                 </a>
-                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=yearly" class="dropdown-item">
                                                                                                     Make invoice yearly cycle (#custCurrency# #lsCurrencyFormat(module.priceYearlyAfterVAT, "none")#)
                                                                                                 </a>
                                                                                             <cfelseif module.priceOnetime gt 0>
-                                                                                                <a href="#application.mainURL#/sysadm/modules?booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
+                                                                                                <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&invoice&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
                                                                                                     Make invoice onetime billing (#custCurrency# #lsCurrencyFormat(module.priceOneTimeAfterVAT, "none")#)
                                                                                                 </a>
                                                                                             </cfif>
                                                                                         </cfif>
-                                                                                        <a href="#application.mainURL#/sysadm/modules?booking&c=#thisCustomerID#&m=#module.moduleID#&free" class="dropdown-item">
+                                                                                        <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&c=#thisCustomerID#&m=#module.moduleID#&free" class="dropdown-item">
                                                                                             Activate now (free)
                                                                                         </a>
                                                                                     </cfif>
                                                                                     <cfif listFind(currentModuleList, module.moduleID)>
-                                                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
                                                                                             Withdraw module
                                                                                         </a>
                                                                                     </cfif>

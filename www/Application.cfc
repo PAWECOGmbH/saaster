@@ -293,22 +293,11 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         }
 
-        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links)
-        if (reFindNoCase("^/?(backend|frontend)/core/handler/", thiscontent.thisPath)) {
+        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links).
+        // The rule itself lives in objGlobal.csrfRequired() so it can be tested.
+        if (application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url))) {
 
-            local.stateChangingGet = false;
-            for (local.urlKey in url) {
-                if (reFindNoCase("^(delete|del_|remove_|revoke|noti_del|invit)", local.urlKey)) {
-                    local.stateChangingGet = true;
-                    break;
-                }
-            }
-
-            if (reFindNoCase("/handler/cancel.cfm$", thiscontent.thisPath)) {
-                local.stateChangingGet = true;
-            }
-
-            if ((cgi.request_method eq "POST" or local.stateChangingGet) and !application.objGlobal.csrfVerify()) {
+            if (!application.objGlobal.csrfVerify()) {
 
                 logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
 

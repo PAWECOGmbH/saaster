@@ -1166,6 +1166,54 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    /*
+        CSRF: decides whether a request needs a valid token. Used by Application.cfc for every request.
+
+        Only the core handlers change data, so only they are protected. There, a token is required for
+          - every POST,
+          - every request to the cancel handler (it only works with GET actions),
+          - GET actions whose url key marks a state change (delete..., del_..., remove_..., revoke, noti_del, invit),
+          - GET actions of a specific handler listed in variables.csrfProtectedGetKeys. Their key names
+            (status, open, default, ...) are too generic to protect them across all handlers.
+    */
+    variables.csrfProtectedGetKeys = {
+        "backend/core/handler/payment.cfm": "del,default",
+        "backend/core/handler/sysadmin/invoices.cfm": "status,email,open",
+        "backend/core/handler/sysadmin/logs.cfm": "logfile",
+        "backend/core/handler/sysadmin/plans.cfm": "booking",
+        "backend/core/handler/sysadmin/modules.cfm": "booking"
+    };
+
+    public boolean function csrfRequired(required string path, required string method, required array urlKeys) {
+
+        if (!reFindNoCase("^/?(backend|frontend)/core/handler/", arguments.path)) {
+            return false;
+        }
+
+        if (arguments.method eq "POST") {
+            return true;
+        }
+
+        if (reFindNoCase("/handler/cancel\.cfm$", arguments.path)) {
+            return true;
+        }
+
+        local.handlerKeys = variables.csrfProtectedGetKeys[lCase(reReplace(arguments.path, "^/", ""))] ?: "";
+
+        for (local.urlKey in arguments.urlKeys) {
+            if (reFindNoCase("^(delete|del_|remove_|revoke|noti_del|invit)", local.urlKey)) {
+                return true;
+            }
+            if (listFindNoCase(local.handlerKeys, local.urlKey)) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+
     // CSRF: verifies the token sent via form field, url parameter or request header
     public boolean function csrfVerify() {
 

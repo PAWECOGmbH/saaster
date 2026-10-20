@@ -70,7 +70,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-list flex-nowrap">
-                                                                <a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/api-settings?deleteAPI=#qApiUser.intApiID#', 'Delete API', 'If you delete an API, the key linked to this API will no longer work. Do you really want to delete? ', 'No, cancel!', 'Yes, delete!')">Delete</a>
+                                                                <a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/api-settings?deleteAPI=#qApiUser.intApiID#&#csrfParam()#', 'Delete API', 'If you delete an API, the key linked to this API will no longer work. Do you really want to delete? ', 'No, cancel!', 'Yes, delete!')">Delete</a>
                                                             </div>
                                                         </td>
                                                     </tr>

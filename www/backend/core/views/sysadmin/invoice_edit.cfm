@@ -112,9 +112,9 @@
                                             <div class="d-flex align-items-center">
                                                 #objInvoice.getInvoiceStatusBadge(session.lng, qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
-                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
-                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
                                                 </cfif>
                                             </div>
                                         </div>
@@ -213,7 +213,7 @@
                                     </cfif>
                                 </div>
                                 <div class="col-lg-6 text-end">
-                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
+                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
                                 </div>
                             </div>
                         </div>

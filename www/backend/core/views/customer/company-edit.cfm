@@ -122,7 +122,7 @@
                                         <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(getCustomerData.logo)#" alt="logo" style="max-height: 150px;">
                                         <div class="d-flex flex-row flex-start">
                                             <div class="mt-3">
-                                                <a href="#application.mainURL#/customer?del_logo" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>
+                                                <a href="#application.mainURL#/customer?del_logo&#csrfParam()#" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>
                                             </div>
                                         </div>
                                     </div>

@@ -230,14 +230,14 @@
                                                         </button>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.intInvoiceID#">Edit invoice</a>
-                                                            <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Send invoice by email</a>
+                                                            <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Send invoice by email</a>
                                                             <cfif qInvoices.intPaymentStatusID eq 1 or qInvoices.intPaymentStatusID eq 2>
-                                                                <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
+                                                                <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
                                                             </cfif>
                                                             <cfif qInvoices.intPaymentStatusID eq 5>
-                                                                <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&open&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Undo cancellation</a>
+                                                                <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&open&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Undo cancellation</a>
                                                             </cfif>
-                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
                                                         </div>
                                                     </div>
                                                 </td>

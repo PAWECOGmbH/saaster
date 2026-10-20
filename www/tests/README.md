@@ -97,6 +97,22 @@ Helpers for side effects:
 - **Logs:** `recordLogs()` replaces `application.objLog` with `support/log_recorder.cfc`. No log files are written, and `count()` / `getCalls()` let you check what would have been logged. The real logger comes back automatically after the spec.
 - **Payrexx:** `support/payrexx_mock.cfm` stands in for the Payrexx API and echoes the request it received. See `specs/integration/payrexx_call_spec.cfc` for how to point `application.payrexxStruct` at it. Specs must never call the real Payrexx, even if `config.cfm` holds real credentials.
 
+## Form registry
+
+`support/form_registry.cfc` is the collection of every form and every action link in the core views and both themes - with its target, the field the handler reacts to, and what it does. `specs/integration/form_registry_spec.cfc` checks it entry by entry, so the runner lists every form on its own line.
+
+The spec reads the sources as text and compares them with the registry in both directions. **Adding, moving or removing a form or an action link turns it red until the registry is updated.** That is intended: every form has to be classified consciously.
+
+| List | What belongs there | What the spec checks |
+| --- | --- | --- |
+| `handlerForms()` | POST forms that change data | POST, `#csrfField()#` inside, target is a core handler covered by the CSRF rule, the handler reacts to the trigger |
+| `viewForms()` | Search, sort, filter or navigation forms posting to a view | Only fields from `readOnlyFields()` |
+| `inertForms()` | `<form>` tags that are never submitted | Still without fields |
+| `protectedLinks()` | GET links that trigger an action and carry `#csrfParam()#` | Every occurrence has the token, the CSRF rule covers it |
+| `openLinks()` | GET action links without a token, with a reason | `session`/`entry`: still unprotected as documented. `gap`: shown as **skipped** until closed |
+
+To see only the open gaps: run with `labels=csrf-gap` (they are skipped, so they show up in the skipped count).
+
 ## Files
 
 | Path | Purpose |
@@ -107,5 +123,5 @@ Helpers for side effects:
 | `box.json` | Pinned TestBox version |
 | `config/testing.json.example` | Template for the generated, git-ignored `testing.json` |
 | `bin/` | Install, prepare, reset, migrate and run scripts |
-| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock |
+| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, form registry and scanner |
 | `specs/` | The specs |
