@@ -158,7 +158,10 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         } else if (structKeyExists(url, "reinit")) {
 
-            writeOutput("Unauthorized reinit attempt by IP");
+            // Only a logged-in sysadmin may reinit - say so instead of silently ignoring it
+            local.reinitIP = new backend.core.com.loginthrottle().clientIP();
+            application.objLog.logWrite("system", "warning", "Unauthorized reinit attempt [IP: #local.reinitIP#, Path: #cgi.script_name#]", false);
+            writeOutput("Unauthorized reinit attempt by IP " & encodeForHTML(local.reinitIP) & ". Log in as sysadmin to reinitialize the application.");
             structDelete(url, "reinit");
             abort;
 
