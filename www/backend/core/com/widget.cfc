@@ -1,12 +1,47 @@
 component displayname="widget" output="false" {
 
+    /*
+        Prepares the dashboard widgets of a user and returns the ones to display.
+
+        Widgets of a plan or module the customer does not have right now (not booked,
+        expired, payment pending, deactivated by the sysadmin) are only hidden - the
+        user's entry with its position and on/off setting stays and is shown again as
+        soon as the widget is available again. New widgets are added at the end.
+        Deleted widgets disappear by themselves (ON DELETE CASCADE).
+    */
+    public query function prepareUserWidgets(required numeric userID, required string moduleList, required numeric planID){
+
+        local.qWidgets = getAllWidgets(arguments.moduleList, arguments.planID);
+        local.availableIDs = valueList(local.qWidgets.intWidgetID);
+
+        local.qOldUserWidgets = getOldUserWidgets(arguments.userID);
+        local.oldUserWidgetIDs = valueList(local.qOldUserWidgets.intWidgetID);
+        local.lastUserWidgetPrio = local.qOldUserWidgets.recordCount;
+
+        for (local.row in local.qWidgets) {
+            if (not listFind(local.oldUserWidgetIDs, local.row.intWidgetID)) {
+                local.lastUserWidgetPrio++;
+                insertWidget(local.row.intWidgetID, local.lastUserWidgetPrio, arguments.userID);
+                local.oldUserWidgetIDs = listAppend(local.oldUserWidgetIDs, local.row.intWidgetID);
+            }
+        }
+
+        return getUserWidgets(arguments.userID, local.availableIDs);
+    }
+
     public query function getAllWidgets(required string moduleList, required numeric planID){
+
+        // Bound as a real list: a plain string "3,5,7" would be read as 3 by MySQL
+        local.moduleIDs = listToArray(arguments.moduleList).filter((id) => isValid("integer", trim(id))).map((id) => int(trim(id)));
+        if (arrayIsEmpty(local.moduleIDs)) {
+            local.moduleIDs = [0];
+        }
 
         local.qWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 planID: {type: "numeric", value: arguments.planID},
-                moduleList: {type: "varchar", value: listLen(arguments.moduleList) ? arguments.moduleList : 0}
+                moduleList: {type: "numeric", value: arrayToList(local.moduleIDs), list: true}
             },
             sql = "
                 SELECT widgets.*, widget_ratio.strDescription, widget_ratio.intSizeRatio
@@ -41,40 +76,6 @@ component displayname="widget" output="false" {
         );
 
         return local.qWidgets;
-    }
-
-    public query function deleteMultipleWidget(required string allWidgets, required numeric userID){
-
-        local.qRemoveWidgets = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                user_id: {type: "numeric", value: arguments.userID},
-                allWidgets: {type: "varchar", value: arguments.allWidgets, list: true, separator: ","}
-            },
-            sql = "
-                DELETE FROM user_widgets
-                WHERE intUserID = :user_id
-                AND intWidgetID NOT IN(:allWidgets)
-            "
-        );
-
-        return local.qRemoveWidgets;
-    }
-
-    public query function deleteWidget(required numeric userID){
-
-        local.qRemoveWidgets = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                user_id: {type: "numeric", value: arguments.userID}
-            },
-            sql = "
-                DELETE FROM user_widgets
-                WHERE intUserID = :user_id
-            "
-        );
-
-        return local.qRemoveWidgets;
     }
 
     public query function getOldUserWidgets(required numeric userID){
@@ -112,12 +113,20 @@ component displayname="widget" output="false" {
         return local.qInsertWidgets;
     }
 
-    public query function getUserWidgets(required numeric userID){
+    // widgetIDs: only these widgets (the ones available right now); all of the user's widgets if not passed
+    public query function getUserWidgets(required numeric userID, string widgetIDs){
+
+        local.widgetFilter = "";
+        if (structKeyExists(arguments, "widgetIDs")) {
+            // An empty list means nothing is available - 0 never matches a widget
+            local.widgetFilter = "AND user_widgets.intWidgetID IN (:widgetIDs)";
+        }
 
         local.qUserWidgets = queryExecute(
             options = {datasource = application.datasource},
             params = {
-                user_id: {type: "numeric", value: arguments.userID}
+                user_id: {type: "numeric", value: arguments.userID},
+                widgetIDs: {type: "numeric", value: (structKeyExists(arguments, "widgetIDs") and listLen(arguments.widgetIDs)) ? arguments.widgetIDs : 0, list: true}
             },
             sql = "
                 SELECT
@@ -136,6 +145,7 @@ component displayname="widget" output="false" {
                 AND widgets.intRatioID = widget_ratio.intRatioID
 
                 WHERE user_widgets.intUserID = :user_id
+                #local.widgetFilter#
                 ORDER BY user_widgets.intPrio
 
             "

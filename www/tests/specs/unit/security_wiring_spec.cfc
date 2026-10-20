@@ -204,6 +204,34 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        /*
+            nginx serves .js/.css with "expires max". Without a version in the URL, browsers
+            kept the old backend.js after the CSRF update - AJAX calls (widgets, sorting) then
+            went out without the X-CSRF-Token header and were rejected.
+        */
+        describe("Backend assets", () => {
+
+            for (var file in ["backend/core/views/js.cfm", "backend/core/views/css.cfm"]) {
+                it(
+                    title = "are versioned in " & file,
+                    data  = { file: file },
+                    body  = (data) => {
+                        var source = scanner.readSource(data.file);
+                        var unversioned = reMatch("(src|href)=""/backend/dist/[^""]+""", source);
+                        expect(unversioned).toBeEmpty("Local files without assetUrl(): " & arrayToList(unversioned, ", "));
+                        expect(source).toInclude("assetUrl('/backend/dist/");
+                    }
+                );
+            }
+
+            it("send the CSRF header with every AJAX call that changes data", () => {
+                var source = scanner.readSource("backend/dist/js/backend.js");
+                expect(source).toInclude("$(document).ajaxSend(");
+                expect(source).toInclude("xhr.setRequestHeader('X-CSRF-Token', token)");
+            });
+
+        });
+
         describe("Full-text searches", () => {
 
             it("pass the search through fullTextSearch() in every function with MATCH ... AGAINST", () => {

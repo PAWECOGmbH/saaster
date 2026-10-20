@@ -10,34 +10,9 @@
         }
     }
 
-    // Get all widgets which are connected to plans and modules (or displayed permanent)
-    qWidgets = objWidget.getAllWidgets(moduleList, session.currentPlan.planID);
-
-    allWidgets = valueList(qWidgets.intWidgetID);
-
-    // Remove user widgets that have been deactivated by admin
-    if(listLen(allWidgets)){
-        qRemoveWidgets = objWidget.deleteMultipleWidget(allWidgets, session.user_id);
-    }else{
-        qRemoveWidgets = objWidget.deleteWidget(session.user_id);
-    }
-
-
-    qOldUserWidgets = objWidget.getOldUserWidgets(session.user_id);
-    oldUserWidgetIDs = valueList(qOldUserWidgets.intWidgetID);
-    lastUserWidgetPrio = qOldUserWidgets.recordCount;
-
-    for(row in qWidgets){
-
-        if(not listFind(oldUserWidgetIDs, row.intWidgetID)){
-
-            lastUserWidgetPrio++;
-            qInsertWidgets = objWidget.insertWidget(row.intWidgetID, lastUserWidgetPrio, session.user_id);
-        }
-
-    }
-
-    qUserWidgets = objWidget.getUserWidgets(session.user_id);
+    // The widgets of the booked plan and modules (and the permanent ones). Unavailable widgets
+    // are only hidden, the user's settings for them stay (widget.cfc::prepareUserWidgets).
+    qUserWidgets = objWidget.prepareUserWidgets(session.user_id, moduleList, session.currentPlan.planID);
     dashboardEditable = !structKeyExists(application.systemSettingStruct, "settingDashboardEditable") or application.systemSettingStruct.settingDashboardEditable eq 1;
 
     if (!dashboardEditable) {

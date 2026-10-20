@@ -70,6 +70,21 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        describe("assetUrl", () => {
+
+            it("appends the modification time of the file as version", () => {
+                var path = "/backend/dist/js/backend.js";
+                var expected = dateTimeFormat(getFileInfo(expandPath(path)).lastmodified, "yyyymmddHHnnss");
+
+                expect(application.objGlobal.assetUrl(path)).toBe(path & "?v=" & expected);
+            });
+
+            it("returns the path unchanged if the file does not exist", () => {
+                expect(application.objGlobal.assetUrl("/backend/dist/js/testbox-missing.js")).toBe("/backend/dist/js/testbox-missing.js");
+            });
+
+        });
+
         /*
             The sysadmin and blog searches use MATCH ... AGAINST (... IN BOOLEAN MODE).
             MySQL throws a syntax error on dangling operators, so only words may pass.

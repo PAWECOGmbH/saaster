@@ -1304,6 +1304,23 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    /*
+        URL of a local asset with its modification time as version: /backend/dist/js/backend.js?v=20261020154500
+        nginx serves static files with "expires max", so browsers keep them forever. A changed
+        file gets a new URL and is loaded again - without it, users keep running old JavaScript
+        after an update (e.g. AJAX calls without the CSRF header).
+    */
+    public string function assetUrl(required string path) {
+
+        try {
+            return arguments.path & "?v=" & dateTimeFormat(getFileInfo(expandPath(arguments.path)).lastmodified, "yyyymmddHHnnss");
+        } catch (any e) {
+            return arguments.path;
+        }
+
+    }
+
+
     // CSRF: token for the current session
     public string function csrfToken() {
 

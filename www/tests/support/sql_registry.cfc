@@ -47,6 +47,7 @@ component output="false" hint="Every value that is written into SQL directly (no
             { file: "backend/core/com/sysadmin.cfc", expression: "local.entries", reason: "Constant page size" },
             { file: "backend/core/com/sysadmin.cfc", expression: "local.orList", reason: "Column names from the languages table; the search value is bound" },
             { file: "backend/core/com/sysadmin.cfc", expression: "local.orderClause", reason: "Chosen in code for whitelisted sort values" },
+            { file: "backend/core/com/widget.cfc", expression: "local.widgetFilter", reason: "Fixed condition with a bound parameter" },
             { file: "backend/core/com/user.cfc", expression: "arguments.columns", reason: "Column list passed by code as a constant" },
             { file: "backend/core/com/user.cfc", expression: "local.tenantID", reason: "Filtered to whole numbers in updateUser()" },
 
