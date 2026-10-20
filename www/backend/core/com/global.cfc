@@ -1272,6 +1272,38 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    /*
+        Turns a search input into a valid expression for MATCH ... AGAINST (... IN BOOLEAN MODE).
+        MySQL parses the bound value as a boolean search expression and throws a syntax error
+        on dangling operators ("foo --", "-", "~", "a)"). The result is therefore built from
+        words only:
+          - with an @ (e-mail addresses): one phrase, "info@example.com"
+          - otherwise every word as a prefix search: muster* ag*
+        Returns an empty string if no word is left - MATCH then finds nothing.
+    */
+    public string function fullTextSearch(required string search) {
+
+        if (find("@", arguments.search)) {
+            local.phrase = trim(reReplace(replace(arguments.search, '"', " ", "all"), "\s+", " ", "all"));
+            return len(local.phrase) ? '"' & local.phrase & '"' : "";
+        }
+
+        // Letters (incl. umlauts), digits, underscore and apostrophe form words - everything else separates them
+        local.words = javaCast("string", arguments.search).replaceAll("[^\p{L}\p{N}_']+", " ");
+        local.terms = [];
+
+        for (local.word in listToArray(local.words, " ")) {
+            local.word = reReplace(local.word, "^'+|'+$", "", "all");
+            if (len(local.word)) {
+                arrayAppend(local.terms, local.word & "*");
+            }
+        }
+
+        return arrayToList(local.terms, " ");
+
+    }
+
+
     // CSRF: token for the current session
     public string function csrfToken() {
 

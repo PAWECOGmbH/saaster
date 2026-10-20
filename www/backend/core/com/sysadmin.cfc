@@ -113,6 +113,9 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalCountriesSearch(required string search){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
             params = {
@@ -169,6 +172,9 @@ component displayname="sysadmin" output="false" {
 
     public query function getCountriesSearch(required string search, required numeric start, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["intPrio", "intPrio ASC", "intPrio DESC", "blnDefault DESC", "strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC"], "intPrio");
 
@@ -195,6 +201,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCountriesImportSearch(required string search, required string sort){
+
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
 
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC", "strSubRegion ASC", "strSubRegion DESC"], "strCountryName ASC");
@@ -299,6 +308,9 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalCustomersSearch(required string search, required numeric start, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCompanyName ASC", "strCompanyName DESC", "strContactPerson ASC", "strContactPerson DESC", "strCity ASC", "strCity DESC", "dtmInsertDate ASC", "dtmInsertDate DESC"], "strCompanyName ASC");
 
@@ -359,6 +371,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCustomerSearch(required string search, required numeric start, required string sort){
+
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
 
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCompanyName ASC", "strCompanyName DESC", "strContactPerson ASC", "strContactPerson DESC", "strCity ASC", "strCity DESC", "dtmInsertDate ASC", "dtmInsertDate DESC"], "strCompanyName ASC");
@@ -472,6 +487,9 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["invoiceNumber ASC", "invoiceNumber DESC", "dtmInvoiceDate ASC", "dtmInvoiceDate DESC", "dtmDueDate ASC", "dtmDueDate DESC"], "invoiceNumber DESC");
 
@@ -559,6 +577,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getAllInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
+
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
 
         // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
         arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["invoiceNumber ASC", "invoiceNumber DESC", "dtmInvoiceDate ASC", "dtmInvoiceDate DESC", "dtmDueDate ASC", "dtmDueDate DESC"], "invoiceNumber DESC");

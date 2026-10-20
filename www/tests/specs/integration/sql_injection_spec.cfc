@@ -112,14 +112,40 @@ component extends="tests.support.integration_spec" {
             });
 
             // MATCH ... AGAINST (:search IN BOOLEAN MODE): the value is bound, but MySQL parses it
-            // as a boolean search expression. A dangling operator such as "--" is a MySQL syntax
-            // error there, not an injection - hence payloads without dangling operators.
-            it("treats quotes as part of the search value (full-text searches)", () => {
-                for (var payload in variables.payloads.merge(['" OR ""="', "\'"])) {
-                    application.objSysadmin.getCustomerSearch(payload, 0, "strCompanyName ASC");
-                    application.objSysadmin.getAllInvoicesSearch(payload, payload, 0, "", "invoiceNumber DESC");
-                    new backend.core.com.blog().getPostsSearch(payload, 0, "dtmCreated DESC");
+            // as a boolean search expression and throws on dangling operators. Every search goes
+            // through global.cfc::fullTextSearch first - none of these inputs may break a list.
+            it("never breaks a full-text search, whatever is typed", () => {
+                var inputs = variables.payloads.merge(["'; --", '" OR ""="', "\'", "foo --", "-", "--", "~", "%", "*", "**", "foo-", "a)", "(a", "+", "foo++", "@3", "foo @3", "*a@b*", '"unterminated', "*-*"]);
+                var blog = new backend.core.com.blog();
+
+                for (var input in inputs) {
+                    try {
+                        application.objSysadmin.getTotalCustomersSearch(input, 0, "strCompanyName ASC");
+                        application.objSysadmin.getCustomerSearch(input, 0, "strCompanyName ASC");
+                        application.objSysadmin.getTotalInvoicesSearch(input, input, 0, "", "invoiceNumber DESC");
+                        application.objSysadmin.getAllInvoicesSearch(input, input, 0, "", "invoiceNumber DESC");
+                        application.objSysadmin.getTotalCountriesSearch(input);
+                        application.objSysadmin.getCountriesSearch(input, 0, "strCountryName ASC");
+                        application.objSysadmin.getCountriesImportSearch(input, "strCountryName ASC");
+                        blog.getTotalPostsSearch(input);
+                        blog.getPostsSearch(input, 0, "dtmCreated DESC");
+                    } catch (any e) {
+                        fail("Search input [" & input & "] broke the query: " & e.message);
+                    }
                 }
+            });
+
+            it("still finds a customer by a word of its name in the full-text search", () => {
+                queryExecute(
+                    "UPDATE customers SET strCompanyName = 'Zwetschgenbaum Testbox' WHERE intCustomerID = :customerID",
+                    { customerID: { type: "numeric", value: variables.customerID } },
+                    { datasource: application.datasource }
+                );
+                // The customer search only lists customers with a user
+                variables.fixtures.createUser(customerID = variables.customerID);
+
+                expect(application.objSysadmin.getCustomerSearch("zwetschgen", 0, "strCompanyName ASC").recordCount).toBeGTE(1);
+                expect(application.objSysadmin.getCustomerSearch("zwetschgen --", 0, "strCompanyName ASC").recordCount).toBeGTE(1);
             });
 
             it("still finds a customer by a normal search value", () => {

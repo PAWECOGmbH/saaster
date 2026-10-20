@@ -70,6 +70,48 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        /*
+            The sysadmin and blog searches use MATCH ... AGAINST (... IN BOOLEAN MODE).
+            MySQL throws a syntax error on dangling operators, so only words may pass.
+        */
+        describe("fullTextSearch", () => {
+
+            it("turns every word into a prefix search", () => {
+                expect(application.objGlobal.fullTextSearch("Muster AG")).toBe("Muster* AG*");
+            });
+
+            it("keeps umlauts, digits and apostrophes inside a word", () => {
+                expect(application.objGlobal.fullTextSearch("Müller 8000 O'Neil")).toBe("Müller* 8000* O'Neil*");
+            });
+
+            it("searches an e-mail address as one phrase", () => {
+                expect(application.objGlobal.fullTextSearch("info@example.com")).toBe('"info@example.com"');
+                expect(application.objGlobal.fullTextSearch('"info@example.com"')).toBe('"info@example.com"');
+            });
+
+            it("accepts what the views send (wrapped in * or quotes)", () => {
+                expect(application.objGlobal.fullTextSearch("*Muster*")).toBe("Muster*");
+            });
+
+            it("removes the boolean operators", () => {
+                expect(application.objGlobal.fullTextSearch("+foo -bar ~baz (qux) <a >b ""c")).toBe("foo* bar* baz* qux* a* b* c*");
+                expect(application.objGlobal.fullTextSearch("foo --")).toBe("foo*");
+                expect(application.objGlobal.fullTextSearch("foo-bar")).toBe("foo* bar*");
+            });
+
+            it("returns an empty string when no word is left", () => {
+                for (var input in ["", "   ", "-", "--", "~", "*", "**", "%", "()", "'", "+-<>"]) {
+                    expect(application.objGlobal.fullTextSearch(input)).toBe("", "Input: " & input);
+                }
+            });
+
+            it("keeps operators inside an e-mail phrase, where MySQL accepts them", () => {
+                expect(application.objGlobal.fullTextSearch('a -- b@c ~ )')).toBe('"a -- b@c ~ )"');
+                expect(application.objGlobal.fullTextSearch('" "')).toBe("");
+            });
+
+        });
+
     }
 
 }

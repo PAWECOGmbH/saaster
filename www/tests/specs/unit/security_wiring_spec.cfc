@@ -183,6 +183,27 @@ component extends="testbox.system.BaseSpec" {
 
         });
 
+        describe("Full-text searches", () => {
+
+            it("pass the search through fullTextSearch() in every function with MATCH ... AGAINST", () => {
+                var missing = [];
+
+                for (var file in scanner.filesBelow(["backend/core/com", "frontend/core/com", "api"]).filter((f) => right(f, 4) eq ".cfc")) {
+                    var functions = listToArray(reReplace(scanner.readSource(file), "\bfunction\s+", chr(30), "all"), chr(30), true);
+                    for (var index = 2; index lte arrayLen(functions); index++) {
+                        if (reFindNoCase("AGAINST\s*\(\s*:", functions[index]) and not find("fullTextSearch(arguments.search)", functions[index])) {
+                            arrayAppend(missing, file & ": " & listFirst(functions[index], "("));
+                        }
+                    }
+                }
+
+                if (arrayLen(missing)) {
+                    fail("Full-text searches without fullTextSearch():" & chr(10) & arrayToList(missing, chr(10)));
+                }
+            });
+
+        });
+
         describe("User data in mails", () => {
 
             it("encodes the name in the registration mail", () => {

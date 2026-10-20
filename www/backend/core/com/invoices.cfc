@@ -794,8 +794,8 @@ component displayname="invoices" output="false" {
     public numeric function calcVat(required numeric amount, required boolean isNet, required numeric rate) {
 
         if (arguments.isNet eq 0) {
-            local.cvat = 10 & arguments.rate;
-            local.vat_amount = (arguments.amount/local.cvat)*arguments.rate;
+            // VAT contained in a gross amount: gross / (100 + rate) * rate
+            local.vat_amount = (arguments.amount/(100 + arguments.rate))*arguments.rate;
         } else {
             local.vat_amount = (arguments.amount/100)*arguments.rate;
         }
