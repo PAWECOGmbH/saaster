@@ -32,7 +32,7 @@
                         <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
                         <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/mappings?mapping=frontend">Frontend mappings</a></li>
-                        <li class="breadcrumb-item active">#qMapping.strMapping#</li>
+                        <li class="breadcrumb-item active">#encodeForHTML(qMapping.strMapping)#</li>
                     </ol>
                 </div>
 
@@ -46,7 +46,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
-                    <form action="#application.mainURL#/sysadm/mappings" method="post" onsubmit="encodeMeta()">
+                    <form action="#application.mainURL#/sysadm/mappings" method="post" onsubmit="encodeMeta()">#csrfField()#
                         <input type="hidden" name="edit_mapping_frontend" value="#qMapping.intFrontendMappingsID#">
                         <div class="card-header">
                             <h3 class="card-title">Edit your mapping here</h3>

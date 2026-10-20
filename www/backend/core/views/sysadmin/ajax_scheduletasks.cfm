@@ -12,7 +12,7 @@
 <cfif qSchdule.recordCount>
 
     <cfoutput>
-    <form action="#application.mainURL#/sysadm/modules?moduleID=#url.moduleID#" method="post">
+    <form action="#application.mainURL#/sysadm/modules?moduleID=#url.moduleID#" method="post">#csrfField()#
     <input type="hidden" name="edit_scheduletask" value="#url.taskID#">
         <div class="modal-content">
             <div class="modal-header">
@@ -22,11 +22,11 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Name</label>
-                    <input type="text" name="schedule_name" class="form-control" autocomplete="off" maxlength="250" value="#qSchdule.strName#" required>
+                    <input type="text" name="schedule_name" class="form-control" autocomplete="off" maxlength="250" value="#encodeForHTML(qSchdule.strName)#" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Path</label>
-                    <input type="text" name="path" class="form-control" autocomplete="off" maxlength="250" value="#qSchdule.strPath#" required>
+                    <input type="text" name="path" class="form-control" autocomplete="off" maxlength="250" value="#encodeForHTML(qSchdule.strPath)#" required>
                 </div>
                 <div class="row">
                     <div class="col-lg-4">

@@ -21,7 +21,7 @@
     <cfset timeZones = new backend.core.com.time(session.customer_id).getTimezones()>
 
     <cfoutput>
-        <form action="#application.mainURL#/sysadm/countries" method="post">
+        <form action="#application.mainURL#/sysadm/countries" method="post">#csrfField()#
             <input type="hidden" name="edit_country" value="#qCountry.intCountryID#">
             <div class="modal-header">
                 <h5 class="modal-title">Edit country</h5>
@@ -37,7 +37,7 @@
                         <label class="form-label">Language</label>
                         <select name="languageID" class="form-select">
                             <cfloop query="qLanguages">
-                                <option value="#qLanguages.intLanguageID#" <cfif qLanguages.intLanguageID eq qCountry.intLanguageID>selected</cfif>>#qLanguages.strLanguageEN#</option>
+                                <option value="#qLanguages.intLanguageID#" <cfif qLanguages.intLanguageID eq qCountry.intLanguageID>selected</cfif>>#encodeForHTML(qLanguages.strLanguageEN)#</option>
                             </cfloop>
                         </select>
                     </div>
@@ -93,7 +93,7 @@
                     </div>
                     <div class="col-lg-1 mb-3 pt-4">
                         <cfif fileExists(qCountry.strFlagSVG)>
-                            <img src="#qCountry.strFlagSVG#" style="max-height: 30px;" alt="Flag of #qCountry.strCountryName#">
+                            <img src="#encodeForHTML(qCountry.strFlagSVG)#" style="max-height: 30px;" alt="Flag of #encodeForHTML(qCountry.strCountryName)#">
                         </cfif>
                     </div>
                     <div class="col-lg-6 mb-3">

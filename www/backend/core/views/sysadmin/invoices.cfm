@@ -14,7 +14,8 @@
 
     // Status
     if(structKeyExists(form, 'status')){
-        session.status = form.status;
+        // The status ID ends up in the SQL of the invoice list - whole numbers only
+        session.status = isValid("integer", form.status) ? int(form.status) : 0;
         if (session.status gt 0) {
             session.status_sql = "AND invoices.intPaymentStatusID = #session.status#";
         }else {
@@ -40,9 +41,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qTotalInvoices = objSysadmin.getTotalInvoicesSearch(searchString, searchTerm, invoice_start, session.status_sql, session.i_sort);
@@ -110,7 +111,7 @@
                             <h3 class="card-title">Invoices overview #searchTerm#</h3>
                         </div>
                         <div class="card-body">
-                            <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">
+                            <form action="#application.mainURL#/sysadmin/invoices?page=1" method="post">#csrfField()#
                                 <div class="row">
                                     <div class="col-lg-8">
                                         <p>There are <b>#qTotalInvoices.totalInvoices#</b> invoices in the database.</p>
@@ -219,9 +220,9 @@
                                                 <td>#qInvoices.invoiceNumber#</td>
                                                 <td>#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
-                                                <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#left(qInvoices.strInvoiceTitle, 25)# ...<cfelse>#qInvoices.strInvoiceTitle#</cfif></td>
-                                                <td><cfif len(qInvoices.customerName) gt 25>#left(qInvoices.customerName, 25)# ...<cfelse>#qInvoices.customerName#</cfif></td>
-                                                <td>#qInvoices.strCurrency#</td>
+                                                <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#encodeForHTML(left(qInvoices.strInvoiceTitle, 25))# ...<cfelse>#encodeForHTML(qInvoices.strInvoiceTitle)#</cfif></td>
+                                                <td><cfif len(qInvoices.customerName) gt 25>#encodeForHTML(left(qInvoices.customerName, 25))# ...<cfelse>#encodeForHTML(qInvoices.customerName)#</cfif></td>
+                                                <td>#encodeForHTML(qInvoices.strCurrency)#</td>
                                                 <td class="text-end">#lsCurrencyFormat(qInvoices.decTotalPrice, "none")#</td>
                                                 <td class="text-end">
                                                     <div class="btn-list flex-nowrap float-end">
@@ -230,14 +231,14 @@
                                                         </button>
                                                         <div class="dropdown-menu dropdown-menu-end">
                                                             <a class="dropdown-item" href="#application.mainURL#/sysadmin/invoice/edit/#qInvoices.intInvoiceID#">Edit invoice</a>
-                                                            <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Send invoice by email</a>
+                                                            <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Send invoice by email</a>
                                                             <cfif qInvoices.intPaymentStatusID eq 1 or qInvoices.intPaymentStatusID eq 2>
-                                                                <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
+                                                                <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Cancel invoice</a>
                                                             </cfif>
                                                             <cfif qInvoices.intPaymentStatusID eq 5>
-                                                                <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&open&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Undo cancellation</a>
+                                                                <a class="dropdown-item" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&open&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#">Undo cancellation</a>
                                                             </cfif>
-                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?i=#qInvoices.intInvoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#qInvoices.intInvoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/invoices?del_redirect')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -325,7 +326,7 @@
 
 
 <cfoutput>
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="new_invoice" id="customer_id">
     <div id="invoice_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">

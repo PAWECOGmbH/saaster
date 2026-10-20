@@ -13,7 +13,7 @@
         </div>
         <div class="row mb-3">
             <div class="col-lg-12">
-                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
+                <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">#csrfField()#
                     <input type="hidden" name="change_pw_btn">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titChoosePassword')#</h3>

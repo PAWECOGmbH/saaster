@@ -50,7 +50,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item">SysAdmin</li>
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/modules">Modules</a></li>
-                            <li class="breadcrumb-item active">#qModule.strModuleName#</li>
+                            <li class="breadcrumb-item active">#encodeForHTML(qModule.strModuleName)#</li>
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">

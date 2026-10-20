@@ -34,11 +34,11 @@
                 </thead>
                 <tbody>
                     <cfloop query="qSchduleTasks">
-                        <form action="#application.mainURL#/sysadm/modules?moduleID=#qModule.intModuleID#&overview" method="post">
+                        <form action="#application.mainURL#/sysadm/modules?moduleID=#qModule.intModuleID#&overview" method="post">#csrfField()#
                             <input type="hidden" name="edit_scheduletask" value="#qSchduleTasks.intScheduletaskID#">
                             <tr>
-                                <td>#qSchduleTasks.strName#</td>
-                                <td>#qSchduleTasks.strPath#</td>
+                                <td>#encodeForHTML(qSchduleTasks.strName)#</td>
+                                <td>#encodeForHTML(qSchduleTasks.strPath)#</td>
                                 <td>#lsDateFormat(startDateTime.utc2local(utcDate=qSchduleTasks.dtmStartTime))#</td>
                                 <td>#lsTimeFormat(startDateTime.utc2local(utcDate=qSchduleTasks.dtmStartTime))#</td>
                                 <td>#qSchduleTasks.intIterationMinutes#</td>
@@ -47,16 +47,16 @@
                                         <input onclick="this.form.submit()" class="form-check-input" type="checkbox" name="active" <cfif qSchduleTasks.blnActive eq 1>checked</cfif>>
                                     </label>
                                 </td>
-                                <td><a href="#application.mainURL#/#qSchduleTasks.strPath#?pass=#variables.schedulePassword#" class="btn" target="_blank">Run</a></td>
+                                <td><a href="#application.mainURL#/#encodeForHTML(qSchduleTasks.strPath)#?pass=#variables.schedulePassword#" class="btn" target="_blank">Run</a></td>
                                 <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_scheduletasks.cfm?taskID=#qSchduleTasks.intScheduletaskID#&moduleID=#qModule.intModuleID#">Edit</a></td>
-                                <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_scheduletask=#qSchduleTasks.intScheduletaskID#&moduleID=#qModule.intModuleID#', 'Delete scheduletask', 'Are you sure you want to delete this scheduletask?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_scheduletask=#qSchduleTasks.intScheduletaskID#&#csrfParam()#&moduleID=#qModule.intModuleID#', 'Delete scheduletask', 'Are you sure you want to delete this scheduletask?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                             </tr>
                         </form>
                     </cfloop>
                 </tbody>
                 <div id="schedule_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                     <div class="modal-dialog modal-dialog-centered" role="document">
-                        <form action="#application.mainURL#/sysadm/modules" method="post">
+                        <form action="#application.mainURL#/sysadm/modules" method="post">#csrfField()#
                         <input type="hidden" name="new_scheduletask" value="#qModule.intModuleID#">
                             <div class="modal-content">
                                 <div class="modal-header">

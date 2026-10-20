@@ -13,6 +13,15 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     // Fixed values
     this.sessionmanagement = true;
     this.setdomaincookies = true;
+
+    // Session cookie: never readable by JavaScript, not sent along with cross-site requests, and
+    // only sent over HTTPS when the application runs on HTTPS (mainURL in config.cfm). Locally on
+    // http the Secure flag would stop the browser from sending the cookie at all.
+    this.sessionCookie = {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: left(lCase(trim(variables.mainURL)), 8) eq "https://"
+    };
     this.processingdirective.pageEncoding = "utf-8";
     this.mappings["/"] = getDirectoryFromPath(getCurrentTemplatePath());
     this.timezone = "UTC+00:00"; // Do NOT change the standard timezone!!!
@@ -209,6 +218,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         getLayout = application.layoutStruct;
         logWrite = application.objLog.logWrite;
         getMeta = application.objMeta.getMeta;
+        csrfToken = application.objGlobal.csrfToken;
+        csrfField = application.objGlobal.csrfField;
+        csrfParam = application.objGlobal.csrfParam;
 
 
         // Is there a redirect coming in url?
@@ -286,6 +298,33 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
             // If someone is trying to call a .cfm file directly
             if (thiscontent.noaccess) {
                 location url="#application.mainURL#" addtoken="false";
+            }
+
+        }
+
+        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links).
+        // The rule itself lives in objGlobal.csrfRequired() so it can be tested.
+        if (application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url))) {
+
+            if (!application.objGlobal.csrfVerify()) {
+
+                logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
+
+                local.reqHeaders = getHTTPRequestData(false).headers;
+                if (structKeyExists(local.reqHeaders, "X-Requested-With") and local.reqHeaders["X-Requested-With"] eq "XMLHttpRequest") {
+                    header statuscode="403" statustext="Forbidden";
+                    writeOutput("Invalid CSRF token");
+                    abort;
+                }
+
+                getAlert('msgCsrfInvalid', 'danger');
+
+                if (structKeyExists(session, "user_id")) {
+                    location url="#application.mainURL#/dashboard" addtoken="false";
+                } else {
+                    location url="#application.mainURL#/login" addtoken="false";
+                }
+
             }
 
         }

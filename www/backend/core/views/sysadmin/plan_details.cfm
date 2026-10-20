@@ -1,6 +1,6 @@
 
 <cfoutput>
-<form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">
+<form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">#csrfField()#
 <input type="hidden" name="edit_plan" value="#qPlan.intPlanID#">
     <div class="row">
         <div class="col-lg-6 pe-5">
@@ -8,7 +8,7 @@
                 <label class="form-label">Plan group</label>
                 <select name="groupID" class="form-select">
                     <cfloop query="qPlanGroups">
-                        <option value="#qPlanGroups.intPlanGroupID#" <cfif qPlanGroups.intPlanGroupID eq qPlan.intPlanGroupID>selected</cfif>>#qPlanGroups.strGroupName#</option>
+                        <option value="#qPlanGroups.intPlanGroupID#" <cfif qPlanGroups.intPlanGroupID eq qPlan.intPlanGroupID>selected</cfif>>#encodeForHTML(qPlanGroups.strGroupName)#</option>
                     </cfloop>
                 </select>
             </div>
@@ -24,7 +24,7 @@
             <div class="mb-3">
                 <label class="form-label">Short description</label>
                 <div class="input-group input-group-flat">
-                    <textarea class="form-control" name="short_desc" rows="3" maxlength="16000" data-bs-toggle="autosize">#qPlan.strShortDescription#</textarea>
+                    <textarea class="form-control" name="short_desc" rows="3" maxlength="16000" data-bs-toggle="autosize">#encodeForHTML(qPlan.strShortDescription)#</textarea>
                     <span class="input-group-text">
                         <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##short_desc_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate short description"></i></a>
                     </span>
@@ -124,7 +124,7 @@
             <div class="row mb-2">
                 <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
             </div>
-            <textarea class="form-control editor" name="desc" style="height: 400px;">#qPlan.strDescription#</textarea>
+            <textarea class="form-control editor" name="desc" style="height: 400px;">#encodeForHTML(qPlan.strDescription)#</textarea>
             <small class="form-hint mt-1">
                 For <i class="fas fa-check mt-2"></i> checkmarks use the <i class="fas fa-list"></i> unordered list function. The bullet points are automatically replaced.
             </small>

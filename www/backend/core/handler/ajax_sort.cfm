@@ -3,11 +3,25 @@
 
 <cfscript>
 
-if (structKeyExists(url, "extend")) {
-    sqlExtend = url.extend;
-} else {
-    sqlExtend = "";
+/*
+    Saves the drag-and-drop order of the sysadmin lists (languages, countries, modules,
+    currencies, plan groups, plans, plan features, blog categories).
+
+    This file is called directly by its path (no mapping), so neither the router's role
+    checks nor the CSRF rule in Application.cfc cover it - it checks both itself.
+*/
+if (!(structKeyExists(session, "sysadmin") and session.sysadmin)) {
+    cfheader(statuscode = 403, statustext = "Forbidden");
+    writeOutput("Forbidden");
+    abort;
 }
+
+if (cgi.request_method neq "POST" or !application.objGlobal.csrfVerify()) {
+    cfheader(statuscode = 403, statustext = "Forbidden");
+    writeOutput("Invalid CSRF token");
+    abort;
+}
+
 
 thisTable = "";
 
@@ -34,6 +48,13 @@ if (structKeyExists(url, "planfeatures")) {
 }
 if (structKeyExists(url, "blog_categories")) {
     thisTable = "blog_categories";
+}
+
+// Unknown list: nothing to sort
+if (!len(thisTable)) {
+    cfheader(statuscode = 400, statustext = "Bad Request");
+    writeOutput("Unknown list");
+    abort;
 }
 
 param name="response" default="ok";
@@ -63,7 +84,6 @@ if(thisTable neq "plans"){
                                 UPDATE #thisTable#
                                 SET intPrio = :thisPrio
                                 WHERE #thisPrimKey# = :thisID
-                                #sqlExtend#
                             "
                         )
 
@@ -114,14 +134,6 @@ if(thisTable neq "plans"){
                 if(datax[i].group eq group_idx){
 
                     thisID = datax[i].intPlanID;
-
-                    sqlstr = "
-                    UPDATE #thisTable#
-                    SET intPrio = #prio#
-                    WHERE intPlanGroupID = #group_idx#
-                    AND #thisPrimKey# = #thisID#
-                    "
-                    //writedump(sqlstr);
 
 
                     queryExecute(

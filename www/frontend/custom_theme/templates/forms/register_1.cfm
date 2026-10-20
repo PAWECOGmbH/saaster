@@ -8,7 +8,7 @@
             #getTrans('formSignUp')#
         </div>
 
-        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">
+        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">#csrfField()#
             <input type="hidden" name="register_btn">
             <div class="card-body">
                 <cfif structKeyExists(session, "alert")>

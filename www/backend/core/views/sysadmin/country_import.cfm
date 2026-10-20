@@ -22,9 +22,9 @@
 
     if(len(trim(searchTerm))){
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qCountries = objSysadmin.getCountriesImportSearch(searchString, session.ci_sort);
@@ -69,7 +69,7 @@
                     <div class="card">
                         <div class="card-body">
                             <p>We have <b>#qTotalCountries.totalCountries# not imported Countries</b> in our database. You will only find countries here that you have not yet imported.</p>
-                            <form action="#application.mainURL#/sysadmin/countries/import" method="post">
+                            <form action="#application.mainURL#/sysadmin/countries/import" method="post">#csrfField()#
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <label class="form-label">Search for country:</label>
@@ -100,7 +100,7 @@
                                 </div>
                             </form>
                             <div class="table-responsive">
-                                <form action="#application.mainURL#/sysadm/countries" method="post">
+                                <form action="#application.mainURL#/sysadm/countries" method="post">#csrfField()#
                                     <input type="hidden" name="import_country">
                                     <table class="table card-table table-vcenter text-nowrap" id="checkall">
                                         <thead>
@@ -119,13 +119,13 @@
                                             <cfloop query="qCountries">
                                                 <tr>
                                                     <td><input type="checkbox" name="country_id" value="#qCountries.intCountryID#" class="form-check-input" id="checkAll"></td>
-                                                    <td>#qCountries.strCountryName#</td>
-                                                    <td class="text-center">#qCountries.strISO1#</td>
-                                                    <td class="text-center">#qCountries.strISO2#</td>
-                                                    <td class="text-center">#qCountries.strLocale#</td>
-                                                    <td>#qCountries.strRegion#</td>
-                                                    <td>#qCountries.strSubRegion#</td>
-                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/countries?delete_country=#qCountries.intCountryID#', 'Delete country', 'Do you really want to delete this country irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    <td>#encodeForHTML(qCountries.strCountryName)#</td>
+                                                    <td class="text-center">#encodeForHTML(qCountries.strISO1)#</td>
+                                                    <td class="text-center">#encodeForHTML(qCountries.strISO2)#</td>
+                                                    <td class="text-center">#encodeForHTML(qCountries.strLocale)#</td>
+                                                    <td>#encodeForHTML(qCountries.strRegion)#</td>
+                                                    <td>#encodeForHTML(qCountries.strSubRegion)#</td>
+                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/countries?delete_country=#qCountries.intCountryID#&#csrfParam()#', 'Delete country', 'Do you really want to delete this country irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
                                             </cfloop>
                                         </tbody>

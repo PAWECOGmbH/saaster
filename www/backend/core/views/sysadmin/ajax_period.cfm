@@ -15,7 +15,7 @@
 </cfscript>
 
 <cfoutput>
-<form action="#application.mainURL#/sysadm/#type#?booking&b=#url.b#&c=#url.c#&m=#url.m#&p=#url.p#&period" method="post">
+<form action="#application.mainURL#/sysadm/#type#?booking&b=#url.b#&c=#url.c#&m=#url.m#&p=#url.p#&period" method="post">#csrfField()#
     <div class="modal-header">
         <h5 class="modal-title">Module edit</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

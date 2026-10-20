@@ -12,16 +12,16 @@ component displayname="user" output="false" {
         local.argsReturnValue['message'] = "";
         local.argsReturnValue['success'] = false;
 
-        // Hash and salt the password
-        local.hashedStruct = application.objGlobal.generateHash(arguments.newPassword);
+        // Hash the password (Argon2id, the salt is part of the hash string)
+        local.passwordHash = application.objGlobal.hashPassword(arguments.newPassword);
 
         try {
 
             queryExecute(
                 options = {datasource = application.datasource},
                 params = {
-                    passwordHash: {type: "nvarchar", value: local.hashedStruct.thisHash},
-                    passwordSalt: {type: "nvarchar", value: local.hashedStruct.thisSalt},
+                    passwordHash: {type: "nvarchar", value: local.passwordHash},
+                    passwordSalt: {type: "nvarchar", value: ""},
                     strUUID: {type: "nvarchar", value: arguments.resetUUID}
                 },
                 sql = "
@@ -98,7 +98,8 @@ component displayname="user" output="false" {
             local.active = arguments.userStruct.active;
         }
         if (structKeyExists(arguments.userStruct, "tenantID")) {
-            local.tenantID = arguments.userStruct.tenantID;
+            // The IDs end up in an IN (...) clause - keep whole numbers only
+            local.tenantID = arrayToList(listToArray(arguments.userStruct.tenantID).filter((tenant) => isValid("integer", trim(tenant))).map((tenant) => int(trim(tenant))));
         }
         if (structKeyExists(arguments.userStruct, "mfa")) {
             local.mfa = arguments.userStruct.mfa;
@@ -330,8 +331,8 @@ component displayname="user" output="false" {
                     sysadmin: {type: "integer", value: local.sysadmin}
                 },
                 sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID)
+                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
+                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
                 "
 
             )
@@ -431,7 +432,8 @@ component displayname="user" output="false" {
                         },
                         sql = "
                             UPDATE users
-                            SET strUUID = :newUUID
+                            SET strUUID = :newUUID,
+                                dtmUUIDCreated = UTC_TIMESTAMP()
                             WHERE intUserID = :userID
                         "
                     )
@@ -542,7 +544,8 @@ component displayname="user" output="false" {
                 },
                 sql = "
                     UPDATE users
-                    SET strUUID = :uuID
+                    SET strUUID = :uuID,
+                        dtmUUIDCreated = UTC_TIMESTAMP()
                     WHERE intUserID = :userID
                 "
             )
@@ -643,7 +646,8 @@ component displayname="user" output="false" {
                 UPDATE users
                 SET intMfaCode = :authcode,
                 dtmMfaDateTime = :mfaDateTime,
-                strUUID = :strUUID
+                strUUID = :strUUID,
+                dtmUUIDCreated = UTC_TIMESTAMP()
                 WHERE strEmail = :strEmail;
             "
         )
@@ -730,22 +734,173 @@ component displayname="user" output="false" {
 
 
     // Get users data using a UUID
+    // The user behind a link to confirm a changed e-mail address - only while the link is valid.
     public query function getOptinUser(required string userUUID){
+        return getUserByValidToken(arguments.userUUID, "emailchange", "*");
+    }
 
-        local.qOptinUser = queryExecute(
 
+    /*
+        Links sent by e-mail carry the token from users.strUUID. They expire:
+        the lifetime depends on what the link is for. dtmUUIDCreated is set
+        wherever a token is issued.
+    */
+    public numeric function tokenLifetimeHours(required string purpose) {
+        switch (arguments.purpose) {
+            case "reset":       return 2;     // password reset
+            case "emailchange": return 24;    // confirm a changed e-mail address
+            case "invitation":  return 168;   // invitation by an admin (7 days)
+        }
+        throw(type = "Saaster.UnknownTokenPurpose", message = "Unknown token purpose [#arguments.purpose#].");
+    }
+
+    // The user a token belongs to, or an empty query if the token is unknown or expired.
+    public query function getUserByValidToken(required string token, required string purpose, string columns = "intUserID, intCustomerID, strEmail, strLanguage, strUUID") {
+
+        if (!len(trim(arguments.token))) {
+            return queryNew("intUserID");
+        }
+
+        return queryExecute(
             options = {datasource = application.datasource},
             params = {
-            strUUID: {type: "nvarchar", value: arguments.userUUID}
+                token: {type: "nvarchar", value: arguments.token},
+                hours: {type: "numeric", value: tokenLifetimeHours(arguments.purpose)}
             },
             sql = "
-                SELECT *
+                SELECT #arguments.columns#
                 FROM users
-                WHERE strUUID = :strUUID
+                WHERE strUUID = :token
+                AND dtmUUIDCreated >= UTC_TIMESTAMP() - INTERVAL :hours HOUR
             "
-        )
+        );
+    }
 
-        return local.qOptinUser;
+
+    /*
+        Role rules for creating and editing users.
+
+        These functions only decide - they do not read the database. The handler
+        (backend/core/handler/user.cfm) collects the facts and asks here. The rules
+        mirror the user forms (customer/user_new.cfm, user_edit.cfm, my-profile.cfm),
+        but they are enforced on the server, because form fields can be changed freely.
+
+        "actor" is the acting user: { userID, admin, superadmin, sysadmin } - usually
+        built from the session with actorFromSession().
+    */
+
+    public struct function actorFromSession() {
+        return {
+            "userID": session.user_id ?: 0,
+            "admin": isTrue(session.admin ?: false),
+            "superadmin": isTrue(session.superadmin ?: false),
+            "sysadmin": isTrue(session.sysadmin ?: false)
+        };
+    }
+
+    // Creating users is for admins (the "new user" page is admin only).
+    public boolean function canCreateUser(required struct actor) {
+        return arguments.actor.sysadmin or arguments.actor.admin or arguments.actor.superadmin;
+    }
+
+    /*
+        Editing ANOTHER user (the own profile is always allowed).
+        target: { inTenantRange, mainUser, sysadmin } - inTenantRange means the target
+        belongs to a tenant the actor has access to.
+    */
+    public boolean function canEditUser(required struct actor, required struct target) {
+        if (arguments.actor.sysadmin) {
+            return true;
+        }
+
+        // The edit page is for super admins only, never for the main user of a
+        // customer or for a system administrator.
+        return arguments.actor.superadmin
+            and arguments.target.inTenantRange
+            and not arguments.target.mainUser
+            and not arguments.target.sysadmin;
+    }
+
+    /*
+        The roles and the active flag that may actually be stored.
+
+        requested: what the form sent { admin, superadmin, sysadmin, active }
+        current:   what the user has now (empty for a new user)
+        isSelf:    the actor edits the own profile
+
+        A role the actor is not allowed to grant or revoke keeps its current value.
+        Nobody changes the own roles or deactivates the own account.
+    */
+    public struct function allowedRoles(required struct actor, required struct requested, struct current = {}, boolean isSelf = false) {
+
+        local.current = {
+            "admin": isTrue(arguments.current.admin ?: false),
+            "superadmin": isTrue(arguments.current.superadmin ?: false),
+            "sysadmin": isTrue(arguments.current.sysadmin ?: false),
+            "active": isTrue(arguments.current.active ?: false)
+        };
+
+        if (arguments.isSelf) {
+            return local.current;
+        }
+
+        local.result = {
+            "sysadmin": arguments.actor.sysadmin ? isTrue(arguments.requested.sysadmin ?: false) : local.current.sysadmin,
+            "superadmin": (arguments.actor.sysadmin or arguments.actor.superadmin) ? isTrue(arguments.requested.superadmin ?: false) : local.current.superadmin,
+            "admin": (arguments.actor.sysadmin or arguments.actor.superadmin or arguments.actor.admin) ? isTrue(arguments.requested.admin ?: false) : local.current.admin,
+            "active": isTrue(arguments.requested.active ?: false)
+        };
+
+        // Higher roles include the lower ones (as insertUser does it).
+        if (local.result.sysadmin) {
+            local.result.superadmin = true;
+        }
+        if (local.result.superadmin) {
+            local.result.admin = true;
+        }
+
+        return local.result;
+    }
+
+    /*
+        The facts the role rules need about an existing user, read straight from
+        the database. mainUser follows the definition of the delete action in
+        handler/user.cfm: the first user (lowest ID) of the user's own customer.
+    */
+    public struct function getRoleFacts(required numeric userID) {
+
+        local.qUser = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                userID: {type: "numeric", value: arguments.userID}
+            },
+            sql = "
+                SELECT users.intUserID, users.intCustomerID, users.blnAdmin, users.blnSuperAdmin, users.blnSysAdmin, users.blnActive,
+                    IF((SELECT MIN(cu.intUserID) FROM customer_user cu WHERE cu.intCustomerID = users.intCustomerID) = users.intUserID, 1, 0) AS blnMainUser
+                FROM users
+                WHERE users.intUserID = :userID
+            "
+        );
+
+        if (!local.qUser.recordCount) {
+            return { "exists": false };
+        }
+
+        return {
+            "exists": true,
+            "userID": local.qUser.intUserID,
+            "customerID": local.qUser.intCustomerID,
+            "admin": isTrue(local.qUser.blnAdmin),
+            "superadmin": isTrue(local.qUser.blnSuperAdmin),
+            "sysadmin": isTrue(local.qUser.blnSysAdmin),
+            "active": isTrue(local.qUser.blnActive),
+            "mainUser": isTrue(local.qUser.blnMainUser)
+        };
+    }
+
+    // Form values arrive as 1, "on", "true", "yes" or empty.
+    private boolean function isTrue(required any value) {
+        return isSimpleValue(arguments.value) and listFindNoCase("1,on,true,yes", trim(arguments.value)) gt 0;
     }
 
 }

@@ -45,7 +45,7 @@
         <dd class="col-7 mt-3">
             <div class="row">
                 <div class="col">#session.currentPlan.nextPlan.planName#</div>
-                <div class="col"><a href="#application.mainURL#/cancel?plan=#session.currentPlan.nextPlan.planID#&waitingPlan"><i class="fas fa-trash-alt me-1"></i> #getTrans('txtRemove')#</a></div>
+                <div class="col"><a href="#application.mainURL#/cancel?plan=#session.currentPlan.nextPlan.planID#&waitingPlan&#csrfParam()#"><i class="fas fa-trash-alt me-1"></i> #getTrans('txtRemove')#</a></div>
             </div>
         </dd>
 

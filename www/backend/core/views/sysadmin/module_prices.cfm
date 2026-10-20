@@ -8,7 +8,7 @@
 </cfscript>
 
 <cfoutput>
-<form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules">
+<form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules">#csrfField()#
 <input type="hidden" name="edit_prices" value="#qModule.intModuleID#">
     <div class="row">
         <div class="col-lg-5">
@@ -23,7 +23,7 @@
                         </tr>
                         <cfloop query="qPrices">
                             <tr>
-                                <td>#qPrices.strCurrencyEN# (#qPrices.strCurrencyISO#)</td>
+                                <td>#encodeForHTML(qPrices.strCurrencyEN)# (#encodeForHTML(qPrices.strCurrencyISO)#)</td>
                                 <td align="right">
                                     <input type="text" name="onetime_#qPrices.currID#" class="form-control text-end w-75" autocomplete="off" value="#trim(numberFormat(qPrices.decPriceOneTime, '__.__'))#" maxlength="10">
                                 </td>

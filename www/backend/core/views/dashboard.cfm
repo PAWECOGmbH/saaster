@@ -137,7 +137,7 @@
 
                 <div class="row mt-4">
                     <div class="col text-center">
-                        <form action="#application.mainURL#/dashboard-settings" method="post">
+                        <form action="#application.mainURL#/dashboard-settings" method="post">#csrfField()#
                             <cfif session.dashboardedit eq 0>
                                 <input type="hidden" name="dashboardedit" value="1">
                                 <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>

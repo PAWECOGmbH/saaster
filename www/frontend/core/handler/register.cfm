@@ -13,11 +13,27 @@ if (structKeyExists(form, 'login_btn')) {
     param name="form.email" default="";
     param name="form.password" default="";
 
+    // Too many failed attempts for this address or IP? Then refuse before checking the password.
+    loginThrottle = new backend.core.com.loginthrottle();
+    clientIP = loginThrottle.clientIP();
+
+    if (loginThrottle.isBlocked(form.email, clientIP)) {
+        getAlert('msgTooManyLoginAttempts', 'warning');
+        logWrite("user", "warning", "Login refused, too many failed attempts [E-mail: #form.email#, IP: #clientIP#]");
+        location url="#local.urlLogin#" addtoken="false";
+    }
+
     objUserLogin = new frontend.core.com.login().checkLogin(argumentCollection = form);
 
     if (isStruct(objUserLogin)) {
 
         if (objUserLogin.loginCorrect) {
+
+            // New session ID after a successful login (protection against session fixation)
+            sessionRotate();
+
+            // The address may try again freely
+            loginThrottle.reset(form.email);
 
             session.user_id = objUserLogin.user_id;
             session.customer_id = objUserLogin.customer_id;
@@ -85,6 +101,9 @@ if (structKeyExists(form, 'login_btn')) {
 
 
         } else {
+
+            // Count the failed attempt (wrong password, unknown address or disabled account)
+            loginThrottle.registerFailure(form.email, clientIP);
 
             // Is the user active?
             if (structKeyExists(objUserLogin, "active") and !objUserLogin.active) {
@@ -197,7 +216,7 @@ if (structKeyExists(form, 'register_btn')) {
             cfsavecontent (variable = "mailContent") {
 
                 echo("
-                    #getTrans('titHello')# #form.first_name# #form.name#<br><br>
+                    #getTrans('titHello')# #encodeForHTML(form.first_name)# #encodeForHTML(form.name)#<br><br>
                     #getTrans('txtPleaseConfirmEmail')#<br><br>
                     <a href='#application.mainURL#/logincheck?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
                     <br><br>
@@ -242,18 +261,8 @@ if (structKeyExists(form, 'register_btn')) {
 // Coming from double opt-in mail (also for new users added by the admin)
 if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
-    qCheckOptin = queryExecute(
-
-        options = {datasource = application.datasource},
-        params = {
-           strUUID: {type: "nvarchar", value: url.u}
-        },
-        sql = "
-            SELECT strUUID, strLanguage
-            FROM optin
-            WHERE strUUID = :strUUID
-        "
-    )
+    // Registration opt-in - only while the link is valid (register.cfc::getValidOptin)
+    qCheckOptin = objRegister.getValidOptin(url.u);
 
     if (qCheckOptin.recordCount) {
 
@@ -265,19 +274,8 @@ if (structKeyExists(url, 'u') and len(trim(url.u)) eq 64) {
 
     } else {
 
-        // Check whether its added by admin
-        qCheckUser = queryExecute(
-
-            options = {datasource = application.datasource},
-            params = {
-                strUUID: {type: "nvarchar", value: url.u}
-            },
-            sql = "
-                SELECT strUUID, strLanguage, strEmail
-                FROM users
-                WHERE strUUID = :strUUID
-            "
-        )
+        // Check whether its added by admin - only while the invitation is valid
+        qCheckUser = application.objUser.getUserByValidToken(url.u, "invitation");
 
         if (qCheckUser.recordCount) {
 
@@ -324,6 +322,14 @@ if (structKeyExists(form, 'create_account')) {
         location url="#local.urlRegister#" addtoken="false";
     }
 
+    // Password policy (global.cfc::isValidPassword)
+    if (!application.objGlobal.isValidPassword(form.password)) {
+        session.step = 2;
+        getAlert('alertChoosePassword', 'warning');
+        logWrite("user", "warning", "Register new user step 3: The password does not meet the password policy");
+        location url="#local.urlRegister#" addtoken="false";
+    }
+
     // Is there a valid uuid?
     if (structKeyExists(session, "uuid")) {
 
@@ -345,10 +351,10 @@ if (structKeyExists(form, 'create_account')) {
 
             customerStruct = QueryRowData(qCheckOptin, 1);
 
-            // Hash and salt the password
-            hashedStruct = application.objGlobal.generateHash(form.password);
-            StructInsert(customerStruct, "hash", hashedStruct.thisHash);
-            StructInsert(customerStruct, "salt", hashedStruct.thisSalt);
+            // Hash the password (Argon2id, the salt is part of the hash string)
+            passwordHash = application.objGlobal.hashPassword(form.password);
+            StructInsert(customerStruct, "hash", passwordHash);
+            StructInsert(customerStruct, "salt", "");
 
             // Save the customer into the db
             insertCustomer = objRegister.insertCustomer(customerStruct);
@@ -544,7 +550,8 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
             },
             sql="
                 UPDATE users
-                SET strUUID = :strUUID
+                SET strUUID = :strUUID,
+                    dtmUUIDCreated = UTC_TIMESTAMP()
                 WHERE intUserID = :intUserID
             "
         );
@@ -556,7 +563,7 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
         cfsavecontent (variable = "variables.mailContent") {
 
             echo("
-                #getTrans('titHello')# #qCheckUser.strFirstName# #qCheckUser.strLastName#<br><br>
+                #getTrans('titHello')# #encodeForHTML(qCheckUser.strFirstName)# #encodeForHTML(qCheckUser.strLastName)#<br><br>
                 #getTrans('txtResetPassword')#
                 <br><br>
                 <a class='mail-btn' href='#application.mainURL#/logincheck?p=#newUUID#' target='_blank'>#getTrans('titResetPassword')#</a>
@@ -589,18 +596,8 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
 // Confirm the password reset
 if (structKeyExists(url, "p")) {
 
-    // Is the link valid?
-    qCheckUUID = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
-            strUUID: {type: "nvarchar", value: url.p}
-        },
-        sql="
-            SELECT intUserID
-            FROM users
-            WHERE strUUID = :strUUID
-        "
-    );
+    // Is the link valid? Reset links expire (user.cfc::tokenLifetimeHours)
+    qCheckUUID = application.objUser.getUserByValidToken(url.p, "reset");
 
     if (qCheckUUID.recordCount) {
 
@@ -637,6 +634,14 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         location url="#local.urlPassword#" addtoken="false";
     }
 
+    // The link may have expired while the form was open
+    if (!application.objUser.getUserByValidToken(thisResetUUID, "reset").recordCount) {
+        structDelete(session, "uuid");
+        getAlert('alertNotValidAnymore', 'warning');
+        logWrite("user", "warning", "Reset password: The reset link has expired. [UUID: #thisResetUUID#]");
+        location url="#local.urlPassword#" addtoken="false";
+    }
+
     // Check passwords first
     if (len(trim(form.password)) and len(trim(form.password2))) {
 
@@ -652,6 +657,13 @@ if (structKeyExists(form, "reset_pw_btn_2")) {
         logWrite("user", "warning", "Reset password: The user tried to reset the password, but the password fields are empty. [UUID: #thisResetUUID#]");
         location url="#local.urlPassword#" addtoken="false";
 
+    }
+
+    // Password policy (global.cfc::isValidPassword)
+    if (!application.objGlobal.isValidPassword(form.password)) {
+        getAlert('alertChoosePassword', 'warning');
+        logWrite("user", "warning", "Reset password: The new password does not meet the password policy. [UUID: #thisResetUUID#]");
+        location url="#local.urlPassword#" addtoken="false";
     }
 
 
@@ -710,6 +722,9 @@ if (structKeyExists(form, 'mfa_btn')) {
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
 
     if (checkMfa.success eq true) {
+
+        // New session ID once the second factor is confirmed (protection against session fixation)
+        sessionRotate();
 
         session.user_id = checkMfa.userID;
         session.customer_id = checkMfa.customerID;

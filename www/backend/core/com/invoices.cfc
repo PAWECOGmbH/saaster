@@ -1386,8 +1386,8 @@ component displayname="invoices" output="false" {
             cfsavecontent(variable="local.addressBlock") {
                 echo(
                     "
-                        #local.customerData.billingAccountName#<br />
-                        #replace(local.customerData.billingAddress, chr(13), '<br />', 'all')#<br />
+                        #encodeForHTML(local.customerData.billingAccountName)#<br />
+                        #replace(encodeForHTML(local.customerData.billingAddress), "&##xd;", '<br />', 'all')#<br />
                     "
                 )
             }
@@ -1409,12 +1409,12 @@ component displayname="invoices" output="false" {
             cfsavecontent(variable="local.addressBlock") {
                 echo(
                     "
-                        #local.customerData.companyName#<br />
-                        #len(local.invoicePerson) ? local.invoicePerson & "<br />" : ""#
-                        #len(local.customerData.address) ? local.customerData.address & "<br />" : ""#
-                        #len(local.customerData.address2) ? local.customerData.address2 & "<br />" : ""#
-                        #len(local.customerData.zip) ? local.customerData.zip & " " : ""# #len(local.customerData.city) ? local.customerData.city & "<br />" : ""#
-                        #len(local.customerData.countryName) ? local.customerData.countryName & "<br />" : ""#
+                        #encodeForHTML(local.customerData.companyName)#<br />
+                        #len(local.invoicePerson) ? encodeForHTML(local.invoicePerson) & "<br />" : ""#
+                        #len(local.customerData.address) ? encodeForHTML(local.customerData.address) & "<br />" : ""#
+                        #len(local.customerData.address2) ? encodeForHTML(local.customerData.address2) & "<br />" : ""#
+                        #len(local.customerData.zip) ? encodeForHTML(local.customerData.zip) & " " : ""# #len(local.customerData.city) ? encodeForHTML(local.customerData.city) & "<br />" : ""#
+                        #len(local.customerData.countryName) ? encodeForHTML(local.customerData.countryName) & "<br />" : ""#
                     "
                 )
             }

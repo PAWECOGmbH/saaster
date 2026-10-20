@@ -115,14 +115,14 @@
                         <h3 class="card-title">#getTrans('titLogo')#</h3>
                     </div>
                     <div class="card-body">
-                        <form action="#application.mainURL#/customer" method="post" enctype="multipart/form-data">
+                        <form action="#application.mainURL#/customer" method="post" enctype="multipart/form-data">#csrfField()#
                             <div class="row mb-1">
                                 <cfif len(trim(getCustomerData.logo))>
                                     <div class="col-auto text-center">
-                                        <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" alt="logo" style="max-height: 150px;">
+                                        <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(getCustomerData.logo)#" alt="logo" style="max-height: 150px;">
                                         <div class="d-flex flex-row flex-start">
                                             <div class="mt-3">
-                                                <a href="#application.mainURL#/customer?del_logo" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>
+                                                <a href="#application.mainURL#/customer?del_logo&#csrfParam()#" class="btn btn-warning btn-block">#getTrans('txtDeleteLogo')#</a>
                                             </div>
                                         </div>
                                     </div>
@@ -142,7 +142,7 @@
                 </div>
             </div>
             <div class="col-lg-8">
-                <form class="card" id="submit_form" method="post" action="#application.mainURL#/customer">
+                <form class="card" id="submit_form" method="post" action="#application.mainURL#/customer">#csrfField()#
                     <input type="hidden" name="edit_company_btn">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('titEditCompany')#</h3>
@@ -192,7 +192,7 @@
                                         <select name="countryID" class="form-select" required>
                                             <option value=""></option>
                                             <cfloop query="qCountries">
-                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#encodeForHTML(qCountries.strCountryName)#</option>
                                             </cfloop>
                                         </select>
                                     </div>
@@ -284,7 +284,7 @@
 <!--- Modal for cancelation --->
 <cfif session.superadmin>
 <cfoutput>
-<form action="#application.mainURL#/cancel" method="post">
+<form action="#application.mainURL#/cancel" method="post">#csrfField()#
 <input type="hidden" name="delete" value="#session.customer_id#">
 <div id="delete_account" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-md modal-dialog-centered" role="document">

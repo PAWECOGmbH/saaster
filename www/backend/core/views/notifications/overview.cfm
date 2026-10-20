@@ -58,7 +58,7 @@
                                         <th width="5%"></th>
                                     </tr>
                                 </thead>
-                                <form action="#application.mainURL#/global?page=#url.page#" method="post">
+                                <form action="#application.mainURL#/global?page=#url.page#" method="post">#csrfField()#
                                     <tbody>
                                         <cfloop array="#qNotiOverview.arrayNoti#" index="i">
                                             <tr id="checkAll">
@@ -78,7 +78,7 @@
                                                         <div class="badge bg-red"></div>
                                                     </cfif>
                                                 </td>
-                                                <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/global?page=#url.page#&noti_del=#i.notiID#', '#getTrans("titDeleteNotification")#', '#getTrans("txtNotificationDelete")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a></td>
+                                                <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/global?page=#url.page#&noti_del=#i.notiID#&#csrfParam()#', '#getTrans("titDeleteNotification")#', '#getTrans("txtNotificationDelete")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a></td>
                                             </tr>
                                         </cfloop>
                                     </tbody>
