@@ -28,7 +28,9 @@ escape_json() {
     printf '    "host": "%s",\n' "$(escape_json "${TEST_MYSQL_HOST}")"
     printf '    "port": %s,\n' "${TEST_MYSQL_PORT}"
     printf '    "user": "%s",\n' "$(escape_json "${TEST_MYSQL_USER}")"
-    printf '    "password": "%s"\n' "$(escape_json "${TEST_MYSQL_PASSWORD}")"
+    printf '    "password": "%s",\n' "$(escape_json "${TEST_MYSQL_PASSWORD}")"
+    # Optional: Inbucket of compose-dev.yml - the specs that check sent mails read it there
+    printf '    "mailCatcherUrl": "http://%s:9000"\n' "$(escape_json "${INBUCKET_CONTAINER_NAME:-saaster_inbucket}")"
     printf '}\n'
 } > "${config_file}"
 

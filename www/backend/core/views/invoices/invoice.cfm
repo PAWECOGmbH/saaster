@@ -32,6 +32,9 @@
     // Get invoice address block
     addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
 
+    // The language of the invoice document (invoices.cfc::getInvoiceLanguage)
+    invoiceLng = objInvoices.getDocumentLanguage(getInvoiceData.language);
+
     // Get existent payments
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
@@ -70,6 +73,8 @@
             </cfif>
         </div>
         <div class="#getLayout.layoutPage#">
+            <!--- The invoice itself is shown in its own language and locale, the page around it in the user's --->
+            <cfset uiLocale = setLocale(application.objLanguage.toLocale(invoiceLng))>
             <div class="card card-lg" style="padding: 0 12%;">
                 <div class="card-body">
                     <div class="row">
@@ -89,7 +94,7 @@
                             </address>
                         </div>
                         <div class="col-12 mt-5">
-                            <p><b>#getTrans('titInvoice')# #getInvoiceData.number#</b></p>
+                            <p><b>#getTrans('titInvoice', invoiceLng)# #getInvoiceData.number#</b></p>
                             <hr class="my-1">
                             <p class="mt-2 h3">#encodeForHTML(getInvoiceData.title)#</p>
                             <hr class="my-1">
@@ -98,11 +103,11 @@
                         <div class="row mt-2">
                             <div class="col-lg-6">
                                 <div class="row">
-                                    <div class="col-md-4">#getTrans('titInvoiceDate')#:</div>
+                                    <div class="col-md-4">#getTrans('titInvoiceDate', invoiceLng)#:</div>
                                     <div class="col-md-8">#lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#</div>
                                 </div>
                                 <div class="row pb-4">
-                                    <div class="col-md-4">#getTrans('txtDueDate')#:</div>
+                                    <div class="col-md-4">#getTrans('txtDueDate', invoiceLng)#:</div>
                                     <div class="col-md-8">#lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#</div>
                                 </div>
                             </div>
@@ -114,12 +119,12 @@
                         <table class="table table-transparent table-responsive">
                             <thead>
                                 <tr>
-                                    <th width="5%" class="pl-0">#getTrans('titPos')#</th>
-                                    <th width="50%">#getTrans('titDescription')#</th>
-                                    <th width="15%" class="text-end">#getTrans('titQuantity')#</th>
-                                    <th width="15%" class="text-end">#getTrans('titSinglePrice')#</th>
-                                    <th width="5%" class="text-end">#getTrans('titDiscount')#</th>
-                                    <th width="10%" class="text-end pr-0">#getTrans('titTotal')# #getInvoiceData.currency#</th>
+                                    <th width="5%" class="pl-0">#getTrans('titPos', invoiceLng)#</th>
+                                    <th width="50%">#getTrans('titDescription', invoiceLng)#</th>
+                                    <th width="15%" class="text-end">#getTrans('titQuantity', invoiceLng)#</th>
+                                    <th width="15%" class="text-end">#getTrans('titSinglePrice', invoiceLng)#</th>
+                                    <th width="5%" class="text-end">#getTrans('titDiscount', invoiceLng)#</th>
+                                    <th width="10%" class="text-end pr-0">#getTrans('titTotal', invoiceLng)# #getInvoiceData.currency#</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,7 +148,7 @@
                                 </cfloop>
                                 <tr>
                                     <td></td>
-                                    <td colspan="4"><b>#getTrans('titTotal')#</b></td>
+                                    <td colspan="4"><b>#getTrans('titTotal', invoiceLng)#</b></td>
                                     <td class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
                                 </tr>
 
@@ -153,7 +158,7 @@
                                     <cfloop array="#getInvoiceData.vatArray#" index="vat">
                                         <tr>
                                             <td class="pb-1 pt-0" style="border: 0;"></td>
-                                            <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#vat.vatText#</td>
+                                            <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#objInvoices.getVatText(getInvoiceData.isNet, vat.vat, invoiceLng)#</td>
                                             <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsCurrencyFormat(vat.amount, "none")#</td>
                                         </tr>
                                     </cfloop>
@@ -163,14 +168,14 @@
                                 </cfif>
                                 <tr>
                                     <td style="border-top: 1px solid;"></td>
-                                    <td style="border-top: 1px solid;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
+                                    <td style="border-top: 1px solid;" colspan="4"><b>#objInvoices.getTotalText(getInvoiceData.vatType, invoiceLng)#</b></td>
                                     <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                                 </tr>
                                 <cfif qPayments.recordCount>
                                     <cfloop query="qPayments">
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
-                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
+                                            <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments', invoiceLng)# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                             <td style="border-top: 1px solid;" class="text-end pr-0">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                         </tr>
 
@@ -178,7 +183,7 @@
 
                                     <tr>
                                         <td style="border-top: 2px inset;"></td>
-                                        <td style="border-top: 2px inset;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                        <td style="border-top: 2px inset;" colspan="4"><b>#getTrans('txtRemainingAmount', invoiceLng)#</b></td>
                                         <td style="border-top: 2px inset;" class="text-end pr-0"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                                     </tr>
                                 </cfif>
@@ -186,6 +191,7 @@
                                 <tr><td colspan="100%" style="border-top: 3px double; border-bottom: 0;"></td></tr>
                             </tbody>
                         </table>
+                        <cfset setLocale(uiLocale)>
                         <cfif getInvoiceData.amountOpen gt 0>
                             <div class="row pe-0">
                                 <div class="text-end pe-0">

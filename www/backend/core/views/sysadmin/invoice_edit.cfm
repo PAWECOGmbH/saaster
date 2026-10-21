@@ -9,6 +9,9 @@
 
     objInvoice = new backend.core.com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
+
+    // Totals and VAT lines are part of the document: in the language of the invoice, like its positions
+    invoiceLng = objInvoice.getDocumentLanguage(qInvoice.language ?: "");
     qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
 
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
@@ -110,7 +113,7 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                #objInvoice.getInvoiceStatusBadge(session.lng, qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
+                                                #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
                                                     <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
@@ -169,7 +172,7 @@
                                             <cfloop array="#qInvoice.vatArray#" index="vat">
                                                 <tr>
                                                     <td class="pb-1 pt-0" style="border: 0;"></td>
-                                                    <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#vat.vatText#</td>
+                                                    <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#objInvoice.getVatText(qInvoice.isNet, vat.vat, invoiceLng)#</td>
                                                     <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsCurrencyFormat(vat.amount, "none")#</td>
                                                 </tr>
                                             </cfloop>
@@ -177,7 +180,7 @@
                                         </cfif>
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
-                                            <td style="border-top: 1px solid;" colspan="4"><b>#qInvoice.totaltext#</b></td>
+                                            <td style="border-top: 1px solid;" colspan="4"><b>#objInvoice.getTotalText(qInvoice.vatType, invoiceLng)#</b></td>
                                             <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsCurrencyFormat(qInvoice.total, "none")#</b></td>
                                         </tr>
                                         <cfif ! qPayments.recordCount>

@@ -91,19 +91,15 @@ component displayname="invoices" output="false" {
         if (structKeyExists(invoiceData, "vatType") and isNumeric(invoiceData.vatType) and invoiceData.vatType <= 3 and invoiceData.vatType > 0) {
             local.vatType = invoiceData.vatType;
         }
+        // The language of the document: given by the caller, otherwise the language of the
+        // invoice person or the customer (getInvoiceLanguage)
         if (structKeyExists(invoiceData, "language") and len(trim(invoiceData.language))) {
-            local.language = invoiceData.language;
+            local.language = getDocumentLanguage(invoiceData.language);
+        } else {
+            local.language = getInvoiceLanguage(local.customerID, isNumeric(local.userID) ? local.userID : 0);
         }
 
-        if (local.vatType eq 1) {
-            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
-        } else if (local.vatType eq 2) {
-            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
-        } else if (local.vatType eq 3) {
-            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
-        } else {
-            local.total_text = "Total";
-        }
+        local.total_text = getTotalText(local.vatType, local.language);
 
 
         try {
@@ -202,15 +198,7 @@ component displayname="invoices" output="false" {
         local.customerID = new backend.core.com.invoices().getInvoiceData(local.invoiceID).customerID;
 
         // Total text
-        if (local.vatType eq 1) {
-            local.total_text = application.objLanguage.getTrans('txtTotalIncl', local.language);
-        } else if (local.vatType eq 2) {
-            local.total_text = application.objLanguage.getTrans('txtTotalExcl', local.language);
-        } else if (local.vatType eq 3) {
-            local.total_text = application.objLanguage.getTrans('txtExemptTax', local.language);
-        } else {
-            local.total_text = "Total";
-        }
+        local.total_text = getTotalText(local.vatType, local.language);
 
         try {
 
@@ -713,11 +701,7 @@ component displayname="invoices" output="false" {
                 local.subtotal_price = local.subtotal_price + qInvoicePositions.decTotalPrice;
 
                 // Define vat text and sum
-                if (qInvoicePositions.blnIsNet eq 1) {
-                    local.vat_text = application.objLanguage.getTrans('txtPlusVat', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
-                } else {
-                    local.vat_text = application.objLanguage.getTrans('txtVatIncluded', local.customerLng) & ' ' & lsCurrencyFormat(qInvoicePositions.decVat, "none") & '%';
-                }
+                local.vat_text = getVatText(qInvoicePositions.blnIsNet eq 1, qInvoicePositions.decVat, local.customerLng);
 
                 if (qInvoicePositions.intVatType eq 1) {
 
@@ -814,6 +798,103 @@ component displayname="invoices" output="false" {
         }
 
         return local.rounded_price;
+
+    }
+
+    /*
+        Invoice language
+
+        An invoice is a document in one language: the language stored with it
+        (invoices.strLanguageISO). Its stored texts (title, positions) are written in it,
+        and everything rendered at display time - labels, total and VAT lines, dates and
+        amounts - uses it as well, whoever looks at the invoice.
+
+        getInvoiceLanguage() decides that language for a new invoice:
+          1. the language of the invoice person (users.strLanguage), if the invoice has one
+          2. the language of the customer's main user (the account owner)
+          3. the language of the customer data (country, last invoice)
+          4. the default language
+    */
+    public string function getInvoiceLanguage(required numeric customerID, numeric userID = 0) {
+
+        if (arguments.userID gt 0) {
+            local.qUser = queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    userID: {type: "numeric", value: arguments.userID}
+                },
+                sql = "SELECT strLanguage FROM users WHERE intUserID = :userID"
+            );
+            local.language = knownLanguage(local.qUser.strLanguage);
+            if (len(local.language)) {
+                return local.language;
+            }
+        }
+
+        local.qMainUser = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT strLanguage
+                FROM users
+                WHERE intCustomerID = :customerID
+                ORDER BY intUserID
+                LIMIT 1
+            "
+        );
+        local.language = knownLanguage(local.qMainUser.strLanguage);
+        if (len(local.language)) {
+            return local.language;
+        }
+
+        local.language = knownLanguage(application.objCustomer.getCustomerData(arguments.customerID).language ?: "");
+        if (len(local.language)) {
+            return local.language;
+        }
+
+        return application.objLanguage.getDefaultLanguage().iso;
+
+    }
+
+    // The language of a stored invoice, ready for display (falls back to the default language)
+    public string function getDocumentLanguage(required string language) {
+
+        local.language = knownLanguage(arguments.language);
+        return len(local.language) ? local.language : application.objLanguage.getDefaultLanguage().iso;
+
+    }
+
+    // The total line of an invoice: incl. VAT (1), excl. VAT (2) or VAT exempt (3)
+    public string function getTotalText(required numeric vatType, required string language) {
+
+        switch (arguments.vatType) {
+            case 1: return application.objLanguage.getTrans('txtTotalIncl', arguments.language);
+            case 2: return application.objLanguage.getTrans('txtTotalExcl', arguments.language);
+            case 3: return application.objLanguage.getTrans('txtExemptTax', arguments.language);
+        }
+        return "Total";
+
+    }
+
+    // The VAT line of an invoice: "plus VAT 8.1%" for net prices, "incl. VAT 8.1%" for gross prices
+    public string function getVatText(required boolean isNet, required numeric vat, required string language) {
+
+        return application.objLanguage.getTrans(arguments.isNet ? 'txtPlusVat' : 'txtVatIncluded', arguments.language) & ' ' & lsCurrencyFormat(arguments.vat, "none") & '%';
+
+    }
+
+    // The ISO code if it is a language of this installation, otherwise an empty string
+    private string function knownLanguage(required string language) {
+
+        local.iso = lCase(trim(arguments.language));
+        if (!len(local.iso)) {
+            return "";
+        }
+        // getAnyLanguage() answers with the default language for an unknown code
+        local.found = application.objLanguage.getAnyLanguage(local.iso).iso;
+        return compareNoCase(local.found, local.iso) eq 0 ? local.found : "";
 
     }
 
@@ -1444,7 +1525,8 @@ component displayname="invoices" output="false" {
         if (!structIsEmpty(local.invoiceData)) {
             local.customerID = local.invoiceData.customerID;
         } else {
-            return local.returnValue['message'] = "No invoice found!";
+            local.returnValue['message'] = "No invoice found!";
+            return local.returnValue;
         }
 
         try {
@@ -1470,6 +1552,10 @@ component displayname="invoices" output="false" {
             // Get the customer data
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
 
+            // The mail is written in the language of the invoice it belongs to
+            local.mailLanguage = getDocumentLanguage(local.invoiceData.language);
+            variables.mailLanguage = local.mailLanguage;
+
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
                 local.userData = application.objCustomer.getUserDataByID(local.invoiceData.userID);
@@ -1480,25 +1566,25 @@ component displayname="invoices" output="false" {
                 }
             }
 
-            variables.mailTitle = getTrans('titInvoiceReady', local.customerData.language);
+            variables.mailTitle = getTrans('titInvoiceReady', local.mailLanguage);
             variables.mailType = "html";
 
             cfsavecontent (variable = "variables.mailContent") {
 
                 echo("
-                    #getTrans('titHello', local.customerData.language)#  #local.invoicePerson#<br><br>
-                    #getTrans('msgThanksForPurchaseFindInvoice', local.customerData.language)#<br><br>
-                    #getTrans('txtDownloadInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.customerData.language)#</a>
+                    #getTrans('titHello', local.mailLanguage)#  #local.invoicePerson#<br><br>
+                    #getTrans('msgThanksForPurchaseFindInvoice', local.mailLanguage)#<br><br>
+                    #getTrans('txtDownloadInvoice', local.mailLanguage)#<br><br>
+                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.mailLanguage)#</a>
                     <br><br>
-                    #getTrans('txtRegards', local.customerData.language)#<br>
-                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #getTrans('txtRegards', local.mailLanguage)#<br>
+                    #getTrans('txtYourTeam', local.mailLanguage)#<br>
                     #application.appOwner#
                 ");
             }
 
             // Send invoice
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.customerData.language)#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.mailLanguage)#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1535,13 +1621,18 @@ component displayname="invoices" output="false" {
         if (!structIsEmpty(local.invoiceData)) {
             local.customerID = local.invoiceData.customerID;
         } else {
-            return local.returnValue['message'] = "No invoice found!";
+            local.returnValue['message'] = "No invoice found!";
+            return local.returnValue;
         }
 
         try {
 
             // Get the customer data
             local.customerData = application.objCustomer.getCustomerData(local.customerID);
+
+            // The mail is written in the language of the invoice it belongs to
+            local.mailLanguage = getDocumentLanguage(local.invoiceData.language);
+            variables.mailLanguage = local.mailLanguage;
 
             local.invoicePerson = "";
             if (structKeyExists(local.invoiceData, "userID") and (local.invoiceData.userID) gt 0) {
@@ -1556,17 +1647,17 @@ component displayname="invoices" output="false" {
             // Build the link to the invoice (incl. redirect)
             local.dl_link = application.mainURL & "/account-settings/invoice/" & local.invoiceID & "?redirect=" & urlEncodedFormat("account-settings/invoice/#local.invoiceID#?del_redirect");
 
-            variables.mailTitle = getTrans('titInvoice', local.customerData.language) & " | " & local.invoiceData.title;
+            variables.mailTitle = getTrans('titInvoice', local.mailLanguage) & " | " & local.invoiceData.title;
             variables.mailType = "html";
 
             cfsavecontent (variable = "variables.mailContent") {
                 echo("
-                    #getTrans('titHello', local.customerData.language)# #local.invoicePerson#<br><br>
-                    #getTrans('txtPleasePayInvoice', local.customerData.language)#<br><br>
-                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.customerData.language)#</a>
+                    #getTrans('titHello', local.mailLanguage)# #local.invoicePerson#<br><br>
+                    #getTrans('txtPleasePayInvoice', local.mailLanguage)#<br><br>
+                    <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.mailLanguage)#</a>
                     <br><br>
-                    #getTrans('txtRegards', local.customerData.language)#<br>
-                    #getTrans('txtYourTeam', local.customerData.language)#<br>
+                    #getTrans('txtRegards', local.mailLanguage)#<br>
+                    #getTrans('txtYourTeam', local.mailLanguage)#<br>
                     #application.appOwner#
                 ");
             }

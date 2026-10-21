@@ -101,7 +101,7 @@ component displayname="book" output="false" {
 
             variables.object = new backend.core.com.plans(currencyID=local.currencyID);
             local.currentProduct = variables.object.getCurrentPlan(arguments.customerID);
-            local.productType = local.getTrans('titPlan');
+            local.productType = local.getTrans('titPlan', variables.language);
             local.productName = local.bookingData.planName;
             local.maxUsers = local.bookingData.maxUsers;
 
@@ -147,7 +147,7 @@ component displayname="book" output="false" {
                 local.itsFirstProduct = true;
             }
 
-            local.productType = local.getTrans('titModule');
+            local.productType = local.getTrans('titModule', variables.language);
             local.productName = local.bookingData.name;
             local.maxUsers = 0;
             local.sql_field = "intModuleID = " & local.currentProductID;
@@ -372,7 +372,7 @@ component displayname="book" output="false" {
                         local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
 
                         // Set some invoice variables
-                        local.invoiceTitle = local.getTrans('titCycleChange') & " " & lcase(local.getTrans('txtMonthly')) & "/" & lcase(local.getTrans('txtYearly'));
+                        local.invoiceTitle = local.getTrans('titCycleChange', variables.language) & " " & lcase(local.getTrans('txtMonthly', variables.language)) & "/" & lcase(local.getTrans('txtYearly', variables.language));
                         local.invoiceCurrency = local.bookingData.currency;
                         local.invoiceLanguage = variables.language;
 
@@ -461,7 +461,7 @@ component displayname="book" output="false" {
                             local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
 
                             // Set some invoice variables
-                            local.invoiceTitle = local.getTrans('titUpgrade') & ": " & local.productName;
+                            local.invoiceTitle = local.getTrans('titUpgrade', variables.language) & ": " & local.productName;
                             local.invoiceCurrency = local.bookingData.currency;
                             local.invoiceLanguage = variables.language;
 

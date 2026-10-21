@@ -128,6 +128,17 @@ Next to the behaviour specs of the single rules (`csrf_spec`, `user_roles_spec`,
 
 `support/security_scanner.cfc` reads the sources for these specs - nothing is executed.
 
+## Invoice language specs
+
+An invoice is a document in one language (`invoices.cfc::getInvoiceLanguage`).
+
+| Spec | What it checks |
+| --- | --- |
+| `integration/invoice_language_spec` | The rule (invoice person, main user, customer data, default), `createInvoice` with and without a language, total and VAT lines for all VAT types, a booking whose invoice title follows the booking language. |
+| `integration/invoice_rendering_spec` | Invoice view and print rendered for real through `support/invoice_render_probe.cfm` by a user with another interface language; the print is read from the generated PDF. Invoice and payment mails sent and read back from Inbucket. A third language ("fr", added and removed by the spec) that is only partly translated falls back to the default language. |
+
+The mail checks need `mailCatcherUrl` in `config/testing.json` (written by `bin/write_test_config.sh`, Inbucket of `compose-dev.yml`); without it they are skipped.
+
 ## Scheduler specs
 
 The module scheduletasks run as jobs in `scheduler_jobs` (migration V23). Which jobs exist follows the bookings (`modules.cfc::syncCustomerScheduler`), the workers (`frontend/core/scheduletasks/tasks.cfm`) take them through `scheduler.cfc`.

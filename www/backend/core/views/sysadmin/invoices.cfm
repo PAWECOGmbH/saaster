@@ -218,7 +218,7 @@
                                             <tr>
                                                 <td>#lsDateFormat(qInvoices.dtmInvoiceDate)#</td>
                                                 <td>#qInvoices.invoiceNumber#</td>
-                                                <td>#objInvoice.getInvoiceStatusBadge(session.lng, qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
+                                                <td>#objInvoice.getInvoiceStatusBadge('en', qInvoices.strColor, qInvoices.strInvoiceStatusVariable)#</td>
                                                 <td>#lsDateFormat(qInvoices.dtmDueDate)#</td>
                                                 <td><cfif len(qInvoices.strInvoiceTitle) gt 25>#encodeForHTML(left(qInvoices.strInvoiceTitle, 25))# ...<cfelse>#encodeForHTML(qInvoices.strInvoiceTitle)#</cfif></td>
                                                 <td><cfif len(qInvoices.customerName) gt 25>#encodeForHTML(left(qInvoices.customerName, 25))# ...<cfelse>#encodeForHTML(qInvoices.customerName)#</cfif></td>

@@ -193,7 +193,7 @@
 												<table cellpadding="0" cellspacing="0" border="0" align="left" width="47%" class="responsive-table">
 													<tr>
 														<td class="padding-copy" style="padding: 0px 0 0px 0px; font-size: #variables.fontSizeText#px; line-height: 22px; font-family: #variables.fontFamily#; color: ###variables.headerFontColor#; border:none;">
-															<span style="font-size: 21px;">#getTrans('txtContact')#</span><br><br>
+															<span style="font-size: 21px;">#structKeyExists(variables, "mailLanguage") ? getTrans('txtContact', variables.mailLanguage) : getTrans('txtContact')#</span><br><br>
 															#customerData.companyName#<br>
 															#customerData.address#<br>
 															#customerData.zip# #customerData.city#<br>

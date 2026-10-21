@@ -4,5 +4,6 @@
     "host": "saaster_dev_mysql_host",
     "port": 3306,
     "user": "mysql_user",
-    "password": ""
+    "password": "",
+    "mailCatcherUrl": "http://saaster_inbucket:9000"
 }
