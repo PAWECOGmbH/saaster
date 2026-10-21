@@ -16,8 +16,13 @@ component output="false" hint="Creates test data and removes it again." {
     // time the domain marks test data that was left behind.
     variables.emailDomain = "@saaster.invalid";
 
+    // Name prefix of modules and plan groups created by the fixtures (see removeOrphans)
+    variables.namePrefix = "testbox: ";
+
     public any function init() {
         variables.createdCustomerIds = [];
+        variables.createdModuleIds = [];
+        variables.createdPlanGroupIds = [];
         return this;
     }
 
@@ -164,6 +169,73 @@ component output="false" hint="Creates test data and removes it again." {
         );
     }
 
+    /*
+        A bookable module. Deleting it later cascades to its scheduletasks,
+        bookings and scheduler jobs.
+    */
+    public numeric function createModule(string name = "Module") {
+        queryExecute(
+            "INSERT INTO modules (strModuleName, blnActive, blnBookable, intNumTestDays, intPrio) VALUES (:name, 1, 1, 0, 999)",
+            { name: { type: "varchar", value: left(variables.namePrefix & arguments.name, 50) } },
+            { datasource: application.datasource, result: "local.insertResult" }
+        );
+
+        arrayAppend(variables.createdModuleIds, local.insertResult.generatedKey);
+        return local.insertResult.generatedKey;
+    }
+
+    // A scheduletask of a module. The default path is the probe task of the scheduler specs.
+    public numeric function createScheduletask(
+        required numeric moduleID,
+        boolean active = true,
+        string path = "/tests/support/scheduler_task_probe.cfm",
+        numeric iterationMinutes = 5
+    ) {
+        queryExecute(
+            "INSERT INTO scheduletasks (strName, intModuleID, dtmStartTime, strPath, intIterationMinutes, blnActive)
+             VALUES (:name, :moduleID, '2026-01-01 00:00:00', :path, :iteration, :active)",
+            {
+                name: { type: "varchar", value: variables.namePrefix & "Task" },
+                moduleID: { type: "numeric", value: arguments.moduleID },
+                path: { type: "varchar", value: arguments.path },
+                iteration: { type: "numeric", value: arguments.iterationMinutes },
+                active: { type: "bit", value: arguments.active }
+            },
+            { datasource: application.datasource, result: "local.insertResult" }
+        );
+
+        return local.insertResult.generatedKey;
+    }
+
+    /*
+        A plan (in its own plan group) that includes the given modules.
+        Deleting the plan group later cascades to the plan and its bookings.
+    */
+    public numeric function createPlan(array moduleIDs = []) {
+        queryExecute(
+            "INSERT INTO plan_groups (strGroupName, intPrio) VALUES (:name, 999)",
+            { name: { type: "varchar", value: variables.namePrefix & "Plan group" } },
+            { datasource: application.datasource, result: "local.groupResult" }
+        );
+        arrayAppend(variables.createdPlanGroupIds, local.groupResult.generatedKey);
+
+        queryExecute(
+            "INSERT INTO plans (intPlanGroupID, strPlanName, intPrio) VALUES (:groupID, :name, 999)",
+            { groupID: { type: "numeric", value: local.groupResult.generatedKey }, name: { type: "varchar", value: variables.namePrefix & "Plan" } },
+            { datasource: application.datasource, result: "local.planResult" }
+        );
+
+        for (var moduleID in arguments.moduleIDs) {
+            queryExecute(
+                "INSERT INTO plans_modules (intPlanID, intModuleID) VALUES (:planID, :moduleID)",
+                { planID: { type: "numeric", value: local.planResult.generatedKey }, moduleID: { type: "numeric", value: moduleID } },
+                { datasource: application.datasource }
+            );
+        }
+
+        return local.planResult.generatedKey;
+    }
+
     // Removes everything this instance created. Children first, in case a
     // sub-tenant points to a parent created in the same run.
     public void function cleanup() {
@@ -175,14 +247,42 @@ component output="false" hint="Creates test data and removes it again." {
             );
         }
 
+        for (var moduleID in variables.createdModuleIds) {
+            queryExecute(
+                "DELETE FROM modules WHERE intModuleID = :moduleID",
+                { moduleID: { type: "numeric", value: moduleID } },
+                { datasource: application.datasource }
+            );
+        }
+
+        for (var groupID in variables.createdPlanGroupIds) {
+            queryExecute(
+                "DELETE FROM plan_groups WHERE intPlanGroupID = :groupID",
+                { groupID: { type: "numeric", value: groupID } },
+                { datasource: application.datasource }
+            );
+        }
+
         variables.createdCustomerIds = [];
+        variables.createdModuleIds = [];
+        variables.createdPlanGroupIds = [];
     }
 
-    // Removes data a crashed run left behind, recognisable by the marker domain.
+    // Removes data a crashed run left behind, recognisable by the marker domain and the name prefix.
     public void function removeOrphans() {
         queryExecute(
             "DELETE FROM customers WHERE strEmail LIKE :marker",
             { marker: { type: "varchar", value: "%" & variables.emailDomain } },
+            { datasource: application.datasource }
+        );
+        queryExecute(
+            "DELETE FROM modules WHERE strModuleName LIKE :prefix",
+            { prefix: { type: "varchar", value: variables.namePrefix & "%" } },
+            { datasource: application.datasource }
+        );
+        queryExecute(
+            "DELETE FROM plan_groups WHERE strGroupName LIKE :prefix",
+            { prefix: { type: "varchar", value: variables.namePrefix & "%" } },
             { datasource: application.datasource }
         );
     }

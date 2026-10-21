@@ -408,6 +408,7 @@ component displayname="modules" output="false" {
                     FROM bookings
                     WHERE intModuleID = :moduleID
                     AND intCustomerID = :customerID
+                    ORDER BY dteStartDate, intBookingID
                 "
             )
 
@@ -450,203 +451,189 @@ component displayname="modules" output="false" {
     }
 
 
-    // Distribute the booking of a module in the scheduler
-    public boolean function distributeScheduler(required numeric moduleID, required numeric customerID, required string status) {
+    /*
+        Scheduler jobs (table scheduler_jobs, one row per scheduletask and customer).
 
-        // Initialise variables
-        local.targetTable = "";
-        local.schedulerID = 0;
-        local.whatsToDo = "";
+        Whether a customer gets the scheduletasks of a module is read from the bookings,
+        with the same rule as the access check in global.cfc::getSEF: the module is booked
+        as "free", or today lies between start and end date of a booking - whatever the
+        status. A canceled module therefore keeps its tasks until its end date, a waiting
+        booking (cycle change) does not stop the current one. Modules included in a plan
+        count through the plan booking.
 
-        // Act according the status
-        if (arguments.status eq "test" or arguments.status eq "free" or arguments.status eq "active") {
-            local.whatsToDo = "run";
-        } else {
-            local.whatsToDo = "stop";
+        The functions reconcile instead of acting on a single status: they compute what
+        should exist and add or remove jobs accordingly. Calling them again changes nothing.
+    */
+
+
+    // The scheduletasks a customer should have right now (query: intScheduletaskID, intModuleID, dtmStartTime, intIterationMinutes)
+    public query function getDueScheduletasks(required numeric customerID) {
+
+        return queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID},
+                today: {type: "date", value: dateFormat(now(), "yyyy-mm-dd")}
+            },
+            sql = "
+                SELECT scheduletasks.intScheduletaskID, scheduletasks.intModuleID, scheduletasks.dtmStartTime, scheduletasks.intIterationMinutes
+                FROM scheduletasks
+                WHERE scheduletasks.intModuleID IN (
+                    SELECT bookings.intModuleID
+                    FROM bookings
+                    WHERE bookings.intCustomerID = :customerID
+                    AND bookings.intModuleID > 0
+                    AND (
+                        bookings.strStatus = 'free'
+                        OR (DATE(bookings.dteStartDate) <= :today AND DATE(bookings.dteEndDate) >= :today)
+                    )
+                    UNION
+                    SELECT plans_modules.intModuleID
+                    FROM bookings
+                    INNER JOIN plans_modules ON plans_modules.intPlanID = bookings.intPlanID
+                    WHERE bookings.intCustomerID = :customerID
+                    AND bookings.intPlanID > 0
+                    AND (
+                        bookings.strStatus = 'free'
+                        OR (DATE(bookings.dteStartDate) <= :today AND DATE(bookings.dteEndDate) >= :today)
+                    )
+                )
+                ORDER BY scheduletasks.intScheduletaskID
+            "
+        );
+
+    }
+
+
+    // Should the scheduletasks of this module run for this customer right now?
+    public boolean function shouldRunScheduler(required numeric customerID, required numeric moduleID) {
+
+        return listFind(valueList(getDueScheduletasks(arguments.customerID).intModuleID), arguments.moduleID) gt 0;
+
+    }
+
+
+    // Bring the jobs of one customer in line with the bookings. Returns { added, removed }.
+    public struct function syncCustomerScheduler(required numeric customerID) {
+
+        local.result = { "added": 0, "removed": 0 };
+
+        if (arguments.customerID lte 0) {
+            return local.result;
         }
 
-        // Get scheduletask data
-        local.qGetScheduleTask = queryExecute (
+        local.qDue = getDueScheduletasks(arguments.customerID);
+
+        // Remove the jobs the customer should not have (any more)
+        queryExecute(
+            options = {datasource = application.datasource, result = "local.deleteResult"},
+            params = {
+                customerID: {type: "numeric", value: arguments.customerID},
+                dueIDs: {type: "numeric", value: local.qDue.recordCount ? valueList(local.qDue.intScheduletaskID) : 0, list: true}
+            },
+            sql = "
+                DELETE FROM scheduler_jobs
+                WHERE intCustomerID = :customerID
+                AND intScheduletaskID NOT IN (:dueIDs)
+            "
+        );
+        local.result.removed = local.deleteResult.recordCount;
+
+        // Add the missing ones. Existing jobs keep their next and last run.
+        loop query="local.qDue" {
+
+            queryExecute(
+                options = {datasource = application.datasource, result = "local.insertResult"},
+                params = {
+                    taskID: {type: "numeric", value: local.qDue.intScheduletaskID},
+                    customerID: {type: "numeric", value: arguments.customerID},
+                    nextRun: {type: "datetime", value: application.objSysadmin.calcNextRun(local.qDue.dtmStartTime, local.qDue.intIterationMinutes)}
+                },
+                sql = "
+                    INSERT IGNORE INTO scheduler_jobs (intScheduletaskID, intCustomerID, dtmNextRun)
+                    VALUES (:taskID, :customerID, :nextRun)
+                "
+            );
+            local.result.added += local.insertResult.recordCount;
+
+        }
+
+        return local.result;
+
+    }
+
+
+    // Reconcile every customer who has a booking or a job (nightly repair and after new scheduletasks)
+    public struct function syncAllSchedulers() {
+
+        local.result = { "customers": 0, "added": 0, "removed": 0 };
+
+        local.qCustomers = queryExecute(
+            options = {datasource = application.datasource},
+            sql = "
+                SELECT intCustomerID FROM bookings
+                UNION
+                SELECT intCustomerID FROM scheduler_jobs
+            "
+        );
+
+        loop query="local.qCustomers" {
+            local.sync = syncCustomerScheduler(local.qCustomers.intCustomerID);
+            local.result.customers++;
+            local.result.added += local.sync.added;
+            local.result.removed += local.sync.removed;
+        }
+
+        return local.result;
+
+    }
+
+
+    // A scheduletask got a new start time or interval: recalculate the next run of all its jobs
+    public void function rescheduleModuleTasks(required numeric moduleID) {
+
+        local.qTasks = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 moduleID: {type: "numeric", value: arguments.moduleID}
             },
             sql = "
-                SELECT intScheduletaskID, intIterationMinutes, dtmStartTime
+                SELECT intScheduletaskID, dtmStartTime, intIterationMinutes
                 FROM scheduletasks
                 WHERE intModuleID = :moduleID
             "
-        )
+        );
 
-        if (local.qGetScheduleTask.recordCount) {
+        loop query="local.qTasks" {
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    taskID: {type: "numeric", value: local.qTasks.intScheduletaskID},
+                    nextRun: {type: "datetime", value: application.objSysadmin.calcNextRun(local.qTasks.dtmStartTime, local.qTasks.intIterationMinutes)}
+                },
+                sql = "
+                    UPDATE scheduler_jobs
+                    SET dtmNextRun = :nextRun
+                    WHERE intScheduletaskID = :taskID
+                "
+            );
+        }
 
-            // If the customerID is gt 0, we need to delete or to add
-            if (arguments.customerID gt 0) {
-
-                loop query="local.qGetScheduleTask" {
-
-                    // If we need to delete the entries
-                    if (local.whatsToDo eq "stop") {
-
-                        loop from="1" to="20" index="local.i" {
-
-                            local.tableName = "scheduler_#numberFormat(local.i, '00')#"; // Generates table names such as scheduler_01, scheduler_02, etc.
-
-                            queryExecute (
-                                options = {datasource = application.datasource},
-                                params = {
-                                    schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                                    customerID: {type: "numeric", value: arguments.customerID}
-                                },
-                                sql = "
-                                    DELETE FROM #local.tableName#
-                                    WHERE intScheduletaskID = :schedID
-                                    AND intCustomerID = :customerID
-                                "
-                            )
-
-                        }
-
-                    }
-
-                    // If we need to insert the entries
-                    if (local.whatsToDo eq "run") {
-
-                        // Initialize variables to track the table with the fewest records
-                        local.minRecords = 99999999;
-                        local.targetTable = "";
-                        local.sqlCount = "";
-
-                        // Generate the SQL for counting entries in each table and combine them using UNION
-                        loop from="1" to="20" index="local.i" {
-
-                            local.tableName = "scheduler_#numberFormat(local.i, '00')#"; // Generates table names such as scheduler_01, scheduler_02, etc.
-
-                            if (local.i gt 1) {
-                                local.sqlCount &= " UNION ALL ";
-                            }
-
-                            local.sqlCount &= "SELECT '" & local.tableName & "' AS tableName, COUNT(*) AS thisCount FROM " & local.tableName;
-
-                        }
-
-                        // Execute the combined query
-                        local.qCount = queryExecute(sql=local.sqlCount, options={datasource: application.datasource});
-
-                        // Iterate over the results to find the table with the fewest entries
-                        loop from="1" to="#local.qCount.recordCount#" index="local.j" {
-                            if (local.qCount.thisCount[local.j] < local.minRecords) {
-                                local.minRecords = local.qCount.thisCount[local.j];
-                                local.targetTable = local.qCount.tableName[local.j];
-                            }
-                        }
-
-                        // Now we have found the table with the fewest entries, so we insert the data record there
-                        if (len(trim(local.targetTable))) {
-
-                            // Calculate next run
-                            local.nextRun = application.objSysadmin.calcNextRun(local.qGetScheduleTask.dtmStartTime, local.qGetScheduleTask.intIterationMinutes);
-
-                            // Check if the combination already exists in any table
-                            local.exists = false;
-                            loop from="1" to="20" index="local.i" {
-                                local.tableName = "scheduler_#numberFormat(local.i, '00')#";
-                                local.qCheckExist = queryExecute(
-                                    options = {datasource = application.datasource},
-                                    params = {
-                                        schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                                        customerID: {type: "numeric", value: arguments.customerID}
-                                    },
-                                    sql = "
-                                        SELECT 1
-                                        FROM #local.tableName#
-                                        WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
-                                    "
-                                );
-                                if (local.qCheckExist.recordCount) {
-                                    local.exists = true;
-                                    break;
-                                }
-                            }
-
-                            if (!local.exists) {
-
-                                queryExecute (
-                                    options = {datasource = application.datasource, result="local.checkInsert"},
-                                    params = {
-                                        schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                                        customerID: {type: "numeric", value: arguments.customerID},
-                                        nextRun: {type: "datetime", value: local.nextRun}
-                                    },
-                                    sql = "
-                                        INSERT INTO #local.targetTable# (intScheduletaskID, intCustomerID, dtmLastRun, dtmNextRun)
-                                        SELECT :schedID, :customerID, NULL, :nextRun
-                                        FROM DUAL
-                                        WHERE NOT EXISTS (
-                                            SELECT 1
-                                            FROM #local.targetTable#
-                                            WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
-                                        )
-                                        LIMIT 1
-                                    "
-                                )
+    }
 
 
-                            } else {
+    /*
+        Kept for existing callers (core, myapp, modules). The status is no longer used:
+        the jobs follow the bookings in the database, so the caller must have saved the
+        booking change first - all callers do. With customerID 0 the module's tasks were
+        edited and only the next runs are recalculated.
+    */
+    public boolean function distributeScheduler(required numeric moduleID, required numeric customerID, string status = "") {
 
-                                // Maybe we have to update
-                                queryExecute (
-                                    options = {datasource = application.datasource},
-                                    params = {
-                                        schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                                        customerID: {type: "numeric", value: arguments.customerID},
-                                        nextRun: {type: "datetime", value: local.nextRun}
-                                    },
-                                    sql = "
-                                        UPDATE #local.targetTable#
-                                        SET dtmNextRun = :nextRun
-                                        WHERE intScheduletaskID = :schedID AND intCustomerID = :customerID
-                                    "
-                                )
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-
-            // If the customerID is 0, we need to update the next run
-            } else {
-
-                // Calculate next run
-                local.nextRun = application.objSysadmin.calcNextRun(local.qGetScheduleTask.dtmStartTime, local.qGetScheduleTask.intIterationMinutes);
-
-                loop from="1" to="20" index="local.i" {
-
-                    local.tableName = "scheduler_#numberFormat(local.i, '00')#"; // Generates table names such as scheduler_01, scheduler_02, etc.
-
-                    queryExecute (
-                        options = {datasource = application.datasource},
-                        params = {
-                            schedID: {type: "numeric", value: local.qGetScheduleTask.intScheduletaskID},
-                            moduleID: {type: "numeric", value: arguments.moduleID},
-                            nextRun: {type: "datetime", value: local.nextRun}
-                        },
-                        sql = "
-                            UPDATE #local.tableName# sch
-                            INNER JOIN scheduletasks ON sch.intScheduletaskID = scheduletasks.intScheduletaskID
-                            SET sch.dtmNextRun = :nextRun
-                            WHERE scheduletasks.intModuleID = :moduleID
-                        "
-                    )
-
-                }
-
-            }
-
+        if (arguments.customerID gt 0) {
+            syncCustomerScheduler(arguments.customerID);
+        } else {
+            rescheduleModuleTasks(arguments.moduleID);
         }
 
         return true;

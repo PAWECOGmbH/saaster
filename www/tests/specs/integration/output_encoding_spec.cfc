@@ -18,7 +18,6 @@ component extends="tests.support.integration_spec" {
     variables.allowed = {
         "backend/core/views/dashboard.cfm|qUserWidgets.strFilePath": "Path for fileExists/cfinclude, set by the sysadmin - not HTML output",
         "backend/core/views/sysadmin/translations.cfm|qLanguages.strLanguageISO": "Part of a variable name inside evaluate(), language code from the database",
-        "frontend/core/scheduletasks/tasks.cfm|qGetTasks.strPath": "Path of the scheduled task include - not HTML output",
         "frontend/core/mail_design.cfm|customerData.companyName": "Address of the operator (sysadmin settings) in the mail footer"
     };
 

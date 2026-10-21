@@ -128,6 +128,20 @@ Next to the behaviour specs of the single rules (`csrf_spec`, `user_roles_spec`,
 
 `support/security_scanner.cfc` reads the sources for these specs - nothing is executed.
 
+## Scheduler specs
+
+The module scheduletasks run as jobs in `scheduler_jobs` (migration V23). Which jobs exist follows the bookings (`modules.cfc::syncCustomerScheduler`), the workers (`frontend/core/scheduletasks/tasks.cfm`) take them through `scheduler.cfc`.
+
+| Spec | What it checks |
+| --- | --- |
+| `integration/scheduler_spec` | The single rules (#655): waiting, canceled and expired bookings, modules of a plan, plan change, idempotence, `getModuleStatus`, claiming and finishing jobs, four parallel workers never get the same job. |
+| `integration/scheduler_scenarios_spec` | Sixteen customers with different booking situations, some with wrong jobs from before. After one `syncAllSchedulers()` each has exactly the expected jobs. |
+| `integration/scheduler_booking_flow_spec` | The real booking code (`book.cfc`, `cancel.cfc`): booking with test days, free and paid, cycle change, plan with modules, cancel, revoke, withdraw, `updateBooking`. |
+| `integration/scheduler_worker_spec` | Real runs of `tasks.cfm` through `support/scheduler_worker_probe.cfm`: what a task receives, failed and missing tasks, password, worker limit, held and stale worker slots, time budget. |
+| `integration/scheduler_migration_spec` | Migration V23 from the shard tables `scheduler_01..20`: copy, merge of duplicates, existing jobs kept, safe to run twice. Reads the migration file from `/var/saaster/db` (read-only mount of `config/db` in `compose-dev.yml`); skipped without the mount. |
+
+The fixtures create modules, scheduletasks and plans (`createModule`, `createScheduletask`, `createPlan`) and remove them with the customers.
+
 ## Files
 
 | Path | Purpose |

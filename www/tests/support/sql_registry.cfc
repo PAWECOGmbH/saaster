@@ -32,8 +32,6 @@ component output="false" hint="Every value that is written into SQL directly (no
             { file: "backend/core/com/language.cfc", expression: "local.langIso", reason: "Language code read from the languages table" },
             { file: "backend/core/com/mappings.cfc", expression: "local.whereStatement", reason: "Built from a numeric argument" },
             { file: "backend/core/com/modules.cfc", expression: "local.exceptList", reason: "Module IDs read from the database (booked modules)" },
-            { file: "backend/core/com/modules.cfc", expression: "local.tableName", reason: "Scheduler table name generated in code (scheduler_01 to scheduler_20)" },
-            { file: "backend/core/com/modules.cfc", expression: "local.targetTable", reason: "Scheduler table name generated in code" },
             { file: "backend/core/com/notifications.cfc", expression: "local.queryLimit", reason: "Built from numeric arguments" },
             { file: "backend/core/com/notifications.cfc", expression: "local.queryWhere", reason: "Fixed condition" },
             { file: "backend/core/com/payrexx.cfc", expression: "local.sql_default", reason: "Built from a boolean argument (checked with isBoolean)" },
@@ -59,7 +57,6 @@ component output="false" hint="Every value that is written into SQL directly (no
             { file: "backend/core/handler/sysadmin/languages.cfm", expression: "table", reason: "Checked with isKnownColumn() against the database schema" },
             { file: "backend/core/handler/sysadmin/languages.cfm", expression: "ucase(form.iso)", reason: "Validated as exactly two letters before" },
             { file: "backend/core/handler/sysadmin/languages.cfm", expression: "ucase(qLanguage.strLanguageISO)", reason: "Language code read from the database" },
-            { file: "backend/core/handler/sysadmin/modules.cfm", expression: "i", reason: "Loop counter from 1 to 20" },
             { file: "backend/core/handler/sysadmin/modules.cfm", expression: "updateSQL", reason: "Fixed SQL fragment" },
             { file: "backend/core/handler/sysadmin/translations.cfm", expression: "allTables.table_name", reason: "Table names read from information_schema" },
             { file: "backend/core/handler/sysadmin/translations.cfm", expression: "form.fromLang", reason: "Validated as exactly two letters before" },
@@ -72,8 +69,7 @@ component output="false" hint="Every value that is written into SQL directly (no
             { file: "frontend/core/com/blog.cfc", expression: "arguments.sort", reason: "Checked against a whitelist with safeOrderBy()" },
             { file: "frontend/core/com/blog.cfc", expression: "arguments.start", reason: "Numeric argument (typed)" },
             { file: "frontend/core/com/blog.cfc", expression: "local.categoryJoin", reason: "Fixed join with a bound parameter" },
-            { file: "frontend/core/com/blog.cfc", expression: "local.published", reason: "Fixed condition" },
-            { file: "frontend/core/scheduletasks/tasks.cfm", expression: "taskTable", reason: "scheduler_ plus url.task, validated as a number from 1 to 20" }
+            { file: "frontend/core/com/blog.cfc", expression: "local.published", reason: "Fixed condition" }
 
         ];
     }
