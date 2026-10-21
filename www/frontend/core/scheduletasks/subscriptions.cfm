@@ -183,15 +183,14 @@ if (url.pass eq variables.schedulePassword) {
             (qRenewBookings.strStatus eq "active" or
             qRenewBookings.strStatus eq "expired")) {
 
-            // Get invoice data of the last invoice
-            invoiceArray = objInvoice.getInvoices(qRenewBookings.intCustomerID).arrayInvoices;
+            // Currency of the newest invoice; language by the same rule as every invoice of the customer
+            invoiceArray = objInvoice.getInvoices(customerID=qRenewBookings.intCustomerID, order="intInvoiceID").arrayInvoices;
+            language = objInvoice.getInvoiceLanguage(qRenewBookings.intCustomerID);
             if (!arrayIsEmpty(invoiceArray)) {
                 lastInvoice = arrayLast(invoiceArray);
-                language = lastInvoice.invoiceLanguage;
                 currencyID = objCurrency.getCurrency(lastInvoice.invoiceCurrency).id;
                 currency = lastInvoice.invoiceCurrency;
             } else {
-                language = application.objLanguage.getDefaultLanguage().iso;
                 currencyID = objCurrency.getCurrency().id;
                 currency = objCurrency.getCurrency().iso;
             }
@@ -371,7 +370,7 @@ if (url.pass eq variables.schedulePassword) {
                 invoiceStruct = structNew();
                 invoiceStruct['bookingID'] = qRenewBookings.intBookingID;
                 invoiceStruct['customerID'] = qRenewBookings.intCustomerID;
-                invoiceStruct['title'] = getTrans('titRenewal') & " " & moduleData.name;
+                invoiceStruct['title'] = getTrans('titRenewal', language) & " " & moduleData.name;
                 invoiceStruct['currency'] = currency;
                 invoiceStruct['isNet'] = moduleData.isNet;
                 invoiceStruct['vatType'] = moduleData.vatType;

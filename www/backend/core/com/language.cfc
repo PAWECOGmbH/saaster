@@ -74,10 +74,26 @@ component displayname="language" output="false" {
             local.thisLang = application.objLanguage.getDefaultLanguage().iso;
         }
 
-        local.searchString = structFindKey(application.langStruct[#local.thisLang#], arguments.stringToTrans, "one");
+        // A language the cache does not know yet (added without reinit, or an unknown code) is
+        // read like a missing translation: from the default language instead of failing
+        if (structKeyExists(application.langStruct, local.thisLang)) {
+            local.searchString = structFindKey(application.langStruct[local.thisLang], arguments.stringToTrans, "one");
+            if (isArray(local.searchString) and !arrayIsEmpty(local.searchString)) {
+                local.translatedString = local.searchString[1].value;
+            }
+        }
 
-        if (isArray(local.searchString) and !arrayIsEmpty(local.searchString)) {
-            local.translatedString = local.searchString[1].value;
+        // A language whose translation is still empty shows the text of the default language,
+        // e.g. on an invoice in a language that is not fully translated yet
+        if (!len(trim(local.translatedString)) or local.translatedString eq "--undefined--") {
+            // Called through a function reference (getTrans = application.objLanguage.getTrans), so never unqualified
+            local.defaultLang = application.objLanguage.getDefaultLanguage().iso;
+            if (local.defaultLang neq local.thisLang and structKeyExists(application.langStruct, local.defaultLang)) {
+                local.searchString = structFindKey(application.langStruct[local.defaultLang], arguments.stringToTrans, "one");
+                if (isArray(local.searchString) and !arrayIsEmpty(local.searchString) and len(trim(local.searchString[1].value))) {
+                    local.translatedString = local.searchString[1].value;
+                }
+            }
         }
 
         return local.translatedString;

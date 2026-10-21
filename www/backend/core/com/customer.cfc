@@ -381,7 +381,7 @@ component displayname="customer" output="false" {
 
             // If the currency struct is empty, get the currency via the last invoice, if they have any
             if (structIsEmpty(local.customerStruct.currencyStruct)) {
-                local.invoiceArray = objInvoices.getInvoices(arguments.customerID).arrayInvoices;
+                local.invoiceArray = objInvoices.getInvoices(customerID=arguments.customerID, order="intInvoiceID").arrayInvoices;
                 if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
                     local.lastInvoice = arrayLast(invoiceArray);
                     local.language = local.lastInvoice.invoiceLanguage;

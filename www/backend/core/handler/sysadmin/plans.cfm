@@ -898,7 +898,8 @@ if (structKeyExists(url, "booking")) {
 
     // Get some customer data
     customerData = application.objCustomer.getCustomerData(url.c);
-    custLanguage = customerData.language;
+    // Same rule as every invoice of the customer (invoices.cfc::getInvoiceLanguage)
+    custLanguage = new backend.core.com.invoices().getInvoiceLanguage(url.c);
     custCurrency = customerData.currencyStruct.iso;
     custCurrencyID = customerData.currencyStruct.id;
 
