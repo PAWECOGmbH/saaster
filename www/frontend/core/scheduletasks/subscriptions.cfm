@@ -625,24 +625,15 @@ if (url.pass eq variables.schedulePassword) {
 
 
 
-    // Check for filled schedule tables of modules
-    // We do this for security reasons so that all customers are always in the schedule tables
+    // Reconcile the scheduler jobs with the bookings (modules.cfc::syncAllSchedulers)
+    // Adds missing jobs (incl. modules of a plan), removes jobs of ended bookings and repairs
+    // anything a crash or a manual change in the database left behind.
     // #######################################################################################
 
-    qModules = queryExecute(
-        options = {datasource = application.datasource},
-        params = {
+    schedulerSync = objModules.syncAllSchedulers();
 
-        },
-        sql = "
-            SELECT intModuleID, strStatus, intCustomerID
-            FROM bookings
-            WHERE intModuleID > 0
-        "
-    )
-
-    loop query=qModules {
-        objModules.distributeScheduler(moduleID=qModules.intModuleID, customerID=qModules.intCustomerID, status=qModules.strStatus);
+    if (schedulerSync.added or schedulerSync.removed) {
+        objLogs.logWrite("scheduletask", "info", "Scheduler jobs reconciled [Customers: #schedulerSync.customers#, Added: #schedulerSync.added#, Removed: #schedulerSync.removed#]");
     }
 
 
