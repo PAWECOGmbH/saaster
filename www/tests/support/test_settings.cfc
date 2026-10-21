@@ -59,7 +59,9 @@ component output="false" hint="Reads the local test configuration and builds the
             bundleVersion: "8.4.0",
             connectionString: "jdbc:mysql://" & arguments.settings.host & ":" & arguments.settings.port
                 & "/" & arguments.settings.database
-                & "?characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false",
+                // allowMultiQueries like the datasource of the application: several core queries
+                // send more than one statement (e.g. customer.cfc::deleteAccount)
+                & "?characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false&allowMultiQueries=true",
             username: arguments.settings.user,
             password: arguments.settings.password
         };
