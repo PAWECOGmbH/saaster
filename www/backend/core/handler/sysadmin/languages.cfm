@@ -29,83 +29,13 @@ if (structKeyExists(form, "modal_lng")) {
 
     try {
 
+        objTranslate = new backend.core.com.translate();
+
+        // One field per language: text_<iso>. form[i] reads the value - a field name the browser sent must never go through evaluate.
         loop list=form.fieldnames index="i" {
-
             if (listFirst(i, "_") eq "text") {
-
-                thisLng = listLast(i, "_");
-                text_value = evaluate(i);
-
-                //Does the entry already exist?
-                qCheck = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        thisLng: {type: "varchar", value: thisLng},
-                        thisID: {type: "numeric", value: thisID}
-                    },
-                    sql = "
-                        SELECT #key#
-                        FROM #table#
-                        WHERE #key# = :thisID
-                        AND intLanguageID =
-                        (
-                            SELECT intLanguageID
-                            FROM languages
-                            WHERE strLanguageISO = :thisLng
-                        )
-                    "
-                )
-
-                if (qCheck.recordCount) {
-
-                    queryExecute(
-                        options = {datasource = application.datasource},
-                        params = {
-                            thisText: {type: "nvarchar", value: text_value},
-                            thisLng: {type: "varchar", value: thisLng},
-                            thisID: {type: "numeric", value: thisID}
-                        },
-                        sql = "
-                            UPDATE #table#
-                            SET #field# = :thisText
-                            WHERE #key# = :thisID
-                            AND intLanguageID =
-                            (
-                                SELECT intLanguageID
-                                FROM languages
-                                WHERE strLanguageISO = :thisLng
-                            )
-                        "
-                    )
-
-                } else {
-
-                    queryExecute(
-                        options = {datasource = application.datasource},
-                        params = {
-                            thisText: {type: "nvarchar", value: text_value},
-                            thisLng: {type: "varchar", value: thisLng},
-                            thisID: {type: "numeric", value: thisID}
-                        },
-                        sql = "
-                            INSERT INTO #table# (#key#, intLanguageID, #field#)
-                            VALUES
-                            (
-                                :thisID,
-                                (
-                                    SELECT intLanguageID
-                                    FROM languages
-                                    WHERE strLanguageISO = :thisLng
-                                ),
-                                :thisText
-                            )
-                        "
-                    )
-
-                }
-
+                objTranslate.saveTranslation(table, key, field, val(thisID), listLast(i, "_"), form[i]);
             }
-
         }
 
         getAlert('Saved!');

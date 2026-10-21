@@ -46,15 +46,15 @@ component output="false" hint="Every value that is written into SQL directly (no
             { file: "backend/core/com/sysadmin.cfc", expression: "local.orList", reason: "Column names from the languages table; the search value is bound" },
             { file: "backend/core/com/sysadmin.cfc", expression: "local.orderClause", reason: "Chosen in code for whitelisted sort values" },
             { file: "backend/core/com/widget.cfc", expression: "local.widgetFilter", reason: "Fixed condition with a bound parameter" },
+            { file: "backend/core/com/translate.cfc", expression: "arguments.field", reason: "Checked with isKnownColumn() against the database schema" },
+            { file: "backend/core/com/translate.cfc", expression: "arguments.key", reason: "Checked with isKnownColumn() against the database schema" },
+            { file: "backend/core/com/translate.cfc", expression: "arguments.transTable", reason: "Checked with isKnownColumn() against the database schema" },
             { file: "backend/core/com/user.cfc", expression: "arguments.columns", reason: "Column list passed by code as a constant" },
             { file: "backend/core/com/user.cfc", expression: "local.tenantID", reason: "Filtered to whole numbers in updateUser()" },
 
             // ---------- backend/core/handler ----------
             { file: "backend/core/handler/ajax_sort.cfm", expression: "thisPrimKey", reason: "Primary key read from the database schema" },
             { file: "backend/core/handler/ajax_sort.cfm", expression: "thisTable", reason: "Chosen in code from a fixed list of tables" },
-            { file: "backend/core/handler/sysadmin/languages.cfm", expression: "field", reason: "Checked with isKnownColumn() against the database schema" },
-            { file: "backend/core/handler/sysadmin/languages.cfm", expression: "key", reason: "Checked with isKnownColumn() against the database schema" },
-            { file: "backend/core/handler/sysadmin/languages.cfm", expression: "table", reason: "Checked with isKnownColumn() against the database schema" },
             { file: "backend/core/handler/sysadmin/languages.cfm", expression: "ucase(form.iso)", reason: "Validated as exactly two letters before" },
             { file: "backend/core/handler/sysadmin/languages.cfm", expression: "ucase(qLanguage.strLanguageISO)", reason: "Language code read from the database" },
             { file: "backend/core/handler/sysadmin/modules.cfm", expression: "updateSQL", reason: "Fixed SQL fragment" },

@@ -490,9 +490,9 @@ component displayname="customer" output="false" {
                 "
             )
 
-            // Delete the customers logo
+            // Delete the customers logo (the check used to look at the photo of the first user)
             if (local.qCustomer.recordCount) {
-                if (len(trim(local.qCustomer.strPhoto))) {
+                if (len(trim(local.qCustomer.strLogo))) {
                     if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
                         fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
                     }
