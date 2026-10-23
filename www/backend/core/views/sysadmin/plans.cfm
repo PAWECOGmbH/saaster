@@ -86,14 +86,14 @@
                                         </thead>
                                         <tbody <cfif qPlans.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qPlans">
-                                                <form action="#application.mainURL#/sysadm/plans?default" method="post">
+                                                <form action="#application.mainURL#/sysadm/plans?default" method="post">#csrfField()#
                                                     <input type="hidden" name="planID" value="#qPlans.intPlanID#">
                                                     <input type="hidden" name="groupID" value="#qPlans.intPlanGroupID#">
                                                     <tr <cfif qPlans.recordCount gt 1>id="sort_#qPlans.intPlanID#" data-id="#qPlans.intPlanID#" data-group="#qPlans.intPlanGroupID#" data-extend="#urlencodedformat('AND intPlanGroupID=' & qPlans.intPlanGroupID)#"</cfif>>
                                                         <td class="move text-center"><cfif qPlans.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                         <td class="text-center">#qPlans.intPrio#</td>
-                                                        <td>#qPlans.strPlanName#</td>
-                                                        <td>#qPlans.strGroupName#</td>
+                                                        <td>#encodeForHTML(qPlans.strPlanName)#</td>
+                                                        <td>#encodeForHTML(qPlans.strGroupName)#</td>
                                                         <td class="text-center">#yesNoFormat(qPlans.blnRecommended)#</td>
                                                         <td class="text-center">
                                                             <cfif qPlans.blnFree eq 1 or qPlans.intNumTestDays gt 0>
@@ -103,7 +103,7 @@
                                                             </cfif>
                                                         </td>
                                                         <td><a href="#application.mainURL#/sysadmin/plan/edit/#qPlans.intPlanID#" class="btn">Edit</a></td>
-                                                        <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_plan=#qPlans.intPlanID#', 'Delete plan', 'Do you really want to delete this plan irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                        <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_plan=#qPlans.intPlanID#&#csrfParam()#', 'Delete plan', 'Do you really want to delete this plan irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                     </tr>
                                                 </form>
                                             </cfloop>
@@ -112,7 +112,7 @@
                                 </cfif>
 
                                 <!--- Modal for new plan --->
-                                <form action="#application.mainURL#/sysadm/plans" method="post">
+                                <form action="#application.mainURL#/sysadm/plans" method="post">#csrfField()#
                                 <div id="plan_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                                         <input type="hidden" name="new_plan">
@@ -126,7 +126,7 @@
                                                     <label class="form-label">Plan group</label>
                                                     <select name="groupID" class="form-select">
                                                         <cfloop query="qPlanGroups">
-                                                            <option value="#qPlanGroups.intPlanGroupID#">#qPlanGroups.strGroupName#</option>
+                                                            <option value="#qPlanGroups.intPlanGroupID#">#encodeForHTML(qPlanGroups.strGroupName)#</option>
                                                         </cfloop>
                                                     </select>
                                                 </div>

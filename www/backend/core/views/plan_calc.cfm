@@ -62,7 +62,8 @@
         // If there is no payment method and the amount to pay is greater than 0
         getWebhook = new backend.core.com.payrexx().getWebhook(session.customer_id, 'authorized');
         if (amountToPay gt 0 and !getWebhook.recordCount) {
-            bookingLink = application.mainURL & "/account-settings/payment";
+            // Add the payment method first - the booking follows right after it (#521)
+            bookingLink = objBooking.paymentFirstLink(bookingLink);
         }
 
 

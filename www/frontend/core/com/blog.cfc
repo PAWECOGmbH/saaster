@@ -5,6 +5,9 @@ component displayname="frontendBlog" output="false" {
      */
     public array function getOverviewPosts(numeric start=0, string sort="dtmCreated DESC", numeric limit=10, string lng="en", category=0) {
 
+        // Only allow known ORDER BY expressions (the sort is built into the SQL)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["dtmCreated DESC", "dtmCreated ASC", "dtePublishDate DESC", "dtePublishDate ASC", "strPreviewTitle ASC", "strPreviewTitle DESC"], "dtmCreated DESC");
+
         // Get the language ID based on the provided language code
         local.languageID = application.objLanguage.getAnyLanguage(arguments.lng).lngID;
 
@@ -59,8 +62,8 @@ component displayname="frontendBlog" output="false" {
                 WHERE bp.blnIsPublished = 1
                   AND bp.dtePublishDate <= NOW()
                   AND (bp.dteUnpublishDate IS NULL OR bp.dteUnpublishDate > NOW())
-                ORDER BY #sort#
-                LIMIT #start#, #limit#
+                ORDER BY #arguments.sort#
+                LIMIT #arguments.start#, #arguments.limit#
             "
         );
 

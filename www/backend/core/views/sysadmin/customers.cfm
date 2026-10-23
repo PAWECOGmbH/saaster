@@ -27,9 +27,9 @@
     if (len(trim(searchTerm))) {
 
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qTotalCustomers = objSysadmin.getTotalCustomersSearch(searchString, cust_start, session.cust_sort);
@@ -54,9 +54,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qCustomers = objSysadmin.getCustomerSearch(searchString, cust_start, session.cust_sort);
@@ -106,7 +106,7 @@
         <div class="#getLayout.layoutPage#">
             <div class="row">
                 <div class="col-lg-12">
-                    <form action="#application.mainURL#/sysadmin/customers?page=1" method="post">
+                    <form action="#application.mainURL#/sysadmin/customers?page=1" method="post">#csrfField()#
                         <div class="row">
                             <div class="col-lg-4">
                                 <label class="form-label">Search for customer:</label>
@@ -163,18 +163,18 @@
                                                     <td data-label="Name">
                                                         <div class="d-flex py-1 align-items-center">
                                                             <cfif len(trim(qCustomers.strLogo))>
-                                                                <img src="#application.mainURL#/userdata/images/logos/#qCustomers.strLogo#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#qCustomers.strCompanyName#">
+                                                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qCustomers.strLogo)#" style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center" alt="#encodeForHTML(qCustomers.strCompanyName)#">
                                                             <cfelse>
                                                                 <cfif len(trim(qCustomers.strCompanyName))>
-                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strCompanyName,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#encodeForHTML(left(qCustomers.strCompanyName,2))#</div>
                                                                 <cfelse>
-                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#left(qCustomers.strContactPerson,2)#</div>
+                                                                    <div style="margin-right:20px" class="avatar avatar-sm mr-3 align-self-center">#encodeForHTML(left(qCustomers.strContactPerson,2))#</div>
                                                                 </cfif>
                                                             </cfif>
                                                             <a href="#application.mainURL#/sysadmin/customers/details/#qCustomers.intCustomerID#">
                                                                 <div class="flex-fill">
                                                                     <cfif len(trim(qCustomers.strCompanyName))>
-                                                                        <div class="font-weight-medium">#qCustomers.strCompanyName# <cfif qCustomers.intCustomerID eq session.customer_id>(SysAdmin)</cfif></div>
+                                                                        <div class="font-weight-medium">#encodeForHTML(qCustomers.strCompanyName)# <cfif qCustomers.intCustomerID eq session.customer_id>(SysAdmin)</cfif></div>
                                                                     <cfelse>
                                                                         <div class="font-weight-medium">-</div>
                                                                     </cfif>
@@ -183,14 +183,14 @@
                                                         </div>
                                                     </td>
                                                     <td data-label="Contact">
-                                                        <div>#qCustomers.strContactPerson#</div>
-                                                        <div class="text-muted">#qCustomers.strEmail#</div>
+                                                        <div>#encodeForHTML(qCustomers.strContactPerson)#</div>
+                                                        <div class="text-muted">#encodeForHTML(qCustomers.strEmail)#</div>
                                                     </td>
                                                     <td data-label="City">
-                                                        #qCustomers.strCity#
+                                                        #encodeForHTML(qCustomers.strCity)#
                                                     </td>
                                                     <td data-label="Phone">
-                                                        #qCustomers.strPhone#
+                                                        #encodeForHTML(qCustomers.strPhone)#
                                                     </td>
                                                     <td data-label="Registered">
                                                         #lsDateFormat(qCustomers.dtmInsertDate)#
@@ -288,7 +288,7 @@
 
 <!--- Modal new customer --->
 <cfoutput>
-    <form action="#application.mainURL#/sysadm/customers" method="post">
+    <form action="#application.mainURL#/sysadm/customers" method="post">#csrfField()#
         <input type="hidden" name="add_customer">
         <div id="customer_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -334,7 +334,7 @@
                                 <select name="countryID" class="form-select" required>
                                     <option value=""></option>
                                     <cfloop query="qCountries">
-                                        <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                        <option value="#qCountries.intCountryID#">#encodeForHTML(qCountries.strCountryName)#</option>
                                     </cfloop>
                                 </select>
                             </div>

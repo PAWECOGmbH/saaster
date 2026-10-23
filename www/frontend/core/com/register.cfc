@@ -62,8 +62,8 @@ component displayname="customer" output="false" {
                     newUUID: {type: "nvarchar", value: local.newUUID}
                 },
                 sql = "
-                    INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strLanguage, strUUID)
-                    VALUES (:first_name, :name, :company, :email, :language, :newUUID)
+                    INSERT INTO optin (strFirstName, strLastName, strCompanyName, strEmail, strLanguage, strUUID, dtmCreated)
+                    VALUES (:first_name, :name, :company, :email, :language, :newUUID, UTC_TIMESTAMP())
                 "
 
             );
@@ -84,6 +84,32 @@ component displayname="customer" output="false" {
 
 
     // Insert customer: used for register
+    // How long the link in the opt-in e-mail of a new registration stays valid.
+    variables.optinLifetimeHours = 168;
+
+    // The opt-in behind a registration link, or an empty query if the link is unknown or expired.
+    public query function getValidOptin(required string token) {
+
+        if (!len(trim(arguments.token))) {
+            return queryNew("strUUID");
+        }
+
+        return queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                token: {type: "nvarchar", value: arguments.token},
+                hours: {type: "numeric", value: variables.optinLifetimeHours}
+            },
+            sql = "
+                SELECT strUUID, strLanguage, strEmail
+                FROM optin
+                WHERE strUUID = :token
+                AND dtmCreated >= UTC_TIMESTAMP() - INTERVAL :hours HOUR
+            "
+        );
+    }
+
+
     public struct function insertCustomer(required struct customerStruct) {
 
         // Default variables

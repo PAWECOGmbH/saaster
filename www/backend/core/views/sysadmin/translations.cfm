@@ -48,9 +48,9 @@
         s_badge_custom = "";
 
         if(qCustomResults.recordCount){
-            s_badge_custom = "<span class='mx-2 badge bg-green'>#qCustomResults.recordCount#</span>";
+            s_badge_custom = "<span class='mx-2 badge bg-green text-green-fg'>#qCustomResults.recordCount#</span>";
         }else {
-            s_badge_custom = "<span class='mx-2 badge bg-red'>0</span>";
+            s_badge_custom = "<span class='mx-2 badge bg-red text-red-fg'>0</span>";
         }
 
         qSystemResults = objSysadmin.searchSystemTranslations(session.search);
@@ -58,9 +58,9 @@
         s_badge_system = "";
 
         if(qSystemResults.recordCount){
-            s_badge_system = "<span class='mx-2 badge bg-green'>#qSystemResults.recordCount#</span>";
+            s_badge_system = "<span class='mx-2 badge bg-green text-green-fg'>#qSystemResults.recordCount#</span>";
         }else {
-            s_badge_system = "<span class='mx-2 badge bg-red'>0</span>";
+            s_badge_system = "<span class='mx-2 badge bg-red text-red-fg'>0</span>";
         }
 
         // Create getModal object
@@ -95,7 +95,7 @@
                 #session.alert#
             </cfif>
             <div class="alert alert-info" id="loadingAlert" style="display: none;" role="alert">
-                <h4 class="alert-title">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
+                <h4 class="alert-heading">Translating<span id="loadingPoints" class="animated-dots"></span></h4>
                 <div class="text-muted">This can take a couple of minutes.</div>
             </div>
         </div>
@@ -130,7 +130,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-4">
-                                        <form action="#application.mainURL#/sysadmin/translations" method="post">
+                                        <form action="#application.mainURL#/sysadmin/translations" method="post">#csrfField()#
                                             <label class="form-label">Search for translations:</label>
                                             <div class="input-group mb-2">
                                                 <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
@@ -142,12 +142,12 @@
                                         </form>
                                     </div>
                                     <div class="col-lg-2 trans-display-lng">
-                                        <form action="#application.mainURL#/sysadmin/translations?tr=custom" method="post">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=custom" method="post">#csrfField()#
                                             <label class="form-label">Display language:</label>
                                             <div>
                                                 <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
                                                     <cfoutput query="qLanguages">
-                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                        <option value="#encodeForHTML(qLanguages.strLanguageISO)#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#encodeForHTML(qLanguages.strLanguageEN)#</option>
                                                     </cfoutput>
                                                 </select>
                                             </div>
@@ -190,7 +190,7 @@
                                                     <cfloop query="qCustomResults">
                                                         <cfset transTextCustom = HTMLCodeFormat(Left(evaluate("qCustomResults.strString#ucase(session.displayLanguage)#"), 250)) >
                                                         <tr>
-                                                            <td>#qCustomResults.strVariable#</td>
+                                                            <td>#encodeForHTML(qCustomResults.strVariable)#</td>
                                                             <td>
                                                                 <div class="trans-container">
                                                                     <div class="trans-text">
@@ -204,7 +204,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-left">
-                                                                <a href="#application.mainURL#/sysadm/translations?delete_trans=#qCustomResults.intCustTransID#" title="Delete">
+                                                                <a href="#application.mainURL#/sysadm/translations?delete_trans=#qCustomResults.intCustTransID#&#csrfParam()#" title="Delete">
                                                                     <i class="fas fa-times text-red" style="font-size: 20px;"></i>
                                                                 </a>
                                                             </td>
@@ -214,7 +214,7 @@
                                                         <!--- Modal for translations --->
                                                         <div id="modal_#qCustomResults.intCustTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                                <form action="#application.mainURL#/sysadm/translations" method="post">
+                                                                <form action="#application.mainURL#/sysadm/translations" method="post">#csrfField()#
                                                                 <input type="hidden" name="edit_variable" value="#qCustomResults.intCustTransID#">
                                                                     <div class="modal-content">
                                                                         <div class="modal-header">
@@ -225,8 +225,8 @@
                                                                             <p></p>
                                                                             <cfloop query="qLanguages">
                                                                                 <div class="mb-3">
-                                                                                    <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                    <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                    <div class="hr-text hr-text-start my-2">#encodeForHTML(qLanguages.strLanguageEN)#</div>
+                                                                                    <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#encodeForHTML(qLanguages.strLanguageISO)#" placeholder="Text in #encodeForHTML(lcase(qLanguages.strLanguageEN))#" required>#encodeForHTML(evaluate("qCustomResults.strString#ucase(qLanguages.strLanguageISO)#"))#</textarea>
                                                                                 </div>
                                                                             </cfloop>
                                                                         </div>
@@ -250,7 +250,7 @@
                                             <!--- Modal for new translations --->
                                             <div id="lng_trans" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                    <form action="#application.mainURL#/sysadm/translations" method="post">
+                                                    <form action="#application.mainURL#/sysadm/translations" method="post">#csrfField()#
                                                     <input type="hidden" name="new_variable">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
@@ -264,8 +264,8 @@
                                                                 </div>
                                                                 <cfloop query="qLanguages">
                                                                     <div class="mb-3">
-                                                                        <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                        <textarea oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required></textarea>
+                                                                        <div class="hr-text hr-text-start my-2">#encodeForHTML(qLanguages.strLanguageEN)#</div>
+                                                                        <textarea oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#encodeForHTML(qLanguages.strLanguageISO)#" placeholder="Text in #encodeForHTML(lcase(qLanguages.strLanguageEN))#" required></textarea>
                                                                     </div>
                                                                 </cfloop>
                                                             </div>
@@ -306,7 +306,7 @@
                                 <p class="text-red">The system translations are used by the developers of the saaster.io project. Users of the tool should only perform translations and not change any variables. Co-developers can request changes via Github.</p>
                                 <div class="row">
                                     <div class="col-lg-4">
-                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">#csrfField()#
                                             <label class="form-label">Search for translations:</label>
                                             <div class="input-group mb-2">
                                                 <input type="text" name="search" class="form-control" minlength="3" placeholder="Search for…">
@@ -318,12 +318,12 @@
                                         </form>
                                     </div>
                                     <div class="col-lg-2 trans-display-lng">
-                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">
+                                        <form action="#application.mainURL#/sysadmin/translations?tr=system" method="post">#csrfField()#
                                             <label class="form-label">Display language:</label>
                                             <div>
                                                 <select onchange="this.form.submit()" name="displayLanguage" class="form-select" required>
                                                     <cfoutput query="qLanguages">
-                                                        <option value="#qLanguages.strLanguageISO#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#qLanguages.strLanguageEN#</option>
+                                                        <option value="#encodeForHTML(qLanguages.strLanguageISO)#" <cfif session.displayLanguage eq qLanguages.strLanguageISO> selected </cfif>>#encodeForHTML(qLanguages.strLanguageEN)#</option>
                                                     </cfoutput>
                                                 </select>
                                             </div>
@@ -359,7 +359,7 @@
                                                         <cfloop query="qSystemResults">
                                                             <cfset transText = HTMLCodeFormat(Left(evaluate("qSystemResults.strString#session.displayLanguage#"), 250)) >
                                                             <tr>
-                                                                <td>#qSystemResults.strVariable#</td>
+                                                                <td>#encodeForHTML(qSystemResults.strVariable)#</td>
                                                                 <td>
                                                                     <div class="trans-container">
                                                                         <div class="trans-text">
@@ -374,7 +374,7 @@
                                                             <!--- Modal for translations --->
                                                             <div id="syst_modal_#qSystemResults.intSystTransID#" class="modal modal-blur fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                                                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                                    <form action="#application.mainURL#/sysadm/translations" method="post">
+                                                                    <form action="#application.mainURL#/sysadm/translations" method="post">#csrfField()#
                                                                     <input type="hidden" name="edit_syst_variable" value="#qSystemResults.intSystTransID#">
                                                                         <div class="modal-content">
                                                                             <div class="modal-header">
@@ -385,8 +385,8 @@
                                                                                 <p></p>
                                                                                 <cfloop query="qLanguages">
                                                                                     <div class="mb-3">
-                                                                                        <div class="hr-text hr-text-left my-2">#qLanguages.strLanguageEN#</div>
-                                                                                        <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#qLanguages.strLanguageISO#" placeholder="Text in #lcase(qLanguages.strLanguageEN)#" required>#evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#")#</textarea>
+                                                                                        <div class="hr-text hr-text-start my-2">#encodeForHTML(qLanguages.strLanguageEN)#</div>
+                                                                                        <textarea onclick='this.style.height = "";this.style.height = this.scrollHeight + "px"' class="form-control" name="text_#encodeForHTML(qLanguages.strLanguageISO)#" placeholder="Text in #encodeForHTML(lcase(qLanguages.strLanguageEN))#" required>#encodeForHTML(evaluate("qSystemResults.strString#ucase(qLanguages.strLanguageISO)#"))#</textarea>
                                                                                     </div>
                                                                                 </cfloop>
                                                                             </div>
@@ -420,14 +420,14 @@
                                     Here you can translate a complete language via the Deepl API.
                                     A <a href="https://www.deepl.com/pro-api" target="_blank">Deepl API</a> key is required for this. Please check whether the language you want to translate is supported.
                                 </p>
-                                <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">
+                                <form onsubmit="loading()" id="submit_form" class="col-lg-9 row" action="#application.mainURL#/sysadm/translations" method="post">#csrfField()#
 
                                     <div class="col-lg-5">
                                         <label for="fromLang">From:</label>
                                         <select onchange="checkIfSame()" id="fromLang" name="fromLang" class="form-select" required>
                                             <option value="">Select Language</option>
                                             <cfoutput query="qLanguages">
-                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                                <option value="#encodeForHTML(qLanguages.strLanguageISO)#">#encodeForHTML(qLanguages.strLanguageEN)#</option>
                                             </cfoutput>
                                         </select>
                                     </div>
@@ -441,7 +441,7 @@
                                         <select onchange="checkIfSame()" id="toLang" name="toLang" class="form-select" required>
                                             <option value="">Select Language</option>
                                             <cfoutput query="qLanguages">
-                                                <option value="#qLanguages.strLanguageISO#">#qLanguages.strLanguageEN#</option>
+                                                <option value="#encodeForHTML(qLanguages.strLanguageISO)#">#encodeForHTML(qLanguages.strLanguageEN)#</option>
                                             </cfoutput>
                                         </select>
                                     </div>

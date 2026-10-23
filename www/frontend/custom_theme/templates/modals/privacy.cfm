@@ -1,6 +1,6 @@
 <cfoutput>
 <div id="privacy_policy" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-    <form action="step3.cfm" method="post">
+    <form action="step3.cfm" method="post">#csrfField()#
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">

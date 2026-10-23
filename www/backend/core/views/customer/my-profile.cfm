@@ -56,14 +56,14 @@
                                 <h3 class="card-title">#getTrans('titMyPhoto')#</h3>
                             </div>
                             <div class="card-body">
-                                <form action="#application.mainURL#/user" method="post" enctype="multipart/form-data">
+                                <form action="#application.mainURL#/user" method="post" enctype="multipart/form-data">#csrfField()#
                                     <div class="row mb-3">
                                         <div class="col-auto text-center">
                                             <!--- Object "objUser" initialized in /backend/core/views/header.cfm --->
-                                            <img src="#application.objUser.getUserImage(session.user_id).userImage#" alt="#session.user_name#" class="avatar avatar-xl brround"><br />
+                                            <img src="#application.objUser.getUserImage(session.user_id).userImage#" alt="#encodeForHTML(session.user_name)#" class="avatar avatar-xl brround"><br />
                                         </div>
                                         <div class="col">
-                                            <h3 class="mb-1">#qCustomer.strFirstName# #qCustomer.strLastName#</h3>
+                                            <h3 class="mb-1">#encodeForHTML(qCustomer.strFirstName)# #encodeForHTML(qCustomer.strLastName)#</h3>
                                             <p class="mb-4">
                                                 <cfif qCustomer.blnAdmin>
                                                     #getTrans('titAdmin')#
@@ -76,7 +76,7 @@
 
                                     <cfif application.objUser.getUserImage(session.user_id).itsLocal>
                                         <div class="d-flex flex-row flex-start">
-                                            <a href="#application.mainURL#/user?del_photo" class="btn btn-warning btn-block" >#getTrans('txtDeletePhoto')#</a>
+                                            <a href="#application.mainURL#/user?del_photo&#csrfParam()#" class="btn btn-warning btn-block" >#getTrans('txtDeletePhoto')#</a>
                                         </div>
                                     <cfelse>
                                         <div class="mt-3">
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <div class="col-lg-8">
-                        <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
+                        <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">#csrfField()#
                             <input type="hidden" name="edit_profile_btn">
                             <input type="hidden" name="admin" value="#qCustomer.blnAdmin#">
                             <input type="hidden" name="superadmin" value="#qCustomer.blnSuperAdmin#">

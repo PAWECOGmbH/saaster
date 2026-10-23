@@ -9,6 +9,9 @@
 
     objInvoice = new backend.core.com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
+
+    // Totals and VAT lines are part of the document: in the language of the invoice, like its positions
+    invoiceLng = objInvoice.getDocumentLanguage(qInvoice.language ?: "");
     qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
 
     qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
@@ -62,12 +65,12 @@
                         <div class="card-header" style="display: block;">
                             <div class="row mt-2">
                                 <div class="col-lg-6">
-                                    <h3 class="card-title">Title: #qInvoice.title#</h3>
+                                    <h3 class="card-title">Title: #encodeForHTML(qInvoice.title)#</h3>
                                     <p>
                                     <cfif len(trim(qCustomer.companyName))>
-                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.companyName#</a><cfif invoicePersonID gt 0> - </cfif>
+                                        Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.companyName)#</a><cfif invoicePersonID gt 0> - </cfif>
                                     <cfelseif len(trim(qCustomer.contactPerson)) and invoicePersonID eq 0>
-                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#qCustomer.contactPerson#</a></p>
+                                        <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.contactPerson)#</a></p>
                                     </cfif>
                                     <cfif invoicePersonID gt 0>
                                         <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#invoicePerson#</a>
@@ -110,11 +113,11 @@
                                         </div>
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
-                                                #objInvoice.getInvoiceStatusBadge(session.lng, qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
+                                                #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
-                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
-                                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
                                                 </cfif>
                                             </div>
                                         </div>
@@ -154,7 +157,7 @@
                                                 <td valign="top" class="text-end">
                                                     <cfif qInvoice.paymentstatusID eq 1>
                                                         <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
-                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&#csrfParam()#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
                                                     </cfif>
                                                 </td>
                                             </tr>
@@ -169,7 +172,7 @@
                                             <cfloop array="#qInvoice.vatArray#" index="vat">
                                                 <tr>
                                                     <td class="pb-1 pt-0" style="border: 0;"></td>
-                                                    <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#vat.vatText#</td>
+                                                    <td colspan="4" class="pb-1 pt-0 small" style="border: 0;">#objInvoice.getVatText(qInvoice.isNet, vat.vat, invoiceLng)#</td>
                                                     <td class="pb-1 pt-0 text-end small" style="border: 0;">#lsCurrencyFormat(vat.amount, "none")#</td>
                                                 </tr>
                                             </cfloop>
@@ -177,7 +180,7 @@
                                         </cfif>
                                         <tr>
                                             <td style="border-top: 1px solid;"></td>
-                                            <td style="border-top: 1px solid;" colspan="4"><b>#qInvoice.totaltext#</b></td>
+                                            <td style="border-top: 1px solid;" colspan="4"><b>#objInvoice.getTotalText(qInvoice.vatType, invoiceLng)#</b></td>
                                             <td style="border-top: 1px solid;" class="text-end pr-0"><b>#lsCurrencyFormat(qInvoice.total, "none")#</b></td>
                                         </tr>
                                         <cfif ! qPayments.recordCount>
@@ -187,7 +190,7 @@
                                             <cfloop query="qPayments">
                                                 <tr>
                                                     <td style="border-top: 1px solid;"></td>
-                                                    <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                                    <td style="border-top: 1px solid;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                                     <td style="border-top: 1px solid;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                                 </tr>
                                             </cfloop>
@@ -213,7 +216,7 @@
                                     </cfif>
                                 </div>
                                 <div class="col-lg-6 text-end">
-                                    <a href="#application.mainURL#/sysadm/invoices?i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
+                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +233,7 @@
 
 <cfoutput>
 
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="new_position" value="#thisInvoiceID#">
 <div id="position_new" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false' data-bs-focus="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -290,7 +293,7 @@
 <cfloop array="#qInvoice.positions#" index="pos">
 <div id="pos_#pos.invoicePosID#" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <form action="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#" method="post">
+        <form action="#application.mainURL#/sysadm/invoices?invoiceID=#thisInvoiceID#" method="post">#csrfField()#
         <input type="hidden" name="edit_position" value="#pos.invoicePosID#">
             <div class="modal-content">
                 <div class="modal-header">
@@ -348,7 +351,7 @@
 </cfloop>
 
 
-<form action="#application.mainURL#/sysadm/invoices" method="post">
+<form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
 <input type="hidden" name="settings" value="#thisInvoiceID#">
 <div id="settings" class="modal modal-blur fade" tabindex="-1" style="display: none;" aria-hidden="true" data-bs-backdrop='static' data-bs-keyboard='false'>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -367,7 +370,7 @@
                     <select name="userID" class="form-select">
                         <option value=""></option>
                         <cfloop query="qUsers">
-                            <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#qUsers.strFirstName# #qUsers.strLastName#</option>
+                            <option value="#qUsers.intUserID#" <cfif qUsers.intUserID eq qInvoice.userID>selected</cfif>>#encodeForHTML(qUsers.strFirstName)# #encodeForHTML(qUsers.strLastName)#</option>
                         </cfloop>
                     </select>
                 </div>

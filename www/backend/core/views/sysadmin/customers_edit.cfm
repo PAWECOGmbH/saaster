@@ -108,9 +108,9 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/customers">Customers</a></li>
                             <li class="breadcrumb-item active">
                                 <cfif len(trim(qCustomers.companyName))>
-                                    #qCustomers.companyName#
+                                    #encodeForHTML(qCustomers.companyName)#
                                 <cfelse>
-                                    #qCustomers.contactPerson# (Private)
+                                    #encodeForHTML(qCustomers.contactPerson)# (Private)
                                 </cfif>
                             </li>
                         </ol>
@@ -133,15 +133,15 @@
                         <div class="card-header">
                             <h3 class="card-title">Edit: 
                                 <cfif len(trim(qCustomers.companyName))>
-                                    #qCustomers.companyName#
+                                    #encodeForHTML(qCustomers.companyName)#
                                 <cfelse>
-                                    #qCustomers.contactPerson# (Private)
+                                    #encodeForHTML(qCustomers.contactPerson)# (Private)
                                 </cfif>
                             </h3>
                         </div>
                         <div class="card-body">
                             <div class="col-lg-12">
-                                <form class="card" id="submit_form" method="post" action="#application.mainURL#/sysadm/customers">
+                                <form class="card" id="submit_form" method="post" action="#application.mainURL#/sysadm/customers">#csrfField()#
                                     <input type="hidden" name="edit_company_btn" value="#thisCustomerID#">
                                     <div class="card-header">
                                         <h3 class="card-title">Edit company</h3>
@@ -191,7 +191,7 @@
                                                         <select name="countryID" class="form-select" required>
                                                             <option value=""></option>
                                                             <cfloop query="qCountries">
-                                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                                <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq countryID>selected</cfif>>#encodeForHTML(qCountries.strCountryName)#</option>
                                                             </cfloop>
                                                         </select>
                                                     </div>

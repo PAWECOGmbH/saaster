@@ -621,25 +621,9 @@ if (structKeyExists(form, "new_scheduletask")) {
             "
         )
 
-        // In case there are bookings already
-        qGetBookings = queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                moduleID: {type: "numeric", value: form.new_scheduletask}
-            },
-            sql = "
-                SELECT intModuleID, intCustomerID, strStatus
-                FROM bookings
-                WHERE intModuleID = :moduleID
-            "
-        )
-
-        if (qGetBookings.recordCount) {
-            objModule = new backend.core.com.modules();
-            loop query="qGetBookings" {
-                objModule.distributeScheduler(moduleID=qGetBookings.intModuleID, customerID=qGetBookings.intCustomerID, status=qGetBookings.strStatus);
-            }
-        }
+        // In case there are bookings already: create the jobs for every customer who has the module
+        // (booked directly or included in the plan)
+        new backend.core.com.modules().syncAllSchedulers();
 
         getAlert('Scheduletask added and activated for all bookings (if any).');
         location url="#application.mainURL#/sysadmin/modules/edit/#form.new_scheduletask#?tab=scheduletasks" addtoken="false";
@@ -743,23 +727,7 @@ if (structKeyExists(url, "delete_scheduletask")) {
             "
         )
 
-        // Delete all scheduletask entries
-        loop from="1" to="20" index="i" {
-            if (i lt 10) {
-                i = "0" & i;
-            }
-            queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    taskID: {type: "numeric", value: url.delete_scheduletask}
-                },
-                sql = "
-                    DELETE FROM scheduler_#i#
-                    WHERE intScheduletaskID = :taskID
-                "
-            )
-        }
-
+        // The jobs of the task are deleted with it (ON DELETE CASCADE on scheduler_jobs)
 
         getAlert('Scheduletask deleted.');
         location url="#application.mainURL#/sysadmin/modules/edit/#url.moduleID#?tab=scheduletasks" addtoken="false";
@@ -784,7 +752,8 @@ if (structKeyExists(url, "booking")) {
 
     // Get some customer data
     customerData = application.objCustomer.getCustomerData(url.c);
-    custLanguage = customerData.language;
+    // Same rule as every invoice of the customer (invoices.cfc::getInvoiceLanguage)
+    custLanguage = new backend.core.com.invoices().getInvoiceLanguage(url.c);
     custCurrency = customerData.currencyStruct.iso;
     custCurrencyID = customerData.currencyStruct.id;
 
@@ -800,7 +769,15 @@ if (structKeyExists(url, "booking")) {
             bookingStruct['dateEnd'] = form.end_date;
         }
 
-        updateBooking = new backend.core.com.book('module', custLanguage).updateBooking(bookingStruct);
+        objBookPeriod = new backend.core.com.book('module', custLanguage);
+
+        // An expired test phase with a new end date runs again as test phase (#624)
+        newStatus = objBookPeriod.statusAfterPeriodChange(url.b, url.c, bookingStruct.dateEnd ?: "");
+        if (len(newStatus)) {
+            bookingStruct['status'] = newStatus;
+        }
+
+        updateBooking = objBookPeriod.updateBooking(bookingStruct);
 
         getAlert('Module period saved.');
         location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";

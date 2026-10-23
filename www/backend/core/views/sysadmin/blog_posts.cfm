@@ -27,7 +27,7 @@
     searchTerm = replace(searchTerm,' - ', "-", "all");
 
     if (len(trim(searchTerm))) {
-        searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+        searchString = '*#searchTerm#*'
         qTotalPosts = objBlog.getTotalPostsSearch(searchString);
     } else {
         qTotalPosts = objBlog.getTotalPosts();
@@ -48,9 +48,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qPosts = objBlog.getPostsSearch(searchString, p_start, session.p_sort);
@@ -105,7 +105,7 @@
                         <h3 class="card-title">Existing blog posts: #qTotalPosts.totalPosts#</h3>
                     </div>
                     <div class="card-body">
-                        <form action="#application.mainURL#/sysadmin/blog-posts?page=1" method="post">
+                        <form action="#application.mainURL#/sysadmin/blog-posts?page=1" method="post">#csrfField()#
                             <div class="row">
                                 <div class="col-lg-4">
                                     <label class="form-label">Search for post:</label>
@@ -151,7 +151,7 @@
                                     <tbody id="dragndrop_body">
                                         <cfloop query="qPosts">
                                             <tr>
-                                                <td>#qPosts.strPreviewTitle#</td>
+                                                <td>#encodeForHTML(qPosts.strPreviewTitle)#</td>
                                                 <td>#lsDateFormat(qPosts.dtmCreated)#</td>
                                                 <td>#lsDateFormat(qPosts.dtmUpdated)#</td>
                                                 <td>#lsDateFormat(qPosts.dtePublishDate)#</td>
@@ -234,7 +234,7 @@
     </div>
 </div>
 <!--- Modal for new post --->
-<form action="#application.mainURL#/sysadm/blog-posts" method="post">
+<form action="#application.mainURL#/sysadm/blog-posts" method="post">#csrfField()#
 <div id="post_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <input type="hidden" name="post_new">

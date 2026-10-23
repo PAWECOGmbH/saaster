@@ -16,85 +16,26 @@ if (structKeyExists(form, "modal_lng")) {
     table = form.table;
     key = form.key;
 
+    // Table and column names cannot be bound as SQL parameters - only names that really exist pass
+    if (!application.objGlobal.isKnownColumn(table, field) or !application.objGlobal.isKnownColumn(table, key) or !application.objGlobal.isKnownColumn(table, "intLanguageID")) {
+        getAlert('Unknown table or field.', 'danger');
+        location url="#application.mainURL#/sysadmin/languages" addtoken="false";
+    }
+
+    // Only paths of this application as target of the redirect
+    if (left(referer, 1) neq "/" or left(referer, 2) eq "//") {
+        referer = "/sysadmin/languages";
+    }
+
     try {
 
+        objTranslate = new backend.core.com.translate();
+
+        // One field per language: text_<iso>. form[i] reads the value - a field name the browser sent must never go through evaluate.
         loop list=form.fieldnames index="i" {
-
             if (listFirst(i, "_") eq "text") {
-
-                thisLng = listLast(i, "_");
-                text_value = evaluate(i);
-
-                //Does the entry already exist?
-                qCheck = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        thisLng: {type: "varchar", value: thisLng},
-                        thisID: {type: "numeric", value: thisID}
-                    },
-                    sql = "
-                        SELECT #key#
-                        FROM #table#
-                        WHERE #key# = :thisID
-                        AND intLanguageID =
-                        (
-                            SELECT intLanguageID
-                            FROM languages
-                            WHERE strLanguageISO = :thisLng
-                        )
-                    "
-                )
-
-                if (qCheck.recordCount) {
-
-                    queryExecute(
-                        options = {datasource = application.datasource},
-                        params = {
-                            thisText: {type: "nvarchar", value: text_value},
-                            thisLng: {type: "varchar", value: thisLng},
-                            thisID: {type: "numeric", value: thisID}
-                        },
-                        sql = "
-                            UPDATE #table#
-                            SET #field# = :thisText
-                            WHERE #key# = :thisID
-                            AND intLanguageID =
-                            (
-                                SELECT intLanguageID
-                                FROM languages
-                                WHERE strLanguageISO = :thisLng
-                            )
-                        "
-                    )
-
-                } else {
-
-                    queryExecute(
-                        options = {datasource = application.datasource},
-                        params = {
-                            thisText: {type: "nvarchar", value: text_value},
-                            thisLng: {type: "varchar", value: thisLng},
-                            thisID: {type: "numeric", value: thisID}
-                        },
-                        sql = "
-                            INSERT INTO #table# (#key#, intLanguageID, #field#)
-                            VALUES
-                            (
-                                :thisID,
-                                (
-                                    SELECT intLanguageID
-                                    FROM languages
-                                    WHERE strLanguageISO = :thisLng
-                                ),
-                                :thisText
-                            )
-                        "
-                    )
-
-                }
-
+                objTranslate.saveTranslation(table, key, field, val(thisID), listLast(i, "_"), form[i]);
             }
-
         }
 
         getAlert('Saved!');
@@ -164,6 +105,12 @@ if (structKeyExists(form, "new_language")) {
     param name="form.lng_en" default="";
     param name="form.lng_own" default="";
     param name="form.iso" default="";
+
+    // The ISO code becomes part of a column name (strString<ISO>) - only two letters are allowed
+    if (!reFind("^[A-Za-z]{2}$", form.iso)) {
+        getAlert('The ISO code must consist of exactly two letters.', 'warning');
+        location url="#application.mainURL#/sysadmin/languages" addtoken="false";
+    }
 
     chooseable = structKeyExists(form, "chooseable") ? 1 : 0;
 

@@ -74,7 +74,7 @@ component displayname="translate" accessors="true" {
 
 
         loop query = local.getLng {
-            writeOutput("<div class='hr-text hr-text-left my-3 mt-4'>#local.getLng.strLanguageEN#</div>");
+            writeOutput("<div class='hr-text hr-text-start my-3 mt-4'>#local.getLng.strLanguageEN#</div>");
             if (isNumeric(variables.maxLength)) {
                 writeOutput("<textarea class='form-control #local.editorClass#'  name='text_#local.getLng.strLanguageISO#' maxlength='#variables.maxLength#' rows='3' placeholder='Translate to #lcase(local.getLng.strLanguageEN)#'>");
             } else {
@@ -110,6 +110,77 @@ component displayname="translate" accessors="true" {
         return "<pre><code class=""language-html"">"
             &   encodeForHTML( local.qContent.myField )
             & "</code></pre>";
+
+    }
+
+
+    /*
+        Saves the translation of one field for one language (the form of openModal(),
+        handler/sysadmin/languages.cfm). Updates the row of the language, or creates it
+        with only this field - the other columns of a new row stay empty until they are
+        translated, and the reading queries fall back to the base table for them (#689).
+
+        transTable/key/field are table and column names: they cannot be bound as SQL
+        parameters, so only names that exist in the database pass. Returns false for an
+        unknown name or language.
+    */
+    public boolean function saveTranslation(required string transTable, required string key, required string field, required numeric id, required string languageIso, required string text) {
+
+        if (!application.objGlobal.isKnownColumn(arguments.transTable, arguments.field)
+            or !application.objGlobal.isKnownColumn(arguments.transTable, arguments.key)
+            or !application.objGlobal.isKnownColumn(arguments.transTable, "intLanguageID")) {
+            return false;
+        }
+
+        local.qLanguage = queryExecute(
+            "SELECT intLanguageID FROM languages WHERE strLanguageISO = :iso",
+            { iso: { type: "varchar", value: arguments.languageIso } },
+            { datasource: application.datasource }
+        );
+        if (!local.qLanguage.recordCount) {
+            return false;
+        }
+
+        local.params = {
+            thisID: {type: "numeric", value: arguments.id},
+            lngID: {type: "numeric", value: local.qLanguage.intLanguageID},
+            thisText: {type: "nvarchar", value: arguments.text}
+        };
+
+        local.qCheck = queryExecute(
+            options = {datasource = application.datasource},
+            params = local.params,
+            sql = "
+                SELECT #arguments.key#
+                FROM #arguments.transTable#
+                WHERE #arguments.key# = :thisID
+                AND intLanguageID = :lngID
+            "
+        );
+
+        if (local.qCheck.recordCount) {
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = local.params,
+                sql = "
+                    UPDATE #arguments.transTable#
+                    SET #arguments.field# = :thisText
+                    WHERE #arguments.key# = :thisID
+                    AND intLanguageID = :lngID
+                "
+            );
+        } else {
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = local.params,
+                sql = "
+                    INSERT INTO #arguments.transTable# (#arguments.key#, intLanguageID, #arguments.field#)
+                    VALUES (:thisID, :lngID, :thisText)
+                "
+            );
+        }
+
+        return true;
 
     }
 

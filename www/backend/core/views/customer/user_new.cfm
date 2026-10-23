@@ -82,7 +82,7 @@
                 <div class="col-lg-12">
                     <div class="card">
 
-                        <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">
+                        <form id="submit_form" class="card" method="post" action="#application.mainURL#/user">#csrfField()#
                         <input type="hidden" name="user_new_btn">
                             <div class="card-header">
                                 <h3 class="card-title">#getTrans('titNewUser')#</h3>

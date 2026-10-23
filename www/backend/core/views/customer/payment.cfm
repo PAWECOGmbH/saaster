@@ -8,6 +8,7 @@
     if (structKeyExists(url, "cancel")) {
 
         // If the user is coming from registration process, set the default plan
+        // (setDefaultPlan only books for a customer without a plan - an existing customer keeps the current one)
         if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
 
             objBook = new backend.core.com.book();
@@ -36,6 +37,10 @@
             }
 
         }
+
+        // The booking that waited for this payment method is not wanted any more - it must not run
+        // when a payment method is added later for another reason
+        structDelete(session, "redirect");
 
         logWrite("user", "info", "The user has canceled the payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 
@@ -89,22 +94,22 @@
                                             <img src="/assets/img/payments/card_#lcase(replace(getWebhook.strPaymentBrand,' ', '-', 'all'))#.svg" class="avatar-lg">
                                         </div>
                                         <div class="col-lg-2 mb-3">
-                                            <div class="font-weight-medium">#getWebhook.strPaymentBrand#</div>
-                                            <div class="text-muted">#getWebhook.strCardNumber#</div>
+                                            <div class="font-weight-medium">#encodeForHTML(getWebhook.strPaymentBrand)#</div>
+                                            <div class="text-muted">#encodeForHTML(getWebhook.strCardNumber)#</div>
                                         </div>
                                         <div class="col-lg-3 mb-3">
                                             <label class="form-check form-switch">
                                                 <cfif getWebhook.blndefault eq 1 and getWebhook.blnFailed eq 0>
                                                     <input class="form-check-input" type="checkbox" name="default" checked <cfif getWebhook.recordCount eq 1>disabled</cfif>>
                                                 <cfelse>
-                                                    <input onclick="window.location.href='#application.mainURL#/payment-settings?default=#getWebhook.intPayrexxID#'" class="form-check-input" type="checkbox" name="default">
+                                                    <input onclick="window.location.href='#application.mainURL#/payment-settings?#csrfParam()#&default=#getWebhook.intPayrexxID#'" class="form-check-input" type="checkbox" name="default">
                                                 </cfif>
                                                 <span class="form-check-label">#getTrans('btnSetStandard')#</span>
                                             </label>
                                         </div>
                                         <div class="col-lg-2 mb-3">
                                             <cfif getWebhook.recordCount gt 1>
-                                                <a onclick="sweetAlert('warning', '#application.mainURL#/payment-settings?del=#getWebhook.intPayrexxID#', '#getTrans('btnRemovePaymentMethod')#', '#getTrans('msgRemovePaymentMethod')#', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
+                                                <a onclick="sweetAlert('warning', '#application.mainURL#/payment-settings?#csrfParam()#&del=#getWebhook.intPayrexxID#', '#getTrans('btnRemovePaymentMethod')#', '#getTrans('msgRemovePaymentMethod')#', '#getTrans('btnNoCancel')#', '#getTrans('btnYesDelete')#')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
                                             <cfelse>
                                                 <a onclick="sweetAlert('info', '', '', '#getTrans('msgNeedOnePaymentType')#', 'OK')" class="btn">#getTrans('btnRemovePaymentMethod')#</a>
                                             </cfif>

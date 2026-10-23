@@ -72,6 +72,9 @@ component displayname="sysadmin" output="false" {
 
         local.qCustomer = queryExecute (
             options = {datasource = application.datasource},
+            params = {
+                searchLike: {type: "varchar", value: "%" & arguments.search & "%"}
+            },
             sql = "
                 SELECT intCustomerID, strZIP, strCity,
                     IF(
@@ -82,10 +85,10 @@ component displayname="sysadmin" output="false" {
                 FROM customers
                 WHERE blnActive = 1
                 AND (
-                    strCompanyName LIKE '%#arguments.search#%' OR
-                    strContactPerson LIKE '%#arguments.search#%' OR
-                    strZIP LIKE '%#arguments.search#%' OR
-                    strCity LIKE '%#arguments.search#%'
+                    strCompanyName LIKE :searchLike OR
+                    strContactPerson LIKE :searchLike OR
+                    strZIP LIKE :searchLike OR
+                    strCity LIKE :searchLike
                 )
                 ORDER BY strCompanyName
                 LIMIT 10
@@ -110,8 +113,14 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalCountriesSearch(required string search){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
         local.qTotalCountries = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT COUNT(intCountryID) as totalCountries
                 FROM countries
@@ -125,7 +134,7 @@ component displayname="sysadmin" output="false" {
                     countries.strRegion,
                     countries.strSubRegion
                 )
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
             "
         );
 
@@ -163,17 +172,26 @@ component displayname="sysadmin" output="false" {
 
     public query function getCountriesSearch(required string search, required numeric start, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["intPrio", "intPrio ASC", "intPrio DESC", "blnDefault DESC", "strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC"], "intPrio");
+
         local.entries = 10;
 
         local.qCountries = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT countries.*, languages.strLanguageEN
                 FROM countries
                 LEFT JOIN languages ON countries.intLanguageID = languages.intLanguageID
                 WHERE blnActive = 1
                 AND MATCH (countries.strCountryName, countries.strLocale, countries.strISO1, countries.strISO2, countries.strCurrency, countries.strRegion, countries.strSubRegion)
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
             "
@@ -184,8 +202,17 @@ component displayname="sysadmin" output="false" {
 
     public query function getCountriesImportSearch(required string search, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC", "strSubRegion ASC", "strSubRegion DESC"], "strCountryName ASC");
+
         local.qCountries = queryExecute (
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT *
                 FROM countries
@@ -199,7 +226,7 @@ component displayname="sysadmin" output="false" {
                     countries.strRegion,
                     countries.strSubRegion
                 )
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
                 ORDER BY #arguments.sort#
             "
         );
@@ -208,6 +235,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCountries(required numeric start, required string sort){
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["intPrio", "intPrio ASC", "intPrio DESC", "blnDefault DESC", "strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC"], "intPrio");
 
         local.entries = 10;
 
@@ -227,6 +257,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCountriesImport(required string sort){
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCountryName ASC", "strCountryName DESC", "strRegion ASC", "strRegion DESC", "strSubRegion ASC", "strSubRegion DESC"], "strCountryName ASC");
 
         local.qCountries = queryExecute (
             options = {datasource = application.datasource},
@@ -275,10 +308,19 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalCustomersSearch(required string search, required numeric start, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCompanyName ASC", "strCompanyName DESC", "strContactPerson ASC", "strContactPerson DESC", "strCity ASC", "strCity DESC", "dtmInsertDate ASC", "dtmInsertDate DESC"], "strCompanyName ASC");
+
         local.entries = 10;
 
         local.qTotalCustomers = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT COUNT(DISTINCT customers.intCustomerID) as totalCustomers, customers.strCompanyName, customers.strContactPerson,
                 customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone
@@ -297,7 +339,7 @@ component displayname="sysadmin" output="false" {
                     customers.strCity,
                     customers.strEmail
                 )
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
                 GROUP BY customers.intCustomerID
                 ORDER BY customers.#arguments.sort#
                 LIMIT #arguments.start#, #local.entries#
@@ -330,6 +372,12 @@ component displayname="sysadmin" output="false" {
 
     public query function getCustomerSearch(required string search, required numeric start, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCompanyName ASC", "strCompanyName DESC", "strContactPerson ASC", "strContactPerson DESC", "strCity ASC", "strCity DESC", "dtmInsertDate ASC", "dtmInsertDate DESC"], "strCompanyName ASC");
+
         local.entries = 10;
 
         // Sorting logic dependent on arguments.sort
@@ -358,6 +406,9 @@ component displayname="sysadmin" output="false" {
 
         local.qCustomers = queryExecute(
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search}
+            },
             sql = "
                 SELECT DISTINCT customers.intCustomerID, customers.strCompanyName, customers.strContactPerson,
                 customers.strCity, customers.strEmail, customers.strLogo, customers.strPhone, customers.dtmInsertDate
@@ -376,7 +427,7 @@ component displayname="sysadmin" output="false" {
                     customers.strCity,
                     customers.strEmail
                 )
-                #arguments.search#
+                AGAINST (:search IN BOOLEAN MODE)
                 ORDER BY #local.orderClause#
                 LIMIT #arguments.start#, #local.entries#
             "
@@ -387,6 +438,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getCustomer(required numeric start, required string sort){
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["strCompanyName ASC", "strCompanyName DESC", "strContactPerson ASC", "strContactPerson DESC", "strCity ASC", "strCity DESC", "dtmInsertDate ASC", "dtmInsertDate DESC"], "strCompanyName ASC");
 
         local.entries = 10;
 
@@ -433,10 +487,20 @@ component displayname="sysadmin" output="false" {
 
     public query function getTotalInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["invoiceNumber ASC", "invoiceNumber DESC", "dtmInvoiceDate ASC", "dtmInvoiceDate DESC", "dtmDueDate ASC", "dtmDueDate DESC"], "invoiceNumber DESC");
+
         local.entries = 10;
 
         local.qTotalInvoices = queryExecute (
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search},
+                term: {type: "varchar", value: arguments.term}
+            },
             sql = "
                 SELECT  COUNT(intInvoiceID) as totalInvoices,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
@@ -473,12 +537,12 @@ component displayname="sysadmin" output="false" {
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #arguments.search#
+                    AGAINST (:search IN BOOLEAN MODE)
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #arguments.search#
-                    OR invoices.intInvoiceNumber = '#arguments.term#'
-                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = '#arguments.term#'
+                    AGAINST (:search IN BOOLEAN MODE)
+                    OR invoices.intInvoiceNumber = :term
+                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = :term
                 )
                 GROUP BY invoices.intInvoiceID
                 ORDER BY #arguments.sort#
@@ -514,10 +578,20 @@ component displayname="sysadmin" output="false" {
 
     public query function getAllInvoicesSearch(required string search, required string term, required numeric start, required string status, required string sort){
 
+        // Only a valid boolean-mode expression may reach MATCH ... AGAINST (global.cfc::fullTextSearch)
+        arguments.search = application.objGlobal.fullTextSearch(arguments.search);
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["invoiceNumber ASC", "invoiceNumber DESC", "dtmInvoiceDate ASC", "dtmInvoiceDate DESC", "dtmDueDate ASC", "dtmDueDate DESC"], "invoiceNumber DESC");
+
         local.entries = 10;
 
         local.qInvoices = queryExecute (
             options = {datasource = application.datasource},
+            params = {
+                search: {type: "varchar", value: arguments.search},
+                term: {type: "varchar", value: arguments.term}
+            },
             sql = "
                 SELECT  invoices.intInvoiceID,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
@@ -554,12 +628,12 @@ component displayname="sysadmin" output="false" {
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
-                    #arguments.search#
+                    AGAINST (:search IN BOOLEAN MODE)
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
-                    #arguments.search#
-                    OR invoices.intInvoiceNumber = '#arguments.term#'
-                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = '#arguments.term#'
+                    AGAINST (:search IN BOOLEAN MODE)
+                    OR invoices.intInvoiceNumber = :term
+                    OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = :term
                 )
 
                 ORDER BY #arguments.sort#
@@ -571,6 +645,9 @@ component displayname="sysadmin" output="false" {
     }
 
     public query function getAllInvoices(required numeric start, required string status, required string sort){
+
+        // Only allow known ORDER BY expressions (defense against SQL injection via the sort parameter)
+        arguments.sort = application.objGlobal.safeOrderBy(arguments.sort, ["invoiceNumber ASC", "invoiceNumber DESC", "dtmInvoiceDate ASC", "dtmInvoiceDate DESC", "dtmDueDate ASC", "dtmDueDate DESC"], "invoiceNumber DESC");
 
         local.entries = 10;
 
@@ -959,56 +1036,54 @@ component displayname="sysadmin" output="false" {
 
     public query function searchCustomTranslations(required string search){
 
-        // Custom results
-        defaultQueryCustom = "
-            SELECT *
-            FROM custom_translations
-            WHERE strVariable LIKE '%#arguments.search#%'
-        ";
-        orListCustom = "";
-        orderQryCustom = "
-            ORDER BY strVariable
-        ";
-
-        qLanguages = getLanguages();
-
-        // Loop over query and append to query string
-        loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#arguments.search#%'", " ");
+        // Search in the variable name and in every language column (column names come from the languages table, the search value is a bound parameter)
+        local.qLanguages = getLanguages();
+        local.orList = "";
+        loop query=local.qLanguages {
+            local.orList &= " OR strString" & local.qLanguages.strLanguageISO & " LIKE :searchLike";
         }
 
-        cfquery(datasource=application.datasource name="qCustomResults") {
-            writeOutput(defaultQueryCustom & orListCustom & orderQryCustom);
-        }
+        local.qCustomResults = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                searchLike: {type: "varchar", value: "%" & arguments.search & "%"}
+            },
+            sql = "
+                SELECT *
+                FROM custom_translations
+                WHERE strVariable LIKE :searchLike
+                #local.orList#
+                ORDER BY strVariable
+            "
+        );
 
-        return qCustomResults;
+        return local.qCustomResults;
     }
 
     public query function searchSystemTranslations(required string search){
 
-        // System results
-        defaultQuerySys = "
-        SELECT *
-        FROM system_translations
-        WHERE strVariable LIKE '%#arguments.search#%'
-        ";
-        orListCustom = "";
-        orderQrySys = "
-            ORDER BY strVariable
-        ";
-
-        qLanguages = getLanguages();
-
-        // Loop over query and append to query string
-        loop query=qLanguages {
-            orListCustom = listAppend(orListCustom, "OR strString#qLanguages.strLanguageISO# LIKE '%#arguments.search#%'", " ");
+        // Search in the variable name and in every language column (column names come from the languages table, the search value is a bound parameter)
+        local.qLanguages = getLanguages();
+        local.orList = "";
+        loop query=local.qLanguages {
+            local.orList &= " OR strString" & local.qLanguages.strLanguageISO & " LIKE :searchLike";
         }
 
-        cfquery(datasource=application.datasource name="qSystemResults") {
-            writeOutput(defaultQuerySys & orListCustom & orderQrySys);
-        }
+        local.qSystemResults = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                searchLike: {type: "varchar", value: "%" & arguments.search & "%"}
+            },
+            sql = "
+                SELECT *
+                FROM system_translations
+                WHERE strVariable LIKE :searchLike
+                #local.orList#
+                ORDER BY strVariable
+            "
+        );
 
-        return qSystemResults;
+        return local.qSystemResults;
     }
 
     public query function getSystemTranslations(){

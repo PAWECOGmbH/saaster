@@ -352,6 +352,82 @@ component displayname="globalFunctions" output="false" {
     }
 
 
+    /*
+        Password hashing with Argon2id (OWASP recommendation: 19 MiB memory, 2 iterations,
+        1 lane). The result is a self-describing string ("$argon2id$v=19$m=19456,t=2,p=1$salt$hash")
+        stored in users.strPasswordHash; strPasswordSalt stays empty for these hashes.
+
+        generateHash() above is NOT for passwords any more - it stays for API keys, which
+        are long random values where a fast hash is fine.
+    */
+    variables.argon2Params = { variant: "argon2id", parallelism: 1, memoryKB: 19456, iterations: 2 };
+
+    public string function hashPassword(required string password) {
+        return GenerateArgon2Hash(
+            arguments.password,
+            variables.argon2Params.variant,
+            variables.argon2Params.parallelism,
+            variables.argon2Params.memoryKB,
+            variables.argon2Params.iterations
+        );
+    }
+
+    /*
+        Password policy for every place where a password is set (registration, reset,
+        change, customer created by the sysadmin). The forms say "at least 8 characters";
+        this enforces it on the server. The upper limit only protects the hashing from
+        absurdly long input.
+    */
+    variables.passwordPolicy = { minLength: 8, maxLength: 256 };
+
+    public numeric function passwordMinLength() {
+        return variables.passwordPolicy.minLength;
+    }
+
+    public boolean function isValidPassword(required string password) {
+        return len(arguments.password) gte variables.passwordPolicy.minLength
+            and len(arguments.password) lte variables.passwordPolicy.maxLength
+            and len(trim(arguments.password)) gt 0;
+    }
+
+
+    /*
+        Checks a password against the stored hash. Understands both Argon2 hashes and the
+        legacy format (hex SHA-512 of password & salt). "needsRehash" is true when the
+        password was correct but the hash is legacy or uses weaker parameters - the caller
+        should then store hashPassword(password), so every user is migrated on the next login.
+    */
+    public struct function verifyPassword(required string password, required string storedHash, string storedSalt = "") {
+
+        local.result = { valid: false, needsRehash: false };
+
+        if (!len(arguments.storedHash)) {
+            return local.result;
+        }
+
+        if (left(arguments.storedHash, 7) eq "$argon2") {
+            try {
+                local.result.valid = Argon2CheckHash(arguments.password, arguments.storedHash);
+            } catch (any e) {
+                local.result.valid = false;
+            }
+            local.result.needsRehash = local.result.valid and !findNoCase(
+                "$#variables.argon2Params.variant#$v=19$m=#variables.argon2Params.memoryKB#,t=#variables.argon2Params.iterations#,p=#variables.argon2Params.parallelism#$",
+                arguments.storedHash
+            );
+            return local.result;
+        }
+
+        // Legacy: SHA-512 with salt
+        if (len(arguments.storedSalt)) {
+            local.result.valid = compare(lCase(arguments.storedHash), lCase(hash(arguments.password & arguments.storedSalt, "SHA-512"))) eq 0;
+            local.result.needsRehash = local.result.valid;
+        }
+
+        return local.result;
+    }
+
+
     // Email validating
     public boolean function checkEmail(thisEmail) {
 
@@ -579,14 +655,24 @@ component displayname="globalFunctions" output="false" {
                 local.nameConflict = "overwrite";
             }
 
-            // Upload the file now
+            /*
+                Security: the upload first lands in a private temporary folder outside the
+                webroot. Only after the extension and size checks passed is it moved into
+                the target folder (usually below /userdata, which the web server serves).
+                A forbidden file - e.g. a .cfm - is therefore never reachable by URL, not
+                even for the moment between upload and check.
+            */
+            local.tempDir = getTempDirectory() & "saaster-uploads/" & createUUID();
+
             try {
+                directoryCreate(local.tempDir, true);
                 local.uploadedFile = fileUpload(
                     fileField = local.fileNameOrig,
-                    destination = local.filePath,
-                    nameConflict = local.nameConflict
+                    destination = local.tempDir,
+                    nameConflict = "makeunique"
                 )
             } catch (e) {
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = e.message;
                 return local.argsReturnValue;
             }
@@ -597,43 +683,47 @@ component displayname="globalFunctions" output="false" {
             // Get the file name
             local.originalFileName = local.uploadedFile.clientfilename;
 
-            // Get the file name with extension
-            local.originalFileNameExt = local.uploadedFile.serverfile;
-
-            // Get the path of the file
-            local.originalFilePath = local.uploadedFile.serverdirectory;
-
             // Get the file extension
             local.originalFileExt = local.uploadedFile.serverFileExt;
 
-            // Get file path and name with extension
-            local.originalFile = local.originalFilePath & "/" & local.originalFileNameExt;
+            // The uploaded file inside the temporary folder
+            local.tempFile = local.uploadedFile.serverdirectory & "/" & local.uploadedFile.serverfile;
 
             // Get the size of the file
             local.fileSizeInKB = local.uploadedFile.filesize/1000;
 
-            // Is it an image?
-            if (IsImageFile(local.originalFile)) {
-                local.isImage = true;
-            }
-
-            // Security (only file ext. configured in config.cfm)
+            // Security (only the allowed file extensions)
             if (not listFindNoCase(local.allowedFileTypesList, local.originalFileExt)) {
-                if (fileExists(local.originalFile)) {
-                    FileDelete(local.originalFile);
-                }
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = 'msgFileExtForbidden';
                 return local.argsReturnValue;
             }
 
             // File too large? If yes, delete it and send message
             if (len(trim(local.maxSize)) and local.maxSize lt local.fileSizeInKB) {
-                if (fileExists(local.originalFile)) {
-                    FileDelete(local.originalFile);
-                }
+                removeUploadTempDir(local.tempDir);
                 local.argsReturnValue['message'] = 'msgFileTooLarge';
                 return local.argsReturnValue;
             }
+
+            // Is it an image?
+            if (IsImageFile(local.tempFile)) {
+                local.isImage = true;
+            }
+
+            // Checks passed: move the file into the target folder under a neutral uuid name
+            local.originalFilePath = local.filePath;
+            local.originalFile = local.filePath & "/" & local.fileUUID;
+
+            try {
+                fileMove(local.tempFile, local.originalFile);
+            } catch (e) {
+                removeUploadTempDir(local.tempDir);
+                local.argsReturnValue['message'] = e.message;
+                return local.argsReturnValue;
+            }
+
+            removeUploadTempDir(local.tempDir);
 
             // If fileName is defined, the developer is responsible for the correct file name
             if (len(trim(local.fileName))) {
@@ -651,8 +741,7 @@ component displayname="globalFunctions" output="false" {
             // Otherwise we will change the filename using a beautifier
             } else {
 
-                // Rename the file into the uuid
-                cffile(action="rename", source=local.originalFile, destination=local.originalFilePath & "/" & local.fileUUID);
+                // The file already carries the uuid name (see the move above)
 
                 // We beautify the file name so that all systems can read it
                 local.beautifiedString = beautifyString(local.originalFileName);
@@ -753,6 +842,18 @@ component displayname="globalFunctions" output="false" {
 
 
     // Check if a file exists
+    // Removes the private temporary folder of an upload (see uploadFile), whatever is left in it.
+    private void function removeUploadTempDir(required string tempDir) {
+        try {
+            if (directoryExists(arguments.tempDir)) {
+                directoryDelete(arguments.tempDir, true);
+            }
+        } catch (any e) {
+            // A leftover temp folder is harmless; it is outside the webroot.
+        }
+    }
+
+
     private boolean function checkFileExists(required string filePath) {
 
         loop from=1 to=100000 index="local.i" {
@@ -1123,6 +1224,196 @@ component displayname="globalFunctions" output="false" {
         }
 
         return local.mimeTypes;
+
+    }
+
+
+
+    /*
+        True if the table exists in the application database and has this column.
+        For the few places that must build table or column names into SQL from request
+        data (they cannot be bound as parameters): only names that really exist pass.
+    */
+    public boolean function isKnownColumn(required string tableName, required string columnName) {
+        if (!reFind("^[A-Za-z_][A-Za-z0-9_]{0,63}$", arguments.tableName) or !reFind("^[A-Za-z_][A-Za-z0-9_]{0,63}$", arguments.columnName)) {
+            return false;
+        }
+
+        local.qColumn = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                tableName: {type: "varchar", value: arguments.tableName},
+                columnName: {type: "varchar", value: arguments.columnName}
+            },
+            sql = "
+                SELECT COUNT(*) AS cnt
+                FROM information_schema.columns
+                WHERE table_schema = DATABASE()
+                AND table_name = :tableName
+                AND column_name = :columnName
+            "
+        );
+
+        return local.qColumn.cnt gt 0;
+    }
+
+
+    // Returns the sort value only if it is in the list of allowed ORDER BY expressions, otherwise the default
+    public string function safeOrderBy(required string sort, required array allowed, required string defaultSort) {
+
+        for (local.item in arguments.allowed) {
+            if (compareNoCase(trim(arguments.sort), local.item) eq 0) {
+                return local.item;
+            }
+        }
+
+        return arguments.defaultSort;
+
+    }
+
+
+    /*
+        Turns a search input into a valid expression for MATCH ... AGAINST (... IN BOOLEAN MODE).
+        MySQL parses the bound value as a boolean search expression and throws a syntax error
+        on dangling operators ("foo --", "-", "~", "a)"). The result is therefore built from
+        words only:
+          - with an @ (e-mail addresses): one phrase, "info@example.com"
+          - otherwise every word as a prefix search: muster* ag*
+        Returns an empty string if no word is left - MATCH then finds nothing.
+    */
+    public string function fullTextSearch(required string search) {
+
+        if (find("@", arguments.search)) {
+            local.phrase = trim(reReplace(replace(arguments.search, '"', " ", "all"), "\s+", " ", "all"));
+            return len(local.phrase) ? '"' & local.phrase & '"' : "";
+        }
+
+        // Letters (incl. umlauts), digits, underscore and apostrophe form words - everything else separates them
+        local.words = javaCast("string", arguments.search).replaceAll("[^\p{L}\p{N}_']+", " ");
+        local.terms = [];
+
+        for (local.word in listToArray(local.words, " ")) {
+            local.word = reReplace(local.word, "^'+|'+$", "", "all");
+            if (len(local.word)) {
+                arrayAppend(local.terms, local.word & "*");
+            }
+        }
+
+        return arrayToList(local.terms, " ");
+
+    }
+
+
+    /*
+        URL of a local asset with its modification time as version: /backend/dist/js/backend.js?v=20261020154500
+        nginx serves static files with "expires max", so browsers keep them forever. A changed
+        file gets a new URL and is loaded again - without it, users keep running old JavaScript
+        after an update (e.g. AJAX calls without the CSRF header).
+    */
+    public string function assetUrl(required string path) {
+
+        try {
+            return arguments.path & "?v=" & dateTimeFormat(getFileInfo(expandPath(arguments.path)).lastmodified, "yyyymmddHHnnss");
+        } catch (any e) {
+            return arguments.path;
+        }
+
+    }
+
+
+    // CSRF: token for the current session
+    public string function csrfToken() {
+
+        return CSRFGenerateToken();
+
+    }
+
+
+    // CSRF: hidden input field for forms
+    public string function csrfField() {
+
+        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '">';
+
+    }
+
+
+    // CSRF: url parameter for links that change state (e.g. delete links)
+    public string function csrfParam() {
+
+        return 'csrf_token=' & CSRFGenerateToken();
+
+    }
+
+
+    /*
+        CSRF: decides whether a request needs a valid token. Used by Application.cfc for every request.
+
+        Only the core handlers change data, so only they are protected. There, a token is required for
+          - every POST,
+          - every request to the cancel handler (it only works with GET actions),
+          - GET actions whose url key marks a state change (delete..., del_..., remove_..., revoke, noti_del, invit),
+          - GET actions of a specific handler listed in variables.csrfProtectedGetKeys. Their key names
+            (status, open, default, ...) are too generic to protect them across all handlers.
+    */
+    variables.csrfProtectedGetKeys = {
+        "backend/core/handler/payment.cfm": "del,default",
+        "backend/core/handler/sysadmin/invoices.cfm": "status,email,open",
+        "backend/core/handler/sysadmin/logs.cfm": "logfile",
+        "backend/core/handler/sysadmin/plans.cfm": "booking",
+        "backend/core/handler/sysadmin/modules.cfm": "booking"
+    };
+
+    public boolean function csrfRequired(required string path, required string method, required array urlKeys) {
+
+        if (!reFindNoCase("^/?(backend|frontend)/core/handler/", arguments.path)) {
+            return false;
+        }
+
+        if (arguments.method eq "POST") {
+            return true;
+        }
+
+        if (reFindNoCase("/handler/cancel\.cfm$", arguments.path)) {
+            return true;
+        }
+
+        local.handlerKeys = variables.csrfProtectedGetKeys[lCase(reReplace(arguments.path, "^/", ""))] ?: "";
+
+        for (local.urlKey in arguments.urlKeys) {
+            if (reFindNoCase("^(delete|del_|remove_|revoke|noti_del|invit)", local.urlKey)) {
+                return true;
+            }
+            if (listFindNoCase(local.handlerKeys, local.urlKey)) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+
+    // CSRF: verifies the token sent via form field, url parameter or request header
+    public boolean function csrfVerify() {
+
+        local.token = "";
+
+        if (structKeyExists(form, "csrf_token") and len(trim(form.csrf_token))) {
+            local.token = form.csrf_token;
+        } else if (structKeyExists(url, "csrf_token") and len(trim(url.csrf_token))) {
+            local.token = url.csrf_token;
+        } else {
+            local.headers = getHTTPRequestData(false).headers;
+            if (structKeyExists(local.headers, "X-CSRF-Token") and len(trim(local.headers["X-CSRF-Token"]))) {
+                local.token = local.headers["X-CSRF-Token"];
+            }
+        }
+
+        if (!len(local.token)) {
+            return false;
+        }
+
+        return CSRFVerifyToken(local.token);
 
     }
 

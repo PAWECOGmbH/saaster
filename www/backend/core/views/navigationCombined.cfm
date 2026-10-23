@@ -17,7 +17,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <h1 class="#getLayout.layoutTitel#">
+                <div class="#getLayout.layoutTitel#">
                     <cfif len(trim(getSysadminData.logo))>
                         <a href="#application.mainURL#/dashboard">
                             <img src="/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
@@ -28,7 +28,7 @@
                         </a>
                     </cfif>
 
-                </h1>
+                </div>
 
 
                 <div class="#getLayout.layoutDiv#">
@@ -51,7 +51,7 @@
                         <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                             <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
                             <div class="d-none d-xl-block ps-2 newclass">
-                                <div>#session.user_name#</div>
+                                <div>#encodeForHTML(session.user_name)#</div>
                             </div>
                         </a>
 
@@ -175,29 +175,29 @@
                                                         <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#" class="dropdown-item">
                                                             <cfif len(trim(qTenants.strCompanyName))>
                                                                 <cfif len(trim(qTenants.strLogo))>
-                                                                    <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center" alt="#qTenants.strCompanyName#">
+                                                                    <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center" alt="#encodeForHTML(qTenants.strCompanyName)#">
                                                                     <cfif (len(qTenants.strCompanyName) gt 12)>
                                                                         <div class="d-none d-lg-inline-block">#qTenants.strCompanyName.left(12)#..</div>
-                                                                        <div class="d-lg-none">#qTenants.strCompanyName#</div>
+                                                                        <div class="d-lg-none">#encodeForHTML(qTenants.strCompanyName)#</div>
                                                                     <cfelse>
-                                                                        #qTenants.strCompanyName#
+                                                                        #encodeForHTML(qTenants.strCompanyName)#
                                                                     </cfif>
                                                                 <cfelse>
-                                                                    <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strCompanyName,2)#</div>
+                                                                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
                                                                     <cfif (len(qTenants.strCompanyName) gt 12)>
                                                                         <div class="d-none d-lg-inline-block">#qTenants.strCompanyName.left(12)#..</div>
-                                                                        <div class="d-lg-none">#qTenants.strCompanyName#</div>
+                                                                        <div class="d-lg-none">#encodeForHTML(qTenants.strCompanyName)#</div>
                                                                     <cfelse>
-                                                                        #qTenants.strCompanyName#
+                                                                        #encodeForHTML(qTenants.strCompanyName)#
                                                                     </cfif>
                                                                 </cfif>
                                                             <cfelse>
                                                                 <cfif len(trim(qTenants.strLogo))>
-                                                                    <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center" alt="#qTenants.strContactPerson#">
+                                                                    <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center" alt="#encodeForHTML(qTenants.strContactPerson)#">
                                                                     #qTenants.strContactPerson.left(12)#
                                                                 <cfelse>
-                                                                    <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strContactPerson,2)#</div>
-                                                                    <span class="nav-link-title">#qTenants.strContactPerson#</span>
+                                                                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
+                                                                    <span class="nav-link-title">#encodeForHTML(qTenants.strContactPerson)#</span>
                                                                 </cfif>
                                                             </cfif>
                                                         </a>
@@ -264,14 +264,14 @@
 
 
 
-    <header class="navbar navbar-expand-md navbar-light d-print-none d-none d-sm-none d-md-none d-lg-inline-block">
+    <header class="navbar navbar-expand-md d-print-none d-none d-sm-none d-md-none d-lg-inline-block">
 
         <div class="container-xl">
 
             <cfoutput>
 
-            <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            </h1>
+            <div class="navbar-brand navbar-brand-autodark pe-0 pe-md-3">
+            </div>
 
             <div class="navbar-nav flex-row order-md-last">
 
@@ -289,7 +289,7 @@
                     <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                         <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
                         <div class="d-none d-xl-block ps-2 newclass">
-                            <div>#session.user_name#</div>
+                            <div>#encodeForHTML(session.user_name)#</div>
                         </div>
                     </a>
 

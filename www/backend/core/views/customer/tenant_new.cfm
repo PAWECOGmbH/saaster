@@ -27,7 +27,7 @@
         </cfif>
         <div class="row">
             <div class="col-lg-12">
-                <form id="submit_form" class="card" method="post" action="#application.mainURL#/customer">
+                <form id="submit_form" class="card" method="post" action="#application.mainURL#/customer">#csrfField()#
                     <input type="hidden" name="new_tenant_btn">
                     <div class="card-header">
                         <h3 class="card-title">#getTrans('txtNewTenant')#</h3>

@@ -41,6 +41,12 @@
     }
 
     getTime = new backend.core.com.time(getInvoiceData.customerID);
+
+    // The invoice is a document in its own language: labels, totals, dates and amounts (invoices.cfc::getInvoiceLanguage)
+    invoiceLng = objInvoices.getDocumentLanguage(getInvoiceData.language);
+    try {
+        setLocale(application.objLanguage.toLocale(invoiceLng));
+    } catch (any e) {}
     addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
     qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
 
@@ -70,7 +76,7 @@
 <cfsavecontent variable="invoiceData">
     <cfoutput>
     <head>
-        <title>#getInvoiceData.title#</title>
+        <title>#encodeForHTML(getInvoiceData.title)#</title>
     </head>
     <body style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
         <table width="100%" border="0">
@@ -90,12 +96,12 @@
             </tr>
             <tr>
                 <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
-                    <b>#getTrans('titInvoice')# #getInvoiceData.number#</b>
+                    <b>#getTrans('titInvoice', invoiceLng)# #getInvoiceData.number#</b>
                 </td>
             </tr>
             <tr>
                 <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px; font-size: 12px;">
-                    <b>#getInvoiceData.title#</b>
+                    <b>#encodeForHTML(getInvoiceData.title)#</b>
                 </td>
             </tr>
             <tr>
@@ -103,8 +109,8 @@
                     <table width="100%" border="0">
                         <tr>
                             <td width="20%">
-                                #getTrans('titInvoiceDate')#:<br />
-                                #getTrans('txtDueDate')#:
+                                #getTrans('titInvoiceDate', invoiceLng)#:<br />
+                                #getTrans('txtDueDate', invoiceLng)#:
                             </td>
                             <td width="30%">
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#<br />
@@ -122,12 +128,12 @@
                 <td>
                     <table width="100%" border="0" style="border-collapse: collapse;">
                         <tr>
-                            <td width="5%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos')#</td>
-                            <td width="45%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription')#</td>
-                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity')#</td>
-                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice')#</td>
-                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount')#</td>
-                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal')# #getInvoiceData.currency#</td>
+                            <td width="5%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos', invoiceLng)#</td>
+                            <td width="45%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription', invoiceLng)#</td>
+                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity', invoiceLng)#</td>
+                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice', invoiceLng)#</td>
+                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount', invoiceLng)#</td>
+                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal', invoiceLng)# #getInvoiceData.currency#</td>
                         </tr>
                         <cfloop array="#getInvoiceData.positions#" index="pos">
                             <tr>
@@ -150,7 +156,7 @@
                         </cfloop>
                         <tr>
                             <td></td>
-                            <td colspan="4"><b>#getTrans('titTotal')#</b></td>
+                            <td colspan="4"><b>#getTrans('titTotal', invoiceLng)#</b></td>
                             <td align="right"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
                         </tr>
                         <cfif arrayLen(getInvoiceData.vatArray)>
@@ -158,7 +164,7 @@
                             <cfloop array="#getInvoiceData.vatArray#" index="vat">
                                 <tr>
                                     <td></td>
-                                    <td colspan="4" style="font-size: 10px;">#vat.vatText#</td>
+                                    <td colspan="4" style="font-size: 10px;">#objInvoices.getVatText(getInvoiceData.isNet, vat.vat, invoiceLng)#</td>
                                     <td align="right">#lsCurrencyFormat(vat.amount, "none")#</td>
                                 </tr>
                             </cfloop>
@@ -166,7 +172,7 @@
                         </cfif>
                         <tr>
                             <td style="border-top: 1px solid ##ccc; padding: 5px 0;"></td>
-                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" colspan="4"><b>#getInvoiceData.totaltext#</b></td>
+                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" colspan="4"><b>#objInvoices.getTotalText(getInvoiceData.vatType, invoiceLng)#</b></td>
                             <td style="border-top: 1px solid ##ccc; padding: 5px 0;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
                         </tr>
 
@@ -174,14 +180,14 @@
                             <cfloop query="qPayments">
                                 <tr>
                                     <td style="border-top: 1px solid; padding: 5px 0;"></td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments')# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#qPayments.strPaymentType#):</td>
+                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments', invoiceLng)# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
                                     <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
                                 </tr>
                             </cfloop>
 
                             <tr>
                                 <td style="border-top: 1px solid ##ccc;"></td>
-                                <td style="border-top: 1px solid ##ccc;" colspan="4"><b>#getTrans('txtRemainingAmount')#</b></td>
+                                <td style="border-top: 1px solid ##ccc;" colspan="4"><b>#getTrans('txtRemainingAmount', invoiceLng)#</b></td>
                                 <td style="border-top: 1px solid ##ccc;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
                             </tr>
                         </cfif>
@@ -199,10 +205,10 @@
     <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
         <tr>
             <td align="center">
-                <b>#sysAdminData.companyName#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
-                #getTrans('formEmailAddress')#: #sysAdminData.email# |
-                #getTrans('formPhone')#: #sysAdminData.phone# |
-                #getTrans('formWebsite')#: #sysAdminData.website#
+                <b>#encodeForHTML(sysAdminData.companyName)#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
+                #getTrans('formEmailAddress', invoiceLng)#: #sysAdminData.email# |
+                #getTrans('formPhone', invoiceLng)#: #sysAdminData.phone# |
+                #getTrans('formWebsite', invoiceLng)#: #sysAdminData.website#
 
             </td>
         </tr>

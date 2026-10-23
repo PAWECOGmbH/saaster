@@ -71,14 +71,14 @@
                                                 <tr <cfif qPlanGroups.recordCount gt 1>id="sort_#qPlanGroups.intPlanGroupID#"</cfif>>
                                                     <td class="move text-center"><cfif qPlanGroups.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qPlanGroups.intPrio#</td>
-                                                    <td>#qPlanGroups.strGroupName# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
-                                                    <td>#qPlanGroups.strCountryName#</td>
+                                                    <td>#encodeForHTML(qPlanGroups.strGroupName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
+                                                    <td>#encodeForHTML(qPlanGroups.strCountryName)#</td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##plangroup_#qPlanGroups.intPlanGroupID#">Edit</a></td>
-                                                    <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_group=#qPlanGroups.intPlanGroupID#', 'Delete plan group', 'Caution: If you delete a plan group, all the associated plans will also be deleted. Do you really want to delete this group irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_group=#qPlanGroups.intPlanGroupID#&#csrfParam()#', 'Delete plan group', 'Caution: If you delete a plan group, all the associated plans will also be deleted. Do you really want to delete this group irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
                                                 <div id="plangroup_#qPlanGroups.intPlanGroupID#" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                                                        <form action="#application.mainURL#/sysadm/plans" method="post">
+                                                        <form action="#application.mainURL#/sysadm/plans" method="post">#csrfField()#
                                                         <input type="hidden" name="edit_plangroup" value="#qPlanGroups.intPlanGroupID#">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
@@ -96,7 +96,7 @@
                                                                             <select name="countryID" class="form-select">
                                                                                 <option value=""></option>
                                                                                 <cfloop query="qCountries">
-                                                                                    <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#qCountries.strCountryName#</option>
+                                                                                    <option value="#qCountries.intCountryID#" <cfif qCountries.intCountryID eq qPlanGroups.intCountryID>selected</cfif>>#encodeForHTML(qCountries.strCountryName)#</option>
                                                                                 </cfloop>
                                                                             </select>
                                                                         </div>
@@ -153,7 +153,7 @@
                                 </cfif>
 
                                 <!--- Modal for new group --->
-                                <form action="#application.mainURL#/sysadm/plans" method="post">
+                                <form action="#application.mainURL#/sysadm/plans" method="post">#csrfField()#
                                 <div id="plangroup_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                                         <input type="hidden" name="new_group">
@@ -173,7 +173,7 @@
                                                         <select name="countryID" class="form-select">
                                                             <option value=""></option>
                                                             <cfloop query="qCountries">
-                                                                <option value="#qCountries.intCountryID#">#qCountries.strCountryName#</option>
+                                                                <option value="#qCountries.intCountryID#">#encodeForHTML(qCountries.strCountryName)#</option>
                                                             </cfloop>
                                                         </select>
                                                     </div>

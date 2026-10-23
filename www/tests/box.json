@@ -1,0 +1,11 @@
+{
+    "name": "saaster-tests",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "testbox": "7.0.0"
+    },
+    "installPaths": {
+        "testbox": "vendor/testbox/"
+    }
+}

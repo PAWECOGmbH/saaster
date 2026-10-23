@@ -61,12 +61,12 @@
                                                 <tr id="sort_#qModules.intModuleID#">
                                                     <td class="move text-center"><cfif qModules.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qModules.intPrio#</td>
-                                                    <td>#qModules.strModuleName#</td>
-                                                    <td>#qModules.strShortDescription#</td>
+                                                    <td>#encodeForHTML(qModules.strModuleName)#</td>
+                                                    <td>#encodeForHTML(qModules.strShortDescription)#</td>
                                                     <td class="text-center">#yesNoFormat(qModules.blnActive)#</td>
                                                     <td class="text-center">#yesNoFormat(qModules.blnBookable)#</td>
                                                     <td><a href="#application.mainURL#/sysadmin/modules/edit/#qModules.intModuleID#" class="btn">Edit</a></td>
-                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_module=#qModules.intModuleID#', 'Delete module', 'Are you sure you want to delete this module?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                                    <td><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?delete_module=#qModules.intModuleID#&#csrfParam()#', 'Delete module', 'Are you sure you want to delete this module?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
 
                                             </cfloop>
@@ -78,7 +78,7 @@
                                     </cfif>
                                     <div id="module_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                                            <form action="#application.mainURL#/sysadm/modules" method="post">
+                                            <form action="#application.mainURL#/sysadm/modules" method="post">#csrfField()#
                                             <input type="hidden" name="new_module">
                                                 <div class="modal-content">
                                                     <div class="modal-header">

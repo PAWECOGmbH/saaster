@@ -8,7 +8,7 @@
             #getTrans('titMfa')#
         </div>
 
-        <form id="mfa_form" method="post" action="#application.mainURL#/logincheck?uuid=#uuid#">
+        <form id="mfa_form" method="post" action="#application.mainURL#/logincheck?uuid=#uuid#">#csrfField()#
             <input type="hidden" name="mfa_btn">
             <div class="card-body">
                 <cfif structKeyExists(session, "alert")>

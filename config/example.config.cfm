@@ -16,9 +16,13 @@ variables.mainURL = "https://www.yourdomain.com";
 // Password for the Scheduler (url.pass)
 variables.schedulePassword = "";
 
-// Minutes a scheduler shard (tasks.cfm?task=NN) may be held by one run before the next
-// run is allowed to take it over. Must be longer than your longest legitimate shard run.
+// Minutes a scheduler worker (tasks.cfm?task=NN) may be held by one run before the next
+// run is allowed to take it over. Must be longer than your longest legitimate job.
 variables.scheduleLeaseMinutes = 60;
+
+// Number of scheduler workers that take jobs (1-20). Workers share the jobs of all customers,
+// more workers run more jobs in parallel. Calls of tasks.cfm with a higher task number exit at once.
+variables.scheduleWorkers = 20;
 
 
 // ####################################
