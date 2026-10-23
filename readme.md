@@ -169,8 +169,6 @@ To check what a server would start: ```docker compose config --services```
 
 The File Browser variables (```FILEBROWSER_PORT```, ```FILEBROWSER_CONTAINER_NAME```) are only needed where the File Browser runs - Compose validates every service, so ```compose.yml``` has defaults for them.
 
-Lucee installs the extensions listed in ```LUCEE_EXTENSIONS``` on every container start (the server needs internet access for it). Without the variable in ```.env```, ```compose.yml``` installs the Argon2 Extension, which provides ```GenerateArgon2Hash()``` for the password hashing - since Lucee 6.1 it is no longer part of the core. To add more extensions, list all IDs comma-separated, including the Argon2 one.
-
 When you remove a profile from a server where its service is already running (e.g. the File Browser on staging), stop and remove that container once - Compose leaves it running otherwise:
 ```
 docker compose stop filebrowser
@@ -226,6 +224,7 @@ For more information or if you're unsure about something, feel free to open an i
 - [Fontawesome](https://fontawesome.com/v4/license/)
 - [jquery](https://github.com/jquery/jquery)
 - [taffy](https://github.com/atuttle/Taffy)
+- [Bouncy Castle](https://www.bouncycastle.org/about/license/) (Argon2 password hashing, ```www/assets/java```)
 
 
 

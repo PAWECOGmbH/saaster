@@ -1,5 +1,5 @@
 <!--- Local files carry their modification time as version (global.cfc::assetUrl); the setup has no objGlobal yet --->
-<cfset assetUrl = structKeyExists(application, "objGlobal") ? application.objGlobal.assetUrl : (path) => path>
+<cfset assetUrl = (path) => structKeyExists(application, "objGlobal") ? application.objGlobal.assetUrl(path) : path>
 <cfoutput>
 <!--- Main Tabler CSS --->
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css" />

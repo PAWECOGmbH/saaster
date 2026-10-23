@@ -1,5 +1,5 @@
 <!--- Local files carry their modification time as version (global.cfc::assetUrl); the setup has no objGlobal yet --->
-<cfset assetUrl = structKeyExists(application, "objGlobal") ? application.objGlobal.assetUrl : (path) => path>
+<cfset assetUrl = (path) => structKeyExists(application, "objGlobal") ? application.objGlobal.assetUrl(path) : path>
 <cfoutput>
 <!--- Main jQuery --->
 <script src="#assetUrl('/backend/dist/js/jquery-3.6.0.min.js')#"></script>

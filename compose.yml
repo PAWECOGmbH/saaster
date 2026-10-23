@@ -8,9 +8,6 @@ services:
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
       - UMASK=0000
-      # Extensions Lucee installs on every start, so a fresh container is complete (comma-separated IDs).
-      # Default: Argon2 Extension - GenerateArgon2Hash() is no longer in the core since Lucee 6.1.
-      - LUCEE_EXTENSIONS=${LUCEE_EXTENSIONS:-7891D723-8F78-45F5-B7E333A22F8467CA}
     working_dir: /var/www
     volumes:
       - ./www:/var/www
