@@ -83,6 +83,17 @@ component extends="testbox.system.BaseSpec" {
                 expect(application.objGlobal.assetUrl("/backend/dist/js/testbox-missing.js")).toBe("/backend/dist/js/testbox-missing.js");
             });
 
+            // Lucee 6.2 could not compile the old ternary "objGlobal.assetUrl : (path) => path" (Lambda not present)
+            it("is used by css.cfm and js.cfm, which compile and render", () => {
+                for (var view in ["css", "js"]) {
+                    savecontent variable="local.html" {
+                        include "/backend/core/views/#view#.cfm";
+                    }
+                    expect(local.html).toInclude("/backend/dist/");
+                    expect(reFind("/backend/dist/[^""]+\?v=\d{14}", local.html)).toBeGT(0, view & ".cfm: versioned asset");
+                }
+            });
+
         });
 
         /*

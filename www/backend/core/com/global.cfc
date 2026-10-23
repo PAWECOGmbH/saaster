@@ -359,17 +359,70 @@ component displayname="globalFunctions" output="false" {
 
         generateHash() above is NOT for passwords any more - it stays for API keys, which
         are long random values where a fast hash is fine.
+
+        Argon2 is computed with Bouncy Castle (www/assets/java/bcprov-*.jar), which is pure
+        Java: the Argon2 extension of Lucee >= 6.1 needs a native library that is missing on
+        ARM servers. The encoded format is the one of the reference implementation, so hashes
+        made earlier with GenerateArgon2Hash() stay valid.
     */
-    variables.argon2Params = { variant: "argon2id", parallelism: 1, memoryKB: 19456, iterations: 2 };
+    variables.argon2Params = { variant: "argon2id", parallelism: 1, memoryKB: 19456, iterations: 2, saltLength: 16, hashLength: 32 };
+    variables.argon2Types = { argon2d: 0, argon2i: 1, argon2id: 2 };
 
     public string function hashPassword(required string password) {
-        return GenerateArgon2Hash(
-            arguments.password,
-            variables.argon2Params.variant,
-            variables.argon2Params.parallelism,
-            variables.argon2Params.memoryKB,
-            variables.argon2Params.iterations
+        local.p = variables.argon2Params;
+        local.salt = binaryDecode(repeatString("00", local.p.saltLength), "hex");
+        createObject("java", "java.security.SecureRandom").init().nextBytes(local.salt);
+        return argon2Encode(arguments.password, local.p.variant, 19, local.p.memoryKB, local.p.iterations, local.p.parallelism, local.salt, local.p.hashLength);
+    }
+
+    // Argon2 hash in the encoded format "$argon2id$v=19$m=...,t=...,p=...$salt$hash" (Base64 without padding)
+    public string function argon2Encode(required string password, required string variant, required numeric version, required numeric memoryKB, required numeric iterations, required numeric parallelism, required binary salt, numeric hashLength = 32) {
+        local.raw = argon2Raw(argumentCollection = arguments);
+        local.encoder = createObject("java", "java.util.Base64").getEncoder().withoutPadding();
+        return "$#arguments.variant#$v=#arguments.version#$m=#arguments.memoryKB#,t=#arguments.iterations#,p=#arguments.parallelism#$"
+            & local.encoder.encodeToString(arguments.salt) & "$" & local.encoder.encodeToString(local.raw);
+    }
+
+    private binary function argon2Raw(required string password, required string variant, required numeric version, required numeric memoryKB, required numeric iterations, required numeric parallelism, required binary salt, numeric hashLength = 32) {
+        local.params = createObject("java", "org.bouncycastle.crypto.params.Argon2Parameters$Builder")
+            .init(javaCast("int", variables.argon2Types[arguments.variant]))
+            .withVersion(javaCast("int", arguments.version))
+            .withMemoryAsKB(javaCast("int", arguments.memoryKB))
+            .withIterations(javaCast("int", arguments.iterations))
+            .withParallelism(javaCast("int", arguments.parallelism))
+            .withSalt(arguments.salt)
+            .build();
+        local.generator = createObject("java", "org.bouncycastle.crypto.generators.Argon2BytesGenerator").init();
+        local.generator.init(local.params);
+        local.result = binaryDecode(repeatString("00", arguments.hashLength), "hex");
+        local.generator.generateBytes(charsetDecode(arguments.password, "utf-8"), local.result);
+        return local.result;
+    }
+
+    // Checks a password against an encoded Argon2 hash (any variant, version 1.0 and 1.3)
+    private boolean function argon2Check(required string password, required string encoded) {
+        // "$argon2id$v=19$m=19456,t=2,p=1$salt$hash" - hashes of version 1.0 have no "v=" part
+        local.parts = listToArray(arguments.encoded, "$");
+        if (arrayLen(local.parts) eq 4) {
+            arrayInsertAt(local.parts, 2, "v=16");
+        }
+        if (arrayLen(local.parts) neq 5 or !structKeyExists(variables.argon2Types, local.parts[1]) or !reFind("^v=\d+$", local.parts[2])) {
+            return false;
+        }
+        local.cost = {};
+        for (local.pair in listToArray(local.parts[3])) {
+            local.cost[listFirst(local.pair, "=")] = listRest(local.pair, "=");
+        }
+        if (!isValid("integer", local.cost.m ?: "") or !isValid("integer", local.cost.t ?: "") or !isValid("integer", local.cost.p ?: "")) {
+            return false;
+        }
+        local.decoder = createObject("java", "java.util.Base64").getDecoder();
+        local.expected = local.decoder.decode(local.parts[5]);
+        local.actual = argon2Raw(
+            arguments.password, local.parts[1], listLast(local.parts[2], "="),
+            local.cost.m, local.cost.t, local.cost.p, local.decoder.decode(local.parts[4]), arrayLen(local.expected)
         );
+        return createObject("java", "java.security.MessageDigest").isEqual(local.actual, local.expected);
     }
 
     /*
@@ -407,7 +460,7 @@ component displayname="globalFunctions" output="false" {
 
         if (left(arguments.storedHash, 7) eq "$argon2") {
             try {
-                local.result.valid = Argon2CheckHash(arguments.password, arguments.storedHash);
+                local.result.valid = argon2Check(arguments.password, arguments.storedHash);
             } catch (any e) {
                 local.result.valid = false;
             }
