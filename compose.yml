@@ -14,7 +14,7 @@ services:
       - ./config/nginx/conf.d:/etc/nginx/conf.d
       - userdata_volume:/var/www/userdata
       - ./logs/lucee:/opt/lucee/server/lucee-server/context/logs
-      - ./logs/nginx:/var/log/nginx                             
+      - ./logs/nginx:/var/log/nginx
       - ./logs/tomcat:/usr/local/tomcat/logs
     networks:
       - npm_network
@@ -62,9 +62,10 @@ services:
         condition: service_healthy
     networks:
       - npm_network
-  
+
   filebrowser:
     image: filebrowser/filebrowser:latest
+    profiles: ["filebrowser"]
     container_name: ${FILEBROWSER_CONTAINER_NAME}
     restart: always
     user: "0:0"
