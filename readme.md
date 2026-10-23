@@ -157,6 +157,22 @@ For production deployment, Saaster can be run on an Ubuntu server using Docker. 
 
 + <b>Production Setup Guide:</b> *coming soon*
 
+### Production and staging with one compose.yml
+Production and staging use the same ```compose.yml```. Optional services have a Compose profile and only start when the profile is listed in ```COMPOSE_PROFILES``` of the server's ```.env```:
+
+| Server | ```.env``` | Started by ```docker compose up -d``` |
+| --- | --- | --- |
+| Production | ```COMPOSE_PROFILES=filebrowser``` | Lucee, MySQL, File Browser |
+| Staging | ```COMPOSE_PROFILES=``` (empty) | Lucee, MySQL |
+
+To check what a server would start: ```docker compose config --services```
+
+When you remove a profile from a server where its service is already running (e.g. the File Browser on staging), stop and remove that container once - Compose leaves it running otherwise:
+```
+docker compose stop filebrowser
+docker compose rm filebrowser
+```
+
 <br><br>
 
 ## Contributing
