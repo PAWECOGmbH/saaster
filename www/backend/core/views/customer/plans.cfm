@@ -175,7 +175,9 @@
                                                         <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                     </cfif>
                                                 <cfelse>
-                                                    <p class="mt-4"><a href="#application.mainURL#/account-settings/payment" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
+                                                    <!--- Add the payment method first, the renewal follows right after it (##521) --->
+                                                    <cfset renewLink = new backend.core.com.book().paymentFirstLink(bookedPlan.recurring eq "monthly" ? planDetail.bookingLinkM : planDetail.bookingLinkY)>
+                                                    <p class="mt-4"><a href="#renewLink#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                 </cfif>
                                             <cfelse>
                                                 <cfif not structKeyExists(url, "recurring") and planDetail.itsFree eq 0>

@@ -8,6 +8,7 @@
     if (structKeyExists(url, "cancel")) {
 
         // If the user is coming from registration process, set the default plan
+        // (setDefaultPlan only books for a customer without a plan - an existing customer keeps the current one)
         if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
 
             objBook = new backend.core.com.book();
@@ -36,6 +37,10 @@
             }
 
         }
+
+        // The booking that waited for this payment method is not wanted any more - it must not run
+        // when a payment method is added later for another reason
+        structDelete(session, "redirect");
 
         logWrite("user", "info", "The user has canceled the payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#]");
 

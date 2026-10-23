@@ -38,6 +38,25 @@ component displayname="book" output="false" {
     }
 
 
+    /*
+        The target of a booking button when the customer has no payment method yet (#521):
+        the payment page, carrying the booking link as redirect. Application.cfc keeps it
+        in session.redirect, and handler/payment.cfm opens it right after the payment
+        method was added - the booking happens without going back to the plans.
+    */
+    public string function paymentFirstLink(required string bookingLink) {
+
+        local.path = arguments.bookingLink;
+        if (left(local.path, len(application.mainURL)) eq application.mainURL) {
+            local.path = mid(local.path, len(application.mainURL) + 1, len(local.path));
+        }
+        local.path = reReplace(local.path, "^/+", "");
+
+        return application.mainURL & "/account-settings/payment?redirect=" & urlEncodedFormat(local.path);
+
+    }
+
+
     // Decrypt booking link
     public struct function decryptBookingLink(required string bookingLink) {
 
