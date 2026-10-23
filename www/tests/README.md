@@ -163,5 +163,5 @@ The fixtures create modules, scheduletasks and plans (`createModule`, `createSch
 | `box.json` | Pinned TestBox version |
 | `config/testing.json.example` | Template for the generated, git-ignored `testing.json` |
 | `bin/` | Install, prepare, reset, migrate and run scripts |
-| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, upload probe, form and SQL registries, scanners |
+| `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, form and SQL registries, scanners, and the probes that run real pages inside the test application (upload, scheduler worker, invoice view and print, return from Payrexx) |
 | `specs/` | The specs |

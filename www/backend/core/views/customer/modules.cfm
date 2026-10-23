@@ -23,6 +23,9 @@
 
     getWebhook = new backend.core.com.payrexx().getWebhook(session.customer_id, 'authorized');
 
+    // Without a payment method, the booking buttons lead to the payment page first and book right after it (#521)
+    objBookLinks = new backend.core.com.book();
+
 </cfscript>
 
 
@@ -143,9 +146,9 @@
                                                                         <cfset linkY = module.moduleData.bookingLinkY>
                                                                         <cfset linkO = module.moduleData.bookingLinkO>
                                                                     <cfelse>
-                                                                        <cfset linkM = application.mainURL & "/account-settings/payment">
-                                                                        <cfset linkY = application.mainURL & "/account-settings/payment">
-                                                                        <cfset linkO = application.mainURL & "/account-settings/payment">
+                                                                        <cfset linkM = objBookLinks.paymentFirstLink(module.moduleData.bookingLinkM)>
+                                                                        <cfset linkY = objBookLinks.paymentFirstLink(module.moduleData.bookingLinkY)>
+                                                                        <cfset linkO = objBookLinks.paymentFirstLink(module.moduleData.bookingLinkO)>
                                                                     </cfif>
                                                                     <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#&#csrfParam()#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
                                                                         <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
@@ -264,9 +267,9 @@
                                                                                 <cfset linkY = module.bookingLinkY>
                                                                                 <cfset linkO = module.bookingLinkO>
                                                                             <cfelse>
-                                                                                <cfset linkM = application.mainURL & "/account-settings/payment">
-                                                                                <cfset linkY = application.mainURL & "/account-settings/payment">
-                                                                                <cfset linkO = application.mainURL & "/account-settings/payment">
+                                                                                <cfset linkM = objBookLinks.paymentFirstLink(module.bookingLinkM)>
+                                                                                <cfset linkY = objBookLinks.paymentFirstLink(module.bookingLinkY)>
+                                                                                <cfset linkO = objBookLinks.paymentFirstLink(module.bookingLinkO)>
                                                                             </cfif>
                                                                             <cfif module.priceMonthly gt 0>
                                                                                 <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
