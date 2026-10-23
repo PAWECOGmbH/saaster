@@ -57,6 +57,43 @@ component displayname="book" output="false" {
     }
 
 
+    /*
+        The status a booking gets when the sysadmin changes its period (#624).
+
+        An expired test phase that gets an end date of today or later runs again as test
+        phase - before, the module had to be withdrawn and booked again. Every other booking
+        keeps its status: an expired paid booking is renewed by an invoice or a booking,
+        not by moving its dates. Returns the new status, or an empty string to keep it.
+    */
+    public string function statusAfterPeriodChange(required numeric bookingID, required numeric customerID, required string newEndDate) {
+
+        if (!isDate(arguments.newEndDate) or dateFormat(arguments.newEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd")) {
+            return "";
+        }
+
+        local.qBooking = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: arguments.bookingID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT strStatus, strRecurring
+                FROM bookings
+                WHERE intBookingID = :bookingID
+                AND intCustomerID = :customerID
+            "
+        );
+
+        if (local.qBooking.recordCount and local.qBooking.strStatus eq "expired" and local.qBooking.strRecurring eq "test") {
+            return "test";
+        }
+
+        return "";
+
+    }
+
+
     // Decrypt booking link
     public struct function decryptBookingLink(required string bookingLink) {
 

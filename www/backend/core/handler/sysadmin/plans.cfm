@@ -917,7 +917,15 @@ if (structKeyExists(url, "booking")) {
             bookingStruct['dateEnd'] = form.end_date;
         }
 
-        updateBooking = new backend.core.com.book('plan', custLanguage).updateBooking(bookingStruct);
+        objBookPeriod = new backend.core.com.book('plan', custLanguage);
+
+        // An expired test phase with a new end date runs again as test phase (#624)
+        newStatus = objBookPeriod.statusAfterPeriodChange(url.b, url.c, bookingStruct.dateEnd ?: "");
+        if (len(newStatus)) {
+            bookingStruct['status'] = newStatus;
+        }
+
+        updateBooking = objBookPeriod.updateBooking(bookingStruct);
 
         getAlert('Plan period saved.');
         location url="#application.mainURL#/sysadmin/customers/details/#url.c###plans" addtoken="false";

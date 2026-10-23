@@ -570,7 +570,12 @@
                                                                                     <cfelse>
                                                                                         <cfif module.priceOnetime gt 0 or module.priceMonthly gt 0 or module.priceYearly gt 0>
                                                                                             <cfif module.testDays gt 0>
-                                                                                                <cfif structKeyExists(moduleStatus, "status") and (moduleStatus.status eq "expired" or moduleStatus.status eq "test")>
+                                                                                                <cfif structKeyExists(moduleStatus, "status") and moduleStatus.status eq "expired" and (moduleStatus.recurring ?: "") eq "test">
+                                                                                                    <!--- An expired test phase can get a new end date and runs again as test phase (##624) --->
+                                                                                                    <a href="##" class="openPopup dropdown-item" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_period.cfm?b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#">
+                                                                                                        Extend the test phase
+                                                                                                    </a>
+                                                                                                <cfelseif structKeyExists(moduleStatus, "status") and (moduleStatus.status eq "expired" or moduleStatus.status eq "test")>
                                                                                                 <cfelse>
                                                                                                     <a href="#application.mainURL#/sysadm/modules?#csrfParam()#&booking&test&c=#thisCustomerID#&m=#module.moduleID#&r=onetime" class="dropdown-item">
                                                                                                         Activate the test time (#module.testDays# days)
