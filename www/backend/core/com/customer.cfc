@@ -381,7 +381,7 @@ component displayname="customer" output="false" {
 
             // If the currency struct is empty, get the currency via the last invoice, if they have any
             if (structIsEmpty(local.customerStruct.currencyStruct)) {
-                local.invoiceArray = objInvoices.getInvoices(arguments.customerID).arrayInvoices;
+                local.invoiceArray = objInvoices.getInvoices(customerID=arguments.customerID, order="intInvoiceID").arrayInvoices;
                 if (isArray(local.invoiceArray) and !arrayIsEmpty(local.invoiceArray)) {
                     local.lastInvoice = arrayLast(invoiceArray);
                     local.language = local.lastInvoice.invoiceLanguage;
@@ -490,9 +490,9 @@ component displayname="customer" output="false" {
                 "
             )
 
-            // Delete the customers logo
+            // Delete the customers logo (the check used to look at the photo of the first user)
             if (local.qCustomer.recordCount) {
-                if (len(trim(local.qCustomer.strPhoto))) {
+                if (len(trim(local.qCustomer.strLogo))) {
                     if (fileExists(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"))) {
                         fileDelete(expandPath("/userdata/images/logos/#local.qCustomer.strLogo#"));
                     }

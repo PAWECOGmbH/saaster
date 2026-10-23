@@ -10,7 +10,7 @@
 <cfif qFeatures.recordCount>
 
     <cfoutput>
-    <form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">
+    <form id="submit_form" method="post" action="#application.mainURL#/sysadm/plans">#csrfField()#
     <input type="hidden" name="edit_features" value="#thisPlanID#">
         <div class="row mb-5">
             <div class="col-lg-10">
@@ -18,9 +18,9 @@
                     <div class="row pt-3" style="border-bottom: 1px solid ##eee;">
                         <div class="col-lg-4 pt-2">
                             <cfif qFeatures.blnCategory eq 1>
-                                <h3>#qFeatures.strFeatureName#</h3>
+                                <h3>#encodeForHTML(qFeatures.strFeatureName)#</h3>
                             <cfelse>
-                                <p>#qFeatures.strFeatureName#</p>
+                                <p>#encodeForHTML(qFeatures.strFeatureName)#</p>
                             </cfif>
                         </div>
                         <div class="col-lg-3 pt-2">
@@ -36,7 +36,7 @@
                         <div class="col-lg-5 pb-3 pe-4">
                             <cfif !qFeatures.blnCategory>
                                 <div class="input-group input-group-flat">
-                                    <input type="text" name="text_#qFeatures.currID#" class="form-control" autocomplete="off" value="#trim(qFeatures.strValue)#" maxlength="100">
+                                    <input type="text" name="text_#qFeatures.currID#" class="form-control" autocomplete="off" value="#encodeForHTML(trim(qFeatures.strValue))#" maxlength="100">
                                     <cfif len(trim(qFeatures.strValue))>
                                         <span class="input-group-text">
                                             <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##value_#qFeatures.intPlansPlanFeatID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate value"></i></a>

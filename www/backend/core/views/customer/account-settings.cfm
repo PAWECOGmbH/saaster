@@ -122,7 +122,7 @@
 
                                         <cfif session.currentPlan.status eq "canceled">
 
-                                            <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
+                                            <p><a href="#application.mainURL#/cancel?plan=#session.currentPlan.planID#&revoke&#csrfParam()#" class="btn btn-outline-info">#getTrans('btnRevokeCancellation')#</a></p>
 
                                         <cfelse>
 

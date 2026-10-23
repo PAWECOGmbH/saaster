@@ -59,17 +59,17 @@
                                                 <td class="text-center"></td>
                                             </cfif>
                                             <td class="text-center">#qLanguages.intPrio#</td>
-                                            <td>#qLanguages.strLanguageEN#</td>
-                                            <td>#qLanguages.strLanguage#</td>
-                                            <td class="text-center">#qLanguages.strLanguageISO#</td>
+                                            <td>#encodeForHTML(qLanguages.strLanguageEN)#</td>
+                                            <td>#encodeForHTML(qLanguages.strLanguage)#</td>
+                                            <td class="text-center">#encodeForHTML(qLanguages.strLanguageISO)#</td>
                                             <td class="text-center">#yesNoFormat(qLanguages.blnChooseable)#</td>
                                             <td class="text-center">#yesNoFormat(qLanguages.blnDefault)#</td>
                                             <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##lng_#qLanguages.intLanguageID#">Edit</a></td>
-                                            <td><cfif !qLanguages.blnDefault><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/languages?delete_language=#qLanguages.intLanguageID#', 'Delete language', 'If you delete a language, all variables, translations and contents in tables with this language will also be deleted. Do you really want to delete this language irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></cfif></td>
+                                            <td><cfif !qLanguages.blnDefault><a href="##?" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/languages?delete_language=#qLanguages.intLanguageID#&#csrfParam()#', 'Delete language', 'If you delete a language, all variables, translations and contents in tables with this language will also be deleted. Do you really want to delete this language irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></cfif></td>
                                         </tr>
                                         <div id="lng_#qLanguages.intLanguageID#" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                <form action="#application.mainURL#/sysadm/languages" method="post">
+                                                <form action="#application.mainURL#/sysadm/languages" method="post">#csrfField()#
                                                 <input type="hidden" name="edit_language" value="#qLanguages.intLanguageID#">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -90,7 +90,7 @@
                                                                     <div class="mb-3">
                                                                         <label class="form-label">ISO code</label>
                                                                         <div class="input-group input-group-flat">
-                                                                            <input type="text" class="form-control" name="iso" autocomplete="off" value="#qLanguages.strLanguageISO#" maxlength="2" required>
+                                                                            <input type="text" class="form-control" name="iso" autocomplete="off" value="#encodeForHTML(qLanguages.strLanguageISO)#" maxlength="2" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -122,7 +122,7 @@
                                     </tbody>
                                     <div id="lng_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                            <form action="#application.mainURL#/sysadm/languages" method="post">
+                                            <form action="#application.mainURL#/sysadm/languages" method="post">#csrfField()#
                                             <input type="hidden" name="new_language">
                                                 <div class="modal-content">
                                                     <div class="modal-header">

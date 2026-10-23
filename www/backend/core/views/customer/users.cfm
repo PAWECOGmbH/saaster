@@ -50,11 +50,11 @@
                                     <cfif not len(trim(qUser.strPhoto))>
                                         <td><span class="avatar avatar-md brround">#ucase(left(qUser.strFirstName,1))##ucase(left(qUser.strLastName,1))#</span></td>
                                     <cfelse>
-                                        <td><img src="#application.mainURL#/userdata/images/users/#qUser.strPhoto#" title="#qUser.strFirstName#" class="avatar avatar-md brround"></td>
+                                        <td><img src="#application.mainURL#/userdata/images/users/#encodeForHTML(qUser.strPhoto)#" title="#encodeForHTML(qUser.strFirstName)#" class="avatar avatar-md brround"></td>
                                     </cfif>
-                                    <td>#qUser.strFirstName#</td>
-                                    <td>#qUser.strLastName#</td>
-                                    <td>#qUser.strEmail#</td>
+                                    <td>#encodeForHTML(qUser.strFirstName)#</td>
+                                    <td>#encodeForHTML(qUser.strLastName)#</td>
+                                    <td>#encodeForHTML(qUser.strEmail)#</td>
                                     <td class="text-center"><cfif qUser.blnSuperAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
                                     <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
@@ -93,11 +93,11 @@
                                                         </cfif>
                                                     </cfif>
                                                     <cfif canDelete>
-                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/user?delete=#qUser.intUserID#&#csrfParam()#', '#getTrans("titDeleteUser")#', '#getTrans("txtDeleteUserConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
                                                     </cfif>
                                                     <cfif canEdit or session.sysadmin>
                                                         <cfif not len(qUser.strPasswordHash) and not len(qUser.strPasswordSalt)>
-                                                            <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#">#getTrans('btnSendActivLink')#</a>
+                                                            <a class="dropdown-item" href="#application.mainURL#/user?invit=#qUser.intUserID#&#csrfParam()#">#getTrans('btnSendActivLink')#</a>
                                                         </cfif>
                                                     </cfif>
                                                 </div>

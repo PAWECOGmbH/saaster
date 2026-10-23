@@ -193,6 +193,7 @@ if (structKeyExists(url, "add")) {
 
                 // If there is no data from the webhook, send the customer back and try again
                 if (getWebhook.recordCount) {
+                    paymentMethodAdded = true;
                     getAlert('msgPaymentMethodAdded', 'success');
                     logWrite("user", "info", "Payment method added [CustomerID: #session.customer_id#, UserID: #session.user_id#, TransactionID: #getWebhook.intTransactionID#, paymentType: #getWebhook.strPaymentBrand#]");
                 } else {
@@ -226,8 +227,9 @@ if (structKeyExists(url, "add")) {
 
             structDelete(session, "payrexxPendingGatewayID");
 
-            // If there is a plan to pay, charge right now
-            if (structKeyExists(session, "redirect") and findNoCase("plan=", session.redirect)) {
+            // A plan or module was waiting for the payment method: book it right now (#521).
+            // Only after a successful setup - otherwise the booking would fail for lack of a payment method.
+            if ((paymentMethodAdded ?: false) and structKeyExists(session, "redirect") and reFindNoCase("[?&](plan|module)=", session.redirect)) {
                 bookingPath = session.redirect;
                 structDelete(session, "redirect");
                 location url="#bookingPath#" addtoken=false;

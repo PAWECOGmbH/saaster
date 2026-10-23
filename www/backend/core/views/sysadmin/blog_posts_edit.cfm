@@ -40,12 +40,12 @@
                     <ol class="breadcrumb breadcrumb-dots">
                         <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/blog-posts">Blog posts</a></li>
-                        <li class="breadcrumb-item active">#qPost.strPreviewTitle#</li>
+                        <li class="breadcrumb-item active">#encodeForHTML(qPost.strPreviewTitle)#</li>
                     </ol>
                 </div>
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                     <cfif len(trim(qPost.strMapping))>
-                        <button type="button" class="btn btn-primary" onclick="window.open('#application.mainURL#/#qPost.strMapping#?preview', '_blank')">
+                        <button type="button" class="btn btn-primary" onclick="window.open('#application.mainURL#/#encodeForJavaScript(qPost.strMapping)#?preview', '_blank')">
                             <i class="fas fa-eye me-2"></i> Preview
                         </button>
                     </cfif>
@@ -70,10 +70,10 @@
                             <div class="text-muted small">Updated: <cfif isDate(qPost.dtmUpdated)>#lsDateFormat(qPost.dtmUpdated)#<cfelse>n/a</cfif></div>
                         </div>
                     </div>
-                    <form action="#application.mainURL#/sysadm/blog-posts" method="post" enctype="multipart/form-data">
+                    <form action="#application.mainURL#/sysadm/blog-posts" method="post" enctype="multipart/form-data">#csrfField()#
                         <div class="card-body">
                             <input type="hidden" name="postID" value="#qPost.intBlogPostID#">
-                            <input type="hidden" name="author_name" value="#session.user_name#">
+                            <input type="hidden" name="author_name" value="#encodeForHTML(session.user_name)#">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -126,7 +126,7 @@
                                             <div class="col-md-4">
                                                 <label class="form-check form-switch form-switch-2">
                                                     <input class="form-check-input" type="checkbox" value="1" name="show_author" <cfif qPost.blnShowAuthor>checked</cfif>>
-                                                    <span class="form-check-label">Show author <br><span class="text-muted small">(#session.user_name#)</span>
+                                                    <span class="form-check-label">Show author <br><span class="text-muted small">(#encodeForHTML(session.user_name)#)</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -140,7 +140,7 @@
                                         <label class="form-label">Select one or more categories (optional)</label>
                                         <select id="categories" class="form-select" name="categoryID" multiple autocomplete="off" tabindex="-1">
                                             <cfloop query="qCategories">
-                                                <option value="#qCategories.intBlogCategoryID#" <cfif listFind(connectedCategories, qCategories.intBlogCategoryID)>selected</cfif>>#qCategories.strCategoryName#</option>
+                                                <option value="#qCategories.intBlogCategoryID#" <cfif listFind(connectedCategories, qCategories.intBlogCategoryID)>selected</cfif>>#encodeForHTML(qCategories.strCategoryName)#</option>
                                             </cfloop>
                                         </select>
                                     </div>
@@ -192,8 +192,8 @@
                                         <label class="form-label">Preview image</label>
                                         <cfif len(qPost.strPreviewImage)>
                                             <div class="d-flex align-items-center mb-2">
-                                                <img src="#qPost.strPreviewImage#" alt="Preview Image" style="max-width: 300px; max-height: 110px;" />
-                                                <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_image=#qPost.intBlogPostID#', 'Delete preview image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
+                                                <img src="#encodeForHTML(qPost.strPreviewImage)#" alt="Preview Image" style="max-width: 300px; max-height: 110px;" />
+                                                <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_image=#qPost.intBlogPostID#&#csrfParam()#', 'Delete preview image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
                                                     <i class="fas fa-trash-alt fa-lg"></i>
                                                 </a>
                                             </div>
@@ -236,8 +236,8 @@
                                         <label class="form-label">Header image</label>
                                         <cfif len(qPost.strBlogHeaderImage)>
                                             <div class="d-flex align-items-center mb-2">
-                                                <img src="#qPost.strBlogHeaderImage#" alt="Header Image" style="max-width: 300px; max-height: 180px;" />
-                                                <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_header_image=#qPost.intBlogPostID#', 'Delete header image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
+                                                <img src="#encodeForHTML(qPost.strBlogHeaderImage)#" alt="Header Image" style="max-width: 300px; max-height: 180px;" />
+                                                <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_header_image=#qPost.intBlogPostID#&#csrfParam()#', 'Delete header image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
                                                     <i class="fas fa-trash-alt fa-lg"></i>
                                                 </a>
                                             </div>
@@ -250,13 +250,13 @@
                             <div class="mb-3">
                                 <div class="mb-3">
                                     <label class="form-label">Content <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##post_content_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post content"></i></a></label>
-                                    <textarea class="form-control big-editor" name="content" style="height: 800px;">#qPost.strPostContent#</textarea>
+                                    <textarea class="form-control big-editor" name="content" style="height: 800px;">#encodeForHTML(qPost.strPostContent)#</textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
                             <button type="submit" class="btn btn-primary">Save changes</button>
-                            <a href="##?" class="btn btn-danger ms-auto" title="Delete post" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_post=#postID#', 'Delete post', 'Are you sure you want to delete this post?', 'No, cancel!', 'Yes, delete!')">Delete post</a>
+                            <a href="##?" class="btn btn-danger ms-auto" title="Delete post" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_post=#postID#&#csrfParam()#', 'Delete post', 'Are you sure you want to delete this post?', 'No, cancel!', 'Yes, delete!')">Delete post</a>
                         </div>
                     </form>
                 </div>

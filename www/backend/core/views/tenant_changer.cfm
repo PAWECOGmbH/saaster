@@ -9,19 +9,19 @@
         <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
             <cfif len(trim(getCustomerData.companyName))>
                 <cfif len(trim(getCustomerData.logo))>
-                    <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#getCustomerData.companyName#">
-                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.companyName#</span>
+                    <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(getCustomerData.logo)#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#encodeForHTML(getCustomerData.companyName)#">
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#encodeForHTML(getCustomerData.companyName)#</span>
                 <cfelse>
-                    <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.companyName,2)#</div>
-                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.companyName#</span>
+                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(getCustomerData.companyName,2))#</div>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#encodeForHTML(getCustomerData.companyName)#</span>
                 </cfif>
             <cfelse>
                 <cfif len(trim(getCustomerData.logo))>
-                    <img src="#application.mainURL#/userdata/images/logos/#getCustomerData.logo#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#getCustomerData.companyName#">
-                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.contactPerson#</span>
+                    <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(getCustomerData.logo)#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#encodeForHTML(getCustomerData.companyName)#">
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#encodeForHTML(getCustomerData.contactPerson)#</span>
                 <cfelse>
-                    <div class="avatar avatar-sm me-3 align-self-center">#left(getCustomerData.contactPerson,2)#</div>
-                    <span class="nav-link-title d-none d-sm-none d-md-block">#getCustomerData.contactPerson#</span>
+                    <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(getCustomerData.contactPerson,2))#</div>
+                    <span class="nav-link-title d-none d-sm-none d-md-block">#encodeForHTML(getCustomerData.contactPerson)#</span>
                 </cfif>
             </cfif>
         </a>
@@ -31,19 +31,19 @@
                     <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#" class="dropdown-item">
                         <cfif len(trim(qTenants.strCompanyName))>
                             <cfif len(trim(qTenants.strLogo))>
-                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#qTenants.strCompanyName#">
-                                #qTenants.strCompanyName#
+                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#encodeForHTML(qTenants.strCompanyName)#">
+                                #encodeForHTML(qTenants.strCompanyName)#
                             <cfelse>
-                                <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strCompanyName,2)#</div>
-                                #qTenants.strCompanyName#
+                                <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
+                                #encodeForHTML(qTenants.strCompanyName)#
                             </cfif>
                         <cfelse>
                             <cfif len(trim(qTenants.strLogo))>
-                                <img src="#application.mainURL#/userdata/images/logos/#qTenants.strLogo#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#qTenants.strContactPerson#">
-                                #qTenants.strContactPerson#
+                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#encodeForHTML(qTenants.strContactPerson)#">
+                                #encodeForHTML(qTenants.strContactPerson)#
                             <cfelse>
-                                <div class="avatar avatar-sm me-3 align-self-center">#left(qTenants.strContactPerson,2)#</div>
-                                <span class="nav-link-title">#qTenants.strContactPerson#</span>
+                                <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
+                                <span class="nav-link-title">#encodeForHTML(qTenants.strContactPerson)#</span>
                             </cfif>
                         </cfif>
                     </a>

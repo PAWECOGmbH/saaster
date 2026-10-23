@@ -5,11 +5,11 @@
     acceptFileTypesList = fileList.acceptFileTypesList;
 </cfscript>
 <cfoutput>
-<form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">
+<form id="submit_form" method="post" action="#application.mainURL#/sysadm/modules" enctype="multipart/form-data">#csrfField()#
     <input type="hidden" name="edit_module" value="#qModule.intModuleID#">
     <!--- to not send empty and therefore deleting the prefix if field is disabled  --->
     <cfif len(trim(qModule.strSettingPath))>
-        <input type="hidden" name="prefix" value="#qModule.strTabPrefix#">
+        <input type="hidden" name="prefix" value="#encodeForHTML(qModule.strTabPrefix)#">
     </cfif>
     <div class="card-body">
         <div class="row">
@@ -112,14 +112,14 @@
                     <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
                 </div>
                 <div class="mb-3">
-                    <textarea class="form-control editor" name="desc" style="height: 400px;">#qModule.strDescription#</textarea>
+                    <textarea class="form-control editor" name="desc" style="height: 400px;">#encodeForHTML(qModule.strDescription)#</textarea>
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Picture/Logo</label>
                     <cfif len(trim(qModule.strPicture))>
                         <div class="mt-3">
-                            <p><img src="#application.mainURL#/userdata/images/modules/#qModule.strPicture#" class="avatar avatar-xl"></p>
-                            <p><a href="#application.mainURL#/sysadm/modules?delete_pic=#qModule.intModuleID#">Delete picture</a></p>
+                            <p><img src="#application.mainURL#/userdata/images/modules/#encodeForHTML(qModule.strPicture)#" class="avatar avatar-xl"></p>
+                            <p><a href="#application.mainURL#/sysadm/modules?delete_pic=#qModule.intModuleID#&#csrfParam()#">Delete picture</a></p>
                         </div>
                     <cfelse>
                         <input name="pic" type="file" accept="#allowedFileTypesList#" class="dropify" data-height="100" data-allowed-file-extensions='[#acceptFileTypesList#]' data-max-file-size="3M" />

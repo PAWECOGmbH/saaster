@@ -7,6 +7,7 @@
     <cfoutput>
     <title>#variables.metaTitle#</title>
     <meta name="description" content="#variables.metaDescription#">
+    <meta name="csrf-token" content="#csrfToken()#">
     </cfoutput>
 
     <cfinclude template="css.cfm">

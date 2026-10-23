@@ -12,6 +12,8 @@ services:
       - ./www:/var/www
       - ./config/nginx/conf.d:/etc/nginx/conf.d
       - userdata_volume:/var/www/userdata
+      # Read-only for the TestBox specs that check the migrations (www/tests)
+      - ./config/db:/var/saaster/db:ro
     networks:
       - saaster_net
 

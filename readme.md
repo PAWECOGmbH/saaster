@@ -88,10 +88,23 @@ Run the setup script to initialize Saaster:
 ## Optional: Load Test Data
 If you want to load test data into your database:
 
-1.	In the folder ```config/db/dev/```, you'll find several SQL files containing test data. For example, to import the "create-plans.sql" file:
+1.	In the folder ```config/db/dev/```, you'll find SQL files with demo data. They contain data only - the tables come from the migrations - and can be imported again at any time (they replace their own records). Import them in this order:
+
+| File | Content |
+| --- | --- |
+| ```create-plans.sql``` | One plan group with four plans (Free, Standard, Advanced, Enterprise), features and prices in USD, EUR and CHF (CHF with 8.1% VAT) |
+| ```create-modules.sql``` | Three modules: a free Todo app, Easy ERP (monthly/yearly, 30 test days), MailChimp API (one-time, 10 test days) |
+| ```create-widgets.sql``` | Five dashboard widgets: shown to everybody, only with a module, only with certain plans, deactivated (replaces widgets 1-5) |
+| ```create-customers.sql``` | Eleven demo companies with users, active, test, free, canceled, expired and waiting bookings, invoices in every status, payments, payment methods and tenants |
+| ```create-notifications.sql``` | Notifications for the first account (customer 1, user 1) |
+
 ```
-cat ./config/db/dev/create-plans.sql | docker exec -i {MYSQL_CONTAINER_NAME} mysql -u {MYSQL_USER} -p{MYSQL_PASSWORD} {MYSQL_DATABASE}
+for f in create-plans create-modules create-widgets create-customers create-notifications; do
+  cat ./config/db/dev/$f.sql | docker exec -i {MYSQL_CONTAINER_NAME} mysql -u {MYSQL_USER} -p{MYSQL_PASSWORD} {MYSQL_DATABASE}
+done
 ```
+
+All demo users log in with the password ```Saaster-Demo-2026!```, e.g. ```anna.meier@alpine-bakery.example``` (German, Standard plan) or ```oliver.smith@brightpixel.example``` (English, overdue invoice). The list of companies and what each of them shows is at the top of ```create-customers.sql```.
 
 Replace the following placeholders:
 + ```{MYSQL_CONTAINER_NAME}```: The name of your MySQL container.
@@ -125,10 +138,42 @@ After configuring Lucee and Saaster, you may want to create a custom Docker imag
 
 <br><br>
 
+## Testing
+Saaster comes with a [TestBox](https://www.ortussolutions.com/products/testbox) test workspace in ```www/tests```. The specs run inside your local Lucee container against a dedicated test database (```saaster_test_db```), never against your development database. With the dev stack running, set it up once from the repository root:
+```
+bash www/tests/bin/install_test_dependencies.sh
+bash www/tests/bin/prepare_test_db.sh
+```
+Then run the specs in the browser at ```http://localhost:8080/tests/runner.cfm``` or from the shell:
+```
+bash www/tests/bin/run_tests.sh "reporter=mintext"
+```
+The test application only starts when ```config.cfm``` is set to ```variables.environment = "dev"```. Details and how to write your own specs: [www/tests/README.md](www/tests/README.md)
+
+<br><br>
+
 ## Live Setup
 For production deployment, Saaster can be run on an Ubuntu server using Docker. This setup ensures a stable and scalable environment. A detailed guide on how to configure the server, set up Docker, and deploy Saaster in a live environment can be found in the official documentation:
 
 + <b>Production Setup Guide:</b> *coming soon*
+
+### Production and staging with one compose.yml
+Production and staging use the same ```compose.yml```. Optional services have a Compose profile and only start when the profile is listed in ```COMPOSE_PROFILES``` of the server's ```.env```:
+
+| Server | ```.env``` | Started by ```docker compose up -d``` |
+| --- | --- | --- |
+| Production | ```COMPOSE_PROFILES=filebrowser``` | Lucee, MySQL, File Browser |
+| Staging | nothing (or ```COMPOSE_PROFILES=``` empty) | Lucee, MySQL |
+
+To check what a server would start: ```docker compose config --services```
+
+The File Browser variables (```FILEBROWSER_PORT```, ```FILEBROWSER_CONTAINER_NAME```) are only needed where the File Browser runs - Compose validates every service, so ```compose.yml``` has defaults for them.
+
+When you remove a profile from a server where its service is already running (e.g. the File Browser on staging), stop and remove that container once - Compose leaves it running otherwise:
+```
+docker compose stop filebrowser
+docker compose rm filebrowser
+```
 
 <br><br>
 
@@ -162,7 +207,7 @@ We welcome contributions from developers to help improve Saaster. Whether it's f
 
 ### Guidelines
 + <b>Code style:</b> Follow the existing code style of the project.
-+ <b>Testing:</b> Ensure that your changes do not break any existing functionality. Add tests where applicable.
++ <b>Testing:</b> Ensure that your changes do not break any existing functionality. Run the test suite (see [Testing](#testing)) and add specs where applicable.
 + <b>Documentation:</b> If your changes affect functionality, please update the relevant documentation.
 
 For more information or if you're unsure about something, feel free to open an issue or ask for guidance on an existing one.
@@ -179,6 +224,7 @@ For more information or if you're unsure about something, feel free to open an i
 - [Fontawesome](https://fontawesome.com/v4/license/)
 - [jquery](https://github.com/jquery/jquery)
 - [taffy](https://github.com/atuttle/Taffy)
+- [Bouncy Castle](https://www.bouncycastle.org/about/license/) (Argon2 password hashing, ```www/assets/java```)
 
 
 

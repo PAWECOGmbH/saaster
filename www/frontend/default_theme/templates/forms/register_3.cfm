@@ -8,7 +8,7 @@
             #getTrans('txtUpdateInformation')#
         </div>
 
-        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">
+        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">#csrfField()#
             <input type="hidden" name="fill_remaining_data">
             <div class="card-body">
                 <div class="mb-3">
@@ -41,7 +41,7 @@
                         <select name="countryID" class="form-select" required>
                             <option value=""></option>
                             <cfloop query="additionalData.qCountries">
-                                <option value="#additionalData.qCountries.intCountryID#">#additionalData.qCountries.strCountryName#</option>
+                                <option value="#additionalData.qCountries.intCountryID#">#encodeForHTML(additionalData.qCountries.strCountryName)#</option>
                             </cfloop>
                         </select>
                     </div>

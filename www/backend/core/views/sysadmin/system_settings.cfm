@@ -65,7 +65,7 @@
                     <div class="card-header">
                         <h3 class="card-title">System settings</h3>
                     </div>
-                    <form action="#application.mainURL#/sysadm/settings" method="post">
+                    <form action="#application.mainURL#/sysadm/settings" method="post">#csrfField()#
                         <input type="hidden" name="edit_sysadmin_settings">
                         <div class="card-body">
 
@@ -73,8 +73,8 @@
                             <div class="border align-baseline p-3">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <p>#infoMailNewRegistrations.strDescription#</p>
-                                        <select name="#infoMailNewRegistrations.strSettingVariable#" class="form-select w-50">
+                                        <p>#encodeForHTML(infoMailNewRegistrations.strDescription)#</p>
+                                        <select name="#encodeForHTML(infoMailNewRegistrations.strSettingVariable)#" class="form-select w-50">
                                             <option value="0" <cfif infoMailNewRegistrations.strDefaultValue eq 0>selected</cfif>>No</option>
                                             <option value="1" <cfif infoMailNewRegistrations.strDefaultValue eq 1>selected</cfif>>Yes</option>
                                         </select>
@@ -90,8 +90,8 @@
                             <div class="border align-baseline p-3">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <p>#dashboardEditable.strDescription#</p>
-                                        <select name="#dashboardEditable.strSettingVariable#" class="form-select w-50">
+                                        <p>#encodeForHTML(dashboardEditable.strDescription)#</p>
+                                        <select name="#encodeForHTML(dashboardEditable.strSettingVariable)#" class="form-select w-50">
                                             <option value="0" <cfif dashboardEditable.strDefaultValue eq 0>selected</cfif>>No</option>
                                             <option value="1" <cfif dashboardEditable.strDefaultValue eq 1>selected</cfif>>Yes</option>
                                         </select>
@@ -107,12 +107,12 @@
                             <div class="border align-baseline p-3">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <p>#qInvoiceNumberStart.strDescription#</p>
-                                        <input type="number" name="#qInvoiceNumberStart.strSettingVariable#" value="#qInvoiceNumberStart.strDefaultValue#" class="form-control w-25" required>
+                                        <p>#encodeForHTML(qInvoiceNumberStart.strDescription)#</p>
+                                        <input type="number" name="#encodeForHTML(qInvoiceNumberStart.strSettingVariable)#" value="#encodeForHTML(qInvoiceNumberStart.strDefaultValue)#" class="form-control w-25" required>
                                     </div>
                                     <div class="col-lg-6">
-                                        <p>#qRoundFactor.strDescription#</p>
-                                        <select name="#qRoundFactor.strSettingVariable#" class="form-select w-50" id="roundFactorSelect">
+                                        <p>#encodeForHTML(qRoundFactor.strDescription)#</p>
+                                        <select name="#encodeForHTML(qRoundFactor.strSettingVariable)#" class="form-select w-50" id="roundFactorSelect">
                                             <option value="5" <cfif qRoundFactor.strDefaultValue eq 5>selected</cfif>>0.05 Switzerland</option>
                                             <option value="1" <cfif qRoundFactor.strDefaultValue eq 1>selected</cfif>>0.01 rest of the world</option>
                                         </select>
@@ -120,15 +120,15 @@
                                 </div>
                                 <div class="row mt-4">
                                     <div class="col-lg-6">
-                                        <p>#qInvoicePrefix.strDescription#</p>
-                                        <input type="text" name="#qInvoicePrefix.strSettingVariable#" value="#qInvoicePrefix.strDefaultValue#" class="form-control w-25" maxlength="5">
+                                        <p>#encodeForHTML(qInvoicePrefix.strDescription)#</p>
+                                        <input type="text" name="#encodeForHTML(qInvoicePrefix.strSettingVariable)#" value="#encodeForHTML(qInvoicePrefix.strDefaultValue)#" class="form-control w-25" maxlength="5">
                                     </div>
                                     <div class="col-lg-6">
                                         <div id="QrBillContainer" style="display: none;">
                                             <div class="row">
-                                                <p>#qSwissQrBill.strDescription#</p>
+                                                <p>#encodeForHTML(qSwissQrBill.strDescription)#</p>
                                                 <div class="col-lg-4">
-                                                    <select name="#qSwissQrBill.strSettingVariable#" class="form-select w-50" id="QrBillCheckbox">
+                                                    <select name="#encodeForHTML(qSwissQrBill.strSettingVariable)#" class="form-select w-50" id="QrBillCheckbox">
                                                         <option value="0" <cfif qSwissQrBill.strDefaultValue eq 0>selected</cfif>>No</option>
                                                         <option value="1" <cfif qSwissQrBill.strDefaultValue eq 1>selected</cfif>>Yes</option>
                                                     </select>
@@ -148,7 +148,7 @@
                                                             <div class="row mb-3">
                                                                 <div class="col-lg-6">
                                                                     <b>Invoice address:</b><br /><br />
-                                                                    #customerData.companyName#<br />
+                                                                    #encodeForHTML(customerData.companyName)#<br />
                                                                     #customerData.address#<br />
                                                                     #customerData.zip# #customerData.city#<br />
                                                                     CH
@@ -162,11 +162,11 @@
                                                         <div class="modal-body mb-3">
                                                             <div class="mb-3">
                                                                 <label class="form-label">IBAN number:</label>
-                                                                <input type="text" name="settingIBANnumber" class="form-control" autocomplete="off" value="#qSwissQrIBAN.strDefaultValue#" maxlength="30">
+                                                                <input type="text" name="settingIBANnumber" class="form-control" autocomplete="off" value="#encodeForHTML(qSwissQrIBAN.strDefaultValue)#" maxlength="30">
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label">QR reference number:</label>
-                                                                <input type="text" name="settingQRreference" class="form-control" autocomplete="off" value="#qSwissQrRef.strDefaultValue#" maxlength="30">
+                                                                <input type="text" name="settingQRreference" class="form-control" autocomplete="off" value="#encodeForHTML(qSwissQrRef.strDefaultValue)#" maxlength="30">
                                                             </div>
                                                         </div>
                                                         <div class="modal-body modal-footer pt-3">
@@ -181,23 +181,23 @@
                                 </div>
                                 <div class="row mt-4">
                                     <div class="col-lg-6">
-                                        <p>#qStandardVatType.strDescription#</p>
+                                        <p>#encodeForHTML(qStandardVatType.strDescription)#</p>
                                         <label class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="#qStandardVatType.strSettingVariable#" value="1" <cfif qStandardVatType.strDefaultValue eq 1 or qStandardVatType.strDefaultValue eq "">checked</cfif>>
+                                            <input class="form-check-input" type="radio" name="#encodeForHTML(qStandardVatType.strSettingVariable)#" value="1" <cfif qStandardVatType.strDefaultValue eq 1 or qStandardVatType.strDefaultValue eq "">checked</cfif>>
                                             <span class="form-check-label small pt-1">Incl. VAT</span>
                                         </label>
                                         <label class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="#qStandardVatType.strSettingVariable#" value="2" <cfif qStandardVatType.strDefaultValue eq 2>checked</cfif>>
+                                            <input class="form-check-input" type="radio" name="#encodeForHTML(qStandardVatType.strSettingVariable)#" value="2" <cfif qStandardVatType.strDefaultValue eq 2>checked</cfif>>
                                             <span class="form-check-label small pt-1">Excl. VAT</span>
                                         </label>
                                         <label class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="#qStandardVatType.strSettingVariable#" value="3" <cfif qStandardVatType.strDefaultValue eq 3>checked</cfif>>
+                                            <input class="form-check-input" type="radio" name="#encodeForHTML(qStandardVatType.strSettingVariable)#" value="3" <cfif qStandardVatType.strDefaultValue eq 3>checked</cfif>>
                                             <span class="form-check-label small pt-1">No VAT</span>
                                         </label>
                                     </div>
                                     <div class="col-lg-6">
-                                        <p>#qInvoiceNet.strDescription#</p>
-                                        <select name="#qInvoiceNet.strSettingVariable#" class="form-select w-50">
+                                        <p>#encodeForHTML(qInvoiceNet.strDescription)#</p>
+                                        <select name="#encodeForHTML(qInvoiceNet.strSettingVariable)#" class="form-select w-50">
                                             <option value="1" <cfif qInvoiceNet.strDefaultValue eq 1>selected</cfif>>Net</option>
                                             <option value="0" <cfif qInvoiceNet.strDefaultValue eq 0>selected</cfif>>Gross</option>
                                         </select>
@@ -211,13 +211,13 @@
                             <div class="border align-baseline p-3">
                                 <div class="row">
                                     <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
-                                        <p class="no-margin">#qColorPrimary.strDescription#</p>
-                                        <input type="color" class="form-control form-control-color color-width" name="#qColorPrimary.strSettingVariable#" value="#qColorPrimary.strDefaultValue#">
+                                        <p class="no-margin">#encodeForHTML(qColorPrimary.strDescription)#</p>
+                                        <input type="color" class="form-control form-control-color color-width" name="#encodeForHTML(qColorPrimary.strSettingVariable)#" value="#encodeForHTML(qColorPrimary.strDefaultValue)#">
                                     </div>
                                     <div class="col-lg-1"></div>
                                     <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
-                                        <p class="no-margin">#qColorSecondary.strDescription#</p>
-                                        <input type="color" class="form-control form-control-color color-width" name="#qColorSecondary.strSettingVariable#" value="#qColorSecondary.strDefaultValue#">
+                                        <p class="no-margin">#encodeForHTML(qColorSecondary.strDescription)#</p>
+                                        <input type="color" class="form-control form-control-color color-width" name="#encodeForHTML(qColorSecondary.strSettingVariable)#" value="#encodeForHTML(qColorSecondary.strDefaultValue)#">
                                     </div>
                                     <div class="col-lg-5"></div>
                                 </div>

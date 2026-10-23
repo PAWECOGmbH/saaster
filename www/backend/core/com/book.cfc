@@ -38,6 +38,62 @@ component displayname="book" output="false" {
     }
 
 
+    /*
+        The target of a booking button when the customer has no payment method yet (#521):
+        the payment page, carrying the booking link as redirect. Application.cfc keeps it
+        in session.redirect, and handler/payment.cfm opens it right after the payment
+        method was added - the booking happens without going back to the plans.
+    */
+    public string function paymentFirstLink(required string bookingLink) {
+
+        local.path = arguments.bookingLink;
+        if (left(local.path, len(application.mainURL)) eq application.mainURL) {
+            local.path = mid(local.path, len(application.mainURL) + 1, len(local.path));
+        }
+        local.path = reReplace(local.path, "^/+", "");
+
+        return application.mainURL & "/account-settings/payment?redirect=" & urlEncodedFormat(local.path);
+
+    }
+
+
+    /*
+        The status a booking gets when the sysadmin changes its period (#624).
+
+        An expired test phase that gets an end date of today or later runs again as test
+        phase - before, the module had to be withdrawn and booked again. Every other booking
+        keeps its status: an expired paid booking is renewed by an invoice or a booking,
+        not by moving its dates. Returns the new status, or an empty string to keep it.
+    */
+    public string function statusAfterPeriodChange(required numeric bookingID, required numeric customerID, required string newEndDate) {
+
+        if (!isDate(arguments.newEndDate) or dateFormat(arguments.newEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd")) {
+            return "";
+        }
+
+        local.qBooking = queryExecute(
+            options = {datasource = application.datasource},
+            params = {
+                bookingID: {type: "numeric", value: arguments.bookingID},
+                customerID: {type: "numeric", value: arguments.customerID}
+            },
+            sql = "
+                SELECT strStatus, strRecurring
+                FROM bookings
+                WHERE intBookingID = :bookingID
+                AND intCustomerID = :customerID
+            "
+        );
+
+        if (local.qBooking.recordCount and local.qBooking.strStatus eq "expired" and local.qBooking.strRecurring eq "test") {
+            return "test";
+        }
+
+        return "";
+
+    }
+
+
     // Decrypt booking link
     public struct function decryptBookingLink(required string bookingLink) {
 
@@ -101,7 +157,7 @@ component displayname="book" output="false" {
 
             variables.object = new backend.core.com.plans(currencyID=local.currencyID);
             local.currentProduct = variables.object.getCurrentPlan(arguments.customerID);
-            local.productType = local.getTrans('titPlan');
+            local.productType = local.getTrans('titPlan', variables.language);
             local.productName = local.bookingData.planName;
             local.maxUsers = local.bookingData.maxUsers;
 
@@ -147,7 +203,7 @@ component displayname="book" output="false" {
                 local.itsFirstProduct = true;
             }
 
-            local.productType = local.getTrans('titModule');
+            local.productType = local.getTrans('titModule', variables.language);
             local.productName = local.bookingData.name;
             local.maxUsers = 0;
             local.sql_field = "intModuleID = " & local.currentProductID;
@@ -372,7 +428,7 @@ component displayname="book" output="false" {
                         local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
 
                         // Set some invoice variables
-                        local.invoiceTitle = local.getTrans('titCycleChange') & " " & lcase(local.getTrans('txtMonthly')) & "/" & lcase(local.getTrans('txtYearly'));
+                        local.invoiceTitle = local.getTrans('titCycleChange', variables.language) & " " & lcase(local.getTrans('txtMonthly', variables.language)) & "/" & lcase(local.getTrans('txtYearly', variables.language));
                         local.invoiceCurrency = local.bookingData.currency;
                         local.invoiceLanguage = variables.language;
 
@@ -461,7 +517,7 @@ component displayname="book" output="false" {
                             local.messageStruct['button'] = local.getTrans('btnYesUpgrade');
 
                             // Set some invoice variables
-                            local.invoiceTitle = local.getTrans('titUpgrade') & ": " & local.productName;
+                            local.invoiceTitle = local.getTrans('titUpgrade', variables.language) & ": " & local.productName;
                             local.invoiceCurrency = local.bookingData.currency;
                             local.invoiceLanguage = variables.language;
 

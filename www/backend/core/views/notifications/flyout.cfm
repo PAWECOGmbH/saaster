@@ -13,7 +13,7 @@
     <a href="##" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" aria-expanded="false">
         <i class="far fa-bell" style="font-size: 20px;"></i>
         <cfif !arrayIsEmpty(qNotiesUnread.arrayNoti)>
-            <span class="badge bg-red"></span>
+            <span class="badge bg-red text-red-fg"></span>
         </cfif>
     </a>
     <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">

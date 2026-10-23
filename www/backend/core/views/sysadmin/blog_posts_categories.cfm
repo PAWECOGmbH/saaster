@@ -64,13 +64,13 @@
                                         <tr <cfif qCategories.recordCount gt 1>id="sort_#qCategories.intBlogCategoryID#"</cfif>>
                                             <td class="move text-center"><cfif qCategories.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
                                             <td class="text-center">#qCategories.intPrio#</td>
-                                            <td>#qCategories.strCategoryName# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_category_#qCategories.intBlogCategoryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate category"></i></a></td>
+                                            <td>#encodeForHTML(qCategories.strCategoryName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_category_#qCategories.intBlogCategoryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate category"></i></a></td>
                                             <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##category_#qCategories.intBlogCategoryID#">Edit</a></td>
-                                            <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_category=#qCategories.intBlogCategoryID#', 'Delete blog category', 'Do you want to delete this category?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
+                                            <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_category=#qCategories.intBlogCategoryID#&#csrfParam()#', 'Delete blog category', 'Do you want to delete this category?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                         </tr>
                                         <div id="category_#qCategories.intBlogCategoryID#" class='modal fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                             <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                                                <form action="#application.mainURL#/sysadm/blog-posts" method="post">
+                                                <form action="#application.mainURL#/sysadm/blog-posts" method="post">#csrfField()#
                                                 <input type="hidden" name="edit_category" value="#qCategories.intBlogCategoryID#">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -139,7 +139,7 @@
     </div>
 </div>
 <!--- Modal for new group --->
-<form action="#application.mainURL#/sysadm/blog-posts" method="post">
+<form action="#application.mainURL#/sysadm/blog-posts" method="post">#csrfField()#
 <div id="category_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <input type="hidden" name="new_category">

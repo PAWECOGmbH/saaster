@@ -26,9 +26,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
         
         qTotalCountries = objSysadmin.getTotalCountriesSearch(searchString);
@@ -53,9 +53,9 @@
 
     if (len(trim(searchTerm))) {
         if (FindNoCase("@",searchTerm)){
-            searchString = 'AGAINST (''"#searchTerm#"'' IN BOOLEAN MODE)'
+            searchString = '"#searchTerm#"'
         }else {
-            searchString = 'AGAINST (''*''"#searchTerm#"''*'' IN BOOLEAN MODE)'
+            searchString = '*#searchTerm#*'
         }
 
         qCountries = objSysadmin.getCountriesSearch(searchString, c_start, session.c_sort);
@@ -119,7 +119,7 @@
                     <div class="card">
                         <div class="card-body">
                             <p>You have <b>#qTotalCountries.totalCountries#</b> countries activated. If you want to activate more countries, click to the "Import" or "New country" button.</p>
-                            <form action="#application.mainURL#/sysadmin/countries?page=1" method="post">
+                            <form action="#application.mainURL#/sysadmin/countries?page=1" method="post">#csrfField()#
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <label class="form-label">Search for country:</label>
@@ -170,12 +170,12 @@
                                                 <tr>
                                                     <td class="text-center">#qCountries.intPrio#</td>
                                                     <td class="text-center">#yesNoFormat(qCountries.blnDefault)#</td>
-                                                    <td>#qCountries.strCountryName# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
-                                                    <td class="text-center">#qCountries.strISO1#</td>
-                                                    <td>#qCountries.strRegion#</td>
-                                                    <td>#qCountries.strLanguageEN#</td>
+                                                    <td>#encodeForHTML(qCountries.strCountryName)# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
+                                                    <td class="text-center">#encodeForHTML(qCountries.strISO1)#</td>
+                                                    <td>#encodeForHTML(qCountries.strRegion)#</td>
+                                                    <td>#encodeForHTML(qCountries.strLanguageEN)#</td>
                                                     <td><a href="##" class="btn openPopup" data-bs-toggle="modal" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_country.cfm?countryID=#qCountries.intCountryID#">Edit</a></td>
-                                                    <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#" class="btn">Remove</a></cfif></td>
+                                                    <td><cfif !qCountries.blnDefault><a href="#application.mainURL#/sysadm/countries?remove_country=#qCountries.intCountryID#&#csrfParam()#" class="btn">Remove</a></cfif></td>
                                                 </tr>
                                                 #getModal.args('countries', 'strCountryName', qCountries.intCountryID, 100).openModal('country', cgi.path_info, 'Translate country name')#
                                             </cfloop>
@@ -187,7 +187,7 @@
                                     </cfif>
                                     <div id="country_new" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
                                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                            <form action="#application.mainURL#/sysadm/countries" method="post">
+                                            <form action="#application.mainURL#/sysadm/countries" method="post">#csrfField()#
                                             <input type="hidden" name="new_country">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -205,7 +205,7 @@
                                                                 <select name="languageID" class="form-select">
                                                                     <option value=""></option>
                                                                     <cfloop query="qLanguages">
-                                                                        <option value="#qLanguages.intLanguageID#">#qLanguages.strLanguageEN#</option>
+                                                                        <option value="#qLanguages.intLanguageID#">#encodeForHTML(qLanguages.strLanguageEN)#</option>
                                                                     </cfloop>
                                                                 </select>
                                                             </div>

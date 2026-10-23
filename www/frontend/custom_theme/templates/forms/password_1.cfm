@@ -8,7 +8,7 @@
             #getTrans('titResetPassword')#
         </div>
 
-        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">
+        <form id="submit_form" method="post" action="#application.mainURL#/logincheck">#csrfField()#
             <input type="hidden" name="reset_pw_btn_1">
             <div class="card-body">
                 <cfif structKeyExists(session, "alert")>

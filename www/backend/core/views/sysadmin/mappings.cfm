@@ -82,7 +82,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <form action="#application.mainURL#/sysadm/mappings" method="post">
+                                                <form action="#application.mainURL#/sysadm/mappings" method="post">#csrfField()#
                                                     <input type="hidden" name="new_mapping">
                                                     <tr>
                                                         <td class="bottom_line small">add<br>new</td>
@@ -101,12 +101,12 @@
                                                     </tr>
                                                 </form>
                                                 <cfloop query="qCustomMappings">
-                                                    <form action="#application.mainURL#/sysadm/mappings" method="post">
+                                                    <form action="#application.mainURL#/sysadm/mappings" method="post">#csrfField()#
                                                         <input type="hidden" name="edit_mapping" value="#qCustomMappings.intCustomMappingID#">
                                                         <tr>
                                                             <td></td>
-                                                            <td><input type="text" name="mapping" value="#qCustomMappings.strMapping#" class="form-control"></td>
-                                                            <td><input type="text" name="path" value="#qCustomMappings.strPath#" class="form-control"></td>
+                                                            <td><input type="text" name="mapping" value="#encodeForHTML(qCustomMappings.strMapping)#" class="form-control"></td>
+                                                            <td><input type="text" name="path" value="#encodeForHTML(qCustomMappings.strPath)#" class="form-control"></td>
                                                             <td class="text-center"><input type="radio" name="admin" value="public" class="form-check-input" <cfif !qCustomMappings.blnOnlyAdmin and !qCustomMappings.blnOnlySuperAdmin and !qCustomMappings.blnOnlySysAdmin>checked</cfif>></td>
                                                             <td class="text-center"><input type="radio" name="admin" value="admin" class="form-check-input" <cfif qCustomMappings.blnOnlyAdmin eq 1>checked</cfif>></td>
                                                             <td class="text-center"><input type="radio" name="admin" value="superadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySuperAdmin eq 1>checked</cfif>></td>
@@ -156,7 +156,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <form action="#application.mainURL#/sysadm/mappings" method="post">
+                                                <form action="#application.mainURL#/sysadm/mappings" method="post">#csrfField()#
                                                     <input type="hidden" name="new_mapping_frontend">
                                                     <tr>
                                                         <td class="bottom_line"><input type="text" name="mapping" class="form-control" required placeholder="Add new mapping"></td>
@@ -170,11 +170,11 @@
                                                     </tr>
                                                 </form>
                                                 <cfoutput query="qFrontendMappings">
-                                                    <form action="#application.mainURL#/sysadmin/mapping/edit" method="post">
+                                                    <form action="#application.mainURL#/sysadmin/mapping/edit" method="post">#csrfField()#
                                                         <input type="hidden" name="mappingID" value="#qFrontendMappings.intFrontendMappingsID#">
                                                         <tr>
-                                                            <td>#qFrontendMappings.strMapping#</td>
-                                                            <td>#qFrontendMappings.strPath#</td>
+                                                            <td>#encodeForHTML(qFrontendMappings.strMapping)#</td>
+                                                            <td>#encodeForHTML(qFrontendMappings.strPath)#</td>
                                                             <td>
                                                                 <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-info">
                                                                     <i class="fas fa-edit"></i>
@@ -210,8 +210,8 @@
                                             <cfoutput query="qSystemMappings">
                                                 <tr>
                                                     <td></td>
-                                                    <td>#qSystemMappings.strMapping#</td>
-                                                    <td>#qSystemMappings.strPath#</td>
+                                                    <td>#encodeForHTML(qSystemMappings.strMapping)#</td>
+                                                    <td>#encodeForHTML(qSystemMappings.strPath)#</td>
                                                     <td class="text-center">#qSystemMappings.blnOnlyAdmin#</td>
                                                     <td class="text-center">#qSystemMappings.blnOnlySuperAdmin#</td>
                                                     <td class="text-center">#qSystemMappings.blnOnlySysAdmin#</td>

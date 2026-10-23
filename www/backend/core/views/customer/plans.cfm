@@ -66,7 +66,7 @@
 
                                 <div class="col-lg-5">
 
-                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">1</span> #getTrans('titYourPlan')#:</h2>
+                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">1</span> #getTrans('titYourPlan')#:</h2>
 
                                     <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column mb-3">
                                     <cfloop array="#planArray#" index="i">
@@ -123,7 +123,7 @@
 
                                 <div class="col-lg-6">
 
-                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">2</span> #getTrans('titBillingCycle')#:</h2>
+                                    <h2 class="mb-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">2</span> #getTrans('titBillingCycle')#:</h2>
 
                                     <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column mb-3">
 
@@ -158,7 +158,7 @@
 
                                     </div>
 
-                                    <h2 class="mb-4 mt-4"><span class="badge badge-pill bg-primary ps-2 pe-2 me-2">3</span> #getTrans('titOrderSummary')#:</h2>
+                                    <h2 class="mb-4 mt-4"><span class="badge badge-pill bg-primary text-primary-fg ps-2 pe-2 me-2">3</span> #getTrans('titOrderSummary')#:</h2>
 
                                     <div class="card">
 
@@ -175,11 +175,13 @@
                                                         <p class="mt-4"><a href="#planDetail.bookingLinkY#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                     </cfif>
                                                 <cfelse>
-                                                    <p class="mt-4"><a href="#application.mainURL#/account-settings/payment" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
+                                                    <!--- Add the payment method first, the renewal follows right after it (##521) --->
+                                                    <cfset renewLink = new backend.core.com.book().paymentFirstLink(bookedPlan.recurring eq "monthly" ? planDetail.bookingLinkM : planDetail.bookingLinkY)>
+                                                    <p class="mt-4"><a href="#renewLink#" class="btn btn-success w-100 plan">#getTrans('txtRenewNow')#</a></p>
                                                 </cfif>
                                             <cfelse>
                                                 <cfif not structKeyExists(url, "recurring") and planDetail.itsFree eq 0>
-                                                    <p><a class="btn" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
+                                                    <p><a class="btn" onclick="sweetAlert('warning', '#application.mainURL#/cancel?plan=#bookedPlan.planID#&#csrfParam()#', '#getTrans('txtCancelPlan')#', '#getTrans('msgCancelPlanWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">#getTrans('txtCancelPlan')#</a></p>
                                                 </cfif>
                                             </cfif>
 
