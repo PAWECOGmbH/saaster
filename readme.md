@@ -163,9 +163,11 @@ Production and staging use the same ```compose.yml```. Optional services have a 
 | Server | ```.env``` | Started by ```docker compose up -d``` |
 | --- | --- | --- |
 | Production | ```COMPOSE_PROFILES=filebrowser``` | Lucee, MySQL, File Browser |
-| Staging | ```COMPOSE_PROFILES=``` (empty) | Lucee, MySQL |
+| Staging | nothing (or ```COMPOSE_PROFILES=``` empty) | Lucee, MySQL |
 
 To check what a server would start: ```docker compose config --services```
+
+The File Browser variables (```FILEBROWSER_PORT```, ```FILEBROWSER_CONTAINER_NAME```) are only needed where the File Browser runs - Compose validates every service, so ```compose.yml``` has defaults for them.
 
 When you remove a profile from a server where its service is already running (e.g. the File Browser on staging), stop and remove that container once - Compose leaves it running otherwise:
 ```
