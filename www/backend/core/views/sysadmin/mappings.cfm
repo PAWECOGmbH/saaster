@@ -61,7 +61,7 @@
                                             data-bs-placement="top"
                                             title="Generate SQL Code for the table custom_mappings"
                                             class="text-decoration-none" target="_blank">
-                                                <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                                <i class="ti ti-file-code fs-3 me-3 p-0" style="font-size: 20px;"></i>
                                         </a>
                                     </div>
 
@@ -94,7 +94,7 @@
                                                         <td class="bottom_line text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input"></td>
                                                         <td class="bottom_line text-end">
                                                             <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-success">
-                                                                <i class="fas fa-check"></i>
+                                                                <i class="ti ti-check"></i>
                                                             </button>
                                                         </td>
                                                         <td class="bottom_line"></td>
@@ -113,12 +113,12 @@
                                                             <td class="text-center"><input type="radio" name="admin" value="sysadmin" class="form-check-input" <cfif qCustomMappings.blnOnlySysAdmin eq 1>checked</cfif>></td>
                                                             <td class="text-end">
                                                                 <button type="submit" class="btn btn-x btn-icon btn-ghost-success">
-                                                                    <i class="fas fa-check"></i>
+                                                                    <i class="ti ti-check"></i>
                                                                 </button>
                                                             </td>
                                                             <td class="text-left">
                                                                 <button type="submit" name="delete" class="btn btn-x w-50 btn-icon btn-ghost-danger">
-                                                                    <i class="fas fa-trash-alt"></i>
+                                                                    <i class="ti ti-trash"></i>
                                                                 </button>
                                                             </td>
                                                         </tr>
@@ -140,7 +140,7 @@
                                             data-bs-placement="top"
                                             title="Generate SQL Code for the table frontend_mappings"
                                             class="text-decoration-none" target="_blank">
-                                                <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                                <i class="ti ti-file-code fs-3 me-3 p-0" style="font-size: 20px;"></i>
                                         </a>
                                     </div>
 
@@ -163,7 +163,7 @@
                                                         <td class="bottom_line"><input type="text" name="path" class="form-control" required placeholder="Add new path"></td>
                                                         <td class="bottom_line">
                                                             <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-success">
-                                                                <i class="fas fa-check"></i>
+                                                                <i class="ti ti-check"></i>
                                                             </button>
                                                         </td>
                                                         <td class="bottom_line"></td>
@@ -177,7 +177,7 @@
                                                             <td>#encodeForHTML(qFrontendMappings.strPath)#</td>
                                                             <td>
                                                                 <button type="submit" class="btn btn-x w-50 btn-icon btn-ghost-info">
-                                                                    <i class="fas fa-edit"></i>
+                                                                    <i class="ti ti-edit"></i>
                                                                 </button>
                                                             </td>
                                                         </tr>

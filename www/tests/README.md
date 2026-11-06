@@ -29,6 +29,13 @@ This creates, in this order:
 
 There is no seed on purpose. Every spec creates the data it needs and removes it again (see "Writing specs").
 
+## Updating an existing development stack
+
+After pulling the migration-spec mount in `compose-dev.yml`, recreate the Lucee
+container once with `docker compose -f compose-dev.yml up -d lucee`. The specs need
+`config/db` mounted read-only at `/var/saaster/db`; restarting an old container does
+not add the mount.
+
 ## Daily use
 
 In the browser: **http://localhost:8080/tests/runner.cfm** (use your `LUCEE_PORT`). Pick directories or single specs, run them, and see the failed expectations with file and line.
@@ -44,6 +51,7 @@ bash www/tests/bin/run_tests.sh "reporter=mintext&bundles=tests.specs.unit.globa
 
 The script exits with code 1 as soon as a spec fails - usable in pipelines and git hooks.
 
+- **Stale full-text search after repeated test runs:** `bash www/tests/bin/reset_test_db.sh --rebuild-search-index` rebuilds the customer index in the test database without deleting its data.
 - **New migrations:** `bash www/tests/bin/migrate_test_db.sh`
 - **Clean database:** `bash www/tests/bin/prepare_test_db.sh` again
 - **Changed a component:** `run_tests.sh` reloads the test application automatically. In the browser, open `healthcheck.cfm?reinit=1` once.

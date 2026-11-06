@@ -49,7 +49,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
-                            <i class="fas fa-search pe-3"></i> Preview
+                            <i class="ti ti-search pe-3"></i> Preview
                         </a>
                     </div>
                 </div>
@@ -81,14 +81,14 @@
                                     <div class="btn-group">
                                         <cfif qInvoice.paymentstatusID eq 1>
                                             <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-outline-primary">
-                                                <i class="fas fa-plus me-3"></i> Add position
+                                                <i class="ti ti-plus me-3"></i> Add position
                                             </a>
                                         </cfif>
                                         <div class="ms-4 mt-2">
                                             <cfif qInvoice.paymentstatusID gt 1>
-                                                <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="fas fa-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
+                                                <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="ti ti-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
                                             <cfelse>
-                                                <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="fas fa-cog h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
+                                                <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="ti ti-settings h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
                                             </cfif>
                                         </div>
                                     </div>
@@ -115,9 +115,9 @@
                                             <div class="d-flex align-items-center">
                                                 #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
                                                 <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
-                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="fas fa-arrow-alt-circle-up h1 mt-2 ms-2"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="ti ti-circle-arrow-up h1 mt-2 ms-2"></i></a>
                                                 <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
-                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="fas fa-arrow-alt-circle-down h1 mt-2 ms-2 text-muted"></i></a>
+                                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="ti ti-circle-arrow-down h1 mt-2 ms-2 text-muted"></i></a>
                                                 </cfif>
                                             </div>
                                         </div>
@@ -156,8 +156,8 @@
                                                 <td valign="top" class="text-end">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                                                 <td valign="top" class="text-end">
                                                     <cfif qInvoice.paymentstatusID eq 1>
-                                                        <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="far fa-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
-                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&#csrfParam()#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="far fa-times-circle" style="font-size: 18px;"></i></a>
+                                                        <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="ti ti-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
+                                                        <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&#csrfParam()#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="ti ti-circle-x" style="font-size: 18px;"></i></a>
                                                     </cfif>
                                                 </td>
                                             </tr>
@@ -212,11 +212,11 @@
                             <div class="row ms-1 me-1">
                                 <div class="col-lg-6">
                                     <cfif structKeyExists(session, "comingfrom")>
-                                        <a href="#application.mainURL#/sysadmin/customers/details/#qInvoice.customerID####listLast(session.comingfrom, '_')#" class="btn bg-lime-lt"><i class="fas fa-angle-left pe-2"></i></i> Back to #listLast(session.comingfrom, '_')#</a>
+                                        <a href="#application.mainURL#/sysadmin/customers/details/#qInvoice.customerID####listLast(session.comingfrom, '_')#" class="btn bg-lime-lt"><i class="ti ti-chevron-left pe-2"></i></i> Back to #listLast(session.comingfrom, '_')#</a>
                                     </cfif>
                                 </div>
                                 <div class="col-lg-6 text-end">
-                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="far fa-envelope pe-2"></i> Send invoice by email</a>
+                                    <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="ti ti-mail pe-2"></i> Send invoice by email</a>
                                 </div>
                             </div>
                         </div>
@@ -398,14 +398,14 @@
                     <div class="col-lg-6">
                         <label class="form-label">Invoice date *</label>
                         <div class="input-icon">
-                            <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
+                            <span class="input-icon-addon"><i class="ti ti-calendar"></i></span>
                             <input class="form-control" placeholder="Select a date" name="invoice_date" id="invoice_date" value="#dateFormat(qInvoice.date, 'yyyy-mm-dd')#" required>
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <label class="form-label">Due date *</label>
                         <div class="input-icon">
-                            <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
+                            <span class="input-icon-addon"><i class="ti ti-calendar"></i></span>
                             <input class="form-control" placeholder="Select a date" name="due_date" id="due_date" value="#dateFormat(qInvoice.dueDate, 'yyyy-mm-dd')#" required>
                         </div>
                     </div>
@@ -454,8 +454,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('invoice_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
-                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
+                previousMonth: `<i class="ti ti-chevron-left cursor-pointer"></i>`,
+                nextMonth: `<i class="ti ti-chevron-right cursor-pointer"></i>`,
             },
         }));
     });
@@ -463,8 +463,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('due_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
-                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
+                previousMonth: `<i class="ti ti-chevron-left cursor-pointer"></i>`,
+                nextMonth: `<i class="ti ti-chevron-right cursor-pointer"></i>`,
             },
         }));
     });

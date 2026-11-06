@@ -7,8 +7,9 @@
 <!--- Dropify --->
 <link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/dropify.min.css')#" />
 
-<!--- Fontawesome Plugin --->
-<link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/fontawesome/css/all.css')#" />
+<!--- Tabler Icons (self-hosted) --->
+<link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/tabler-icons/tabler-icons.min.css')#" />
+<link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/icons.css')#" />
 
 <!--- Sweetalert --->
 <link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/sweetalert.css')#" />

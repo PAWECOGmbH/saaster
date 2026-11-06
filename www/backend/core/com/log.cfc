@@ -54,12 +54,20 @@ component displayname="log" {
 
 
     // Get logfiles directly from the log directory
-    public query function getLogs(string type = "", string date = "", string level = "") {
+    public query function getLogs(string type = "", string date = "", string level = "", string search = "") {
 
         // Init
         local.logPath = expandPath("/logs");
         local.filterDate = "";
         local.filterLevel = "";
+
+        if (len(arguments.type) and !reFind("^[a-zA-Z0-9_-]+$", arguments.type)) {
+            throw(type="InvalidLogFilter", message="Invalid log type");
+        }
+        if (len(arguments.level) and !listFindNoCase("info,warning,error", arguments.level)) {
+            throw(type="InvalidLogFilter", message="Invalid log level");
+        }
+        local.searchText = trim(arguments.search);
 
         // Create base path based on the type, if specified
         if (len(trim(arguments.type))) {
@@ -76,9 +84,14 @@ component displayname="log" {
             local.filterLevel = arguments.level & ".log";
         }
 
+        if (!directoryExists(local.logPath)) {
+            return queryNew("name,directory,size,dateLastModified", "varchar,varchar,bigint,timestamp");
+        }
+
         // Temporary variables to avoid the closure scope problems
-        var tempFilterDate = local.filterDate;
-        var tempFilterLevel = local.filterLevel;
+        local.tempFilterDate = local.filterDate;
+        local.tempFilterLevel = local.filterLevel;
+        local.tempSearch = local.searchText;
 
         // List log files with a closure that captures the necessary local variables
         local.qLogfiles = directoryList(
@@ -88,7 +101,9 @@ component displayname="log" {
             listInfo="query",
             filter=function(path) {
                 // Use of temporary variables within the closure
-                return filterTheList(path=path, dateFilter=tempFilterDate, levelFilter=tempFilterLevel);
+                return listLast(path, ".") eq "log"
+                    and filterTheList(path=path, dateFilter=tempFilterDate, levelFilter=tempFilterLevel)
+                    and (!len(tempSearch) or logContains(path, tempSearch));
             },
             sort="dateLastModified desc"
         );
@@ -98,6 +113,22 @@ component displayname="log" {
     }
 
 
+
+    // Literal, case-insensitive search; files can disappear during log rotation.
+    public boolean function logContains(required string path, required string search) {
+        local.handle = javacast("null", "");
+        try {
+            local.handle = fileOpen(arguments.path, "read", "utf-8");
+            while (!fileIsEOF(local.handle)) {
+                if (findNoCase(arguments.search, fileReadLine(local.handle))) return true;
+            }
+        } catch (any error) {
+            return false;
+        } finally {
+            if (!isNull(local.handle)) fileClose(local.handle);
+        }
+        return false;
+    }
 
     // Universal filter function with extended filter options
     public boolean function filterTheList(required string path, string dateFilter = "", string levelFilter = "") {

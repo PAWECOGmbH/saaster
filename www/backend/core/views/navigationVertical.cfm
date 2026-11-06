@@ -9,7 +9,7 @@
                 <a href="#application.mainURL#/dashboard" class="nav-link">
                 </cfoutput>
                     <span class="nav-link-icon d-none d-sm-none d-md-inline-block d-lg-inline-block">
-                        <i class="fas fa-home"></i>
+                        <i class="ti ti-home"></i>
                     </span>
                     <span class="nav-link-title">
                         Home
@@ -23,7 +23,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                         <span class="nav-link-icon d-none d-sm-none d-md-inline-block d-lg-inline-block">
-                            <i class="fas fa-user-cog"></i>
+                            <i class="ti ti-user-cog"></i>
                         </span>
                         <span class="nav-link-title">
                             SysAdmin
@@ -92,7 +92,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                                 <span class="nav-link-icon d-md-inline-block d-lg-inline-block">
-                                    <i class="fas fa-users"></i>
+                                    <i class="ti ti-users"></i>
                                 </span>
                                 <span class="nav-link-title d-none d-sm-none d-md-block">
                                     #getTrans('titMandanten')#
@@ -148,7 +148,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                                     <span class="nav-link-icon d-md-inline-block d-lg-inline-block">
-                                        <i class="fas fa-globe"></i>
+                                        <i class="ti ti-world"></i>
                                     </span>
                                     <span class="nav-link-title d-none d-sm-none d-md-block">
                                         #application.objLanguage.getAnyLanguage(session.lng).language#

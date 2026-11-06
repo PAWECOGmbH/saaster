@@ -42,7 +42,7 @@
 
                         <!--- VAT text if defined --->
                         <div class="small text-secondary text-center mt-2">
-                            #i.dynVAT#
+                            #i.dynVAT#<br>#i.dynBillingNotice#
                         </div>
 
                     </cfif>

@@ -27,10 +27,10 @@
                 <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/blog-posts" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to blog posts
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to blog posts
                         </a>
                         <a href="##" data-bs-toggle="modal" data-bs-target="##category_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add category
+                            <i class="ti ti-plus pe-3"></i> Add category
                         </a>
                     </div>
                 </div>
@@ -62,9 +62,9 @@
                                 <tbody <cfif qCategories.recordCount gt 1>id="dragndrop_body"</cfif>>
                                     <cfloop query="qCategories">
                                         <tr <cfif qCategories.recordCount gt 1>id="sort_#qCategories.intBlogCategoryID#"</cfif>>
-                                            <td class="move text-center"><cfif qCategories.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
+                                            <td class="move text-center"><cfif qCategories.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></cfif></td>
                                             <td class="text-center">#qCategories.intPrio#</td>
-                                            <td>#encodeForHTML(qCategories.strCategoryName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_category_#qCategories.intBlogCategoryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate category"></i></a></td>
+                                            <td>#encodeForHTML(qCategories.strCategoryName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_category_#qCategories.intBlogCategoryID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate category"></i></a></td>
                                             <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##category_#qCategories.intBlogCategoryID#">Edit</a></td>
                                             <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_category=#qCategories.intBlogCategoryID#&#csrfParam()#', 'Delete blog category', 'Do you want to delete this category?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                         </tr>

@@ -11,7 +11,7 @@
 <cfoutput>
 <div class="nav-item dropdown d-none d-md-flex me-3">
     <a href="##" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" aria-expanded="false">
-        <i class="far fa-bell" style="font-size: 20px;"></i>
+        <i class="ti ti-bell" style="font-size: 20px;"></i>
         <cfif !arrayIsEmpty(qNotiesUnread.arrayNoti)>
             <span class="badge bg-red text-red-fg"></span>
         </cfif>

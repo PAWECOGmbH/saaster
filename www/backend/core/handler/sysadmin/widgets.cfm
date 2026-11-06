@@ -8,6 +8,11 @@ if (structKeyExists(form, "new_widget")) {
     param name="form.planList" default="";
     param name="form.moduleList" default="";
 
+    qNextPrio = queryExecute(
+        options = {datasource = application.datasource},
+        sql = "SELECT COALESCE(MAX(intPrio), 0) + 1 AS nextPrio FROM widgets"
+    );
+
     itsActive = structKeyExists(form, "active") ? 1 : 0;
     permanently = structKeyExists(form, "perm") ? 1 : 0;
 
@@ -18,11 +23,12 @@ if (structKeyExists(form, "new_widget")) {
             path: {type: "nvarchar", value: form.path},
             active: {type: "boolean", value: itsActive},
             ratioID: {type: "numeric", value: form.ratioID},
-            perm: {type: "boolean", value: permanently}
+            perm: {type: "boolean", value: permanently},
+            prio: {type: "integer", value: qNextPrio.nextPrio}
         },
         sql = "
-            INSERT INTO widgets (strWidgetName, strFilePath, blnActive, intRatioID, blnPermDisplay)
-            VALUES (:name, :path, :active, :ratioID, :perm)
+            INSERT INTO widgets (strWidgetName, strFilePath, blnActive, intRatioID, blnPermDisplay, intPrio)
+            VALUES (:name, :path, :active, :ratioID, :perm, :prio)
         "
     )
 

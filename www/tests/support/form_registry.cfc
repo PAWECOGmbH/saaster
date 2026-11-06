@@ -140,7 +140,7 @@ component output="false" hint="The collection of every form and every action lin
     // The only fields a form posting to a view may contain. Anything else could change data
     // and belongs into a handler, behind the CSRF check.
     public array function readOnlyFields() {
-        return ["search", "delete", "sort", "status", "log_type", "log_level", "log_date", "mappingid", "displaylanguage"];
+        return ["search", "delete", "sort", "status", "log_type", "log_level", "log_search", "log_date", "mappingid", "displaylanguage"];
     }
 
     public array function inertForms() {
@@ -184,10 +184,10 @@ component output="false" hint="The collection of every form and every action lin
             // Protected per handler (global.cfc variables.csrfProtectedGetKeys) - the key names are too generic for a global rule.
             { file: "backend/core/views/customer/payment.cfm", target: "payment-settings", key: "url.del", purpose: "Delete a payment method" },
             { file: "backend/core/views/customer/payment.cfm", target: "payment-settings", key: "url.default", purpose: "Set the default payment method" },
-            { file: "backend/core/views/sysadmin/customers_details.cfm", target: "sysadm/plans", key: "url.booking", purpose: "Book, change, cancel, revoke or delete a plan booking of a customer" },
-            { file: "backend/core/views/sysadmin/customers_details.cfm", target: "sysadm/modules", key: "url.booking", purpose: "Book, change, cancel, revoke or delete a module booking of a customer" },
-            { file: "backend/core/views/sysadmin/customers_details.cfm", target: "sysadm/invoices", key: "url.status", purpose: "Cancel or delete an invoice" },
-            { file: "backend/core/views/sysadmin/customers_details.cfm", target: "sysadm/invoices", key: "url.email", purpose: "Send an invoice by e-mail" },
+            { file: "backend/core/views/sysadmin/ajax_customer_tab.cfm", target: "sysadm/plans", key: "url.booking", purpose: "Book, change, cancel, revoke or delete a plan booking of a customer" },
+            { file: "backend/core/views/sysadmin/ajax_customer_tab.cfm", target: "sysadm/modules", key: "url.booking", purpose: "Book, change, cancel, revoke or delete a module booking of a customer" },
+            { file: "backend/core/views/sysadmin/ajax_customer_tab.cfm", target: "sysadm/invoices", key: "url.status", purpose: "Cancel or delete an invoice" },
+            { file: "backend/core/views/sysadmin/ajax_customer_tab.cfm", target: "sysadm/invoices", key: "url.email", purpose: "Send an invoice by e-mail" },
             { file: "backend/core/views/sysadmin/invoices.cfm", target: "sysadm/invoices", key: "url.status", purpose: "Cancel or delete an invoice" },
             { file: "backend/core/views/sysadmin/invoices.cfm", target: "sysadm/invoices", key: "url.email", purpose: "Send an invoice by e-mail" },
             { file: "backend/core/views/sysadmin/invoices.cfm", target: "sysadm/invoices", key: "url.open", purpose: "Set an invoice to open" },

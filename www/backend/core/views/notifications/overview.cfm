@@ -107,14 +107,14 @@
                         <!--- First page --->
                         <li class="page-item <cfif session.noti_c_page eq 1>disabled</cfif>">
                             <a class="page-link" href="#application.mainURL#/notifications?page=1" tabindex="-1" aria-disabled="true">
-                                <i class="fas fa-angle-double-left"></i>
+                                <i class="ti ti-chevrons-left"></i>
                             </a>
                         </li>
 
                         <!--- Prev arrow --->
                         <li class="page-item <cfif session.noti_c_page eq 1>disabled</cfif>">
                             <a class="page-link" href="#application.mainURL#/notifications?page=#session.noti_c_page-1#" tabindex="-1" aria-disabled="true">
-                                <i class="fas fa-angle-left"></i>
+                                <i class="ti ti-chevron-left"></i>
                             </a>
                         </li>
 
@@ -150,14 +150,14 @@
                         <!--- Next arrow --->
                         <li class="page-item <cfif session.noti_c_page gte pages>disabled</cfif>">
                             <a class="page-link" href="#application.mainURL#/notifications?page=#session.noti_c_page+1#">
-                                <i class="fas fa-angle-right"></i>
+                                <i class="ti ti-chevron-right"></i>
                             </a>
                         </li>
 
                         <!--- Last page --->
                         <li class="page-item <cfif session.noti_c_page gte pages>disabled</cfif>">
                             <a class="page-link" href="#application.mainURL#/notifications?page=#pages#">
-                                <i class="fas fa-angle-double-right"></i>
+                                <i class="ti ti-chevrons-right"></i>
                             </a>
                         </li>
 

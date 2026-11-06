@@ -42,6 +42,24 @@ component extends="tests.support.integration_spec" {
                 }
             });
 
+            it("uses the default order for new widgets and keeps existing personal positions", () => {
+                queryExecute(
+                    options={datasource=application.datasource},
+                    params={id:{type:"integer",value:variables.widgetB}},
+                    sql="UPDATE widgets SET intPrio = -10 WHERE intWidgetID = :id"
+                );
+                local.shown = widgets.prepareUserWidgets(variables.user.userID, variables.moduleA & "," & variables.moduleB, 0);
+                local.ids = queryColumnData(local.shown, "intWidgetID");
+                expect(arrayFind(local.ids, variables.widgetB)).toBeLT(arrayFind(local.ids, variables.widgetA));
+                setUserWidget(variables.widgetA, 50, 0);
+                local.shown = widgets.prepareUserWidgets(variables.user.userID, variables.moduleA & "," & variables.moduleB & "," & variables.moduleC, 0);
+                local.added = local.shown.filter((row) => row.intWidgetID eq variables.widgetC);
+                expect(local.added.intPrio).toBe(51);
+                local.existing = local.shown.filter((row) => row.intWidgetID eq variables.widgetA);
+                expect(local.existing.intPrio).toBe(50);
+                expect(local.existing.blnActive).toBe(0);
+            });
+
             it("finds the widgets of every booked module, not only the first one", () => {
                 var found = ownWidgets(valueList(widgets.getAllWidgets(variables.moduleA & "," & variables.moduleB & "," & variables.moduleC, 0).intWidgetID));
 

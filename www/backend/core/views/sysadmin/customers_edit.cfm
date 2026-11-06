@@ -117,7 +117,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/sysadmin/customers/details/#thisCustomerID#" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to detail view
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to detail view
                         </a>
                     </div>
                 </div>

@@ -29,10 +29,10 @@
                 <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to plans
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to plans
                         </a>
                         <a href="##" data-bs-toggle="modal" data-bs-target="##plangroup_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add plan group
+                            <i class="ti ti-plus pe-3"></i> Add plan group
                         </a>
                     </div>
                 </div>
@@ -69,9 +69,9 @@
                                         <tbody <cfif qPlanGroups.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qPlanGroups">
                                                 <tr <cfif qPlanGroups.recordCount gt 1>id="sort_#qPlanGroups.intPlanGroupID#"</cfif>>
-                                                    <td class="move text-center"><cfif qPlanGroups.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
+                                                    <td class="move text-center"><cfif qPlanGroups.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qPlanGroups.intPrio#</td>
-                                                    <td>#encodeForHTML(qPlanGroups.strGroupName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
+                                                    <td>#encodeForHTML(qPlanGroups.strGroupName)# <a href="##?" data-bs-toggle="modal" data-bs-target="##trans_plangroup_#qPlanGroups.intPlanGroupID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan group"></i></a></td>
                                                     <td>#encodeForHTML(qPlanGroups.strCountryName)#</td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##plangroup_#qPlanGroups.intPlanGroupID#">Edit</a></td>
                                                     <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_group=#qPlanGroups.intPlanGroupID#&#csrfParam()#', 'Delete plan group', 'Caution: If you delete a plan group, all the associated plans will also be deleted. Do you really want to delete this group irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>

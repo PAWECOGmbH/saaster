@@ -21,7 +21,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##lng_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add language
+                            <i class="ti ti-plus pe-3"></i> Add language
                         </a>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                                     <cfloop query="qLanguages">
                                         <tr id="sort_#qLanguages.intLanguageID#">
                                             <cfif qLanguages.recordCount gt 1>
-                                                <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                                <td class="move text-center"><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></td>
                                             <cfelse>
                                                 <td class="text-center"></td>
                                             </cfif>

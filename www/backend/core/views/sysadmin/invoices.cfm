@@ -94,7 +94,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##invoice_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> New invoice
+                            <i class="ti ti-plus pe-3"></i> New invoice
                         </a>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
                                             <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 ti ti-x"></i>
                                                 </button>
                                             </cfif>
                                         </div>
@@ -258,14 +258,14 @@
                                     <!--- First page --->
                                     <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=1" tabindex="-1" aria-disabled="true">
-                                            <i class="fas fa-angle-double-left"></i>
+                                            <i class="ti ti-chevrons-left"></i>
                                         </a>
                                     </li>
 
                                     <!--- Prev arrow --->
                                     <li class="page-item <cfif session.invoice_page eq 1>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page-1#" tabindex="-1" aria-disabled="true">
-                                            <i class="fas fa-angle-left"></i>
+                                            <i class="ti ti-chevron-left"></i>
                                         </a>
                                     </li>
 
@@ -301,14 +301,14 @@
                                     <!--- Next arrow --->
                                     <li class="page-item <cfif session.invoice_page gte pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#session.invoice_page+1#">
-                                            <i class="fas fa-angle-right"></i>
+                                            <i class="ti ti-chevron-right"></i>
                                         </a>
                                     </li>
 
                                     <!--- Last page --->
                                     <li class="page-item <cfif session.invoice_page gte pages>disabled</cfif>">
                                         <a class="page-link" href="#application.mainURL#/sysadmin/invoices?page=#pages#">
-                                            <i class="fas fa-angle-double-right"></i>
+                                            <i class="ti ti-chevrons-right"></i>
                                         </a>
                                     </li>
                                 </ul>

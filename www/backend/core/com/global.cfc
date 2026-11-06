@@ -1,5 +1,30 @@
 component displayname="globalFunctions" output="false" {
 
+    // Resolve a template to its configured URL in the requested language (#628).
+    public string function getLink(required string templatePath, string language = "") {
+        local.language = len(arguments.language) ? arguments.language : (session.lng ?: application.objLanguage.getDefaultLanguage().iso);
+        if (!structKeyExists(request, "frontendSlugs") or request.frontendSlugs.language neq local.language) {
+            local.qSlugs = queryExecute(
+                options = {datasource = application.datasource},
+                params = { language: {type: "varchar", value: local.language} },
+                sql = "
+                    SELECT fm.strPath, COALESCE(NULLIF(fmt.strMapping, ''), fm.strMapping) AS slug
+                    FROM frontend_mappings fm
+                    LEFT JOIN frontend_mappings_trans fmt ON fmt.intFrontendMappingsID = fm.intFrontendMappingsID
+                        AND fmt.intLanguageID = (SELECT intLanguageID FROM languages WHERE strLanguageISO = :language)
+                "
+            );
+            request.frontendSlugs = { language: local.language, paths: {} };
+            loop query=local.qSlugs {
+                request.frontendSlugs.paths[local.qSlugs.strPath] = local.qSlugs.slug;
+            }
+        }
+        // The conventional path remains usable when a custom installation has no mapping.
+        local.fallback = reReplace(reReplace(arguments.templatePath, "^templates/", ""), "\.cfm$", "");
+        local.slug = request.frontendSlugs.paths[arguments.templatePath] ?: local.fallback;
+        return reReplace(application.mainURL, "/+$", "") & "/" & reReplace(local.slug, "^/+", "");
+    }
+
     // SEF building
     public struct function getSEF(string sef_string) {
 
@@ -49,6 +74,8 @@ component displayname="globalFunctions" output="false" {
         loop query = local.qNavSlugs {
             local.returnStruct['navSlugs'][local.qNavSlugs.strPath] = local.qNavSlugs.slug;
         }
+
+        request.frontendSlugs = { language: session.lng, paths: local.returnStruct.navSlugs };
 
         if (len(trim(arguments.sef_string))) {
 
@@ -308,10 +335,10 @@ component displayname="globalFunctions" output="false" {
             }
 
             switch(arguments.alertType) {
-                case "info": local.thisIcon = "fa-regular fa-bell"; break;
-                case "warning": local.thisIcon = "fa-solid fa-triangle-exclamation"; break;
-                case "danger": local.thisIcon = "fa-regular fa-face-frown"; break;
-                default: local.thisIcon = "fa-solid fa-check";
+                case "info": local.thisIcon = "ti ti-bell"; break;
+                case "warning": local.thisIcon = "ti ti-alert-triangle"; break;
+                case "danger": local.thisIcon = "ti ti-mood-sad"; break;
+                default: local.thisIcon = "ti ti-check";
             }
 
             cfsavecontent ( variable="local.alertHTML" ) {

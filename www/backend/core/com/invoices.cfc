@@ -1512,6 +1512,16 @@ component displayname="invoices" output="false" {
     }
 
 
+    // Reuse the configured system administrator mailbox used for registration notices.
+    public string function getInvoiceBcc() {
+        return application.objSettings.getSetting("settingInvoiceBcc") eq "1" ? application.toEmail : "";
+    }
+
+    // Format a booking period in the document language without changing the request locale.
+    public string function formatDocumentDate(required date value, required string language) {
+        return lsDateFormat(date=arguments.value, locale=application.objLanguage.toLocale(getDocumentLanguage(arguments.language)));
+    }
+
     // Send invoice by e-mail
     public struct function sendInvoice(required numeric invoiceID) {
 
@@ -1588,7 +1598,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send invoice
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.mailLanguage)#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" bcc="#getInvoiceBcc()#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.mailLanguage)#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1667,7 +1677,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send activation link
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" bcc="#getInvoiceBcc()#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }

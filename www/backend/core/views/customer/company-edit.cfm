@@ -293,7 +293,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <div class="modal-status bg-danger"></div>
                 <div class="modal-body text-center">
-                    <i class="fas fa-exclamation-triangle display-1 text-danger"></i>
+                    <i class="ti ti-alert-triangle display-1 text-danger"></i>
                     <h3 class="mt-3">#getTrans('titDeleteAccount')#</h3>
                     <p>#getTrans('txtDeleteAccount')#</p>
                 </div>

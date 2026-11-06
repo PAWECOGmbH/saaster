@@ -92,7 +92,7 @@
                             <div class="#getLayout.layoutPageHeader# text-end">
                                 <div>
                                     <a href="#application.mainURL#/sysadmin/countries/import?delete" class="btn btn-primary">
-                                        <i class="fas fa-file-import pe-3"></i> Import countries
+                                        <i class="ti ti-file-import pe-3"></i> Import countries
                                     </a>
                                 </div>
                             </div>
@@ -101,7 +101,7 @@
                             <div class="#getLayout.layoutPageHeader#">
                                 <div>
                                     <a href="##" data-bs-toggle="modal" data-bs-target="##country_new" class="btn btn-primary">
-                                        <i class="fas fa-plus pe-3"></i> New country
+                                        <i class="ti ti-plus pe-3"></i> New country
                                     </a>
                                 <div>
                             </div>
@@ -128,7 +128,7 @@
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
                                             <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 ti ti-x"></i>
                                                 </button>
                                             </cfif>
                                         </div>
@@ -170,7 +170,7 @@
                                                 <tr>
                                                     <td class="text-center">#qCountries.intPrio#</td>
                                                     <td class="text-center">#yesNoFormat(qCountries.blnDefault)#</td>
-                                                    <td>#encodeForHTML(qCountries.strCountryName)# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
+                                                    <td>#encodeForHTML(qCountries.strCountryName)# <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##country_#qCountries.intCountryID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate country name"></i></a></td>
                                                     <td class="text-center">#encodeForHTML(qCountries.strISO1)#</td>
                                                     <td>#encodeForHTML(qCountries.strRegion)#</td>
                                                     <td>#encodeForHTML(qCountries.strLanguageEN)#</td>
@@ -303,14 +303,14 @@
                                         <!--- First Page --->
                                         <li class="page-item <cfif session.c_page eq 1>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=1" tabindex="-1" aria-disabled="true">
-                                                <i class="fas fa-angle-double-left"></i>
+                                                <i class="ti ti-chevrons-left"></i>
                                             </a>
                                         </li>
 
                                         <!--- Prev arrow --->
                                         <li class="page-item <cfif session.c_page eq 1>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.c_page-1#" tabindex="-1" aria-disabled="true">
-                                                <i class="fas fa-angle-left"></i>
+                                                <i class="ti ti-chevron-left"></i>
                                             </a>
                                         </li>
 
@@ -347,14 +347,14 @@
                                         <!--- Next arrow --->
                                         <li class="page-item <cfif session.c_page gte pages>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#session.c_page+1#">
-                                                <i class="fas fa-angle-right"></i>
+                                                <i class="ti ti-chevron-right"></i>
                                             </a>
                                         </li>
 
                                         <!--- Last Page --->
                                         <li class="page-item <cfif session.c_page gte pages>disabled</cfif>">
                                             <a class="page-link" href="#application.mainURL#/sysadmin/countries?page=#pages#">
-                                                <i class="fas fa-angle-double-right"></i>
+                                                <i class="ti ti-chevrons-right"></i>
                                             </a>
                                         </li>
                                     </ul>

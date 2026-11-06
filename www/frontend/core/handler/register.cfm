@@ -1,9 +1,9 @@
 ﻿
 <cfscript>
-    local.urlLogin    = application.mainURL & "/" & thiscontent.navSlugs['templates/login.cfm'];
-    local.urlRegister = application.mainURL & "/" & thiscontent.navSlugs['templates/register.cfm'];
-    local.urlPassword = application.mainURL & "/" & thiscontent.navSlugs['templates/password.cfm'];
-    local.urlMfa      = application.mainURL & "/" & thiscontent.navSlugs['templates/mfa.cfm'];
+    local.urlLogin    = application.objGlobal.getLink("templates/login.cfm");
+    local.urlRegister = application.objGlobal.getLink("templates/register.cfm");
+    local.urlPassword = application.objGlobal.getLink("templates/password.cfm");
+    local.urlMfa      = application.objGlobal.getLink("templates/mfa.cfm");
 
 objRegister = new frontend.core.com.register();
 

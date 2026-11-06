@@ -331,7 +331,7 @@ $(document).ready(function() {
      * It retrieves the URL from the 'data-href' attribute of the clicked element,
      * then loads that URL's content into the modal, and finally displays the modal.
      */
-    $('.openPopup').on('click', function(event) {
+    $(document).on('click', '.openPopup', function(event) {
         event.preventDefault(); // Prevent the default behavior (e.g., following a link)
 
         // Retrieve the URL for loading dynamic content from the 'data-href' attribute
@@ -348,8 +348,8 @@ $(document).ready(function() {
                 new Litepicker({
                     element: document.getElementById('date1'),
                     buttonText: {
-                        previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-                        nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+                        previousMonth: `<i class="ti ti-chevron-left" style="cursor: pointer;"></i>`,
+                        nextMonth: `<i class="ti ti-chevron-right" style="cursor: pointer;"></i>`,
                     },
                 });
 
@@ -357,8 +357,8 @@ $(document).ready(function() {
                 new Litepicker({
                     element: document.getElementById('date2'),
                     buttonText: {
-                        previousMonth: `<i class="fas fa-angle-left" style="cursor: pointer;"></i>`,
-                        nextMonth: `<i class="fas fa-angle-right" style="cursor: pointer;"></i>`,
+                        previousMonth: `<i class="ti ti-chevron-left" style="cursor: pointer;"></i>`,
+                        nextMonth: `<i class="ti ti-chevron-right" style="cursor: pointer;"></i>`,
                     },
                 });
             }
@@ -366,7 +366,7 @@ $(document).ready(function() {
     });
 
     // Load modal with dynamic content (general big)
-    $('.openPopup_big').on('click', function(event) {
+    $(document).on('click', '.openPopup_big', function(event) {
         event.preventDefault(); // Prevent default behavior (e.g., following a link)
         var dataURL = $(this).attr('data-href');
 
@@ -655,39 +655,18 @@ $(document).ready(function() {
     optsBig.content_css = 'dark';
     }
 
-    document.querySelectorAll('.editor').forEach(function(element) {
-        if (window.hugerte && typeof window.hugerte.init === 'function') {
-            window.hugerte.init(opts);
+    if (window.hugerte && typeof window.hugerte.init === 'function') {
+        if (document.querySelector(opts.selector)) window.hugerte.init(opts);
+        if (document.querySelector(optsBig.selector)) window.hugerte.init(optsBig);
+    }
+
+    // Bootstrap's document-level focus trap must not capture editor dialogs.
+    // Bubble phase lets the editor's own input and dialog handlers run first.
+    document.addEventListener('focusin', function (event) {
+        if (event.target.closest('.tox-tinymce-aux, .tox-dialog, .tox-menu, .tox-pop')) {
+            event.stopImmediatePropagation();
         }
     });
-    document.querySelectorAll('.big-editor').forEach(function(element) {
-        if (window.hugerte && typeof window.hugerte.init === 'function') {
-            window.hugerte.init(optsBig);
-        }
-    });
-
-    // Disable Bootstrap's focus trap on all Tabler/Bootstrap modals with
-    // classes "modal modal-blur fade".
-    // This is required so that nested editor dialogs (e.g., Hugerte link dialog)
-    // can receive focus inside a modal without Bootstrap snapping focus back.
-    $(document).on('show.bs.modal', '.modal.modal-blur.fade', function () {
-    $(this).attr('data-bs-focus', 'false');
-    });
-
-    // Clean up stray Hugerte/TinyMCE UI when a Bootstrap/Tabler modal closes.
-    // Without this, floating elements like overflow menus (⋯), context menus, or dialogs
-    // remain in the DOM if the parent modal is dismissed, leaving "ghost" UI visible.
-    // This ensures all `.tox-*` overlays are removed when the bootstrap-modal is hidden.
-    $(document).on('hidden.bs.modal', '.modal.modal-blur.fade', function () {
-    $('.tox-dialog, .tox-pop, .tox-menu, .tox-toolbar__overflow').remove();
-    });
-
-    // Fix: Allow focus inside Hugerte dialogs even when inside a Bootstrap modal
-    document.addEventListener('focusin', function (e) {
-        if (e.target.closest('.tox-dialog, .tox-menu, .tox-pop')) {
-            e.stopImmediatePropagation(); // prevents Bootstrap from intercepting the focus
-        }
-    }, true);
 
     /**
      * Initializes the Dropify plugin on all input elements with the class 'dropify'.
@@ -862,4 +841,45 @@ $(document).ready(function() {
     });
 
 
+});
+// Fetch customer details only when a tab is opened; retain the loaded panel until reload.
+$(function () {
+    var ui = window.bootstrap || window.tabler;
+    function loadCustomerTab(panel) {
+        if (!panel || !panel.dataset.customerTab || panel.dataset.loaded || panel.dataset.loading) return;
+        panel.dataset.loading = 'true';
+        panel.setAttribute('aria-busy', 'true');
+        $.ajax({
+            url: '/backend/core/views/sysadmin/ajax_customer_tab.cfm',
+            data: { customerID: panel.dataset.customerId, tab: panel.dataset.customerTab },
+            dataType: 'html'
+        }).done(function (html) {
+            panel.innerHTML = html;
+            panel.dataset.loaded = 'true';
+            if (ui && ui.Tooltip) {
+                panel.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+                    ui.Tooltip.getOrCreateInstance(element);
+                });
+            }
+        }).fail(function () {
+            panel.innerHTML = '<p class="text-danger" role="alert">Could not load this tab.</p><button type="button" class="btn btn-outline-primary customer-tab-retry">Try again</button>';
+        }).always(function () {
+            delete panel.dataset.loading;
+            panel.removeAttribute('aria-busy');
+        });
+    }
+    $(document).on('shown.bs.tab', '[data-bs-toggle="tab"]', function () {
+        var target = document.getElementById((this.getAttribute('href') || '').replace(/^#/, ''));
+        loadCustomerTab(target);
+    });
+    $(document).on('click', '.customer-tab-retry', function () {
+        loadCustomerTab(this.closest('[data-customer-tab]'));
+    });
+    // Action redirects such as #invoices must reopen and load the right tab.
+    var target = document.getElementById(window.location.hash.slice(1));
+    if (target && target.dataset.customerTab && ui && ui.Tab) {
+        var link = document.querySelector('[data-bs-toggle="tab"][href="#' + target.id + '"]');
+        if (link) ui.Tab.getOrCreateInstance(link).show();
+        loadCustomerTab(target);
+    }
 });

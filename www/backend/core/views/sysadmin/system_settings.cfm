@@ -20,6 +20,8 @@
     qInvoicePrefix = objSysadmin.getSystemSetting('settingInvoicePrefix');
     qStandardVatType = objSysadmin.getSystemSetting('settingStandardVatType');
     qInvoiceNet = objSysadmin.getSystemSetting('settingInvoiceNet');
+    invoiceBcc = application.objSettings.getSetting('settingInvoiceBcc');
+    yearlyPricePerMonth = application.objSettings.getSetting('settingYearlyPricePerMonth');
     qLayout = objSysadmin.getSystemSetting('settingLayout');
     qColorPrimary = objSysadmin.getSystemSetting('settingColorPrimary');
     qColorSecondary = objSysadmin.getSystemSetting('settingColorSecondary');
@@ -103,7 +105,25 @@
 
                         <div class="card-body">
 
+                            <h3>Price display</h3>
+                            <div class="border p-3 mb-4">
+                                <label class="form-check">
+                                    <input class="form-check-input" type="radio" name="settingYearlyPricePerMonth" value="0" <cfif yearlyPricePerMonth neq "1">checked</cfif>>
+                                    <span class="form-check-label">Show yearly plan prices per year</span>
+                                </label>
+                                <label class="form-check">
+                                    <input class="form-check-input" type="radio" name="settingYearlyPricePerMonth" value="1" <cfif yearlyPricePerMonth eq "1">checked</cfif>>
+                                    <span class="form-check-label">Show yearly plan prices per month (billed yearly)</span>
+                                </label>
+                            </div>
                             <h3>Invoice settings</h3>
+                            <div class="border p-3 mb-3">
+                                <label class="form-label" for="invoice-bcc">Send a blind copy of invoice emails to #encodeForHTML(application.toEmail)#</label>
+                                <select id="invoice-bcc" name="settingInvoiceBcc" class="form-select w-50">
+                                    <option value="0" <cfif invoiceBcc neq "1">selected</cfif>>No</option>
+                                    <option value="1" <cfif invoiceBcc eq "1">selected</cfif>>Yes</option>
+                                </select>
+                            </div>
                             <div class="border align-baseline p-3">
                                 <div class="row">
                                     <div class="col-lg-6">

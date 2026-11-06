@@ -1130,6 +1130,7 @@ component displayname="sysadmin" output="false" {
                 ) as moduleList
                 FROM widgets
                 INNER JOIN widget_ratio ON widgets.intRatioID = widget_ratio.intRatioID
+                ORDER BY widgets.intPrio, widgets.intWidgetID
             "
         );
 

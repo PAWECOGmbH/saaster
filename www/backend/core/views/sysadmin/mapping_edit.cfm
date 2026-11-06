@@ -59,7 +59,7 @@
                                         <input type="text" name="mapping" value="#HTMLEditFormat(qMapping.strMapping)#" class="form-control" maxlength="255" required>
                                         <span class="input-group-text">
                                             <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_mapping_#qMapping.intFrontendMappingsID#">
-                                                <i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate mapping" data-bs-original-title="Translate mapping"></i>
+                                                <i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate mapping" data-bs-original-title="Translate mapping"></i>
                                             </a>
                                         </span>
                                     </div>
@@ -77,7 +77,7 @@
                                     <div class="input-group input-group-flat">
                                         <input type="text" name="metatitle" value="#HTMLEditFormat(qMapping.strMetatitle)#" class="form-control" id="input#qMapping.intFrontendMappingsID#" maxlength="255">
                                         <span class="input-group-text">
-                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metatitle_#qMapping.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta title" data-bs-original-title="Translate meta title"></i></a>
+                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metatitle_#qMapping.intFrontendMappingsID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta title" data-bs-original-title="Translate meta title"></i></a>
                                         </span>
                                     </div>
                                     <div class="d-flex">
@@ -94,7 +94,7 @@
                                     <div class="input-group input-group-flat">
                                         <textarea name="metadescription" value="#HTMLEditFormat(qMapping.strMetadescription)#" class="form-control" id="inputDesc#qMapping.intFrontendMappingsID#" maxlength="3000" rows="3">#HTMLEditFormat(qMapping.strMetadescription)#</textarea>
                                         <span class="input-group-text">
-                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metadescription_#qMapping.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta description" data-bs-original-title="Translate meta description"></i></a>
+                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_metadescription_#qMapping.intFrontendMappingsID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate meta description" data-bs-original-title="Translate meta description"></i></a>
                                         </span>
                                     </div>
                                     <div class="d-flex">
@@ -111,7 +111,7 @@
                                     <div class="input-group input-group-flat">
                                         <textarea type="text" name="htmlcodes" id="htmlcodes" class="form-control" maxlength="10000" rows="10">#HTMLEditFormat(qMapping.strhtmlcodes)#</textarea>
                                         <span class="input-group-text">
-                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qMapping.intFrontendMappingsID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate HTML Codes" data-bs-original-title="Translate HTML Codes"></i></a>
+                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##frontend_htmlcodes_#qMapping.intFrontendMappingsID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Translate HTML Codes" data-bs-original-title="Translate HTML Codes"></i></a>
                                         </span>
                                     </div>
                                 </div>
