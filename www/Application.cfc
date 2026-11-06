@@ -64,6 +64,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objSettings = new backend.core.com.settings();
         application.objUser = new backend.core.com.user();
         application.objAuthorization = new backend.core.com.authorization();
+        application.objMembership = new backend.core.com.membership();
+        application.objMembershipMigration = new backend.core.com.membership_migration();
+        application.objMembershipAccess = new backend.core.com.membership_access();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
@@ -131,6 +134,12 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     public boolean function onRequestStart(required string TargetPage) {
 
+        // Revalidate membership before routing, including existing sessions.
+        local.supportReturn = (session.supportLogin ?: false) and structKeyExists(url, "sysadmin") and reFindNoCase("^/?customer/?$", cgi.path_info);
+        if (structKeyExists(application, "objMembershipAccess") and not local.supportReturn and not application.objMembershipAccess.refreshSession()) {
+            location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+        }
+
         // Check if the user is logged in as a sysadmin
         if (structKeyExists(session, "sysadmin") and session.sysadmin) {
 
@@ -194,6 +203,13 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         // Create SEF URL
         thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
+
+        if (structKeyExists(session, "user_id") and structKeyExists(session, "customer_id")
+            and not application.objMembershipAccess.allowRequest(session.user_id, session.customer_id, thiscontent.thisPath, cgi.request_method, form, url)) {
+            header statuscode=403 statustext="Forbidden";
+            writeOutput(encodeForHTML(application.objLanguage.getTrans("msgNoAccess")));
+            abort;
+        }
 
         // Change language
         if (structKeyExists(url, "l") and session.lng neq url.l) {

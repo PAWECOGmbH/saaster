@@ -7,6 +7,10 @@
     planGroup = objPlans.prepareForGroupID(session.customer_id).groupID;
     getPlansAsArray = objPlans.getPlans(planGroup);
     hasPlans = arrayLen(getPlansAsArray) ? true : false;
+    membershipOrganization = application.objMembershipAccess.organizationForCustomer(session.customer_id);
+    showMemberships = membershipOrganization.enabled
+        ? application.objMembershipAccess.canManage(session.user_id, session.customer_id)
+        : application.objMembershipAccess.canSetup(session.user_id, membershipOrganization.id);
 
 </cfscript>
 
@@ -40,6 +44,12 @@
                     </div>
                     <div class="card-body">
                         <div class="list-group">
+                            <cfif showMemberships>
+                                <a href="#application.mainURL#/account-settings/memberships" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <h4 class="mb-1">#getTrans('titMemberships')#</h4>
+                                    <p class="mb-1">#getTrans('txtMembershipsDescription')#</p>
+                                </a>
+                            </cfif>
                             <cfif session.admin>
                                 <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex justify-content-between">

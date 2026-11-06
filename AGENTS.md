@@ -30,6 +30,12 @@ Saaster is a modular CFML SaaS framework running on Lucee 7, NGINX, and MySQL 8.
 - Add API resources under `www/api/resources/` using the existing Taffy registration pattern. Keep JWT integration under `www/api/jwt/`.
 - Put project-specific extensions under `www/backend/myapp/` or `www/backend/modules/`, following the existing module structure.
 
+## User-facing language
+
+- Use formal German address consistently in user-facing UI text, notifications, emails, and translations: `Sie`, `Ihnen`, and `Ihr/Ihre`. This applies to both frontend themes and backend screens.
+- Use neutral infinitives for buttons and labels (for example, `Rolle speichern`). In instructions, use the formal imperative (for example, `Prüfen Sie die Vorschau`). Do not introduce `du`, `dir`, `dich`, `dein`, or informal imperatives.
+- Follow the same convention when adding or changing translation seeds in SQL migrations. Preserve customized translations when correcting existing default wording.
+
 ## CFML template output
 
 - When adding dynamic `#...#` expressions to HTML in a `.cfm` template, put the affected markup inside an explicit `<cfoutput>...</cfoutput>` block in that template.

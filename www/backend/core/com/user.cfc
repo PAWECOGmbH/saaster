@@ -105,6 +105,20 @@ component displayname="user" output="false" {
             local.mfa = arguments.userStruct.mfa;
         }
 
+        // Legacy profile editing cannot change account status or role flags in
+        // an activated organization, including through the platform user editor.
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled) {
+            local.current = queryExecute(
+                options = {datasource: application.datasource},
+                params = {id: {type: "integer", value: arguments.userID}},
+                sql = "SELECT blnAdmin, blnSuperAdmin, blnActive FROM users WHERE intUserID = :id"
+            );
+            local.admin = local.current.blnAdmin;
+            local.superadmin = local.current.blnSuperAdmin;
+            local.active = local.current.blnActive;
+            local.tenantID = "";
+        }
+
         try {
 
             // update the user
@@ -354,6 +368,20 @@ component displayname="user" output="false" {
 
     // Get all users
     public query function getAllUsers(required numeric customerID) {
+
+        local.org = application.objMembershipAccess.organizationForCustomer(arguments.customerID);
+        if (local.org.enabled) {
+            return queryExecute(
+                options = {datasource: application.datasource},
+                params = {organizationID: {type: "integer", value: local.org.id}, customerID: {type: "integer", value: arguments.customerID}},
+                sql = "SELECT DISTINCT users.*, IF(membership.strRoleKey = 'organization.owner', 1, 0) AS mainUser
+                    FROM users INNER JOIN organization_memberships membership ON membership.intUserID = users.intUserID
+                    LEFT JOIN tenant_memberships assignment ON assignment.intOrgMembershipID = membership.intOrgMembershipID AND assignment.intCustomerID = :customerID
+                    WHERE membership.intOrganizationID = :organizationID
+                        AND (membership.strRoleKey IN ('organization.owner', 'organization.admin') OR assignment.intTenantMembershipID IS NOT NULL)
+                    ORDER BY mainUser DESC, users.intUserID"
+            );
+        }
 
         if (arguments.customerID gt 0) {
 
@@ -720,6 +748,15 @@ component displayname="user" output="false" {
                 local.argsReturnValue['userID'] = local.qGetUserMfa.intUserID;
                 local.argsReturnValue['customerID'] = local.qGetUserMfa.intCustomerID;
                 local.argsReturnValue['success'] = true;
+                local.membershipContext = application.objMembershipAccess.context(local.qGetUserMfa.intUserID);
+                if (local.membershipContext.enabled) {
+                    local.argsReturnValue.success = local.membershipContext.allowed;
+                    local.argsReturnValue.customerID = local.membershipContext.customerID;
+                    if (!local.membershipContext.allowed) {
+                        local.argsReturnValue.message = variables.getTrans("msgNoAccess");
+                        local.argsReturnValue.uuid = arguments.mfaUUID;
+                    }
+                }
             }
 
         } else {

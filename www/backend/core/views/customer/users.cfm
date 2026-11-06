@@ -1,5 +1,8 @@
 
 <cfscript>
+    if (session.membership_access ?: false) {
+        location url="#application.mainURL#/account-settings/memberships" addtoken=false;
+    }
     qUser = application.objUser.getAllUsers(session.customer_id);
 </cfscript>
 

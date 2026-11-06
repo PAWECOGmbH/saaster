@@ -53,6 +53,10 @@ if (structKeyExists(form, 'login_btn')) {
                 session.admin = true;
             }
 
+            // Membership permissions override the compatibility flags after login.
+            if (!application.objMembershipAccess.refreshSession(true)) {
+                location url=local.urlLogin addtoken=false;
+            }
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
@@ -79,7 +83,8 @@ if (structKeyExists(form, 'login_btn')) {
 
             // Is the needed data of the cutomer already filled out?
             dataFilledIn = objRegister.checkFilledData(session.customer_id);
-            if (!dataFilledIn) {
+            if (!dataFilledIn and (!(session.membership_access ?: false)
+                or application.objAuthorization.canInTenant(session.user_id, session.customer_id, "tenant.settings.manage"))) {
 
                 // Set the sessions again in case it doesn't exist anymore
                 session.company = objUser.strCompanyName;
@@ -728,6 +733,10 @@ if (structKeyExists(form, 'mfa_btn')) {
 
         session.user_id = checkMfa.userID;
         session.customer_id = checkMfa.customerID;
+        if (!application.objMembershipAccess.refreshSession(true)) {
+            location url=local.urlLogin addtoken=false;
+        }
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
         structDelete(session, "alert");
         logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
 

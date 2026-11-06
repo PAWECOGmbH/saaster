@@ -89,6 +89,18 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
+                                    <cfif session.membership_access ?: false>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="member-role">#getTrans('txtMembershipTenantAccess')#</label>
+                                            <select id="member-role" name="member_role" class="form-select">
+                                                <cfloop list="tenant.viewer,tenant.editor,tenant.admin" item="memberRole"><option value="#memberRole#">#getTrans(application.objMembershipAccess.roleLabel(memberRole))#</option></cfloop>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="member-status">#getTrans('titStatus')#</label>
+                                            <select id="member-status" name="member_status" class="form-select"><option value="active">#getTrans('txtMembershipActive')#</option><option value="suspended">#getTrans('txtMembershipSuspended')#</option></select>
+                                        </div>
+                                    <cfelse>
                                     <cfif !session.sysadmin>
                                         <div class="col-lg-4 mb-3">
                                             <div class="form-label">#getTrans('titActive')#</div>
@@ -147,6 +159,7 @@
                                         </div>
                                     </cfif>
 
+                                    </cfif>
                                     <div class="col-sm-6 col-md-3 mb-3">
                                         <div class="form-group">
                                             <label class="form-label">#getTrans('formSalutation')#</label>
@@ -169,7 +182,7 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label class="form-label">#getTrans('formEmailAddress')# *</label>
-                                            <input type="email" class="form-control" name="email" value="#userEmail#" minlength="3" maxlength="100" required>
+                                            <input type="email" class="form-control" name="email" value="#encodeForHTMLAttribute(userEmail)#" minlength="3" maxlength="100" required>
                                         </div>
                                     </div>
                                         <div class="col-sm-6 col-md-4 mb-3">

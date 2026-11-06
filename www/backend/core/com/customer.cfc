@@ -286,6 +286,10 @@ component displayname="customer" output="false" {
     // Get all tenants
     public query function getAllTenants(required numeric userID) {
 
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled) {
+            return application.objMembershipAccess.tenants(arguments.userID);
+        }
+
         if (arguments.userID gt 0) {
 
             local.qTenants = queryExecute(

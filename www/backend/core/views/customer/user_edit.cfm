@@ -1,4 +1,7 @@
 <cfscript>
+    if (session.membership_access ?: false) {
+        location url="#application.mainURL#/account-settings/memberships" addtoken=false;
+    }
 
     // Read out the ID of the desired user
     param name="thiscontent.thisID" default=0 type="numeric";

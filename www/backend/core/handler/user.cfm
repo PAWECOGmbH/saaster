@@ -64,6 +64,11 @@ if (structKeyExists(form, "edit_profile_btn")) {
         form.tenantID = allowedTenants;
     }
 
+    if (session.membership_access ?: false) {
+        // Tenant preferences and roles are managed separately from profile edits.
+        form.tenantID = "";
+    }
+
     // Roles the actor may not change keep their current value; nobody changes the own roles
     roles = application.objUser.allowedRoles(
         actor = actor,
@@ -215,7 +220,16 @@ if (structKeyExists(form, "user_new_btn")) {
     }
 
     // Save the user using a function
-    objUserInsert = application.objUser.insertUser(form, session.customer_id);
+    if (session.membership_access ?: false) {
+        try {
+            objUserInsert = application.objMembership.createUser(session.user_id, session.customer_id, form, form.member_role ?: "tenant.viewer", form.member_status ?: "active");
+        } catch (Saaster.Membership error) {
+            getAlert(error.type eq "Saaster.Membership.UserLimit" ? "msgMaxUsersReached" : "msgMembershipDenied", "warning");
+            location url="#application.mainURL#/account-settings/user/new" addtoken=false;
+        }
+    } else {
+        objUserInsert = application.objUser.insertUser(form, session.customer_id);
+    }
 
     if (objUserInsert.success) {
 

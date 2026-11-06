@@ -973,6 +973,11 @@ component displayname="globalFunctions" output="false" {
     // Check whether the user is in the range of the current tenant
     public boolean function checkTenantRange(required numeric userID, required numeric customerID) {
 
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled
+            or application.objMembershipAccess.organizationForCustomer(arguments.customerID).enabled) {
+            return application.objAuthorization.canInTenant(arguments.userID, arguments.customerID, "tenant.view");
+        }
+
         local.isAllowed = false;
 
         local.qRange = queryExecute(

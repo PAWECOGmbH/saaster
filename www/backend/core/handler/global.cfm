@@ -1,5 +1,17 @@
 <cfscript>
 
+// Membership switches resolve rights for the selected tenant immediately.
+if (structKeyExists(url, "switch") and (session.membership_access ?: false)) {
+    if (!isValid("integer", url.switch) or !application.objAuthorization.canInTenant(session.user_id, val(url.switch), "tenant.view")) {
+        header statuscode=403 statustext="Forbidden";
+        abort;
+    }
+    session.customer_id = val(url.switch);
+    application.objMembershipAccess.refreshSession();
+    application.objCustomer.setProductSessions(session.customer_id, session.lng);
+    location url="#application.mainURL#/dashboard" addtoken=false;
+}
+
 // Switch the company/tenant
 if (structKeyExists(url, "switch")) {
 
