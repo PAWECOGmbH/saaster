@@ -1,5 +1,5 @@
 <div align="center"><img src="https://www.saaster.io/images/saaster-logo.png" height="100"/></div><br><br>
-<b>Saaster</b> is a CFML-based framework designed to simplify the development of SaaS applications. It is built on a modern stack, using <b>Lucee 6</b>, <b>NGINX</b>, and <b>MySQL 8.1</b>, and is fully containerized with <b>Docker Compose</b>. The architecture provides a solid foundation for building scalable SaaS platforms while keeping configuration flexible. Saaster includes core features such as user authentication, API integration, and a modular approach to extend functionality. This framework allows developers to focus on building their application's unique components without reinventing common SaaS patterns.
+<b>Saaster</b> is a CFML-based framework designed to simplify the development of SaaS applications. It is built on a modern stack, using <b>Lucee 7</b>, <b>NGINX</b>, and <b>MySQL 8.1</b>, and is fully containerized with <b>Docker Compose</b>. The architecture provides a solid foundation for building scalable SaaS platforms while keeping configuration flexible. Saaster includes core features such as user authentication, API integration, and a modular approach to extend functionality. This framework allows developers to focus on building their application's unique components without reinventing common SaaS patterns.
 <br><br>
 <a target="_blank" href="https://www.saaster.io">🌐 Website</a><br>
 <a target="_blank" href="https://docs.saaster.io">📚 Documentation</a><br>
@@ -174,6 +174,17 @@ When you remove a profile from a server where its service is already running (e.
 docker compose stop filebrowser
 docker compose rm filebrowser
 ```
+
+### Upgrading a server to Lucee 7
+Lucee 7 needs Tomcat 11 (Jakarta), so it cannot be updated in the Lucee admin - the container must be created from the Lucee 7 image. The Lucee settings (datasource, mail server) live inside the container and are lost with it, so take them along:
+
+1. Save the settings of the running container:<br>
+```docker cp <lucee_container_name>:/opt/lucee/server/lucee-server/context/.CFConfig.json ./cfconfig-backup.json```
+2. Set the image in ```.env``` (```LUCEE_IMAGE=lucee/lucee```, ```LUCEE_IMAGE_VERSION=7.0.6.10-nginx```) and recreate the container: ```docker compose up -d lucee```
+3. Set up the datasource (with 'Allow Multiple Queries') and the mail server in the Lucee admin again. Alternatively, put a ```.CFConfig.json``` containing only the ```dataSources``` and ```mailServers``` parts of the backup into ```/opt/lucee/server/lucee-server/deploy/``` and restart the container - Lucee merges it into its settings.
+4. Preserve the result as your own image (see [Preserve Configurations with a Custom Docker Image](#preserve-configurations-with-a-custom-docker-image)).
+
+The PDF extension of Lucee 7 ships the "classic" engine only as demo with a watermark, so Saaster always uses the "modern" engine; ```variables.pdf_type``` in older ```config.cfm``` files is ignored.
 
 <br><br>
 

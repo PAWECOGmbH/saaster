@@ -1464,11 +1464,15 @@ component displayname="invoices" output="false" {
         local.addressBlock = "";
         if (len(trim(local.customerData.billingAccountName)) and len(trim(local.customerData.billingAddress))) {
 
+            // Encode line by line: encodeForHTML() keeps line breaks in Lucee 7 (Guard), ESAPI encoded them
+            local.billingLines = listToArray(replace(local.customerData.billingAddress, chr(13), "", "all"), chr(10), true);
+            local.billingAddress = arrayToList(arrayMap(local.billingLines, (line) => encodeForHTML(line)), "<br />");
+
             cfsavecontent(variable="local.addressBlock") {
                 echo(
                     "
                         #encodeForHTML(local.customerData.billingAccountName)#<br />
-                        #replace(encodeForHTML(local.customerData.billingAddress), "&##xd;", '<br />', 'all')#<br />
+                        #local.billingAddress#<br />
                     "
                 )
             }

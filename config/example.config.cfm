@@ -35,9 +35,6 @@ variables.applicationname = "saaster";
 // Please use the timespan tag directly
 variables.sessiontimeout = createTimespan(00,03,00,00);
 
-// You can use "modern" or "classic" for lucee pdf print
-variables.pdf_type = "classic";
-
 // RequestTimeout in seconds
 variables.requesttimeout = 6000;
 

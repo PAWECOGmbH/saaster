@@ -7,7 +7,10 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     // Dynamic values
     this.name = variables.applicationname;
     this.sessiontimeout = variables.sessiontimeout;
-    this.pdf.type = variables.pdf_type;
+    // Lucee 7 ships the "classic" engine (PD4ML) only as demo with a watermark on every page,
+    // so the PDF templates (invoices, Swiss QR-bill) are made for "modern". variables.pdf_type
+    // in older config.cfm files is ignored.
+    this.pdf.type = "modern";
     this.requesttimeout = variables.requesttimeout;
 
     // Fixed values

@@ -56,6 +56,15 @@
     // Get sysadmin data
     sysAdminData = application.objSysadmin.getSysAdminData();
 
+    // Logo with a fixed size: the PDF renderer of Lucee 7 ('modern') ignores max-width
+    logoPath = len(trim(sysAdminData.logo)) ? expandPath('/userdata/images/logos/#sysAdminData.logo#') : expandPath('/assets/img/logo.png');
+    logoSize = "width: 180px;";
+    try {
+        logoImage = imageRead(logoPath);
+        logoWidth = min(180, logoImage.width);
+        logoSize = "width: #logoWidth#px; height: #round(logoImage.height * logoWidth / logoImage.width)#px;";
+    } catch (any e) {}
+
     // Generate UUID for the pdf name
     pdfName = "invoice-" & replace(lcase(getInvoiceData.number), " ", "", "all") & "-" & dateTimeFormat(getTime.utc2local(now()), "yyyymmddHHNNSS");
 
@@ -79,14 +88,10 @@
         <title>#encodeForHTML(getInvoiceData.title)#</title>
     </head>
     <body style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
-        <table width="100%" border="0">
+        <table width="100%" border="0" style="table-layout: fixed;">
             <tr>
                 <td align="right" height="100" valign="top">
-                    <cfif len(trim(sysAdminData.logo))>
-                        <img alt="Logo" src="#expandPath('/userdata/images/logos/#sysAdminData.logo#')#" style="max-width: 180px; font-size: 16px;" border="0">
-                    <cfelse>
-                        <img alt="Logo" src="#expandPath('/assets/img/logo.png')#" style="max-width: 180px; font-size: 16px;" border="0">
-                    </cfif>
+                    <img alt="Logo" src="#logoPath#" style="#logoSize# font-size: 16px;" border="0">
                 </td>
             </tr>
             <tr>
@@ -106,17 +111,17 @@
             </tr>
             <tr>
                 <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
-                    <table width="100%" border="0">
+                    <table width="100%" border="0" style="table-layout: fixed;">
                         <tr>
-                            <td width="20%">
+                            <td width="20%" style="width: 20%;">
                                 #getTrans('titInvoiceDate', invoiceLng)#:<br />
                                 #getTrans('txtDueDate', invoiceLng)#:
                             </td>
-                            <td width="30%">
+                            <td width="30%" style="width: 30%;">
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#<br />
                                 #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
                             </td>
-                            <td width="50%" valign="top">
+                            <td width="50%" valign="top" style="width: 50%;">
                                 #replace(customerData.billingInfo, chr(13), "<br />", "all")#
                             </td>
                         </tr>
@@ -126,14 +131,14 @@
             <tr><td style="padding: 5px;"></td></tr>
             <tr>
                 <td>
-                    <table width="100%" border="0" style="border-collapse: collapse;">
+                    <table width="100%" border="0" style="border-collapse: collapse; table-layout: fixed;">
                         <tr>
-                            <td width="5%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos', invoiceLng)#</td>
-                            <td width="45%" style="border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription', invoiceLng)#</td>
-                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity', invoiceLng)#</td>
-                            <td width="15%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice', invoiceLng)#</td>
-                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount', invoiceLng)#</td>
-                            <td width="10%" style="border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal', invoiceLng)# #getInvoiceData.currency#</td>
+                            <td width="5%" style="width: 5%; border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos', invoiceLng)#</td>
+                            <td width="45%" style="width: 45%; border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription', invoiceLng)#</td>
+                            <td width="15%" style="width: 15%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity', invoiceLng)#</td>
+                            <td width="15%" style="width: 15%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice', invoiceLng)#</td>
+                            <td width="10%" style="width: 10%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount', invoiceLng)#</td>
+                            <td width="10%" style="width: 10%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal', invoiceLng)# #getInvoiceData.currency#</td>
                         </tr>
                         <cfloop array="#getInvoiceData.positions#" index="pos">
                             <tr>
