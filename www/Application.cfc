@@ -63,6 +63,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objLanguage = new backend.core.com.language();
         application.objSettings = new backend.core.com.settings();
         application.objUser = new backend.core.com.user();
+        application.objAuthorization = new backend.core.com.authorization();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
