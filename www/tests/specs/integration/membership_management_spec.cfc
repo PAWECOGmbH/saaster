@@ -17,6 +17,69 @@ component extends="tests.support.integration_spec" {
                 variables.service = application.objMembership;
             });
 
+            it(title = "resends an expired activation link with a fresh seven-day token and the real email", skip = not len(request.testSettings.mailCatcherUrl ?: ""), body = () => {
+                local.previous = invitationToken(variables.member.userID);
+                executeSQL("UPDATE users SET dtmUUIDCreated = UTC_TIMESTAMP() - INTERVAL 8 DAY WHERE intUserID = :id", idParam(variables.member.userID));
+                expect(application.objUser.getUserByValidToken(local.previous, "invitation").recordCount).toBe(0);
+                try {
+                    local.sent = variables.service.resendInvitation(variables.admin.userID, variables.organization, variables.member.userID);
+                    expect(local.sent.success).toBeTrue();
+                    local.token = invitationToken(variables.member.userID);
+                    expect(local.token).notToBe(local.previous);
+                    expect(application.objUser.getUserByValidToken(local.token, "invitation").recordCount).toBe(1);
+                    expect(application.objUser.getUserByValidToken(local.previous, "invitation").recordCount).toBe(0);
+                    local.mail = waitForInvitation(variables.member.email, local.token);
+                    expect(local.mail).toInclude("/logincheck?u=" & local.token);
+                    expect(local.mail).toInclude(variables.admin.firstName & " " & variables.admin.lastName);
+                    // A second resend also revokes the previous, still-valid link.
+                    variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID);
+                    local.latest = invitationToken(variables.member.userID);
+                    expect(local.latest).notToBe(local.token);
+                    expect(application.objUser.getUserByValidToken(local.token, "invitation").recordCount).toBe(0);
+                    expect(application.objUser.getUserByValidToken(local.latest, "invitation").recordCount).toBe(1);
+                    waitForInvitation(variables.member.email, local.latest);
+                } finally {
+                    cfhttp(url = request.testSettings.mailCatcherUrl & "/api/v1/mailbox/" & listFirst(variables.member.email, "@"), method = "delete", timeout = 10);
+                }
+            });
+
+            it("does not send activation links for accounts that already have a password", () => {
+                local.token = invitationToken(variables.member.userID);
+                executeSQL("UPDATE users SET strPasswordHash = 'existing-password-hash' WHERE intUserID = :id", idParam(variables.member.userID));
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                executeSQL("UPDATE users SET strPasswordHash = '', strPasswordSalt = 'legacy-salt' WHERE intUserID = :id", idParam(variables.member.userID));
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                expect(invitationToken(variables.member.userID)).toBe(local.token);
+            });
+
+            it("refuses activation links for suspended, inactive or removed members", () => {
+                local.token = invitationToken(variables.member.userID);
+                variables.service.setOrganizationMember(variables.owner.userID, variables.organization, variables.member.userID, "organization.member", "suspended");
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                variables.service.setOrganizationMember(variables.owner.userID, variables.organization, variables.member.userID);
+                executeSQL("UPDATE users SET blnActive = 0 WHERE intUserID = :id", idParam(variables.member.userID));
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                variables.service.removeOrganizationMember(variables.owner.userID, variables.organization, variables.member.userID);
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                expect(invitationToken(variables.member.userID)).toBe(local.token);
+            });
+
+            it("keeps invitation actions within the organization and the actor's manageable roles", () => {
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.stranger.userID)).toThrow(type = "Saaster.Membership.OutsideOrganization");
+                expect(() => variables.service.resendInvitation(variables.admin.userID, variables.organization, variables.owner.userID)).toThrow(type = "Saaster.Membership.ProtectedRole");
+                expect(() => variables.service.resendInvitation(variables.admin.userID, variables.organization, variables.admin.userID)).toThrow(type = "Saaster.Membership.ProtectedRole");
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.owner.userID)).toThrow(type = "Saaster.Membership.InvalidInvitation");
+                executeSQL("UPDATE users SET blnSysAdmin = 1 WHERE intUserID = :id", idParam(variables.member.userID));
+                expect(() => variables.service.resendInvitation(variables.owner.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.ProtectedSystemUser");
+            });
+
+            it("denies resending invitations to tenant admins and rechecks revoked organization rights", () => {
+                variables.service.setTenantMember(variables.owner.userID, variables.tenant, variables.member.userID, "tenant.admin");
+                expect(() => variables.service.resendInvitation(variables.member.userID, variables.organization, variables.admin.userID)).toThrow(type = "Saaster.Membership.Forbidden");
+                variables.service.setOrganizationMember(variables.owner.userID, variables.organization, variables.admin.userID, "organization.member");
+                expect(() => variables.service.resendInvitation(variables.admin.userID, variables.organization, variables.member.userID)).toThrow(type = "Saaster.Membership.Forbidden");
+            });
+
             it("saves organization status and multiple tenant assignments together", () => {
                 variables.service.saveMember(variables.owner.userID, variables.organization, variables.member.userID,
                     {role: "organization.member", status: "suspended"}, [
@@ -304,6 +367,28 @@ component extends="tests.support.integration_spec" {
                 expect(memberRecord(variables.member.userID).recordCount).toBe(1);
             });
         });
+    }
+
+    private string function invitationToken(required numeric userID) {
+        return executeSQL("SELECT strUUID FROM users WHERE intUserID = :id", idParam(arguments.userID)).strUUID;
+    }
+
+    private string function waitForInvitation(required string email, required string token) {
+        local.mailboxURL = request.testSettings.mailCatcherUrl & "/api/v1/mailbox/" & listFirst(arguments.email, "@");
+        loop from=1 to=30 index="local.attempt" {
+            cfhttp(url = local.mailboxURL, method = "get", timeout = 10, result = "local.response");
+            if (isJSON(local.response.fileContent)) {
+                loop array=deserializeJSON(local.response.fileContent) item="local.entry" {
+                    cfhttp(url = local.mailboxURL & "/" & local.entry.id, method = "get", timeout = 10, result = "local.message");
+                    local.body = deserializeJSON(local.message.fileContent).body.html ?: "";
+                    if (find(arguments.token, local.body)) {
+                        return local.body;
+                    }
+                }
+            }
+            sleep(250);
+        }
+        fail("The activation email did not arrive in the test mailbox.");
     }
 
     private struct function idParam(required numeric id) {

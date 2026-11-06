@@ -24,6 +24,10 @@
                     throw(type = "Saaster.Membership.Forbidden", message = "Membership administration is not available.");
                 }
                 switch (form.member_action) {
+                    case "resend_invitation":
+                        invitationResult = application.objMembership.resendInvitation(session.user_id, membershipOrganization.id, form.userID);
+                        getAlert(invitationResult.message, invitationResult.success ? "success" : "danger");
+                        break;
                     case "save_member":
                         organizationChanges = {};
                         if (structKeyExists(form, "organization_role") or structKeyExists(form, "organization_status")) {
@@ -61,7 +65,9 @@
                     default:
                         throw(type = "Saaster.Membership.InvalidValue", message = "Unknown membership action.");
                 }
-                getAlert("msgMembershipSaved", "success");
+                if (form.member_action neq "resend_invitation") {
+                    getAlert("msgMembershipSaved", "success");
+                }
             }
         } catch (Saaster.Membership error) {
             getAlert(error.type eq "Saaster.Membership.LastOwner" ? "msgMembershipLastOwner" : "msgMembershipDenied", "warning");

@@ -76,6 +76,7 @@ are reported for preservation during cutover, not copied or corrected by the pre
 
 | Method | Effect |
 | --- | --- |
+| `resendInvitation(actorUserID, organizationID, userID)` | Send a fresh activation link to an active member who has not set a password; restricted to organization managers who may manage that role |
 | `saveMember(actorUserID, organizationID, userID, organization, tenants)` | Save organization role/status and tenant assignments atomically after validating every change |
 | `setOrganizationMember(actorUserID, organizationID, userID, role, status)` | Add/update a same-family account's organization membership |
 | `removeOrganizationMember(actorUserID, organizationID, userID)` | Remove that membership and its tenant assignments, preserving the identity |
@@ -127,13 +128,19 @@ menus and route metadata; they are derived from the current tenant's permissions
 Tenant switching rebuilds those flags and product settings immediately. Shared
 `checkTenantRange()` and `getAllTenants()` also use memberships after activation.
 
+The question-mark button at the right of the list heading opens a read-only table
+explaining the six built-in roles, their scope and inherited tenant access. The help
+is also available during setup, in German and English.
+
 The management page provides organization and tenant roles, membership suspension,
 removal, restoration and ownership transfer. One **Save changes** button applies the
 whole edit; inherited access replaces the tenant controls when an owner/admin role is
 selected. The **Action** dropdown beside **Edit** in each list row opens separate
 removal/ownership confirmation dialogs that name the member and organization and
-explain the effect on all its tenants. Canceling returns to the list. Tenant admins can manage existing
-organization members in their current tenant. Organization managers can create new
+explain the effect on all its tenants. Canceling returns to the list.
+For active members without a password, the menu also offers **Send activation link**.
+Resending creates a fresh token valid for seven days and invalidates the previous link.
+Tenant admins can manage existing organization members in their current tenant. Organization managers can create new
 accounts using the existing invitation-email flow; submitted legacy privilege flags
 are ignored, the account belongs to the root, and its initial tenant access is explicit.
 New-account creation enforces the tenant's plan user limit on the server, including
@@ -149,7 +156,8 @@ it cannot safely delete the whole organization and its children.
 ## Remaining work
 
 - First-class pending invitations, resend/revoke/accept states and expiry management.
-  Currently, new members receive the existing seven-day account invitation link.
+  New members receive the existing seven-day account invitation link; organization
+  managers can resend it from the member list.
 - Organization deletion and a dedicated global account activation/deactivation flow.
   Membership suspension is available; globally disabled legacy accounts remain disabled.
 - Fine-grained permissions for custom modules and project extensions. Unclassified

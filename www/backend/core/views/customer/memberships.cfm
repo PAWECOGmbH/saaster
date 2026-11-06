@@ -38,7 +38,12 @@
             <div class="col-md-12 col-lg-12">
                 <cfif not membershipData.organization.enabled>
                     <div class="card mb-3">
-                        <div class="card-header"><h3 class="card-title">#getTrans('txtMembershipSetup')#</h3></div>
+                        <div class="card-header gap-3">
+                            <h3 class="card-title">#getTrans('txtMembershipSetup')#</h3>
+                            <button type="button" class="btn btn-icon btn-ghost-secondary ms-auto flex-shrink-0" data-bs-toggle="modal" data-bs-target="##membership-role-help" aria-controls="membership-role-help" aria-label="#encodeForHTMLAttribute(getTrans('titMembershipRoleHelp'))#" title="#encodeForHTMLAttribute(getTrans('titMembershipRoleHelp'))#">
+                                <i class="ti ti-help-circle" aria-hidden="true"></i>
+                            </button>
+                        </div>
                         <div class="card-body">
                             <p>#getTrans('txtMembershipSetupInfo')#</p>
                             <p class="text-secondary">#getTrans('txtMembershipReview')#</p>
@@ -97,8 +102,11 @@
                     </div>
                 <cfelse>
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header gap-3">
                             <h3 class="card-title">#getTrans('txtMembershipsDescription')#</h3>
+                            <button type="button" class="btn btn-icon btn-ghost-secondary ms-auto flex-shrink-0" data-bs-toggle="modal" data-bs-target="##membership-role-help" aria-controls="membership-role-help" aria-label="#encodeForHTMLAttribute(getTrans('titMembershipRoleHelp'))#" title="#encodeForHTMLAttribute(getTrans('titMembershipRoleHelp'))#">
+                                <i class="ti ti-help-circle" aria-hidden="true"></i>
+                            </button>
                         </div>
                         <div class="table-responsive">
                             <table class="table card-table table-vcenter text-nowrap">
@@ -166,6 +174,12 @@
                                                         <cfif memberEditable and len(membershipData.members.role)>
                                                             <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown" aria-expanded="false">#getTrans('blnAction')#</button>
                                                             <div class="dropdown-menu dropdown-menu-end">
+                                                                <cfif memberActive and membershipData.members.activationPending and memberID neq session.user_id>
+                                                                    <form method="post" action="#application.mainURL#/memberships" class="m-0">#csrfField()#
+                                                                        <input type="hidden" name="member_action" value="resend_invitation"><input type="hidden" name="userID" value="#memberID#">
+                                                                        <button type="submit" class="dropdown-item">#getTrans('btnSendActivLink')#</button>
+                                                                    </form>
+                                                                </cfif>
                                                                 <cfif membershipData.owner and memberID neq session.user_id and membershipData.members.status eq 'active' and membershipData.members.blnActive>
                                                                     <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="##membership-transfer-#memberID#">#getTrans('txtMembershipTransferOrganization')#</button>
                                                                 </cfif>
@@ -188,6 +202,49 @@
 </div>
 
 <!--- Keep dialogs outside the table and page container so their markup and scrolling stay independent. --->
+<div id="membership-role-help" class="modal modal-blur fade" tabindex="-1" aria-labelledby="membership-role-help-title" aria-describedby="membership-role-help-intro" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="membership-role-help-title">#getTrans('titMembershipRoleHelp')#</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="#encodeForHTMLAttribute(getTrans('btnClose'))#"></button>
+            </div>
+            <div class="modal-body">
+                <p id="membership-role-help-intro">#getTrans('txtMembershipRoleHelpIntro')#</p>
+                <div class="table-responsive">
+                    <table class="table table-vcenter text-wrap mb-0 membership-role-help-table" aria-labelledby="membership-role-help-title">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="w-25">#getTrans('txtMembershipRoleHelpRole')#</th>
+                                <th scope="col">#getTrans('txtMembershipRoleHelpPermissions')#</th>
+                            </tr>
+                        </thead>
+                        <cfloop list="organization,tenant" item="roleHelpScope">
+                            <tbody>
+                                <tr class="bg-light"><th colspan="2" scope="rowgroup" class="text-wrap">#getTrans('txtMembershipRoleHelp_' & roleHelpScope)#</th></tr>
+                                <cfloop list="#roleHelpScope eq 'organization' ? 'organization.owner,organization.admin,organization.member' : 'tenant.admin,tenant.editor,tenant.viewer'#" item="roleHelpKey">
+                                    <tr>
+                                        <th scope="row" class="text-wrap text-break align-top">#getTrans(roleLabels.roleLabel(roleHelpKey))#</th>
+                                        <td>#getTrans('txtMembershipRoleHelp_' & replace(roleHelpKey, '.', '_', 'all'))#</td>
+                                    </tr>
+                                </cfloop>
+                            </tbody>
+                        </cfloop>
+                    </table>
+                </div>
+                <div class="text-secondary small mt-3">
+                    <p>#getTrans('txtMembershipRoleHelpInherited')#</p>
+                    <p class="mb-0">#getTrans('txtMembershipRoleHelpPlatform')#</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">#getTrans('btnClose')#</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <cfif membershipData.organization.enabled>
     <cfloop query="membershipData.members">
         <cfset memberID = membershipData.members.intUserID>

@@ -38,6 +38,24 @@ component output="false" hint="Transactional organization and tenant membership 
         return local.created;
     }
 
+    public struct function resendInvitation(required numeric actorUserID, required numeric organizationID, required numeric userID) {
+        transaction isolation="read_committed" {
+            lockOrganization(arguments.organizationID);
+            local.actor = requireOrganizationManager(arguments.actorUserID, arguments.organizationID);
+            local.target = lockTarget(arguments.userID, arguments.organizationID);
+            protectOrganizationRole(local.actor, local.target, local.target.role);
+            if (arguments.actorUserID eq arguments.userID or not local.target.exists or not local.target.active
+                or local.target.status neq "active" or not local.target.activationPending) {
+                reject("InvalidInvitation", "Only an active member who has not set a password can receive an activation link.");
+            }
+            // Use a request-local mailer: its template variables must not be shared
+            // with concurrent invitations. Refresh expired links on every resend.
+            local.mailer = new backend.core.com.user();
+            local.result = local.mailer.sendInvitation(arguments.userID, arguments.actorUserID, true);
+        }
+        return local.result;
+    }
+
     // Callers must take actorUserID from the authenticated session. These methods
     // are not remote endpoints. Legacy flags never authorize a membership change.
     public numeric function setOrganizationMember(required numeric actorUserID, required numeric organizationID, required numeric userID, string role = "organization.member", string status = "active") {
@@ -316,6 +334,7 @@ component output="false" hint="Transactional organization and tenant membership 
                 organizationID: {type: "integer", value: arguments.organizationID}
             },
             sql = "SELECT users.blnActive, users.blnSysAdmin, membership.intOrgMembershipID,
+                    CASE WHEN COALESCE(users.strPasswordHash, '') = '' AND COALESCE(users.strPasswordSalt, '') = '' THEN 1 ELSE 0 END AS activationPending,
                     membership.intOrganizationID, membership.strRoleKey, membership.strStatus
                 FROM users INNER JOIN customers home ON home.intCustomerID = users.intCustomerID
                 LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID
@@ -335,6 +354,7 @@ component output="false" hint="Transactional organization and tenant membership 
             membershipID: val(local.target.intOrgMembershipID),
             userID: arguments.userID,
             active: local.target.blnActive eq 1,
+            activationPending: local.target.activationPending eq 1,
             role: local.target.strRoleKey ?: "",
             status: local.target.strStatus ?: ""
         };

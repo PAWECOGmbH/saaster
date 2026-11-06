@@ -124,6 +124,7 @@ component output="false" hint="Membership activation, session context and reques
         local.members = queryExecute(
             options = {datasource: application.datasource}, params = local.params,
             sql = "SELECT users.intUserID, users.strFirstName, users.strLastName, users.strEmail, users.blnActive, users.blnSysAdmin,
+                    CASE WHEN COALESCE(users.strPasswordHash, '') = '' AND COALESCE(users.strPasswordSalt, '') = '' THEN 1 ELSE 0 END AS activationPending,
                     COALESCE(membership.strRoleKey, '') AS role, COALESCE(membership.strStatus, '') AS status
                 FROM users INNER JOIN customers home ON home.intCustomerID = users.intCustomerID
                 LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID AND membership.intOrganizationID = :organizationID

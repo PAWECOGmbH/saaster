@@ -416,7 +416,7 @@ component displayname="user" output="false" {
 
 
     // Send invitation link
-    public struct function sendInvitation(required numeric toUserID, required numeric fromUserID) {
+    public struct function sendInvitation(required numeric toUserID, required numeric fromUserID, boolean renewToken = false) {
 
         // Default variables
         local.argsReturnValue = structNew();
@@ -447,8 +447,8 @@ component displayname="user" output="false" {
 
             if (local.qUser.recordCount) {
 
-                // UUID already set?
-                if (!len(trim(local.qUser.strUUID))) {
+                // A resend renews the token and starts a fresh invitation lifetime.
+                if (arguments.renewToken or !len(trim(local.qUser.strUUID))) {
 
                     local.thisUUID = application.objGlobal.getUUID();
 

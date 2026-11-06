@@ -58,7 +58,7 @@ component output="false" hint="The collection of every form and every action lin
             { file: "frontend/custom_theme/templates/forms/register_2.cfm", target: "logincheck", trigger: "form.create_account", purpose: "Registration step 2 (custom theme)" },
             { file: "frontend/custom_theme/templates/forms/register_3.cfm", target: "logincheck", trigger: "form.fill_remaining_data", purpose: "Registration step 3 (custom theme)" },
 
-            { file: "backend/core/views/customer/memberships.cfm", target: "memberships", trigger: "form.member_action", count: 5, purpose: "Preview and activate organization roles, manage memberships and transfer ownership" },
+            { file: "backend/core/views/customer/memberships.cfm", target: "memberships", trigger: "form.member_action", count: 6, purpose: "Preview and activate organization roles, manage memberships, resend activation links and transfer ownership" },
 
             // ---------- Sysadmin: customers ----------
             { file: "backend/core/views/sysadmin/customers.cfm", target: "sysadm/customers", trigger: "form.add_customer", purpose: "Create a customer with its first user" },
