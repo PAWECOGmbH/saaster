@@ -198,3 +198,28 @@ div.dashboard div.card-header label.form-check {
         margin-top: 15px !important;
     }
 }
+
+/* Stack role descriptions on narrow screens so role names remain readable. */
+@media (max-width: 575.98px) {
+    .membership-role-help-table,
+    .membership-role-help-table tbody,
+    .membership-role-help-table tr,
+    .membership-role-help-table th,
+    .membership-role-help-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .membership-role-help-table thead {
+        display: none;
+    }
+
+    .membership-role-help-table th[scope="row"] {
+        border-bottom: 0;
+        padding-bottom: .25rem;
+    }
+
+    .membership-role-help-table td {
+        padding-top: .25rem;
+    }
+}

@@ -6,6 +6,7 @@ $(document).ajaxSend(function (event, xhr, settings) {
     var token = $('meta[name="csrf-token"]').attr('content');
     if (token && !/^(GET|HEAD|OPTIONS)$/i.test(settings.type || 'GET')) {
         xhr.setRequestHeader('X-CSRF-Token', token);
+        xhr.setRequestHeader('X-Saaster-Context', $('meta[name="saaster-context"]').attr('content') || '');
     }
 });
 

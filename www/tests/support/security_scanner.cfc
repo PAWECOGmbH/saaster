@@ -11,6 +11,7 @@ component extends="tests.support.form_scanner" output="false" hint="Reads core s
         "backend/core/com",
         "backend/core/handler",
         "backend/core/views",
+        "frontend/core/views",
         "frontend/core/com",
         "frontend/core/handler",
         "frontend/core/scheduletasks",

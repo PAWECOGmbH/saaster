@@ -105,6 +105,21 @@ Helpers for side effects:
 - **Logs:** `recordLogs()` replaces `application.objLog` with `support/log_recorder.cfc`. No log files are written, and `count()` / `getCalls()` let you check what would have been logged. The real logger comes back automatically after the spec.
 - **Payrexx:** `support/payrexx_mock.cfm` stands in for the Payrexx API and echoes the request it received. See `specs/integration/payrexx_call_spec.cfc` for how to point `application.payrexxStruct` at it. Specs must never call the real Payrexx, even if `config.cfm` holds real credentials.
 
+## Organization access and invitations
+
+`organization_authorization_spec`, `membership_management_spec`, `membership_migration_spec`
+and `membership_access_spec` cover the built-in model. `multiple_organizations_spec`
+checks independent contexts, support boundaries and stale form tokens;
+`organization_invitation_spec` covers consent, token lifecycle, identity binding and
+parallel acceptance. `access_registry_spec` and `extension_http_spec` cover extension
+manifests and real direct HTTP dispatch. `organization_upgrade_spec` executes V29 on
+isolated pre-upgrade tables in the dedicated test database.
+
+The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
+so mail tests do not depend on the development application's Lucee admin SMTP settings.
+`organization_flow_probe.cfm` runs production dispatch inside the test application and
+accepts fixture identities only. All test endpoints remain excluded from deployment.
+
 ## Form registry
 
 `support/form_registry.cfc` is the collection of every form and every action link in the core views and both themes - with its target, the field the handler reacts to, and what it does. `specs/integration/form_registry_spec.cfc` checks it entry by entry, so the runner lists every form on its own line.

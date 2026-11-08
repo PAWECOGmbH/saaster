@@ -30,6 +30,12 @@ Saaster is a modular CFML SaaS framework running on Lucee 7, NGINX, and MySQL 8.
 - Add API resources under `www/api/resources/` using the existing Taffy registration pattern. Keep JWT integration under `www/api/jwt/`.
 - Put project-specific extensions under `www/backend/myapp/` or `www/backend/modules/`, following the existing module structure.
 
+## User-facing language
+
+- Use formal German address consistently in user-facing UI text, notifications, emails, and translations: `Sie`, `Ihnen`, and `Ihr/Ihre`. This applies to both frontend themes and backend screens.
+- Use neutral infinitives for buttons and labels (for example, `Rolle speichern`). In instructions, use the formal imperative (for example, `Prüfen Sie die Vorschau`). Do not introduce `du`, `dir`, `dich`, `dein`, or informal imperatives.
+- Follow the same convention when adding or changing translation seeds in SQL migrations. Preserve customized translations when correcting existing default wording.
+
 ## CFML template output
 
 - When adding dynamic `#...#` expressions to HTML in a `.cfm` template, put the affected markup inside an explicit `<cfoutput>...</cfoutput>` block in that template.
@@ -51,8 +57,10 @@ Saaster is a modular CFML SaaS framework running on Lucee 7, NGINX, and MySQL 8.
 - Start the development stack with `docker compose -f compose-dev.yml up -d`. SMTP testing uses the local Inbucket service.
 - Reload application configuration through `/index.cfm?reinit=1` when needed.
 - Add versioned Flyway migrations under `config/db/core/` for core changes or `config/db/myapp/` for project changes. `config/db/dev/` contains development data scripts, not versioned core migrations.
+- Start every new SQL migration with `SET NAMES utf8mb4;` as its first statement and save the file as UTF-8. Apply this to core and project migrations.
 - Keep released migrations unchanged unless explicitly asked to revise them. When a migration must be repeatable, preserve existing settings, customized translations, and user-defined ordering, and check for existing schema objects before creating them.
 - Respect existing uncommitted changes. Keep `todo.md` local and ignored; never force-add it. Keep local credentials and generated test configuration out of Git.
+- Do not create or amend Git commits unless the user explicitly requests it. Requests to create a branch, implement changes, or run tests do not authorize committing. Leave completed changes uncommitted for the user to review and commit.
 
 ## Validation
 

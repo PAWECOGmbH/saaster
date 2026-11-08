@@ -263,6 +263,11 @@ component output="false" hint="Creates test data and removes it again." {
             );
         }
 
+        queryExecute(
+            options = {datasource: application.datasource},
+            params = {marker: {type: "varchar", value: "%" & variables.emailDomain}},
+            sql = "DELETE FROM users WHERE intCustomerID IS NULL AND strEmail LIKE :marker"
+        );
         variables.createdCustomerIds = [];
         variables.createdModuleIds = [];
         variables.createdPlanGroupIds = [];
@@ -274,6 +279,11 @@ component output="false" hint="Creates test data and removes it again." {
             "DELETE FROM customers WHERE strEmail LIKE :marker",
             { marker: { type: "varchar", value: "%" & variables.emailDomain } },
             { datasource: application.datasource }
+        );
+        queryExecute(
+            options = {datasource: application.datasource},
+            params = {marker: {type: "varchar", value: "%" & variables.emailDomain}},
+            sql = "DELETE FROM users WHERE intCustomerID IS NULL AND strEmail LIKE :marker"
         );
         queryExecute(
             "DELETE FROM modules WHERE strModuleName LIKE :prefix",

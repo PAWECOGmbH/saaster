@@ -12,7 +12,8 @@ component displayname="customer" output="false" {
 
                 options = {datasource = application.datasource},
                 params = {
-                    thisUserID: {type: "numeric", value = arguments.userID}
+                    thisUserID: {type: "numeric", value = arguments.userID},
+                    contextID: {type: "integer", value: (session.user_id ?: 0) eq arguments.userID ? val(session.customer_id ?: 0) : 0}
                 },
                 sql = "
                     SELECT DISTINCT
@@ -51,10 +52,9 @@ component displayname="customer" output="false" {
                     customers.strBillingAddress,
                     customers.strBillingInfo,
                     customers.intCountryID
-                    FROM customer_user
-                    INNER JOIN users ON customer_user.intUserID = users.intUserID
-                    INNER JOIN customers ON users.intCustomerID = customers.intCustomerID
-                    WHERE customer_user.intUserID = :thisUserID
+                    FROM users
+                    LEFT JOIN customers ON customers.intCustomerID = COALESCE(NULLIF(:contextID, 0), users.intCustomerID)
+                    WHERE users.intUserID = :thisUserID
                 "
             )
 
@@ -286,6 +286,10 @@ component displayname="customer" output="false" {
     // Get all tenants
     public query function getAllTenants(required numeric userID) {
 
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled) {
+            return application.objMembershipAccess.tenants(arguments.userID);
+        }
+
         if (arguments.userID gt 0) {
 
             local.qTenants = queryExecute(
@@ -483,9 +487,10 @@ component displayname="customer" output="false" {
                     customerID: {type: "numeric", value: arguments.customerID}
                 },
                 sql = "
-                    SELECT users.strPhoto, customers.strLogo
+                    SELECT CASE WHEN identity.intUserID IS NULL THEN users.strPhoto ELSE NULL END AS strPhoto, customers.strLogo
                     FROM customers
                     LEFT JOIN users ON customers.intCustomerID = users.intCustomerID
+                    LEFT JOIN membership_identities identity ON identity.intUserID = users.intUserID
                     WHERE customers.intCustomerID = :customerID
                 "
             )

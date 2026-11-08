@@ -95,7 +95,7 @@ component extends="tests.support.integration_spec" {
 
                 expect(ownWidgets(valueList(widgets.prepareUserWidgets(variables.user.userID, "", 0).intWidgetID))).toBeEmpty();
 
-                var rowA = widgets.prepareUserWidgets(variables.user.userID, variables.moduleA, 0);
+                local.rowA = widgets.prepareUserWidgets(variables.user.userID, variables.moduleA, 0).filter((row) => row.intWidgetID eq variables.widgetA);
                 expect(rowA.intPrio).toBe(5);
                 expect(rowA.blnActive).toBe(0);
             });

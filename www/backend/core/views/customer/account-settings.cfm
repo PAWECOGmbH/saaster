@@ -7,6 +7,10 @@
     planGroup = objPlans.prepareForGroupID(session.customer_id).groupID;
     getPlansAsArray = objPlans.getPlans(planGroup);
     hasPlans = arrayLen(getPlansAsArray) ? true : false;
+    membershipOrganization = application.objMembershipAccess.organizationForCustomer(session.customer_id);
+    showMemberships = membershipOrganization.enabled
+        ? application.objMembershipAccess.canManage(session.user_id, session.customer_id)
+        : application.objMembershipAccess.canSetup(session.user_id, membershipOrganization.id);
 
 </cfscript>
 
@@ -72,12 +76,22 @@
                         </div>
                         <div class="card-body">
                             <div class="list-group">
-                                <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
-                                        <h4 class="mb-1"><b>#getTrans('titUser')#</b></h4>
-                                    </div>
-                                    <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
-                                </a>
+                                <cfif showMemberships>
+                                    <a href="#application.mainURL#/account-settings/memberships" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titMemberships')#</b></h4>
+                                        </div>
+                                        <p class="mb-1">#getTrans('txtMembershipsDescription')#</p>
+                                    </a>
+                                </cfif>
+                                <cfif not membershipOrganization.enabled>
+                                    <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                            <h4 class="mb-1"><b>#getTrans('titUser')#</b></h4>
+                                        </div>
+                                        <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
+                                    </a>
+                                </cfif>
                                 <cfif getCustomerData.custParentID eq 0 and session.superadmin>
                                     <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex justify-content-between">

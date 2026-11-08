@@ -63,6 +63,12 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objLanguage = new backend.core.com.language();
         application.objSettings = new backend.core.com.settings();
         application.objUser = new backend.core.com.user();
+        application.objAccessRegistry = new backend.core.com.access_registry().load();
+        application.objAuthorization = new backend.core.com.authorization();
+        application.objMembership = new backend.core.com.membership();
+        application.objOrganizationInvitation = new backend.core.com.organization_invitation();
+        application.objMembershipMigration = new backend.core.com.membership_migration();
+        application.objMembershipAccess = new backend.core.com.membership_access();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
@@ -130,6 +136,14 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     public boolean function onRequestStart(required string TargetPage) {
 
+        // Revalidate membership before routing, including existing sessions.
+        local.supportReturn = (session.supportLogin ?: false) and structKeyExists(url, "sysadmin") and reFindNoCase("^/?customer/?$", cgi.path_info);
+        lock scope="session" type="exclusive" timeout="60" {
+            if (structKeyExists(application, "objMembershipAccess") and not local.supportReturn and not application.objMembershipAccess.refreshSession()) {
+                location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+            }
+        }
+
         // Check if the user is logged in as a sysadmin
         if (structKeyExists(session, "sysadmin") and session.sysadmin) {
 
@@ -190,9 +204,63 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
 
     public boolean function onRequest(required string TargetPage) {
+        // Serialize context switches and mutations from tabs sharing this session.
+        lock scope="session" type="exclusive" timeout="60" {
+            local.supportReturn = (session.supportLogin ?: false) and structKeyExists(url, "sysadmin") and reFindNoCase("^/?customer/?$", cgi.path_info);
+            if (not local.supportReturn and not application.objMembershipAccess.refreshSession()) {
+                location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+            }
+            return dispatchRequest(arguments.TargetPage);
+        }
+    }
+
+    private boolean function dispatchRequest(required string TargetPage) {
 
         // Create SEF URL
         thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
+
+        // Authorize the actual requested template, independent of Host/path-info.
+        // Registered extensions reuse their canonical mapping's module/visibility checks.
+        local.directPath = lCase(reReplace(replace(arguments.TargetPage, chr(92), "/", "all"), "^/", ""));
+        if (reFind("^(backend/(myapp/|modules/|core/handler/|core/views/sysadmin/)|frontend/core/handler/)", local.directPath)) {
+            local.directMapping = queryExecute(
+                options = {datasource: application.datasource},
+                params = {path: {type: "varchar", value: local.directPath}},
+                sql = "SELECT strMapping FROM system_mappings WHERE strPath = :path
+                    UNION SELECT strMapping FROM custom_mappings WHERE strPath = :path"
+            );
+            if (application.objAccessRegistry.policy(local.directPath, cgi.request_method).registered) {
+                if (local.directMapping.recordCount neq 1) {
+                    header statuscode=403 statustext="Forbidden";
+                    abort;
+                }
+                thiscontent = application.objGlobal.getSEF(local.directMapping.strMapping);
+            } else if (local.directMapping.recordCount) {
+                header statuscode=403 statustext="Forbidden";
+                abort;
+            }
+            thiscontent.thisPath = local.directPath;
+            thiscontent.onlySysAdmin = thiscontent.onlySysAdmin or find("/sysadmin/", local.directPath) gt 0;
+        }
+
+        if (structKeyExists(session, "user_id") and structKeyExists(session, "customer_id")
+            and not application.objMembershipAccess.allowRequest(session.user_id, session.customer_id, thiscontent.thisPath, cgi.request_method, form, url)) {
+            header statuscode=403 statustext="Forbidden";
+            writeOutput(encodeForHTML(application.objLanguage.getTrans("msgNoAccess")));
+            abort;
+        }
+
+        if ((session.membership_identity ?: (session.membership_access ?: false))
+            and (left(thiscontent.thisPath, 8) eq "backend/")
+            and (not listFindNoCase("GET,HEAD,OPTIONS", cgi.request_method)
+                or application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url)))) {
+            local.contextHeaders = getHTTPRequestData(false).headers;
+            if (not application.objGlobal.contextVerify(form.context_token ?: (url.context_token ?: (local.contextHeaders["X-Saaster-Context"] ?: "")))) {
+                header statuscode=409 statustext="Conflict";
+                writeOutput(encodeForHTML(application.objLanguage.getTrans("msgMembershipContextChanged")));
+                abort;
+            }
+        }
 
         // Change language
         if (structKeyExists(url, "l") and session.lng neq url.l) {
@@ -237,6 +305,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         }
 
 
+        local.explicitExtensionPolicy = (session.membership_access ?: false)
+            and application.objAccessRegistry.policy(thiscontent.thisPath, cgi.request_method).registered;
+
         // Check whether the user has access to corresponding sections
         if (structKeyExists(session, "customer_id")) {
 
@@ -253,13 +324,13 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
             } else {
 
                 if (structKeyExists(session, "admin") and !session.admin) {
-                    if (thiscontent.onlyAdmin) {
+                    if (thiscontent.onlyAdmin and not local.explicitExtensionPolicy) {
                         getAlert('msgNoAccess', 'danger');
                         local.no_access = true;
                     }
                 }
                 if (structKeyExists(session, "superadmin") and !session.superadmin) {
-                    if (thiscontent.onlySuperAdmin) {
+                    if (thiscontent.onlySuperAdmin and not local.explicitExtensionPolicy) {
                         getAlert('msgNoAccess', 'danger');
                         local.no_access = true;
                     }

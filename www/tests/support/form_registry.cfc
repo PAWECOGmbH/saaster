@@ -26,6 +26,9 @@ component output="false" hint="The collection of every form and every action lin
 
     public array function handlerForms() {
         return [
+            { file: "backend/core/views/customer/membership_invitations.cfm", target: "memberships", trigger: "form.member_action", count: 3, purpose: "Invite, resend or revoke an organization invitation" },
+            { file: "frontend/core/views/organization_invitation.cfm", target: "accept-organization-invitation", trigger: "form.accept_invitation", purpose: "Accept an invitation as the verified recipient" },
+
 
             // ---------- Customer: company, profile, users, tenants ----------
             { file: "backend/core/views/customer/company-edit.cfm", target: "customer", trigger: "form.logo_upload_btn", purpose: "Upload the company logo" },
@@ -57,6 +60,8 @@ component output="false" hint="The collection of every form and every action lin
             { file: "frontend/custom_theme/templates/forms/register_1.cfm", target: "logincheck", trigger: "form.register_btn", purpose: "Registration step 1 (custom theme)" },
             { file: "frontend/custom_theme/templates/forms/register_2.cfm", target: "logincheck", trigger: "form.create_account", purpose: "Registration step 2 (custom theme)" },
             { file: "frontend/custom_theme/templates/forms/register_3.cfm", target: "logincheck", trigger: "form.fill_remaining_data", purpose: "Registration step 3 (custom theme)" },
+
+            { file: "backend/core/views/customer/memberships.cfm", target: "memberships", trigger: "form.member_action", count: 6, purpose: "Preview and activate organization roles, manage memberships, resend activation links and transfer ownership" },
 
             // ---------- Sysadmin: customers ----------
             { file: "backend/core/views/sysadmin/customers.cfm", target: "sysadm/customers", trigger: "form.add_customer", purpose: "Create a customer with its first user" },
@@ -152,6 +157,11 @@ component output="false" hint="The collection of every form and every action lin
 
     public array function protectedLinks() {
         return [
+            { file: "backend/core/views/customer/tenants.cfm", target: "global", key: "url.switch", purpose: "Switch the active tenant" },
+            { file: "backend/core/views/tenant_changer.cfm", target: "global", key: "url.switch", purpose: "Switch the active tenant (header dropdown)" },
+            { file: "backend/core/views/navigationVertical.cfm", target: "global", key: "url.switch", purpose: "Switch the active tenant (vertical navigation)" },
+            { file: "backend/core/views/navigationCombined.cfm", target: "global", key: "url.switch", purpose: "Switch the active tenant (combined navigation)" },
+
             { file: "backend/core/views/customer/account-settings.cfm", target: "cancel", key: "url.plan", purpose: "Cancel the plan or revoke the cancellation" },
             { file: "backend/core/views/customer/plans.cfm", target: "cancel", key: "url.plan", purpose: "Cancel the plan" },
             { file: "backend/core/views/plan_view.cfm", target: "cancel", key: "url.plan", purpose: "Remove a waiting plan" },
@@ -210,10 +220,6 @@ component output="false" hint="The collection of every form and every action lin
     public array function openLinks() {
         return [
             { file: "backend/core/views/customer/tenants.cfm", target: "customer", key: "url.change_tenant", reason: "session", purpose: "Switch to another tenant from the tenant list" },
-            { file: "backend/core/views/customer/tenants.cfm", target: "global", key: "url.switch", reason: "session", purpose: "Switch the active tenant" },
-            { file: "backend/core/views/tenant_changer.cfm", target: "global", key: "url.switch", reason: "session", purpose: "Switch the active tenant (header dropdown)" },
-            { file: "backend/core/views/navigationVertical.cfm", target: "global", key: "url.switch", reason: "session", purpose: "Switch the active tenant (vertical navigation)" },
-            { file: "backend/core/views/navigationCombined.cfm", target: "global", key: "url.switch", reason: "session", purpose: "Switch the active tenant (combined navigation)" },
             { file: "backend/core/views/header.cfm", target: "customer", key: "url.sysadmin", reason: "session", purpose: "Return from a support login to the own sysadmin session" },
             { file: "backend/core/views/header.cfm", target: "logincheck", key: "url.logout", reason: "session", purpose: "Log out" },
             { file: "backend/core/views/sysadmin/customers.cfm", target: "sysadm/customers", key: "url.logincustomer", reason: "session", purpose: "Log in as a customer for support (sysadmin only)" },

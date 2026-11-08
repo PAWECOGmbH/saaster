@@ -22,7 +22,7 @@
 -- create-plans.sql and create-modules.sql (it books their plans 1-4 and modules 1-3).
 -- Dates are relative to the day of the import, so the bookings are always current.
 -- Running it again replaces customers 1001-1099 and everything that belongs to them
--- (users, bookings, invoices, payments, notifications - ON DELETE CASCADE).
+-- (demo users explicitly; bookings, invoices, payments and notifications via foreign keys).
 --
 -- Import (see readme.md): cat ./config/db/dev/create-customers.sql | docker exec -i <mysql container> mysql -u <user> -p<password> <database>
 
@@ -32,6 +32,9 @@ SET @today = CURDATE();
 SET @now = UTC_TIMESTAMP();
 -- Argon2id hash of "Saaster-Demo-2026!" (global.cfc::hashPassword)
 SET @password = '$argon2id$v=19$m=19456,t=2,p=1$4cmXB3REA9udGAnL0X4Dsw$7nb6tEL7bSvnJwNr02mnCIPQ12IIy7we/iHrF4g5MQo';
+
+-- Identities survive customer deletion; explicitly replace only the reserved demo identities.
+DELETE FROM users WHERE intUserID BETWEEN 1001 AND 1099 AND strEmail LIKE '%.example';
 
 -- Sub-tenants first, then their parents and the rest
 DELETE FROM customers WHERE intCustomerID BETWEEN 1001 AND 1099 AND intCustParentID > 0;

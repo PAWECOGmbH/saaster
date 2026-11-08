@@ -153,77 +153,82 @@ component displayname="customer" output="false" {
 
 
         try {
+            transaction isolation="read_committed" {
+                new backend.core.com.identity().requireUnusedEmail(local.email);
 
-            queryExecute(
 
-                options = {datasource = application.datasource},
-                params = {
-                    company_name: {type: "nvarchar", value: local.company_name},
-                    first_name: {type: "nvarchar", value: local.first_name},
-                    last_name: {type: "nvarchar", value: local.last_name},
-                    email: {type: "nvarchar", value: local.email},
-                    language: {type: "varchar", value: local.language},
-                    hash: {type: "nvarchar", value: local.hash},
-                    salt: {type: "nvarchar", value: local.salt},
-                    uuid: {type: "nvarchar", value: local.uuid},
-                    dateNow: {type: "datetime", value: now()}
-                },
-                sql = "
+                queryExecute(
 
-                    INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail)
-                    VALUES (0, :dateNow, :dateNow, 1, :company_name,
-                        (SELECT intCountryID FROM countries WHERE blnDefault = 1), CONCAT(:first_name, ' ', :last_name), :email);
+                    options = {datasource = application.datasource},
+                    params = {
+                        company_name: {type: "nvarchar", value: local.company_name},
+                        first_name: {type: "nvarchar", value: local.first_name},
+                        last_name: {type: "nvarchar", value: local.last_name},
+                        email: {type: "nvarchar", value: local.email},
+                        language: {type: "varchar", value: local.language},
+                        hash: {type: "nvarchar", value: local.hash},
+                        salt: {type: "nvarchar", value: local.salt},
+                        uuid: {type: "nvarchar", value: local.uuid},
+                        dateNow: {type: "datetime", value: now()}
+                    },
+                    sql = "
 
-                    SET @last_inserted_customer_id = LAST_INSERT_ID();
+                        INSERT INTO customers (intCustParentID, dtmInsertDate, dtmMutDate, blnActive, strCompanyName, intCountryID, strContactPerson, strEmail)
+                        VALUES (0, :dateNow, :dateNow, 1, :company_name,
+                            (SELECT intCountryID FROM countries WHERE blnDefault = 1), CONCAT(:first_name, ' ', :last_name), :email);
 
-                    INSERT INTO users
-                    (
-                        intCustomerID,
-                        dtmInsertDate,
-                        dtmMutDate,
-                        strFirstName,
-                        strLastName,
-                        strEmail,
-                        strPasswordHash,
-                        strPasswordSalt,
-                        strLanguage,
-                        blnActive,
-                        blnAdmin,
-                        blnSuperAdmin,
-                        blnSysAdmin,
-                        strUUID
-                    )
-                    VALUES
-                    (
-                        @last_inserted_customer_id,
-                        :dateNow,
-                        :dateNow,
-                        :first_name,
-                        :last_name,
-                        :email,
-                        :hash,
-                        :salt,
-                        :language,
-                        1,
-                        1,
-                        1,
-                        IF(
-                            (
-                                SELECT COUNT(intCustomerID)
-                                FROM customers
-                                WHERE intCustomerID <> @last_inserted_customer_id
-                            ) > 0,
-                            0,
-                            1
-                        ),
-                        :uuid
-                    );
+                        SET @last_inserted_customer_id = LAST_INSERT_ID();
 
-                    DELETE FROM optin WHERE strUUID = :uuid;
+                        INSERT INTO users
+                        (
+                            intCustomerID,
+                            dtmInsertDate,
+                            dtmMutDate,
+                            strFirstName,
+                            strLastName,
+                            strEmail,
+                            strPasswordHash,
+                            strPasswordSalt,
+                            strLanguage,
+                            blnActive,
+                            blnAdmin,
+                            blnSuperAdmin,
+                            blnSysAdmin,
+                            strUUID
+                        )
+                        VALUES
+                        (
+                            @last_inserted_customer_id,
+                            :dateNow,
+                            :dateNow,
+                            :first_name,
+                            :last_name,
+                            :email,
+                            :hash,
+                            :salt,
+                            :language,
+                            1,
+                            1,
+                            1,
+                            IF(
+                                (
+                                    SELECT COUNT(intCustomerID)
+                                    FROM customers
+                                    WHERE intCustomerID <> @last_inserted_customer_id
+                                ) > 0,
+                                0,
+                                1
+                            ),
+                            :uuid
+                        );
 
-                "
+                        DELETE FROM optin WHERE strUUID = :uuid;
 
-            );
+                    "
+
+                );
+
+            }
 
             // Send notification email to sysadmin
             if (application.objSysAdmin.getSystemSetting('settingMailNewRegistrations').strDefaultValue eq 1) {

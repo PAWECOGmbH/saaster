@@ -64,6 +64,11 @@ if (structKeyExists(form, "edit_profile_btn")) {
         form.tenantID = allowedTenants;
     }
 
+    if (session.membership_access ?: false) {
+        // Tenant preferences and roles are managed separately from profile edits.
+        form.tenantID = "";
+    }
+
     // Roles the actor may not change keep their current value; nobody changes the own roles
     roles = application.objUser.allowedRoles(
         actor = actor,
@@ -147,6 +152,11 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
 // User new
 if (structKeyExists(form, "user_new_btn")) {
+    // Activated organizations create memberships through invitation acceptance only.
+    if (application.objMembershipAccess.organizationForCustomer(session.customer_id).enabled) {
+        location url="#application.mainURL#/account-settings/memberships" addtoken=false;
+    }
+
 
     param name="form.salutation" default="";
     param name="form.first_name" default="";
@@ -214,7 +224,7 @@ if (structKeyExists(form, "user_new_btn")) {
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
-    // Save the user using a function
+    // Legacy organizations retain their existing account creation flow.
     objUserInsert = application.objUser.insertUser(form, session.customer_id);
 
     if (objUserInsert.success) {

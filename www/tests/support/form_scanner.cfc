@@ -12,6 +12,7 @@ component output="false" hint="Finds every form and every action link in the cor
 
     variables.scanRoots = [
         "backend/core/views",
+        "frontend/core/views",
         "frontend/default_theme",
         "frontend/custom_theme"
     ];
