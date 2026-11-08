@@ -115,6 +115,11 @@ parallel acceptance. `access_registry_spec` and `extension_http_spec` cover exte
 manifests and real direct HTTP dispatch. `organization_upgrade_spec` executes V29 on
 isolated pre-upgrade tables in the dedicated test database.
 
+`request_access_spec` covers the shared browser request policy: legacy mapping roles,
+anonymous entry points, action visibility, context-token checks and module-booking
+dates. `extension_http_spec` also verifies canonical routes, module and platform
+restrictions, ambiguous direct mappings, invalid CSRF and stale form responses.
+
 The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
 so mail tests do not depend on the development application's Lucee admin SMTP settings.
 `organization_flow_probe.cfm` runs production dispatch inside the test application and

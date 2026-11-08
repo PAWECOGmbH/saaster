@@ -56,11 +56,81 @@ component extends="tests.support.integration_spec" {
                 }
                 expect(local.allowed.statusCode).toInclude("200");
                 expect(local.allowed.fileContent).toInclude("extension request reached");
+                cfhttp(url=local.url, method="post", redirect=false, timeout=30, result="local.invalidCsrf") {
+                    cfhttpparam(type="header", name="Cookie", value=arrayToList(local.cookies, "; "));
+                    cfhttpparam(type="header", name="X-Requested-With", value="XMLHttpRequest");
+                    cfhttpparam(type="formfield", name="csrf_token", value="invalid");
+                    cfhttpparam(type="formfield", name="context_token", value=local.fields.context_token);
+                }
+                expect(local.invalidCsrf.statusCode).toInclude("403");
+                expect(local.invalidCsrf.fileContent).toInclude("Invalid CSRF token");
+                cfhttp(url=local.url, method="post", redirect=false, timeout=30, result="local.staleContext") {
+                    cfhttpparam(type="header", name="Cookie", value=arrayToList(local.cookies, "; "));
+                    cfhttpparam(type="formfield", name="csrf_token", value=local.fields.csrf_token);
+                    cfhttpparam(type="formfield", name="context_token", value="invalid");
+                }
+                expect(local.staleContext.statusCode).toInclude("409");
+                expect(local.staleContext.fileContent).notToInclude("extension request reached");
                 cfhttp(url=local.url, method="delete", redirect=false, timeout=30, result="local.unknownMethod") {
                     cfhttpparam(type="header", name="Cookie", value=arrayToList(local.cookies, "; "));
                 }
                 expect(local.unknownMethod.statusCode).toInclude("403");
             });
+
+            it("enforces product entitlement on canonical and direct extension requests", () => {
+                local.module = variables.fixtures.createModule();
+                queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:local.module}},
+                    sql="UPDATE custom_mappings SET intModuleID = :id WHERE strMapping = 'saaster-extension-test'");
+                loop array=[false, true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("302");
+                    expect(local.response.responseHeader.Location).toInclude("/dashboard");
+                    expect(local.response.fileContent).notToInclude("extension request reached");
+                }
+                variables.fixtures.createBooking(customerID=variables.organization, moduleID=local.module, status="canceled",
+                    startDate=dateFormat(now(), "yyyy-mm-dd"), endDate=dateFormat(dateAdd("d", 1, now()), "yyyy-mm-dd"));
+                loop array=[false, true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("200");
+                    expect(local.response.fileContent).toInclude("extension request reached");
+                }
+            });
+
+            it("does not let an explicit extension grant bypass platform-only mapping flags", () => {
+                queryExecute(options={datasource:application.datasource},
+                    sql="UPDATE custom_mappings SET blnOnlySysAdmin = 1 WHERE strMapping = 'saaster-extension-test'");
+                loop array=[false, true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("302");
+                    expect(local.response.fileContent).notToInclude("extension request reached");
+                }
+            });
+
+            it("refuses ambiguous, absent and unregistered direct mappings", () => {
+                queryExecute(options={datasource:application.datasource}, sql="INSERT INTO custom_mappings (strMapping, strPath)
+                    VALUES ('saaster-extension-test-alias', 'backend/myapp/__saaster_access_test.cfm')");
+                try {
+                    expect(fetchExtension(true).statusCode).toInclude("403");
+                } finally {
+                    queryExecute(options={datasource:application.datasource}, sql="DELETE FROM custom_mappings WHERE strMapping = 'saaster-extension-test-alias'");
+                }
+                application.objAccessRegistry = new backend.core.com.access_registry([]);
+                expect(fetchExtension(true).statusCode).toInclude("403");
+                queryExecute(options={datasource:application.datasource}, sql="DELETE FROM custom_mappings WHERE strMapping = 'saaster-extension-test'");
+                application.objAccessRegistry = new backend.core.com.access_registry([{
+                    namespace:"httptest", basePath:"backend/myapp/", permissions:[
+                        {key:"httptest.read", scope:"tenant", label:"titUser", roles:["tenant.viewer"]}
+                    ], routes:[{path:"__saaster_access_test.cfm", methods:["GET"], permissions:["httptest.read"]}]
+                }]);
+                expect(fetchExtension(true).statusCode).toInclude("403");
+            });
         });
+    }
+
+    private struct function fetchExtension(boolean direct = false) {
+        local.url = "http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=saaster-extension-test&userID=" & variables.reader.userID;
+        if (arguments.direct) { local.url &= "&direct=1"; }
+        cfhttp(url=local.url, method="get", redirect=false, timeout=30, result="local.response");
+        return local.response;
     }
 }
