@@ -61,16 +61,23 @@ use the positive value consistently; there is no duplicate negative flag. Custom
 code reading `route.noaccess` must use `not route.access`, and code setting a denial
 must set `route.access = false`.
 
-`moduleAccess(moduleID)` preserves the existing module-booking decision and delegates
-the date check to `bookingAccess(status, at)`: free bookings, or bookings whose
-inclusive start/end dates contain today, retain access. Canceled bookings retain
-access until their end date. The existing platform-admin exception is preserved;
-support sessions do not gain it. Role permissions do not grant product access.
+`moduleAccess(moduleID)` accepts a direct module booking or a booking of a plan
+containing that module. `objModules.getModuleAccessBookings(customerID, moduleID)`
+reads both sources for the exact selected customer; parent and other organizations'
+bookings do not grant access. It considers every matching booking, so an expired
+historical booking or a future renewal cannot mask a currently valid one.
 
-This refactor deliberately retains `getModuleStatus()` as the source of route-level
-module entitlement. That existing method reads direct module bookings, not modules
-included only through a plan. Aligning that behavior with plan-included modules is
-a separate follow-up, not a change introduced by this refactor.
+The date check remains in `bookingAccess(status, at)`: a free booking, or a booking
+whose inclusive start/end dates contain today, grants access. Canceled bookings
+retain access until their end date; future and expired non-free bookings do not.
+Non-free bookings with missing dates do not grant access. This agrees with the
+scheduler's eligibility rule. A free catalog plan alone grants nothing without a
+booking. Changes to bookings or included modules take effect on the next request.
+
+The existing platform-admin exception is preserved; support sessions do not gain
+it. Role permissions and permitted HTTP methods are still checked independently.
+`getModuleStatus()` retains its direct-booking UI/billing contract; callers needing
+route-level entitlement should use `objRequestAccess.moduleAccess()` instead.
 
 No database migration is required. Reload the application after deploying so that
 the new service is initialized. Existing organization activation boundaries remain
@@ -82,5 +89,8 @@ unchanged.
 membership checks, support separation, context-token handling and booking dates.
 `extension_http_spec` exercises real routed and direct template requests, including
 product/platform restrictions, missing or ambiguous mappings, CSRF, stale forms and
-unregistered HTTP methods. Existing membership, scheduler and security suites remain
-applicable.
+unregistered HTTP methods, also for modules included only through a plan.
+`module_entitlement_spec` covers plan-only access, free and canceled bookings,
+inclusive dates, future renewals, overlapping booking sources, customer isolation
+and revoked assignments, and compares each decision with scheduler eligibility.
+Existing membership, scheduler and security suites remain applicable.
