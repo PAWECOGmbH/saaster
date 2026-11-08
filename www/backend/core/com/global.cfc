@@ -34,7 +34,7 @@ component displayname="globalFunctions" output="false" {
         local.returnStruct['onlyAdmin'] = false;
         local.returnStruct['onlySuperAdmin'] = false;
         local.returnStruct['onlySysAdmin'] = false;
-        local.returnStruct['noaccess'] = false;
+        local.returnStruct['access'] = true;
         local.returnStruct['navSlugs'] = {};
         local.returnStruct['langSlugs'] = {};
 
@@ -122,43 +122,8 @@ component displayname="globalFunctions" output="false" {
 
             if (local.qCheckSEF.recordCount) {
 
-                // Check if the path is coming from a module
-                if (local.qCheckSEF.intModuleID gt 0 and structKeyExists(session, "customer_id") and session.customer_id gt 0) {
-
-                    // We have to check if the module is active for the current customer
-                    local.moduleStatus = application.objModules.getModuleStatus(session.customer_id, local.qCheckSEF.intModuleID);
-
-                    // Overwrite the flag 'noaccess' generally to true (if its not a SysAdmin)
-                    if (!session.sysadmin) {
-                        local.returnStruct['noaccess'] = true;
-                    }
-
-                    // If the module is active, we can set 'noaccess' to false.
-                    // Access is granted for any booking still within its
-                    // start/end window, regardless of strStatus - a canceled
-                    // booking ('test' or 'active' status flipped to
-                    // 'canceled') still keeps access until dteEndDate, it
-                    // just won't renew. Checking the status label alone
-                    // (the old 'free'/'test'/'active' allowlist) incorrectly
-                    // cut off access the instant a customer canceled, even
-                    // though the account settings page told them access
-                    // continues until the end date.
-                    if (isStruct(local.moduleStatus) and !structIsEmpty(local.moduleStatus)) {
-                        if (structKeyExists(local.moduleStatus, "status")) {
-                            if (local.moduleStatus.status eq "free") {
-                                local.returnStruct['noaccess'] = false;
-                            } else if (
-                                structKeyExists(local.moduleStatus, "startDate") and structKeyExists(local.moduleStatus, "endDate")
-                                and isDate(local.moduleStatus.startDate) and isDate(local.moduleStatus.endDate)
-                                and dateFormat(local.moduleStatus.startDate, "yyyy-mm-dd") lte dateFormat(now(), "yyyy-mm-dd")
-                                and dateFormat(local.moduleStatus.endDate, "yyyy-mm-dd") gte dateFormat(now(), "yyyy-mm-dd")
-                            ) {
-                                local.returnStruct['noaccess'] = false;
-                            }
-                        }
-                    }
-
-                }
+                // Route metadata uses a positive access result; product rules live in the shared policy.
+                local.returnStruct['access'] = application.objRequestAccess.moduleAccess(val(local.qCheckSEF.intModuleID));
 
                 if (local.qCheckSEF.itsFrontend) {
 
@@ -295,7 +260,7 @@ component displayname="globalFunctions" output="false" {
             // If we find an entry, the .cfm file may not be called directly
             if (local.qCheckSEF.recordCount) {
                 local.returnStruct['thisPath'] = local.thisPath;
-                local.returnStruct['noaccess'] = true;
+                local.returnStruct['access'] = false;
             }
 
             // Check whether someone is trying to call a file in the sysadmin folder without a sysadmin session

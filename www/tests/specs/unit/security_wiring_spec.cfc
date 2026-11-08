@@ -19,9 +19,16 @@ component extends="testbox.system.BaseSpec" {
             var source = scanner.readSource("Application.cfc");
 
             it("checks the CSRF token for every request the rule covers", () => {
-                expect(source).toInclude("application.objGlobal.csrfRequired(");
-                expect(source).toInclude("application.objGlobal.csrfVerify()");
-                expect(find("csrfRequired(", source)).toBeLT(find("csrfVerify()", source));
+                local.policy = scanner.readSource("backend/core/com/request_access.cfc");
+                expect(local.policy).toInclude("application.objGlobal.csrfRequired(");
+                expect(local.policy).toInclude("application.objGlobal.csrfVerify()");
+                expect(find("csrfRequired(", local.policy)).toBeLT(find("csrfVerify()", local.policy));
+                expect(source).toInclude("enforceAccess(application.objRequestAccess.checkContext(");
+                expect(source).toInclude("enforceAccess(application.objRequestAccess.checkPage(");
+                expect(source).toInclude("enforceAccess(application.objRequestAccess.checkCsrf(");
+                expect(find("objRequestAccess.checkContext(", source)).toBeLT(find("objRequestAccess.checkPage(", source));
+                expect(find("objRequestAccess.checkPage(", source)).toBeLT(find("objRequestAccess.checkCsrf(", source));
+                expect(find("objRequestAccess.checkCsrf(", source)).toBeLT(find("ownRequest();", source));
             });
 
             it("sets httpOnly, SameSite and secure on the session cookie", () => {

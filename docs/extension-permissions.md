@@ -84,6 +84,12 @@ mapping are rejected.
 
 ## Forms, AJAX and tabs
 
+To decide whether to show a routed action, use
+`application.objRequestAccess.canAccess(targetRoute, method, submitted, queryString)`
+with trusted, freshly resolved route metadata. This includes product and mapping
+restrictions as well as role permissions, without requiring a submitted token.
+See [shared request access](request-access.md) for usage and compatibility notes.
+
 Use `csrfField()` in forms and `csrfParam()` in action links. They now include a token
 bound to the rendered user/tenant context. A stale form is rejected after another tab
 switches context. Non-GET requests to registered extension routes also require CSRF.

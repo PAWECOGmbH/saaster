@@ -69,6 +69,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objOrganizationInvitation = new backend.core.com.organization_invitation();
         application.objMembershipMigration = new backend.core.com.membership_migration();
         application.objMembershipAccess = new backend.core.com.membership_access();
+        application.objRequestAccess = new backend.core.com.request_access();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
@@ -216,51 +217,11 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     private boolean function dispatchRequest(required string TargetPage) {
 
-        // Create SEF URL
-        thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
-
-        // Authorize the actual requested template, independent of Host/path-info.
-        // Registered extensions reuse their canonical mapping's module/visibility checks.
-        local.directPath = lCase(reReplace(replace(arguments.TargetPage, chr(92), "/", "all"), "^/", ""));
-        if (reFind("^(backend/(myapp/|modules/|core/handler/|core/views/sysadmin/)|frontend/core/handler/)", local.directPath)) {
-            local.directMapping = queryExecute(
-                options = {datasource: application.datasource},
-                params = {path: {type: "varchar", value: local.directPath}},
-                sql = "SELECT strMapping FROM system_mappings WHERE strPath = :path
-                    UNION SELECT strMapping FROM custom_mappings WHERE strPath = :path"
-            );
-            if (application.objAccessRegistry.policy(local.directPath, cgi.request_method).registered) {
-                if (local.directMapping.recordCount neq 1) {
-                    header statuscode=403 statustext="Forbidden";
-                    abort;
-                }
-                thiscontent = application.objGlobal.getSEF(local.directMapping.strMapping);
-            } else if (local.directMapping.recordCount) {
-                header statuscode=403 statustext="Forbidden";
-                abort;
-            }
-            thiscontent.thisPath = local.directPath;
-            thiscontent.onlySysAdmin = thiscontent.onlySysAdmin or find("/sysadmin/", local.directPath) gt 0;
-        }
-
-        if (structKeyExists(session, "user_id") and structKeyExists(session, "customer_id")
-            and not application.objMembershipAccess.allowRequest(session.user_id, session.customer_id, thiscontent.thisPath, cgi.request_method, form, url)) {
-            header statuscode=403 statustext="Forbidden";
-            writeOutput(encodeForHTML(application.objLanguage.getTrans("msgNoAccess")));
-            abort;
-        }
-
-        if ((session.membership_identity ?: (session.membership_access ?: false))
-            and (left(thiscontent.thisPath, 8) eq "backend/")
-            and (not listFindNoCase("GET,HEAD,OPTIONS", cgi.request_method)
-                or application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url)))) {
-            local.contextHeaders = getHTTPRequestData(false).headers;
-            if (not application.objGlobal.contextVerify(form.context_token ?: (url.context_token ?: (local.contextHeaders["X-Saaster-Context"] ?: "")))) {
-                header statuscode=409 statustext="Conflict";
-                writeOutput(encodeForHTML(application.objLanguage.getTrans("msgMembershipContextChanged")));
-                abort;
-            }
-        }
+        local.route = application.objRequestAccess.resolve(arguments.TargetPage, replace(cgi.path_info, "/", "", "one"), cgi.request_method);
+        thiscontent = local.route.content;
+        enforceAccess(local.route.decision);
+        local.headers = getHTTPRequestData(false).headers;
+        enforceAccess(application.objRequestAccess.checkContext(thiscontent, cgi.request_method, form, url, local.headers));
 
         // Change language
         if (structKeyExists(url, "l") and session.lng neq url.l) {
@@ -305,105 +266,13 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         }
 
 
-        local.explicitExtensionPolicy = (session.membership_access ?: false)
-            and application.objAccessRegistry.policy(thiscontent.thisPath, cgi.request_method).registered;
+        enforceAccess(application.objRequestAccess.checkPage(thiscontent, cgi.request_method, url));
+        enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
 
-        // Check whether the user has access to corresponding sections
+        // More global variables (with customer session).
         if (structKeyExists(session, "customer_id")) {
-
-            // More global variables (with customer session)
             getTime = new backend.core.com.time(session.customer_id);
             getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
-
-            local.no_access = false;
-
-            if (thiscontent.noaccess) {
-
-                local.no_access = true;
-
-            } else {
-
-                if (structKeyExists(session, "admin") and !session.admin) {
-                    if (thiscontent.onlyAdmin and not local.explicitExtensionPolicy) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-                if (structKeyExists(session, "superadmin") and !session.superadmin) {
-                    if (thiscontent.onlySuperAdmin and not local.explicitExtensionPolicy) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-                if (structKeyExists(session, "sysadmin") and !session.sysadmin) {
-                    if (thiscontent.onlySysAdmin) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-
-            }
-
-            if (local.no_access) {
-                location url="#application.mainURL#/dashboard" addtoken="false";
-            }
-
-        } else {
-
-            // Protect the 'backend' folder excluding the pdf print page
-            if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
-
-                if (structKeyExists(url, "pdf")) {
-
-                    location url="#application.mainURL#/backend/core/views/invoices/print.cfm?pdf=#url.pdf#" addtoken="false";
-
-                } else {
-
-                    // Redirect to the register form with plan redirect
-                    if (structKeyExists(url, "plan")) {
-                        location url="#application.mainURL#/register?redirect=book?plan=#url.plan#" addtoken="false";
-                    } else {
-                        getAlert('alertSessionExpired', 'warning');
-                        location url="#application.mainURL#/login" addtoken="false";
-                    }
-
-                }
-
-            }
-
-
-            // If someone is trying to call a .cfm file directly
-            if (thiscontent.noaccess) {
-                location url="#application.mainURL#" addtoken="false";
-            }
-
-        }
-
-        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links).
-        // The rule itself lives in objGlobal.csrfRequired() so it can be tested.
-        if (application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url))) {
-
-            if (!application.objGlobal.csrfVerify()) {
-
-                logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
-
-                local.reqHeaders = getHTTPRequestData(false).headers;
-                if (structKeyExists(local.reqHeaders, "X-Requested-With") and local.reqHeaders["X-Requested-With"] eq "XMLHttpRequest") {
-                    header statuscode="403" statustext="Forbidden";
-                    writeOutput("Invalid CSRF token");
-                    abort;
-                }
-
-                getAlert('msgCsrfInvalid', 'danger');
-
-                if (structKeyExists(session, "user_id")) {
-                    location url="#application.mainURL#/dashboard" addtoken="false";
-                } else {
-                    location url="#application.mainURL#/login" addtoken="false";
-                }
-
-            }
-
         }
 
         // Custom code
@@ -412,6 +281,26 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         include template="\#ARGUMENTS.TargetPage#";
         return true;
 
+    }
+
+    // Apply the shared policy's decision without duplicating its access rules.
+    private void function enforceAccess(required struct decision) {
+        if (arguments.decision.access) {
+            return;
+        }
+        if ((arguments.decision.reason ?: "") eq "csrf") {
+            application.objLog.logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
+        }
+        if (structKeyExists(arguments.decision, "alertKey")) {
+            application.objGlobal.getAlert(arguments.decision.alertKey, arguments.decision.alertType);
+        }
+        if (structKeyExists(arguments.decision, "redirect")) {
+            location url=application.mainURL & arguments.decision.redirect addtoken=false;
+        }
+        header statuscode=arguments.decision.statusCode statustext=arguments.decision.statusText;
+        writeOutput(encodeForHTML(structKeyExists(arguments.decision, "messageKey")
+            ? application.objLanguage.getTrans(arguments.decision.messageKey) : (arguments.decision.message ?: "")));
+        abort;
     }
 
     public void function onError(struct exception, string eventName) {

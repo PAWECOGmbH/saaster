@@ -205,6 +205,10 @@ The existing mail layout and translation system serve both themes.
 
 ## Deployment and compatibility
 
+Browser route decisions are coordinated by `application.objRequestAccess`; see
+[shared request access](request-access.md) for dispatch order, action visibility
+and the positive `getSEF().access` metadata replacing `noaccess`.
+
 Apply V29 and V30 after V26–V28, then reload the application. Existing activated
 organizations retain their memberships and grants. No unactivated organization is
 imported or activated by these migrations. New application permissions require an
