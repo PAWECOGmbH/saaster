@@ -119,6 +119,10 @@ isolated pre-upgrade tables in the dedicated test database.
 anonymous entry points, action visibility, context-token checks and module-booking
 dates. `extension_http_spec` also verifies canonical routes, module and platform
 restrictions, ambiguous direct mappings, invalid CSRF and stale form responses.
+`module_entitlement_spec` checks direct and plan-included module access against
+scheduler eligibility, including booking dates, renewals, cancellations, free plans,
+customer isolation and live revocation. HTTP specs exercise plan-included modules
+through both canonical routes and direct templates with the same role/token checks.
 
 The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
 so mail tests do not depend on the development application's Lucee admin SMTP settings.

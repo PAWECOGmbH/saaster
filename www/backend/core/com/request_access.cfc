@@ -111,8 +111,16 @@ component output="false" {
         if (arguments.moduleID lte 0 or not structKeyExists(session, "customer_id") or session.customer_id lte 0) {
             return true;
         }
-        local.status = application.objModules.getModuleStatus(session.customer_id, arguments.moduleID);
-        return (session.sysadmin ?: false) or bookingAccess(local.status);
+        if (session.sysadmin ?: false) {
+            return true;
+        }
+        local.bookings = application.objModules.getModuleAccessBookings(session.customer_id, arguments.moduleID);
+        loop query=local.bookings {
+            if (bookingAccess({status: local.bookings.status, startDate: local.bookings.startDate, endDate: local.bookings.endDate})) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean function bookingAccess(required struct status, date at = now()) {

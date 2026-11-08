@@ -28,7 +28,8 @@ component extends="tests.support.integration_spec" {
                 if (fileExists(variables.path)) { fileDelete(variables.path); }
                 queryExecute(options={datasource:application.datasource}, sql="DELETE FROM custom_mappings WHERE strMapping = 'saaster-extension-test'");
             });
-            it("checks the real template path, permissions, methods and CSRF even without path-info", () => {
+            it("checks permissions, methods and tokens for a plan-included module even without path-info", () => {
+                bookIncludedModule();
                 local.url = "http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=dashboard&direct=1";
                 cfhttp(url=local.url & "&userID=" & variables.reader.userID, method="get", redirect=false, timeout=30, result="local.read");
                 expect(local.read.statusCode).toInclude("200");
@@ -97,12 +98,46 @@ component extends="tests.support.integration_spec" {
             });
 
             it("does not let an explicit extension grant bypass platform-only mapping flags", () => {
+                bookIncludedModule();
                 queryExecute(options={datasource:application.datasource},
                     sql="UPDATE custom_mappings SET blnOnlySysAdmin = 1 WHERE strMapping = 'saaster-extension-test'");
                 loop array=[false, true] item="local.direct" {
                     local.response = fetchExtension(local.direct);
                     expect(local.response.statusCode).toInclude("302");
                     expect(local.response.fileContent).notToInclude("extension request reached");
+                }
+            });
+
+            it("checks plan dates on canonical and direct routes and rechecks changes in an existing session", () => {
+                local.booking = bookIncludedModule();
+                loop array=[false, true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("200");
+                    expect(local.response.fileContent).toInclude("extension request reached");
+                    local.headers = local.response.responseHeader["Set-Cookie"] ?: [];
+                    if (not isArray(local.headers)) { local.headers = [local.headers]; }
+                    local.cookies = [];
+                    loop array=local.headers item="local.cookie" { arrayAppend(local.cookies, listFirst(local.cookie, ";")); }
+                    local.url = "http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=saaster-extension-test" & (local.direct ? "&direct=1" : "");
+                    loop array=[{status:"waiting", start:1, end:2, code:"302"},
+                        {status:"canceled", start:-1, end:0, code:"200"},
+                        {status:"canceled", start:-2, end:-1, code:"302"}] item="local.state" {
+                        queryExecute(options={datasource:application.datasource}, params={
+                            id:{type:"integer",value:local.booking}, status:{type:"varchar",value:local.state.status},
+                            start:{type:"date",value:dateAdd("d",local.state.start,now())}, end:{type:"date",value:dateAdd("d",local.state.end,now())}},
+                            sql="UPDATE bookings SET strStatus = :status, dteStartDate = :start, dteEndDate = :end WHERE intBookingID = :id");
+                        cfhttp(url=local.url, method="get", redirect=false, timeout=30, result="local.changed") {
+                            cfhttpparam(type="header", name="Cookie", value=arrayToList(local.cookies, "; "));
+                        }
+                        expect(local.changed.statusCode).toInclude(local.state.code);
+                        if (local.state.code eq "302") {
+                            expect(local.changed.fileContent).notToInclude("extension request reached");
+                        } else {
+                            expect(local.changed.fileContent).toInclude("extension request reached");
+                        }
+                    }
+                    queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:local.booking}},
+                        sql="UPDATE bookings SET strStatus = 'free', dteStartDate = NULL, dteEndDate = NULL WHERE intBookingID = :id");
                 }
             });
 
@@ -132,5 +167,14 @@ component extends="tests.support.integration_spec" {
         if (arguments.direct) { local.url &= "&direct=1"; }
         cfhttp(url=local.url, method="get", redirect=false, timeout=30, result="local.response");
         return local.response;
+    }
+
+    private numeric function bookIncludedModule() {
+        local.module = variables.fixtures.createModule();
+        local.plan = variables.fixtures.createPlan([local.module]);
+        queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:local.module}},
+            sql="UPDATE custom_mappings SET intModuleID = :id WHERE strMapping = 'saaster-extension-test'");
+        return variables.fixtures.createBooking(customerID=variables.organization, planID=local.plan, status="active",
+            startDate=dateFormat(now(), "yyyy-mm-dd"), endDate=dateFormat(dateAdd("d", 1, now()), "yyyy-mm-dd"));
     }
 }
