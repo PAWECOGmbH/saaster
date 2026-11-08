@@ -975,7 +975,7 @@ component displayname="globalFunctions" output="false" {
 
         if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled
             or application.objMembershipAccess.organizationForCustomer(arguments.customerID).enabled) {
-            return application.objAuthorization.canInTenant(arguments.userID, arguments.customerID, "tenant.view");
+            return application.objMembershipAccess.canAccessTenant(arguments.userID, arguments.customerID);
         }
 
         local.isAllowed = false;
@@ -1417,7 +1417,7 @@ component displayname="globalFunctions" output="false" {
     // CSRF: hidden input field for forms
     public string function csrfField() {
 
-        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '">';
+        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '"><input type="hidden" name="context_token" value="' & application.objGlobal.contextToken() & '">';
 
     }
 
@@ -1425,7 +1425,7 @@ component displayname="globalFunctions" output="false" {
     // CSRF: url parameter for links that change state (e.g. delete links)
     public string function csrfParam() {
 
-        return 'csrf_token=' & CSRFGenerateToken();
+        return 'csrf_token=' & CSRFGenerateToken() & (len(application.objGlobal.contextToken()) ? '&context_token=' & application.objGlobal.contextToken() : '');
 
     }
 
@@ -1441,6 +1441,7 @@ component displayname="globalFunctions" output="false" {
             (status, open, default, ...) are too generic to protect them across all handlers.
     */
     variables.csrfProtectedGetKeys = {
+        "backend/core/handler/global.cfm": "switch",
         "backend/core/handler/payment.cfm": "del,default",
         "backend/core/handler/sysadmin/invoices.cfm": "status,email,open",
         "backend/core/handler/sysadmin/logs.cfm": "logfile",
@@ -1448,7 +1449,24 @@ component displayname="globalFunctions" output="false" {
         "backend/core/handler/sysadmin/modules.cfm": "booking"
     };
 
+    public string function contextToken() {
+        if (not structKeyExists(session, "user_id") or not structKeyExists(session, "customer_id")) {
+            return "";
+        }
+        return CSRFGenerateToken("tenant:" & session.user_id & ":" & session.customer_id);
+    }
+
+    public boolean function contextVerify(required string token) {
+        return not (session.membership_identity ?: (session.membership_access ?: false))
+            or (len(arguments.token) and CSRFVerifyToken(arguments.token, "tenant:" & session.user_id & ":" & session.customer_id));
+    }
+
     public boolean function csrfRequired(required string path, required string method, required array urlKeys) {
+        if (structKeyExists(application, "objAccessRegistry") and application.objAccessRegistry.policy(arguments.path, arguments.method).registered
+            and not listFindNoCase("GET,HEAD,OPTIONS", arguments.method)) {
+            return true;
+        }
+
 
         if (!reFindNoCase("^/?(backend|frontend)/core/handler/", arguments.path)) {
             return false;
@@ -1498,7 +1516,9 @@ component displayname="globalFunctions" output="false" {
             return false;
         }
 
-        return CSRFVerifyToken(local.token);
+        local.headers = getHTTPRequestData(false).headers;
+        local.contextToken = form.context_token ?: (url.context_token ?: (local.headers["X-Saaster-Context"] ?: ""));
+        return CSRFVerifyToken(local.token) and contextVerify(local.contextToken);
 
     }
 

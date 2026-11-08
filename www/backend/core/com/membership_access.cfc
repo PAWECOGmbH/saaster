@@ -17,21 +17,26 @@ component output="false" hint="Membership activation, session context and reques
         local.q = queryExecute(
             options = {datasource: application.datasource},
             params = {id: {type: "integer", value: arguments.userID}},
-            sql = "SELECT intCustomerID FROM users WHERE intUserID = :id"
+            sql = "SELECT users.intCustomerID, identity.intUserID AS managed FROM users
+                LEFT JOIN membership_identities identity ON identity.intUserID = users.intUserID WHERE users.intUserID = :id"
         );
-        return organizationForCustomer(val(local.q.intCustomerID));
+        local.organization = organizationForCustomer(val(local.q.intCustomerID));
+        local.organization.enabled = local.organization.enabled or val(local.q.managed) gt 0;
+        return local.organization;
     }
 
     public query function tenants(required numeric userID) {
-        return queryExecute(
+        local.result = queryExecute(
             options = {datasource: application.datasource},
             params = {userID: {type: "integer", value: arguments.userID}},
-            sql = "SELECT DISTINCT customer.*, IF(preference.intDefaultCustomerID = customer.intCustomerID, 1, 0) AS blnStandard,
+            sql = "SELECT DISTINCT customer.*, organization.intCustomerID AS organizationID,
+                    COALESCE(NULLIF(organization.strCompanyName, ''), organization.strContactPerson) AS organizationName, 1 AS membershipEnabled, IF(preference.intDefaultCustomerID = customer.intCustomerID, 1, 0) AS blnStandard,
                     IF(membership.strRoleKey IN ('organization.owner', 'organization.admin'), 'tenant.admin', assignment.strRoleKey) AS tenantRole,
                     IF(membership.strRoleKey IN ('organization.owner', 'organization.admin'), 1, 0) AS blnSuperAdmin,
                     IF(membership.strRoleKey IN ('organization.owner', 'organization.admin') OR assignment.strRoleKey = 'tenant.admin', 1, 0) AS blnAdmin
                 FROM organization_memberships membership INNER JOIN users ON users.intUserID = membership.intUserID
                 INNER JOIN customers organization ON organization.intCustomerID = membership.intOrganizationID
+                INNER JOIN organization_access activated ON activated.intOrganizationID = organization.intCustomerID
                 INNER JOIN customers customer ON customer.intCustomerID = organization.intCustomerID OR customer.intCustParentID = organization.intCustomerID
                 LEFT JOIN tenant_memberships assignment ON assignment.intOrgMembershipID = membership.intOrgMembershipID
                     AND assignment.intCustomerID = customer.intCustomerID AND assignment.strStatus = 'active'
@@ -42,6 +47,38 @@ component output="false" hint="Membership activation, session context and reques
                     AND grants.strPermissionKey = 'tenant.view'
                 ORDER BY blnStandard DESC, customer.intCustomerID"
         );
+        // A legacy home organization remains usable until its explicit activation.
+        // Joining another organization must not import or disable that legacy access.
+        local.legacy = queryExecute(
+            options = {datasource: application.datasource},
+            params = {userID: {type: "integer", value: arguments.userID}},
+            sql = "SELECT customer.*, organization.intCustomerID AS organizationID,
+                    COALESCE(NULLIF(organization.strCompanyName, ''), organization.strContactPerson) AS organizationName,
+                    0 AS membershipEnabled, assigned.blnStandard, '' AS tenantRole, users.blnSuperAdmin, users.blnAdmin
+                FROM users INNER JOIN customers home ON home.intCustomerID = users.intCustomerID
+                INNER JOIN customers organization ON organization.intCustomerID =
+                    CASE WHEN home.intCustParentID = 0 THEN home.intCustomerID ELSE home.intCustParentID END
+                INNER JOIN customer_user assigned ON assigned.intUserID = users.intUserID
+                INNER JOIN customers customer ON customer.intCustomerID = assigned.intCustomerID
+                LEFT JOIN organization_access activated ON activated.intOrganizationID = organization.intCustomerID
+                WHERE users.intUserID = :userID AND users.blnActive = 1 AND organization.blnActive = 1
+                    AND organization.intCustParentID = 0 AND customer.blnActive = 1 AND activated.intOrganizationID IS NULL
+                    AND (customer.intCustomerID = organization.intCustomerID OR customer.intCustParentID = organization.intCustomerID)
+                ORDER BY assigned.blnStandard DESC, customer.intCustomerID"
+        );
+        loop query=local.legacy {
+            queryAddRow(local.result, queryRowData(local.legacy, local.legacy.currentRow));
+        }
+        if ((session.supportLogin ?: false) and (session.user_id ?: 0) eq arguments.userID) {
+            local.supportOrganizationID = val(session.supportOrganizationID ?: organizationForCustomer(session.customer_id ?: 0).id);
+            local.result = local.result.filter((tenant) => tenant.organizationID eq supportOrganizationID);
+        }
+        querySort(local.result, "blnStandard,organizationID,intCustomerID", "desc,asc,asc");
+        return local.result;
+    }
+
+    public boolean function canAccessTenant(required numeric userID, required numeric customerID) {
+        return listFind(valueList(tenants(arguments.userID).intCustomerID), arguments.customerID) gt 0;
     }
 
     public struct function context(required numeric userID, numeric customerID = 0, boolean allowFallback = true) {
@@ -61,16 +98,20 @@ component output="false" hint="Membership activation, session context and reques
         } else {
             return local.result;
         }
+        local.selected = queryRowData(local.tenants, listFind(valueList(local.tenants.intCustomerID), local.result.customerID));
+        local.result.organizationID = local.selected.organizationID;
+        local.result.usesMembership = local.selected.membershipEnabled eq 1;
         local.user = queryExecute(
             options = {datasource: application.datasource},
-            params = {id: {type: "integer", value: arguments.userID}},
+            params = {id: {type: "integer", value: arguments.userID}, organizationID: {type: "integer", value: local.result.organizationID}},
             sql = "SELECT users.strFirstName, users.strLastName, users.strEmail, users.strLanguage, users.blnSysAdmin, membership.strRoleKey
-                FROM users INNER JOIN organization_memberships membership ON membership.intUserID = users.intUserID WHERE users.intUserID = :id"
+                FROM users LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID
+                    AND membership.intOrganizationID = :organizationID WHERE users.intUserID = :id"
         );
         local.result.allowed = true;
-        local.result.role = local.user.strRoleKey;
-        local.result.admin = application.objAuthorization.canInTenant(arguments.userID, local.result.customerID, "tenant.settings.manage");
-        local.result.superadmin = application.objAuthorization.canInTenant(arguments.userID, local.result.customerID, "tenant.billing.manage");
+        local.result.role = local.user.strRoleKey ?: "";
+        local.result.admin = not local.selected.membershipEnabled ? local.selected.blnAdmin eq 1 : application.objAuthorization.canInTenant(arguments.userID, local.result.customerID, "tenant.settings.manage");
+        local.result.superadmin = not local.selected.membershipEnabled ? local.selected.blnSuperAdmin eq 1 : application.objAuthorization.canInTenant(arguments.userID, local.result.customerID, "tenant.billing.manage");
         local.result.sysadmin = local.user.blnSysAdmin eq 1;
         local.result.name = local.user.strFirstName & " " & local.user.strLastName;
         local.result.email = local.user.strEmail;
@@ -85,24 +126,26 @@ component output="false" hint="Membership activation, session context and reques
             return true;
         }
         local.context = context(session.user_id, session.customer_id ?: 0, arguments.allowFallback);
-        if ((session.membership_access ?: false) and not local.context.enabled) {
-            loop list="user_id,customer_id,admin,superadmin,sysadmin,membership_access,organization_id,user_name,user_email" index="local.key" {
+        if ((session.membership_identity ?: (session.membership_access ?: false)) and not local.context.enabled) {
+            loop list="user_id,customer_id,admin,superadmin,sysadmin,membership_access,membership_identity,organization_id,user_name,user_email" index="local.key" {
                 structDelete(session, local.key);
             }
             return false;
         }
         if (not local.context.enabled) {
             structDelete(session, "membership_access");
+            structDelete(session, "membership_identity");
             structDelete(session, "organization_id");
             return true;
         }
         if (not local.context.allowed) {
-            loop list="user_id,customer_id,admin,superadmin,sysadmin,membership_access,organization_id" index="local.key" {
+            loop list="user_id,customer_id,admin,superadmin,sysadmin,membership_access,membership_identity,organization_id" index="local.key" {
                 structDelete(session, local.key);
             }
             return false;
         }
-        session.membership_access = true;
+        session.membership_access = local.context.usesMembership;
+        session.membership_identity = true;
         session.organization_id = local.context.organizationID;
         session.customer_id = local.context.customerID;
         session.admin = local.context.admin;
@@ -126,9 +169,9 @@ component output="false" hint="Membership activation, session context and reques
             sql = "SELECT users.intUserID, users.strFirstName, users.strLastName, users.strEmail, users.blnActive, users.blnSysAdmin,
                     CASE WHEN COALESCE(users.strPasswordHash, '') = '' AND COALESCE(users.strPasswordSalt, '') = '' THEN 1 ELSE 0 END AS activationPending,
                     COALESCE(membership.strRoleKey, '') AS role, COALESCE(membership.strStatus, '') AS status
-                FROM users INNER JOIN customers home ON home.intCustomerID = users.intCustomerID
+                FROM users LEFT JOIN customers home ON home.intCustomerID = users.intCustomerID
                 LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID AND membership.intOrganizationID = :organizationID
-                WHERE (home.intCustomerID = :organizationID OR home.intCustParentID = :organizationID)
+                WHERE (membership.intOrgMembershipID IS NOT NULL OR home.intCustomerID = :organizationID OR home.intCustParentID = :organizationID)
                 ORDER BY users.strLastName, users.strFirstName, users.intUserID"
         );
         // Tenant admins may assign existing organization members only, and only
@@ -187,10 +230,28 @@ component output="false" hint="Membership activation, session context and reques
         if (not local.org.enabled) {
             return true;
         }
-        local.authorization = application.objAuthorization;
         if (find("/sysadmin/", local.path)) {
             return session.sysadmin ?: false;
         }
+        local.policy = application.objAccessRegistry.policy(local.path, arguments.method);
+        if (local.policy.registered) {
+            if (not arrayLen(local.policy.permissions)
+                or not application.objAuthorization.canInTenant(arguments.userID, arguments.customerID, "tenant.view")) {
+                return false;
+            }
+            loop array=local.policy.permissions item="local.permission" {
+                local.definition = application.objAccessRegistry.permission(local.permission);
+                if (local.definition.scope eq "organization") {
+                    if (not application.objAuthorization.canInOrganization(arguments.userID, local.org.id, local.permission)) {
+                        return false;
+                    }
+                } else if (not application.objAuthorization.canInTenant(arguments.userID, arguments.customerID, local.permission)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        local.authorization = application.objAuthorization;
         if (local.path eq "frontend/core/handler/register.cfm") {
             return not structKeyExists(arguments.submitted, "fill_remaining_data")
                 or local.authorization.canInTenant(arguments.userID, arguments.customerID, "tenant.settings.manage");
@@ -242,7 +303,7 @@ component output="false" hint="Membership activation, session context and reques
         }
         if (local.path eq "backend/core/handler/global.cfm" and structKeyExists(arguments.queryString, "switch")) {
             return isValid("integer", arguments.queryString.switch)
-                and local.authorization.canInTenant(arguments.userID, arguments.queryString.switch, "tenant.view");
+                and canAccessTenant(arguments.userID, arguments.queryString.switch);
         }
         // Personal settings remain available to readers. Unclassified handlers and
         // extension pages require write access until their own read policy is defined.

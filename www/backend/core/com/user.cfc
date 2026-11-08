@@ -324,32 +324,37 @@ component displayname="user" output="false" {
 
 
         try {
+            transaction isolation="read_committed" {
+                new backend.core.com.identity().requireUnusedEmail(local.email);
 
-            queryExecute(
 
-                options = {datasource = application.datasource, result="newUserID"},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID},
-                    salutation: {type: "nvarchar", value: local.salutation},
-                    first_name: {type: "nvarchar", value: local.first_name},
-                    last_name: {type: "nvarchar", value: local.last_name},
-                    email: {type: "nvarchar", value: local.email},
-                    phone: {type: "nvarchar", value: local.phone},
-                    mobile: {type: "nvarchar", value: local.mobile},
-                    admin: {type: "boolean", value: local.admin},
-                    superadmin: {type: "boolean", value: local.superadmin},
-                    active: {type: "boolean", value: local.active},
-                    language: {type: "varchar", value: local.language},
-                    newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
-                    dateNow: {type: "datetime", value: now()},
-                    sysadmin: {type: "integer", value: local.sysadmin}
-                },
-                sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
-                "
+                queryExecute(
 
-            )
+                    options = {datasource = application.datasource, result="newUserID"},
+                    params = {
+                        customerID: {type: "numeric", value: arguments.customerID},
+                        salutation: {type: "nvarchar", value: local.salutation},
+                        first_name: {type: "nvarchar", value: local.first_name},
+                        last_name: {type: "nvarchar", value: local.last_name},
+                        email: {type: "nvarchar", value: local.email},
+                        phone: {type: "nvarchar", value: local.phone},
+                        mobile: {type: "nvarchar", value: local.mobile},
+                        admin: {type: "boolean", value: local.admin},
+                        superadmin: {type: "boolean", value: local.superadmin},
+                        active: {type: "boolean", value: local.active},
+                        language: {type: "varchar", value: local.language},
+                        newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
+                        dateNow: {type: "datetime", value: now()},
+                        sysadmin: {type: "integer", value: local.sysadmin}
+                    },
+                    sql = "
+                        INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
+                        VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
+                    "
+
+                )
+
+            }
 
             local.argsReturnValue['newUserID'] = newUserID.generatedkey;
             local.argsReturnValue['message'] = "OK";
@@ -749,7 +754,9 @@ component displayname="user" output="false" {
                 local.argsReturnValue['customerID'] = local.qGetUserMfa.intCustomerID;
                 local.argsReturnValue['success'] = true;
                 local.membershipContext = application.objMembershipAccess.context(local.qGetUserMfa.intUserID);
-                if (local.membershipContext.enabled) {
+                local.invitationLogin = val(session.invitation_mfa_user ?: 0) eq local.qGetUserMfa.intUserID
+                    and application.objOrganizationInvitation.permitsIdentityLogin(local.qGetUserMfa.intUserID, session.pendingOrganizationInvitation ?: "");
+                if (local.membershipContext.enabled and not local.invitationLogin) {
                     local.argsReturnValue.success = local.membershipContext.allowed;
                     local.argsReturnValue.customerID = local.membershipContext.customerID;
                     if (!local.membershipContext.allowed) {

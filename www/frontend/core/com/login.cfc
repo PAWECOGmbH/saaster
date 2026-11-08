@@ -56,6 +56,12 @@ component displayname="login" output="false" {
             }
 
             if (local.passwordCheck.valid) {
+                // An invitation can authenticate an identity with no current tenant.
+                // It grants no application session or membership before acceptance.
+                if (application.objOrganizationInvitation.permitsIdentityLogin(local.qCheckLogin.intUserID, session.pendingOrganizationInvitation ?: "")) {
+                    return {loginCorrect: true, invitationOnly: true, user_id: local.qCheckLogin.intUserID,
+                        user_email: local.qCheckLogin.strEmail, user_name: local.qCheckLogin.strFirstName & " " & local.qCheckLogin.strLastName};
+                }
 
                 local.membershipContext = application.objMembershipAccess.context(local.qCheckLogin.intUserID);
                 if (local.membershipContext.enabled) {

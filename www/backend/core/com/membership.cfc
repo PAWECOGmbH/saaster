@@ -76,13 +76,14 @@ component output="false" hint="Transactional organization and tenant membership 
             local.params = {
                 userID: {type: "integer", value: arguments.userID},
                 role: {type: "varchar", value: arguments.role},
-                status: {type: "varchar", value: arguments.status}
+                status: {type: "varchar", value: arguments.status},
+                organizationID: {type: "integer", value: arguments.organizationID}
             };
             if (local.target.exists) {
                 queryExecute(
                     options = {datasource: application.datasource},
                     params = local.params,
-                    sql = "UPDATE organization_memberships SET strRoleKey = :role, strStatus = :status WHERE intUserID = :userID"
+                    sql = "UPDATE organization_memberships SET strRoleKey = :role, strStatus = :status WHERE intUserID = :userID AND intOrganizationID = :organizationID"
                 );
                 local.membershipID = local.target.membershipID;
             } else {
@@ -170,8 +171,8 @@ component output="false" hint="Transactional organization and tenant membership 
 
             queryExecute(
                 options = {datasource: application.datasource},
-                params = {userID: {type: "integer", value: arguments.userID}},
-                sql = "DELETE FROM organization_memberships WHERE intUserID = :userID"
+                params = {userID: {type: "integer", value: arguments.userID}, organizationID: {type: "integer", value: arguments.organizationID}},
+                sql = "DELETE FROM organization_memberships WHERE intUserID = :userID AND intOrganizationID = :organizationID"
             );
         }
     }
@@ -195,13 +196,13 @@ component output="false" hint="Transactional organization and tenant membership 
 
             queryExecute(
                 options = {datasource: application.datasource},
-                params = {userID: {type: "integer", value: arguments.userID}},
-                sql = "UPDATE organization_memberships SET strRoleKey = 'organization.owner' WHERE intUserID = :userID"
+                params = {userID: {type: "integer", value: arguments.userID}, organizationID: {type: "integer", value: arguments.organizationID}},
+                sql = "UPDATE organization_memberships SET strRoleKey = 'organization.owner' WHERE intUserID = :userID AND intOrganizationID = :organizationID"
             );
             queryExecute(
                 options = {datasource: application.datasource},
-                params = {userID: {type: "integer", value: arguments.actorUserID}},
-                sql = "UPDATE organization_memberships SET strRoleKey = 'organization.admin' WHERE intUserID = :userID"
+                params = {userID: {type: "integer", value: arguments.actorUserID}, organizationID: {type: "integer", value: arguments.organizationID}},
+                sql = "UPDATE organization_memberships SET strRoleKey = 'organization.admin' WHERE intUserID = :userID AND intOrganizationID = :organizationID"
             );
         }
     }
@@ -325,8 +326,8 @@ component output="false" hint="Transactional organization and tenant membership 
     }
 
     private struct function lockTarget(required numeric userID, required numeric organizationID) {
-        // The legacy home customer remains a boundary until identity migration.
-        // Never attach an existing account from an unrelated organization.
+        // Existing memberships are scoped by organization. Adding unrelated identities
+        // requires the invitation acceptance service; management cannot bypass consent.
         local.target = queryExecute(
             options = {datasource: application.datasource},
             params = {
@@ -336,10 +337,10 @@ component output="false" hint="Transactional organization and tenant membership 
             sql = "SELECT users.blnActive, users.blnSysAdmin, membership.intOrgMembershipID,
                     CASE WHEN COALESCE(users.strPasswordHash, '') = '' AND COALESCE(users.strPasswordSalt, '') = '' THEN 1 ELSE 0 END AS activationPending,
                     membership.intOrganizationID, membership.strRoleKey, membership.strStatus
-                FROM users INNER JOIN customers home ON home.intCustomerID = users.intCustomerID
-                LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID
+                FROM users LEFT JOIN customers home ON home.intCustomerID = users.intCustomerID
+                LEFT JOIN organization_memberships membership ON membership.intUserID = users.intUserID AND membership.intOrganizationID = :organizationID
                 WHERE users.intUserID = :userID
-                    AND ((home.intCustomerID = :organizationID AND home.intCustParentID = 0) OR home.intCustParentID = :organizationID)
+                    AND (membership.intOrgMembershipID IS NOT NULL OR (home.intCustomerID = :organizationID AND home.intCustParentID = 0) OR home.intCustParentID = :organizationID)
                 FOR UPDATE"
         );
         if (not local.target.recordCount

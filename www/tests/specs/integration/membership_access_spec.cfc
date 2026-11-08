@@ -185,15 +185,15 @@ component extends="tests.support.integration_spec" {
                 expect(local.page.fileContent).toInclude('value="transfer"');
                 expect(local.page.fileContent).toInclude('name="csrf_token"');
             });
-            it("renders the account-settings entry and new-user role controls", () => {
+            it("renders the account-settings entry and invitation controls", () => {
                 local.page = renderPage("account");
                 expect(local.page.statusCode).toInclude("200");
                 expect(local.page.fileContent).toInclude("/account-settings/memberships");
                 expect(local.page.fileContent).toInclude("Members and roles");
                 activate();
-                local.page = renderPage("newuser");
+                local.page = renderPage("memberships");
                 expect(local.page.statusCode).toInclude("200");
-                expect(local.page.fileContent).toInclude('name="member_role"');
+                expect(local.page.fileContent).toInclude('name="invite_organization_role"');
                 expect(local.page.fileContent).notToInclude('name="sysadmin"');
                 expect(local.page.fileContent).notToInclude('name="superadmin"');
                 expect(local.page.fileContent).notToInclude('name="admin"');

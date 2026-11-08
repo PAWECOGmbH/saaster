@@ -2,24 +2,24 @@
 
 ## Scope
 
-A login belongs to one main organization and can access its directly associated
-tenants. Membership in unrelated organizations and nested tenant hierarchies are
+A login can belong to multiple independent main organizations, with independent
+roles, status and direct tenant assignments in each. Nested tenant hierarchies remain
 outside the model. Existing `customers` IDs remain the business-data boundary:
 `intCustParentID = 0` identifies the organization, and its direct children are tenants.
 The root customer may also contain business data and is a valid tenant context.
 
 Platform administration (`users.blnSysAdmin`) stays separate. It is not a role an
 organization can grant, and it does not implicitly bypass the new permission service.
-Support sessions use the represented membership and suppress platform privileges until the verified return to the original platform administrator.
+Support sessions use the represented membership, stay within the organization selected at support login, and suppress platform privileges until the verified return to the original platform administrator.
 
 ## Step 1: foundation (implemented)
 
 V26 adds role and permission catalogs, organization memberships and tenant
-memberships. One user can have only one organization membership, including when
-suspended. Each organization membership can have at most one assignment per tenant.
+memberships. V29 changes V26's original one-organization constraint to one membership
+per (user, organization) pair. Each membership can have at most one assignment per tenant.
 Foreign keys and checks prevent assigning tenant roles at organization level or
 organization roles at tenant level. Membership states are `active` and `suspended`.
-Pending invitations will be separate records, not active memberships.
+V30 stores invitations separately; they grant no membership before acceptance.
 
 `application.objAuthorization` provides `canInOrganization(userID, organizationID,
 permission)` and `canInTenant(userID, customerID, permission)`, plus corresponding
@@ -140,10 +140,11 @@ removal/ownership confirmation dialogs that name the member and organization and
 explain the effect on all its tenants. Canceling returns to the list.
 For active members without a password, the menu also offers **Send activation link**.
 Resending creates a fresh token valid for seven days and invalidates the previous link.
-Tenant admins can manage existing organization members in their current tenant. Organization managers can create new
-accounts using the existing invitation-email flow; submitted legacy privilege flags
-are ignored, the account belongs to the root, and its initial tenant access is explicit.
-New-account creation enforces the tenant's plan user limit on the server, including
+Tenant admins can manage existing organization members in their current tenant.
+Organization managers invite new or existing identities through the invitation dialog.
+Old account-creation bookmarks redirect to memberships for activated organizations.
+The older activation-link action remains available for pre-existing passwordless members.
+Invitation tenant assignments enforce plan user limits again on acceptance, including
 suspended assignments in the count. Existing-member assignment changes do not add
 subscription billing or a new seat-purchase flow.
 
@@ -153,22 +154,79 @@ identities. Tenant deletion is restricted to direct children of the current orga
 The legacy account-cancellation deletion flow is disabled for activated organizations;
 it cannot safely delete the whole organization and its children.
 
-## Remaining work
+## Multiple organizations and identity (V29)
 
-- First-class pending invitations, resend/revoke/accept states and expiry management.
-  New members receive the existing seven-day account invitation link; organization
-  managers can resend it from the member list.
-- Organization deletion and a dedicated global account activation/deactivation flow.
-  Membership suspension is available; globally disabled legacy accounts remain disabled.
-- Fine-grained permissions for custom modules and project extensions. Unclassified
-  handlers, non-GET requests and extension pages require `tenant.content.write`, so
-  viewers cannot open extension pages until those modules define safe read routes.
+User IDs stay stable. `users.intCustomerID` is a nullable legacy home reference, not an
+authorization boundary. Its foreign key now uses SET NULL rather than deleting an
+identity with the customer. Membership removal, suspension, role changes and ownership
+transfer always constrain the exact organization. `membership_identities` remembers
+managed identities after their last membership disappears and prevents legacy fallback.
+Existing IDs, assignments, flags and business-data boundaries are preserved.
+
+The tenant picker includes destinations across accessible organizations and labels
+them with the organization name. Login/MFA choose an accessible default; an existing
+request never silently moves to a fallback tenant. Derived administrator flags are
+rebuilt for the selected context. A legacy home organization remains usable until its
+own explicit activation even when the identity joins an activated organization.
+
+Forms and action links carry a context token through the existing CSRF helpers. AJAX
+sends the same context via a header. An old form cannot apply to another tenant after
+a tab changes context. The dispatcher serializes requests sharing a session while
+executing them. See [extension integration](extension-permissions.md) for custom clients.
+
+## Invitation lifecycle (V30)
+
+`objOrganizationInvitation` exposes `invite`, `resend`, `revoke`, `inspect`,
+`listForOrganization` and `accept`. Management calls require the authenticated actor
+and an explicit organization. Acceptance takes an authenticated recipient ID, or a new
+password for a previously unregistered/passwordless recipient proven by the mail token.
+HTTP callers cannot submit the authenticated recipient ID themselves.
+
+Invitations store the organization, recipient, proposed organization role, explicit
+tenant assignments, inviter, expiry and status (`pending`, `accepted`, `revoked`,
+`expired`). Tokens have 256 bits of random input; only SHA-256 hashes are stored.
+Links last seven days. Resending replaces the token; old, revoked, expired and used
+links cannot be accepted. Expiry is enforced on every lookup and displayed even if the
+stored pending row has not yet been marked expired by a subsequent management action.
+
+Acceptance locks the organization and invitation, rechecks the inviter's current
+permission to grant the proposal, validates active tenants and identity, and creates
+memberships atomically. Existing memberships are never overwritten or reactivated by
+an invitation. Duplicate/paralleled acceptance has one success and subsequent rejection.
+Email locks shared by registration, legacy account creation and invitation acceptance
+prevent concurrent account duplication. Existing ambiguous email identities are not
+merged automatically; inviting/accepting them is rejected for review.
+
+Existing password-protected identities must sign in; the existing MFA flow remains in
+force. Invitation-only authentication does not create an application access session.
+This also allows an identity with no current memberships to accept a new invitation.
+A new identity is created only at acceptance, with no organization privilege flags.
+The existing mail layout and translation system serve both themes.
+
+## Deployment and compatibility
+
+Apply V29 and V30 after V26–V28, then reload the application. Existing activated
+organizations retain their memberships and grants. No unactivated organization is
+imported or activated by these migrations. New application permissions require an
+explicit manifest and explicit role grants; there are no wildcard grants.
+
+Applications should migrate from home-customer/global-flag checks to the public
+membership/authorization services and adopt the context-bearing CSRF helpers. See
+[the integration guide](extension-permissions.md) for a neutral example. Direct SQL
+that assumes deleting a customer also deletes its users must be reviewed; identity
+cleanup is an explicit lifecycle operation now. Demo seeding explicitly removes its
+reserved demo identities before rebuilding customers.
+
+## Remaining work outside this scope
+
+- Organization deletion and dedicated global account activation/deactivation workflows.
+- Object-specific access rules remain the responsibility of each application/module.
 - API service-identity scopes remain separate from browser memberships.
 - Custom-role administration and eventual retirement of legacy snapshots.
 
 ## Manual verification
 
-1. Apply V26/V27 and reload the application (`/index.cfm?reinit=1` as a platform admin).
+1. Apply V26–V30 and reload the application (`/index.cfm?reinit=1` as a platform admin).
 2. Open Members and roles in the main organization, review the preview and activate it.
 3. Give a test member `organization.member` and `tenant.viewer` in one tenant.
    In a separate browser session, verify that only that tenant is selectable and
@@ -177,6 +235,16 @@ it cannot safely delete the whole organization and its children.
    apply immediately. Suspend or remove the membership and verify access is revoked.
 5. Transfer ownership to an active member. The old owner becomes organization admin;
    attempts to remove, suspend or demote the sole active owner must fail.
+
+6. Invite an existing identity into a second activated organization as a viewer. Sign
+   in with that identity, accept, and switch between the original and new organization.
+   Verify separate roles, settings and tenant access. Suspend/remove only one membership.
+7. Invite a new email, verify that no user/membership exists before acceptance, and
+   accept using the mail link. Resend/revoke another invitation and try its old link.
+8. Keep a management form open in tab A, switch context in tab B, then submit tab A.
+   Even when both destinations allow management, the old form must be rejected.
+9. Exercise a manifest's GET read route as a viewer and its POST handler as an editor;
+   direct template requests, wrong methods and missing tokens must follow the same rules.
 
 ## Validation
 
@@ -191,3 +259,9 @@ test application for browser checks; it only accepts fixture identities.
 bash www/tests/bin/migrate_test_db.sh
 bash www/tests/bin/run_tests.sh 'reporter=mintext&bundles=tests.specs.integration.organization_authorization_spec,tests.specs.integration.membership_management_spec,tests.specs.integration.membership_migration_spec,tests.specs.integration.membership_access_spec'
 ```
+
+Additional integration suites cover `access_registry_spec`, `extension_http_spec`,
+`multiple_organizations_spec`, `organization_invitation_spec` and `organization_upgrade_spec`.
+The upgrade spec executes V29 against isolated pre-upgrade tables inside the dedicated
+test database, checking retained IDs/roles and explicit activation boundaries. Invitation
+specs use the real mail layout and local Inbucket service, including concurrent acceptance.

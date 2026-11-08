@@ -19,6 +19,27 @@
                     structDelete(session, "membershipPreviewOwner");
                     getAlert("msgMembershipActivated", "success");
                 }
+            } else if (listFind("invite,resend_pending,revoke_pending", form.member_action)) {
+                if (form.member_action eq "invite") {
+                    invitationTenants = [];
+                    loop collection=form key="invitationField" {
+                        if (left(invitationField, 12) eq "invite_role_" and len(form[invitationField])) {
+                            arrayAppend(invitationTenants, {customerID: mid(invitationField, 13, len(invitationField)), role: form[invitationField]});
+                        }
+                    }
+                    application.objOrganizationInvitation.invite(session.user_id, membershipOrganization.id, form.email ?: "",
+                        form.invite_organization_role ?: "organization.member", invitationTenants, session.lng);
+                    getAlert("msgInvitationSent", "success");
+                } else {
+                    if (not isValid("integer", form.invitationID ?: "")) { throw(type="Saaster.Invitation.Invalid"); }
+                    if (form.member_action eq "resend_pending") {
+                        application.objOrganizationInvitation.resend(session.user_id, membershipOrganization.id, form.invitationID);
+                        getAlert("msgInvitationSent", "success");
+                    } else {
+                        application.objOrganizationInvitation.revoke(session.user_id, membershipOrganization.id, form.invitationID);
+                        getAlert("msgInvitationRevoked", "success");
+                    }
+                }
             } else {
                 if (not membershipOrganization.enabled or not isValid("integer", form.userID ?: "")) {
                     throw(type = "Saaster.Membership.Forbidden", message = "Membership administration is not available.");
@@ -69,6 +90,8 @@
                     getAlert("msgMembershipSaved", "success");
                 }
             }
+        } catch (Saaster.Invitation error) {
+            getAlert("msgInvitationInvalid", "warning");
         } catch (Saaster.Membership error) {
             getAlert(error.type eq "Saaster.Membership.LastOwner" ? "msgMembershipLastOwner" : "msgMembershipDenied", "warning");
         }

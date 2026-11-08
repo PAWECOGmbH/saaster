@@ -88,7 +88,7 @@
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         <cfif qTenants.blnActive eq 1>
-                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#">#getTrans('btnSwitchToThisCompany')#</a>
+                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
                                                         </cfif>
                                                             <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                         <cfif qTenants.intCustomerID neq session.customer_id>
@@ -186,7 +186,7 @@
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end">
                                                     <cfif qTenants.blnActive eq 1>
-                                                        <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#">#getTrans('btnSwitchToThisCompany')#</a>
+                                                        <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
                                                     </cfif>
                                                         <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                     <cfif qTenants.intCustomerID neq session.customer_id>

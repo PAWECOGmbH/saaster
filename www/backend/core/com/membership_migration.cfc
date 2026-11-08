@@ -77,6 +77,11 @@ component output="false" hint="Legacy membership audit, preview and explicit tra
                     sql = "UPDATE users SET intCustomerID = :organizationID WHERE intUserID = :userID"
                 );
             }
+            queryExecute(
+                options = {datasource: application.datasource}, params = local.params,
+                sql = "INSERT IGNORE INTO membership_identities (intUserID)
+                    SELECT intUserID FROM organization_memberships WHERE intOrganizationID = :organizationID"
+            );
             loop array=local.preview.assignments item="local.assignment" {
                 queryExecute(
                     options = {datasource: application.datasource},

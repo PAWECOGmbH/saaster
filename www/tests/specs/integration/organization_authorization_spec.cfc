@@ -271,10 +271,11 @@ component extends="tests.support.integration_spec" {
                 expect(listValueCountNoCase(valueList(local.permissions.strPermissionKey), "tenant.view")).toBe(1);
             });
 
-            it("enforces one organization per identity even for suspended memberships", () => {
+            it("allows independent organization memberships but rejects duplicate pairs", () => {
                 executeSQL("UPDATE organization_memberships SET strStatus = 'suspended' WHERE intOrgMembershipID = :membership", {membership: membershipParam()});
 
-                expect(() => addOrganizationMembership(variables.user.userID, variables.foreignOrganization)).toThrow();
+                addOrganizationMembership(variables.user.userID, variables.foreignOrganization);
+                expect(() => addOrganizationMembership(variables.user.userID, variables.organizationID)).toThrow();
             });
 
             it("rejects duplicate tenant memberships", () => {

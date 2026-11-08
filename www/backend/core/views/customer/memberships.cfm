@@ -26,9 +26,9 @@
                 </div>
                 <cfif membershipData.organization.enabled and membershipData.manageOrganization>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-12 align-items-sm-end float-start">
-                        <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary">
-                            <i class="ti ti-plus pe-3" aria-hidden="true"></i> #getTrans('btnNewUser')#
-                        </a>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="##membership-invite" class="btn btn-primary">
+                            <i class="ti ti-plus pe-3" aria-hidden="true"></i> #getTrans('btnInviteMember')#
+                        </button>
                     </div>
                 </cfif>
             </div>
@@ -196,6 +196,9 @@
                         </div>
                     </div>
                 </cfif>
+                <cfif membershipData.organization.enabled and membershipData.manageOrganization>
+                    <cfinclude template="membership_invitations.cfm">
+                </cfif>
             </div>
         </div>
     </div>
@@ -225,7 +228,14 @@
                                 <cfloop list="#roleHelpScope eq 'organization' ? 'organization.owner,organization.admin,organization.member' : 'tenant.admin,tenant.editor,tenant.viewer'#" item="roleHelpKey">
                                     <tr>
                                         <th scope="row" class="text-wrap text-break align-top">#getTrans(roleLabels.roleLabel(roleHelpKey))#</th>
-                                        <td>#getTrans('txtMembershipRoleHelp_' & replace(roleHelpKey, '.', '_', 'all'))#</td>
+                                        <td>
+                                            #getTrans('txtMembershipRoleHelp_' & replace(roleHelpKey, '.', '_', 'all'))#
+                                            <cfset extensionRolePermissions = application.objAccessRegistry.granted('organization', [roleHelpKey])>
+                                            <cfset arrayAppend(extensionRolePermissions, application.objAccessRegistry.granted('tenant', [roleHelpKey]), true)>
+                                            <cfif arrayLen(extensionRolePermissions)>
+                                                <ul class="small mt-2 mb-0"><cfloop array="#extensionRolePermissions#" item="extensionPermission"><li>#encodeForHTML(getTrans(application.objAccessRegistry.permission(extensionPermission).label))#</li></cfloop></ul>
+                                            </cfif>
+                                        </td>
                                     </tr>
                                 </cfloop>
                             </tbody>

@@ -152,6 +152,11 @@ if (structKeyExists(form, "edit_profile_btn")) {
 
 // User new
 if (structKeyExists(form, "user_new_btn")) {
+    // Activated organizations create memberships through invitation acceptance only.
+    if (application.objMembershipAccess.organizationForCustomer(session.customer_id).enabled) {
+        location url="#application.mainURL#/account-settings/memberships" addtoken=false;
+    }
+
 
     param name="form.salutation" default="";
     param name="form.first_name" default="";
@@ -219,17 +224,8 @@ if (structKeyExists(form, "user_new_btn")) {
         location url="#application.mainURL#/account-settings/user/new" addtoken="false";
     }
 
-    // Save the user using a function
-    if (session.membership_access ?: false) {
-        try {
-            objUserInsert = application.objMembership.createUser(session.user_id, session.customer_id, form, form.member_role ?: "tenant.viewer", form.member_status ?: "active");
-        } catch (Saaster.Membership error) {
-            getAlert(error.type eq "Saaster.Membership.UserLimit" ? "msgMaxUsersReached" : "msgMembershipDenied", "warning");
-            location url="#application.mainURL#/account-settings/user/new" addtoken=false;
-        }
-    } else {
-        objUserInsert = application.objUser.insertUser(form, session.customer_id);
-    }
+    // Legacy organizations retain their existing account creation flow.
+    objUserInsert = application.objUser.insertUser(form, session.customer_id);
 
     if (objUserInsert.success) {
 

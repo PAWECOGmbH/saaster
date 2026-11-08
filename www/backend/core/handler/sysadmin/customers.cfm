@@ -348,8 +348,10 @@
                 session.superadmin = 1;
                 session.sysadmin = 0;
                 session.supportLogin = 1;
+                session.supportOrganizationID = application.objMembershipAccess.organizationForCustomer(qCustomer.intCustomerID).id;
 
                 structDelete(session, "membership_access");
+                structDelete(session, "membership_identity");
                 structDelete(session, "organization_id");
                 if (not application.objMembershipAccess.refreshSession(true)) {
                     location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;

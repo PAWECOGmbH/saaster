@@ -87,7 +87,7 @@ component extends="testbox.system.BaseSpec" hint="Base for specs that run agains
     }
 
     function logout() {
-        for (var key in ["user_id", "customer_id", "user_name", "user_email", "admin", "superadmin", "sysadmin", "membership_access", "organization_id", "supportLogin", "supportOriginUserID"]) {
+        for (var key in ["user_id", "customer_id", "user_name", "user_email", "admin", "superadmin", "sysadmin", "membership_access", "membership_identity", "organization_id", "supportLogin", "supportOriginUserID", "supportOrganizationID"]) {
             structDelete(session, key);
         }
     }

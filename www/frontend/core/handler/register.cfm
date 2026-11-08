@@ -28,6 +28,26 @@ if (structKeyExists(form, 'login_btn')) {
     if (isStruct(objUserLogin)) {
 
         if (objUserLogin.loginCorrect) {
+            if (objUserLogin.invitationOnly ?: false) {
+                loop list="user_id,customer_id,organization_id,membership_access,membership_identity,admin,superadmin,sysadmin,supportLogin,supportOriginUserID,supportOrganizationID" index="invitationSessionKey" {
+                    structDelete(session, invitationSessionKey);
+                }
+                sessionRotate();
+                loginThrottle.reset(form.email);
+                invitationLoginUser = application.objCustomer.getUserDataByID(objUserLogin.user_id);
+                // Keep the identity separate from the active organization session.
+                structDelete(session, "invitation_authenticated_user");
+                if (invitationLoginUser.blnMfa) {
+                    session.invitation_mfa_user = objUserLogin.user_id;
+                    session.user_email = objUserLogin.user_email;
+                    session.user_name = objUserLogin.user_name;
+                    session.mfaCheckCount = 0;
+                    invitationMfa = application.objUser.sendMfaCode(application.objGlobal.getUUID(), false, session.user_email, session.user_name);
+                    location url=invitationMfa.redirect addtoken=false;
+                }
+                session.invitation_authenticated_user = objUserLogin.user_id;
+                location url="#application.mainURL#/organization-invitation" addtoken=false;
+            }
 
             // New session ID after a successful login (protection against session fixation)
             sessionRotate();
@@ -727,6 +747,13 @@ if (structKeyExists(form, 'mfa_btn')) {
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
 
     if (checkMfa.success eq true) {
+        if (val(session.invitation_mfa_user ?: 0) eq checkMfa.userID
+            and application.objOrganizationInvitation.permitsIdentityLogin(checkMfa.userID, session.pendingOrganizationInvitation ?: "")) {
+            sessionRotate();
+            session.invitation_authenticated_user = checkMfa.userID;
+            structDelete(session, "invitation_mfa_user");
+            location url="#application.mainURL#/organization-invitation" addtoken=false;
+        }
 
         // New session ID once the second factor is confirmed (protection against session fixation)
         sessionRotate();

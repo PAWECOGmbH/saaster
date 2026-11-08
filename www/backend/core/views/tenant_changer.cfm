@@ -28,7 +28,8 @@
         <div class="dropdown-menu">
             <cfloop query="qTenants">
                 <cfif qTenants.blnActive eq 1>
-                    <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#" class="dropdown-item">
+                    <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#" class="dropdown-item">
+                        <cfif session.membership_access ?: false><span class="text-muted small me-2">#encodeForHTML(qTenants.organizationName)# ·</span></cfif>
                         <cfif len(trim(qTenants.strCompanyName))>
                             <cfif len(trim(qTenants.strLogo))>
                                 <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center no-max-width" alt="#encodeForHTML(qTenants.strCompanyName)#">

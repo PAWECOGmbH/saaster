@@ -397,7 +397,9 @@ if (structKeyExists(url, "sysadmin")) {
             session.sysadmin = 1;
             session.supportLogin = 0;
             structDelete(session, "supportOriginUserID");
+            structDelete(session, "supportOrganizationID");
             structDelete(session, "membership_access");
+                structDelete(session, "membership_identity");
             structDelete(session, "organization_id");
             if (not application.objMembershipAccess.refreshSession(true)) {
                 location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;

@@ -1,3 +1,6 @@
+<cfif application.objMembershipAccess.organizationForCustomer(session.customer_id).enabled>
+    <cflocation url="#application.mainURL#/account-settings/memberships" addtoken="false">
+</cfif>
 <cfscript>
 
     // Is the customer allowed to create more users?
