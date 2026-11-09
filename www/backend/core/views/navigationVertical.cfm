@@ -9,7 +9,7 @@
                 <a href="#application.mainURL#/dashboard" class="nav-link">
                 </cfoutput>
                     <span class="nav-link-icon d-none d-sm-none d-md-inline-block d-lg-inline-block">
-                        <i class="fas fa-home"></i>
+                        <i class="ti ti-home"></i>
                     </span>
                     <span class="nav-link-title">
                         Home
@@ -23,7 +23,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                         <span class="nav-link-icon d-none d-sm-none d-md-inline-block d-lg-inline-block">
-                            <i class="fas fa-user-cog"></i>
+                            <i class="ti ti-user-cog"></i>
                         </span>
                         <span class="nav-link-title">
                             SysAdmin
@@ -92,7 +92,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                                 <span class="nav-link-icon d-md-inline-block d-lg-inline-block">
-                                    <i class="fas fa-users"></i>
+                                    <i class="ti ti-users"></i>
                                 </span>
                                 <span class="nav-link-title d-none d-sm-none d-md-block">
                                     #getTrans('titMandanten')#
@@ -101,7 +101,8 @@
                             <div class="dropdown-menu">
                                 <cfloop query="qTenants">
                                     <cfif qTenants.blnActive eq 1>
-                                        <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#" class="dropdown-item">
+                                        <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#" class="dropdown-item">
+                        <cfif session.membership_access ?: false><span class="text-muted small me-2">#encodeForHTML(qTenants.organizationName)# ·</span></cfif>
                                             <cfif len(trim(qTenants.strCompanyName))>
                                                 <cfif len(trim(qTenants.strLogo))>
                                                     <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center" alt="#encodeForHTML(qTenants.strCompanyName)#">
@@ -148,7 +149,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
                                     <span class="nav-link-icon d-md-inline-block d-lg-inline-block">
-                                        <i class="fas fa-globe"></i>
+                                        <i class="ti ti-world"></i>
                                     </span>
                                     <span class="nav-link-title d-none d-sm-none d-md-block">
                                         #application.objLanguage.getAnyLanguage(session.lng).language#

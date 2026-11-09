@@ -63,7 +63,7 @@
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 text-end">
                         <div class="button-group">
                             <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
-                                <i class="fas fa-angle-double-left pe-3"></i> Back to plans
+                                <i class="ti ti-chevrons-left pe-3"></i> Back to plans
                             </a>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                                 </div>
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">
-                                        <a href="#application.mainURL#/plans" target="_blank"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
+                                        <a href="#application.mainURL#/plans" target="_blank"><i class="ti ti-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
                                     </div>
                                 </cfif>
                             </div>
@@ -96,32 +96,32 @@
                                         <ul class="nav nav-tabs nav-fill mb-4" data-bs-toggle="tabs">
                                             <li class="nav-item">
                                                 <a href="##details" class="nav-link #details#" data-bs-toggle="tab">
-                                                    <i class="fas fa-info-circle pe-3"></i>
+                                                    <i class="ti ti-info-circle pe-3"></i>
                                                     Details
                                                 </a>
                                             </li>
                                             <li class="nav-item">
                                                 <cfif qPlan.blnFree>
                                                     <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free plan">
-                                                        <i class="fas fa-coins pe-3"></i>
+                                                        <i class="ti ti-coins pe-3"></i>
                                                         Prices
                                                     </a>
                                                 <cfelse>
                                                     <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
-                                                        <i class="fas fa-coins pe-3"></i>
+                                                        <i class="ti ti-coins pe-3"></i>
                                                         Prices
                                                     </a>
                                                 </cfif>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="##features" class="nav-link #features#" data-bs-toggle="tab">
-                                                    <i class="fas fa-list-ul pe-3"></i>
+                                                    <i class="ti ti-list pe-3"></i>
                                                     Features
                                                 </a>
                                             </li>
                                             <li class="nav-item">
                                                 <a href="##modules" class="nav-link #modules#" data-bs-toggle="tab">
-                                                    <i class="fas fa-th-list pe-3"></i>
+                                                    <i class="ti ti-list-details pe-3"></i>
                                                     Modules
                                                 </a>
                                             </li>

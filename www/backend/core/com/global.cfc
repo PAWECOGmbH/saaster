@@ -1,5 +1,30 @@
 component displayname="globalFunctions" output="false" {
 
+    // Resolve a template to its configured URL in the requested language (#628).
+    public string function getLink(required string templatePath, string language = "") {
+        local.language = len(arguments.language) ? arguments.language : (session.lng ?: application.objLanguage.getDefaultLanguage().iso);
+        if (!structKeyExists(request, "frontendSlugs") or request.frontendSlugs.language neq local.language) {
+            local.qSlugs = queryExecute(
+                options = {datasource = application.datasource},
+                params = { language: {type: "varchar", value: local.language} },
+                sql = "
+                    SELECT fm.strPath, COALESCE(NULLIF(fmt.strMapping, ''), fm.strMapping) AS slug
+                    FROM frontend_mappings fm
+                    LEFT JOIN frontend_mappings_trans fmt ON fmt.intFrontendMappingsID = fm.intFrontendMappingsID
+                        AND fmt.intLanguageID = (SELECT intLanguageID FROM languages WHERE strLanguageISO = :language)
+                "
+            );
+            request.frontendSlugs = { language: local.language, paths: {} };
+            loop query=local.qSlugs {
+                request.frontendSlugs.paths[local.qSlugs.strPath] = local.qSlugs.slug;
+            }
+        }
+        // The conventional path remains usable when a custom installation has no mapping.
+        local.fallback = reReplace(reReplace(arguments.templatePath, "^templates/", ""), "\.cfm$", "");
+        local.slug = request.frontendSlugs.paths[arguments.templatePath] ?: local.fallback;
+        return reReplace(application.mainURL, "/+$", "") & "/" & reReplace(local.slug, "^/+", "");
+    }
+
     // SEF building
     public struct function getSEF(string sef_string) {
 
@@ -9,7 +34,7 @@ component displayname="globalFunctions" output="false" {
         local.returnStruct['onlyAdmin'] = false;
         local.returnStruct['onlySuperAdmin'] = false;
         local.returnStruct['onlySysAdmin'] = false;
-        local.returnStruct['noaccess'] = false;
+        local.returnStruct['access'] = true;
         local.returnStruct['navSlugs'] = {};
         local.returnStruct['langSlugs'] = {};
 
@@ -49,6 +74,8 @@ component displayname="globalFunctions" output="false" {
         loop query = local.qNavSlugs {
             local.returnStruct['navSlugs'][local.qNavSlugs.strPath] = local.qNavSlugs.slug;
         }
+
+        request.frontendSlugs = { language: session.lng, paths: local.returnStruct.navSlugs };
 
         if (len(trim(arguments.sef_string))) {
 
@@ -95,43 +122,8 @@ component displayname="globalFunctions" output="false" {
 
             if (local.qCheckSEF.recordCount) {
 
-                // Check if the path is coming from a module
-                if (local.qCheckSEF.intModuleID gt 0 and structKeyExists(session, "customer_id") and session.customer_id gt 0) {
-
-                    // We have to check if the module is active for the current customer
-                    local.moduleStatus = application.objModules.getModuleStatus(session.customer_id, local.qCheckSEF.intModuleID);
-
-                    // Overwrite the flag 'noaccess' generally to true (if its not a SysAdmin)
-                    if (!session.sysadmin) {
-                        local.returnStruct['noaccess'] = true;
-                    }
-
-                    // If the module is active, we can set 'noaccess' to false.
-                    // Access is granted for any booking still within its
-                    // start/end window, regardless of strStatus - a canceled
-                    // booking ('test' or 'active' status flipped to
-                    // 'canceled') still keeps access until dteEndDate, it
-                    // just won't renew. Checking the status label alone
-                    // (the old 'free'/'test'/'active' allowlist) incorrectly
-                    // cut off access the instant a customer canceled, even
-                    // though the account settings page told them access
-                    // continues until the end date.
-                    if (isStruct(local.moduleStatus) and !structIsEmpty(local.moduleStatus)) {
-                        if (structKeyExists(local.moduleStatus, "status")) {
-                            if (local.moduleStatus.status eq "free") {
-                                local.returnStruct['noaccess'] = false;
-                            } else if (
-                                structKeyExists(local.moduleStatus, "startDate") and structKeyExists(local.moduleStatus, "endDate")
-                                and isDate(local.moduleStatus.startDate) and isDate(local.moduleStatus.endDate)
-                                and dateFormat(local.moduleStatus.startDate, "yyyy-mm-dd") lte dateFormat(now(), "yyyy-mm-dd")
-                                and dateFormat(local.moduleStatus.endDate, "yyyy-mm-dd") gte dateFormat(now(), "yyyy-mm-dd")
-                            ) {
-                                local.returnStruct['noaccess'] = false;
-                            }
-                        }
-                    }
-
-                }
+                // Route metadata uses a positive access result; product rules live in the shared policy.
+                local.returnStruct['access'] = application.objRequestAccess.moduleAccess(val(local.qCheckSEF.intModuleID));
 
                 if (local.qCheckSEF.itsFrontend) {
 
@@ -268,7 +260,7 @@ component displayname="globalFunctions" output="false" {
             // If we find an entry, the .cfm file may not be called directly
             if (local.qCheckSEF.recordCount) {
                 local.returnStruct['thisPath'] = local.thisPath;
-                local.returnStruct['noaccess'] = true;
+                local.returnStruct['access'] = false;
             }
 
             // Check whether someone is trying to call a file in the sysadmin folder without a sysadmin session
@@ -308,10 +300,10 @@ component displayname="globalFunctions" output="false" {
             }
 
             switch(arguments.alertType) {
-                case "info": local.thisIcon = "fa-regular fa-bell"; break;
-                case "warning": local.thisIcon = "fa-solid fa-triangle-exclamation"; break;
-                case "danger": local.thisIcon = "fa-regular fa-face-frown"; break;
-                default: local.thisIcon = "fa-solid fa-check";
+                case "info": local.thisIcon = "ti ti-bell"; break;
+                case "warning": local.thisIcon = "ti ti-alert-triangle"; break;
+                case "danger": local.thisIcon = "ti ti-mood-sad"; break;
+                default: local.thisIcon = "ti ti-check";
             }
 
             cfsavecontent ( variable="local.alertHTML" ) {
@@ -946,6 +938,11 @@ component displayname="globalFunctions" output="false" {
     // Check whether the user is in the range of the current tenant
     public boolean function checkTenantRange(required numeric userID, required numeric customerID) {
 
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled
+            or application.objMembershipAccess.organizationForCustomer(arguments.customerID).enabled) {
+            return application.objMembershipAccess.canAccessTenant(arguments.userID, arguments.customerID);
+        }
+
         local.isAllowed = false;
 
         local.qRange = queryExecute(
@@ -1385,7 +1382,7 @@ component displayname="globalFunctions" output="false" {
     // CSRF: hidden input field for forms
     public string function csrfField() {
 
-        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '">';
+        return '<input type="hidden" name="csrf_token" value="' & CSRFGenerateToken() & '"><input type="hidden" name="context_token" value="' & application.objGlobal.contextToken() & '">';
 
     }
 
@@ -1393,7 +1390,7 @@ component displayname="globalFunctions" output="false" {
     // CSRF: url parameter for links that change state (e.g. delete links)
     public string function csrfParam() {
 
-        return 'csrf_token=' & CSRFGenerateToken();
+        return 'csrf_token=' & CSRFGenerateToken() & (len(application.objGlobal.contextToken()) ? '&context_token=' & application.objGlobal.contextToken() : '');
 
     }
 
@@ -1409,6 +1406,7 @@ component displayname="globalFunctions" output="false" {
             (status, open, default, ...) are too generic to protect them across all handlers.
     */
     variables.csrfProtectedGetKeys = {
+        "backend/core/handler/global.cfm": "switch",
         "backend/core/handler/payment.cfm": "del,default",
         "backend/core/handler/sysadmin/invoices.cfm": "status,email,open",
         "backend/core/handler/sysadmin/logs.cfm": "logfile",
@@ -1416,7 +1414,24 @@ component displayname="globalFunctions" output="false" {
         "backend/core/handler/sysadmin/modules.cfm": "booking"
     };
 
+    public string function contextToken() {
+        if (not structKeyExists(session, "user_id") or not structKeyExists(session, "customer_id")) {
+            return "";
+        }
+        return CSRFGenerateToken("tenant:" & session.user_id & ":" & session.customer_id);
+    }
+
+    public boolean function contextVerify(required string token) {
+        return not (session.membership_identity ?: (session.membership_access ?: false))
+            or (len(arguments.token) and CSRFVerifyToken(arguments.token, "tenant:" & session.user_id & ":" & session.customer_id));
+    }
+
     public boolean function csrfRequired(required string path, required string method, required array urlKeys) {
+        if (structKeyExists(application, "objAccessRegistry") and application.objAccessRegistry.policy(arguments.path, arguments.method).registered
+            and not listFindNoCase("GET,HEAD,OPTIONS", arguments.method)) {
+            return true;
+        }
+
 
         if (!reFindNoCase("^/?(backend|frontend)/core/handler/", arguments.path)) {
             return false;
@@ -1466,7 +1481,9 @@ component displayname="globalFunctions" output="false" {
             return false;
         }
 
-        return CSRFVerifyToken(local.token);
+        local.headers = getHTTPRequestData(false).headers;
+        local.contextToken = form.context_token ?: (url.context_token ?: (local.headers["X-Saaster-Context"] ?: ""));
+        return CSRFVerifyToken(local.token) and contextVerify(local.contextToken);
 
     }
 

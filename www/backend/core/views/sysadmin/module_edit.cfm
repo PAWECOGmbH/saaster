@@ -55,7 +55,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/sysadmin/modules" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to overview
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to overview
                         </a>
                     </div>
 
@@ -76,28 +76,28 @@
                                         <ul class="nav nav-tabs nav-fill mb-4" data-bs-toggle="tabs">
                                             <li class="nav-item">
                                                 <a href="##details" class="nav-link #details#" data-bs-toggle="tab">
-                                                    <i class="fas fa-info-circle pe-3"></i>
+                                                    <i class="ti ti-info-circle pe-3"></i>
                                                     Details
                                                 </a>
                                             </li>
                                             <cfif qModule.blnFree>
                                                 <li class="nav-item">
                                                     <a class="nav-link" style="cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" title="Its a free module">
-                                                        <i class="fas fa-coins pe-3"></i>
+                                                        <i class="ti ti-coins pe-3"></i>
                                                         Prices
                                                     </a>
                                                 </li>
                                             <cfelse>
                                                 <li class="nav-item">
                                                     <a href="##prices" class="nav-link #prices#" data-bs-toggle="tab">
-                                                        <i class="fas fa-coins pe-3"></i>
+                                                        <i class="ti ti-coins pe-3"></i>
                                                         Prices
                                                     </a>
                                                 </li>
                                             </cfif>
                                             <li class="nav-item">
                                                 <a href="##scheduletasks" class="nav-link #scheduletasks#" data-bs-toggle="tab">
-                                                    <i class="fas fa-clock pe-3"></i>
+                                                    <i class="ti ti-clock pe-3"></i>
                                                     Scheduletasks
                                                 </a>
                                             </li>

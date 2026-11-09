@@ -54,7 +54,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/sysadmin/countries?delete" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to overview
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to overview
                         </a>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                                             <button class="btn bg-green-lt" type="submit">Go!</button>
                                             <cfif len(trim(searchTerm))>
                                                 <button class="btn bg-red-lt" name="delete" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete search">
-                                                    #searchTerm# <i class="ms-2 fas fa-times"></i>
+                                                    #searchTerm# <i class="ms-2 ti ti-x"></i>
                                                 </button>
                                             </cfif>
                                         </div>

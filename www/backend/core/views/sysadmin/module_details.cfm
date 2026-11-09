@@ -33,7 +33,7 @@
                     <div class="input-group input-group-flat">
                         <input type="text" class="form-control" name="module_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qModule.strModuleName)#" required>
                         <span class="input-group-text">
-                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##module_name_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
+                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##module_name_#qModule.intModuleID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
                         </span>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
                     <div class="input-group input-group-flat">
                         <input type="text" class="form-control" name="short_desc" maxlength="100" value="#HTMLEditFormat(qModule.strShortDescription)#">
                         <span class="input-group-text">
-                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##short_desc_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
+                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##short_desc_#qModule.intModuleID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate module name"></i></a>
                         </span>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
             </div>
             <div class="col-lg-6">
                 <div class="row mb-2">
-                    <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qModule.intModuleID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
+                    <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qModule.intModuleID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
                 </div>
                 <div class="mb-3">
                     <textarea class="form-control editor" name="desc" style="height: 400px;">#encodeForHTML(qModule.strDescription)#</textarea>

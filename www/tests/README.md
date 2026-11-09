@@ -29,6 +29,13 @@ This creates, in this order:
 
 There is no seed on purpose. Every spec creates the data it needs and removes it again (see "Writing specs").
 
+## Updating an existing development stack
+
+After pulling the migration-spec mount in `compose-dev.yml`, recreate the Lucee
+container once with `docker compose -f compose-dev.yml up -d lucee`. The specs need
+`config/db` mounted read-only at `/var/saaster/db`; restarting an old container does
+not add the mount.
+
 ## Daily use
 
 In the browser: **http://localhost:8080/tests/runner.cfm** (use your `LUCEE_PORT`). Pick directories or single specs, run them, and see the failed expectations with file and line.
@@ -44,6 +51,7 @@ bash www/tests/bin/run_tests.sh "reporter=mintext&bundles=tests.specs.unit.globa
 
 The script exits with code 1 as soon as a spec fails - usable in pipelines and git hooks.
 
+- **Stale full-text search after repeated test runs:** `bash www/tests/bin/reset_test_db.sh --rebuild-search-index` rebuilds the customer index in the test database without deleting its data.
 - **New migrations:** `bash www/tests/bin/migrate_test_db.sh`
 - **Clean database:** `bash www/tests/bin/prepare_test_db.sh` again
 - **Changed a component:** `run_tests.sh` reloads the test application automatically. In the browser, open `healthcheck.cfm?reinit=1` once.
@@ -96,6 +104,30 @@ Helpers for side effects:
 
 - **Logs:** `recordLogs()` replaces `application.objLog` with `support/log_recorder.cfc`. No log files are written, and `count()` / `getCalls()` let you check what would have been logged. The real logger comes back automatically after the spec.
 - **Payrexx:** `support/payrexx_mock.cfm` stands in for the Payrexx API and echoes the request it received. See `specs/integration/payrexx_call_spec.cfc` for how to point `application.payrexxStruct` at it. Specs must never call the real Payrexx, even if `config.cfm` holds real credentials.
+
+## Organization access and invitations
+
+`organization_authorization_spec`, `membership_management_spec`, `membership_migration_spec`
+and `membership_access_spec` cover the built-in model. `multiple_organizations_spec`
+checks independent contexts, support boundaries and stale form tokens;
+`organization_invitation_spec` covers consent, token lifecycle, identity binding and
+parallel acceptance. `access_registry_spec` and `extension_http_spec` cover extension
+manifests and real direct HTTP dispatch. `organization_upgrade_spec` executes V29 on
+isolated pre-upgrade tables in the dedicated test database.
+
+`request_access_spec` covers the shared browser request policy: legacy mapping roles,
+anonymous entry points, action visibility, context-token checks and module-booking
+dates. `extension_http_spec` also verifies canonical routes, module and platform
+restrictions, ambiguous direct mappings, invalid CSRF and stale form responses.
+`module_entitlement_spec` checks direct and plan-included module access against
+scheduler eligibility, including booking dates, renewals, cancellations, free plans,
+customer isolation and live revocation. HTTP specs exercise plan-included modules
+through both canonical routes and direct templates with the same role/token checks.
+
+The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
+so mail tests do not depend on the development application's Lucee admin SMTP settings.
+`organization_flow_probe.cfm` runs production dispatch inside the test application and
+accepts fixture identities only. All test endpoints remain excluded from deployment.
 
 ## Form registry
 

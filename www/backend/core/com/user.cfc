@@ -105,6 +105,20 @@ component displayname="user" output="false" {
             local.mfa = arguments.userStruct.mfa;
         }
 
+        // Legacy profile editing cannot change account status or role flags in
+        // an activated organization, including through the platform user editor.
+        if (application.objMembershipAccess.organizationForUser(arguments.userID).enabled) {
+            local.current = queryExecute(
+                options = {datasource: application.datasource},
+                params = {id: {type: "integer", value: arguments.userID}},
+                sql = "SELECT blnAdmin, blnSuperAdmin, blnActive FROM users WHERE intUserID = :id"
+            );
+            local.admin = local.current.blnAdmin;
+            local.superadmin = local.current.blnSuperAdmin;
+            local.active = local.current.blnActive;
+            local.tenantID = "";
+        }
+
         try {
 
             // update the user
@@ -310,32 +324,37 @@ component displayname="user" output="false" {
 
 
         try {
+            transaction isolation="read_committed" {
+                new backend.core.com.identity().requireUnusedEmail(local.email);
 
-            queryExecute(
 
-                options = {datasource = application.datasource, result="newUserID"},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID},
-                    salutation: {type: "nvarchar", value: local.salutation},
-                    first_name: {type: "nvarchar", value: local.first_name},
-                    last_name: {type: "nvarchar", value: local.last_name},
-                    email: {type: "nvarchar", value: local.email},
-                    phone: {type: "nvarchar", value: local.phone},
-                    mobile: {type: "nvarchar", value: local.mobile},
-                    admin: {type: "boolean", value: local.admin},
-                    superadmin: {type: "boolean", value: local.superadmin},
-                    active: {type: "boolean", value: local.active},
-                    language: {type: "varchar", value: local.language},
-                    newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
-                    dateNow: {type: "datetime", value: now()},
-                    sysadmin: {type: "integer", value: local.sysadmin}
-                },
-                sql = "
-                    INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
-                    VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
-                "
+                queryExecute(
 
-            )
+                    options = {datasource = application.datasource, result="newUserID"},
+                    params = {
+                        customerID: {type: "numeric", value: arguments.customerID},
+                        salutation: {type: "nvarchar", value: local.salutation},
+                        first_name: {type: "nvarchar", value: local.first_name},
+                        last_name: {type: "nvarchar", value: local.last_name},
+                        email: {type: "nvarchar", value: local.email},
+                        phone: {type: "nvarchar", value: local.phone},
+                        mobile: {type: "nvarchar", value: local.mobile},
+                        admin: {type: "boolean", value: local.admin},
+                        superadmin: {type: "boolean", value: local.superadmin},
+                        active: {type: "boolean", value: local.active},
+                        language: {type: "varchar", value: local.language},
+                        newUUID: {type: "nvarchar", value: local.argsReturnValue.newUUID},
+                        dateNow: {type: "datetime", value: now()},
+                        sysadmin: {type: "integer", value: local.sysadmin}
+                    },
+                    sql = "
+                        INSERT INTO users (intCustomerID, dtmInsertDate, dtmMutDate, strSalutation, strFirstName, strLastName, strEmail, strPhone, strMobile, strLanguage, blnActive, blnAdmin, blnSuperAdmin, blnSysAdmin, strUUID, dtmUUIDCreated)
+                        VALUES (:customerID, :dateNow, :dateNow, :salutation, :first_name, :last_name, :email, :phone, :mobile, :language, :active, :admin, :superadmin, :sysadmin, :newUUID, UTC_TIMESTAMP())
+                    "
+
+                )
+
+            }
 
             local.argsReturnValue['newUserID'] = newUserID.generatedkey;
             local.argsReturnValue['message'] = "OK";
@@ -354,6 +373,20 @@ component displayname="user" output="false" {
 
     // Get all users
     public query function getAllUsers(required numeric customerID) {
+
+        local.org = application.objMembershipAccess.organizationForCustomer(arguments.customerID);
+        if (local.org.enabled) {
+            return queryExecute(
+                options = {datasource: application.datasource},
+                params = {organizationID: {type: "integer", value: local.org.id}, customerID: {type: "integer", value: arguments.customerID}},
+                sql = "SELECT DISTINCT users.*, IF(membership.strRoleKey = 'organization.owner', 1, 0) AS mainUser
+                    FROM users INNER JOIN organization_memberships membership ON membership.intUserID = users.intUserID
+                    LEFT JOIN tenant_memberships assignment ON assignment.intOrgMembershipID = membership.intOrgMembershipID AND assignment.intCustomerID = :customerID
+                    WHERE membership.intOrganizationID = :organizationID
+                        AND (membership.strRoleKey IN ('organization.owner', 'organization.admin') OR assignment.intTenantMembershipID IS NOT NULL)
+                    ORDER BY mainUser DESC, users.intUserID"
+            );
+        }
 
         if (arguments.customerID gt 0) {
 
@@ -388,7 +421,7 @@ component displayname="user" output="false" {
 
 
     // Send invitation link
-    public struct function sendInvitation(required numeric toUserID, required numeric fromUserID) {
+    public struct function sendInvitation(required numeric toUserID, required numeric fromUserID, boolean renewToken = false) {
 
         // Default variables
         local.argsReturnValue = structNew();
@@ -419,8 +452,8 @@ component displayname="user" output="false" {
 
             if (local.qUser.recordCount) {
 
-                // UUID already set?
-                if (!len(trim(local.qUser.strUUID))) {
+                // A resend renews the token and starts a fresh invitation lifetime.
+                if (arguments.renewToken or !len(trim(local.qUser.strUUID))) {
 
                     local.thisUUID = application.objGlobal.getUUID();
 
@@ -720,6 +753,17 @@ component displayname="user" output="false" {
                 local.argsReturnValue['userID'] = local.qGetUserMfa.intUserID;
                 local.argsReturnValue['customerID'] = local.qGetUserMfa.intCustomerID;
                 local.argsReturnValue['success'] = true;
+                local.membershipContext = application.objMembershipAccess.context(local.qGetUserMfa.intUserID);
+                local.invitationLogin = val(session.invitation_mfa_user ?: 0) eq local.qGetUserMfa.intUserID
+                    and application.objOrganizationInvitation.permitsIdentityLogin(local.qGetUserMfa.intUserID, session.pendingOrganizationInvitation ?: "");
+                if (local.membershipContext.enabled and not local.invitationLogin) {
+                    local.argsReturnValue.success = local.membershipContext.allowed;
+                    local.argsReturnValue.customerID = local.membershipContext.customerID;
+                    if (!local.membershipContext.allowed) {
+                        local.argsReturnValue.message = variables.getTrans("msgNoAccess");
+                        local.argsReturnValue.uuid = arguments.mfaUUID;
+                    }
+                }
             }
 
         } else {

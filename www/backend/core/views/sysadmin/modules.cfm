@@ -24,7 +24,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##module_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add module
+                            <i class="ti ti-plus pe-3"></i> Add module
                         </a>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                                         <tbody <cfif qModules.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qModules">
                                                 <tr id="sort_#qModules.intModuleID#">
-                                                    <td class="move text-center"><cfif qModules.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
+                                                    <td class="move text-center"><cfif qModules.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></cfif></td>
                                                     <td class="text-center">#qModules.intPrio#</td>
                                                     <td>#encodeForHTML(qModules.strModuleName)#</td>
                                                     <td>#encodeForHTML(qModules.strShortDescription)#</td>

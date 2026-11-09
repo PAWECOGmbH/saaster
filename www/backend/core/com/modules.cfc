@@ -391,6 +391,26 @@ component displayname="modules" output="false" {
     }
 
 
+    // Access can come from any valid direct booking or a plan containing the module.
+    // Keep this separate from getModuleStatus(), which describes direct bookings for billing/UI.
+    public query function getModuleAccessBookings(required numeric customerID, required numeric moduleID) {
+        return queryExecute(
+            options = {datasource: application.datasource},
+            params = {
+                customerID: {type: "integer", value: arguments.customerID},
+                moduleID: {type: "integer", value: arguments.moduleID}
+            },
+            sql = "SELECT bookings.strStatus AS status, bookings.dteStartDate AS startDate, bookings.dteEndDate AS endDate
+                FROM bookings
+                WHERE bookings.intCustomerID = :customerID
+                    AND (bookings.intModuleID = :moduleID OR EXISTS (
+                        SELECT 1 FROM plans_modules
+                        WHERE plans_modules.intPlanID = bookings.intPlanID AND plans_modules.intModuleID = :moduleID
+                    ))"
+        );
+    }
+
+
     public struct function getModuleStatus(required numeric customerID, required numeric moduleID) {
 
         local.moduleStruct = structNew();

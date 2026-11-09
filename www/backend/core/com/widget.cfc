@@ -16,7 +16,7 @@ component displayname="widget" output="false" {
 
         local.qOldUserWidgets = getOldUserWidgets(arguments.userID);
         local.oldUserWidgetIDs = valueList(local.qOldUserWidgets.intWidgetID);
-        local.lastUserWidgetPrio = local.qOldUserWidgets.recordCount;
+        local.lastUserWidgetPrio = local.qOldUserWidgets.recordCount ? arrayMax(queryColumnData(local.qOldUserWidgets, "intPrio")) : 0;
 
         for (local.row in local.qWidgets) {
             if (not listFind(local.oldUserWidgetIDs, local.row.intWidgetID)) {
@@ -71,6 +71,7 @@ component displayname="widget" output="false" {
                 WHERE (widgets_modules.intModuleID IN (:moduleList) OR widgets.blnPermDisplay = 1)
 
                 AND widgets.blnActive = 1
+                ORDER BY intPrio, intWidgetID
 
             "
         );
@@ -86,7 +87,7 @@ component displayname="widget" output="false" {
                 user_id: {type: "numeric", value: arguments.userID}
             },
             sql = "
-                SELECT intWidgetID
+                SELECT intWidgetID, intPrio
                 FROM user_widgets
                 WHERE intUserID = :user_id
             "

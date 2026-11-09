@@ -52,7 +52,7 @@
 				</div>
 			</article>
 			<div class="mt-4">
-				<a href="#application.mainURL#/blog/overview" class="btn btn-outline-secondary">Back to overview</a>
+				<a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#" class="btn btn-outline-secondary">Back to overview</a>
 			</div>
 		</div>
 		<cfif arrayLen(post.categories) or post.showTOC>
@@ -71,7 +71,7 @@
 							<div class="card-header bg-light fw-bold">Categories</div>
 							<div class="card-body p-3">
 								<cfloop array="#post.categories#" index="cat">
-									<a href="#application.mainURL#/blog/overview?catID=#cat.id#" class="badge bg-light text-dark border">#encodeForHtml(cat.name)#</a>
+									<a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#?catID=#cat.id#" class="badge bg-light text-dark border">#encodeForHtml(cat.name)#</a>
 								</cfloop>
 							</div>
 						</div>

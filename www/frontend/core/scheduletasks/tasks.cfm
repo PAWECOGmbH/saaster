@@ -160,7 +160,7 @@ if (url.pass eq variables.schedulePassword) {
 } else {
 
     // Make log
-    objLogs.logWrite("scheduletask", "warning", "Someone tried to call the scheduler (task_#url.task#.cfm) manually with wrong password. Password was: #url.pass#");
+    objLogs.logWrite("scheduletask", "warning", "Scheduler authentication failed [IP: #cgi.remote_addr#]");
 
 }
 

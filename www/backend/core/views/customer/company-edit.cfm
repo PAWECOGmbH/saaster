@@ -264,7 +264,7 @@
                     <div class="card-footer">
                         <div class="button-group">
                             <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
-                            <cfif session.superadmin and not session.sysadmin>
+                            <cfif session.superadmin and not session.sysadmin and not (session.membership_access ?: false)>
                                 <a href="##" data-bs-toggle="modal" data-bs-target="##delete_account" class="btn btn-outline-danger float-end">#getTrans('titDeleteAccount')#</a>
                             </cfif>
                         </div>
@@ -282,7 +282,7 @@
 
 
 <!--- Modal for cancelation --->
-<cfif session.superadmin>
+<cfif session.superadmin and not (session.membership_access ?: false)>
 <cfoutput>
 <form action="#application.mainURL#/cancel" method="post">#csrfField()#
 <input type="hidden" name="delete" value="#session.customer_id#">
@@ -293,7 +293,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <div class="modal-status bg-danger"></div>
                 <div class="modal-body text-center">
-                    <i class="fas fa-exclamation-triangle display-1 text-danger"></i>
+                    <i class="ti ti-alert-triangle display-1 text-danger"></i>
                     <h3 class="mt-3">#getTrans('titDeleteAccount')#</h3>
                     <p>#getTrans('txtDeleteAccount')#</p>
                 </div>

@@ -7,7 +7,10 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
     // Dynamic values
     this.name = variables.applicationname;
     this.sessiontimeout = variables.sessiontimeout;
-    this.pdf.type = variables.pdf_type;
+    // Lucee 7 ships the "classic" engine (PD4ML) only as demo with a watermark on every page,
+    // so the PDF templates (invoices, Swiss QR-bill) are made for "modern". variables.pdf_type
+    // in older config.cfm files is ignored.
+    this.pdf.type = "modern";
     this.requesttimeout = variables.requesttimeout;
 
     // Fixed values
@@ -60,6 +63,13 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objLanguage = new backend.core.com.language();
         application.objSettings = new backend.core.com.settings();
         application.objUser = new backend.core.com.user();
+        application.objAccessRegistry = new backend.core.com.access_registry().load();
+        application.objAuthorization = new backend.core.com.authorization();
+        application.objMembership = new backend.core.com.membership();
+        application.objOrganizationInvitation = new backend.core.com.organization_invitation();
+        application.objMembershipMigration = new backend.core.com.membership_migration();
+        application.objMembershipAccess = new backend.core.com.membership_access();
+        application.objRequestAccess = new backend.core.com.request_access();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
         application.objNotifications = new backend.core.com.notifications();
@@ -127,6 +137,14 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
     public boolean function onRequestStart(required string TargetPage) {
 
+        // Revalidate membership before routing, including existing sessions.
+        local.supportReturn = (session.supportLogin ?: false) and structKeyExists(url, "sysadmin") and reFindNoCase("^/?customer/?$", cgi.path_info);
+        lock scope="session" type="exclusive" timeout="60" {
+            if (structKeyExists(application, "objMembershipAccess") and not local.supportReturn and not application.objMembershipAccess.refreshSession()) {
+                location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+            }
+        }
+
         // Check if the user is logged in as a sysadmin
         if (structKeyExists(session, "sysadmin") and session.sysadmin) {
 
@@ -187,9 +205,23 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
 
     public boolean function onRequest(required string TargetPage) {
+        // Serialize context switches and mutations from tabs sharing this session.
+        lock scope="session" type="exclusive" timeout="60" {
+            local.supportReturn = (session.supportLogin ?: false) and structKeyExists(url, "sysadmin") and reFindNoCase("^/?customer/?$", cgi.path_info);
+            if (not local.supportReturn and not application.objMembershipAccess.refreshSession()) {
+                location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+            }
+            return dispatchRequest(arguments.TargetPage);
+        }
+    }
 
-        // Create SEF URL
-        thiscontent = application.objGlobal.getSEF(replace(cgi.path_info,'/','','one'));
+    private boolean function dispatchRequest(required string TargetPage) {
+
+        local.route = application.objRequestAccess.resolve(arguments.TargetPage, replace(cgi.path_info, "/", "", "one"), cgi.request_method);
+        thiscontent = local.route.content;
+        enforceAccess(local.route.decision);
+        local.headers = getHTTPRequestData(false).headers;
+        enforceAccess(application.objRequestAccess.checkContext(thiscontent, cgi.request_method, form, url, local.headers));
 
         // Change language
         if (structKeyExists(url, "l") and session.lng neq url.l) {
@@ -234,102 +266,13 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         }
 
 
-        // Check whether the user has access to corresponding sections
-        if (structKeyExists(session, "customer_id")) {
+        enforceAccess(application.objRequestAccess.checkPage(thiscontent, cgi.request_method, url));
+        enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
 
-            // More global variables (with customer session)
+        // More global variables (with customer session).
+        if (structKeyExists(session, "customer_id")) {
             getTime = new backend.core.com.time(session.customer_id);
             getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
-
-            local.no_access = false;
-
-            if (thiscontent.noaccess) {
-
-                local.no_access = true;
-
-            } else {
-
-                if (structKeyExists(session, "admin") and !session.admin) {
-                    if (thiscontent.onlyAdmin) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-                if (structKeyExists(session, "superadmin") and !session.superadmin) {
-                    if (thiscontent.onlySuperAdmin) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-                if (structKeyExists(session, "sysadmin") and !session.sysadmin) {
-                    if (thiscontent.onlySysAdmin) {
-                        getAlert('msgNoAccess', 'danger');
-                        local.no_access = true;
-                    }
-                }
-
-            }
-
-            if (local.no_access) {
-                location url="#application.mainURL#/dashboard" addtoken="false";
-            }
-
-        } else {
-
-            // Protect the 'backend' folder excluding the pdf print page
-            if (listFirst(thiscontent.thisPath, "/") eq "backend" and !structKeyExists(session, "user_id")) {
-
-                if (structKeyExists(url, "pdf")) {
-
-                    location url="#application.mainURL#/backend/core/views/invoices/print.cfm?pdf=#url.pdf#" addtoken="false";
-
-                } else {
-
-                    // Redirect to the register form with plan redirect
-                    if (structKeyExists(url, "plan")) {
-                        location url="#application.mainURL#/register?redirect=book?plan=#url.plan#" addtoken="false";
-                    } else {
-                        getAlert('alertSessionExpired', 'warning');
-                        location url="#application.mainURL#/login" addtoken="false";
-                    }
-
-                }
-
-            }
-
-
-            // If someone is trying to call a .cfm file directly
-            if (thiscontent.noaccess) {
-                location url="#application.mainURL#" addtoken="false";
-            }
-
-        }
-
-        // CSRF protection for the core handlers (POST requests and state-changing GET actions like delete links).
-        // The rule itself lives in objGlobal.csrfRequired() so it can be tested.
-        if (application.objGlobal.csrfRequired(thiscontent.thisPath, cgi.request_method, structKeyArray(url))) {
-
-            if (!application.objGlobal.csrfVerify()) {
-
-                logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
-
-                local.reqHeaders = getHTTPRequestData(false).headers;
-                if (structKeyExists(local.reqHeaders, "X-Requested-With") and local.reqHeaders["X-Requested-With"] eq "XMLHttpRequest") {
-                    header statuscode="403" statustext="Forbidden";
-                    writeOutput("Invalid CSRF token");
-                    abort;
-                }
-
-                getAlert('msgCsrfInvalid', 'danger');
-
-                if (structKeyExists(session, "user_id")) {
-                    location url="#application.mainURL#/dashboard" addtoken="false";
-                } else {
-                    location url="#application.mainURL#/login" addtoken="false";
-                }
-
-            }
-
         }
 
         // Custom code
@@ -338,6 +281,26 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         include template="\#ARGUMENTS.TargetPage#";
         return true;
 
+    }
+
+    // Apply the shared policy's decision without duplicating its access rules.
+    private void function enforceAccess(required struct decision) {
+        if (arguments.decision.access) {
+            return;
+        }
+        if ((arguments.decision.reason ?: "") eq "csrf") {
+            application.objLog.logWrite("system", "warning", "CSRF token missing or invalid [Path: #thiscontent.thisPath#, Method: #cgi.request_method#, IP: #cgi.remote_addr#]");
+        }
+        if (structKeyExists(arguments.decision, "alertKey")) {
+            application.objGlobal.getAlert(arguments.decision.alertKey, arguments.decision.alertType);
+        }
+        if (structKeyExists(arguments.decision, "redirect")) {
+            location url=application.mainURL & arguments.decision.redirect addtoken=false;
+        }
+        header statuscode=arguments.decision.statusCode statustext=arguments.decision.statusText;
+        writeOutput(encodeForHTML(structKeyExists(arguments.decision, "messageKey")
+            ? application.objLanguage.getTrans(arguments.decision.messageKey) : (arguments.decision.message ?: "")));
+        abort;
     }
 
     public void function onError(struct exception, string eventName) {

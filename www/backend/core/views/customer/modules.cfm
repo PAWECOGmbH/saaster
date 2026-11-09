@@ -137,7 +137,7 @@
                                                         <cfif ((module.moduleData.itsFree and module.moduleStatus.recurring neq "onetime") or module.moduleStatus.status eq "expired" or module.moduleStatus.status eq "test") and session.superAdmin>
                                                             <cfif module.moduleStatus.status eq "canceled">
                                                                 <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke&#csrfParam()#" class="card-btn text-blue">
-                                                                    <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
+                                                                    <i class="ti ti-arrow-back-up pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
                                                                 </a>
                                                             <cfelse>
                                                                 <cfif module.moduleStatus.recurring eq "test">
@@ -151,11 +151,11 @@
                                                                         <cfset linkO = objBookLinks.paymentFirstLink(module.moduleData.bookingLinkO)>
                                                                     </cfif>
                                                                     <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#&#csrfParam()#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                        <i class="ti ti-trash pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                     </a>
                                                                     <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
                                                                         <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                            <i class="ti ti-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                         </a>
                                                                         <div class="dropdown-menu">
                                                                             <cfif module.moduleData.priceMonthly gt 0>
@@ -168,26 +168,26 @@
                                                                     </div>
                                                                 <cfelse>
                                                                     <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#&#csrfParam()#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                        <i class="ti ti-trash pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                     </a>
                                                                 </cfif>
                                                             </cfif>
                                                         <cfelseif module.moduleStatus.status eq "canceled">
                                                             <a href="#application.mainURL#/#module.moduleData.settingPath#" class="card-btn">
-                                                                <i class="fas fa-cog pe-2"></i> #getTrans('txtSettings')#
+                                                                <i class="ti ti-settings pe-2"></i> #getTrans('txtSettings')#
                                                             </a>
                                                             <a href="#application.mainURL#/cancel?module=#module.moduleData.moduleID#&revoke&#csrfParam()#" class="card-btn text-blue">
-                                                                <i class="fas fa-undo pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
+                                                                <i class="ti ti-arrow-back-up pe-2 text-blue"></i> #getTrans('btnRevokeCancellation')#
                                                             </a>
                                                         <cfelse>
                                                             <cfif module.moduleStatus.status eq "payment" and module.invoiceID gt 0 and session.superAdmin>
                                                                 <a href="#application.mainURL#/account-settings/invoice/#module.invoiceID#" class="card-btn">
-                                                                    <i class="fas fa-coins pe-2"></i> #getTrans('txtViewInvoice')#
+                                                                    <i class="ti ti-coins pe-2"></i> #getTrans('txtViewInvoice')#
                                                                 </a>
                                                             <cfelse>
                                                                 <cfif module.moduleStatus.recurring neq "onetime">
                                                                     <a class="card-btn text-red cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/cancel?module=#module.moduleData.moduleID#&#csrfParam()#', '#getTrans('txtCancel')#', '#getTrans('msgCancelModuleWarningText')#', '#getTrans('btnDontCancel')#', '#getTrans('btnYesCancel')#')">
-                                                                        <i class="far fa-trash-alt pe-2 text-red"></i> #getTrans('txtCancel')#
+                                                                        <i class="ti ti-trash pe-2 text-red"></i> #getTrans('txtCancel')#
                                                                     </a>
                                                                 </cfif>
                                                             </cfif>
@@ -240,7 +240,7 @@
                                                         </div>
                                                         <div class="d-flex">
                                                             <a href="##?" class="card-btn w-50" data-bs-toggle="modal" data-bs-target="##modul_#module.moduleID#">
-                                                                <i class="fa-solid fa-circle-info pe-2"></i> Info
+                                                                <i class="ti ti-info-circle pe-2"></i> Info
                                                             </a>
                                                             <cfif session.superAdmin>
                                                                 <cfif not arrayLen(module.includedInPlans)>
@@ -254,11 +254,11 @@
                                                                     </cfif>
                                                                     <cfif module.testDays gt 0 and (module.priceMonthly gt 0 or module.priceOnetime gt 0)>
                                                                         <a href="#testLink#" class="card-btn w-50 activate-module">
-                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnTestNow')#
+                                                                            <i class="ti ti-lock activate-lock pe-2"></i> #getTrans('btnTestNow')#
                                                                         </a>
                                                                     <cfelseif module.itsFree>
                                                                         <a href="#module.bookingLinkO#" class="card-btn w-50 activate-module">
-                                                                            <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                            <i class="ti ti-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                         </a>
                                                                     <cfelse>
                                                                         <cfif module.priceMonthly gt 0 or module.priceOnetime gt 0>
@@ -274,7 +274,7 @@
                                                                             <cfif module.priceMonthly gt 0>
                                                                                 <div class="dropdown w-50" style="border-left: 1px solid ##e6e7e9;">
                                                                                     <a class="card-btn dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                                                        <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                                        <i class="ti ti-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                                     </a>
                                                                                     <div class="dropdown-menu">
                                                                                         <a class="dropdown-item activate-module" href="#linkM#">#getTrans('txtMonthly')# (#module.currencySign# #lsCurrencyFormat(module.priceMonthly, "none")#)</a>
@@ -283,7 +283,7 @@
                                                                                 </div>
                                                                             <cfelseif module.priceOnetime gt 0>
                                                                                 <a href="#linkO#" class="card-btn w-50 activate-module">
-                                                                                    <i class="fa-solid fa-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
+                                                                                    <i class="ti ti-lock activate-lock pe-2"></i> #getTrans('btnActivate')#
                                                                                 </a>
                                                                             </cfif>
                                                                         </cfif>

@@ -11,6 +11,19 @@ load_test_environment
 guard_test_database_name
 require_running_container "${MYSQL_CONTAINER_NAME}"
 
+# Repair stale InnoDB full-text indexes after repeated fixture insert/delete runs,
+# without dropping the database or touching development data.
+case "${1:-}" in
+    --rebuild-search-index)
+        printf 'ALTER TABLE `%s`.`customers` ENGINE=InnoDB;\n' "${TEST_MYSQL_DATABASE}" | \
+            docker exec -i "${MYSQL_CONTAINER_NAME}" mysql -u root --password="${MYSQL_ROOT_PASSWORD}"
+        echo "Customer search index rebuilt in '${TEST_MYSQL_DATABASE}'."
+        exit 0
+        ;;
+    "") ;;
+    *) echo "Usage: $0 [--rebuild-search-index]" >&2; exit 2 ;;
+esac
+
 # Character set as in V9__change-collation-to-unicode.sql. The migrations set it
 # for the tables anyway, this is about the database itself.
 sql="DROP DATABASE IF EXISTS \`${TEST_MYSQL_DATABASE}\`;

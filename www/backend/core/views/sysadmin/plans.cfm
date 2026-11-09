@@ -28,7 +28,7 @@
                     <div class="button-group">
                         <cfif qPlanGroups.recordCount>
                             <button href="##" data-bs-toggle="modal" data-bs-target="##plan_new" class="btn btn-primary">
-                                <i class="fas fa-plus pe-3"></i> Add plan
+                                <i class="ti ti-plus pe-3"></i> Add plan
                             </button>
                         </cfif>
                         <button class="btn dropdown-toggle btn-primary" data-bs-toggle="dropdown">
@@ -56,7 +56,7 @@
                                 </div>
                                 <cfif qPlanGroups.recordCount>
                                     <div class="col-lg-6 text-end pe-3">
-                                        <a href="#application.mainURL#/plans" target="_blank"><i class="fas fa-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
+                                        <a href="#application.mainURL#/plans" target="_blank"><i class="ti ti-search h2" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview plans"></i></a>
                                     </div>
                                 </cfif>
                             </div>
@@ -66,7 +66,7 @@
                                 <cfif qPlanGroups.recordCount>
                                     Here you can configure your plans and prices. The <b>default plan</b> indicates that it will be activated immediately when a new registration is made without choosing a plan.
                                 <cfelse>
-                                    <span class="text-red">You need at least one plan group before you can create plans. <a href="#application.mainURL#/sysadmin/plangroups"><i class="fas fa-long-arrow-alt-right"></i> Manage plan groups</a></span>
+                                    <span class="text-red">You need at least one plan group before you can create plans. <a href="#application.mainURL#/sysadmin/plangroups"><i class="ti ti-arrow-right"></i> Manage plan groups</a></span>
                                 </cfif>
                             </p>
                             <div class="table-responsive">
@@ -90,7 +90,7 @@
                                                     <input type="hidden" name="planID" value="#qPlans.intPlanID#">
                                                     <input type="hidden" name="groupID" value="#qPlans.intPlanGroupID#">
                                                     <tr <cfif qPlans.recordCount gt 1>id="sort_#qPlans.intPlanID#" data-id="#qPlans.intPlanID#" data-group="#qPlans.intPlanGroupID#" data-extend="#urlencodedformat('AND intPlanGroupID=' & qPlans.intPlanGroupID)#"</cfif>>
-                                                        <td class="move text-center"><cfif qPlans.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
+                                                        <td class="move text-center"><cfif qPlans.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></cfif></td>
                                                         <td class="text-center">#qPlans.intPrio#</td>
                                                         <td>#encodeForHTML(qPlans.strPlanName)#</td>
                                                         <td>#encodeForHTML(qPlans.strGroupName)#</td>

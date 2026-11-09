@@ -69,7 +69,7 @@
 
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/payment-settings?add=#session.customer_id#" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> #getTrans('btnAddPaymentMethod')#
+                            <i class="ti ti-plus pe-3"></i> #getTrans('btnAddPaymentMethod')#
                         </a>
                     </div>
 
@@ -116,7 +116,7 @@
                                         </div>
                                         <cfif getWebhook.blnFailed eq 1>
                                             <div class="col-lg-2 mb-2">
-                                                <i class="fas fa-exclamation-triangle text-yellow h1" data-bs-toggle="tooltip" data-bs-placement="top" title="#getTrans('titChargingNotPossible')#"></i>
+                                                <i class="ti ti-alert-triangle text-yellow h1" data-bs-toggle="tooltip" data-bs-placement="top" title="#getTrans('titChargingNotPossible')#"></i>
                                             </div>
                                         </cfif>
                                     </div>

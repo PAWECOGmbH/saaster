@@ -1,5 +1,8 @@
 
 <cfscript>
+    if (session.membership_access ?: false) {
+        location url="#application.mainURL#/account-settings/memberships" addtoken=false;
+    }
     qUser = application.objUser.getAllUsers(session.customer_id);
 </cfscript>
 
@@ -18,7 +21,7 @@
                 </div>
                 <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                     <a href="#application.mainURL#/account-settings/user/new" class="btn btn-primary">
-                        <i class="fas fa-plus pe-3"></i> #getTrans('btnNewUser')#
+                        <i class="ti ti-plus pe-3"></i> #getTrans('btnNewUser')#
                     </a>
                 </div>
             </div>
@@ -55,9 +58,9 @@
                                     <td>#encodeForHTML(qUser.strFirstName)#</td>
                                     <td>#encodeForHTML(qUser.strLastName)#</td>
                                     <td>#encodeForHTML(qUser.strEmail)#</td>
-                                    <td class="text-center"><cfif qUser.blnSuperAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
-                                    <td class="text-center"><cfif qUser.blnAdmin><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
-                                    <td class="text-center"><cfif qUser.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
+                                    <td class="text-center"><cfif qUser.blnSuperAdmin><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                    <td class="text-center"><cfif qUser.blnAdmin><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                    <td class="text-center"><cfif qUser.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
                                     <td class="text-end">
                                         <cfset canEdit = true>
                                         <cfset canDelete = false>

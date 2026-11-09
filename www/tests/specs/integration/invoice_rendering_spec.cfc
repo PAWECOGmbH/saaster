@@ -80,6 +80,29 @@ component extends="tests.support.integration_spec" {
 
             describe(title = "Mails", skip = !len(mailCatcher()), body = () => {
 
+                it("delivers optional blind copies of both invoice mails to the configured operator", () => {
+                    local.originalSetting = application.objSettings.getSetting("settingInvoiceBcc");
+                    local.originalMailbox = application.toEmail;
+                    local.bccMailbox = "testbox-bcc-" & lCase(replace(createUUID(), "-", "", "all"));
+                    try {
+                        application.toEmail = local.bccMailbox & "@saaster.invalid";
+                        application.systemSettingStruct.settingInvoiceBcc = "0";
+                        expect(invoices.getInvoiceBcc()).toBe("");
+                        application.systemSettingStruct.settingInvoiceBcc = "1";
+                        local.invoiceID = createInvoiceWithPosition("de");
+                        local.sent = invoices.sendInvoice(local.invoiceID);
+                        expect(local.sent.success).toBeTrue(local.sent.message);
+                        expect(waitForMail(trans("titInvoiceReady", "de"), local.bccMailbox).body).toInclude(trans("btnDownloadInvoice", "de"));
+                        local.sent = invoices.sendPaymentRequest(local.invoiceID);
+                        expect(local.sent.success).toBeTrue(local.sent.message);
+                        expect(waitForMail(trans("titInvoice", "de") & " | ", local.bccMailbox).body).notToBeEmpty();
+                    } finally {
+                        application.systemSettingStruct.settingInvoiceBcc = local.originalSetting;
+                        application.toEmail = local.originalMailbox;
+                        cfhttp(url=mailCatcher() & "/api/v1/mailbox/" & local.bccMailbox, method="delete", timeout=10);
+                    }
+                });
+
                 it("sends the invoice in the language of the invoice, whatever the session language", () => {
                     session.lng = "en";
                     var invoiceID = createInvoiceWithPosition("de");
@@ -259,13 +282,14 @@ component extends="tests.support.integration_spec" {
     }
 
     // Waits up to 15 seconds for a mail with the given subject start; returns { subject, body }
-    private struct function waitForMail(required string subjectStart) {
+    private struct function waitForMail(required string subjectStart, string mailboxName = "") {
+        local.targetMailbox = len(arguments.mailboxName) ? arguments.mailboxName : mailbox();
         for (var attempt = 1; attempt lte 30; attempt++) {
-            cfhttp(url = mailCatcher() & "/api/v1/mailbox/" & mailbox(), method = "get", timeout = 10, result = "local.list");
+            cfhttp(url = mailCatcher() & "/api/v1/mailbox/" & local.targetMailbox, method = "get", timeout = 10, result = "local.list");
             if (isJSON(local.list.fileContent)) {
                 for (var entry in deserializeJSON(local.list.fileContent)) {
                     if (left(entry.subject, len(arguments.subjectStart)) eq arguments.subjectStart) {
-                        cfhttp(url = mailCatcher() & "/api/v1/mailbox/" & mailbox() & "/" & entry.id, method = "get", timeout = 10, result = "local.message");
+                        cfhttp(url = mailCatcher() & "/api/v1/mailbox/" & local.targetMailbox & "/" & entry.id, method = "get", timeout = 10, result = "local.message");
                         var message = deserializeJSON(local.message.fileContent);
                         return { subject: entry.subject, body: message.body.html ?: message.body.text ?: "" };
                     }
@@ -273,7 +297,7 @@ component extends="tests.support.integration_spec" {
             }
             sleep(500);
         }
-        fail("No mail starting with [" & arguments.subjectStart & "] arrived in the mailbox " & mailbox());
+        fail("No mail starting with [" & arguments.subjectStart & "] arrived in the mailbox " & local.targetMailbox);
     }
 
     // ---------- a third language ----------

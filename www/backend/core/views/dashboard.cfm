@@ -60,7 +60,7 @@
                                 <cfif session.dashboardedit eq 1>
                                     <div class="card-header d-flex">
                                         <div style="margin-right:15px">
-                                            <i class="fas fa-bars move-widget" style="cursor:grab;"></i>
+                                            <i class="ti ti-menu-2 move-widget" style="cursor:grab;"></i>
                                         </div>
                                         <div class="flex-grow-1">
                                             <span class="isvisible" style="<cfif qUserWidgets.blnActive eq 1>display:block<cfelse>display:none</cfif>">#getTrans('txtWidgetVisible')#</span>
@@ -115,10 +115,10 @@
                         <form action="#application.mainURL#/dashboard-settings" method="post">#csrfField()#
                             <cfif session.dashboardedit eq 0>
                                 <input type="hidden" name="dashboardedit" value="1">
-                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEditDashboard')#</button>
+                                <button type="submit" class="btn btn-outline-dark"><i class="ti ti-layout-grid pe-3"></i>#getTrans('bnEditDashboard')#</button>
                             <cfelse>
                                 <input type="hidden" name="dashboardedit" value="0">
-                                <button type="submit" class="btn btn-outline-dark"><i class="fas fa-th-large pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
+                                <button type="submit" class="btn btn-outline-dark"><i class="ti ti-layout-grid pe-3"></i>#getTrans('bnEndEditDashboard')#</button>
                             </cfif>
                         </form>
                     </div>

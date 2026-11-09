@@ -6,18 +6,22 @@
     param name="session.log_type" default="";
     param name="session.log_date" default=dateFormat(now(), "yyyy-mm-dd");
     param name="session.log_level" default="";
+    param name="session.log_search" default="";
 
     if (structKeyExists(form, "log_type")) {
         session.log_type = form.log_type;
     }
     if (structKeyExists(form, "log_date")) {
-        session.log_date = dateFormat(form.log_date, "yyyy-mm-dd");
+        session.log_date = isDate(form.log_date) ? dateFormat(form.log_date, "yyyy-mm-dd") : "";
     }
     if (structKeyExists(form, "log_level")) {
         session.log_level = form.log_level;
     }
 
-    qLogfiles = objLogs.getLogs(type=session.log_type, date=session.log_date, level=session.log_level);
+    if (structKeyExists(form, "log_search")) {
+        session.log_search = left(trim(form.log_search), 200);
+    }
+    qLogfiles = objLogs.getLogs(type=session.log_type, date=session.log_date, level=session.log_level, search=session.log_search);
     logTypes = objLogs.getLogTypes();
 
 </cfscript>
@@ -82,6 +86,11 @@
                                         <div class="form-label">Filter by date:</div>
                                         <input type="date" class="form-control" name="log_date" value="#session.log_date#">
                                     </div>
+                                    <div class="col-lg-4 mb-3">
+                                        <label class="form-label" for="log-search">Search file contents:</label>
+                                        <input id="log-search" type="search" name="log_search" class="form-control" maxlength="200" value="#encodeForHTMLAttribute(session.log_search)#" placeholder="Customer, invoice, error message…">
+                                        <small class="text-muted">Clear the date to search all retained log files.</small>
+                                    </div>
                                     <div class="col-lg-1 mb-3">
                                         <div class="form-label">&nbsp;</div>
                                         <input type="submit" class="btn btn-primary" value="Filter">
@@ -139,7 +148,7 @@
                         </div>
                     <cfelse>
                         <div class="alert alert-primary" role="alert">
-                            No logs found on this day.
+                            No log files match these filters.
                         </div>
                     </cfif>
                 </div>

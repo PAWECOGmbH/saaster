@@ -27,7 +27,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##widget_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add widget
+                            <i class="ti ti-plus pe-3"></i> Add widget
                         </a>
                     </div>
                 </div>
@@ -48,8 +48,10 @@
                                 <table class="table card-table table-vcenter text-nowrap">
                                     <thead >
                                         <tr>
+                                            <th width="5%"></th>
+                                            <th width="5%" class="text-center">Default order</th>
                                             <th width="20%">Widget name</th>
-                                            <th width="40%">Filepath</th>
+                                            <th width="30%">Filepath</th>
                                             <th width="20%" class="text-center">Size ratio</th>
                                             <th width="10%" class="text-center">Active</th>
                                             <th width="5%"></th>
@@ -57,9 +59,11 @@
                                         </tr>
                                     </thead>
                                     <cfif qWidgets.recordCount>
-                                        <tbody id="dragndrop_body">
+                                        <tbody <cfif qWidgets.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qWidgets">
-                                                <tr>
+                                                <tr id="sort_#qWidgets.intWidgetID#">
+                                                    <td class="move text-center"><cfif qWidgets.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;" title="Drag to reorder"></i></cfif></td>
+                                                    <td class="text-center">#qWidgets.intPrio#</td>
                                                     <td>#encodeForHTML(qWidgets.strWidgetName)#</td>
                                                     <td>#encodeForHTML(qWidgets.strFilePath)#</td>
                                                     <td class="text-center">#encodeForHTML(qWidgets.strDescription)#</td>
@@ -236,3 +240,39 @@
     
 
 </div>
+
+<cfif qWidgets.recordCount gt 1>
+    <cfoutput>
+    <script>
+        function fnSaveSort() {
+            var order = $('##dragndrop_body > tr').map(function(index) {
+                return { prio: index + 1, intWidgetID: Number(this.id.replace('sort_', '')) };
+            }).get();
+
+            $('##dragndrop_body').sortable('disable');
+            function sortFailed() {
+                swal({
+                    text: 'The widget order could not be saved. Please try again.',
+                    icon: 'error'
+                }).then(function() {
+                    location.reload();
+                });
+            }
+
+            $.ajax({
+                type: 'post',
+                url: '#application.mainURL#/backend/core/handler/ajax_sort.cfm?widgets',
+                contentType: 'application/json',
+                // The shared sort handler expects a JSON string containing nested rows.
+                data: JSON.stringify(JSON.stringify([order]))
+            }).done(function(response) {
+                if (response.trim() === 'ok') {
+                    location.reload();
+                } else {
+                    sortFailed();
+                }
+            }).fail(sortFailed);
+        }
+    </script>
+    </cfoutput>
+</cfif>

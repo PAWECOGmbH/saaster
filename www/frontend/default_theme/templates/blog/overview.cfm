@@ -17,15 +17,15 @@
     <div class="mb-4 text-center">
         <span class="me-2">Filter by category:</span>
         <cfif catID gt 0>
-            <a href="#application.mainURL#/blog/overview" class="badge bg-primary text-light me-1">All</a>
+            <a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#" class="badge bg-primary text-light me-1">All</a>
         <cfelse>
-            <a href="#application.mainURL#/blog/overview" class="badge bg-primary text-light me-1 border border-dark">All</a>
+            <a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#" class="badge bg-primary text-light me-1 border border-dark">All</a>
         </cfif>
         <cfloop array="#allCategories#" index="cat">
             <cfif catID eq cat.id>
-                <a href="#application.mainURL#/blog/overview?catID=#cat.id#" class="badge bg-light text-dark border me-1 border border-dark">#encodeForHtml(cat.name)#</a>
+                <a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#?catID=#cat.id#" class="badge bg-light text-dark border me-1 border border-dark">#encodeForHtml(cat.name)#</a>
             <cfelse>
-                <a href="#application.mainURL#/blog/overview?catID=#cat.id#" class="badge bg-light text-dark border me-1">#encodeForHtml(cat.name)#</a>
+                <a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#?catID=#cat.id#" class="badge bg-light text-dark border me-1">#encodeForHtml(cat.name)#</a>
             </cfif>
         </cfloop>
     </div>
@@ -48,7 +48,7 @@
                             <div class="mt-2">
                                 <span class="badge bg-secondary me-1">Categories:</span>
                                 <cfloop array="#post.categories#" index="cat">
-                                    <a href="#application.mainURL#/blog/overview?catID=#cat.id#" class="badge bg-light text-dark border">#encodeForHtml(cat.name)#</a>
+                                    <a href="#application.objGlobal.getLink('templates/blog/overview.cfm')#?catID=#cat.id#" class="badge bg-light text-dark border">#encodeForHtml(cat.name)#</a>
                                 </cfloop>
                             </div>
                         </cfif>

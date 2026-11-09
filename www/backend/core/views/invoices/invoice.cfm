@@ -63,7 +63,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
-                            <i class="fas fa-print pe-2"></i> #getTrans('txtPrintInvoice')#
+                            <i class="ti ti-printer pe-2"></i> #getTrans('txtPrintInvoice')#
                         </a>
                     </div>
                 </div>
@@ -197,7 +197,7 @@
                                 <div class="text-end pe-0">
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-green dropdown-toggle" data-bs-toggle="dropdown">
-                                            <i class="fas fa-coins pe-2  activate-lock"></i> #getTrans('txtPayInvoice')#
+                                            <i class="ti ti-coins pe-2  activate-lock"></i> #getTrans('txtPayInvoice')#
                                         </button>
                                         <div class="dropdown-menu">
                                             <a href="#application.mainURL#/payment-settings?pay=#thisInvoiceID#" class="dropdown-item activate-module">

@@ -1464,11 +1464,15 @@ component displayname="invoices" output="false" {
         local.addressBlock = "";
         if (len(trim(local.customerData.billingAccountName)) and len(trim(local.customerData.billingAddress))) {
 
+            // Encode line by line: encodeForHTML() keeps line breaks in Lucee 7 (Guard), ESAPI encoded them
+            local.billingLines = listToArray(replace(local.customerData.billingAddress, chr(13), "", "all"), chr(10), true);
+            local.billingAddress = arrayToList(arrayMap(local.billingLines, (line) => encodeForHTML(line)), "<br />");
+
             cfsavecontent(variable="local.addressBlock") {
                 echo(
                     "
                         #encodeForHTML(local.customerData.billingAccountName)#<br />
-                        #replace(encodeForHTML(local.customerData.billingAddress), "&##xd;", '<br />', 'all')#<br />
+                        #local.billingAddress#<br />
                     "
                 )
             }
@@ -1507,6 +1511,16 @@ component displayname="invoices" output="false" {
 
     }
 
+
+    // Reuse the configured system administrator mailbox used for registration notices.
+    public string function getInvoiceBcc() {
+        return application.objSettings.getSetting("settingInvoiceBcc") eq "1" ? application.toEmail : "";
+    }
+
+    // Format a booking period in the document language without changing the request locale.
+    public string function formatDocumentDate(required date value, required string language) {
+        return lsDateFormat(date=arguments.value, locale=application.objLanguage.toLocale(getDocumentLanguage(arguments.language)));
+    }
 
     // Send invoice by e-mail
     public struct function sendInvoice(required numeric invoiceID) {
@@ -1584,7 +1598,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send invoice
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.mailLanguage)#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" bcc="#getInvoiceBcc()#" from="#application.fromEmail#" subject="#getTrans('titInvoiceReady', local.mailLanguage)#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }
@@ -1663,7 +1677,7 @@ component displayname="invoices" output="false" {
             }
 
             // Send activation link
-            mail to="#getInvoiceEmail(customerID=local.customerID)#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
+            mail to="#getInvoiceEmail(customerID=local.customerID)#" bcc="#getInvoiceBcc()#" from="#application.fromEmail#" subject="#variables.mailTitle#" type="html" {
                 include template="/config.cfm";
                 include template="/frontend/core/mail_design.cfm";
             }

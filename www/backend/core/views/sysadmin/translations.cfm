@@ -121,7 +121,7 @@
                                         data-bs-placement="top"
                                         title="Generate SQL Code for the table custom_translations"
                                         class="text-decoration-none" target="_blank">
-                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                            <i class="ti ti-file-code fs-3 me-3 p-0" style="font-size: 20px;"></i>
                                     </a>
 
                                 </div>
@@ -155,18 +155,18 @@
                                     </div>
                                     <div class="col-lg-3 px-4">
                                         <a  data-bs-toggle="modal" data-bs-target="##lng_trans" class="btn btn-primary trans-btn">
-                                            <i class="fas fa-plus pe-3"></i> Add custom translation
+                                            <i class="ti ti-plus pe-3"></i> Add custom translation
                                         </a>
                                     </div>
                                     <div class="col-lg-3 text-end px-4">
                                         <cfif session.visTrans>
                                             <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=custom" class="btn btn-primary trans-btn">
-                                                <i class="fas fa-eye-slash  pe-3"></i>
+                                                <i class="ti ti-eye-off  pe-3"></i>
                                                 Hide translations
                                             </a>
                                         <cfelse>
                                             <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=custom" class="btn btn-primary trans-btn">
-                                                <i class="fas fa-eye pe-3"></i>
+                                                <i class="ti ti-eye pe-3"></i>
                                                 Show all translations
                                             </a>
                                         </cfif>
@@ -198,14 +198,14 @@
                                                                     </div>
                                                                     <div>
                                                                         <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##modal_#qCustomResults.intCustTransID#">
-                                                                            <i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i>
+                                                                            <i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i>
                                                                         </a>
                                                                     </div>
                                                                 </div>
                                                             </td>
                                                             <td class="text-left">
                                                                 <a href="#application.mainURL#/sysadm/translations?delete_trans=#qCustomResults.intCustTransID#&#csrfParam()#" title="Delete">
-                                                                    <i class="fas fa-times text-red" style="font-size: 20px;"></i>
+                                                                    <i class="ti ti-x text-red" style="font-size: 20px;"></i>
                                                                 </a>
                                                             </td>
                                                         </tr>
@@ -297,7 +297,7 @@
                                         data-bs-placement="top"
                                         title="Generate SQL Code for the table system_translations"
                                         class="text-decoration-none" target="_blank">
-                                            <i class="fas fa-file-code fa-lg me-3 p-0" style="font-size: 20px;"></i>
+                                            <i class="ti ti-file-code fs-3 me-3 p-0" style="font-size: 20px;"></i>
                                     </a>
 
                                 </div>
@@ -332,12 +332,12 @@
                                     <div class="col-lg-6 text-end px-4">
                                             <cfif session.visTrans>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=hide&tr=system" class="btn btn-primary trans-btn">
-                                                    <i class="fas fa-eye-slash  pe-3"></i>
+                                                    <i class="ti ti-eye-off  pe-3"></i>
                                                     Hide translations
                                                 </a>
                                             <cfelse>
                                                 <a href="#application.mainURL#/sysadmin/translations?vis=show&tr=system" class="btn btn-primary trans-btn">
-                                                    <i class="fas fa-eye pe-3"></i>
+                                                    <i class="ti ti-eye pe-3"></i>
                                                     Show all translations
                                                 </a>
                                             </cfif>
@@ -366,7 +366,7 @@
                                                                             #transText#
                                                                         </div>
                                                                         <div>
-                                                                            <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a>
+                                                                            <a href="##?" class="trans-link input-group-link" data-bs-toggle="modal" data-bs-target="##syst_modal_#qSystemResults.intSystTransID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate content"></i></a>
                                                                         </div>
                                                                     </div>
                                                                 </td>
@@ -433,7 +433,7 @@
                                     </div>
 
                                     <div class="col-lg-2 trans-arrow-box">
-                                        <i class="fa fa-long-arrow-right trans-arrow" aria-hidden="true"></i>
+                                        <i class="ti ti-arrow-right trans-arrow" aria-hidden="true"></i>
                                     </div>
 
                                     <div class="col-lg-5">

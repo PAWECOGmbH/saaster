@@ -1,9 +1,9 @@
 ﻿
 <cfscript>
-    local.urlLogin    = application.mainURL & "/" & thiscontent.navSlugs['templates/login.cfm'];
-    local.urlRegister = application.mainURL & "/" & thiscontent.navSlugs['templates/register.cfm'];
-    local.urlPassword = application.mainURL & "/" & thiscontent.navSlugs['templates/password.cfm'];
-    local.urlMfa      = application.mainURL & "/" & thiscontent.navSlugs['templates/mfa.cfm'];
+    local.urlLogin    = application.objGlobal.getLink("templates/login.cfm");
+    local.urlRegister = application.objGlobal.getLink("templates/register.cfm");
+    local.urlPassword = application.objGlobal.getLink("templates/password.cfm");
+    local.urlMfa      = application.objGlobal.getLink("templates/mfa.cfm");
 
 objRegister = new frontend.core.com.register();
 
@@ -28,6 +28,26 @@ if (structKeyExists(form, 'login_btn')) {
     if (isStruct(objUserLogin)) {
 
         if (objUserLogin.loginCorrect) {
+            if (objUserLogin.invitationOnly ?: false) {
+                loop list="user_id,customer_id,organization_id,membership_access,membership_identity,admin,superadmin,sysadmin,supportLogin,supportOriginUserID,supportOrganizationID" index="invitationSessionKey" {
+                    structDelete(session, invitationSessionKey);
+                }
+                sessionRotate();
+                loginThrottle.reset(form.email);
+                invitationLoginUser = application.objCustomer.getUserDataByID(objUserLogin.user_id);
+                // Keep the identity separate from the active organization session.
+                structDelete(session, "invitation_authenticated_user");
+                if (invitationLoginUser.blnMfa) {
+                    session.invitation_mfa_user = objUserLogin.user_id;
+                    session.user_email = objUserLogin.user_email;
+                    session.user_name = objUserLogin.user_name;
+                    session.mfaCheckCount = 0;
+                    invitationMfa = application.objUser.sendMfaCode(application.objGlobal.getUUID(), false, session.user_email, session.user_name);
+                    location url=invitationMfa.redirect addtoken=false;
+                }
+                session.invitation_authenticated_user = objUserLogin.user_id;
+                location url="#application.mainURL#/organization-invitation" addtoken=false;
+            }
 
             // New session ID after a successful login (protection against session fixation)
             sessionRotate();
@@ -53,6 +73,10 @@ if (structKeyExists(form, 'login_btn')) {
                 session.admin = true;
             }
 
+            // Membership permissions override the compatibility flags after login.
+            if (!application.objMembershipAccess.refreshSession(true)) {
+                location url=local.urlLogin addtoken=false;
+            }
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
@@ -79,7 +103,8 @@ if (structKeyExists(form, 'login_btn')) {
 
             // Is the needed data of the cutomer already filled out?
             dataFilledIn = objRegister.checkFilledData(session.customer_id);
-            if (!dataFilledIn) {
+            if (!dataFilledIn and (!(session.membership_access ?: false)
+                or application.objAuthorization.canInTenant(session.user_id, session.customer_id, "tenant.settings.manage"))) {
 
                 // Set the sessions again in case it doesn't exist anymore
                 session.company = objUser.strCompanyName;
@@ -722,12 +747,23 @@ if (structKeyExists(form, 'mfa_btn')) {
     checkMfa = application.objUser.checkMfa(url.uuid, mfaCodes);
 
     if (checkMfa.success eq true) {
+        if (val(session.invitation_mfa_user ?: 0) eq checkMfa.userID
+            and application.objOrganizationInvitation.permitsIdentityLogin(checkMfa.userID, session.pendingOrganizationInvitation ?: "")) {
+            sessionRotate();
+            session.invitation_authenticated_user = checkMfa.userID;
+            structDelete(session, "invitation_mfa_user");
+            location url="#application.mainURL#/organization-invitation" addtoken=false;
+        }
 
         // New session ID once the second factor is confirmed (protection against session fixation)
         sessionRotate();
 
         session.user_id = checkMfa.userID;
         session.customer_id = checkMfa.customerID;
+        if (!application.objMembershipAccess.refreshSession(true)) {
+            location url=local.urlLogin addtoken=false;
+        }
+        application.objCustomer.setProductSessions(session.customer_id, session.lng);
         structDelete(session, "alert");
         logWrite("user", "info", "Login via MFA: User successfully logged in with multi-factor-authentication. [UserID: #checkMfa.userid#]");
 

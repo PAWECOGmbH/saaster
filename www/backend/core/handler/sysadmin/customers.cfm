@@ -90,6 +90,7 @@
 
         if (
             !userToDelete.recordCount
+            or application.objMembershipAccess.organizationForUser(val(form.user_id)).enabled
             or userToDelete.intUserID eq session.user_id
             or customerUserCount.userCount lte 1
         ) {
@@ -347,6 +348,14 @@
                 session.superadmin = 1;
                 session.sysadmin = 0;
                 session.supportLogin = 1;
+                session.supportOrganizationID = application.objMembershipAccess.organizationForCustomer(qCustomer.intCustomerID).id;
+
+                structDelete(session, "membership_access");
+                structDelete(session, "membership_identity");
+                structDelete(session, "organization_id");
+                if (not application.objMembershipAccess.refreshSession(true)) {
+                    location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+                }
 
                 // Set plans and modules as well as the custom settings into a session
                 application.objCustomer.setProductSessions(session.customer_id, session.lng);

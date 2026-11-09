@@ -79,7 +79,7 @@ qLanguages = queryExecute(
             </div>
         </div>
         <div class="mb-3">
-            <p><a href="##" data-bs-toggle="modal" data-bs-target="##lng_new"><i class="fas fa-plus pe-3"></i> Add language</a></p>
+            <p><a href="##" data-bs-toggle="modal" data-bs-target="##lng_new"><i class="ti ti-plus pe-3"></i> Add language</a></p>
             <p class="small">(Add a new language only if you miss your default language. You can add more languages later.)</p>
         </div>
         <div class="mb-3 text-center">

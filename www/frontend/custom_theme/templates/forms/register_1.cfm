@@ -53,7 +53,7 @@
                     <button id="submit_button" type="submit" class="btn btn-primary w-100">#getTrans('titCreateNewAccount')#</button>
                 </div>
                 <div class="text-center text-muted mt-4">
-                    #getTrans('formAlreadyHaveAccount')# <a href="#application.mainURL#/login">#getTrans('formSignIn')#</a>
+                    #getTrans('formAlreadyHaveAccount')# <a href="#application.objGlobal.getLink('templates/login.cfm')#">#getTrans('formSignIn')#</a>
                 </div>
             </div>
         </form>

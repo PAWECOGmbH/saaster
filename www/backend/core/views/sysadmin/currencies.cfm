@@ -24,7 +24,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##cur_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add currency
+                            <i class="ti ti-plus pe-3"></i> Add currency
                         </a>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                                     
                                     <cfloop query="qCurrencies">
                                         <tr id="sort_#qCurrencies.intCurrencyID#">
-                                            <td class="move text-center"><i class="fas fa-bars hand" style="cursor: grab;"></i></td>
+                                            <td class="move text-center"><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></td>
                                             <td class="text-center">#qCurrencies.intPrio#</td>
                                             <td>#encodeForHTML(qCurrencies.strCurrencyEN)#</td>
                                             <td>#encodeForHTML(qCurrencies.strCurrency)#</td>

@@ -203,6 +203,8 @@ component displayname="coreutility" output="false" {
         // Get the plans array using the groupID
         local.arrayPlans = local.objPlans.getPlans(local.groupID);
 
+        local.yearlyPerMonth = application.objSettings.getSetting("settingYearlyPricePerMonth") eq "1";
+
         // Append dynamic values with <span> elements for monthly/yearly toggle functionality
         if (arrayLen(local.arrayPlans)) {
 
@@ -211,8 +213,11 @@ component displayname="coreutility" output="false" {
                 // Create the dynamic price HTML string with monthly and yearly spans
                 local.dynPrice =
                     '<span class="price_box monthly">' & local.arrayPlans[i].priceMonthly & '</span>' &
-                    '<span class="price_box yearly" style="display: none;">' & local.arrayPlans[i].priceYearly & '</span>';
+                    '<span class="price_box yearly" style="display: none;">' & (local.yearlyPerMonth ? lsNumberFormat(local.arrayPlans[i].priceYearly / 12, '0.00') : local.arrayPlans[i].priceYearly) & '</span>';
                 local.arrayPlans[i]['dynPrice'] = local.dynPrice;
+                local.arrayPlans[i]['dynBillingNotice'] = local.yearlyPerMonth
+                    ? '<span class="price_box yearly" style="display: none;">' & application.objLanguage.getTrans('txtBilledYearly') & '</span>'
+                    : "";
 
                 // Create the dynamic VAT HTML string with monthly and yearly spans
                 local.dynVAT =
@@ -223,13 +228,13 @@ component displayname="coreutility" output="false" {
                 // Create the dynamic cycling text A
                 local.dynBillingCycleTextA =
                     '<span class="price_box monthly">' & lCase(application.objLanguage.getTrans('txtMonthly')) & '</span>' &
-                    '<span class="price_box yearly" style="display: none;">' & lCase(application.objLanguage.getTrans('txtYearly')) & '</span>';
+                    '<span class="price_box yearly" style="display: none;">' & lCase(application.objLanguage.getTrans(local.yearlyPerMonth ? 'txtMonthly' : 'txtYearly')) & '</span>';
                 local.arrayPlans[i]['dynBillingCycleTextA'] = local.dynBillingCycleTextA;
 
                 // Create the dynamic cycling text B
                 local.dynBillingCycleTextB =
                     '<span class="price_box monthly">' & lCase(application.objLanguage.getTrans('TitMonth')) & '</span>' &
-                    '<span class="price_box yearly" style="display: none;">' & lCase(application.objLanguage.getTrans('TitYear')) & '</span>';
+                    '<span class="price_box yearly" style="display: none;">' & lCase(application.objLanguage.getTrans(local.yearlyPerMonth ? 'TitMonth' : 'TitYear')) & '</span>';
                 local.arrayPlans[i]['dynBillingCycleTextB'] = local.dynBillingCycleTextB;
 
 

@@ -147,6 +147,17 @@ component extends="tests.support.integration_spec" {
                     expect(invoice.recordCount).toBe(1, result.message ?: "");
                     expect(invoice.strLanguageISO).toBe("de");
                     expect(invoice.strInvoiceTitle).toBe(application.objLanguage.getTrans("titModule", "de") & ": Sprachmodul");
+                    local.position = queryExecute(
+                        options={datasource=application.datasource},
+                        params={id:{type:"integer",value:variables.customerID}},
+                        sql="SELECT p.strTitle, b.dteStartDate, b.dteEndDate FROM invoice_positions p
+                            INNER JOIN invoices i ON i.intInvoiceID = p.intInvoiceID
+                            INNER JOIN bookings b ON b.intBookingID = i.intBookingID WHERE i.intCustomerID = :id"
+                    );
+                    local.customerTime = new backend.core.com.time(variables.customerID);
+                    expect(local.position.strTitle).toBe("Sprachmodul "
+                        & lsDateFormat(date=local.customerTime.utc2local(local.position.dteStartDate), locale="german (standard)") & " - "
+                        & lsDateFormat(date=local.customerTime.utc2local(local.position.dteEndDate), locale="german (standard)"));
                 });
 
             });

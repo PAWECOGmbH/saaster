@@ -55,6 +55,11 @@ component output="false" hint="Separate application for TestBox runs: own applic
     this.datasources[variables.testSettings.datasourceName] = variables.testDatasource;
     this.datasources[variables.datasource] = variables.testDatasource;
     this.defaultDatasource = variables.testSettings.datasourceName;
+    // Test mail must always stay in the local mail catcher, independent of admin settings.
+    if (len(variables.testSettings.mailCatcherUrl ?: "")) {
+        this.mailServers = [{host: listFirst(reReplace(variables.testSettings.mailCatcherUrl, "^https?://", ""), ":/"), port: 2500}];
+    }
+
 
     /*
         The Saaster components are not injectable services: they rely on

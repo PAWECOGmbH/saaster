@@ -1,0 +1,4 @@
+/* Scale the glyph so explicit icon sizes grow by the same factor. */
+.ti::before {
+    font-size: 1.2em;
+}
