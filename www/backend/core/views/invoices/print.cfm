@@ -222,6 +222,7 @@
 </cfsavecontent>
 
 
+<!--- The modern renderer centers the footer in the bottom margin; reserve space for a printable gap below it. --->
 <cfif !swissQrInvoice>
 
     <cfdocument
@@ -231,7 +232,7 @@
         marginLeft="1.8"
         marginRight="1.8"
         marginTop="2"
-        marginBottom="1"
+        marginBottom="3"
         format="pdf"
         overwrite="yes">
 
@@ -258,7 +259,7 @@
             marginLeft="1.8"
             marginRight="1.8"
             marginTop="2"
-            marginBottom="1"
+            marginBottom="3"
             format="pdf"
             overwrite="yes">
 
