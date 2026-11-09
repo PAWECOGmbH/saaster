@@ -26,6 +26,7 @@ component output="false" hint="The collection of every form and every action lin
 
     public array function handlerForms() {
         return [
+            { file: "backend/core/views/sysadmin/module_access_modal.cfm", target: "sysadm/modules", trigger: "form.module_access_action", purpose: "Block or unblock a module for one customer without changing billing" },
             { file: "backend/core/views/customer/membership_invitations.cfm", target: "memberships", trigger: "form.member_action", count: 3, purpose: "Invite, resend or revoke an organization invitation" },
             { file: "frontend/core/views/organization_invitation.cfm", target: "accept-organization-invitation", trigger: "form.accept_invitation", purpose: "Accept an invitation as the verified recipient" },
 

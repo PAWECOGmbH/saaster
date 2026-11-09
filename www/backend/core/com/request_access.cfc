@@ -54,6 +54,9 @@ component output="false" {
     }
 
     private struct function checkMembership(required struct content, required string method, required struct submitted, required struct queryString) {
+        if (structKeyExists(session, "customer_id") and application.objModuleBlocks.pathBlocked(session.customer_id, arguments.content.thisPath)) {
+            return {access: false, reason: "moduleBlocked", statusCode: 403, statusText: "Forbidden", messageKey: "msgModuleBlocked"};
+        }
         if (structKeyExists(session, "user_id") and structKeyExists(session, "customer_id")
             and not application.objMembershipAccess.allowRequest(session.user_id, session.customer_id,
                 arguments.content.thisPath, arguments.method, arguments.submitted, arguments.queryString)) {
@@ -110,6 +113,9 @@ component output="false" {
     public boolean function moduleAccess(required numeric moduleID) {
         if (arguments.moduleID lte 0 or not structKeyExists(session, "customer_id") or session.customer_id lte 0) {
             return true;
+        }
+        if (application.objModuleBlocks.isBlocked(session.customer_id, arguments.moduleID)) {
+            return false;
         }
         if (session.sysadmin ?: false) {
             return true;

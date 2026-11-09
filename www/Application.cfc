@@ -76,6 +76,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objSysadmin = new backend.core.com.sysadmin();
         application.objMeta = new backend.core.com.meta();
         application.objModules = new backend.core.com.modules();
+        application.objModuleBlocks = new backend.core.com.module_blocks();
         application.objCoreUtil = new frontend.core.com.coreutility();
 
         // Save all choosable languages into a list

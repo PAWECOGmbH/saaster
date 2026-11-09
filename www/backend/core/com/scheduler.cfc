@@ -50,6 +50,8 @@ component displayname="scheduler" output="false" {
                     AND scheduletasks.blnActive = 1
                     WHERE (scheduler_jobs.dtmNextRun IS NULL OR scheduler_jobs.dtmNextRun < :utcDate)
                     AND (scheduler_jobs.dtmLockedUntil IS NULL OR scheduler_jobs.dtmLockedUntil < :utcDate)
+                    AND NOT EXISTS (SELECT 1 FROM customer_module_blocks blocked
+                        WHERE blocked.intCustomerID = scheduler_jobs.intCustomerID AND blocked.intModuleID = scheduletasks.intModuleID)
                     ORDER BY scheduler_jobs.dtmNextRun
                     LIMIT 1
                     FOR UPDATE OF scheduler_jobs SKIP LOCKED
