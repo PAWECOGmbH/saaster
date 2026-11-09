@@ -119,7 +119,9 @@ component extends="tests.support.integration_spec" {
 
                 expect(answer.ran).toBeEmpty();
                 expect(getJob(jobID).dtmLastRun).toBe("");
-                expect(hasLog(answer, "warning", "wrong password")).toBeTrue();
+                expect(hasLog(answer, "warning", "Scheduler authentication failed [IP:")).toBeTrue();
+                expect(serializeJSON(answer.logs)).notToInclude("wrong");
+                expect(serializeJSON(answer.logs)).notToInclude("testbox-scheduler-probe");
             });
 
             it("exits at once when the worker number is above scheduleWorkers", () => {

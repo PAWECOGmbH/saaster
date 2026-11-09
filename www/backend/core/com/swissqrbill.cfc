@@ -147,199 +147,179 @@ component displayname="swissqrbill" output="false" {
                 <meta charset='UTF-8'>
                 <title>Swiss QR-Bill</title>
                 <style>
-                    /* Generell */
+                    /*
+                        Fixed sizes of the Swiss QR-bill (receipt 62mm, payment part 148mm, height 105mm)
+                        as table: floats with percentages and padding break into two pages in the PDF
+                        renderer of Lucee 7, which no longer has a free 'classic' engine.
+                    */
                     body, p, div {
                         margin: 0;
                         padding: 0;
-                        font-family: 'Arial';
+                        font-family: Arial, Helvetica, sans-serif;
+                    }
+                    table {
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                    }
+                    td {
+                        padding: 0;
+                        vertical-align: top;
                     }
                     ##bill {
-                        width: 100%;
-                        height: 240pt;
+                        width: 210mm;
+                        height: 105mm;
                         border-top: 1px dotted black;
                     }
-
-                    /* Main boxes */
-                    ##receipt,
-                    ##payment {
-                        float: left;
-                    }
                     ##receipt {
-                        width: 29%;
-                        padding: 10pt;
+                        width: 62mm;
+                        height: 105mm;
                         border-right: 1px dotted black;
                     }
                     ##payment {
-                        width: 71%;
-                        padding: 10pt;
+                        width: 148mm;
+                    }
+                    .inner {
+                        padding: 5mm;
                     }
 
                     /* Receipt part boxes */
                     ##receipt .account {
-                        height: 143pt;
+                        height: 56mm;
                     }
                     ##receipt .money {
-                        width: 100%;
-                        height: 30pt;
-                    }
-                    ##receipt .currency {
-                        float: left;
-                        width: 40%;
-                    }
-                    ##receipt .amount {
-                        width: 55%;
+                        height: 14mm;
                     }
                     ##receipt .receiving {
                         text-align: right;
-                        width: 100%;
-                        height: 25pt;
                     }
 
                     /* Payment part boxes */
-                    ##payment .top {
-                        height: 143pt;
-                    }
-                    ##payment .payment_part {
-                        width: 100%;
-                    }
                     ##payment .left_part {
-                        float: left;
-                        width: 37%;
+                        width: 51mm;
                     }
-                    ##payment .right_part {
-                        float: left;
-                        width: 63%;
+                    ##payment .top {
+                        height: 70mm;
                     }
-
-                    ##payment .qr_code {
-                        width: 105pt;
-                        height: 105pt;
-                        clip-path: inset(10px);
-                        display: block;
-                    }
-
                     ##payment .qr_code img {
-                        width: 100%;
-                        height: auto;
+                        width: 46mm;
+                        height: 46mm;
                         display: block;
                     }
-
-                    ##payment .money {
-                        width: 100%;
-                    }
-                    ##payment .currency {
-                        float: left;
-                        width: 40%;
-                    }
-                    ##payment .amount {
+                    .currency {
                         width: 40%;
                     }
 
                     /* Font sizes and paddings */
-                    ##receipt .title, .subtitle,
-                    ##payment .title, .subtitle {
+                    .title, .subtitle {
                         font-weight: bold;
                     }
-                    ##payment .title, ##receipt .title {
-                        font-size: 9pt;
-                        padding-bottom: 10pt;
+                    .title {
+                        font-size: 11pt;
+                        padding-bottom: 4mm;
                     }
-
-                    ##payment .title {
-                        padding-bottom: 15pt;
-                    }
-
                     ##receipt .subtitle {
-                        font-size: 5pt;
-                        padding-bottom: 1pt;
-                    }
-                    ##payment .subtitle {
                         font-size: 6pt;
                         padding-bottom: 1pt;
                     }
+                    ##payment .subtitle {
+                        font-size: 8pt;
+                        padding-bottom: 1pt;
+                    }
                     ##receipt .text {
-                        font-size: 7pt;
+                        font-size: 8pt;
                         padding-bottom: 8pt;
                     }
                     ##payment .text {
-                        font-size: 8pt;
+                        font-size: 10pt;
                         padding-bottom: 8pt;
                     }
                 </style>
             </head>
             <body>
-                <div id='bill'>
-                    <div id='receipt'>
-                        <div class='account'>
-                            <p class='title'>Empfangsschein</p>
-                            <p class='subtitle'>Konto / Zahlbar an</p>
-                            <p class='text'>
-                                " & variables.qrData.billerIBANformatted & "<br />
-                                " & variables.qrData.billerName & "<br />
-                                " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
-                                " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
-                            </p>
-                            #local.referenceNumberCode#
-                            <p class='subtitle'>Zahlbar durch</p>
-                            <p class='text'>
-                                " & variables.qrData.debtorName & "<br />
-                                " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
-                                " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
-                            </p>
-                        </div>
-                        <div class='money'>
-                            <div class='currency'>
-                                <p class='subtitle'>Währung</p>
-                                <p class='text'>" & variables.qrData.invoiceCurrency & "</p>
-                            </div>
-                            <div class='amount'>
-                                <p class='subtitle'>Betrag</p>
-                                <p class='text'>" & variables.qrData.invoiceAmountPDF & "</p>
-                            </div>
-                        </div>
-                        <p class='receiving subtitle'>Annahmestelle</p>
-                    </div>
-                    <div id='payment'>
-                        <div class='payment_part'>
-                            <div class='left_part'>
-                                <div class='top'>
-                                    <p class='title'>Zahlteil</p>
-                                    <div class='qr_code'>
-                                        <img src='data:image/png;base64," & generateQRCode(500, 0.12).base64String & "'>
-                                    </div>
+                <table id='bill'>
+                    <tr>
+                        <td id='receipt'>
+                            <div class='inner'>
+                                <div class='account'>
+                                    <p class='title'>Empfangsschein</p>
+                                    <p class='subtitle'>Konto / Zahlbar an</p>
+                                    <p class='text'>
+                                        " & variables.qrData.billerIBANformatted & "<br />
+                                        " & variables.qrData.billerName & "<br />
+                                        " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
+                                        " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
+                                    </p>
+                                    #local.referenceNumberCode#
+                                    <p class='subtitle'>Zahlbar durch</p>
+                                    <p class='text'>
+                                        " & variables.qrData.debtorName & "<br />
+                                        " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
+                                        " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
+                                    </p>
                                 </div>
-                                <div class='money'>
-                                    <div class='currency'>
-                                        <p class='subtitle'>Währung</p>
-                                        <p class='text'>" & variables.qrData.invoiceCurrency & "</p>
-                                    </div>
-                                    <div class='amount'>
-                                        <p class='subtitle'>Betrag</p>
-                                        <p class='text'>" & variables.qrData.invoiceAmountPDF & "</p>
-                                    </div>
-                                </div>
+                                <table class='money' width='100%'>
+                                    <tr>
+                                        <td class='currency'>
+                                            <p class='subtitle'>Währung</p>
+                                            <p class='text'>" & variables.qrData.invoiceCurrency & "</p>
+                                        </td>
+                                        <td>
+                                            <p class='subtitle'>Betrag</p>
+                                            <p class='text'>" & variables.qrData.invoiceAmountPDF & "</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p class='receiving subtitle'>Annahmestelle</p>
                             </div>
-                            <div class='right_part'>
-                                <p class='subtitle'>Konto / Zahlbar an</p>
-                                <p class='text'>
-                                    " & variables.qrData.billerIBANFormatted & "<br />
-                                    " & variables.qrData.billerName & "<br />
-                                    " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
-                                    " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
-                                </p>
-                                #local.referenceNumberCode#
-                                <p class='subtitle'>Zusätzliche Informationen</p>
-                                <p class='text'>" & variables.qrData.invoiceAddText & "</p>
-                                <p class='subtitle'>Zahlbar durch</p>
-                                <p class='text'>
-                                    " & variables.qrData.debtorName & "<br />
-                                    " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
-                                    " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
-                                </p>
+                        </td>
+                        <td id='payment'>
+                            <div class='inner'>
+                                <table width='100%'>
+                                    <tr>
+                                        <td class='left_part'>
+                                            <div class='top'>
+                                                <p class='title'>Zahlteil</p>
+                                                <div class='qr_code'>
+                                                    <img src='data:image/png;base64," & generateQRCode(500, 0.12).base64String & "'>
+                                                </div>
+                                            </div>
+                                            <table width='100%'>
+                                                <tr>
+                                                    <td class='currency'>
+                                                        <p class='subtitle'>Währung</p>
+                                                        <p class='text'>" & variables.qrData.invoiceCurrency & "</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class='subtitle'>Betrag</p>
+                                                        <p class='text'>" & variables.qrData.invoiceAmountPDF & "</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td class='right_part'>
+                                            <p class='subtitle'>Konto / Zahlbar an</p>
+                                            <p class='text'>
+                                                " & variables.qrData.billerIBANFormatted & "<br />
+                                                " & variables.qrData.billerName & "<br />
+                                                " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
+                                                " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
+                                            </p>
+                                            #local.referenceNumberCode#
+                                            <p class='subtitle'>Zusätzliche Informationen</p>
+                                            <p class='text'>" & variables.qrData.invoiceAddText & "</p>
+                                            <p class='subtitle'>Zahlbar durch</p>
+                                            <p class='text'>
+                                                " & variables.qrData.debtorName & "<br />
+                                                " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
+                                                " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+                </table>
             </body>
         </html>";
 
@@ -351,7 +331,7 @@ component displayname="swissqrbill" output="false" {
 
         // Create and open the PDF directly in the browser
         if (arguments.pdfType eq "pdf") {
-            cfdocument(format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0", type="classic") {
+            cfdocument(format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0") {
                 writeOutput(buildHTML());
             }
             return;
@@ -359,7 +339,7 @@ component displayname="swissqrbill" output="false" {
 
         // Create the PDF and save it into the memory
         if (arguments.pdfType eq "variable") {
-            cfdocument(name="local.qrslip" format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0", type="classic") {
+            cfdocument(name="local.qrslip" format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0") {
                 writeOutput(buildHTML());
             }
             return local.qrslip;

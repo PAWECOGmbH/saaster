@@ -130,6 +130,7 @@ component displayname="book" output="false" {
         local.redirectPath = "";
 
         local.getTime = new backend.core.com.time(arguments.customerID);
+        local.objInvoice = new backend.core.com.invoices();
 
         local.messageStruct = structNew();
         local.messageStruct['title'] = "";
@@ -290,7 +291,7 @@ component displayname="book" output="false" {
                     if (local.recurring eq "onetime") {
                         local.invoicePositionTitle = local.productName;
                     } else {
-                        local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                        local.invoicePositionTitle = local.productName & ' ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.startDate), variables.language) & ' - ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.endDate), variables.language);
                     }
 
                 }
@@ -382,7 +383,7 @@ component displayname="book" output="false" {
                         if (local.recurring eq "onetime") {
                             local.invoicePositionTitle = local.productName;
                         } else {
-                            local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            local.invoicePositionTitle = local.productName & ' ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.startDate), variables.language) & ' - ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.endDate), variables.language);
                         }
 
                     } else {
@@ -435,7 +436,7 @@ component displayname="book" output="false" {
                         if (local.recurring eq "onetime") {
                             local.invoicePositionTitle = local.productName;
                         } else {
-                            local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                            local.invoicePositionTitle = local.productName & ' ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.startDate), variables.language) & ' - ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.endDate), variables.language);
                         }
 
 
@@ -524,7 +525,7 @@ component displayname="book" output="false" {
                             if (local.recurring eq "onetime") {
                                 local.invoicePositionTitle = local.productName;
                             } else {
-                                local.invoicePositionTitle = local.productName & ' ' & lsDateFormat(local.getTime.utc2local(utcDate=local.startDate)) & ' - ' & lsDateFormat(local.getTime.utc2local(utcDate=local.endDate));
+                                local.invoicePositionTitle = local.productName & ' ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.startDate), variables.language) & ' - ' & local.objInvoice.formatDocumentDate(local.getTime.utc2local(utcDate=local.endDate), variables.language);
                             }
 
                         }

@@ -17,7 +17,7 @@
                 <div class="input-group input-group-flat">
                     <input type="text" class="form-control" name="plan_name" autocomplete="off" maxlength="100" value="#HTMLEditFormat(qPlan.strPlanName)#" required placeholder="Basic">
                     <span class="input-group-text">
-                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##plan_name_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan name"></i></a>
+                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##plan_name_#qPlan.intPlanID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate plan name"></i></a>
                     </span>
                 </div>
             </div>
@@ -26,7 +26,7 @@
                 <div class="input-group input-group-flat">
                     <textarea class="form-control" name="short_desc" rows="3" maxlength="16000" data-bs-toggle="autosize">#encodeForHTML(qPlan.strShortDescription)#</textarea>
                     <span class="input-group-text">
-                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##short_desc_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate short description"></i></a>
+                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##short_desc_#qPlan.intPlanID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate short description"></i></a>
                     </span>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                 <div class="input-group input-group-flat">
                     <input type="text" class="form-control" name="button_name" autocomplete="off" maxlength="50" value="#HTMLEditFormat(qPlan.strButtonName)#" placeholder="Book now">
                     <span class="input-group-text">
-                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##button_name_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate button name"></i></a>
+                        <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##button_name_#qPlan.intPlanID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate button name"></i></a>
                     </span>
                 </div>
             </div>
@@ -122,11 +122,11 @@
         </div>
         <div class="col-lg-6">
             <div class="row mb-2">
-                <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qPlan.intPlanID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
+                <label class="form-label">Description <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##desc_#qPlan.intPlanID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></label>
             </div>
             <textarea class="form-control editor" name="desc" style="height: 400px;">#encodeForHTML(qPlan.strDescription)#</textarea>
             <small class="form-hint mt-1">
-                For <i class="fas fa-check mt-2"></i> checkmarks use the <i class="fas fa-list"></i> unordered list function. The bullet points are automatically replaced.
+                For <i class="ti ti-check mt-2"></i> checkmarks use the <i class="ti ti-list"></i> unordered list function. The bullet points are automatically replaced.
             </small>
         </div>
     </div>

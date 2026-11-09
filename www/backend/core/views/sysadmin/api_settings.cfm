@@ -23,7 +23,7 @@
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <a href="##" data-bs-toggle="modal" data-bs-target="##api_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> New API
+                            <i class="ti ti-plus pe-3"></i> New API
                         </a>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                                     <input type="text" id="apiKey" name="api_key" class="form-control input-icon" autocomplete="off" maxlength="100" required>
                                 </div>
                                 <div style="display: flex; justify-content: center; align-items: center; cursor: pointer;" class="col-lg-1 mb-3">
-                                    <i id="keygen" style="padding-top: 26px;" class="fa-sharp fa-solid fa-arrow-rotate-right"></i>
+                                    <i id="keygen" style="padding-top: 26px;" class="ti ti-refresh"></i>
                                 </div>
                             </div>
                             <div class="row">

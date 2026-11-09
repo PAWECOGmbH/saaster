@@ -46,11 +46,11 @@
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                     <cfif len(trim(qPost.strMapping))>
                         <button type="button" class="btn btn-primary" onclick="window.open('#application.mainURL#/#encodeForJavaScript(qPost.strMapping)#?preview', '_blank')">
-                            <i class="fas fa-eye me-2"></i> Preview
+                            <i class="ti ti-eye me-2"></i> Preview
                         </button>
                     </cfif>
                     <a href="#application.mainURL#/sysadmin/blog-posts" class="btn btn-primary">
-                        <i class="fas fa-chevron-left pe-2"></i> Back to overview
+                        <i class="ti ti-chevron-left pe-2"></i> Back to overview
                     </a>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                                                 <div class="position-relative">
                                                     <input class="form-control ps-5" placeholder="Select a date" name="publish_date" id="publish_date" value="#dateFormat(qPost.dtePublishDate, 'yyyy-mm-dd')#" required>
                                                     <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
-                                                        <i class="far fa-calendar-alt"></i>
+                                                        <i class="ti ti-calendar"></i>
                                                     </span>
                                                 </div>
                                             </div>
@@ -102,10 +102,10 @@
                                                 <div class="position-relative">
                                                     <input class="form-control ps-5" placeholder="Optional" name="unpublish_date" id="unpublish_date" value="#dateFormat(qPost.dteUnpublishDate, 'yyyy-mm-dd')#">
                                                     <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
-                                                        <i class="far fa-calendar-alt"></i>
+                                                        <i class="ti ti-calendar"></i>
                                                     </span>
                                                     <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2" id="clear_unpublish_date" title="Delete date" style="z-index:2;">
-                                                        <i class="fas fa-times text-muted"></i>
+                                                        <i class="ti ti-x text-muted"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -164,7 +164,7 @@
                                         <div class="input-group input-group-flat">
                                             <input type="text" name="preview_title" class="form-control" value="#HTMLEditFormat(qPost.strPreviewTitle)#" maxlength="255" required>
                                             <span class="input-group-text">
-                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##preview_title_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate preview title"></i></a>
+                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##preview_title_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate preview title"></i></a>
                                             </span>
                                         </div>
                                     </div>
@@ -173,7 +173,7 @@
                                         <div class="input-group input-group-flat">
                                             <textarea name="preview_text" class="form-control" rows="5" maxlength="3000">#HTMLEditFormat(qPost.strPreviewText)#</textarea>
                                             <span class="input-group-text">
-                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##preview_text_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate preview text"></i></a>
+                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##preview_text_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate preview text"></i></a>
                                             </span>
                                         </div>
                                     </div>
@@ -184,7 +184,7 @@
                                         <div class="input-group input-group-flat">
                                             <input type="text" name="button_text" class="form-control" value="#HTMLEditFormat(qPost.strButtonText)#" maxlength="100">
                                             <span class="input-group-text">
-                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##button_text_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate button text"></i></a>
+                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##button_text_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate button text"></i></a>
                                             </span>
                                         </div>
                                     </div>
@@ -194,7 +194,7 @@
                                             <div class="d-flex align-items-center mb-2">
                                                 <img src="#encodeForHTML(qPost.strPreviewImage)#" alt="Preview Image" style="max-width: 300px; max-height: 110px;" />
                                                 <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_image=#qPost.intBlogPostID#&#csrfParam()#', 'Delete preview image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
-                                                    <i class="fas fa-trash-alt fa-lg"></i>
+                                                    <i class="ti ti-trash fs-3"></i>
                                                 </a>
                                             </div>
                                         <cfelse>
@@ -217,7 +217,7 @@
                                         <div class="input-group input-group-flat">
                                             <input type="text" name="post_title" class="form-control" value="#HTMLEditFormat(qPost.strPostTitle)#" maxlength="255">
                                             <span class="input-group-text">
-                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##post_title_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post title"></i></a>
+                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##post_title_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post title"></i></a>
                                             </span>
                                         </div>
                                     </div>
@@ -226,7 +226,7 @@
                                         <div class="input-group input-group-flat">
                                             <textarea name="post_intro" class="form-control" rows="5" maxlength="3000">#HTMLEditFormat(qPost.strPostIntro)#</textarea>
                                             <span class="input-group-text">
-                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##post_intro_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post intro"></i></a>
+                                                <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##post_intro_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post intro"></i></a>
                                             </span>
                                         </div>
                                     </div>
@@ -238,7 +238,7 @@
                                             <div class="d-flex align-items-center mb-2">
                                                 <img src="#encodeForHTML(qPost.strBlogHeaderImage)#" alt="Header Image" style="max-width: 300px; max-height: 180px;" />
                                                 <a href="##?" class="ms-3 text-danger" title="Delete image" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/blog-posts?delete_header_image=#qPost.intBlogPostID#&#csrfParam()#', 'Delete header image', 'Do you want to delete this image?', 'No, cancel!', 'Yes, delete!')">
-                                                    <i class="fas fa-trash-alt fa-lg"></i>
+                                                    <i class="ti ti-trash fs-3"></i>
                                                 </a>
                                             </div>
                                         <cfelse>
@@ -249,7 +249,7 @@
                             </div>
                             <div class="mb-3">
                                 <div class="mb-3">
-                                    <label class="form-label">Content <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##post_content_#qPost.intBlogPostID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post content"></i></a></label>
+                                    <label class="form-label">Content <a href="##?" class="input-group-link ms-2" data-bs-toggle="modal" data-bs-target="##post_content_#qPost.intBlogPostID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate post content"></i></a></label>
                                     <textarea class="form-control big-editor" name="content" style="height: 800px;">#encodeForHTML(qPost.strPostContent)#</textarea>
                                 </div>
                             </div>
@@ -277,8 +277,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('publish_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
-                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
+                previousMonth: `<i class="ti ti-chevron-left cursor-pointer"></i>`,
+                nextMonth: `<i class="ti ti-chevron-right cursor-pointer"></i>`,
             },
         }));
     });
@@ -286,8 +286,8 @@
         window.Litepicker && (new Litepicker({
             element: document.getElementById('unpublish_date'),
             buttonText: {
-                previousMonth: `<i class="fas fa-angle-left cursor-pointer"></i>`,
-                nextMonth: `<i class="fas fa-angle-right cursor-pointer"></i>`,
+                previousMonth: `<i class="ti ti-chevron-left cursor-pointer"></i>`,
+                nextMonth: `<i class="ti ti-chevron-right cursor-pointer"></i>`,
             },
         }));
     });

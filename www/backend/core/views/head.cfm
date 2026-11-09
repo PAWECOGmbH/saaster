@@ -8,6 +8,7 @@
     <title>#variables.metaTitle#</title>
     <meta name="description" content="#variables.metaDescription#">
     <meta name="csrf-token" content="#csrfToken()#">
+    <meta name="saaster-context" content="#application.objGlobal.contextToken()#">
     </cfoutput>
 
     <cfinclude template="css.cfm">

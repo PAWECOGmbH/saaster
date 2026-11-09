@@ -27,7 +27,7 @@
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                         <cfif session.superadmin>
                             <a href="#application.mainURL#/account-settings/tenant/new" class="btn btn-primary">
-                                <i class="fas fa-plus pe-3"></i> #getTrans('btnNewTenant')#
+                                <i class="ti ti-plus pe-3"></i> #getTrans('btnNewTenant')#
                             </a>
                         </cfif>
                     </div>
@@ -78,8 +78,8 @@
                                             <!--- #encodeForHTML(qTenants.strCompanyName)# --->
                                         </td>
                                         <td>#encodeForHTML(qTenants.strContactPerson)#</td>
-                                        <td class="text-center"><cfif qTenants.blnStandard><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
-                                        <td class="text-center"><cfif qTenants.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
+                                        <td class="text-center"><cfif qTenants.blnStandard><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                        <td class="text-center"><cfif qTenants.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap">
                                                 <cfif qTenants.intCustParentID gt 0>
@@ -88,7 +88,7 @@
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         <cfif qTenants.blnActive eq 1>
-                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#">#getTrans('btnSwitchToThisCompany')#</a>
+                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
                                                         </cfif>
                                                             <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                         <cfif qTenants.intCustomerID neq session.customer_id>
@@ -138,7 +138,7 @@
                 <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                     <cfif session.superadmin>
                         <a href="#application.mainURL#/account-settings/tenant/new" class="btn btn-primary" style="white-space: normal; width: 205px;">
-                            <i class="fas fa-plus pe-3"></i> #getTrans('btnNewTenant')#
+                            <i class="ti ti-plus pe-3"></i> #getTrans('btnNewTenant')#
                         </a>
                     </cfif>
                 </div>
@@ -176,8 +176,8 @@
                                     </td>
                                     <td>#encodeForHTML(qTenants.strCompanyName)#</td>
                                     <td>#encodeForHTML(qTenants.strContactPerson)#</td>
-                                    <td class="text-center"><cfif qTenants.blnStandard><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
-                                    <td class="text-center"><cfif qTenants.blnActive><i class="fa fa-check text-green"></i><cfelse><i class="fa fa-close text-red"></cfif></td>
+                                    <td class="text-center"><cfif qTenants.blnStandard><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                    <td class="text-center"><cfif qTenants.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
                                     <td class="text-end">
                                         <div class="btn-list flex-nowrap">
                                             <cfif qTenants.intCustParentID gt 0>
@@ -186,7 +186,7 @@
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end">
                                                     <cfif qTenants.blnActive eq 1>
-                                                        <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#">#getTrans('btnSwitchToThisCompany')#</a>
+                                                        <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
                                                     </cfif>
                                                         <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
                                                     <cfif qTenants.intCustomerID neq session.customer_id>

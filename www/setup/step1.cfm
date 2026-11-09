@@ -23,14 +23,14 @@
                 <label class="form-selectgroup-item">
                     <input type="radio" name="world" value="1" class="form-selectgroup-input" checked>
                     <span class="form-selectgroup-label">
-                        <i class="fas fa-globe-americas"></i>
+                        <i class="ti ti-world"></i>
                         Worldwide
                     </span>
                 </label>
                 <label class="form-selectgroup-item">
                     <input type="radio" name="world" value="0" class="form-selectgroup-input">
                     <span class="form-selectgroup-label w-100">
-                        <i class="fas fa-flag-usa"></i>
+                        <i class="ti ti-flag"></i>
                         Country based
                     </span>
                 </label>

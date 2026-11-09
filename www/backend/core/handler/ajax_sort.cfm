@@ -5,7 +5,7 @@
 
 /*
     Saves the drag-and-drop order of the sysadmin lists (languages, countries, modules,
-    currencies, plan groups, plans, plan features, blog categories).
+    currencies, plan groups, plans, plan features, blog categories, widgets).
 
     This file is called directly by its path (no mapping), so neither the router's role
     checks nor the CSRF rule in Application.cfc cover it - it checks both itself.
@@ -48,6 +48,10 @@ if (structKeyExists(url, "planfeatures")) {
 }
 if (structKeyExists(url, "blog_categories")) {
     thisTable = "blog_categories";
+}
+
+if (structKeyExists(url, "widgets")) {
+    thisTable = "widgets";
 }
 
 // Unknown list: nothing to sort

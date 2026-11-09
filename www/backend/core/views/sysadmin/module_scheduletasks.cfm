@@ -9,7 +9,7 @@
     <div class="row mb-3 me-3">
         <div class="align-items-end">
             <a href="##" data-bs-toggle="modal" data-bs-target="##schedule_new" class="btn btn-primary">
-                <i class="fas fa-plus pe-3"></i> Add scheduletask
+                <i class="ti ti-plus pe-3"></i> Add scheduletask
             </a>
         </div>
     </div>

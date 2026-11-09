@@ -22,7 +22,7 @@
                     <button type="submit" id="submit_button" class="btn btn-primary btn-block w-100">#getTrans('formReset')#</button>
                 </div>
                 <div class="text-center text-muted">
-                    #getTrans('formAlreadyHaveAccount')# <a href="#application.mainURL#/login">#getTrans('formSignIn')#</a>
+                    #getTrans('formAlreadyHaveAccount')# <a href="#application.objGlobal.getLink('templates/login.cfm')#">#getTrans('formSignIn')#</a>
                 </div>
             </div>
         </form>

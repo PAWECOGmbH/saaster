@@ -222,7 +222,7 @@ if (structKeyExists(form, "new_tenant_btn")) {
     tenantStruct = structNew();
     tenantStruct.company_name = form.company_name;
     tenantStruct.contact_person = form.contact_person;
-    tenantStruct.customerID = session.customer_id;
+    tenantStruct.customerID = (session.membership_access ?: false) ? session.organization_id : session.customer_id;
     tenantStruct.userID = session.user_id;
 
     // Insert the tenant using a function
@@ -267,6 +267,10 @@ if (structKeyExists(url, "delete")) {
 
     // Check whether the user is allowed to delete
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.customerID);
+    if (session.membership_access ?: false) {
+        checkTenantRange = getTenant.custParentID eq session.organization_id
+            and application.objAuthorization.canInOrganization(session.user_id, session.organization_id, "organization.tenants.manage");
+    }
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to delete this tenant!', 'danger');
@@ -328,6 +332,10 @@ if (structKeyExists(url, "change_tenant")) {
 
     // Check whether the user is allowed to change
     checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, thisCustomerID);
+    if (session.membership_access ?: false) {
+        checkTenantRange = getTenant.custParentID eq session.organization_id
+            and application.objAuthorization.canInOrganization(session.user_id, session.organization_id, "organization.tenants.manage");
+    }
 
     if (!checkTenantRange) {
         getAlert('You are not allowed to edit this tenant!', 'danger');
@@ -389,6 +397,13 @@ if (structKeyExists(url, "sysadmin")) {
             session.sysadmin = 1;
             session.supportLogin = 0;
             structDelete(session, "supportOriginUserID");
+            structDelete(session, "supportOrganizationID");
+            structDelete(session, "membership_access");
+                structDelete(session, "membership_identity");
+            structDelete(session, "organization_id");
+            if (not application.objMembershipAccess.refreshSession(true)) {
+                location url=application.objGlobal.getLink("templates/login.cfm") addtoken=false;
+            }
 
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);

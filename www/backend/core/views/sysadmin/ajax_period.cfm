@@ -25,14 +25,14 @@
             <div class="col-lg-6">
                 <label class="form-label">Start date *</label>
                 <div class="input-icon">
-                    <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
+                    <span class="input-icon-addon"><i class="ti ti-calendar"></i></span>
                     <input class="form-control" placeholder="Select a date" name="start_date" id="date1" value="#dateFormat(status.startDate, 'yyyy-mm-dd')#" required>
                 </div>
             </div>
             <div class="col-lg-6">
                 <label class="form-label">End date *</label>
                 <div class="input-icon">
-                    <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
+                    <span class="input-icon-addon"><i class="ti ti-calendar"></i></span>
                     <input class="form-control" placeholder="Select a date" name="end_date" id="date2" value="#dateFormat(status.endDate, 'yyyy-mm-dd')#" required>
                 </div>
             </div>

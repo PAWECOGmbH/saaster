@@ -94,7 +94,7 @@ component extends="tests.support.integration_spec" {
                 });
 
                 it("offers the sysadmin to extend an expired module test phase", () => {
-                    var source = scanner.readSource("backend/core/views/sysadmin/customers_details.cfm");
+                    var source = scanner.readSource("backend/core/views/sysadmin/ajax_customer_tab.cfm");
                     var offer = find("Extend the test phase", source);
                     expect(offer).toBeGT(0);
                     expect(mid(source, offer - 700, 700)).toInclude("moduleStatus.status eq ""expired"" and (moduleStatus.recurring ?: """") eq ""test""");

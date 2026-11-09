@@ -6,7 +6,7 @@
                 <a href="#application.mainURL#/dashboard" class="nav-link">
                 </cfoutput>
                     <span class="nav-link-icon d-none d-sm-none d-md-none d-lg-inline-block">
-                        <i class="fas fa-home"></i>
+                        <i class="ti ti-home"></i>
                     </span>
                     <span class="nav-link-title">
                         Home
@@ -19,7 +19,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                         <span class="nav-link-icon d-none d-sm-none d-md-none d-lg-inline-block">
-                            <i class="fas fa-user-cog"></i>
+                            <i class="ti ti-user-cog"></i>
                         </span>
                         <span class="nav-link-title">
                             SysAdmin

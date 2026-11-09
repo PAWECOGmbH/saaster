@@ -36,20 +36,20 @@
                 <tr>
                     <td>
                         <div class="input-icon">
-                            <span class="input-icon-addon"><i class="far fa-calendar-alt"></i></span>
+                            <span class="input-icon-addon"><i class="ti ti-calendar"></i></span>
                             <input class="form-control" placeholder="Select a date" name="payment_date" id="date1" value="#dateFormat(now(), 'yyyy-mm-dd')#" required>
                         </div>
                     </td>
                     <td><input type="text" name="payment_type" class="form-control" maxlength="50" placeholder="Credit card"></td>
                     <td><input type="text" name="amount" class="form-control text-end" maxlength="5" <cfif amountOpen gt 0>value="#amountOpen#"</cfif>></td>
-                    <td class="text-center"><i onclick="sendPayment();" class="far fa-check-circle h1 text-green mt-2 cursor-pointer"></i></td>
+                    <td class="text-center"><i onclick="sendPayment();" class="ti ti-circle-check h1 text-green mt-2 cursor-pointer"></i></td>
                 </tr>
                 <cfloop query="qPayments">
                     <tr>
                         <td>#lsDateFormat(qPayments.dtmPayDate)#</td>
                         <td>#encodeForHTML(qPayments.strPaymentType)#</td>
                         <td class="text-end">#lsCurrencyFormat(qPayments.decAmount, "none")#</td>
-                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="fas fa-times h1 text-red mt-2 cursor-pointer"></i></td>
+                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="ti ti-x h1 text-red mt-2 cursor-pointer"></i></td>
                     </tr>
                 </cfloop>
                 </tbody>

@@ -29,10 +29,10 @@
                 </div>
             </div>
             <div class="text-center mt-2">
-                #getTrans('formRegisterText')# <a href="#application.mainURL#/register">#getTrans('formSignUp')#</a>
+                #getTrans('formRegisterText')# <a href="#application.objGlobal.getLink('templates/register.cfm')#">#getTrans('formSignUp')#</a>
             </div>
             <div class="text-center mt-1 mb-4">
-                #getTrans('formForgotPassword')# <a href="#application.mainURL#/password">#getTrans('formReset')#</a>
+                #getTrans('formForgotPassword')# <a href="#application.objGlobal.getLink('templates/password.cfm')#">#getTrans('formReset')#</a>
             </div>
         </form>
 

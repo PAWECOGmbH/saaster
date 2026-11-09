@@ -39,7 +39,7 @@
                                     <input type="text" name="text_#qFeatures.currID#" class="form-control" autocomplete="off" value="#encodeForHTML(trim(qFeatures.strValue))#" maxlength="100">
                                     <cfif len(trim(qFeatures.strValue))>
                                         <span class="input-group-text">
-                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##value_#qFeatures.intPlansPlanFeatID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate value"></i></a>
+                                            <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##value_#qFeatures.intPlansPlanFeatID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate value"></i></a>
                                         </span>
                                     </cfif>
                                 </div>
@@ -63,7 +63,7 @@
 <cfelse>
 
     <cfoutput>
-    <p class="text-red">You must create some features first. <a href="#application.mainURL#/sysadmin/planfeatures"><i class="fas fa-long-arrow-alt-right"></i> Manage features</a></p>
+    <p class="text-red">You must create some features first. <a href="#application.mainURL#/sysadmin/planfeatures"><i class="ti ti-arrow-right"></i> Manage features</a></p>
     </cfoutput>
 
 </cfif>

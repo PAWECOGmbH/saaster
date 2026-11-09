@@ -27,10 +27,10 @@
                 <div class="#getLayout.layoutPageHeader# col-lg-6 mb-3 text-end">
                     <div class="button-group">
                         <a href="#application.mainURL#/sysadmin/plans" class="btn btn-primary">
-                            <i class="fas fa-angle-double-left pe-3"></i> Back to plans
+                            <i class="ti ti-chevrons-left pe-3"></i> Back to plans
                         </a>
                         <a href="##" data-bs-toggle="modal" data-bs-target="##feature_new" class="btn btn-primary">
-                            <i class="fas fa-plus pe-3"></i> Add feature
+                            <i class="ti ti-plus pe-3"></i> Add feature
                         </a>
                     </div>
                 </div>
@@ -65,9 +65,9 @@
                                         <tbody <cfif qPlanFeatures.recordCount gt 1>id="dragndrop_body"</cfif>>
                                             <cfloop query="qPlanFeatures">
                                                 <tr <cfif qPlanFeatures.recordCount gt 1>id="sort_#qPlanFeatures.intPlanFeatureID#"</cfif>>
-                                                    <td class="move text-center"><cfif qPlanFeatures.recordCount gt 1><i class="fas fa-bars hand" style="cursor: grab;"></i></cfif></td>
-                                                    <td><cfif qPlanFeatures.blnCategory eq 1><span class="h3">#encodeForHTML(qPlanFeatures.strFeatureName)#</span><cfelse>#encodeForHTML(qPlanFeatures.strFeatureName)#</cfif>  <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featurename_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate feature"></i></a></td>
-                                                    <td><cfif len(qPlanFeatures.strDescription) gt 80>#encodeForHTML(left(qPlanFeatures.strDescription, 76))# ...<cfelse>#encodeForHTML(qPlanFeatures.strDescription)#</cfif> <cfif len(qPlanFeatures.strDescription)><a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featuredesc_#qPlanFeatures.intPlanFeatureID#"><i class="fas fa-globe" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></cfif></td>
+                                                    <td class="move text-center"><cfif qPlanFeatures.recordCount gt 1><i class="ti ti-menu-2 hand" style="cursor: grab;"></i></cfif></td>
+                                                    <td><cfif qPlanFeatures.blnCategory eq 1><span class="h3">#encodeForHTML(qPlanFeatures.strFeatureName)#</span><cfelse>#encodeForHTML(qPlanFeatures.strFeatureName)#</cfif>  <a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featurename_#qPlanFeatures.intPlanFeatureID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate feature"></i></a></td>
+                                                    <td><cfif len(qPlanFeatures.strDescription) gt 80>#encodeForHTML(left(qPlanFeatures.strDescription, 76))# ...<cfelse>#encodeForHTML(qPlanFeatures.strDescription)#</cfif> <cfif len(qPlanFeatures.strDescription)><a href="##?" class="input-group-link" data-bs-toggle="modal" data-bs-target="##featuredesc_#qPlanFeatures.intPlanFeatureID#"><i class="ti ti-world" data-bs-toggle="tooltip" data-bs-placement="top" title="Translate description"></i></a></cfif></td>
                                                     <td><a href="##" class="btn" data-bs-toggle="modal" data-bs-target="##feature_#qPlanFeatures.intPlanFeatureID#">Edit</a></td>
                                                     <td><a href="##" class="btn" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/plans?delete_feature=#qPlanFeatures.intPlanFeatureID#&#csrfParam()#', 'Delete feature', 'Do you really want to delete this feature irrevocably?', 'No, cancel!', 'Yes, delete!')">Delete</a></td>
                                                 </tr>
@@ -98,7 +98,7 @@
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Variable
-                                                                            <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                                            <i class="ti ti-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
                                                                         </label>
                                                                         <input type="text" name="feature_variable" class="form-control" autocomplete="off" value="#HTMLEditFormat(qPlanFeatures.strVariable)#" maxlength="100">
                                                                     </div>
@@ -182,7 +182,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Variable
-                                                        <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
+                                                        <i class="ti ti-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="In order to get the value of the feature via function"></i>
                                                     </label>
                                                     <input type="text" name="feature_variable" class="form-control" autocomplete="off" maxlength="100">
                                                 </div>
