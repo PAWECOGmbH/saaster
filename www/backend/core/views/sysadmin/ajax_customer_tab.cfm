@@ -51,6 +51,7 @@ switch (url.tab) {
         objBookModule = new backend.core.com.book("module");
         objSysadmin = new backend.core.com.sysadmin();
         arrModules = objModules.getAllModules();
+        blockedModuleIDs = valueList(application.objModuleBlocks.forCustomer(thisCustomerID).intModuleID);
         qCurrentModules = objSysadmin.getCurrentModules(thisCustomerID);
         currentModuleList = valueList(qCurrentModules.intModuleID);
         break;
@@ -300,14 +301,25 @@ switch (url.tab) {
     <cfloop array="#arrModules#" item="module">
         <cfif structKeyExists(module, "moduleID")>
             <cfset moduleStatus = objModules.getModuleStatus(thisCustomerID, module.moduleID)>
+            <cfset moduleAccessBlocked = listFind(blockedModuleIDs, module.moduleID) gt 0>
+            <cfset moduleAccessManaged = moduleAccessBlocked or objModules.getModuleAccessBookings(thisCustomerID, module.moduleID).recordCount gt 0>
             <cfif arrayLen(module.includedInPlans)>
                 <div class="col-lg-4 mb-3 mt-3">
                     <div class="card">
                         <div class="card-header">
                             <ul class="nav nav-pills card-header-pills">
-                                <a class="btn btn-outline-info disabled">Included in a plan</a>
+                                <li class="nav-item"><a class="btn btn-outline-info disabled">Included in a plan</a></li>
+                                <cfif moduleAccessManaged>
+                                    <li class="nav-item ms-auto">
+                                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Action</a>
+                                        <div class="dropdown-menu">
+                                            <cfinclude template="module_access_action.cfm">
+                                        </div>
+                                    </li>
+                                </cfif>
                             </ul>
                         </div>
+                        <cfif moduleAccessBlocked><div class="card-header"><span class="badge bg-red-lt">Access blocked</span></div></cfif>
                         <div class="card-body">
                             <div class="d-flex align-items-center p-3">
                                 <div class="d-flex align-items-center">
@@ -413,6 +425,7 @@ switch (url.tab) {
                                                 Withdraw module
                                             </a>
                                         </cfif>
+                                        <cfinclude template="module_access_action.cfm">
                                     </div>
                                 </li>
                             </ul>
@@ -430,6 +443,7 @@ switch (url.tab) {
                                 </cfif>
                             </div>
                         </cfif>
+                        <cfif moduleAccessBlocked><div class="card-header"><span class="badge bg-red-lt">Access blocked</span></div></cfif>
                         <div class="card-body">
                             <div class="d-flex align-items-center p-3">
                                 <div class="d-flex align-items-center">
@@ -444,6 +458,7 @@ switch (url.tab) {
                     </div>
                 </div>
             </cfif>
+            <cfinclude template="module_access_modal.cfm">
         </cfif>
     </cfloop>
 

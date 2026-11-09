@@ -72,6 +72,12 @@ if (url.pass eq variables.schedulePassword) {
                 break;
             }
 
+            // A block may have been added after the worker claimed this job.
+            if (application.objModuleBlocks.isBlocked(job.customerID, job.moduleID)) {
+                objScheduler.finishJob(job, false, 0);
+                continue;
+            }
+
             // Variables may be needed in the included file
             customerID = job.customerID;
             moduleID = job.moduleID;

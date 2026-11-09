@@ -7,14 +7,16 @@ param name="url.view" default="tab";
 user = queryExecute(
     options={datasource=application.datasource},
     params={id:{type:"integer",value:val(url.userID)}},
-    sql="SELECT intCustomerID, blnSysAdmin, blnAdmin, blnSuperAdmin FROM users WHERE intUserID = :id"
+    sql="SELECT strFirstName, strLastName, intCustomerID, blnSysAdmin, blnAdmin, blnSuperAdmin FROM users WHERE intUserID = :id"
 );
 session.user_id = val(url.userID);
+session.user_name = user.strFirstName & " " & user.strLastName;
 session.customer_id = user.intCustomerID;
-session.lng = "en";
+session.lng = listFind("en,de",url.language ?: "") ? url.language : "en";
 session.sysadmin = user.blnSysAdmin;
 session.admin = user.blnAdmin;
 session.superadmin = user.blnSuperAdmin;
+application.objCustomer.setProductSessions(session.customer_id, session.lng);
 getTrans = application.objLanguage.getTrans;
 getAlert = application.objGlobal.getAlert;
 csrfField = application.objGlobal.csrfField;

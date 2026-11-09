@@ -518,6 +518,8 @@ component displayname="modules" output="false" {
                         OR (DATE(bookings.dteStartDate) <= :today AND DATE(bookings.dteEndDate) >= :today)
                     )
                 )
+                AND NOT EXISTS (SELECT 1 FROM customer_module_blocks blocked
+                    WHERE blocked.intCustomerID = :customerID AND blocked.intModuleID = scheduletasks.intModuleID)
                 ORDER BY scheduletasks.intScheduletaskID
             "
         );
@@ -555,6 +557,9 @@ component displayname="modules" output="false" {
                 DELETE FROM scheduler_jobs
                 WHERE intCustomerID = :customerID
                 AND intScheduletaskID NOT IN (:dueIDs)
+                AND NOT EXISTS (SELECT 1 FROM customer_module_blocks blocked
+                    INNER JOIN scheduletasks task ON task.intModuleID = blocked.intModuleID
+                    WHERE blocked.intCustomerID = :customerID AND task.intScheduletaskID = scheduler_jobs.intScheduletaskID)
             "
         );
         local.result.removed = local.deleteResult.recordCount;

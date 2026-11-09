@@ -12,6 +12,7 @@
     objPlan = new backend.core.com.plans(language=session.lng, currencyID=getCustomerData.currencyStruct.id);
 
     getBookedModules = session.currentModules;
+    blockedModuleIDs = valueList(application.objModuleBlocks.forCustomer(session.customer_id).intModuleID);
     getBookedModulesAsList = "";
     if (arrayLen(getBookedModules)) {
         loop array=getBookedModules index="i" {
@@ -71,6 +72,10 @@
                                                     <div class="card-body p-4 text-center">
                                                         <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(#application.mainURL#/userdata/images/modules/#module.moduleData.picture#)"></span>
                                                         <h3 class="m-0 mb-1">#module.moduleData.name#</h3>
+                                                        <cfif listFind(blockedModuleIDs, module.moduleID)>
+                                                            <span class="badge bg-red-lt">#getTrans('txtModuleBlocked')#</span>
+                                                            <p class="text-muted small mt-2">#getTrans('msgModuleBlocked')#</p>
+                                                        </cfif>
                                                         <table class="table text-start mt-4" style="width: 90%;">
                                                             <tr>
                                                                 <td width="60%">#getTrans('txtPlanStatus')#:</td>

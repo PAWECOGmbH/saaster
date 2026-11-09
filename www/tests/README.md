@@ -124,6 +124,13 @@ scheduler eligibility, including booking dates, renewals, cancellations, free pl
 customer isolation and live revocation. HTTP specs exercise plan-included modules
 through both canonical routes and direct templates with the same role/token checks.
 
+`module_blocks_spec` covers customer-specific module restrictions, platform/support
+boundaries, idempotence, unchanged bookings and scheduler history/claims.
+`module_block_http_spec` covers the rendered confirmation and protected POST action;
+extension HTTP tests verify blocked canonical/direct routes. Apply V31 before running
+these suites. `module_block_migration_spec` reruns V31 and checks that existing
+blocks and customized translations survive while old default wording is corrected.
+
 The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
 so mail tests do not depend on the development application's Lucee admin SMTP settings.
 `organization_flow_probe.cfm` runs production dispatch inside the test application and

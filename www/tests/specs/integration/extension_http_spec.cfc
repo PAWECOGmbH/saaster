@@ -97,6 +97,22 @@ component extends="tests.support.integration_spec" {
                 }
             });
 
+            it("blocks canonical and direct module access without changing role grants", () => {
+                bookIncludedModule();
+                local.mapping = queryExecute(options={datasource:application.datasource},sql="SELECT intModuleID FROM custom_mappings WHERE strMapping = 'saaster-extension-test'");
+                local.admin = variables.fixtures.createUser(customerID=variables.organization,sysAdmin=true);
+                loginAs(local.admin);
+                application.objModuleBlocks.setBlocked(local.admin.userID,variables.organization,local.mapping.intModuleID,true);
+                loop array=[false,true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("403");
+                    expect(local.response.fileContent).notToInclude("extension request reached");
+                }
+                application.objModuleBlocks.setBlocked(local.admin.userID,variables.organization,local.mapping.intModuleID,false);
+                expect(fetchExtension(true).statusCode).toInclude("200");
+                expect(fetchExtension(false).statusCode).toInclude("200");
+            });
+
             it("does not let an explicit extension grant bypass platform-only mapping flags", () => {
                 bookIncludedModule();
                 queryExecute(options={datasource:application.datasource},

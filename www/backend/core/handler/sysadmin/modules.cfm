@@ -1,5 +1,30 @@
 <cfscript>
 
+if (structKeyExists(form, "module_access_action")) {
+    if (cgi.request_method neq "POST" or not application.objGlobal.csrfVerify()
+        or not (session.sysadmin ?: false) or (session.supportLogin ?: false)) {
+        header statuscode=403 statustext="Forbidden";
+        abort;
+    }
+    if (not listFind("block,unblock", form.module_access_action)
+        or not isValid("integer", form.customer_id ?: "") or val(form.customer_id) lte 0
+        or not isValid("integer", form.module_id ?: "") or val(form.module_id) lte 0) {
+        header statuscode=400 statustext="Bad Request";
+        abort;
+    }
+    try {
+        application.objModuleBlocks.setBlocked(session.user_id, form.customer_id, form.module_id, form.module_access_action eq "block");
+        getAlert("Module access has been updated.", "success");
+    } catch (Saaster.ModuleBlock.Denied e) {
+        header statuscode=403 statustext="Forbidden";
+        abort;
+    } catch (Saaster.ModuleBlock.Invalid e) {
+        getAlert("Module access could not be changed. Check the customer and module booking.", "danger");
+    }
+    location url=application.mainURL & "/sysadmin/customers/details/" & int(form.customer_id) & "?del_redirect##modules" addtoken=false;
+}
+
+
 
 if (structKeyExists(form, "new_module")) {
 
