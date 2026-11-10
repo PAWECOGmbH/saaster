@@ -40,12 +40,21 @@
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <a href="#application.mainURL#/sysadmin/customers/edit/#getCustomer.customerID#" class="btn btn-primary">
-                            <i class="ti ti-edit pe-3"></i> Edit
-                        </a>
+                        <div class="btn-list flex-nowrap justify-content-end">
+                            <a href="#application.mainURL#/sysadmin/customers/edit/#getCustomer.customerID#" class="btn btn-primary">
+                                <i class="ti ti-edit pe-3"></i> Edit
+                            </a>
+                            <div class="dropdown">
+                                <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="##delete-customer">Delete account</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <cfinclude template="account_deletion_status.cfm">
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
@@ -184,8 +193,8 @@
                                                                                                 name="delete_user"
                                                                                                 value="1"
                                                                                                 class="btn btn-danger"
-                                                                                                onclick="return confirm('#encodeForJavaScript(getTrans("txtDeleteUserConfirmText"))#');"
-                                                                                            >#getTrans('btnDelete')#</button>
+                                                                                                onclick="return confirm('Are you sure you want to delete this user? This operation cannot be undone!');"
+                                                                                            >Delete</button>
                                                                                         </cfif>
                                                                                     </div>
                                                                                 </td>
@@ -255,3 +264,5 @@
 
 <!--- Delete the session, if there is one --->
 <cfset structDelete(session, "comingfrom")>
+
+<cfinclude template="account_delete_modal.cfm">

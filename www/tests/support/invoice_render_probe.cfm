@@ -24,7 +24,11 @@ user = application.objCustomer.getUserDataByID(val(url.userID));
 session.user_id = val(url.userID);
 session.customer_id = user.intCustomerID;
 session.lng = url.lng;
-session.sysadmin = false;
+session.sysadmin = queryExecute(
+    options={datasource: application.datasource},
+    params={id: {type: "integer", value: val(url.userID)}},
+    sql="SELECT blnSysAdmin FROM users WHERE intUserID = :id"
+).blnSysAdmin eq 1;
 session.admin = true;
 session.superadmin = true;
 session.user_name = user.strFirstName & " " & user.strLastName;
@@ -46,6 +50,18 @@ if (url.view eq "print") {
     // print.cfm answers with the PDF itself; the spec reads its text
     include template="/backend/core/views/invoices/print.cfm";
     abort;
+} else if (url.view eq "admin" and session.sysadmin) {
+    savecontent variable="html" {
+        include template="/backend/core/views/sysadmin/invoice_edit.cfm";
+    }
+} else if (url.view eq "admin-payments" and session.sysadmin) {
+    savecontent variable="html" {
+        include template="/backend/core/views/sysadmin/ajax_payments.cfm";
+    }
+} else if (url.view eq "admin-list" and session.sysadmin) {
+    savecontent variable="html" {
+        include template="/backend/core/views/sysadmin/invoices.cfm";
+    }
 } else {
     savecontent variable="html" {
         include template="/backend/core/views/invoices/invoice.cfm";

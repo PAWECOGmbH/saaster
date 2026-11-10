@@ -60,6 +60,7 @@ Saaster is a modular CFML SaaS framework running on Lucee 7, NGINX, and MySQL 8.
 - Add versioned Flyway migrations under `config/db/core/` for core changes or `config/db/myapp/` for project changes. `config/db/dev/` contains development data scripts, not versioned core migrations.
 - Start every new SQL migration with `SET NAMES utf8mb4;` as its first statement and save the file as UTF-8. Apply this to core and project migrations.
 - Keep released migrations unchanged unless explicitly asked to revise them. When a migration must be repeatable, preserve existing settings, customized translations, and user-defined ordering, and check for existing schema objects before creating them.
+- During development of account deletion (#398), consolidate all related schema changes in `config/db/core/V32__invoice-documents.sql`; do not add V33 or another migration for this feature. The user resets the V32 Flyway entry locally between iterations. Every extension of V32 must support both a first run and reruns against earlier V32 schemas, preserving existing invoice archives and lifecycle progress.
 - Respect existing uncommitted changes. Keep `todo.md` local and ignored; never force-add it. Keep local credentials and generated test configuration out of Git.
 - Do not create or amend Git commits unless the user explicitly requests it. Requests to create a branch, implement changes, or run tests do not authorize committing. Leave completed changes uncommitted for the user to review and commit.
 

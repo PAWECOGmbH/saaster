@@ -502,7 +502,7 @@ component displayname="sysadmin" output="false" {
                 term: {type: "varchar", value: arguments.term}
             },
             sql = "
-                SELECT  COUNT(intInvoiceID) as totalInvoices,
+                SELECT  COUNT(invoices.intInvoiceID) as totalInvoices,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle,
                         invoices.dtmInvoiceDate,
@@ -512,7 +512,7 @@ component displayname="sysadmin" output="false" {
                         invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
-                        IF(
+                        COALESCE(documents.strCustomerName, IF(
                             LENGTH(customers.strCompanyName),
                             customers.strCompanyName,
                             IF(
@@ -524,7 +524,7 @@ component displayname="sysadmin" output="false" {
                                 ),
                                 customers.strContactPerson
                             )
-                        ) as customerName
+                        )) as customerName
 
                 FROM invoices
 
@@ -532,8 +532,8 @@ component displayname="sysadmin" output="false" {
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
                 #arguments.status#
 
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN customers ON invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN invoice_documents documents ON documents.intInvoiceID = invoices.intInvoiceID
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
@@ -541,6 +541,8 @@ component displayname="sysadmin" output="false" {
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     AGAINST (:search IN BOOLEAN MODE)
+                    OR documents.strCustomerName LIKE CONCAT('%', :term, '%')
+                    OR documents.strCustomerEmail LIKE CONCAT('%', :term, '%')
                     OR invoices.intInvoiceNumber = :term
                     OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = :term
                 )
@@ -566,7 +568,7 @@ component displayname="sysadmin" output="false" {
         local.qTotalInvoices = queryExecute(
             options = {datasource = application.datasource},
             sql = "
-                SELECT COUNT(intInvoiceID) as totalInvoices
+                SELECT COUNT(invoices.intInvoiceID) as totalInvoices
                 FROM invoices
                 WHERE 1=1
                 #arguments.status#
@@ -594,6 +596,9 @@ component displayname="sysadmin" output="false" {
             },
             sql = "
                 SELECT  invoices.intInvoiceID,
+                        invoices.intCustomerID,
+                        invoices.blnDocumentIssued,
+                        (documents.intInvoiceID IS NOT NULL) AS documentArchived,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle,
                         invoices.dtmInvoiceDate,
@@ -603,7 +608,7 @@ component displayname="sysadmin" output="false" {
                         invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
-                        IF(
+                        COALESCE(documents.strCustomerName, IF(
                             LENGTH(customers.strCompanyName),
                             customers.strCompanyName,
                             IF(
@@ -615,7 +620,7 @@ component displayname="sysadmin" output="false" {
                                 ),
                                 customers.strContactPerson
                             )
-                        ) as customerName
+                        )) as customerName
 
                 FROM invoices
 
@@ -623,8 +628,8 @@ component displayname="sysadmin" output="false" {
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
                 #arguments.status#
 
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN customers ON invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN invoice_documents documents ON documents.intInvoiceID = invoices.intInvoiceID
 
                 WHERE (
                     MATCH (invoices.strInvoiceTitle, invoices.strCurrency)
@@ -632,6 +637,8 @@ component displayname="sysadmin" output="false" {
                     OR
                     MATCH (customers.strCompanyName, customers.strContactPerson, customers.strAddress, customers.strZIP, customers.strCity, customers.strEmail)
                     AGAINST (:search IN BOOLEAN MODE)
+                    OR documents.strCustomerName LIKE CONCAT('%', :term, '%')
+                    OR documents.strCustomerEmail LIKE CONCAT('%', :term, '%')
                     OR invoices.intInvoiceNumber = :term
                     OR CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) = :term
                 )
@@ -655,6 +662,9 @@ component displayname="sysadmin" output="false" {
             options = {datasource = application.datasource},
             sql = "
                 SELECT  invoices.intInvoiceID,
+                        invoices.intCustomerID,
+                        invoices.blnDocumentIssued,
+                        (documents.intInvoiceID IS NOT NULL) AS documentArchived,
                         CONCAT(invoices.strPrefix, '', invoices.intInvoiceNumber) as invoiceNumber,
                         invoices.strInvoiceTitle,
                         invoices.dtmInvoiceDate,
@@ -664,7 +674,7 @@ component displayname="sysadmin" output="false" {
                         invoices.intPaymentStatusID,
                         invoice_status.strInvoiceStatusVariable,
                         invoice_status.strColor,
-                        IF(
+                        COALESCE(documents.strCustomerName, IF(
                             LENGTH(customers.strCompanyName),
                             customers.strCompanyName,
                             IF(
@@ -676,7 +686,7 @@ component displayname="sysadmin" output="false" {
                                 ),
                                 customers.strContactPerson
                             )
-                        ) as customerName
+                        )) as customerName
 
                 FROM invoices
 
@@ -684,8 +694,8 @@ component displayname="sysadmin" output="false" {
                 AND invoices.intPaymentStatusID = invoice_status.intPaymentStatusID
                 #arguments.status#
 
-                INNER JOIN customers ON 1=1
-                AND invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN customers ON invoices.intCustomerID = customers.intCustomerID
+                LEFT JOIN invoice_documents documents ON documents.intInvoiceID = invoices.intInvoiceID
 
                 ORDER BY #arguments.sort#
                 LIMIT #arguments.start#, #local.entries#

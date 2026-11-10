@@ -1,5 +1,153 @@
 component displayname="invoices" output="false" {
 
+    public struct function createInvoice(required struct invoiceData) {
+        transaction {
+            if (!new backend.core.com.account_lifecycle().lockActiveCustomer(val(arguments.invoiceData.customerID ?: 0))) {
+                return {success: false, message: "The account is being deleted."};
+            }
+            return createInvoiceActive(argumentCollection=arguments);
+        }
+    }
+
+    public struct function payInvoice(required numeric invoiceID) {
+        local.invoice = getInvoiceData(arguments.invoiceID);
+        local.lifecycle = new backend.core.com.account_lifecycle();
+        local.token = local.lifecycle.beginOperation(val(local.invoice.customerID ?: 0), "charge", arguments.invoiceID);
+        if (!len(local.token)) return {success: false, message: "A charge cannot start while account deletion or another charge is pending."};
+        local.uncertain = true;
+        try {
+            local.result = payInvoiceActive(arguments.invoiceID, local.token);
+            local.uncertain = local.result.requestOutcomeUnknown ?: false;
+            return local.result;
+        } finally {
+            local.lifecycle.finishOperation(local.token, local.uncertain);
+        }
+    }
+
+
+    // Detached invoices are retained records: no document, status or payment changes.
+    public boolean function isReadOnly(required numeric invoiceID) {
+        return queryExecute(options={datasource:application.datasource},
+            params={id:{type:"integer",value:arguments.invoiceID}},
+            sql="SELECT intInvoiceID FROM invoices WHERE intInvoiceID = :id AND intCustomerID IS NULL FOR UPDATE").recordCount gt 0;
+    }
+
+    public struct function insertPayment(required struct paymentStruct) {
+        local.id = arguments.paymentStruct.invoiceID ?: 0;
+        if (!isValid("integer", local.id) or local.id lte 0) return {success:false, message:"No valid invoiceID found!"};
+        transaction {
+            local.invoice = queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:local.id}},
+                sql="SELECT intCustomerID FROM invoices WHERE intInvoiceID = :id FOR UPDATE");
+            if (!local.invoice.recordCount) return {success:false, message:"Invoice not found."};
+            if (!val(local.invoice.intCustomerID)) return {success:false, message:"Invoices of deleted customers are read-only."};
+            return insertPaymentMutable(argumentCollection=arguments);
+        }
+    }
+
+    public any function deletePayment(required numeric paymentID) {
+        transaction {
+            local.payment = queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:arguments.paymentID}},
+                sql="SELECT intInvoiceID FROM payments WHERE intPaymentID = :id");
+            if (!local.payment.recordCount) return;
+            new backend.core.com.invoice_documents().lockInvoice(local.payment.intInvoiceID);
+            if (isReadOnly(local.payment.intInvoiceID)) throw(type="InvoiceDocument.Immutable", message="Invoices of deleted customers are read-only.");
+            return deletePaymentMutable(argumentCollection=arguments);
+        }
+    }
+
+    public struct function updateInvoice(required struct invoiceData) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.id = val(arguments.invoiceData.invoiceID ?: 0);
+            if (local.id lte 0) return {success: false, message: "Invoice not found."};
+            local.documents.lockInvoice(local.id);
+            if (isReadOnly(local.id) or getInvoiceData(local.id).documentIssued or local.documents.isArchived(local.id)) return {success: false, message: "Issued invoices cannot be changed. Create a correction invoice instead."};
+            return updateInvoiceMutable(argumentCollection=arguments);
+        }
+    }
+
+    public struct function insertInvoicePositions(required struct invoicePosData) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.id = val(arguments.invoicePosData.invoiceID ?: 0);
+            if (local.id lte 0) return {success: false, message: "Invoice not found."};
+            local.documents.lockInvoice(local.id);
+            if (isReadOnly(local.id) or getInvoiceData(local.id).documentIssued or local.documents.isArchived(local.id)) return {success: false, message: "Issued invoices cannot be changed. Create a correction invoice instead."};
+            return insertInvoicePositionsMutable(argumentCollection=arguments);
+        }
+    }
+
+    public struct function updatePosition(required struct invoicePosData) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.id = positionInvoiceID(val(arguments.invoicePosData.invoicePosID ?: 0));
+            if (local.id lte 0) return {success: false, message: "Invoice not found."};
+            local.documents.lockInvoice(local.id);
+            if (isReadOnly(local.id) or getInvoiceData(local.id).documentIssued or local.documents.isArchived(local.id)) return {success: false, message: "Issued invoices cannot be changed. Create a correction invoice instead."};
+            return updatePositionMutable(argumentCollection=arguments);
+        }
+    }
+
+    public struct function deletePosition(required numeric posID) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.id = positionInvoiceID(arguments.posID);
+            if (local.id lte 0) return {success: false, message: "Invoice not found."};
+            local.documents.lockInvoice(local.id);
+            if (isReadOnly(local.id) or getInvoiceData(local.id).documentIssued or local.documents.isArchived(local.id)) return {success: false, message: "Issued invoices cannot be changed. Create a correction invoice instead."};
+            return deletePositionMutable(argumentCollection=arguments);
+        }
+    }
+
+    public struct function recalculateInvoice(required numeric invoiceID) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.id = arguments.invoiceID;
+            if (local.id lte 0) return {success: false, message: "Invoice not found."};
+            local.documents.lockInvoice(local.id);
+            if (isReadOnly(local.id) or getInvoiceData(local.id).documentIssued or local.documents.isArchived(local.id)) return {success: false, message: "Issued invoices cannot be changed. Create a correction invoice instead."};
+            return recalculateInvoiceMutable(argumentCollection=arguments);
+        }
+    }
+
+    public void function deleteInvoice(required numeric invoiceID) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.documents.lockInvoice(arguments.invoiceID);
+            if (isReadOnly(arguments.invoiceID) or getInvoiceData(arguments.invoiceID).documentIssued or local.documents.isArchived(arguments.invoiceID)) throw(type="InvoiceDocument.Immutable", message="Issued invoices cannot be deleted.");
+            local.customerID = getInvoiceData(arguments.invoiceID).customerID;
+            if (queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.customerID}},
+                sql="SELECT strToken FROM account_operations WHERE intCustomerID = :id AND strKind = 'charge'").recordCount) return;
+            deleteInvoiceMutable(arguments.invoiceID);
+        }
+    }
+
+    private numeric function positionInvoiceID(required numeric positionID) {
+        local.position = queryExecute(
+            options = {datasource: application.datasource},
+            params = {id: {type: "integer", value: arguments.positionID}},
+            sql = "SELECT intInvoiceID FROM invoice_positions WHERE intInvoicePosID = :id"
+        );
+        return val(local.position.intInvoiceID);
+    }
+
+    public void function setInvoiceStatus(required numeric invoiceID, numeric status) {
+        transaction {
+            local.documents = new backend.core.com.invoice_documents();
+            local.documents.lockInvoice(arguments.invoiceID);
+            local.before = getInvoiceData(arguments.invoiceID);
+            if (isReadOnly(arguments.invoiceID)) throw(type="InvoiceDocument.Immutable", message="Invoices of deleted customers are read-only.");
+            if (structKeyExists(arguments, "status") and arguments.status eq 1 and (local.before.documentIssued or local.documents.isArchived(arguments.invoiceID))) {
+                throw(type="InvoiceDocument.Immutable", message="Issued invoices cannot be changed back to drafts.");
+            }
+            setInvoiceStatusMutable(argumentCollection=arguments);
+            if (!structKeyExists(arguments, "status") or arguments.status neq 1) {
+                local.documents.capture(arguments.invoiceID, local.before.documentIssued ? "legacy" : "issued");
+            }
+        }
+    }
+
+
     // Create invoice number
     private numeric function createInvoiceNumber(required numeric customerID) {
 
@@ -34,7 +182,7 @@ component displayname="invoices" output="false" {
     }
 
     // Create invoice
-    public struct function createInvoice(required struct invoiceData) {
+    private struct function createInvoiceActive(required struct invoiceData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -147,7 +295,7 @@ component displayname="invoices" output="false" {
     }
 
     // Update invoice
-    public struct function updateInvoice(required struct invoiceData) {
+    private struct function updateInvoiceMutable(required struct invoiceData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -258,7 +406,7 @@ component displayname="invoices" output="false" {
     }
 
 
-    public void function deleteInvoice(required numeric invoiceID) {
+    private void function deleteInvoiceMutable(required numeric invoiceID) {
 
         queryExecute(
             options = {datasource = application.datasource},
@@ -277,7 +425,7 @@ component displayname="invoices" output="false" {
 
 
     // Insert invoice positions
-    public struct function insertInvoicePositions(required struct invoicePosData) {
+    private struct function insertInvoicePositionsMutable(required struct invoicePosData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -454,7 +602,7 @@ component displayname="invoices" output="false" {
     }
 
     // Update position
-    public struct function updatePosition(required struct invoicePosData) {
+    private struct function updatePositionMutable(required struct invoicePosData) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -582,7 +730,7 @@ component displayname="invoices" output="false" {
     }
 
     // Delete position
-    public struct function deletePosition(required numeric posID) {
+    private struct function deletePositionMutable(required numeric posID) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -652,7 +800,7 @@ component displayname="invoices" output="false" {
     }
 
     // Recalculate the invoice
-    public struct function recalculateInvoice(required numeric invoiceID) {
+    private struct function recalculateInvoiceMutable(required numeric invoiceID) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -944,6 +1092,7 @@ component displayname="invoices" output="false" {
                         invoices.decTotalPrice as invoiceTotal,
                         invoices.strLanguageISO as invoiceLanguage,
                         invoices.intPaymentStatusID as invoiceStatusID,
+                        invoices.blnDocumentIssued,
                         (
                             SELECT strColor
                             FROM invoice_status
@@ -976,6 +1125,7 @@ component displayname="invoices" output="false" {
             local.invoiceStruct['invoiceCurrency'] = local.qInvoice.invoiceCurrency;
             local.invoiceStruct['invoiceTotal'] = local.qInvoice.invoiceTotal;
             local.invoiceStruct['invoiceStatusID'] = local.qInvoice.invoiceStatusID;
+            local.invoiceStruct['documentIssued'] = local.qInvoice.blnDocumentIssued eq 1;
             local.invoiceStruct['invoiceStatusVariable'] = local.qInvoice.invoiceStatusVariable;
             local.invoiceStruct['invoiceStatusColor'] = local.qInvoice.invoiceStatusColor;
             local.invoiceStruct['invoiceLanguage'] = local.qInvoice.invoiceLanguage;
@@ -1012,8 +1162,9 @@ component displayname="invoices" output="false" {
 
             if (qInvoice.recordCount) {
 
-                local.invoiceInfo['customerID'] = qInvoice.intCustomerID;
-                local.invoiceInfo['userID'] = qInvoice.intUserID;
+                local.invoiceInfo['customerID'] = val(qInvoice.intCustomerID);
+                local.invoiceInfo['userID'] = val(qInvoice.intUserID);
+                local.invoiceInfo['documentIssued'] = qInvoice.blnDocumentIssued eq 1;
                 local.invoiceInfo['number'] = qInvoice.strPrefix & qInvoice.intInvoiceNumber;
                 local.invoiceInfo['title'] = qInvoice.strInvoiceTitle;
                 local.invoiceInfo['date'] = qInvoice.dtmInvoiceDate;
@@ -1156,7 +1307,7 @@ component displayname="invoices" output="false" {
 
 
     // Insert payment
-    public struct function insertPayment(required struct paymentStruct) {
+    private struct function insertPaymentMutable(required struct paymentStruct) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -1218,7 +1369,7 @@ component displayname="invoices" output="false" {
         }
 
         // Update invoice status
-        setInvoiceStatus(local.invoiceID);
+        setInvoiceStatusMutable(local.invoiceID);
 
         local.argsReturnValue['message'] = "OK";
         local.argsReturnValue['success'] = true;
@@ -1229,7 +1380,7 @@ component displayname="invoices" output="false" {
 
 
     // Delete payment
-    public any function deletePayment(required numeric paymentID) {
+    private any function deletePaymentMutable(required numeric paymentID) {
 
         local.qInvoice = queryExecute(
             options = {datasource = application.datasource},
@@ -1254,14 +1405,14 @@ component displayname="invoices" output="false" {
         )
 
         if (local.qInvoice.recordCount) {
-            setInvoiceStatus(local.qInvoice.intInvoiceID);
+            setInvoiceStatusMutable(local.qInvoice.intInvoiceID);
         }
 
     }
 
 
 
-    public void function setInvoiceStatus(required numeric invoiceID, numeric status) {
+    private void function setInvoiceStatusMutable(required numeric invoiceID, numeric status) {
 
         if (structKeyExists(arguments, "status")) {
 
@@ -1352,7 +1503,7 @@ component displayname="invoices" output="false" {
 
 
     // Pay invoice over Payrexx
-    public struct function payInvoice(required numeric invoiceID) {
+    private struct function payInvoiceActive(required numeric invoiceID, required string operationToken) {
 
         local.returnValue = structNew();
         local.returnValue['success'] = false;
@@ -1386,6 +1537,16 @@ component displayname="invoices" output="false" {
             local.paymentStruct['purpose'] = local.qOpenInvoices.strInvoiceTitle;
             local.paymentStruct['referenceId'] = local.qOpenInvoices.intCustomerID & "@" & createUUID() & "@" & getApplicationMetadata().name;
 
+            // A request admitted before deletion may finish, but must not start another charge.
+            if (new backend.core.com.account_lifecycle().isDeleting(local.qOpenInvoices.intCustomerID)) {
+                return {success: false, message: "The account is being deleted."};
+            }
+
+            // Keep the exact provider reference if the response has an unknown outcome.
+            queryExecute(options={datasource: application.datasource},
+                params={token:{type:"varchar",value:arguments.operationToken}, reference:{type:"varchar",value:local.paymentStruct.referenceId}},
+                sql="UPDATE account_operations SET strPaymentReference = :reference WHERE strToken = :token");
+
             // Try to charge over Payrexx
             local.charge = local.objPayrexx.callPayrexx(local.paymentStruct, "POST", "Transaction", local.qOpenInvoices.intTransactionID);
 
@@ -1401,6 +1562,9 @@ component displayname="invoices" output="false" {
                 local.payment['type'] = local.qOpenInvoices.strPaymentBrand;
 
                 local.insPayment = local.objInvoice.insertPayment(local.payment);
+                if (!local.insPayment.success) {
+                    return {success: false, requestOutcomeUnknown: true, message: "Payment was charged but could not be recorded. Reconciliation is required."};
+                }
 
                 // A successful charge also rehabilitates payment methods that were
                 // marked as failed by the old all-or-nothing error handling.
@@ -1433,6 +1597,7 @@ component displayname="invoices" output="false" {
                 // A timeout, invalid response or server error has an unknown outcome.
                 // Trying another card could create a duplicate charge.
                 if (structKeyExists(local.charge, "requestOutcomeUnknown") and local.charge.requestOutcomeUnknown) {
+                    local.returnValue.requestOutcomeUnknown = true;
                     break;
                 }
 
@@ -1454,6 +1619,9 @@ component displayname="invoices" output="false" {
 
     // Get invoice address block
     public string function getInvoiceAddress(required numeric invoiceID) {
+        local.snapshot = new backend.core.com.invoice_documents().getSnapshot(arguments.invoiceID);
+        if (!structIsEmpty(local.snapshot)) return local.snapshot.addressHTML;
+
 
         local.invoiceData = new backend.core.com.invoices().getInvoiceData(arguments.invoiceID);
         local.customerID = local.invoiceData.customerID;
@@ -1536,14 +1704,20 @@ component displayname="invoices" output="false" {
         // Get invoice data
         local.invoiceData = getInvoiceData(local.invoiceID);
 
-        if (!structIsEmpty(local.invoiceData)) {
+        if (structKeyExists(local.invoiceData, "customerID") and local.invoiceData.customerID gt 0) {
             local.customerID = local.invoiceData.customerID;
         } else {
             local.returnValue['message'] = "No invoice found!";
             return local.returnValue;
         }
 
+        if (new backend.core.com.account_lifecycle().isDeleting(local.customerID)) {
+            return {success: false, message: "The account is being deleted."};
+        }
+
         try {
+
+            setInvoiceStatus(arguments.invoiceID);
 
             // Create UUID and save into table
             local.uuid = application.objGlobal.getUUID();
@@ -1632,14 +1806,20 @@ component displayname="invoices" output="false" {
         // Get invoice data
         local.invoiceData = getInvoiceData(local.invoiceID);
 
-        if (!structIsEmpty(local.invoiceData)) {
+        if (structKeyExists(local.invoiceData, "customerID") and local.invoiceData.customerID gt 0) {
             local.customerID = local.invoiceData.customerID;
         } else {
             local.returnValue['message'] = "No invoice found!";
             return local.returnValue;
         }
 
+        if (new backend.core.com.account_lifecycle().isDeleting(local.customerID)) {
+            return {success: false, message: "The account is being deleted."};
+        }
+
         try {
+
+            setInvoiceStatus(arguments.invoiceID);
 
             // Get the customer data
             local.customerData = application.objCustomer.getCustomerData(local.customerID);

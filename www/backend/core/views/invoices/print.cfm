@@ -1,295 +1,31 @@
 <cfscript>
-
     objInvoices = new backend.core.com.invoices();
-
-    // If the download is called up by e-mail
+    invoiceDocuments = new backend.core.com.invoice_documents();
+    param name="thiscontent.thisID" default=0 type="numeric";
+    bearerAccess = false;
     if (structKeyExists(url, "pdf")) {
-
-        // Get the invoiceID
         qInvoice = objInvoices.getInvoice(url.pdf);
-
-        if (qInvoice.recordCount) {
+        if (qInvoice.recordCount and len(trim(url.pdf))) {
             thiscontent.thisID = qInvoice.intInvoiceID;
+            bearerAccess = true;
         } else {
-            getAlert('alertNotValidAnymore', 'warning');
             location url="#application.mainURL#/login" addtoken="false";
         }
-
     }
-
-    // Exception handling for the invoice id
-    param name="thiscontent.thisID" default=0 type="numeric";
-    thisInvoiceID = thiscontent.thisID;
-    if(not isNumeric(thisInvoiceID) or thisInvoiceID lte 0) {
-        location url="#application.mainURL#/login" addtoken="false";
-    }
-
-    // Get the invoice data
+    thisInvoiceID = val(thiscontent.thisID);
     getInvoiceData = objInvoices.getInvoiceData(thisInvoiceID);
-    if(not isStruct(getInvoiceData) or !structKeyExists(getInvoiceData, "customerID") or getInvoiceData.customerID eq 0) {
+    if (!structKeyExists(getInvoiceData, "number")) {
         location url="#application.mainURL#/login" addtoken="false";
     }
-
-    // Is the user allowed to see this invoice
-    if (structKeyExists(session, "customer_id")) {
-        if (!session.sysadmin) {
-            checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID);
-            if(not checkTenantRange) {
-                location url="#application.mainURL#/dashboard" addtoken="false";
-            }
-        }
+    // Only the platform administrator can read retained invoices of deleted customers.
+    platformAccess = (session.sysadmin ?: false) and val(session.user_id ?: 0) gt 0;
+    customerAccess = getInvoiceData.customerID gt 0 and val(session.user_id ?: 0) gt 0
+        and application.objGlobal.checkTenantRange(session.user_id, getInvoiceData.customerID);
+    if (!platformAccess and !(getInvoiceData.customerID gt 0 and bearerAccess) and !customerAccess) {
+        location url="#application.mainURL#/login" addtoken="false";
     }
-
-    getTime = new backend.core.com.time(getInvoiceData.customerID);
-
-    // The invoice is a document in its own language: labels, totals, dates and amounts (invoices.cfc::getInvoiceLanguage)
-    invoiceLng = objInvoices.getDocumentLanguage(getInvoiceData.language);
-    try {
-        setLocale(application.objLanguage.toLocale(invoiceLng));
-    } catch (any e) {}
-    addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
-    qPayments = objInvoices.getInvoicePayments(thisInvoiceID);
-
-    // Get customer data
-    customerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
-
-    // Get sysadmin data
-    sysAdminData = application.objSysadmin.getSysAdminData();
-
-    // Logo with a fixed size: the PDF renderer of Lucee 7 ('modern') ignores max-width
-    logoPath = len(trim(sysAdminData.logo)) ? expandPath('/userdata/images/logos/#sysAdminData.logo#') : expandPath('/assets/img/logo.png');
-    logoSize = "width: 180px;";
-    try {
-        logoImage = imageRead(logoPath);
-        logoWidth = min(180, logoImage.width);
-        logoSize = "width: #logoWidth#px; height: #round(logoImage.height * logoWidth / logoImage.width)#px;";
-    } catch (any e) {}
-
-    // Generate UUID for the pdf name
-    pdfName = "invoice-" & replace(lcase(getInvoiceData.number), " ", "", "all") & "-" & dateTimeFormat(getTime.utc2local(now()), "yyyymmddHHNNSS");
-
-    // If Swiss QR invoice is activated
-    swissQrInvoice = false;
-    if (application.objSysadmin.getSystemSetting('settingSwissQrBill').strDefaultValue eq 1) {
-
-        swissQrInvoice = true;
-
-        qrStruct = objInvoices.setSwissQrInvoiceStruct(getInvoiceData.customerID, getInvoiceData.amountOpen, getInvoiceData.currency, getInvoiceData.number);
-        swissQrSlip = new backend.core.com.swissqrbill().generateSwissBill(qrStruct, "variable");
-
-    }
-
+    pdfDocument = invoiceDocuments.download(thisInvoiceID);
+    pdfName = "invoice-" & reReplace(getInvoiceData.number, "[^a-zA-Z0-9_-]", "", "all") & ".pdf";
+    cfheader(name="Content-Disposition", value='attachment; filename="' & pdfName & '"');
+    cfcontent(type="application/pdf", variable=pdfDocument, reset=true);
 </cfscript>
-
-<!--- Save the HTML part into a variable --->
-<cfsavecontent variable="invoiceData">
-    <cfoutput>
-    <head>
-        <title>#encodeForHTML(getInvoiceData.title)#</title>
-    </head>
-    <body style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
-        <table width="100%" border="0" style="table-layout: fixed;">
-            <tr>
-                <td align="right" height="100" valign="top">
-                    <img alt="Logo" src="#logoPath#" style="#logoSize# font-size: 16px;" border="0">
-                </td>
-            </tr>
-            <tr>
-                <td height="150" valign="top" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
-                    #addressBlock#
-                </td>
-            </tr>
-            <tr>
-                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
-                    <b>#getTrans('titInvoice', invoiceLng)# #getInvoiceData.number#</b>
-                </td>
-            </tr>
-            <tr>
-                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px; font-size: 12px;">
-                    <b>#encodeForHTML(getInvoiceData.title)#</b>
-                </td>
-            </tr>
-            <tr>
-                <td style="border-bottom: 1px solid ##ccc; padding-bottom: 5px;">
-                    <table width="100%" border="0" style="table-layout: fixed;">
-                        <tr>
-                            <td width="20%" style="width: 20%;">
-                                #getTrans('titInvoiceDate', invoiceLng)#:<br />
-                                #getTrans('txtDueDate', invoiceLng)#:
-                            </td>
-                            <td width="30%" style="width: 30%;">
-                                #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#<br />
-                                #lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#
-                            </td>
-                            <td width="50%" valign="top" style="width: 50%;">
-                                #replace(customerData.billingInfo, chr(13), "<br />", "all")#
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr><td style="padding: 5px;"></td></tr>
-            <tr>
-                <td>
-                    <table width="100%" border="0" style="border-collapse: collapse; table-layout: fixed;">
-                        <tr>
-                            <td width="5%" style="width: 5%; border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titPos', invoiceLng)#</td>
-                            <td width="45%" style="width: 45%; border-bottom: 1px solid ##ccc; font-size: 10px;">#getTrans('titDescription', invoiceLng)#</td>
-                            <td width="15%" style="width: 15%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titQuantity', invoiceLng)#</td>
-                            <td width="15%" style="width: 15%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titSinglePrice', invoiceLng)#</td>
-                            <td width="10%" style="width: 10%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titDiscount', invoiceLng)#</td>
-                            <td width="10%" style="width: 10%; border-bottom: 1px solid ##ccc; font-size: 10px;" align="right">#getTrans('titTotal', invoiceLng)# #getInvoiceData.currency#</td>
-                        </tr>
-                        <cfloop array="#getInvoiceData.positions#" index="pos">
-                            <tr>
-                                <td valign="top" style="border-bottom: 1px solid ##ccc;">#pos.posNumber#</td>
-                                <td valign="top" style="border-bottom: 1px solid ##ccc;">
-                                    <b>#pos.title#</b><br />
-                                    #pos.description#
-                                </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">#lsCurrencyFormat(pos.quantity, "none")# #pos.unit#</td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">
-                                    #lsCurrencyFormat(pos.singlePrice, "none")#
-                                    <cfif pos.vat gt 0>
-                                        <br />
-                                        <span style="font-size: 9px; color: ##ccc;">(#pos.vat#%)</span>
-                                    </cfif>
-                                </td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
-                                <td valign="top" align="right" style="border-bottom: 1px solid ##ccc;">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
-                            </tr>
-                        </cfloop>
-                        <tr>
-                            <td></td>
-                            <td colspan="4"><b>#getTrans('titTotal', invoiceLng)#</b></td>
-                            <td align="right"><b>#lsCurrencyFormat(getInvoiceData.subtotal, "none")#</b></td>
-                        </tr>
-                        <cfif arrayLen(getInvoiceData.vatArray)>
-                            <tr><td colspan="6"></td></tr>
-                            <cfloop array="#getInvoiceData.vatArray#" index="vat">
-                                <tr>
-                                    <td></td>
-                                    <td colspan="4" style="font-size: 10px;">#objInvoices.getVatText(getInvoiceData.isNet, vat.vat, invoiceLng)#</td>
-                                    <td align="right">#lsCurrencyFormat(vat.amount, "none")#</td>
-                                </tr>
-                            </cfloop>
-                            <tr><td colspan="100%"></td></tr>
-                        </cfif>
-                        <tr>
-                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;"></td>
-                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" colspan="4"><b>#objInvoices.getTotalText(getInvoiceData.vatType, invoiceLng)#</b></td>
-                            <td style="border-top: 1px solid ##ccc; padding: 5px 0;" align="right"><b>#lsCurrencyFormat(getInvoiceData.total, "none")#</b></td>
-                        </tr>
-
-                        <cfif qPayments.recordCount>
-                            <cfloop query="qPayments">
-                                <tr>
-                                    <td style="border-top: 1px solid; padding: 5px 0;"></td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" colspan="4">#getTrans('txtIncoPayments', invoiceLng)# #lsDateFormat(getTime.utc2local(utcDate=qPayments.dtmPayDate))# (#encodeForHTML(qPayments.strPaymentType)#):</td>
-                                    <td style="border-top: 1px solid; padding: 5px 0;" class="text-end pr-0" align="right">- #lsCurrencyFormat(qPayments.decAmount, "none")#</td>
-                                </tr>
-                            </cfloop>
-
-                            <tr>
-                                <td style="border-top: 1px solid ##ccc;"></td>
-                                <td style="border-top: 1px solid ##ccc;" colspan="4"><b>#getTrans('txtRemainingAmount', invoiceLng)#</b></td>
-                                <td style="border-top: 1px solid ##ccc;" class="text-end pr-0" align="right"><b>#lsCurrencyFormat(getInvoiceData.amountOpen, "none")#</b></td>
-                            </tr>
-                        </cfif>
-                        <tr><td colspan="6" style="border-top: 1px solid ##ccc;"></td></tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>
-    </cfoutput>
-</cfsavecontent>
-<cfsavecontent variable="invoiceDataFooter">
-    <cfoutput>
-    <table width="100%" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 18px;">
-        <tr>
-            <td align="center">
-                <b>#encodeForHTML(sysAdminData.companyName)#</b>, #sysAdminData.address#, #sysAdminData.zip# #sysAdminData.city#<br>
-                #getTrans('formEmailAddress', invoiceLng)#: #sysAdminData.email# |
-                #getTrans('formPhone', invoiceLng)#: #sysAdminData.phone# |
-                #getTrans('formWebsite', invoiceLng)#: #sysAdminData.website#
-
-            </td>
-        </tr>
-    </table>
-    </cfoutput>
-</cfsavecontent>
-
-
-<!--- The modern renderer centers the footer in the bottom margin; reserve space for a printable gap below it. --->
-<cfif !swissQrInvoice>
-
-    <cfdocument
-        saveAsName="#pdfName#.pdf"
-        pageType="A4"
-        unit="cm"
-        marginLeft="1.8"
-        marginRight="1.8"
-        marginTop="2"
-        marginBottom="3"
-        format="pdf"
-        overwrite="yes">
-
-        <cfoutput>
-        #invoiceData#
-        <cfdocumentitem type="footer">
-            #invoiceDataFooter#
-        </cfdocumentitem>
-        </cfoutput>
-
-    </cfdocument>
-
-
-
-<!--- With Swiss QR invoice  --->
-<cfelse>
-
-    <cftry>
-
-        <cfdocument
-            name="invoice"
-            pageType="A4"
-            unit="cm"
-            marginLeft="1.8"
-            marginRight="1.8"
-            marginTop="2"
-            marginBottom="3"
-            format="pdf"
-            overwrite="yes">
-
-            <cfoutput>
-            #invoiceData#
-            <cfdocumentitem type="footer">
-                #invoiceDataFooter#
-            </cfdocumentitem>
-            </cfoutput>
-
-        </cfdocument>
-
-        <cfpdf action="merge" destination="#pdfName#.pdf" overwrite="yes">
-            <cfpdfparam source="invoice">
-            <cfpdfparam source="#swissQrSlip#">
-        </cfpdf>
-
-        <!--- Open PDF in browser and delete the file immediately --->
-        <cfheader name="Content-Disposition" value="attachment;filename=""#pdfName#.pdf"";">
-        <cfheader name="Content-Type" value="application/pdf">
-        <cfcontent type="application/pdf" file="#pdfName#.pdf" deletefile="yes" reset="yes">
-        </cfcontent>
-
-        <cfcatch type="any">
-            <cfoutput>
-                #swissQrSlip#
-            </cfoutput>
-            <cfabort>
-        </cfcatch>
-
-    </cftry>
-
-</cfif>

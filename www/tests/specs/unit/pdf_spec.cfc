@@ -38,15 +38,15 @@ component extends="testbox.system.BaseSpec" {
             });
 
             it("has no cfdocument with the classic engine", () => {
-                for (var file in ["backend/core/com/swissqrbill.cfc", "backend/core/views/invoices/print.cfm"]) {
+                for (var file in ["backend/core/com/swissqrbill.cfc", "backend/core/com/invoice_document.cfm"]) {
                     expect(reFindNoCase("type\s*=\s*[""']classic", scanner.readSource(file))).toBe(0, file);
                 }
             });
 
             it("gives the invoice logo a fixed size (modern ignores max-width)", () => {
-                var source = scanner.readSource("backend/core/views/invoices/print.cfm");
+                var source = scanner.readSource("backend/core/com/invoice_document.cfm");
                 expect(source).notToInclude('style="max-width');
-                expect(source).toInclude('style="##logoSize##');
+                expect(source).toInclude('style="##local.logoSize##');
             });
 
         });

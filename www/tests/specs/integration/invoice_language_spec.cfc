@@ -167,9 +167,9 @@ component extends="tests.support.integration_spec" {
                 var scanner = new tests.support.security_scanner();
 
                 it("translate every label of the print in the invoice language (##694)", () => {
-                    var source = scanner.readSource("backend/core/views/invoices/print.cfm");
+                    var source = scanner.readSource("backend/core/com/invoice_document.cfm");
                     expect(reMatch("getTrans\('[A-Za-z]+'\)", source)).toBeEmpty("Labels without the invoice language");
-                    expect(source).toInclude("setLocale(application.objLanguage.toLocale(invoiceLng))");
+                    expect(scanner.readSource("backend/core/com/invoice_documents.cfc")).toInclude("setLocale(application.objLanguage.toLocale(local.invoiceLng))");
                     expect(source).notToInclude("getInvoiceData.totaltext");
                     expect(source).notToInclude("vat.vatText");
                 });

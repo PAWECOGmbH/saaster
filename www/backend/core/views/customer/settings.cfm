@@ -40,9 +40,9 @@
                         <div class="card-body">
                             Settings goes here
                         </div>
-                        <cfif session.superadmin>
+                        <cfif new backend.core.com.account_lifecycle().canDelete(session.user_id, session.customer_id) and not session.sysadmin>
                             <div class="card-footer text-center">
-                                <a href="##" data-bs-toggle="modal" data-bs-target="##delete_account" class="btn btn-outline-danger">#getTrans('titDeleteAccount')#</a>
+                                <a href="#application.mainURL#/account-settings/company" class="btn btn-outline-danger">#getTrans('titDeleteAccount')#</a>
                             </div>
                         </cfif>
                     </div>
@@ -50,6 +50,6 @@
             </div>
         </div>
     </cfoutput>
-    
+
 
 </div>

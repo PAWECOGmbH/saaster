@@ -108,6 +108,13 @@ if (structKeyExists(form, "edit_module")) {
 
     if (isNumeric(form.edit_module)) {
 
+        // The folder must also be a valid component path for the deletion hook.
+        form.prefix = trim(form.prefix ?: "");
+        if (!reFind("^[a-zA-Z0-9_]{1,20}$", form.prefix)) {
+            getAlert('Use 1 to 20 letters, digits or underscores for the module prefix.', 'danger');
+            location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
+        }
+
         picSuccess = true;
 
         if (structKeyExists(form, "pic") and len(trim(form.pic))) {
@@ -285,7 +292,33 @@ writeOutput("<!--- This file will be included while users login --->");
             }
         }
 
-        if (picSuccess and createFolderSuccess and createLoginFileSuccess) {
+        // Generate only missing hooks; never overwrite module-specific cleanup.
+        createDeletionFileSuccess = true;
+        if (!fileExists(expandPath('/backend/modules/#form.prefix#/deletion.cfc'))) {
+            deletionContent = arrayToList([
+                'component output="false" {',
+                '    // Implement cleanup for this customer, including former subscribers.',
+                '    // Retried calls must be safe after partial success.',
+                '    // See docs/module-account-deletion.md in the Saaster repository.',
+                '    public struct function deleteCustomer(required numeric customerID) {',
+                '        throw(',
+                '            type="AccountDeletion.NotImplemented",',
+                '            message="Implement customer cleanup in this module deletion.cfc before deleting accounts."',
+                '        );',
+                '        // Return {success:true} only after all module-owned customer data is removed.',
+                '    }',
+                '}',
+                ''
+            ], chr(10));
+            try {
+                fileWrite(expandPath('/backend/modules/#form.prefix#/deletion.cfc'), deletionContent, 'utf-8');
+            } catch (any e) {
+                createDeletionFileSuccess = false;
+                getAlert('Could not create the module deletion hook: ' & e.message, 'danger');
+            }
+        }
+
+        if (picSuccess and createFolderSuccess and createFileSuccess and createLoginFileSuccess and createDeletionFileSuccess) {
             getAlert('Module saved.');
         }
 

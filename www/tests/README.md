@@ -98,7 +98,7 @@ Rules:
 - Do **not** define `beforeAll` / `afterAll` in integration specs - the base class uses them for the safety check and the cleanup. Use `beforeEach` / `afterEach`.
 - Fixtures write plain SQL on purpose, so a spec does not depend on the very function it is not testing.
 - Test e-mail addresses end with `@saaster.invalid`. That domain is never deliverable and marks leftovers, which the next run removes automatically.
-- Customers created through fixtures are deleted after the spec. Everything attached to them (users, bookings, invoices, ...) goes with them via `ON DELETE CASCADE`.
+- Customers created through fixtures are deleted after the spec. The fixture explicitly removes its invoice archives and invoices first; production retains these records. Other dependent data uses the schema's foreign keys.
 
 Helpers for side effects:
 
@@ -204,3 +204,5 @@ The fixtures create modules, scheduletasks and plans (`createModule`, `createSch
 | `bin/` | Install, prepare, reset, migrate and run scripts |
 | `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, form and SQL registries, scanners, and the probes that run real pages inside the test application (upload, scheduler worker, invoice view and print, return from Payrexx) |
 | `specs/` | The specs |
+
+`invoice_documents_spec` covers immutable issued PDFs, legacy capture, retained payments and Sysadmin access after deletion, denied customer downloads, draft previews, QR snapshots and deletion rollback. Apply V32 before running it. See [invoice retention](../../docs/invoice-retention.md).

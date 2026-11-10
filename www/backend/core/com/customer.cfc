@@ -205,6 +205,18 @@ component displayname="customer" output="false" {
 
     // Insert tenant (only the most important data)
     public struct function insertTenant(required struct tenantStruct) {
+        if (!isNumeric(arguments.tenantStruct.customerID ?: "")) return {success:false, message:"customerID not valid!"};
+        transaction {
+            if (!new backend.core.com.account_lifecycle().lockActiveCustomer(arguments.tenantStruct.customerID)) {
+                return {success:false, message:application.objLanguage.getTrans("msgAccountDeletionPending")};
+            }
+            local.result = insertTenantActive(arguments.tenantStruct);
+            if (!local.result.success) transaction action="rollback";
+            return local.result;
+        }
+    }
+
+    private struct function insertTenantActive(required struct tenantStruct) {
 
         // Default variables
         local.argsReturnValue = structNew();
@@ -317,6 +329,29 @@ component displayname="customer" output="false" {
 
     }
 
+
+    // Management includes inactive and pending-deletion tenants; the navigation list does not.
+    public query function getManagedTenants(required numeric userID, required numeric parentID) {
+        local.actor = queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:arguments.userID}},
+            sql="SELECT intCustomerID, blnSuperAdmin, blnSysAdmin FROM users WHERE intUserID = :id AND blnActive = 1");
+        local.activated = queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:arguments.parentID}},
+            sql="SELECT intOrganizationID FROM organization_access WHERE intOrganizationID = :id").recordCount gt 0;
+        if (!local.actor.recordCount or !(local.actor.blnSysAdmin
+            or (local.activated and application.objAuthorization.canInOrganization(arguments.userID, arguments.parentID, "organization.tenants.manage"))
+            or (!local.activated and local.actor.blnSuperAdmin and local.actor.intCustomerID eq arguments.parentID))) {
+            throw(type="Authorization.Denied", message="Tenant management is not permitted.");
+        }
+        return queryExecute(options={datasource:application.datasource},
+            params={id:{type:"integer",value:arguments.parentID},user:{type:"integer",value:arguments.userID}},
+            sql="SELECT c.*, CASE WHEN p.intUserID IS NOT NULL THEN IF(p.intDefaultCustomerID = c.intCustomerID, 1, 0) ELSE COALESCE(assigned.blnStandard, 0) END AS blnStandard,
+                    IF(d.intCustomerID IS NULL, 0, 1) AS deletionPending, COALESCE(d.strStatus, '') AS deletionStatus
+                FROM customers c
+                LEFT JOIN membership_preferences p ON p.intUserID = :user
+                LEFT JOIN customer_user assigned ON assigned.intUserID = :user AND assigned.intCustomerID = c.intCustomerID
+                LEFT JOIN account_deletions d ON d.intCustomerID = c.intCustomerID
+                WHERE c.intCustomerID = :id OR c.intCustParentID = :id
+                ORDER BY blnStandard DESC, c.intCustomerID");
+    }
 
     // Get customer data
     public struct function getCustomerData(required numeric customerID) {
@@ -435,6 +470,10 @@ component displayname="customer" output="false" {
 
     // Delete account right now
     public struct function deleteAccount(required numeric customerID) {
+        // The legacy entry point must not bypass a durable lifecycle request.
+        if (new backend.core.com.account_lifecycle().isDeleting(arguments.customerID)) {
+            return {success: false, message: application.objLanguage.getTrans("msgAccountDeletionPending")};
+        }
 
         // Default variables
         local.argsReturnValue = structNew();
@@ -442,43 +481,6 @@ component displayname="customer" output="false" {
         local.argsReturnValue['success'] = false;
 
         if (arguments.customerID gt 0) {
-
-            // Get all registered tenants
-            local.qCheckTenants = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-                    SELECT intCustomerID
-                    FROM customers
-                    WHERE intCustParentID = :customerID
-                "
-            )
-
-            loop query="local.qCheckTenants" {
-
-                // Get users of the tenant
-                local.qCheckTenants = queryExecute(
-                    options = {datasource = application.datasource},
-                    params = {
-                        customerID: {type: "numeric", value: local.qCheckTenants.intCustomerID}
-                    },
-                    sql = "
-                        SELECT intUserID
-                        FROM users
-                        WHERE intCustomerID = :customerID
-                        AND blnSuperAdmin = 1
-                    "
-                )
-
-                // If there is a tenant without user with super privileges, stop deleting
-                if (!local.qCheckTenants.recordCount) {
-                    local.argsReturnValue['message'] = application.objLanguage.getTrans('alertCantDeleteAccount');
-                    return local.argsReturnValue;
-                }
-
-            }
 
             // Get all users of the customer
             local.qCustomer = queryExecute(
@@ -494,6 +496,45 @@ component displayname="customer" output="false" {
                     WHERE customers.intCustomerID = :customerID
                 "
             )
+
+            // Archive first; a failure leaves the account, invoice links and files intact.
+            try {
+                transaction {
+                    local.target = new backend.core.com.account_lifecycle().lockDeletionTarget(arguments.customerID);
+                    if (!local.target.success) {
+                        return {success:false, message:application.objLanguage.getTrans(local.target.reason eq "tenants" ? "msgAccountHasTenants" : "alertCantDeleteAccount")};
+                    }
+                    if (new backend.core.com.account_lifecycle().isDeleting(arguments.customerID)) {
+                        return {success:false, message:application.objLanguage.getTrans("msgAccountDeletionPending")};
+                    }
+                    // External checkout/payment history must be finalized through the lifecycle.
+                    local.checkoutHistory = queryExecute(options={datasource:application.datasource},params={id:{type:"integer",value:arguments.customerID}},
+                        sql="SELECT intCustomerID FROM payrexx_checkouts WHERE intCustomerID=:id AND strStatus <> 'rejected'
+                            UNION SELECT intCustomerID FROM payrexx_checkout_events WHERE intCustomerID=:id");
+                    if (local.checkoutHistory.recordCount or new backend.core.com.account_lifecycle().hasOperations(arguments.customerID)) {
+                        return {success:false,message:application.objLanguage.getTrans("msgAccountDeletionPending")};
+                    }
+                    new backend.core.com.invoice_documents().retainForDeletion(arguments.customerID);
+                    // Delete the customer (the foreign key does the rest)
+                    queryExecute(
+                        options = {datasource = application.datasource},
+                        params = {
+                            customerID: {type: "numeric", value: arguments.customerID}
+                        },
+                        sql = "
+
+                            DELETE FROM customers
+                            WHERE intCustomerID = :customerID;
+
+                        "
+                    )
+
+                }
+            } catch (any e) {
+                local.argsReturnValue.message = application.objLanguage.getTrans('alertCantDeleteAccount');
+                application.objLog.logWrite("system", "error", "Customer deletion failed during invoice retention [CustomerID: #arguments.customerID#]: #e.message#");
+                return local.argsReturnValue;
+            }
 
             // Delete the customers logo (the check used to look at the photo of the first user)
             if (local.qCustomer.recordCount) {
@@ -512,24 +553,6 @@ component displayname="customer" output="false" {
                     }
                 }
             }
-
-            // Delete the customer (the foreign key does the rest)
-            local.qCustomer = queryExecute(
-                options = {datasource = application.datasource},
-                params = {
-                    customerID: {type: "numeric", value: arguments.customerID}
-                },
-                sql = "
-
-                    UPDATE customers
-                    SET intCustParentID = 0
-                    WHERE intCustParentID = :customerID;
-
-                    DELETE FROM customers
-                    WHERE intCustomerID = :customerID;
-
-                "
-            )
 
             local.argsReturnValue['success'] = true;
             return local.argsReturnValue;

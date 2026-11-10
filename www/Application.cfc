@@ -270,17 +270,30 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         enforceAccess(application.objRequestAccess.checkPage(thiscontent, cgi.request_method, url));
         enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
 
-        // More global variables (with customer session).
-        if (structKeyExists(session, "customer_id")) {
-            getTime = new backend.core.com.time(session.customer_id);
-            getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
+        local.operation = "";
+        if (left(thiscontent.thisPath, 8) eq "backend/" and structKeyExists(session, "customer_id")) {
+            local.operation = new backend.core.com.account_lifecycle().beginOperation(session.customer_id, "request");
+            if (!len(local.operation)) {
+                enforceAccess({access:false, reason:"accountDeletion", statusCode:403, statusText:"Forbidden", messageKey:"msgAccountDeletionPending"});
+            }
+            request.accountOperation = local.operation;
         }
+        try {
+            // More global variables (with customer session).
+            if (structKeyExists(session, "customer_id")) {
+                getTime = new backend.core.com.time(session.customer_id);
+                getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
+            }
 
-        // Custom code
-        ownRequest();
+            // Custom code
+            ownRequest();
 
-        include template="\#ARGUMENTS.TargetPage#";
-        return true;
+            include template="\#ARGUMENTS.TargetPage#";
+            return true;
+        } finally {
+            if (len(local.operation)) new backend.core.com.account_lifecycle().finishOperation(local.operation);
+            structDelete(request, "accountOperation");
+        }
 
     }
 

@@ -294,10 +294,9 @@ component output="false" hint="Membership activation, session context and reques
             return local.authorization.canInTenant(arguments.userID, arguments.customerID, "tenant.billing.view");
         }
         if (reFind("/(handler/(book[^/]*|cancel|payment|invoices)|views/customer/(plans|modules|payment))\.cfm$", local.path)) {
-            // Organization deletion is a separate lifecycle operation; the legacy
-            // cancel handler would orphan children and delete identities implicitly.
-            if (structKeyExists(arguments.submitted, "delete")) {
-                return false;
+            if (local.path eq "backend/core/handler/cancel.cfm" and structKeyExists(arguments.submitted, "delete")) {
+                return arguments.method eq "POST" and isValid("integer", arguments.submitted.delete)
+                    and new backend.core.com.account_lifecycle().canDelete(arguments.userID, val(arguments.submitted.delete));
             }
             return local.authorization.canInTenant(arguments.userID, arguments.customerID, "tenant.billing.manage");
         }

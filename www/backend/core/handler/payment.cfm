@@ -259,7 +259,7 @@ if (structKeyExists(url, "add")) {
 
 
             // Call Payrexx and create a gateway
-            payrexxRespond = objPayrexx.callPayrexx(paymentStruct, "POST", "Gateway");
+            payrexxRespond = new backend.core.com.payrexx_checkouts().create(session.customer_id, paymentStruct);
 
             if (payrexxRespond.status eq "success") {
 
@@ -370,32 +370,20 @@ if (structKeyExists(url, "pay")) {
                     include template="/frontend/core/handler/payrexx_webhook.cfm";
                 }
 
-                // Get the webhook data
-                objPayrexx = new backend.core.com.payrexx();
-                getWebhook = objPayrexx.getWebhook(session.customer_id, 'confirmed');
-
-                // If there is no data from the webhook, send the customer back and try again
-                if (getWebhook.recordCount) {
-
-                    // Insert payment
-                    payment = structNew();
-                    payment['invoiceID'] = url.pay;
-                    payment['customerID'] = session.customer_id;
-                    payment['date'] = now();
-                    payment['amount'] = getWebhook.decAmount;
-                    payment['payrexxID'] = getWebhook.intPayrexxID;
-                    payment['type'] = getWebhook.strPaymentBrand;
-
-                    objInvoice = new backend.core.com.invoices();
-                    insPayment = objInvoice.insertPayment(payment);
+                // The webhook imports only the payment belonging to this exact checkout/invoice.
+                // Browser return URLs never select the customer's latest unrelated payment.
+                invoiceGateways = session.payrexxInvoiceGateways ?: {};
+                expectedGatewayID = val(invoiceGateways[toString(url.pay)] ?: 0);
+                paidCheckout = queryExecute(options={datasource:application.datasource},
+                    params={customer:{type:"integer",value:session.customer_id},invoice:{type:"integer",value:url.pay},gateway:{type:"bigint",value:expectedGatewayID}},
+                    sql="SELECT p.intPaymentID FROM payrexx_checkouts c
+                        INNER JOIN payrexx r ON r.intGatewayID=c.intGatewayID AND r.intCustomerID=c.intCustomerID
+                        INNER JOIN payments p ON p.intPayrexxID=r.intPayrexxID AND p.intInvoiceID=c.intInvoiceID
+                        WHERE c.intCustomerID=:customer AND c.intInvoiceID=:invoice AND c.intGatewayID=:gateway");
+                if (paidCheckout.recordCount) {
                     anyLanguage = application.objLanguage.getAnyLanguage(session.lng).iso;
-
-                    // Set plans and modules as well as the custom settings into a session
                     application.objCustomer.setProductSessions(session.customer_id, anyLanguage);
-
                     getAlert('msgInvoicePaid', 'success');
-                    logWrite("user", "info", "Invoice has been paid [CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #url.pay#, payment type: #getWebhook.strPaymentBrand#]");
-
 
                 } else {
 

@@ -84,11 +84,16 @@
 
 
     // Call Payrexx and create a gateway
-    payrexxRespond = objPayrexx.callPayrexx(paymentStruct, "POST", "Gateway");
+    payrexxRespond = new backend.core.com.payrexx_checkouts().create(session.customer_id, paymentStruct, val(url.pay ?: 0));
 
     if (isStruct(payrexxRespond) and payrexxRespond.status eq "success") {
 
         gatewayData = payrexxRespond.data[1];
+
+        if (val(url.pay ?: 0) gt 0) {
+            if (!structKeyExists(session, "payrexxInvoiceGateways")) session.payrexxInvoiceGateways = {};
+            session.payrexxInvoiceGateways[toString(url.pay)] = gatewayData.id;
+        }
 
         try {
 
