@@ -33,6 +33,7 @@ component output="false" {
                 return {success: false, reason: "operations"};
             }
             try {
+                new backend.core.com.payrexx_checkouts().closeForDeletion(arguments.rootCustomerID);
                 local.hooks = cleanupHooks();
                 // Preserve all accounting documents before any module or file cleanup.
                 local.invoices = queryExecute(options={datasource: application.datasource}, params=local.params,
@@ -81,6 +82,11 @@ component output="false" {
                 return {success: true, reason: "completed"};
             } catch (any e) {
                 if (local.finalizing) transaction action="rollback" savepoint="accountFinalization";
+                if (e.type eq "Payrexx.CheckoutPending") {
+                    queryExecute(options={datasource:application.datasource},params=local.params,
+                        sql="UPDATE account_deletions SET strStatus='waiting',strLastError='checkouts' WHERE intRootCustomerID=:root AND strStatus <> 'completed'");
+                    return {success:false,reason:"operations"};
+                }
                 // Completed hooks remain recorded; partial hooks must be safe to retry.
                 queryExecute(options={datasource: application.datasource}, params=local.params,
                     sql="UPDATE account_deletions SET strStatus = 'failed', strLastError = 'cleanup'

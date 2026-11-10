@@ -148,3 +148,35 @@ INSERT IGNORE INTO system_translations (strVariable, strStringDE, strStringEN) V
 INSERT IGNORE INTO system_translations (strVariable, strStringDE, strStringEN) VALUES
     ('txtAccountDeletionFailed', 'Löschung fehlgeschlagen', 'Deletion failed'),
     ('msgAccountDeletionFailed', 'Die Bereinigung konnte nicht abgeschlossen werden. Der Zugriff bleibt gesperrt und die Abonnements sind beendet. Bitte wenden Sie sich an den Support. Nach Behebung der Ursache kann die bestehende Löschung fortgesetzt werden.', 'Cleanup could not be completed. Access remains blocked and subscriptions have stopped. Please contact support. Once the cause has been resolved, the existing deletion can be continued.');
+
+-- Persist the lifetime of external checkouts, independently of browser sessions.
+-- No customer FK: references and minimal payment evidence survive account deletion.
+CREATE TABLE IF NOT EXISTS payrexx_checkouts (
+    strReference VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    intCustomerID INT NOT NULL,
+    intGatewayID BIGINT NULL,
+    intInvoiceID INT NULL,
+    strKind VARCHAR(20) NOT NULL,
+    decAmount DECIMAL(18,2) NOT NULL,
+    strCurrency VARCHAR(10) NOT NULL,
+    strStatus VARCHAR(20) NOT NULL DEFAULT 'creating',
+    blnGatewayDisabled TINYINT NOT NULL DEFAULT 0,
+    dtmCreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (strReference),
+    UNIQUE KEY uq_checkout_gateway (intGatewayID),
+    KEY idx_checkout_customer (intCustomerID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS payrexx_checkout_events (
+    intTransactionID BIGINT NOT NULL,
+    strStatus VARCHAR(40) NOT NULL,
+    intCustomerID INT NOT NULL,
+    intGatewayID BIGINT NOT NULL DEFAULT 0,
+    strReference VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    decAmount DECIMAL(18,2) NOT NULL,
+    strCurrency VARCHAR(10) NOT NULL DEFAULT '',
+    strResolution VARCHAR(20) NOT NULL DEFAULT 'pending',
+    dtmReceivedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (intTransactionID, strStatus),
+    KEY idx_checkout_event_customer (intCustomerID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

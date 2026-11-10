@@ -137,9 +137,10 @@ The switcher continues to list only accessible tenants.
 
 - Custom API resources or background entry points outside the core dispatcher must
   participate in the same operation protocol.
-- Coordinate already issued Payrexx checkout gateways and delayed authorization/payment
-  webhooks before finalization; the current operation guards cover core synchronous
-  charges, not the lifetime of an external browser checkout.
+- Before upgrading an existing installation, reconcile/close checkout links created by
+  the old code in Payrexx. Their IDs may exist only in expired browser sessions and
+  cannot be reconstructed from the database. The new registry covers newly created
+  checkouts; missing historical records must not be interpreted as no external work.
 - Extend the Sysadmin retry interface with verified payment reconciliation. Unknown
   charges and abandoned operation/job records require explicit investigation before
   releasing their hold. There is intentionally no force-delete/clear-holds button.
@@ -217,3 +218,74 @@ Read-only follow-up validation: all 262 relevant invoice, payment, lifecycle and
 specs passed. The actual backend was inspected at desktop and mobile widths; retained
 invoices expose only viewing actions and the original PDF still downloads successfully.
 This follow-up requires no additional migration.
+
+## External Payrexx checkouts and delayed webhooks
+
+V32 now also creates `payrexx_checkouts` and `payrexx_checkout_events`, preserving their
+contents on reruns. Apply the amended V32 before deploying the code. These tables have
+no customer cascade: they retain the reference, gateway/transaction IDs, amount,
+currency and reconciliation status, without copying full webhook payloads or card data.
+
+Both core Gateway creation paths call `payrexx_checkouts.create()`. It stores the
+customer, exact reference and optional invoice ID **before** the external request.
+A creation still in flight or with an unknown outcome blocks finalization; another
+creation is refused while the earlier result remains unknown. A browser returning to
+a cancellation URL does not prove that the payment failed or release this hold.
+
+The authenticated webhook handler locks the same customer row as deletion. It checks
+checkout/reference ownership and records events idempotently. A confirmed invoice
+payment with matching amount and currency is posted once without requiring a browser
+return. The return handler checks that exact gateway/invoice instead of selecting the
+customer's latest unrelated transaction. Delayed waiting notifications cannot downgrade
+a confirmed payment. Refunds, disputed outcomes, amount/currency mismatches and
+unassigned purchase payments require reconciliation rather than automatic posting.
+
+Before module cleanup or invoice detachment, deletion retrieves each known gateway and
+imports its transaction evidence, then closes the gateway through the API. Pending
+transactions remain a hold after gateway closure. A retry reads their current status
+from the transaction API. Neither elapsed time nor an unverified 404 clears a hold.
+Uncertain creation responses, unsuccessful cancellation and incomplete provider data
+leave the account stopped and pending. Sysadmin displays a checkout/payment-verification
+message; the existing password-confirmed retry refreshes provider state.
+
+Late authorizations for an already deleted account are revoked without recreating its
+payment methods. If revocation fails, the durable event remains pending and the webhook
+returns HTTP 503 so the provider can retry. Other storage failures also return HTTP 503.
+Late financial confirmations are retained as `review` events and logged for investigation;
+they do not modify immutable retained invoices, revive bookings or restore customer data.
+Monitor these records/logs and ensure webhook retries are enabled in the Payrexx integration.
+A dedicated operator reconciliation UI remains a separate follow-up; there is no automatic
+refund or force-clear operation. An unresolved financial event must be investigated using
+its provider transaction and reference before any manual resolution.
+
+### Existing installations and custom integrations
+
+The old code did not persist every external Gateway ID. V32 cannot reconstruct an open
+checkout for which no webhook has arrived. Before enabling account deletion after the
+upgrade, close/reconcile those old links and in-flight transactions in Payrexx. Already
+queued legacy webhooks are accepted through the same deletion-aware handler, even if
+no registry row exists. Existing API/background integrations that create gateways must
+use `payrexx_checkouts.create(customerID, payload, invoiceID)` as well.
+
+The implementation uses Payrexx's documented [Gateway retrieval](https://developers.payrexx.com/reference/retrieve-a-gateway),
+[Gateway deletion](https://developers.payrexx.com/reference/delete-a-gateway) and
+[transaction statuses](https://docs.payrexx.com/developer/guides/webhook/transaction).
+Gateway closure stops further use of the link; it is not treated as proof that every
+previous payment attempt has settled. This is why pending attempts and late financial
+events retain separate reconciliation state.
+
+`payrexx_checkout_spec` exercises the real creation/return handlers, authenticated HTTP
+webhooks and the deletion lifecycle against a local Payrexx mock. It covers an in-flight
+creation/deletion race, lost responses, cancellation failure, duplicate/out-of-order
+notifications, waiting-to-confirmed settlement, wrong gateway/amount/currency, legacy
+notifications and late events after account deletion. V32 migration specs also verify
+that disabled gateways and unresolved events survive repeated migration runs.
+
+Validation for checkout coordination: the complete regression run passed 817 specs.
+After adding the final out-of-order authorization regression and its guard, all 94
+relevant specs passed, including 20 checkout scenarios. The English Sysadmin pending
+notice was rendered in a German session at desktop/mobile widths, and the existing
+password-confirmed retry dialog was opened. The notice fits the mobile viewport; the
+pre-existing customer-details tables still extend beyond it. All payment API calls used
+the local mock. The amended V32 was applied only to the dedicated test database; no
+live payment or production customer was changed.

@@ -241,7 +241,7 @@ component output="false" hint="Creates test data and removes it again." {
     public void function cleanup() {
         for (var index = arrayLen(variables.createdCustomerIds); index gte 1; index--) {
             removeTestInvoices(variables.createdCustomerIds[index]);
-            loop list="account_deletion_steps,account_operations,account_deletions" item="local.table" {
+            loop list="payrexx_checkout_events,payrexx_checkouts,account_deletion_steps,account_operations,account_deletions" item="local.table" {
                 queryExecute(options={datasource: application.datasource}, params={id:{type:"integer",value:variables.createdCustomerIds[index]}},
                     sql="DELETE FROM #local.table# WHERE intCustomerID = :id");
             }

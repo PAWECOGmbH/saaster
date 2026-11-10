@@ -12,7 +12,7 @@ component extends="tests.support.integration_spec" {
                 execute("INSERT INTO migration_invoice_invoices VALUES (11,1,1), (12,1,2)");
             });
             afterEach(() => {
-                execute("DROP TABLE IF EXISTS migration_invoice_fk_collision, migration_invoice_system_translations, migration_invoice_account_deletion_steps, migration_invoice_account_operations, migration_invoice_account_deletions, migration_invoice_invoice_documents, migration_invoice_invoices, migration_invoice_customers");
+                execute("DROP TABLE IF EXISTS migration_invoice_payrexx_checkout_events, migration_invoice_payrexx_checkouts, migration_invoice_fk_collision, migration_invoice_system_translations, migration_invoice_account_deletion_steps, migration_invoice_account_operations, migration_invoice_account_deletions, migration_invoice_invoice_documents, migration_invoice_invoices, migration_invoice_customers");
             });
 
             it("upgrades legacy data once and preserves archives and new work on repeated runs", () => {
@@ -29,6 +29,10 @@ component extends="tests.support.integration_spec" {
                 execute("INSERT INTO migration_invoice_account_deletion_steps (intCustomerID, strStep) VALUES (1,'module:todo')");
                 execute("INSERT INTO migration_invoice_account_operations (strToken, intCustomerID, strKind, strStatus) VALUES ('test-token',1,'charge','uncertain')");
                 execute("UPDATE migration_invoice_system_translations SET strStringDE = 'Custom translation'");
+                execute("INSERT INTO migration_invoice_payrexx_checkouts (strReference,intCustomerID,intGatewayID,strKind,decAmount,strCurrency,strStatus,blnGatewayDisabled)
+                    VALUES ('fixture-reference',1,123,'invoice',100,'CHF','open',1)");
+                execute("INSERT INTO migration_invoice_payrexx_checkout_events (intTransactionID,strStatus,intCustomerID,strReference,decAmount,strResolution)
+                    VALUES (1234,'waiting',1,'fixture-reference',100,'pending')");
                 local.before = archiveState();
                 local.schema = execute("SHOW CREATE TABLE migration_invoice_invoices")["Create Table"][1];
 
@@ -36,6 +40,8 @@ component extends="tests.support.integration_spec" {
                 runMigration();
 
                 expect(archiveState()).toBe(local.before);
+                expect(execute("SELECT blnGatewayDisabled FROM migration_invoice_payrexx_checkouts").blnGatewayDisabled).toBe(1);
+                expect(execute("SELECT strResolution FROM migration_invoice_payrexx_checkout_events").strResolution).toBe("pending");
                 expect(execute("SELECT strStatus FROM migration_invoice_account_deletions WHERE intCustomerID = 1").strStatus).toBe("failed");
                 expect(execute("SELECT strStep FROM migration_invoice_account_deletion_steps WHERE intCustomerID = 1").strStep).toBe("module:todo");
                 expect(execute("SELECT strStatus FROM migration_invoice_account_operations WHERE strToken = 'test-token'").strStatus).toBe("uncertain");
@@ -92,7 +98,7 @@ component extends="tests.support.integration_spec" {
     private void function runMigration() {
         local.source = fileRead("/var/saaster/db/core/V32__invoice-documents.sql", "utf-8");
         // Fixed test-only identifiers: exercise the real migration on an isolated legacy schema.
-        loop list="system_translations,account_deletion_steps,account_operations,account_deletions,invoice_documents,invoices,customers" item="local.table" {
+        loop list="payrexx_checkout_events,payrexx_checkouts,system_translations,account_deletion_steps,account_operations,account_deletions,invoice_documents,invoices,customers" item="local.table" {
             local.source = reReplaceNoCase(local.source, "\b" & local.table & "\b", "migration_invoice_" & local.table, "all");
         }
         local.source = replace(local.source, "frn_inv_customer", "migration_invoice_customer", "all");

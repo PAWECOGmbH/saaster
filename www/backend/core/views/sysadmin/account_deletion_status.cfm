@@ -15,6 +15,9 @@
     <cfelseif deletionState.status eq 'failed'>
         <p>Cleanup could not finish. Check the system log and the affected module or payment service, then retry.</p>
     </cfif>
+    <cfif deletionState.error eq 'checkouts'>
+        <p>Waiting for Payrexx checkout cancellation or payment verification. Retry to refresh the provider status. Unknown outcomes require reconciliation.</p>
+    </cfif>
     <cfif deletionOperations.recordCount>
         <ul>
         <cfloop query="deletionOperations">

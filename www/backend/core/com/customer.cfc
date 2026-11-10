@@ -507,6 +507,13 @@ component displayname="customer" output="false" {
                     if (new backend.core.com.account_lifecycle().isDeleting(arguments.customerID)) {
                         return {success:false, message:application.objLanguage.getTrans("msgAccountDeletionPending")};
                     }
+                    // External checkout/payment history must be finalized through the lifecycle.
+                    local.checkoutHistory = queryExecute(options={datasource:application.datasource},params={id:{type:"integer",value:arguments.customerID}},
+                        sql="SELECT intCustomerID FROM payrexx_checkouts WHERE intCustomerID=:id AND strStatus <> 'rejected'
+                            UNION SELECT intCustomerID FROM payrexx_checkout_events WHERE intCustomerID=:id");
+                    if (local.checkoutHistory.recordCount or new backend.core.com.account_lifecycle().hasOperations(arguments.customerID)) {
+                        return {success:false,message:application.objLanguage.getTrans("msgAccountDeletionPending")};
+                    }
                     new backend.core.com.invoice_documents().retainForDeletion(arguments.customerID);
                     // Delete the customer (the foreign key does the rest)
                     queryExecute(
