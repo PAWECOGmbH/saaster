@@ -47,6 +47,11 @@ if (url.pass eq variables.schedulePassword) {
     )
 
     loop query=qWaiting {
+        accountLifecycle = new backend.core.com.account_lifecycle();
+        accountOperation = accountLifecycle.beginOperation(qWaiting.intCustomerID, "renewal");
+        if (!len(accountOperation)) continue;
+        try {
+
 
         // Plans to delete
         qPlans = queryExecute(
@@ -154,6 +159,10 @@ if (url.pass eq variables.schedulePassword) {
             objLogs.logWrite("scheduletask", "info", "Waiting module activated [ModuleID: #qWaiting.intModuleID#, CustomerID: #qWaiting.intCustomerID#]");
         }
 
+
+        } finally {
+            accountLifecycle.finishOperation(accountOperation);
+        }
     }
 
 
@@ -177,6 +186,11 @@ if (url.pass eq variables.schedulePassword) {
     )
 
     loop query=qRenewBookings {
+        accountLifecycle = new backend.core.com.account_lifecycle();
+        accountOperation = accountLifecycle.beginOperation(qRenewBookings.intCustomerID, "renewal");
+        if (!len(accountOperation)) continue;
+        try {
+
 
         // Renew plans or modules
         if ((qRenewBookings.strRecurring eq "monthly" or qRenewBookings.strRecurring eq "yearly") and
@@ -620,6 +634,10 @@ if (url.pass eq variables.schedulePassword) {
 
         }
 
+
+        } finally {
+            accountLifecycle.finishOperation(accountOperation);
+        }
     }
 
 

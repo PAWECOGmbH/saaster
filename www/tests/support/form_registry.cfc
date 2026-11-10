@@ -26,6 +26,7 @@ component output="false" hint="The collection of every form and every action lin
 
     public array function handlerForms() {
         return [
+            { file: "backend/core/views/sysadmin/account_delete_modal.cfm", target: "sysadm/customers", trigger: "form.delete_account", purpose: "Delete an account or retry pending cleanup with current Sysadmin password" },
             { file: "backend/core/views/sysadmin/module_access_modal.cfm", target: "sysadm/modules", trigger: "form.module_access_action", purpose: "Block or unblock a module for one customer without changing billing" },
             { file: "backend/core/views/customer/membership_invitations.cfm", target: "memberships", trigger: "form.member_action", count: 3, purpose: "Invite, resend or revoke an organization invitation" },
             { file: "frontend/core/views/organization_invitation.cfm", target: "accept-organization-invitation", trigger: "form.accept_invitation", purpose: "Accept an invitation as the verified recipient" },
@@ -34,7 +35,7 @@ component output="false" hint="The collection of every form and every action lin
             // ---------- Customer: company, profile, users, tenants ----------
             { file: "backend/core/views/customer/company-edit.cfm", target: "customer", trigger: "form.logo_upload_btn", purpose: "Upload the company logo" },
             { file: "backend/core/views/customer/company-edit.cfm", target: "customer", trigger: "form.edit_company_btn", purpose: "Save company details and invoice settings" },
-            { file: "backend/core/views/customer/company-edit.cfm", target: "cancel", trigger: "form.delete", purpose: "Delete the whole account (asks for e-mail and password)" },
+            { file: "backend/core/views/customer/account_delete_modal.cfm", target: "cancel", trigger: "form.delete", purpose: "Delete one account or tenant with the current user password and explicit confirmation" },
             { file: "backend/core/views/customer/my-profile.cfm", target: "user", trigger: "form.photo_upload_btn", purpose: "Upload the own profile photo" },
             { file: "backend/core/views/customer/my-profile.cfm", target: "user", trigger: "form.edit_profile_btn", purpose: "Save the own profile" },
             { file: "backend/core/views/customer/reset-password.cfm", target: "user", trigger: "form.change_pw_btn", purpose: "Change the own password" },
@@ -168,7 +169,6 @@ component output="false" hint="The collection of every form and every action lin
             { file: "backend/core/views/plan_view.cfm", target: "cancel", key: "url.plan", purpose: "Remove a waiting plan" },
             { file: "backend/core/views/customer/modules.cfm", target: "cancel", key: "url.module", purpose: "Cancel a module or revoke the cancellation" },
             { file: "backend/core/views/customer/company-edit.cfm", target: "customer", key: "url.del_logo", purpose: "Delete the company logo" },
-            { file: "backend/core/views/customer/tenants.cfm", target: "customer", key: "url.delete", purpose: "Delete a tenant" },
             { file: "backend/core/views/customer/my-profile.cfm", target: "user", key: "url.del_photo", purpose: "Delete the own profile photo" },
             { file: "backend/core/views/customer/users.cfm", target: "user", key: "url.delete", purpose: "Delete a user" },
             { file: "backend/core/views/customer/users.cfm", target: "user", key: "url.invit", purpose: "Send the activation link to a user again" },

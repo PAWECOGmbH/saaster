@@ -78,6 +78,13 @@ if (url.pass eq variables.schedulePassword) {
                 continue;
             }
 
+            lifecycle = new backend.core.com.account_lifecycle();
+            operationToken = lifecycle.beginOperation(job.customerID, "job");
+            if (!len(operationToken)) {
+                objScheduler.finishJob(job, false, 0);
+                continue;
+            }
+            try {
             // Variables may be needed in the included file
             customerID = job.customerID;
             moduleID = job.moduleID;
@@ -141,6 +148,10 @@ if (url.pass eq variables.schedulePassword) {
                 // Make log
                 objLogs.logWrite("scheduletask", "warning", "Schedule task finished after its lock expired, another run took it over [File: #job.path#, CustomerID: #job.customerID#, Duration: #elapsedSeconds# s]", false);
 
+            }
+
+            } finally {
+                lifecycle.finishOperation(operationToken);
             }
 
         }

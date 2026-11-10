@@ -54,6 +54,9 @@ component output="false" {
     }
 
     private struct function checkMembership(required struct content, required string method, required struct submitted, required struct queryString) {
+        if (left(arguments.content.thisPath, 8) eq "backend/" and structKeyExists(session, "customer_id") and new backend.core.com.account_lifecycle().isDeleting(session.customer_id)) {
+            return {access: false, reason: "accountDeletion", statusCode: 403, statusText: "Forbidden", messageKey: "msgAccountDeletionPending"};
+        }
         if (structKeyExists(session, "customer_id") and application.objModuleBlocks.pathBlocked(session.customer_id, arguments.content.thisPath)) {
             return {access: false, reason: "moduleBlocked", statusCode: 403, statusText: "Forbidden", messageKey: "msgModuleBlocked"};
         }

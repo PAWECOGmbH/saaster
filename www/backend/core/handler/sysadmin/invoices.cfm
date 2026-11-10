@@ -3,6 +3,35 @@
 
 objInvoice = new backend.core.com.invoices();
 
+// Reject direct mutations of retained invoices before dispatching any action.
+invoiceMutationTargets = [];
+loop list="new_position,settings,payments" item="invoiceTrigger" {
+    if (structKeyExists(form, invoiceTrigger) and isValid("integer", form[invoiceTrigger])) arrayAppend(invoiceMutationTargets, val(form[invoiceTrigger]));
+}
+if ((structKeyExists(url, "status") or structKeyExists(url, "open") or structKeyExists(url, "email")) and isValid("integer", url.i ?: "")) {
+    arrayAppend(invoiceMutationTargets, val(url.i));
+}
+// Resolve the actual parent from the row ID; never trust the invoice ID in the URL.
+loop array=[{scope:form,key:"edit_position",table:"invoice_positions"},
+    {scope:url,key:"delete_pos",table:"invoice_positions"},
+    {scope:form,key:"delete_payment",table:"payments"}] item="invoiceRowAction" {
+    if (structKeyExists(invoiceRowAction.scope, invoiceRowAction.key) and isValid("integer", invoiceRowAction.scope[invoiceRowAction.key])) {
+        invoiceParent = queryExecute(options={datasource:application.datasource},
+            params={id:{type:"integer",value:invoiceRowAction.scope[invoiceRowAction.key]}},
+            sql=invoiceRowAction.table eq "payments"
+                ? "SELECT intInvoiceID FROM payments WHERE intPaymentID = :id"
+                : "SELECT intInvoiceID FROM invoice_positions WHERE intInvoicePosID = :id");
+        if (invoiceParent.recordCount) arrayAppend(invoiceMutationTargets, invoiceParent.intInvoiceID);
+    }
+}
+loop array=invoiceMutationTargets item="invoiceMutationTarget" {
+    if (objInvoice.isReadOnly(invoiceMutationTarget)) {
+        header statuscode=403 statustext="Forbidden";
+        writeOutput("Invoices of deleted customers are read-only.");
+        abort;
+    }
+}
+
 if (structKeyExists(form, "new_invoice")) {
 
     if (isNumeric(form.new_invoice)) {
@@ -311,6 +340,11 @@ if (structKeyExists(url, "status")) {
 
     if (!isNumeric(url.i) or url.i lte 0) {
         getAlert('No invoice found!', 'danger');
+        location url="#session.redirect#" addtoken="false";
+    }
+
+    if (listFind("delete,1", url.status) and objInvoice.getInvoiceData(url.i).documentIssued) {
+        getAlert('Issued invoices are preserved and cannot be deleted or changed back to drafts.', 'warning');
         location url="#session.redirect#" addtoken="false";
     }
 

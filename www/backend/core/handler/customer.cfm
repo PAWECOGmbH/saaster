@@ -245,70 +245,11 @@ if (structKeyExists(form, "new_tenant_btn")) {
 }
 
 
-// Delete tenant
+// Deletion requires the password-confirmed POST action in the tenant dialog.
 if (structKeyExists(url, "delete")) {
-
-    param name="url.delete" default="0";
-
-    if (!isNumeric(url.delete) or url.delete lte 0) {
-        getAlert('No tenant found!', 'danger');
-        logWrite("user", "warning", "Someone tried to delete a tenant via url manually: tenantID is not numeric [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.delete#]");
-        location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-    }
-
-    // User data of the user to be deleted
-    getTenant = application.objCustomer.getCustomerData(url.delete);
-
-    if (structIsEmpty(getTenant)) {
-        getAlert('No tenant found!', 'danger');
-        logWrite("user", "warning", "Someone tried to delete a tenant but no tenant found [CustomerID: #session.customer_id#, UserID: #session.user_id#, url value: #url.delete#]");
-        location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-    }
-
-    // Check whether the user is allowed to delete
-    checkTenantRange = application.objGlobal.checkTenantRange(session.user_id, getTenant.customerID);
-    if (session.membership_access ?: false) {
-        checkTenantRange = getTenant.custParentID eq session.organization_id
-            and application.objAuthorization.canInOrganization(session.user_id, session.organization_id, "organization.tenants.manage");
-    }
-
-    if (!checkTenantRange) {
-        getAlert('You are not allowed to delete this tenant!', 'danger');
-        logWrite("user", "warning", "User tried to delete a tenant: not allowed [CustomerID: #session.customer_id#, UserID: #session.user_id#, tenantID to delete: #url.delete#]");
-        location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-    }
-
-    // Delete users photo
-    if (len(trim(getTenant.logo))) {
-
-        photoPath = expandPath('../userdata/images/logos/#getTenant.logo#');
-        objUserFileDelete = application.objGlobal.deleteFile(photoPath);
-
-    }
-
-    // Delete tenant
-    queryExecute(
-        options = {datasource = application.datasource, result="getAnswer"},
-        params = {
-            customerID: {type: "numeric", value: getTenant.customerID},
-            myCustomerID: {type: "numeric", value: session.customer_id}
-        },
-        sql = "
-            DELETE FROM customers
-            WHERE intCustomerID = :customerID
-            AND intCustomerID != :myCustomerID
-        "
-    )
-
-    if (getAnswer.recordCount) {
-        getAlert('alertTenantDeleted', 'success');
-        logWrite("user", "info", "Tenant has been deleted [CustomerID: #session.customer_id#, UserID: #session.user_id#, tenantID to delete: #url.delete#]");
-    }
-
-    location url="#application.mainURL#/account-settings/tenants" addtoken="false";
-
+    header statuscode=405 statustext="Method Not Allowed";
+    abort;
 }
-
 
 // Activate or deactivate tenant
 if (structKeyExists(url, "change_tenant")) {
@@ -353,6 +294,7 @@ if (structKeyExists(url, "change_tenant")) {
             UPDATE customers
             SET blnActive = IF(blnActive = 1, 0, 1)
             WHERE intCustomerID = :customerID AND intCustomerID != :myCustomerID
+                AND NOT EXISTS (SELECT 1 FROM account_deletions d WHERE d.intCustomerID = customers.intCustomerID)
         "
     )
 

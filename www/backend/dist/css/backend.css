@@ -223,3 +223,23 @@ div.dashboard div.card-header label.form-check {
         padding-top: .25rem;
     }
 }
+
+/* Center the compact tenant menu beneath its avatar on small screens. */
+@media (max-width: 575.98px) {
+    .dropdown-menu.tenant-switcher-menu {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 15rem;
+        max-width: calc(100vw - 2rem);
+    }
+
+    .tenant-switcher-menu .dropdown-item {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .tenant-switcher-menu .avatar {
+        flex-shrink: 0;
+    }
+}

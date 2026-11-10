@@ -36,8 +36,8 @@ component output="false" hint="Creates test data and removes it again." {
 
     /*
         A customer (tenant). parentID > 0 makes it a sub-tenant of another customer.
-        Deleting the customer later cascades to users, customer_user, invoices
-        and everything else hanging on it (ON DELETE CASCADE in the schema).
+        Cleanup explicitly removes retained invoices before deleting customers.
+        Other dependent records follow their foreign keys.
     */
     public numeric function createCustomer(
         string companyName = "TestBox Company",
@@ -240,6 +240,11 @@ component output="false" hint="Creates test data and removes it again." {
     // sub-tenant points to a parent created in the same run.
     public void function cleanup() {
         for (var index = arrayLen(variables.createdCustomerIds); index gte 1; index--) {
+            removeTestInvoices(variables.createdCustomerIds[index]);
+            loop list="account_deletion_steps,account_operations,account_deletions" item="local.table" {
+                queryExecute(options={datasource: application.datasource}, params={id:{type:"integer",value:variables.createdCustomerIds[index]}},
+                    sql="DELETE FROM #local.table# WHERE intCustomerID = :id");
+            }
             queryExecute(
                 "DELETE FROM customers WHERE intCustomerID = :customerID",
                 { customerID: { type: "numeric", value: variables.createdCustomerIds[index] } },
@@ -275,6 +280,7 @@ component output="false" hint="Creates test data and removes it again." {
 
     // Removes data a crashed run left behind, recognisable by the marker domain and the name prefix.
     public void function removeOrphans() {
+        removeTestInvoices();
         queryExecute(
             "DELETE FROM customers WHERE strEmail LIKE :marker",
             { marker: { type: "varchar", value: "%" & variables.emailDomain } },
@@ -295,6 +301,23 @@ component output="false" hint="Creates test data and removes it again." {
             { prefix: { type: "varchar", value: variables.namePrefix & "%" } },
             { datasource: application.datasource }
         );
+    }
+
+    // Production retains invoices; only the dedicated test fixtures may discard their archive.
+    private void function removeTestInvoices(numeric customerID = 0) {
+        local.invoices = queryExecute(
+            options = {datasource: application.datasource},
+            params = {id: {type: "integer", value: arguments.customerID}, marker: {type: "varchar", value: "%" & variables.emailDomain}},
+            sql = "SELECT i.intInvoiceID FROM invoices i
+                LEFT JOIN customers c ON c.intCustomerID = i.intCustomerID
+                LEFT JOIN invoice_documents d ON d.intInvoiceID = i.intInvoiceID
+                WHERE (:id > 0 AND (i.intCustomerID = :id OR d.intOriginalCustomerID = :id))
+                    OR (:id = 0 AND (c.strEmail LIKE :marker OR d.strCustomerEmail LIKE :marker))"
+        );
+        loop query="local.invoices" {
+            queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.invoices.intInvoiceID}}, sql="DELETE FROM invoice_documents WHERE intInvoiceID = :id");
+            queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.invoices.intInvoiceID}}, sql="DELETE FROM invoices WHERE intInvoiceID = :id");
+        }
     }
 
 }

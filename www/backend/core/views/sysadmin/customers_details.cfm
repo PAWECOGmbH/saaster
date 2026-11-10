@@ -40,12 +40,14 @@
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                        <button type="button" class="btn btn-outline-danger mb-2" data-bs-toggle="modal" data-bs-target="##delete-customer">Delete account</button>
                         <a href="#application.mainURL#/sysadmin/customers/edit/#getCustomer.customerID#" class="btn btn-primary">
                             <i class="ti ti-edit pe-3"></i> Edit
                         </a>
                     </div>
                 </div>
             </div>
+            <cfinclude template="account_deletion_status.cfm">
             <cfif structKeyExists(session, "alert")>
                 #session.alert#
             </cfif>
@@ -255,3 +257,5 @@
 
 <!--- Delete the session, if there is one --->
 <cfset structDelete(session, "comingfrom")>
+
+<cfinclude template="account_delete_modal.cfm">

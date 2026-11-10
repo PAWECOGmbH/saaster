@@ -5,6 +5,7 @@
         getAlert('msgNoAccess', 'danger');
         location url="#application.mainURL#/account-settings" addtoken="false";
     }
+    qManagedTenants = application.objCustomer.getManagedTenants(session.user_id, session.customer_id);
 </cfscript>
 
 
@@ -55,44 +56,48 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <!--- ## qTenants is in /backend/core/views/tenant_changer.cfm (header.cfm) --->
-                                <cfloop query="qTenants">
+                                <!--- Include inactive and pending tenants in management. --->
+                                <cfloop query="qManagedTenants">
                                     <tr>
                                         <td>
-                                            <cfif not len(trim(qTenants.strLogo))>
-                                                <cfif len(trim(qTenants.strCompanyName))>
-                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
+                                            <cfif not len(trim(qManagedTenants.strLogo))>
+                                                <cfif len(trim(qManagedTenants.strCompanyName))>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qManagedTenants.strCompanyName,2))#</div>
                                                 <cfelse>
-                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
+                                                    <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qManagedTenants.strContactPerson,2))#</div>
                                                 </cfif>
                                             <cfelse>
-                                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
+                                                <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qManagedTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
                                             </cfif>
                                         </td>
                                         <td>
-                                            <cfif len(trim(qTenants.strCompanyName))>
-                                                #encodeForHTML(qTenants.strCompanyName)#
+                                            <cfif len(trim(qManagedTenants.strCompanyName))>
+                                                #encodeForHTML(qManagedTenants.strCompanyName)#
                                             <cfelse>
-                                                #encodeForHTML(qTenants.strContactPerson)# (#getTrans('formContactName')#)
+                                                #encodeForHTML(qManagedTenants.strContactPerson)# (#getTrans('formContactName')#)
                                             </cfif>
-                                            <!--- #encodeForHTML(qTenants.strCompanyName)# --->
+                                            <!--- #encodeForHTML(qManagedTenants.strCompanyName)# --->
                                         </td>
-                                        <td>#encodeForHTML(qTenants.strContactPerson)#</td>
-                                        <td class="text-center"><cfif qTenants.blnStandard><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
-                                        <td class="text-center"><cfif qTenants.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                        <td>#encodeForHTML(qManagedTenants.strContactPerson)#</td>
+                                        <td class="text-center"><cfif qManagedTenants.blnStandard><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
+                                        <td class="text-center"><cfif qManagedTenants.deletionStatus eq 'failed'><span class="badge bg-danger-lt">#getTrans('txtAccountDeletionFailed')#</span><cfelseif qManagedTenants.deletionPending><span class="badge bg-warning-lt">#getTrans('txtAccountDeletionPending')#</span><cfelseif qManagedTenants.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></i></cfif></td>
                                         <td class="text-end">
                                             <div class="btn-list flex-nowrap">
-                                                <cfif qTenants.intCustParentID gt 0>
+                                                <cfif qManagedTenants.intCustParentID gt 0>
                                                     <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
                                                         #getTrans('blnAction')#
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-end">
-                                                        <cfif qTenants.blnActive eq 1>
-                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
+                                                        <cfif qManagedTenants.blnActive eq 1>
+                                                            <a class="dropdown-item" href="#application.mainURL#/global?switch=#qManagedTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
                                                         </cfif>
-                                                            <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
-                                                        <cfif qTenants.intCustomerID neq session.customer_id>
-                                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#&#csrfParam()#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
+                                                        <cfif not qManagedTenants.deletionPending>
+                                                            <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qManagedTenants.intCustomerID#"><cfif qManagedTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
+                                                        </cfif>
+                                                        <cfif qManagedTenants.intCustomerID neq session.customer_id>
+                                                            <cfif new backend.core.com.account_lifecycle().canDelete(session.user_id, qManagedTenants.intCustomerID)>
+                                                                <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="##delete-tenant-#qManagedTenants.intCustomerID#">#getTrans(qManagedTenants.deletionPending ? 'btnAccountDeletionRetry' : 'btnDelete')#</button>
+                                                            </cfif>
                                                         </cfif>
                                                     </div>
                                                 </cfif>
@@ -122,94 +127,15 @@
 
 
 
-<!--- <div class="page-wrapper">
-    <div class="container-xl">
-        <cfoutput>
-        <div class="row mb-3">
-            <div class="col-md-12 col-lg-12">
-                <div class="page-header col-lg-9 col-md-8 col-sm-8 col-xs-12" style="float:left;">
-                    <h4 class="page-title">#getTrans('titTenantOverview')#</h4>
-                    <ol class="breadcrumb breadcrumb-dots">
-                        <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="#application.mainURL#/account-settings">#getTrans('txtAccountSettings')#</a></li>
-                        <li class="breadcrumb-item active">#getTrans('titTenantOverview')#</li>
-                    </ol>
-                </div>
-                <div class="page-header col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                    <cfif session.superadmin>
-                        <a href="#application.mainURL#/account-settings/tenant/new" class="btn btn-primary" style="white-space: normal; width: 205px;">
-                            <i class="ti ti-plus pe-3"></i> #getTrans('btnNewTenant')#
-                        </a>
-                    </cfif>
-                </div>
-            </div>
-            <cfif structKeyExists(session, "alert")>
-                #session.alert#
-            </cfif>
-        </div>
-        <div class="row">
-            <div class="col-md-12 col-lg-12">
-                <div class="card">
-
-                    <div class="table-responsive">
-                        <table class="table card-table table-vcenter text-nowrap">
-                            <thead >
-                                <tr>
-                                    <th>#getTrans('titLogo')#</th>
-                                    <th>#getTrans('formCompanyName')#</th>
-                                    <th>#getTrans('formContactName')#</th>
-                                    <th class="text-center">#getTrans('formStandard')#</th>
-                                    <th class="text-center">#getTrans('titActive')#</th>
-                                    <th class="w-1"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <!--- ## qTenants is in /backend/core/views/tenant_changer.cfm (header.cfm) --->
-                            <cfloop query="qTenants">
-                                <tr>
-                                    <td>
-                                        <cfif not len(trim(qTenants.strLogo))>
-                                            <div style="margin-right:20px" class="avatar avatar-md brround">#encodeForHTML(left(qTenants.strCompanyName,2))#</div>
-                                        <cfelse>
-                                            <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" style="margin-right:20px" class="avatar avatar-md brround" alt="Companylogo">
-                                        </cfif>
-                                    </td>
-                                    <td>#encodeForHTML(qTenants.strCompanyName)#</td>
-                                    <td>#encodeForHTML(qTenants.strContactPerson)#</td>
-                                    <td class="text-center"><cfif qTenants.blnStandard><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
-                                    <td class="text-center"><cfif qTenants.blnActive><i class="ti ti-check text-green"></i><cfelse><i class="ti ti-x text-red"></cfif></td>
-                                    <td class="text-end">
-                                        <div class="btn-list flex-nowrap">
-                                            <cfif qTenants.intCustParentID gt 0>
-                                                <button type="button" class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                                    #getTrans('blnAction')#
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-end">
-                                                    <cfif qTenants.blnActive eq 1>
-                                                        <a class="dropdown-item" href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#">#getTrans('btnSwitchToThisCompany')#</a>
-                                                    </cfif>
-                                                        <a class="dropdown-item" href="#application.mainURL#/customer?change_tenant=#qTenants.intCustomerID#"><cfif qTenants.blnActive eq 1>#getTrans('btnDeactivate')#<cfelse>#getTrans('btnActivate')#</cfif></a>
-                                                    <cfif qTenants.intCustomerID neq session.customer_id>
-                                                        <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/customer?delete=#qTenants.intCustomerID#&#csrfParam()#', '#getTrans("titDeleteTenant")#', '#getTrans("txtDeleteTenantConfirmText")#', '#getTrans("btnNoCancel")#', '#getTrans("btnYesDelete")#')">#getTrans('btnDelete')#</a>
-                                                    </cfif>
-                                                </div>
-                                            </cfif>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </cfloop>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        </cfoutput>
-
-    </div>
-    
-</div> --->
 
 
+
+
+<cfloop query="qManagedTenants">
+    <cfif qManagedTenants.intCustParentID gt 0 and new backend.core.com.account_lifecycle().canDelete(session.user_id, qManagedTenants.intCustomerID)>
+        <cfset deletionCustomerID = qManagedTenants.intCustomerID>
+        <cfset deletionCustomerName = len(trim(qManagedTenants.strCompanyName)) ? qManagedTenants.strCompanyName : qManagedTenants.strContactPerson>
+        <cfset deletionModalID = "delete-tenant-" & qManagedTenants.intCustomerID>
+        <cfinclude template="account_delete_modal.cfm">
+    </cfif>
+</cfloop>

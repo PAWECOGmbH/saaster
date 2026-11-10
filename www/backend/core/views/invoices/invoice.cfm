@@ -26,8 +26,12 @@
         logWrite("user", "info", "Pay invoice: The user has canceled the Payrexx payment process [CustomerID: #session.customer_id#, UserID: #session.user_id#, InvoiceID: #thisInvoiceID#]");
     }
 
+    invoiceDocuments = new backend.core.com.invoice_documents();
+    if (getInvoiceData.documentIssued and !invoiceDocuments.isArchived(thisInvoiceID)) invoiceDocuments.capture(thisInvoiceID, "legacy");
+    invoiceSnapshot = invoiceDocuments.getSnapshot(thisInvoiceID);
+
     // Get customer data
-    getCustomerData = application.objCustomer.getCustomerData(getInvoiceData.customerID);
+    getCustomerData = structIsEmpty(invoiceSnapshot) ? application.objCustomer.getCustomerData(getInvoiceData.customerID) : invoiceSnapshot.customer;
 
     // Get invoice address block
     addressBlock = objInvoices.getInvoiceAddress(thisInvoiceID);
@@ -82,7 +86,9 @@
                             #objInvoices.getInvoiceStatusBadge(session.lng, getInvoiceData.paymentstatusColor, getInvoiceData.paymentstatusVar)#
                         </div>
                         <div class="col-12 mt-5">
-                            <cfif len(trim(sysAdminData.logo))>
+                            <cfif !structIsEmpty(invoiceSnapshot)>
+                                <img alt="Logo" src="#encodeForHTMLAttribute(invoiceSnapshot.logoURL)#" style="display: block; max-width: 250px; float: right;" border="0">
+                            <cfelseif len(trim(sysAdminData.logo))>
                                 <img alt="Logo" src="/userdata/images/logos/#sysAdminData.logo#" style="display: block; max-width: 250px; float: right;" border="0">
                             <cfelse>
                                 <img alt="Logo" src="/assets/img/logo.png" style="display: block; max-width: 250px; float: right;" border="0">
@@ -104,11 +110,11 @@
                             <div class="col-lg-6">
                                 <div class="row">
                                     <div class="col-md-4">#getTrans('titInvoiceDate', invoiceLng)#:</div>
-                                    <div class="col-md-8">#lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date))#</div>
+                                    <div class="col-md-8">#structIsEmpty(invoiceSnapshot) ? lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.date)) : invoiceSnapshot.invoiceDateText#</div>
                                 </div>
                                 <div class="row pb-4">
                                     <div class="col-md-4">#getTrans('txtDueDate', invoiceLng)#:</div>
-                                    <div class="col-md-8">#lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate))#</div>
+                                    <div class="col-md-8">#structIsEmpty(invoiceSnapshot) ? lsDateFormat(getTime.utc2local(utcDate=getInvoiceData.dueDate)) : invoiceSnapshot.dueDateText#</div>
                                 </div>
                             </div>
                             <div class="col-lg-6">

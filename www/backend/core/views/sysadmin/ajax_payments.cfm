@@ -9,19 +9,27 @@
     thisInvoiceID = url.invoiceID;
     objInvoice = new backend.core.com.invoices();
     qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
-    amountOpen = objInvoice.getInvoiceData(thisInvoiceID).amountOpen;
-    currency = objInvoice.getInvoiceData(thisInvoiceID).currency;
+    invoiceData = objInvoice.getInvoiceData(thisInvoiceID);
+    if (!structKeyExists(invoiceData, "number")) {
+        header statuscode=404 statustext="Not Found"; abort;
+    }
+    amountOpen = invoiceData.amountOpen;
+    currency = invoiceData.currency;
+    invoiceReadOnly = invoiceData.customerID eq 0;
 </cfscript>
 
 <cfoutput>
 
+<cfif not invoiceReadOnly>
 <form action="#application.mainURL#/sysadm/invoices" method="post" id="sendPayment" data-return="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#">#csrfField()#
     <input type="hidden" name="payments" value="#thisInvoiceID#">
+</cfif>
     <div class="modal-header">
         <h5 class="modal-title">Payments</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
+        <cfif invoiceReadOnly><p class="text-muted">This customer's account has been deleted. Recorded payments are read-only.</p></cfif>
         <div class="table-responsive">
             <table class="table table-vcenter table-mobile-md card-table">
                 <thead>
@@ -33,6 +41,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                <cfif not invoiceReadOnly>
                 <tr>
                     <td>
                         <div class="input-icon">
@@ -44,12 +53,13 @@
                     <td><input type="text" name="amount" class="form-control text-end" maxlength="5" <cfif amountOpen gt 0>value="#amountOpen#"</cfif>></td>
                     <td class="text-center"><i onclick="sendPayment();" class="ti ti-circle-check h1 text-green mt-2 cursor-pointer"></i></td>
                 </tr>
+                </cfif>
                 <cfloop query="qPayments">
                     <tr>
                         <td>#lsDateFormat(qPayments.dtmPayDate)#</td>
                         <td>#encodeForHTML(qPayments.strPaymentType)#</td>
                         <td class="text-end">#lsCurrencyFormat(qPayments.decAmount, "none")#</td>
-                        <td class="text-center"><i onclick="deletePayment(#qPayments.intPaymentID#);" class="ti ti-x h1 text-red mt-2 cursor-pointer"></i></td>
+                        <td class="text-center"><cfif not invoiceReadOnly><i onclick="deletePayment(#qPayments.intPaymentID#);" class="ti ti-x h1 text-red mt-2 cursor-pointer"></i></cfif></td>
                     </tr>
                 </cfloop>
                 </tbody>
@@ -60,5 +70,5 @@
         <a href="##" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
         <a href="#application.mainURL#/sysadmin/invoice/edit/#thisInvoiceID#" class="btn btn-primary ms-auto">Done!</a>
     </div>
-</form>
+<cfif not invoiceReadOnly></form></cfif>
 </cfoutput>

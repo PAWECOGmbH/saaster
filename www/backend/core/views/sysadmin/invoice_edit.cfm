@@ -10,14 +10,26 @@
     objInvoice = new backend.core.com.invoices();
     qInvoice = objInvoice.getInvoiceData(thisInvoiceID);
 
+    if (!structKeyExists(qInvoice, "number")) {
+        location url="#application.mainURL#/sysadmin/invoices" addtoken="false";
+    }
+    invoiceDocuments = new backend.core.com.invoice_documents();
+    if (qInvoice.documentIssued and !invoiceDocuments.isArchived(thisInvoiceID)) {
+        invoiceDocuments.capture(thisInvoiceID, "legacy");
+    }
+    invoiceSnapshot = invoiceDocuments.getSnapshot(thisInvoiceID);
+    invoiceFrozen = !structIsEmpty(invoiceSnapshot);
+    invoiceReadOnly = qInvoice.customerID eq 0;
+
     // Totals and VAT lines are part of the document: in the language of the invoice, like its positions
     invoiceLng = objInvoice.getDocumentLanguage(qInvoice.language ?: "");
     qPayments = objInvoice.getInvoicePayments(thisInvoiceID);
 
-    qCustomer = application.objCustomer.getCustomerData(qInvoice.customerID);
-    qUsers = application.objUser.getAllUsers(qInvoice.customerID);
+    qCustomer = invoiceFrozen ? invoiceSnapshot.customer : application.objCustomer.getCustomerData(qInvoice.customerID);
+    qCustomer.customerID = qInvoice.customerID;
+    qUsers = qInvoice.customerID gt 0 ? application.objUser.getAllUsers(qInvoice.customerID) : queryNew("intUserID,strFirstName,strLastName");
 
-    if (isNumeric(qInvoice.userID) and qInvoice.userID gt 0) {
+    if (!invoiceFrozen and isNumeric(qInvoice.userID) and qInvoice.userID gt 0) {
         qUser = application.objCustomer.getUserDataByID(qInvoice.userID);
         invoicePerson = qUser.strFirstName & " " & qUser.strLastName;
         invoicePersonID = qUser.intUserID;
@@ -39,7 +51,7 @@
             <div class="row mb-3">
                 <div class="col-md-12 col-lg-12">
 
-                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-xs-12 float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-9 col-md-8 col-sm-8 col-12 float-start">
                         <h4 class="page-title">Invoice #qInvoice.number#</h4>
                         <ol class="breadcrumb breadcrumb-dots">
                             <li class="breadcrumb-item"><a href="#application.mainURL#/dashboard">Dashboard</a></li>
@@ -47,7 +59,7 @@
                             <li class="breadcrumb-item"><a href="#application.mainURL#/sysadmin/invoices">Invoices</a></li>
                         </ol>
                     </div>
-                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
+                    <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-12 align-items-sm-end float-start">
                         <a href="#application.mainURL#/account-settings/invoice/print/#thisInvoiceID#" target="_blank" class="btn btn-primary">
                             <i class="ti ti-search pe-3"></i> Preview
                         </a>
@@ -59,6 +71,18 @@
             </cfif>
         </div>
         <div class="#getLayout.layoutPage#">
+            <cfif invoiceFrozen>
+                <div class="alert alert-info" role="status">
+                    <cfif invoiceReadOnly>
+                        This customer's account has been deleted. The invoice, its status and recorded payments are read-only.
+                    <cfelse>
+                        The invoice document is preserved. Payments and the current balance are shown separately below.
+                    </cfif>
+                    <cfif invoiceSnapshot.captureSource eq "legacy">
+                        This older invoice was captured on #dateTimeFormat(invoiceSnapshot.capturedAt, "yyyy-mm-dd HH:nn")# using the data available at that time. Its original historical details cannot be verified.
+                    </cfif>
+                </div>
+            </cfif>
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -67,7 +91,10 @@
                                 <div class="col-lg-6">
                                     <h3 class="card-title">Title: #encodeForHTML(qInvoice.title)#</h3>
                                     <p>
-                                    <cfif len(trim(qCustomer.companyName))>
+                                    <cfif invoiceFrozen>
+                                        #invoiceSnapshot.addressHTML#
+                                        <cfif qInvoice.customerID eq 0><br><span class="badge bg-secondary-lt">Customer account deleted</span></cfif>
+                                    <cfelseif len(trim(qCustomer.companyName))>
                                         Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.companyName)#</a><cfif invoicePersonID gt 0> - </cfif>
                                     <cfelseif len(trim(qCustomer.contactPerson)) and invoicePersonID eq 0>
                                         <p>Customer: <a href="#application.mainURL#/sysadmin/customers/details/#qCustomer.customerID#">#encodeForHTML(qCustomer.contactPerson)#</a></p>
@@ -79,18 +106,20 @@
                                 </div>
                                 <div class="col-lg-6 text-end pe-3">
                                     <div class="btn-group">
-                                        <cfif qInvoice.paymentstatusID eq 1>
+                                        <cfif qInvoice.paymentstatusID eq 1 and !invoiceFrozen>
                                             <a href="##" data-bs-toggle="modal" data-bs-target="##position_new" class="btn btn-outline-primary">
                                                 <i class="ti ti-plus me-3"></i> Add position
                                             </a>
                                         </cfif>
+                                        <cfif not invoiceReadOnly>
                                         <div class="ms-4 mt-2">
-                                            <cfif qInvoice.paymentstatusID gt 1>
+                                            <cfif qInvoice.paymentstatusID gt 1 or invoiceFrozen>
                                                 <a href="##" data-bs-toggle="modal" class="openPopup" data-href="#application.mainURL#/backend/core/views/sysadmin/ajax_payments.cfm?invoiceID=#thisInvoiceID#"><i class="ti ti-coins h1 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Payments"></i></a>
                                             <cfelse>
                                                 <a href="##" data-bs-toggle="modal" data-bs-target="##settings"><i class="ti ti-settings h1" data-bs-toggle="tooltip" data-bs-placement="top" title="Invoice settings"></i></a>
                                             </cfif>
                                         </div>
+                                        </cfif>
                                     </div>
                                 </div>
                             </div>
@@ -114,9 +143,9 @@
                                         <div class="col-lg-3 d-flex justify-content-center">
                                             <div class="d-flex align-items-center">
                                                 #objInvoice.getInvoiceStatusBadge('en', qInvoice.paymentstatusColor, qInvoice.paymentstatusVar)#
-                                                <cfif qInvoice.paymentstatusID eq 1 and arrayLen(qInvoice.positions)>
+                                                <cfif qInvoice.paymentstatusID eq 1 and !invoiceFrozen and arrayLen(qInvoice.positions)>
                                                     <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&open" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to OPEN in order to make the invoice visible to the customer."><i class="ti ti-circle-arrow-up h1 mt-2 ms-2"></i></a>
-                                                <cfelseif qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6>
+                                                <cfelseif !invoiceFrozen and (qInvoice.paymentstatusID eq 2 or qInvoice.paymentstatusID eq 6)>
                                                     <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&status=1&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" data-bs-toggle="tooltip" data-bs-placement="top" title="Change the status to DRAFT in order to change the invoice."><i class="ti ti-circle-arrow-down h1 mt-2 ms-2 text-muted"></i></a>
                                                 </cfif>
                                             </div>
@@ -124,7 +153,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-12 mt-4">
+                            <div class="col-lg-12 mt-4 table-responsive">
                                 <table class="table table-transparent table-responsive">
                                     <thead>
                                         <tr>
@@ -155,7 +184,7 @@
                                                 <td valign="top" class="text-end"><cfif pos.discountPercent gt 0>#pos.discountPercent#%</cfif></td>
                                                 <td valign="top" class="text-end">#lsCurrencyFormat(pos.totalPrice, "none")#</td>
                                                 <td valign="top" class="text-end">
-                                                    <cfif qInvoice.paymentstatusID eq 1>
+                                                    <cfif qInvoice.paymentstatusID eq 1 and !invoiceFrozen>
                                                         <a href="##?" data-bs-toggle="modal" data-bs-target="##pos_#pos.invoicePosID#"><i class="ti ti-edit pe-2" style="font-size: 18px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit position"></i></a>
                                                         <a href="#application.mainURL#/sysadm/invoices?delete_pos=#pos.invoicePosID#&#csrfParam()#&invoiceID=#thisInvoiceID#" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete position"><i class="ti ti-circle-x" style="font-size: 18px;"></i></a>
                                                     </cfif>
@@ -211,12 +240,14 @@
                         <div class="card-footer">
                             <div class="row ms-1 me-1">
                                 <div class="col-lg-6">
-                                    <cfif structKeyExists(session, "comingfrom")>
+                                    <cfif qInvoice.customerID gt 0 and structKeyExists(session, "comingfrom")>
                                         <a href="#application.mainURL#/sysadmin/customers/details/#qInvoice.customerID####listLast(session.comingfrom, '_')#" class="btn bg-lime-lt"><i class="ti ti-chevron-left pe-2"></i></i> Back to #listLast(session.comingfrom, '_')#</a>
                                     </cfif>
                                 </div>
                                 <div class="col-lg-6 text-end">
+                                    <cfif qInvoice.customerID gt 0>
                                     <a href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#thisInvoiceID#&email&redirect=#urlEncodedFormat('sysadmin/invoice/edit/#thisInvoiceID#?del_redirect')#" class="btn"><i class="ti ti-mail pe-2"></i> Send invoice by email</a>
+                                    </cfif>
                                 </div>
                             </div>
                         </div>
@@ -231,6 +262,7 @@
 
 
 
+<cfif not invoiceFrozen and not invoiceReadOnly>
 <cfoutput>
 
 <form action="#application.mainURL#/sysadm/invoices" method="post">#csrfField()#
@@ -469,3 +501,4 @@
         }));
     });
 </script>
+</cfif>

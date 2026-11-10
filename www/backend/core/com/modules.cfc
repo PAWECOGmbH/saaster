@@ -394,6 +394,7 @@ component displayname="modules" output="false" {
     // Access can come from any valid direct booking or a plan containing the module.
     // Keep this separate from getModuleStatus(), which describes direct bookings for billing/UI.
     public query function getModuleAccessBookings(required numeric customerID, required numeric moduleID) {
+        if (new backend.core.com.account_lifecycle().isDeleting(arguments.customerID)) return queryNew("status,startDate,endDate");
         return queryExecute(
             options = {datasource: application.datasource},
             params = {
