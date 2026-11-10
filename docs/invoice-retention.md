@@ -96,6 +96,9 @@ A failed cleanup keeps the account disabled and its subscriptions stopped.
 
 ### Module and project contract
 
+See [Customer cleanup for module developers](module-account-deletion.md) for generation,
+delivery, implementation examples and testing.
+
 Every installed module with CFML code supplies `backend/modules/<name>/deletion.cfc`;
 the project supplies `backend/myapp/deletion.cfc`. Each exposes
 `public struct function deleteCustomer(required numeric customerID)` and returns
