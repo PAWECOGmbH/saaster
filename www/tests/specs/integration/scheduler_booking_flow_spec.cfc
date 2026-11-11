@@ -101,6 +101,63 @@ component extends="tests.support.integration_spec" {
                 expect(jobTasks()).toBe([variables.taskB]);
             });
 
+            it("calls the project cleanup hook when the sysadmin withdraws a module", () => {
+                bookModule(variables.moduleA, "monthly");
+                local.bookingID = bookingOf(variables.moduleA).intBookingID;
+                local.hadHook = structKeyExists(application, "objSubscriptionHooks");
+                local.oldHook = local.hadHook ? application.objSubscriptionHooks : "";
+                local.hook = new tests.support.subscription_hook_recorder();
+                application.objSubscriptionHooks = local.hook;
+
+                try {
+                    expect(structKeyExists(local.hook, "afterBookingAccessEnded")).toBeTrue();
+                    expect(new backend.core.com.cancel(variables.customerID, variables.moduleA, "module").delete(
+                        local.bookingID, variables.moduleA, variables.customerID
+                    )).toBeTrue();
+                    expect(arrayLen(local.hook.getCalls())).toBe(1);
+                    expect(local.hook.getCalls()[1].moduleID).toBe(variables.moduleA);
+                    expect(local.hook.getCalls()[1].customerID).toBe(variables.customerID);
+                    expect(local.hook.getCalls()[1].reason).toBe("module withdrawn by sysadmin");
+                    expect(bookingOf(variables.moduleA).recordCount).toBe(0);
+                } finally {
+                    if (local.hadHook) {
+                        application.objSubscriptionHooks = local.oldHook;
+                    } else {
+                        structDelete(application, "objSubscriptionHooks");
+                    }
+                }
+            });
+
+            it("keeps the booking if project data cleanup fails", () => {
+                bookModule(variables.moduleA, "monthly");
+                local.bookingID = bookingOf(variables.moduleA).intBookingID;
+                local.hadHook = structKeyExists(application, "objSubscriptionHooks");
+                local.oldHook = local.hadHook ? application.objSubscriptionHooks : "";
+                local.hook = new tests.support.subscription_hook_recorder();
+                local.hook.setFailure(true);
+                application.objSubscriptionHooks = local.hook;
+
+                try {
+                    local.failed = false;
+                    try {
+                        new backend.core.com.cancel(variables.customerID, variables.moduleA, "module").delete(
+                            local.bookingID, variables.moduleA, variables.customerID
+                        );
+                    } catch (Test.SubscriptionHookFailure e) {
+                        local.failed = true;
+                    }
+                    expect(local.failed).toBeTrue();
+                    expect(bookingOf(variables.moduleA).recordCount).toBe(1);
+                    expect(jobTasks()).toBe([variables.taskA]);
+                } finally {
+                    if (local.hadHook) {
+                        application.objSubscriptionHooks = local.oldHook;
+                    } else {
+                        structDelete(application, "objSubscriptionHooks");
+                    }
+                }
+            });
+
             it("removes the jobs when updateBooking ends the booking", () => {
                 bookModule(variables.moduleA, "monthly");
                 var yesterday = dateFormat(dateAdd("d", -1, now()), "yyyy-mm-dd");

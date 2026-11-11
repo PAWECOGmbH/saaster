@@ -566,6 +566,14 @@ if (url.pass eq variables.schedulePassword) {
                 }
             }
 
+            // Let project modules clean up when a canceled booking ends.
+            if (qRenewBookings.intModuleID gt 0 and structKeyExists(application, "objSubscriptionHooks")) {
+                application.objSubscriptionHooks.afterBookingAccessEnded(
+                    customerID = qRenewBookings.intCustomerID,
+                    moduleID = qRenewBookings.intModuleID,
+                    reason = "canceled booking expired"
+                );
+            }
 
         // Set expired test phases to "expired" if its not already done
         } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd") and (qRenewBookings.strStatus eq "test" or qRenewBookings.strRecurring eq "onetime")) {
@@ -606,6 +614,14 @@ if (url.pass eq variables.schedulePassword) {
 
                     objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='delete');
 
+                    if (structKeyExists(application, "objSubscriptionHooks")) {
+                        application.objSubscriptionHooks.afterBookingAccessEnded(
+                            customerID = qRenewBookings.intCustomerID,
+                            moduleID = qModule.intModuleID,
+                            reason = "paid access expired"
+                        );
+                    }
+
                 }
 
 
@@ -621,6 +637,14 @@ if (url.pass eq variables.schedulePassword) {
                 // Update scheduletasks
                 if (qRenewBookings.intModuleID gt 0) {
                     objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
+                }
+
+                if (qRenewBookings.intModuleID gt 0 and qRenewBookings.strStatus eq "test" and structKeyExists(application, "objSubscriptionHooks")) {
+                    application.objSubscriptionHooks.afterBookingAccessEnded(
+                        customerID = qRenewBookings.intCustomerID,
+                        moduleID = qRenewBookings.intModuleID,
+                        reason = "trial expired without purchase"
+                    );
                 }
 
                 // Send expired email to customer

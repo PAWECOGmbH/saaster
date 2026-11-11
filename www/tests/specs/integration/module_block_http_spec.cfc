@@ -51,6 +51,33 @@ component extends="tests.support.integration_spec" {
                 expect(arrayLen(reMatch('data-bs-target="##module-access-' & variables.module & '"',local.page.fileContent))).toBe(1);
             });
 
+            it("warns about permanent module data deletion when the project hook enables it", () => {
+                queryExecute(
+                    options={datasource:application.datasource},
+                    params={id:{type:"integer",value:variables.plan}},
+                    sql="DELETE FROM plans_modules WHERE intPlanID = :id"
+                );
+                variables.fixtures.createBooking(customerID=variables.customer,moduleID=variables.module,status="free");
+                local.hadHook = structKeyExists(application, "objSubscriptionHooks");
+                local.oldHook = local.hadHook ? application.objSubscriptionHooks : "";
+                local.hook = new tests.support.subscription_hook_recorder();
+                local.hook.setWarnModule(variables.module);
+                application.objSubscriptionHooks = local.hook;
+
+                try {
+                    local.page = renderTab(variables.admin.userID);
+                    expect(local.page.statusCode).toInclude("200");
+                    expect(local.page.fileContent).toInclude("All customer data stored by this module will be permanently deleted.");
+                    expect(local.page.fileContent).toInclude("OK, withdraw!");
+                } finally {
+                    if (local.hadHook) {
+                        application.objSubscriptionHooks = local.oldHook;
+                    } else {
+                        structDelete(application, "objSubscriptionHooks");
+                    }
+                }
+            });
+
             it("rejects missing CSRF tokens, invalid actions and users without platform rights", () => {
                 local.auth = sessionFields(renderTab(variables.admin.userID));
                 local.valid = local.auth.csrf_token;

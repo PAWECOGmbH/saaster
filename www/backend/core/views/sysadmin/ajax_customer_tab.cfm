@@ -423,7 +423,11 @@ switch (url.tab) {
                                             </a>
                                         </cfif>
                                         <cfif listFind(currentModuleList, module.moduleID)>
-                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                            <cfset withdrawDeletesData = false>
+                                            <cfif structKeyExists(application, "objSubscriptionHooks") and structKeyExists(application.objSubscriptionHooks, "deletesCustomerDataOnWithdraw")>
+                                                <cfset withdrawDeletesData = application.objSubscriptionHooks.deletesCustomerDataOnWithdraw(module.moduleID)>
+                                            </cfif>
+                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!<cfif withdrawDeletesData> All customer data stored by this module will be permanently deleted.</cfif>', 'Cancel', 'OK, withdraw!')">
                                                 Withdraw module
                                             </a>
                                         </cfif>

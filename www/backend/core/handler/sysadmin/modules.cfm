@@ -990,9 +990,17 @@ if (structKeyExists(url, "booking")) {
     // Withdraw the module booking
     if (structKeyExists(url, "delete")) {
 
-        deleteModule = new backend.core.com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);
-
-        getAlert('The module was withdrawn from the customer.');
+        try {
+            deleteModule = new backend.core.com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);
+            if (deleteModule) {
+                getAlert('The module was withdrawn from the customer.');
+            } else {
+                getAlert('The module booking was not found. Nothing was withdrawn.', 'danger');
+            }
+        } catch (any e) {
+            application.objLog.logWrite("module-withdraw", "error", "Module withdrawal failed [CustomerID: #url.c#, ModuleID: #url.m#, BookingID: #url.b#]: #e.message#");
+            getAlert('The module could not be withdrawn. Please check the application log.', 'danger');
+        }
 
         location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
 
