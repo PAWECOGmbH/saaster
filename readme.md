@@ -180,9 +180,12 @@ Lucee 7 needs Tomcat 11 (Jakarta), so it cannot be updated in the Lucee admin - 
 
 1. Save the settings of the running container:<br>
 ```docker cp <lucee_container_name>:/opt/lucee/server/lucee-server/context/.CFConfig.json ./cfconfig-backup.json```
-2. Set the image in ```.env``` (```LUCEE_IMAGE=lucee/lucee```, ```LUCEE_IMAGE_VERSION=7.0.6.10-nginx```) and recreate the container: ```docker compose up -d lucee```
+2. Set the image in ```.env``` (```LUCEE_IMAGE=lucee/lucee```, ```LUCEE_IMAGE_VERSION=7.1.1.17-nginx```) and recreate the container: ```docker compose up -d lucee```
 3. Set up the datasource (with 'Allow Multiple Queries') and the mail server in the Lucee admin again. Alternatively, put a ```.CFConfig.json``` containing only the ```dataSources``` and ```mailServers``` parts of the backup into ```/opt/lucee/server/lucee-server/deploy/``` and restart the container - Lucee merges it into its settings.
 4. Preserve the result as your own image (see [Preserve Configurations with a Custom Docker Image](#preserve-configurations-with-a-custom-docker-image)).
+
+Since Lucee 7.1, both `<cfmail>` and the CFScript `mail` statement require the Mail extension. Both Compose files declare Mail 1.1.0.17 via `LUCEE_EXTENSIONS`, so custom images install it automatically at startup. SMTP settings still need to be configured separately.
+An update performed only in the Lucee Administrator is not stored in the source Docker image. Build or save a custom image based on Lucee 7.1.1.17 before recreating its container.
 
 The PDF extension of Lucee 7 ships the "classic" engine only as demo with a watermark, so Saaster always uses the "modern" engine; ```variables.pdf_type``` in older ```config.cfm``` files is ignored.
 
