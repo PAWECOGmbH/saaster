@@ -15,7 +15,7 @@
         session.lng = url.language ?: "en";
         application.objCustomer.setProductSessions(session.customer_id, session.lng);
     }
-    flowRoutes = "sysadm/invoices,sysadmin/invoices,account-settings/company,account-settings/tenants,cancel,customer,sysadm/customers,account-settings/memberships,account-settings/modules,memberships,global,organization-invitation,accept-organization-invitation,login,logincheck,dashboard,saaster-extension-test,sysadm/modules";
+    flowRoutes = "sysadm/invoices,sysadmin/invoices,account-settings,account-settings/company,account-settings/tenants,account-settings/tenant/new,sysadmin/system-settings,cancel,customer,sysadm/customers,account-settings/memberships,account-settings/modules,memberships,global,organization-invitation,accept-organization-invitation,login,logincheck,dashboard,saaster-extension-test,sysadm/modules";
     if (not listFind(flowRoutes, url.route ?: "") and not reFind("^sysadmin/(customers/details|invoice/edit)/[0-9]+$", url.route ?: "")) { header statuscode=404; abort; }
     if (listFind("default_theme,custom_theme", url.theme ?: "")) {
         application.activeTheme = url.theme;

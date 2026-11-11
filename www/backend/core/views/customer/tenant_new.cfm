@@ -7,6 +7,10 @@
         getAlert('msgNoAccess', 'danger');
         location url="#application.mainURL#/account-settings" addtoken="false";
     }
+    if (!application.objCustomer.tenantCreationEnabled()) {
+        getAlert('msgNoAccess', 'danger');
+        location url="#application.mainURL#/account-settings/tenants" addtoken="false";
+    }
 </cfscript>
 
 <cfoutput>

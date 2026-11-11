@@ -203,9 +203,24 @@ component displayname="customer" output="false" {
     }
 
 
+    // Disabling tenant creation must not remove access to existing tenants.
+    public boolean function tenantCreationEnabled() {
+        return application.objSettings.getSetting("settingTenantsEnabled") neq "0";
+    }
+
+    public boolean function hasChildTenants(required numeric parentID) {
+        local.children = queryExecute(
+            options = {datasource: application.datasource},
+            params = {parentID: {type: "integer", value: arguments.parentID}},
+            sql = "SELECT intCustomerID FROM customers WHERE intCustParentID = :parentID LIMIT 1"
+        );
+        return local.children.recordCount gt 0;
+    }
+
     // Insert tenant (only the most important data)
     public struct function insertTenant(required struct tenantStruct) {
         if (!isNumeric(arguments.tenantStruct.customerID ?: "")) return {success:false, message:"customerID not valid!"};
+        if (!tenantCreationEnabled()) return {success:false, message:application.objLanguage.getTrans("msgNoAccess")};
         transaction {
             if (!new backend.core.com.account_lifecycle().lockActiveCustomer(arguments.tenantStruct.customerID)) {
                 return {success:false, message:application.objLanguage.getTrans("msgAccountDeletionPending")};

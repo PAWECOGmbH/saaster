@@ -26,7 +26,7 @@
                         </ol>
                     </div>
                     <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
-                        <cfif session.superadmin>
+                        <cfif session.superadmin and application.objCustomer.tenantCreationEnabled()>
                             <a href="#application.mainURL#/account-settings/tenant/new" class="btn btn-primary">
                                 <i class="ti ti-plus pe-3"></i> #getTrans('btnNewTenant')#
                             </a>
