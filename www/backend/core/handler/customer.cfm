@@ -350,8 +350,8 @@ if (structKeyExists(url, "sysadmin")) {
             // Set plans and modules as well as the custom settings into a session
             application.objCustomer.setProductSessions(session.customer_id, session.lng);
 
-            // Go to dashboard
-            location url="#application.mainURL#/dashboard" addtoken="false";
+            // Return to the sysadmin customer list
+            location url="#application.mainURL#/sysadmin/customers" addtoken="false";
 
         }
 
