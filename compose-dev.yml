@@ -6,6 +6,7 @@ services:
     container_name: ${LUCEE_CONTAINER_NAME}
     environment:
       - LUCEE_ADMIN_PASSWORD=${LUCEE_ADMIN_PASSWORD}
+      - LUCEE_EXTENSIONS=212BA548-F15A-4EBD-8B1EEDF8DD8A844D;version=1.1.0.17
       - UMASK=0000
     working_dir: /var/www
     volumes:
