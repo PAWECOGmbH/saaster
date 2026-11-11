@@ -268,7 +268,15 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
 
         enforceAccess(application.objRequestAccess.checkPage(thiscontent, cgi.request_method, url));
-        enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
+        // Payrexx authenticates webhook POSTs with its URL secret, not a browser CSRF token.
+        local.authenticatedPayrexxWebhook = thiscontent.thisPath eq "frontend/core/handler/payrexx_webhook.cfm"
+            and cgi.request_method eq "POST"
+            and len(trim(variables.payrexxWebhookPassword)) gt 0
+            and structKeyExists(url, "pass")
+            and url.pass eq variables.payrexxWebhookPassword;
+        if (not local.authenticatedPayrexxWebhook) {
+            enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
+        }
 
         local.operation = "";
         if (left(thiscontent.thisPath, 8) eq "backend/" and structKeyExists(session, "customer_id")) {
