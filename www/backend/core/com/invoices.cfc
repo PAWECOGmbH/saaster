@@ -1764,10 +1764,6 @@ component displayname="invoices" output="false" {
                     #getTrans('msgThanksForPurchaseFindInvoice', local.mailLanguage)#<br><br>
                     #getTrans('txtDownloadInvoice', local.mailLanguage)#<br><br>
                     <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('btnDownloadInvoice', local.mailLanguage)#</a>
-                    <br><br>
-                    #getTrans('txtRegards', local.mailLanguage)#<br>
-                    #getTrans('txtYourTeam', local.mailLanguage)#<br>
-                    #application.appOwner#
                 ");
             }
 
@@ -1849,10 +1845,6 @@ component displayname="invoices" output="false" {
                     #getTrans('titHello', local.mailLanguage)# #local.invoicePerson#<br><br>
                     #getTrans('txtPleasePayInvoice', local.mailLanguage)#<br><br>
                     <a class='mail-btn' href='#local.dl_link#' target='_blank'>#getTrans('txtViewInvoice', local.mailLanguage)#</a>
-                    <br><br>
-                    #getTrans('txtRegards', local.mailLanguage)#<br>
-                    #getTrans('txtYourTeam', local.mailLanguage)#<br>
-                    #application.appOwner#
                 ");
             }
 

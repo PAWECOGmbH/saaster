@@ -24,6 +24,9 @@ component extends="tests.support.integration_spec" {
 
             it("sends an invitation without creating an account or granting access, then creates one identity on acceptance", () => {
                 variables.invitation = send(variables.email);
+                expect(mailHtml(variables.email)).toInclude("<p>Guten Tag</p>");
+                expect(mailText(variables.email)).toInclude("Guten Tag");
+                expect(mailText(variables.email)).toInclude("organization-invitation?token=");
                 expect(users(variables.email).recordCount).toBe(0);
                 expect(variables.service.inspect(variables.invitation.token).valid).toBeTrue();
                 local.accepted = variables.service.accept(variables.invitation.token, 0, "New-account-123!", "New member");
@@ -36,6 +39,8 @@ component extends="tests.support.integration_spec" {
             });
             it("requires the existing authenticated identity and preserves its original organization access", () => {
                 variables.invitation = send(variables.existing.email);
+                expect(mailHtml(variables.existing.email)).toInclude("Guten Tag TestBox User");
+                expect(mailText(variables.existing.email)).toInclude("Guten Tag TestBox User");
                 expect(() => variables.service.accept(variables.invitation.token, 0, "A-new-password-123!")).toThrow("Saaster.Invitation.Invalid");
                 expect(() => variables.service.accept(variables.invitation.token, variables.owner.userID)).toThrow("Saaster.Invitation.Invalid");
                 expect(variables.service.accept(variables.invitation.token, variables.existing.userID)).toBe(variables.existing.userID);
@@ -152,6 +157,21 @@ component extends="tests.support.integration_spec" {
             sleep(200);
         }
         fail("No invitation arrived in the local mail catcher.");
+    }
+    private string function mailText(required string email) {
+        return mailBody(arguments.email, "text");
+    }
+    private string function mailHtml(required string email) {
+        return mailBody(arguments.email, "html");
+    }
+    private string function mailBody(required string email, required string part) {
+        local.url = request.testSettings.mailCatcherUrl & "/api/v1/mailbox/" & listFirst(arguments.email, "@");
+        cfhttp(url=local.url, method="get", timeout=10, result="local.list");
+        local.messages = deserializeJSON(local.list.fileContent);
+        cfhttp(url=local.url & "/" & local.messages[1].id, method="get", timeout=10, result="local.message");
+        local.mail = deserializeJSON(local.message.fileContent);
+        expect(arrayToList(local.mail.header["Content-Type"])).toInclude("multipart/alternative");
+        return local.mail.body[arguments.part] ?: "";
     }
     private query function users(required string email) {
         return queryExecute(options={datasource:application.datasource}, params={email:{type:"varchar",value:arguments.email}}, sql="SELECT intUserID FROM users WHERE strEmail = :email");

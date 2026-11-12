@@ -244,10 +244,6 @@ if (structKeyExists(form, 'register_btn')) {
                     #getTrans('titHello')# #encodeForHTML(form.first_name)# #encodeForHTML(form.name)#<br><br>
                     #getTrans('txtPleaseConfirmEmail')#<br><br>
                     <a href='#application.mainURL#/logincheck?u=#newUUID#' style='border-bottom: 10px solid ##337ab7; border-top: 10px solid ##337ab7; border-left: 20px solid ##337ab7; border-right: 20px solid ##337ab7; background-color: ##337ab7; color: ##ffffff; text-decoration: none;' target='_blank'>#getTrans('btnActivate')#</a>
-                    <br><br>
-                    #getTrans('txtRegards')#<br>
-                    #getTrans('txtYourTeam')#<br>
-                    #application.appOwner#
                 ");
             }
 
@@ -593,10 +589,6 @@ if (structKeyExists(form, "reset_pw_btn_1")) {
                 <br><br>
                 <a class='mail-btn' href='#application.mainURL#/logincheck?p=#newUUID#' target='_blank'>#getTrans('titResetPassword')#</a>
 
-                <br><br>
-                #getTrans('txtRegards')#<br>
-                #getTrans('txtYourTeam')#<br>
-                #application.appOwner#
             ");
         }
 

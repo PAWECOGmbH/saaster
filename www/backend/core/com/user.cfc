@@ -490,11 +490,7 @@ component displayname="user" output="false" {
                     echo("
                         #variables.getTrans('titHello')# #local.qUser.toName#<br><br>
                         #local.invitationMail#<br><br>
-                        <a class='mail-btn' href='#application.mainURL#/logincheck?u=#local.thisUUID#' target='_blank'>#variables.getTrans('formSignIn')#</a><br><br>
-
-                        #variables.getTrans('txtRegards')#<br>
-                        #variables.getTrans('txtYourTeam')#<br>
-                        #application.appOwner#
+                        <a class='mail-btn' href='#application.mainURL#/logincheck?u=#local.thisUUID#' target='_blank'>#variables.getTrans('formSignIn')#</a>
                     ");
                 }
 
@@ -593,10 +589,6 @@ component displayname="user" output="false" {
                     #variables.getTrans('titHello')# #local.toName#<br><br>
                     #variables.getTrans('txtComfirmEmailChange')#<br><br>
                     <a class='mail-btn' href='#application.mainURL#/account-settings/my-profile?c=#local.newUUID#&nMail=#arguments.useremail#' target='_blank'>#variables.getTrans('btnActivate')#</a>
-                    <br><br>
-                    #variables.getTrans('txtRegards')#<br>
-                    #variables.getTrans('txtYourTeam')#<br>
-                    #application.appOwner#
                 ");
             }
 
@@ -694,11 +686,7 @@ component displayname="user" output="false" {
                 #variables.getTrans('titHello')# #arguments.mfaName#<br><br>
                 #variables.getTrans('txtThreeTimeTry')#<br>
                 #variables.getTrans('txtCodeValidity')#<br><br>
-                #local.authCode#<br><br>
-
-                #variables.getTrans('txtRegards')#<br>
-                #variables.getTrans('txtYourTeam')#<br>
-                #application.appOwner#
+                #local.authCode#
             ");
         }
 

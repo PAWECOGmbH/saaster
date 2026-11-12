@@ -1184,6 +1184,7 @@ component displayname="book" output="false" {
 
         }
 
+        variables.mailLanguage = local.qCustomer.strLanguage;
         variables.mailType = "html";
 
         cfsavecontent (variable = "variables.mailContent") {
@@ -1191,10 +1192,6 @@ component displayname="book" output="false" {
                 #getTrans('titHello', local.qCustomer.strLanguage)#  #local.qCustomer.strFirstName# #local.qCustomer.strLastName#<br><br>
                 #local.mailText#<br><br>
                 <a class='mail-btn' href='#application.mainURL#/login' target='_blank'>Login</a>
-                <br><br>
-                #getTrans('txtRegards', local.qCustomer.strLanguage)#<br>
-                #getTrans('txtYourTeam', local.qCustomer.strLanguage)#<br>
-                #application.appOwner#
             ");
         }
 

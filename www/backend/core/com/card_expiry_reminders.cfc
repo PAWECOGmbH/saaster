@@ -86,6 +86,30 @@ component output="false" {
         return sendOnce(arguments.paymentID,arguments.customerID,local.expiry,local.expiryDate,local.stage);
     }
 
+    private string function getRecipientName(required numeric customerID, required string email) {
+        local.user = queryExecute(
+            options = {datasource:application.datasource},
+            params = {customerID:{type:"integer",value:arguments.customerID},
+                email:{type:"varchar",value:arguments.email}},
+            sql = "SELECT strFirstName,strLastName FROM users
+                WHERE intCustomerID=:customerID AND strEmail=:email AND blnActive=1
+                ORDER BY blnSuperAdmin DESC,intUserID LIMIT 1"
+        );
+        if (local.user.recordCount) {
+            local.name = trim((local.user.strFirstName ?: "") & " " & (local.user.strLastName ?: ""));
+            if (len(local.name)) return local.name;
+        }
+        local.customer = queryExecute(
+            options = {datasource:application.datasource},
+            params = {customerID:{type:"integer",value:arguments.customerID}},
+            sql = "SELECT strEmail,strContactPerson FROM customers WHERE intCustomerID=:customerID"
+        );
+        if (local.customer.recordCount and compareNoCase(trim(local.customer.strEmail ?: ""),trim(arguments.email)) eq 0) {
+            return trim(local.customer.strContactPerson ?: "");
+        }
+        return "";
+    }
+
     private boolean function sendOnce(required numeric paymentID, required numeric customerID,
         required string expiry, required date expiryDate, required string stage) {
         local.token = createUUID();
@@ -132,7 +156,11 @@ component output="false" {
             local.expiryLabel = dateFormat(arguments.expiryDate,"mm/yyyy");
             local.message = replace(application.objLanguage.getTrans(local.messageKey,local.language),
                 "{expiry}",local.expiryLabel,"all");
-            variables.mailContent = "<p>" & encodeForHTML(local.message) & "</p><p><a class='mail-btn' href='"
+            local.recipientName = getRecipientName(arguments.customerID,local.email);
+            local.greeting = application.objLanguage.getTrans("titHello",local.language);
+            if (len(local.recipientName)) local.greeting &= " " & local.recipientName;
+            variables.mailContent = "<p>" & encodeForHTML(local.greeting) & "</p><p>"
+                & encodeForHTML(local.message) & "</p><p><a class='mail-btn' href='"
                 & encodeForHTMLAttribute(application.mainURL & "/account-settings/payment") & "'>"
                 & encodeForHTML(application.objLanguage.getTrans("btnUpdatePaymentMethod",local.language))
                 & "</a></p>";

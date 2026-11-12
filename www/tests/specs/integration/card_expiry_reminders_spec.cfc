@@ -39,6 +39,12 @@ component extends="tests.support.integration_spec" {
                     local.message = waitForMail("Your saved card expires soon");
                     expect(local.message).toInclude("/account-settings/payment");
                     expect(local.message).toInclude("06/2027");
+                    expect(local.message).toInclude("Hello TestBox Contact");
+                    local.plain = waitForMail("Your saved card expires soon", "text");
+                    expect(local.plain).toInclude("Hello TestBox Contact");
+                    expect(local.plain).toInclude("Update payment method (" & application.mainURL & "/account-settings/payment)");
+                    expect(local.plain).toInclude("Contact");
+                    expect(local.plain).notToInclude("<p>");
                     expect(local.message).toInclude("Contact");
                     expect(reFind('bgcolor="' & chr(35) & '[0-9A-Fa-f]{6}" style="background-color: '
                         & chr(35) & '[0-9A-Fa-f]{6};"',local.message) gt 0).toBeTrue();
@@ -53,6 +59,51 @@ component extends="tests.support.integration_spec" {
                 allowRefresh();
                 expect(variables.reminders.run(createDate(2027,6,25)).sent).toBe(0);
                 expect(notices()).toBe(2);
+            });
+            it("uses the recipient language for the shared mail signoff", () => {
+                queryExecute(
+                    options={datasource:application.datasource},
+                    params={id:{type:"integer",value:variables.owner.userID}},
+                    sql="UPDATE users SET strLanguage='de' WHERE intUserID=:id"
+                );
+                expect(variables.reminders.run(createDate(2027,6,1)).sent).toBe(1);
+                if (len(request.testSettings.mailCatcherUrl ?: "")) {
+                    local.message = waitForMail("Ihre hinterlegte Karte läuft bald ab");
+                    expect(local.message).toInclude("Guten Tag TestBox Contact");
+                    expect(local.message).toInclude("Mit freundlichem Gruss");
+                    expect(local.message).toInclude("Ihr Team vom Kundendienst");
+                    expect(local.message).toInclude(encodeForHTML(application.appOwner));
+                    expect(arrayLen(reMatch("Mit freundlichem Gruss",local.message))).toBe(1);
+                }
+            });
+            it("addresses a billing recipient by the matching user name", () => {
+                queryExecute(
+                    options={datasource:application.datasource},
+                    params={id:{type:"integer",value:variables.customerID},
+                        email:{type:"varchar",value:variables.owner.email}},
+                    sql="UPDATE customers SET strBillingEmail=:email WHERE intCustomerID=:id"
+                );
+                expect(variables.reminders.run(createDate(2027,6,1)).sent).toBe(1);
+                if (len(request.testSettings.mailCatcherUrl ?: "")) {
+                    local.message = waitForMail("Your saved card expires soon");
+                    expect(local.message).toInclude("Hello TestBox User");
+                    expect(local.message).notToInclude("Hello TestBox Contact");
+                }
+            });
+            it("uses a general greeting for an unrelated billing address", () => {
+                queryExecute(
+                    options={datasource:application.datasource},
+                    params={id:{type:"integer",value:variables.customerID},
+                        email:{type:"varchar",value:"billing-" & createUUID() & "@saaster.invalid"}},
+                    sql="UPDATE customers SET strBillingEmail=:email WHERE intCustomerID=:id"
+                );
+                expect(variables.reminders.run(createDate(2027,6,1)).sent).toBe(1);
+                if (len(request.testSettings.mailCatcherUrl ?: "")) {
+                    local.message = waitForMail("Your saved card expires soon");
+                    expect(local.message).toInclude("<p>Hello</p>");
+                    expect(local.message).notToInclude("TestBox Contact");
+                    expect(local.message).notToInclude("TestBox User");
+                }
             });
             it("uses the current Payrexx expiry and suppresses reminders after renewal", () => {
                 setExpiry("27-12");
@@ -76,7 +127,7 @@ component extends="tests.support.integration_spec" {
             });
         });
     }
-    private string function waitForMail(required string subject) {
+    private string function waitForMail(required string subject, string part = "html") {
         local.email = new backend.core.com.invoices().getInvoiceEmail(customerID=variables.customerID);
         local.mailbox = lCase(listFirst(local.email,"@"));
         loop from=1 to=20 index="local.attempt" {
@@ -88,7 +139,8 @@ component extends="tests.support.integration_spec" {
                         cfhttp(url=request.testSettings.mailCatcherUrl & "/api/v1/mailbox/" & local.mailbox & "/" & local.entry.id,
                             method="get",timeout=10,result="local.message");
                         local.mail = deserializeJSON(local.message.fileContent);
-                        return local.mail.body.html ?: local.mail.body.text ?: "";
+                        expect(arrayToList(local.mail.header["Content-Type"])).toInclude("multipart/alternative");
+                        return local.mail.body[arguments.part] ?: "";
                     }
                 }
             }

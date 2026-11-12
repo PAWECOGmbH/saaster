@@ -2,17 +2,31 @@
 
 	cfmailparam( name="charset", value="utf-8" );
 	cfmailparam( name="MIME-Version", value=1.0 );
-	cfmailparam( name="Content-Type", value="text/html; charset=utf-8" );
 
 	param name="variables.mailTitle" default="Title";
 	param name="variables.mailContent" default="Content";
 	param name="variables.mailType" default="html";
+    variables.mailSignoffLanguage = structKeyExists(variables, "mailLanguage") ? variables.mailLanguage : "";
 
   	// Get customer data
   	customerData = new backend.core.com.sysadmin().getSysAdminData();
+    variables.mailPlainContent = trim(variables.mailTitle) & chr(10) & chr(10)
+        & new backend.core.com.mail_text().fromHtml(variables.mailContent)
+        & chr(10) & chr(10)
+        & application.objLanguage.getTrans("txtRegards", variables.mailSignoffLanguage) & chr(10)
+        & application.objLanguage.getTrans("txtYourTeam", variables.mailSignoffLanguage) & chr(10)
+        & application.appOwner & chr(10) & chr(10)
+        & application.objLanguage.getTrans("txtContact", variables.mailSignoffLanguage) & chr(10)
+        & customerData.companyName & chr(10)
+        & customerData.address & chr(10)
+        & customerData.zip & " " & customerData.city & chr(10)
+        & customerData.email;
+    if (len(trim(customerData.phone))) variables.mailPlainContent &= chr(10) & customerData.phone;
 
 </cfscript>
 
+<cfmailpart type="text/plain" charset="utf-8"><cfoutput>#variables.mailPlainContent#</cfoutput></cfmailpart>
+<cfmailpart type="text/html" charset="utf-8">
 <!DOCTYPE html>
 <html>
 
@@ -149,6 +163,11 @@
 											<tr>
 												<td style="padding: 0 0 20px 0; font-size: #variables.fontSizeText#px; font-family: #variables.fontFamily#; color: ###variables.fontColorText#; text-decoration: none;">
 													#variables.mailContent#
+                                    <p style="margin: 24px 0 0;">
+                                        #encodeForHTML(application.objLanguage.getTrans('txtRegards', variables.mailSignoffLanguage))#<br>
+                                        #encodeForHTML(application.objLanguage.getTrans('txtYourTeam', variables.mailSignoffLanguage))#<br>
+                                        #encodeForHTML(application.appOwner)#
+                                    </p>
 												</td>
 											</tr>
 										</table>
@@ -218,3 +237,4 @@
 		</table>
 	</cfoutput>
 </body>
+</cfmailpart>
