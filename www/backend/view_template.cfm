@@ -17,7 +17,7 @@
                 </div>
                 <div class="#getLayout.layoutPageHeader# col-lg-3 col-md-4 col-sm-4 col-xs-12 align-items-end float-start">
                     <a href="##" class="btn btn-primary">
-                        <i class="fas fa-plus pe-3"></i> Button
+                        <i class="ti ti-plus pe-3" aria-hidden="true"></i> Button
                     </a>
                 </div>
             </div>
