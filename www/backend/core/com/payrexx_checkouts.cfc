@@ -97,7 +97,7 @@ component output="false" {
                     local.resolution = "review";
                 }
             } else {
-                savePaymentRow(local.p);
+                savePaymentRow(local.p, arguments.event);
                 if (local.state eq "confirmed") {
                     if (local.checkout.recordCount and val(local.checkout.intInvoiceID)) {
                         if (local.p.paymentAmount.value neq local.checkout.decAmount or local.currency neq local.checkout.strCurrency) {
@@ -226,8 +226,10 @@ component output="false" {
         receive(local.event,local.p);
     }
 
-    private void function savePaymentRow(required struct payment) {
+    private void function savePaymentRow(required struct payment, required struct event) {
         local.p = duplicate(arguments.payment);
+        local.expiry = new backend.core.com.payrexx().normalizeCardExpiry(arguments.event.payment.expiry ?: "");
+        local.p.cardExpiry = {type:"char",value:local.expiry,null:!len(local.expiry)};
         local.p.default.value = local.p.status.value eq "authorized" and !queryExecute(
             options={datasource:application.datasource},params={customer:local.p.customerID},
             sql="SELECT intPayrexxID FROM payrexx WHERE intCustomerID=:customer AND strStatus='authorized' AND blnDefault=1").recordCount;
@@ -247,6 +249,7 @@ component output="false" {
                                 decPayrexxFee,
                                 strPaymentBrand,
                                 strCardNumber,
+                                strCardExpiry,
                                 blnDefault
                             )
                             VALUES (
@@ -262,6 +265,7 @@ component output="false" {
                                 :payrexxFee,
                                 :paymentBrand,
                                 :cardNumber,
+                                :cardExpiry,
                                 :default
                             )
                             ON DUPLICATE KEY UPDATE
@@ -274,7 +278,8 @@ component output="false" {
                                 decAmount = VALUES(decAmount),
                                 decPayrexxFee = VALUES(decPayrexxFee),
                                 strPaymentBrand = VALUES(strPaymentBrand),
-                                strCardNumber = VALUES(strCardNumber)
+                                strCardNumber = VALUES(strCardNumber),
+                                strCardExpiry = COALESCE(VALUES(strCardExpiry), strCardExpiry)
 
                         ");
         local.owner = queryExecute(options={datasource:application.datasource},params={id:local.p.transID},

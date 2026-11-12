@@ -12,6 +12,7 @@
 //  - Set status for expired plans
 //  - Check for filled schedule tables of modules
 //  - Check open invoices (overdue)
+//  - Remind customers about expiring saved cards
 //  - Delete logfiles older than 30 days
 
 setting requesttimeout = 1000;
@@ -27,6 +28,11 @@ if (url.pass eq variables.schedulePassword) {
     objModules = new backend.core.com.modules();
     objPlans = new backend.core.com.plans();
     objLogs = application.objLog;
+    try {
+        new backend.core.com.card_expiry_reminders().run();
+    } catch (any reminderError) {
+        objLogs.logWrite("scheduletask", "warning", "Card expiry reminder task failed: #reminderError.message#");
+    }
 
 
     // Look for "waiting" plans or modules

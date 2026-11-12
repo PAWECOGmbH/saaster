@@ -4,6 +4,11 @@ Set up the following scheduled tasks:
 For subscription renewals; the following file EVERY 2 HOURS:
 https://yourdomain.com/frontend/core/scheduletasks/subscriptions.cfm?pass=xxxx
 
+The subscription task also checks up to 100 default Payrexx cards per run. It refreshes
+card expiry data through Payrexx at most once per day per card and sends reminders about one month
+and one week before expiry to customers with recurring bookings. Existing reminder
+records prevent repeats for the same card, expiry month and reminder stage.
+
 For the dynamic tasks (e.g. modules) EVERY 2 MINUTES, one per worker:
 https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=01&pass=xxxx
 https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=02&pass=xxxx

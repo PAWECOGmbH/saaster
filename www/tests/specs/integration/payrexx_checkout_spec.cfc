@@ -22,6 +22,15 @@ component extends="tests.support.integration_spec" {
                 application.payrexxStruct = variables.originalPayrexx;
                 structDelete(application,"checkoutMock");
             });
+            it("stores the card expiry from an authorized webhook and keeps it when a later event omits it", () => {
+                createCheckout();
+                local.authorized = event("authorized");
+                local.authorized.payment.expiry = "2027-06";
+                variables.checkouts.importTransaction(local.authorized);
+                expect(rows("SELECT strCardExpiry FROM payrexx WHERE intCustomerID=:id").strCardExpiry).toBe("27-06");
+                variables.checkouts.importTransaction(event("confirmed"));
+                expect(rows("SELECT strCardExpiry FROM payrexx WHERE intCustomerID=:id").strCardExpiry).toBe("27-06");
+            });
             it("records checkout admission before calling Payrexx and cancels an unused gateway before deleting", () => {
                 createCheckout();
                 expect(application.checkoutMock.admitted).toBe("creating");
