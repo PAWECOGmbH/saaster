@@ -130,7 +130,7 @@
 							</tr>
 							<tr>
 								<td width="9"></td>
-								<td valign="top" bgcolor="#variables.mailContentbgColor#">
+								<td valign="top" bgcolor="###variables.mailContentbgColor#">
 									<table border="0" cellpadding="0" cellspacing="0" width="100%">
 										<tr>
 											<td style="padding: 10px 20px 10px 20px; background-color: ###variables.headerBGColor#; width: 100%; font-family: #variables.fontFamily#; color: ###variables.headerFontColor#; font-size: #variables.fontSizeTitle#px;">#variables.mailTitle#</td>
@@ -182,10 +182,11 @@
 		<table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td bgcolor="###variables.mailbodyBGColor#">
-					<div align="center" style="padding: 0 15px 0 15px;" bgcolor="#variables.headerBGColor#">
-						<table border="0" cellpadding="0" cellspacing="0" width="640" class="wrapper">
+					<div align="center" style="padding: 0 15px 0 15px;">
+						<table border="0" cellpadding="0" cellspacing="0" width="#variables.mailMaxWidthContent#" class="wrapper">
 							<tr>
-								<td align="center" bgcolor="#variables.headerBGColor#">
+                                <td width="9"></td>
+								<td align="center" bgcolor="###variables.headerBGColor#" style="background-color: ###variables.headerBGColor#;">
 									<table width="100%" cellspacing="0" cellpadding="0" border="0">
 										<tr>
 											<td valign="top" style="padding: 20px;" class="mobile-wrapper">
@@ -208,6 +209,7 @@
 										</tr>
 									</table>
 								</td>
+                                <td width="9"></td>
 							</tr>
 						</table>
 					</div>

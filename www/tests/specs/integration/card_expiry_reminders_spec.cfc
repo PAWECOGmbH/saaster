@@ -39,6 +39,12 @@ component extends="tests.support.integration_spec" {
                     local.message = waitForMail("Your saved card expires soon");
                     expect(local.message).toInclude("/account-settings/payment");
                     expect(local.message).toInclude("06/2027");
+                    expect(local.message).toInclude("Contact");
+                    expect(reFind('bgcolor="' & chr(35) & '[0-9A-Fa-f]{6}" style="background-color: '
+                        & chr(35) & '[0-9A-Fa-f]{6};"',local.message) gt 0).toBeTrue();
+                    local.wrapperWidths = reMatch('width="[0-9]+" class="wrapper"',local.message);
+                    expect(arrayLen(local.wrapperWidths)).toBe(2);
+                    expect(local.wrapperWidths[2]).toBe(local.wrapperWidths[1]);
                 }
                 expect(variables.reminders.run(createDate(2027,6,1)).sent).toBe(0);
                 allowRefresh();
