@@ -13,10 +13,13 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v5
 
+      - name: Verify deployment file filters
+        run: sh www/tests/bin/check_deployment_filters.sh
+
       - name: Deploy to server via rsync
         uses: Burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --checksum --delete --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
+          switches: -avzr --checksum --delete --filter='merge .github/deploy.rsync-filter' --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
           path: ./
           remote_path: ${{ secrets.STAGING_REMOTE_PATH }}
           remote_host: ${{ secrets.STAGING_HOST }}

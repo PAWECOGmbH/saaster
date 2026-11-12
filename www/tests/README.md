@@ -56,13 +56,34 @@ The script exits with code 1 as soon as a spec fails - usable in pipelines and g
 - **Clean database:** `bash www/tests/bin/prepare_test_db.sh` again
 - **Changed a component:** `run_tests.sh` reloads the test application automatically. In the browser, open `healthcheck.cfm?reinit=1` once.
 
+## Deployment file check
+
+Tests, support fixtures, example test configuration, SQL demo data in `config/db/dev`,
+and the legacy generator in `www/setup/mockdata` are tracked in Git and included in
+forks. Installed TestBox dependencies, generated credentials, and local results stay
+git-ignored.
+
+Both staging and production workflows run this check before uploading files:
+
+```bash
+sh www/tests/bin/check_deployment_filters.sh
+```
+
+It requires `rsync` and a POSIX shell, and uses disposable local directories without
+TestBox, Docker, a database, or deployment secrets. It exercises both workflows'
+actual rsync options against fresh and previously deployed fixtures. The shared
+`.github/deploy.rsync-filter` excludes the three development-only trees and allows
+removal of old copies, while preserving server configuration, uploads, and logs.
+Runtime files, core/project migrations, and similarly named project-owned directories
+must still transfer. The check also verifies that source fixtures remain untouched.
+
 ## How it works
 
 `www/tests/Application.cfc` is a separate application with its own name, so its application scope is independent of the running app under `/`.
 
 - **Real bootstrap.** It calls the real `onApplicationStart` of Saaster, so `application.objGlobal`, `objUser`, `objCustomer` and all settings exist exactly as in the app.
 - **Datasource redirect.** The test datasource is registered under its own name *and* under the name from `config.cfm` (`variables.datasource`). Every query the app knows of ends up in the test database, including the ones during the start.
-- **Safety.** The application only starts if `config.cfm` says `variables.environment = "dev"`. Both the CFML side and every shell script refuse a database without `test` in its name. This folder is inside the webroot - when you deploy, exclude `www/tests` anyway.
+- **Safety.** The application only starts if `config.cfm` says `variables.environment = "dev"`. The CFML bootstrap and database preparation/migration scripts reject database names without `test`; the database scripts also reject the application database's name. The deployment filters described above keep this webroot folder off staging and production.
 
 ## Writing specs
 

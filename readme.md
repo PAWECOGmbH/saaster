@@ -157,6 +157,8 @@ These are notes about the current configuration. A complete production installat
 
 The environment example enables the `filebrowser` profile. Each server's `.env` determines its active profiles. As in development, Flyway applies only the migration folder selected by `FLYWAY_DB_FOLDER`.
 
+Tests and fixtures (`www/tests/`), SQL demo data (`config/db/dev/`), and the legacy mock-data generator (`www/setup/mockdata/`) remain tracked in Git and are included in forks. Both deployment workflows use the shared [deployment filter](.github/deploy.rsync-filter) to omit these directories and remove previously deployed copies. Server configuration and user data retain their existing exclusions. The workflows run a local fixture check on the GitHub Actions runner before uploading files; they do not execute TestBox on the target server.
+
 Inspect the selected services before starting them:
 
 ```bash

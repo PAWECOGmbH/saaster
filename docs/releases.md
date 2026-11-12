@@ -49,7 +49,7 @@ Once published, release tags and their contents remain unchanged. Corrections re
 - [ ] Complete the repository's installation, production, upgrade, and recovery instructions, and align the public documentation with the same version.
 - [ ] Explain extension locations and update conflicts, including shipped files under `www/backend/myapp/`, `www/backend/modules/`, and `www/frontend/custom_theme/`. Verify deployment-specific permission and lifecycle hooks.
 - [ ] Back up and restore application code, configuration, database with Flyway histories, and user data as a consistent installation. Demonstrate restoration in an isolated environment; a code-only rollback does not prove database recovery.
-- [ ] Review deployment exclusions and preservation of local configuration and project-owned files. Exclude `www/tests` from deployed installations.
+- [ ] Review deployment exclusions and preservation of local configuration and project-owned files. Run `sh www/tests/bin/check_deployment_filters.sh` to verify that `www/tests`, `config/db/dev`, and `www/setup/mockdata` remain available in the checkout but are omitted from staging/production and old deployed copies are removed. Confirm the target installation's file state after deployment.
 - [ ] Starting with the second release, verify the full upgrade path from the previous release, including representative application and theme customizations.
 - [ ] Confirm the decisions below, prepare release notes and a changelog entry, and obtain PAWECO approval for the release commit and publication.
 

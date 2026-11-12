@@ -1,0 +1,9 @@
+# Deployment-only rules: keep these tracked development assets available in forks.
+# H hides them on the sender; R lets --delete remove previously deployed copies.
+# Load this file before .gitignore so its receiver rules also cover nested config files.
+H /www/tests/***
+R /www/tests/***
+H /config/db/dev/***
+R /config/db/dev/***
+H /www/setup/mockdata/***
+R /www/setup/mockdata/***
