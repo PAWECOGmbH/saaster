@@ -24,6 +24,17 @@ component extends="tests.support.integration_spec" {
                 variables.customerID = variables.fixtures.createCustomer();
                 variables.user = variables.fixtures.createUser(customerID = variables.customerID);
                 variables.gatewayID = randRange(900000000, 999999999);
+                // Use the local mock even when the development configuration has no payment credentials.
+                variables.originalPayrexx = duplicate(application.payrexxStruct);
+                application.payrexxStruct = {
+                    payrexxAPIurl: "http://127.0.0.1/tests/support/payrexx_mock.cfm?route=/",
+                    payrexxAPIinstance: "regression",
+                    payrexxAPIkey: "test-key"
+                };
+            });
+
+            afterEach(() => {
+                application.payrexxStruct = variables.originalPayrexx;
             });
 
             it("books the plan right after a successful setup", () => {

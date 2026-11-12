@@ -12,6 +12,8 @@ The tests run inside the local Lucee container, against a **dedicated test datab
 
 ## Setup
 
+Configure the [local NGINX test timeout](../../readme.md#testing) before running the full suite.
+
 Once, from the repository root:
 
 ```bash

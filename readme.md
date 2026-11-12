@@ -99,6 +99,13 @@ Module definitions are demonstration metadata, not complete product integrations
 
 The TestBox workspace in [`www/tests/`](www/tests/README.md) uses a dedicated database, `saaster_test_db` by default. The test application requires `variables.environment = "dev"` in `www/config.cfm`.
 
+The full suite can exceed NGINX's default 60-second proxy timeout (HTTP 504). For local testing, add `proxy_read_timeout 300s;` inside `location @lucee` in `config/nginx/conf.d/base.conf`, then validate and reload NGINX:
+
+```bash
+docker compose -f compose-dev.yml exec -T lucee nginx -t
+docker compose -f compose-dev.yml exec -T lucee nginx -s reload
+```
+
 With the configured development stack running, prepare the test environment once:
 
 ```bash
