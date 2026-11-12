@@ -1,6 +1,6 @@
 # Contributing to Saaster
 
-Saaster accepts contributions to code, tests, and documentation. PAWECO maintains the project's direction and is responsible for merge, deployment, and release approval.
+Saaster is maintained by PAWECO. Contributions to code, tests, and documentation are welcome.
 
 ## Start with development
 
@@ -34,7 +34,7 @@ Keep `.env`, `www/config.cfm`, generated test configuration, and credentials loc
 
 ## Set up local development and testing
 
-Follow [Development Setup](readme.md#development-setup) to configure and start the Docker Compose stack. The examples and commands describe the current repository; clean-install verification is still part of [release preparation](docs/releases.md#release-checklist).
+Follow [Development Setup](readme.md#development-setup) to configure and start the Docker Compose stack.
 
 The test tools require Bash and `curl` on the host; Git Bash can be used on Windows. A global CommandBox installation is not required. The test application requires `variables.environment = "dev"` in `www/config.cfm`.
 
@@ -63,7 +63,7 @@ After adding migrations, apply them to the existing test database:
 bash www/tests/bin/migrate_test_db.sh
 ```
 
-Use fixtures, local payment mocks, and Inbucket. Automated tests must use the dedicated test database and local services, without real payment credentials, customer data, or live mail services. Tests do not need deployment secrets. Automated pull request checks are part of the planned release preparation; include local validation results in your pull request.
+Use fixtures, local payment mocks, and Inbucket. Automated tests must use the dedicated test database and local services, without real payment credentials, customer data, or live mail services. Tests do not need deployment secrets. Include local validation results in your pull request.
 
 ## Validate the change
 
@@ -88,4 +88,4 @@ Start every new migration with `SET NAMES utf8mb4;` as its first statement and s
 - Migration, configuration, extension, or upgrade implications.
 - Documentation changes and screenshots for visible UI changes where useful.
 
-Keep changes small enough to review independently. Release numbering, supported versions, and the confidential security-reporting route remain PAWECO decisions recorded in [Release preparation](docs/releases.md#pending-paweco-decisions).
+Keep changes small enough to review independently.

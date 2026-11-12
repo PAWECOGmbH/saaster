@@ -6,11 +6,11 @@ A CFML framework for building SaaS applications, with authentication, customer a
 
 **Stack:** Lucee 7 · NGINX · MySQL 8.1 · Docker Compose · Flyway
 
-> **Release preparation:** The first tagged public release is being prepared. Use `development` for local evaluation and contributions. See the [release checklist](docs/releases.md#release-checklist) for the remaining verification and approval steps.
+> **Development version:** No tagged release is available yet. Use `development` for local evaluation and contributions.
 
 ## Development setup
 
-These instructions cover the current development configuration. A complete installation check from a fresh checkout using public images is still pending.
+These instructions cover local development with the configuration examples in this repository.
 
 You need Git, Docker with the Docker Compose plugin, and familiarity with CFML and SQL. Commands use Bash syntax; on Windows, use Git Bash. The test tools also require `curl`.
 
@@ -27,7 +27,7 @@ cp config/example.config_dev.cfm www/config.cfm
 
 Edit `.env` and `www/config.cfm` for your installation. Keep container names and published ports unique on the Docker host. If you change `LUCEE_PORT`, also update `variables.mainURL` in `www/config.cfm` and the browser URLs below.
 
-The [environment example](config/example.env) currently selects `lucee/lucee:7.1.1.17-nginx`; both Compose files select `mysql:8.1`. Flyway and Inbucket currently use floating image tags. Reproducible image pinning is part of release preparation.
+The [environment example](config/example.env) currently selects `lucee/lucee:7.1.1.17-nginx`; both Compose files select `mysql:8.1`. Flyway and Inbucket currently use floating image tags.
 
 ### 2. Start the development stack
 
@@ -144,7 +144,7 @@ Changing Lucee through its Administrator does not update the source Docker image
 
 ## Live setup
 
-These are notes about the current configuration. A complete production installation, upgrade, and recovery guide with practical verification remains part of [release preparation](docs/releases.md#release-checklist).
+The following notes describe the supplied deployment configuration.
 
 ### Production and staging with one compose.yml
 
@@ -172,27 +172,17 @@ docker compose -f compose.yml stop filebrowser
 docker compose -f compose.yml rm filebrowser
 ```
 
-### Upgrading a server to Lucee 7
-
-Lucee 7 requires a Jakarta-compatible runtime, with Tomcat 10.1 or newer. Moving from Lucee 6 to 7 requires replacing the runtime and using compatible extensions; an update through the Lucee Administrator alone is insufficient. Follow the [Lucee 7 migration guidance](https://docs.lucee.org/guides/lucee-7.html) when preparing the replacement container.
-
-Before replacing a container, preserve the Lucee configuration as well as application code, database, and user data. For the current image layout, the server configuration is at `/opt/lucee/server/lucee-server/context/.CFConfig.json`. Store exports outside the repository because they can contain credentials. Reconfigure the datasource and SMTP service on the replacement instance, or import the relevant settings using [Lucee's configuration deployment mechanism](https://docs.lucee.org/guides/deploying-lucee-server-apps.html).
-
-Both Compose files request Mail extension `1.1.0.17` through `LUCEE_EXTENSIONS`. SMTP settings are configured separately. Saaster sets `this.pdf.type = "modern"` in `www/Application.cfc`; the older `variables.pdf_type` setting has no effect.
-
-## Releases and branches
+## Branches
 
 | Branch | Purpose |
 | --- | --- |
 | `development` | Default branch for ongoing work and external pull requests; may contain incomplete changes. |
-| `staging` | PAWECO's acceptance environment for the next deployment or release candidate. |
-| `production` | PAWECO's approved deployment state. |
+| `staging` | Integration and acceptance branch. |
+| `production` | Approved deployment branch. |
 
-Pushes to `staging` and `production` trigger deployment workflows and database migrations. PAWECO manages those promotions and release approval.
+Pushes to `staging` and `production` trigger deployment workflows and database migrations. Open contributions against `development`.
 
-No Git tags or GitHub Releases have been published yet. The public documentation's "Version 1.1" label still needs to be mapped to the software's release history before choosing the first release number. See [Release preparation](docs/releases.md).
-
-Use the instructions in this repository for the code you checked out. The public documentation still describes an older setup with `make`, different configuration files, and Mailslurper. Version-specific guides will be maintained alongside the code, with the public documentation linking to the matching version.
+Use the instructions in this repository for the code you checked out. The public documentation still describes an older setup with `make`, different configuration files, and Mailslurper.
 
 ## Contributing
 
@@ -204,7 +194,7 @@ Create a branch from `development` in your fork and target `development` when op
 
 Key libraries used by the application and development tools include:
 
-- **Interface:** [Tabler](https://github.com/tabler/tabler), [Bootstrap](https://github.com/twbs/bootstrap), [jQuery](https://github.com/jquery/jquery), [Tabler Icons](https://github.com/tabler/tabler-icons), and [Font Awesome](https://fontawesome.com/v4/license/).
+- **Interface:** [Tabler](https://github.com/tabler/tabler), [Bootstrap](https://github.com/twbs/bootstrap), [jQuery](https://github.com/jquery/jquery), and [Tabler Icons](https://github.com/tabler/tabler-icons).
 - **Editor and uploads:** [HugeRTE](https://github.com/hugerte/hugerte) and [Dropify](https://github.com/JeremyFagis/dropify).
 - **API:** [Taffy](https://github.com/atuttle/Taffy).
 - **Password hashing and QR codes:** [Bouncy Castle](https://www.bouncycastle.org/about/license/) and [ZXing](https://github.com/zxing/zxing), bundled under `www/assets/java/`.
