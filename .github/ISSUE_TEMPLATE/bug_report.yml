@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem in Saaster.
+body:
+    -   type: textarea
+        id: behavior
+        attributes:
+            label: Expected and actual behavior
+            placeholder: |
+                Expected:
+                Actual:
+        validations:
+            required: true
+    -   type: textarea
+        id: reproduction
+        attributes:
+            label: Steps to reproduce
+            placeholder: |
+                1.
+                2.
+        validations:
+            required: true
+    -   type: textarea
+        id: environment
+        attributes:
+            label: Environment
+            description: Saaster branch/commit, Lucee and MySQL versions, Docker/OS; browser and theme for UI bugs.
+        validations:
+            required: true
+    -   type: textarea
+        id: details
+        attributes:
+            label: Logs or screenshots
+            description: Optional. Remove credentials, tokens and customer data before attaching anything.
