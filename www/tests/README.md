@@ -103,6 +103,16 @@ removal of old copies, while preserving server configuration, uploads, and logs.
 Runtime files, core/project migrations, and similarly named project-owned directories
 must still transfer. The check also verifies that source fixtures remain untouched.
 
+## Isolated Borg backup and restore
+
+Run the manual recovery test with a local Linux Docker engine (including Docker Desktop), Git, Bash and tar:
+
+```bash
+bash www/tests/bin/check_borg_backup.sh
+```
+
+It creates a separate application with random credentials and an encrypted local Borg repository. It deletes only its own data volumes, restores them, and checks application login, database objects/Flyway history, userdata, code/configuration, runtime settings, retention and failure guards. It does not load this checkout's local configuration or use staging/production. Temporary resources are removed on exit. This test is manual and is not added to the deployment workflow. See the [backup guide](../../config/backup/readme.md).
+
 ## How it works
 
 `www/tests/Application.cfc` is a separate application with its own name, so its application scope is independent of the running app under `/`.

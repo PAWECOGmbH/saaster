@@ -181,6 +181,10 @@ docker compose -f compose.yml stop filebrowser
 docker compose -f compose.yml rm filebrowser
 ```
 
+### Backups
+
+The supplied [Borg backup and restore scripts](config/backup/readme.md) capture the database, userdata, deployed code/configuration and current Lucee runtime. Configure the encrypted repository separately and verify an isolated restore before scheduling backups.
+
 ## Branches
 
 | Branch | Purpose |
