@@ -166,6 +166,8 @@ The environment example enables the `filebrowser` profile. Each server's `.env` 
 
 Tests and fixtures (`www/tests/`), SQL demo data (`config/db/dev/`), and the legacy mock-data generator (`www/setup/mockdata/`) remain tracked in Git and are included in forks. Both deployment workflows use the shared [deployment filter](.github/deploy.rsync-filter) to omit these directories and remove previously deployed copies. Server configuration and user data retain their existing exclusions. The workflows run a local fixture check on the GitHub Actions runner before uploading files; they do not execute TestBox on the target server.
 
+Before staging deployment, a separate GitHub test job runs the full TestBox suite in a disposable Docker stack. Failed checks block the upload and server migrations. This runs only for pushes to `staging`; pushes to `development` do not trigger tests. See the [test workspace guide](www/tests/README.md#staging-deployment-checks) to reproduce the job locally.
+
 Inspect the selected services before starting them:
 
 ```bash

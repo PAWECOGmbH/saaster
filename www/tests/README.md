@@ -58,6 +58,30 @@ The script exits with code 1 as soon as a spec fails - usable in pipelines and g
 - **Clean database:** `bash www/tests/bin/prepare_test_db.sh` again
 - **Changed a component:** `run_tests.sh` reloads the test application automatically. In the browser, open `healthcheck.cfm?reinit=1` once.
 
+## Staging deployment checks
+
+A push to `staging` runs the full suite on a separate GitHub-hosted Ubuntu runner.
+Deployment and server migrations require that job to succeed. There are no automatic
+test runs on `development`. Production deployment is unchanged.
+
+The test job uses [`compose.yml`](compose.yml), pinned public images, a new database
+and Inbucket. It needs no deployment secrets or saved Lucee administrator settings.
+Configuration is generated from the repository examples; containers and volumes are
+removed on success or failure. Test files and data stay excluded from deployment.
+
+To reproduce the job, use a **fresh checkout** with Bash, Docker Compose and curl:
+
+```bash
+bash www/tests/bin/check_test_runner.sh
+bash www/tests/bin/run_ci.sh
+```
+
+`run_ci.sh` refuses existing local configuration and creates an isolated Compose
+project. Its HTTP endpoint uses `127.0.0.1:18080`; set `SAASTER_CI_HTTP_PORT` if needed.
+The runner rejects HTTP/healthcheck failures, missing or invalid counters, inconsistent
+results, failures/errors, and runs with no executed tests. The shell check exercises
+these failure cases without a database or network connection.
+
 ## Deployment file check
 
 Tests, support fixtures, example test configuration, SQL demo data in `config/db/dev`,
