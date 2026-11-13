@@ -1,17 +1,5 @@
-#!/bin/bash
-
-# Load env
-source "$(dirname "$0")/../../.env"
-
-# ensure restore scripts are executable
-chmod +x "$(dirname "$0")"/backup_ssh.sh 2>/dev/null
-chmod +x "$(dirname "$0")"/backup_sftp.sh 2>/dev/null
-
-if [[ "$BACKUP_MODE" == "ssh" ]]; then
-    exec "$(dirname "$0")/backup_ssh.sh"
-elif [[ "$BACKUP_MODE" == "sftp" ]]; then
-    exec "$(dirname "$0")/backup_sftp.sh"
-else
-    echo "[ERROR] BACKUP_MODE is invalid → use \"ssh\" or \"sftp\"."
-    exit 1
-fi
+#!/usr/bin/env bash
+# Compatibility entry point; existing backup cron commands now use Borg.
+set -euo pipefail
+if (( $# == 0 )); then set -- --backup; fi
+exec bash "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/backup_borg.sh" "$@"

@@ -28,12 +28,15 @@ try {
     }
 
     response["ok"] = response.connectedDatabase eq request.testSettings.database
+        and response.applicationDatasource eq request.testSettings.datasourceName
         and response.migrations.core gt 0
+        and response.migrations.myapp gt 0
         and response.objectsLoaded gt 0;
 } catch (any e) {
     response["error"] = e.message;
 }
 
+cfheader(statuscode=response.ok ? 200 : 503);
 cfcontent(type="application/json; charset=utf-8", reset=true);
 writeOutput(serializeJSON(response));
 </cfscript>

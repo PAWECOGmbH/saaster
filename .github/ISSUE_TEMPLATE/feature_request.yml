@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an improvement to Saaster.
+body:
+    -   type: textarea
+        id: problem
+        attributes:
+            label: Problem to solve
+            description: What is difficult or missing, and who is affected?
+        validations:
+            required: true
+    -   type: textarea
+        id: proposal
+        attributes:
+            label: Suggested behavior
+            description: What should Saaster do?
+        validations:
+            required: true
+    -   type: textarea
+        id: alternatives
+        attributes:
+            label: Alternatives or workaround
+            description: Optional. Describe other ways to solve the problem.

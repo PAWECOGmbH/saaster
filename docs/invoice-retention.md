@@ -1,14 +1,9 @@
 # Invoice documents and account deletion
 
-Apply core migration V32 before deploying the corresponding application code. It is
-idempotent and starts with `SET NAMES utf8mb4;`. Previously issued, non-draft invoices
-are marked once; rerunning the migration does not mark new work in progress as issued.
-
-V32 is the single migration for the entire account-deletion feature (#398), including
-the subscription-stop and module-cleanup tables. During development the user
-removes the local V32 Flyway entry and reruns the amended migration. Extend V32 with
-existence checks for each added schema object; preserve snapshots and lifecycle progress
-when upgrading an earlier V32 schema. Correct existing foreign keys remain untouched.
+Core migration `V32__invoice-documents.sql` adds invoice archives, account-deletion
+state, operation tracking, and checkout records. Apply it through Flyway before deploying
+the corresponding application code. Existing non-draft invoices are marked as issued
+once; stored invoice snapshots and lifecycle progress are preserved.
 
 ## Issuing and preserving invoices
 
@@ -36,7 +31,7 @@ and timestamp are stored separately from the immutable snapshot.
 
 ## Deletion boundary
 
-The customer foreign key now uses `RESTRICT`, not `CASCADE`. An account cannot be
+The customer foreign key uses `RESTRICT`, not `CASCADE`. An account cannot be
 removed by raw SQL while invoices are still attached. The archive foreign key also
 prevents deleting an archived invoice accidentally.
 
@@ -45,7 +40,7 @@ transaction, before deleting files. This locks the customer, captures all remain
 non-drafts, removes unissued drafts, then detaches the retained invoices. Invoice
 positions, VAT and payment rows survive. Live customer/user/booking references and
 email download tokens are cleared. Capture failure rolls back deletion and leaves
-files intact. Manual account/tenant deletion now uses the lifecycle service described below;
+files intact. Manual account/tenant deletion uses the lifecycle service described below;
 the legacy method remains guarded for compatibility with other callers.
 
 Detached invoices remain searchable in the Sysadmin invoice list by captured customer
@@ -57,7 +52,7 @@ former customer nor an old email download token grants access.
 
 ## Lifecycle service and manual deletion UI
 
-Customer and Sysadmin confirmation forms now use the same lifecycle service. The
+Customer and Sysadmin confirmation forms use the same lifecycle service. The
 customer finds deletion under **Account settings → My company**, and individual tenant
 deletion under **Tenants → Action → Delete**. The Sysadmin action is on the customer's
 details page. Activated organizations are supported; only their owner may delete them.
@@ -75,7 +70,7 @@ impersonation cannot request deletion. The request transaction records the scope
 `account_deletions`, disables that account, and ends its bookings immediately. Repeated
 requests preserve timestamps/progress; overlapping deletion roots are rejected.
 
-Booking, invoice creation, payment, renewal and scheduler entry points now check the
+Booking, invoice creation, payment, renewal and scheduler entry points check the
 persistent deletion marker. Tracked billing/jobs and dispatched backend web requests in `account_operations` must finish
 before cleanup can start. An ambiguous Payrexx response retains the operation, invoice
 ID and exact payment reference. Another charge for that account is blocked until the
@@ -131,63 +126,29 @@ The obsolete tenant GET deletion URL is rejected.
 
 The tenant management list includes inactive and pending-deletion tenants even in
 activated organizations. Pending tenants cannot be reactivated using the tenant toggle.
-The switcher continues to list only accessible tenants.
+Failed cleanup is marked red; pending work is marked yellow. Retrying continues the
+existing deletion. The switcher lists only accessible tenants.
 
-### Remaining integration before production release
+### Integration requirements
 
 - Custom API resources or background entry points outside the core dispatcher must
   participate in the same operation protocol.
-- Before upgrading an existing installation, reconcile/close checkout links created by
-  the old code in Payrexx. Their IDs may exist only in expired browser sessions and
-  cannot be reconstructed from the database. The new registry covers newly created
-  checkouts; missing historical records must not be interpreted as no external work.
-- Extend the Sysadmin retry interface with verified payment reconciliation. Unknown
-  charges and abandoned operation/job records require explicit investigation before
-  releasing their hold. There is intentionally no force-delete/clear-holds button.
+- Unknown charges and abandoned operation/job records require investigation.
+  Retrying does not force-clear their holds.
 - Verify deployment-specific cleanup hooks. The public scaffold cannot remove data
   owned by extensions whose implementation is not present in this repository.
 
-No automatic subscription cancellation or expiry requests account deletion. No cron
-schedule has been removed.
+Subscription cancellation or expiry does not request account deletion.
 
 ## Verification
 
-Run the dedicated-database tests after applying V32:
+Use the [test workspace guide](../www/tests/README.md) for execution, fixtures, and
+local payment mocks. Verify that an issued PDF remains identical after address changes,
+payment updates, and account deletion, while drafts remain editable. Exercise cleanup
+retries with missing hooks or pending payments and confirm that another customer's
+data remains untouched. Use the dedicated test database for these checks.
 
-```bash
-bash www/tests/bin/migrate_test_db.sh
-bash www/tests/bin/run_tests.sh 'reporter=mintext&bundles=tests.specs.integration.invoice_migration_spec,tests.specs.integration.invoice_documents_spec,tests.specs.integration.invoice_rendering_spec,tests.specs.integration.customer_delete_spec,tests.specs.unit.pdf_spec'
-```
-
-For a manual test, create a draft in Sysadmin, add positions, open it and download its
-PDF. Change the customer's address and issuer settings: the original download must
-remain identical. Record a payment: the editor's balance changes, while the PDF stays
-unchanged. The integration suite also covers retained invoices after deletion, denied
-customer access, revoked download tokens, QR slips, and failure rollback without
-calling a live payment provider.
-
-`invoice_migration_spec` runs the real V32 SQL against isolated legacy tables. It checks repeated execution, byte-preserved archived PDFs and snapshots, unchanged issuance flags, detached invoices and restoration of a missing customer foreign key.
-
-`account_deletion_spec` exercises the lifecycle against the dedicated database and a
-local Payrexx mock: actor/owner checks, immediate stop, unknown-charge holds, retained
-PDFs/payments, missing hooks, token-revocation retry, shared identities and atomic account
-finalization. `account_deletion_http_spec` additionally exercises actual rendered forms
-and production dispatch: exact password, CSRF, confirmation, unrelated account denial,
-self-deletion/logout, individual tenants, inactive/pending tenant visibility, parent
-restriction and Sysadmin retry. Migration tests also preserve
-pending operations, completed cleanup steps and customized translations on reruns.
-
-The confirmation dialogs were opened in the browser for customers, individual tenants,
-blocked parents and Sysadmin (including pending retry). Customer desktop/mobile layout
-and evaluated dynamic values were inspected. These views share the backend layout;
-there are no theme-specific copies. V32 was reapplied only to the dedicated test database.
-No real account or live payment service was used. The open-checkout/webhook coordination
-above remains a release prerequisite, even though the manual forms are now connected.
-
-Validation of the GUI integration: all 787 specs passed in sequential batches.
-The final HTTP deletion and membership-authorization checks also passed (31 specs).
-
-## Demo-module regression coverage
+## Demo modules
 
 The MailChimp registration in `config/db/dev/create-modules.sql` is demonstration
 metadata; this repository does not implement a MailChimp integration. Its explicit
@@ -195,36 +156,11 @@ metadata; this repository does not implement a MailChimp integration. Its explic
 other shipped scaffolds. Implement real cleanup before adding module-owned data or
 external synchronization. Missing hooks for other registered modules still stop deletion.
 
-`dev_seeds_spec` now imports all actual development seeds and deletes an own tenant
-through `submitDeletion` as both an owner and a Sysadmin, including a module booking
-and a running request on the parent. It checks completed deletion and an unaffected
-parent. This reproduces the previously missed MailChimp registration failure.
-`account_deletion_http_spec` triggers a real missing-hook failure through the form,
-checks the failed status/message and resumes the same request after fixing the test
-registration. Both regressions failed before the fix and pass after it.
-
-The tenant list distinguishes failed cleanup (red) from pending work (yellow). The
-customer dialog and both handlers report failure explicitly. Retrying is labeled as
-continuing the existing deletion. All 38 relevant seed, HTTP, lifecycle and migration
-specs passed; these checks use only the dedicated test database.
-
-`invoice_readonly_spec` checks rejected service mutations and forged authenticated
-Sysadmin POST/GET requests after deletion, with exact comparisons of invoice rows,
-positions, payment records, snapshot JSON and the PDF hash. It checks the rendered
-invoice, list and payment dialog, and confirms payments/cancellation still work for
-existing customer accounts.
-
-Read-only follow-up validation: all 262 relevant invoice, payment, lifecycle and registry
-specs passed. The actual backend was inspected at desktop and mobile widths; retained
-invoices expose only viewing actions and the original PDF still downloads successfully.
-This follow-up requires no additional migration.
-
 ## External Payrexx checkouts and delayed webhooks
 
-V32 now also creates `payrexx_checkouts` and `payrexx_checkout_events`, preserving their
-contents on reruns. Apply the amended V32 before deploying the code. These tables have
-no customer cascade: they retain the reference, gateway/transaction IDs, amount,
-currency and reconciliation status, without copying full webhook payloads or card data.
+The `payrexx_checkouts` and `payrexx_checkout_events` tables retain references,
+gateway/transaction IDs, amounts, currencies, and reconciliation status. They have no
+customer cascade and do not copy full webhook payloads or card data.
 
 Both core Gateway creation paths call `payrexx_checkouts.create()`. It stores the
 customer, exact reference and optional invoice ID **before** the external request.
@@ -254,9 +190,9 @@ returns HTTP 503 so the provider can retry. Other storage failures also return H
 Late financial confirmations are retained as `review` events and logged for investigation;
 they do not modify immutable retained invoices, revive bookings or restore customer data.
 Monitor these records/logs and ensure webhook retries are enabled in the Payrexx integration.
-A dedicated operator reconciliation UI remains a separate follow-up; there is no automatic
-refund or force-clear operation. An unresolved financial event must be investigated using
-its provider transaction and reference before any manual resolution.
+There is no dedicated operator reconciliation UI, automatic refund, or force-clear
+operation. An unresolved financial event must be investigated using its provider
+transaction and reference before any manual resolution.
 
 ### Existing installations and custom integrations
 
@@ -273,19 +209,3 @@ The implementation uses Payrexx's documented [Gateway retrieval](https://develop
 Gateway closure stops further use of the link; it is not treated as proof that every
 previous payment attempt has settled. This is why pending attempts and late financial
 events retain separate reconciliation state.
-
-`payrexx_checkout_spec` exercises the real creation/return handlers, authenticated HTTP
-webhooks and the deletion lifecycle against a local Payrexx mock. It covers an in-flight
-creation/deletion race, lost responses, cancellation failure, duplicate/out-of-order
-notifications, waiting-to-confirmed settlement, wrong gateway/amount/currency, legacy
-notifications and late events after account deletion. V32 migration specs also verify
-that disabled gateways and unresolved events survive repeated migration runs.
-
-Validation for checkout coordination: the complete regression run passed 817 specs.
-After adding the final out-of-order authorization regression and its guard, all 94
-relevant specs passed, including 20 checkout scenarios. The English Sysadmin pending
-notice was rendered in a German session at desktop/mobile widths, and the existing
-password-confirmed retry dialog was opened. The notice fits the mobile viewport; the
-pre-existing customer-details tables still extend beyond it. All payment API calls used
-the local mock. The amended V32 was applied only to the dedicated test database; no
-live payment or production customer was changed.

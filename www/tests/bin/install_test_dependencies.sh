@@ -15,7 +15,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 MSYS_NO_PATHCONV=1 docker run --rm \
     --volume "$(host_path "${TESTS_ROOT}"):/workspace" \
     --workdir /workspace \
-    ortussolutions/commandbox:latest \
+    ortussolutions/commandbox@sha256:dfae5db36b22ad56d6a2a0aaff648b886f3dc730787d44f69553c41e627c88a5 \
     box install --production "$@"
 
 echo "TestBox installed in ${TESTS_ROOT}/vendor/testbox."

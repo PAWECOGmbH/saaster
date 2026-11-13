@@ -5,18 +5,47 @@ on:
     branches:
       - staging
 
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: false
+
 jobs:
+  test:
+    name: TestBox before staging
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Verify test runner failure handling
+        run: bash www/tests/bin/check_test_runner.sh
+
+      - name: Run isolated TestBox suite
+        run: bash www/tests/bin/run_ci.sh
+
   deploy_and_migrate:
+    needs: test
     runs-on: ubuntu-22.04
     steps:
 
       - name: Checkout the repository
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Verify deployment file filters
+        run: sh www/tests/bin/check_deployment_filters.sh
 
       - name: Deploy to server via rsync
         uses: Burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --checksum --delete --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
+          switches: -avzr --checksum --delete --filter='merge .github/deploy.rsync-filter' --exclude-from='.gitignore' --exclude='/config/nginx/conf.d/custom.conf'
           path: ./
           remote_path: ${{ secrets.STAGING_REMOTE_PATH }}
           remote_host: ${{ secrets.STAGING_HOST }}
