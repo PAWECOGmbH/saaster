@@ -2,7 +2,7 @@
 
 A CFML framework for building SaaS applications, with authentication, customer and tenant management, subscriptions, invoicing, and APIs. Extend it with your own application code, modules, and themes.
 
-[Website](https://www.saaster.io) · [Demo](https://app.saaster.io) · [Documentation](https://docs.saaster.io) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
+[Website](https://www.saaster.io) · [Demo](https://app.saaster.io) · [Documentation](https://docs.saaster.io) · [Customize and update](docs/customization-and-updates.md) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
 
 **Stack:** Lucee 7 · NGINX · MySQL 8.1 · Docker Compose · Flyway
 
@@ -122,6 +122,10 @@ bash www/tests/bin/run_tests.sh 'reporter=mintext'
 The browser runner is at [localhost:8080/tests/runner.cfm](http://localhost:8080/tests/runner.cfm). For new migrations, use `bash www/tests/bin/migrate_test_db.sh` on the existing test database.
 
 Use the local payment mocks and Inbucket. See [CONTRIBUTING.md](CONTRIBUTING.md#validate-the-change) for validation expectations and the [test workspace guide](www/tests/README.md) for fixtures, targeted runs, and cleanup.
+
+## Customize and update
+
+The [customization and update guide](docs/customization-and-updates.md) explains where your application code, modules, themes and migrations belong, and how to bring upstream changes into your fork while reviewing conflicts and preserving configuration and data.
 
 ## Preserve configurations with a custom Docker image
 

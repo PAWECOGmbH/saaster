@@ -28,7 +28,7 @@ The `staging` and `production` branches are managed by PAWECO. Pushes to these b
 
 Keep changes focused, use four spaces, preserve existing line endings, and write comments and technical documentation in English. Customer-facing German text uses formal address; the Sysadmin interface remains in English.
 
-Put project-specific application code in `www/backend/myapp/` or `www/backend/modules/`. Apply shared frontend changes to both themes where applicable. Existing extension contracts are documented in [extension permissions](docs/extension-permissions.md) and [module account deletion](docs/module-account-deletion.md).
+Put project-specific application code in `www/backend/myapp/` or `www/backend/modules/`. Apply shared frontend changes to both themes where applicable. The [customization and update guide](docs/customization-and-updates.md) covers extension locations, project migrations and integrating upstream changes into a fork. Existing extension contracts are documented in [extension permissions](docs/extension-permissions.md) and [module account deletion](docs/module-account-deletion.md).
 
 Keep `.env`, `www/config.cfm`, generated test configuration, and credentials local. Review the files you stage and avoid including unrelated local changes or customer data in commits, issues, or pull requests. Keep `todo.md` ignored and never force-add it.
 
