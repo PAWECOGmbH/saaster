@@ -1,4 +1,4 @@
-<!-- Target development. Keep credentials, tokens and customer data out of the description and attachments. -->
+<!-- External contributions should target development. Keep credentials, tokens and customer data out of the description and attachments. -->
 
 ## Change
 
