@@ -10,14 +10,13 @@ root="$PWD"
 export ENV_FILE="$root/.env"
 random_password() { od -An -N24 -tx1 /dev/urandom | tr -d ' \n'; }
 mkdir -p /borg-test /test-state /backup config/nginx/conf.d config/mysql
-random_password > /borg-test/passphrase
 cat > .env <<EOF
 COMPOSE_PROJECT_NAME=$project
 BACKUP_ENV=test
 BORG_COMPOSE_FILE=www/tests/backup/compose.yml
 BORG_TEST_ROOT=$root
 BORG_REPO=/borg-test/repository
-BORG_PASSPHRASE_FILE=/borg-test/passphrase
+BORG_PASSPHRASE='$(random_password) spaces \$literal # !'
 BORG_WORK_DIR=/backup
 BORG_KEEP_DAILY=1
 BORG_KEEP_WEEKLY=0
@@ -31,8 +30,6 @@ MYSQL_USER=saaster_borg_test_user
 MYSQL_PASSWORD=$(random_password)
 EOF
 set -a; source .env; set +a
-BORG_PASSPHRASE="$(<"$BORG_PASSPHRASE_FILE")"
-export BORG_PASSPHRASE
 compose() { docker compose --env-file "$ENV_FILE" -p "$project" -f www/tests/backup/compose.yml "$@"; }
 mysql_id() { compose ps -q mysql; }
 lucee_id() { compose ps -q lucee; }
@@ -113,7 +110,17 @@ history="$(printf 'SELECT CONCAT(version,":",COALESCE(checksum,""),":",success) 
 config_hash="$(sha256sum www/config.cfm | cut -d' ' -f1)"
 nginx_hash="$(sha256sum config/nginx/conf.d/base.conf | cut -d' ' -f1)"
 filebrowser_hash="$(sha256sum filebrowser.db | cut -d' ' -f1)"
-bash config/backup/backup_borg.sh --init
+env -u BORG_PASSPHRASE bash config/backup/backup_borg.sh --init
+cp .env /test-state/missing-passphrase.env
+sed -i '/^BORG_PASSPHRASE=/d' /test-state/missing-passphrase.env
+expect_failure 'Required setting is missing: BORG_PASSPHRASE' env -u BORG_PASSPHRASE ENV_FILE=/test-state/missing-passphrase.env bash config/backup/backup_borg.sh --list
+cp .env /test-state/empty-passphrase.env
+printf '\nBORG_PASSPHRASE=\n' >> /test-state/empty-passphrase.env
+expect_failure 'Required setting is missing: BORG_PASSPHRASE' env ENV_FILE=/test-state/empty-passphrase.env bash config/backup/restore_borg.sh --list
+cp .env /test-state/wrong-passphrase.env
+printf '\nBORG_PASSPHRASE=wrong-test-passphrase\n' >> /test-state/wrong-passphrase.env
+expect_failure 'passphrase' env ENV_FILE=/test-state/wrong-passphrase.env bash config/backup/backup_borg.sh --list
+echo 'PASS: BORG_PASSPHRASE from .env is required and unlocks the encrypted repository.'
 bash config/backup/backup_borg.sh --export-key /borg-test/exported-key
 bash config/backup/backup_borg.sh --backup
 prefix="$project-saaster-v1"
@@ -185,7 +192,7 @@ printf '[mysqld]\nmax_connections=17\n' > config/mysql/tuning.cnf
 cp config/example.base.conf config/nginx/conf.d/base.conf
 compose up -d --wait --wait-timeout 180 mysql inbucket lucee
 docker exec "$(lucee_id)" sh -c 'printf "stale replacement data\n" > /var/www/userdata/stale.txt'
-bash config/backup/restore_borg.sh --all --force
+env -u BORG_PASSPHRASE bash config/backup/restore_borg.sh --all --force
 set -a; source .env; set +a
 assert_same "$config_hash" "$(sha256sum www/config.cfm | cut -d' ' -f1)" 'application configuration'
 assert_same "$nginx_hash" "$(sha256sum config/nginx/conf.d/base.conf | cut -d' ' -f1)" 'NGINX configuration'
