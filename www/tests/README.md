@@ -12,6 +12,8 @@ The tests run inside the local Lucee container, against a **dedicated test datab
 
 ## Setup
 
+Configure the [local NGINX test timeout](../../readme.md#testing) before running the full suite.
+
 Once, from the repository root:
 
 ```bash
@@ -56,13 +58,68 @@ The script exits with code 1 as soon as a spec fails - usable in pipelines and g
 - **Clean database:** `bash www/tests/bin/prepare_test_db.sh` again
 - **Changed a component:** `run_tests.sh` reloads the test application automatically. In the browser, open `healthcheck.cfm?reinit=1` once.
 
+## Staging deployment checks
+
+A push to `staging` runs the full suite on a separate GitHub-hosted Ubuntu runner.
+Deployment and server migrations require that job to succeed. There are no automatic
+test runs on `development`. Production deployment is unchanged.
+
+The test job uses [`compose.yml`](compose.yml), pinned public images, a new database
+and Inbucket. It needs no deployment secrets or saved Lucee administrator settings.
+Configuration is generated from the repository examples; containers and volumes are
+removed on success or failure. Test files and data stay excluded from deployment.
+
+To reproduce the job, use a **fresh checkout** with Bash, Docker Compose and curl:
+
+```bash
+bash www/tests/bin/check_test_runner.sh
+bash www/tests/bin/run_ci.sh
+```
+
+`run_ci.sh` refuses existing local configuration and creates an isolated Compose
+project. Its HTTP endpoint uses `127.0.0.1:18080`; set `SAASTER_CI_HTTP_PORT` if needed.
+The runner rejects HTTP/healthcheck failures, missing or invalid counters, inconsistent
+results, failures/errors, and runs with no executed tests. The shell check exercises
+these failure cases without a database or network connection.
+
+## Deployment file check
+
+Tests, support fixtures, example test configuration, SQL demo data in `config/db/dev`,
+and the legacy generator in `www/setup/mockdata` are tracked in Git and included in
+forks. Installed TestBox dependencies, generated credentials, and local results stay
+git-ignored.
+
+Both staging and production workflows run this check before uploading files:
+
+```bash
+sh www/tests/bin/check_deployment_filters.sh
+```
+
+It requires `rsync` and a POSIX shell, and uses disposable local directories without
+TestBox, Docker, a database, or deployment secrets. It exercises both workflows'
+actual rsync options against fresh and previously deployed fixtures. The shared
+`.github/deploy.rsync-filter` excludes the three development-only trees and allows
+removal of old copies, while preserving server configuration, uploads, and logs.
+Runtime files, core/project migrations, and similarly named project-owned directories
+must still transfer. The check also verifies that source fixtures remain untouched.
+
+## Isolated Borg backup and restore
+
+Run the manual recovery test with a local Linux Docker engine (including Docker Desktop), Git, Bash and tar:
+
+```bash
+bash www/tests/bin/check_borg_backup.sh
+```
+
+It creates a separate application with random credentials and an encrypted local Borg repository. It deletes only its own data volumes, restores them, and checks application login, database objects/Flyway history, userdata, code/configuration, runtime settings, retention and failure guards. It does not load this checkout's local configuration or use staging/production. Temporary resources are removed on exit. This test is manual and is not added to the deployment workflow. See the [backup guide](../../config/backup/readme.md).
+
 ## How it works
 
 `www/tests/Application.cfc` is a separate application with its own name, so its application scope is independent of the running app under `/`.
 
 - **Real bootstrap.** It calls the real `onApplicationStart` of Saaster, so `application.objGlobal`, `objUser`, `objCustomer` and all settings exist exactly as in the app.
 - **Datasource redirect.** The test datasource is registered under its own name *and* under the name from `config.cfm` (`variables.datasource`). Every query the app knows of ends up in the test database, including the ones during the start.
-- **Safety.** The application only starts if `config.cfm` says `variables.environment = "dev"`. Both the CFML side and every shell script refuse a database without `test` in its name. This folder is inside the webroot - when you deploy, exclude `www/tests` anyway.
+- **Safety.** The application only starts if `config.cfm` says `variables.environment = "dev"`. The CFML bootstrap and database preparation/migration scripts reject database names without `test`; the database scripts also reject the application database's name. The deployment filters described above keep this webroot folder off staging and production.
 
 ## Writing specs
 
@@ -98,7 +155,7 @@ Rules:
 - Do **not** define `beforeAll` / `afterAll` in integration specs - the base class uses them for the safety check and the cleanup. Use `beforeEach` / `afterEach`.
 - Fixtures write plain SQL on purpose, so a spec does not depend on the very function it is not testing.
 - Test e-mail addresses end with `@saaster.invalid`. That domain is never deliverable and marks leftovers, which the next run removes automatically.
-- Customers created through fixtures are deleted after the spec. Everything attached to them (users, bookings, invoices, ...) goes with them via `ON DELETE CASCADE`.
+- Customers created through fixtures are deleted after the spec. The fixture explicitly removes its invoice archives and invoices first; production retains these records. Other dependent data uses the schema's foreign keys.
 
 Helpers for side effects:
 
@@ -123,6 +180,13 @@ restrictions, ambiguous direct mappings, invalid CSRF and stale form responses.
 scheduler eligibility, including booking dates, renewals, cancellations, free plans,
 customer isolation and live revocation. HTTP specs exercise plan-included modules
 through both canonical routes and direct templates with the same role/token checks.
+
+`module_blocks_spec` covers customer-specific module restrictions, platform/support
+boundaries, idempotence, unchanged bookings and scheduler history/claims.
+`module_block_http_spec` covers the rendered confirmation and protected POST action;
+extension HTTP tests verify blocked canonical/direct routes. Apply V31 before running
+these suites. `module_block_migration_spec` reruns V31 and checks that existing
+blocks and customized translations survive while old default wording is corrected.
 
 The test application configures SMTP from the local `mailCatcherUrl` host on port 2500,
 so mail tests do not depend on the development application's Lucee admin SMTP settings.
@@ -197,3 +261,5 @@ The fixtures create modules, scheduletasks and plans (`createModule`, `createSch
 | `bin/` | Install, prepare, reset, migrate and run scripts |
 | `support/` | Settings loader, integration base spec, fixtures, log recorder, Payrexx mock, form and SQL registries, scanners, and the probes that run real pages inside the test application (upload, scheduler worker, invoice view and print, return from Payrexx) |
 | `specs/` | The specs |
+
+`invoice_documents_spec` covers immutable issued PDFs, legacy capture, retained payments and Sysadmin access after deletion, denied customer downloads, draft previews, QR snapshots and deletion rollback. Apply V32 before running it. See [invoice retention](../../docs/invoice-retention.md).

@@ -1,6 +1,18 @@
 
 component displayname="book" output="false" {
 
+    public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking, boolean makeInvoice, boolean chargeInvoice) {
+        local.lifecycle = new backend.core.com.account_lifecycle();
+        local.token = local.lifecycle.beginOperation(arguments.customerID, "booking");
+        if (!len(local.token)) return {success: false, message: "The account is being deleted.", messageStruct: {title: "", message: "The account is being deleted."}};
+        try {
+            return checkBookingActive(argumentCollection=arguments);
+        } finally {
+            local.lifecycle.finishOperation(local.token);
+        }
+    }
+
+
     public any function init(string type, string language) {
 
         param name="arguments.type" default="plan";
@@ -106,7 +118,7 @@ component displayname="book" output="false" {
 
 
     // We prepare the booking requested by the customer and return the data. If required, an entry can be made in the DB immediately.
-    public struct function checkBooking(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking, boolean makeInvoice, boolean chargeInvoice) {
+    private struct function checkBookingActive(required numeric customerID, required struct bookingData, required string recurring, boolean makeBooking, boolean makeInvoice, boolean chargeInvoice) {
 
         local.argsReturnValue = structNew();
         local.argsReturnValue['message'] = "";
@@ -944,6 +956,7 @@ component displayname="book" output="false" {
         }
 
         local.customerID = local.qBooking.intCustomerID;
+        if (new backend.core.com.account_lifecycle().isDeleting(local.customerID)) return 0;
         local.planID = local.qBooking.intPlanID;
         local.moduleID = local.qBooking.intModuleID;
         local.dateStart = local.qBooking.dteStartDate[1] ?: "";
@@ -1007,6 +1020,7 @@ component displayname="book" output="false" {
                     strRecurring = :recurring,
                     strStatus = :status
                 WHERE intBookingID = :bookingID
+                AND NOT EXISTS (SELECT 1 FROM account_deletions d WHERE d.intCustomerID = bookings.intCustomerID)
             "
         )
 
@@ -1170,6 +1184,7 @@ component displayname="book" output="false" {
 
         }
 
+        variables.mailLanguage = local.qCustomer.strLanguage;
         variables.mailType = "html";
 
         cfsavecontent (variable = "variables.mailContent") {
@@ -1177,10 +1192,6 @@ component displayname="book" output="false" {
                 #getTrans('titHello', local.qCustomer.strLanguage)#  #local.qCustomer.strFirstName# #local.qCustomer.strLastName#<br><br>
                 #local.mailText#<br><br>
                 <a class='mail-btn' href='#application.mainURL#/login' target='_blank'>Login</a>
-                <br><br>
-                #getTrans('txtRegards', local.qCustomer.strLanguage)#<br>
-                #getTrans('txtYourTeam', local.qCustomer.strLanguage)#<br>
-                #application.appOwner#
             ");
         }
 

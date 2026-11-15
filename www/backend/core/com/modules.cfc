@@ -394,6 +394,7 @@ component displayname="modules" output="false" {
     // Access can come from any valid direct booking or a plan containing the module.
     // Keep this separate from getModuleStatus(), which describes direct bookings for billing/UI.
     public query function getModuleAccessBookings(required numeric customerID, required numeric moduleID) {
+        if (new backend.core.com.account_lifecycle().isDeleting(arguments.customerID)) return queryNew("status,startDate,endDate");
         return queryExecute(
             options = {datasource: application.datasource},
             params = {
@@ -518,6 +519,8 @@ component displayname="modules" output="false" {
                         OR (DATE(bookings.dteStartDate) <= :today AND DATE(bookings.dteEndDate) >= :today)
                     )
                 )
+                AND NOT EXISTS (SELECT 1 FROM customer_module_blocks blocked
+                    WHERE blocked.intCustomerID = :customerID AND blocked.intModuleID = scheduletasks.intModuleID)
                 ORDER BY scheduletasks.intScheduletaskID
             "
         );
@@ -555,6 +558,9 @@ component displayname="modules" output="false" {
                 DELETE FROM scheduler_jobs
                 WHERE intCustomerID = :customerID
                 AND intScheduletaskID NOT IN (:dueIDs)
+                AND NOT EXISTS (SELECT 1 FROM customer_module_blocks blocked
+                    INNER JOIN scheduletasks task ON task.intModuleID = blocked.intModuleID
+                    WHERE blocked.intCustomerID = :customerID AND task.intScheduletaskID = scheduler_jobs.intScheduletaskID)
             "
         );
         local.result.removed = local.deleteResult.recordCount;

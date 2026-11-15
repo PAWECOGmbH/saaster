@@ -82,6 +82,16 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-6">
+                                        <label class="form-label" for="settingTenantsEnabled">Enable tenants</label>
+                                        <select id="settingTenantsEnabled" name="settingTenantsEnabled" class="form-select w-50">
+                                            <option value="1" <cfif application.objCustomer.tenantCreationEnabled()>selected</cfif>>Yes</option>
+                                            <option value="0" <cfif not application.objCustomer.tenantCreationEnabled()>selected</cfif>>No</option>
+                                        </select>
+                                        <p class="form-hint">Existing tenants remain accessible when creation is disabled.</p>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>

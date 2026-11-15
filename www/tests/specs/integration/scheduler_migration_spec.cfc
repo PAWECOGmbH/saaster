@@ -19,11 +19,16 @@ component extends="tests.support.integration_spec" {
         describe(title = "Migration V23: shard tables to scheduler_jobs", skip = !fileExists(variables.migrationFile), body = () => {
 
             beforeEach(() => {
+                createShardTables();
                 variables.moduleID = variables.fixtures.createModule("Migration");
                 variables.taskID = variables.fixtures.createScheduletask(variables.moduleID);
                 variables.customerA = variables.fixtures.createCustomer();
                 variables.customerB = variables.fixtures.createCustomer();
                 variables.customerC = variables.fixtures.createCustomer();
+            });
+
+            afterEach(() => {
+                dropCreatedShardTables();
             });
 
             it("copies the entries of all shard tables", () => {
@@ -80,6 +85,37 @@ component extends="tests.support.integration_spec" {
 
         });
 
+    }
+
+    // V33 removes the production shards, so create only the columns V23 reads for this historical migration test.
+    private void function createShardTables() {
+        variables.createdShards = [];
+        loop from=1 to=20 index="local.shardNumber" {
+            local.table = "scheduler_" & right("0" & local.shardNumber, 2);
+            local.existing = queryExecute(
+                options = {datasource: application.datasource},
+                params = {tableName: {type: "string", value: local.table}},
+                sql = "SELECT COUNT(*) AS cnt FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :tableName"
+            ).cnt;
+            if (not local.existing) {
+                queryExecute(
+                    options = {datasource: application.datasource},
+                    params = {},
+                    sql = "CREATE TABLE `#local.table#` (intScheduletaskID INT NOT NULL, intCustomerID INT NOT NULL, dtmNextRun DATETIME NULL, dtmLastRun DATETIME NULL, intDuringSeconds SMALLINT NULL) ENGINE=InnoDB"
+                );
+                arrayAppend(variables.createdShards, local.table);
+            }
+        }
+    }
+
+    private void function dropCreatedShardTables() {
+        loop array=variables.createdShards item="local.table" {
+            queryExecute(
+                options = {datasource: application.datasource},
+                params = {},
+                sql = "DROP TABLE IF EXISTS `#local.table#`"
+            );
+        }
     }
 
     // Runs every statement of the migration file (comments removed, split at the semicolons)

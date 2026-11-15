@@ -111,50 +111,32 @@ if (structKeyExists(url, "module")) {
 }
 
 
-// Delete the account right now
+// The same lifecycle handles manual account and individual tenant deletion.
 if (structKeyExists(form, "delete")) {
-
-    if (form.delete eq session.customer_id) {
-
-        param name="form.email" default="";
-        param name="form.password" default="";
-
-        objUserLogin = new frontend.core.com.login().checkLogin(argumentCollection = form);
-
-        if (objUserLogin.loginCorrect and objUserLogin.active and objUserLogin.superadmin) {
-
-            user_email = objUserLogin.user_email;
-            user_name = objUserLogin.user_name;
-            user_id = objUserLogin.user_id;
-
-            deleteAccount = application.objCustomer.deleteAccount(session.customer_id);
-
-            if (deleteAccount.success) {
-
-                logWrite("user", "info", "Account deleted [CustomerID: #session.customer_id#, UserID: #user_id#, E-Mail: #user_email#, Name: #user_name#]");
-
-                structClear(SESSION);
-                onSessionStart();
-                location url="#application.mainURL#?logout" addtoken="false";
-
-            } else {
-
-                logWrite("user", "warning", "Could not delete account [CustomerID: #session.customer_id#, UserID: #user_id#, E-Mail: #user_email#, Name: #user_name#, Message: #deleteAccount.message#]");
-                getAlert(deleteAccount.message, 'warning');
-                location url="#application.mainURL#/account-settings/company" addtoken="false";
-
-            }
-
-        } else {
-
-            getAlert('alertWrongLogin', 'danger');
-            logWrite("user", "warning", "Couldn't delete the account, because of wrong login or user status [CustomerID: #session.customer_id#, UserID: #user_id#, is active: #objUserLogin.active#, is superAdmin: #objUserLogin.superadmin#]");
-            location url="#application.mainURL#/account-settings/company" addtoken="false";
-
-        }
-
+    if (cgi.request_method neq "POST") { header statuscode=405 statustext="Method Not Allowed"; abort; }
+    if (!isValid("integer", form.delete) or val(form.delete) lte 0 or (form.confirm_delete ?: "") neq "1") {
+        header statuscode=400 statustext="Bad Request";
+        abort;
     }
-
+    deletionTarget = val(form.delete);
+    deletionWasOwnContext = deletionTarget eq session.customer_id;
+    deletionResult = new backend.core.com.account_lifecycle().submitDeletion(session.user_id, deletionTarget, form.password ?: "");
+    deletionProgressMessage = deletionResult.reason eq "cleanup" ? "msgAccountDeletionFailed" : "msgAccountDeletionStarted";
+    deletionAlertType = deletionResult.success ? "success" : (deletionResult.reason eq "cleanup" ? "danger" : "warning");
+    if (deletionResult.accepted and deletionWasOwnContext) {
+        deletionLanguage = session.lng;
+        structClear(session);
+        onSessionStart();
+        session.lng = deletionLanguage;
+        getAlert(deletionResult.success ? "msgAccountDeletionComplete" : deletionProgressMessage, deletionAlertType);
+        location url="#application.mainURL#/login" addtoken=false;
+    }
+    deletionMessage = deletionResult.success ? "msgAccountDeletionComplete"
+        : (deletionResult.accepted ? deletionProgressMessage
+        : (deletionResult.reason eq "tenants" ? "msgAccountHasTenants"
+        : (deletionResult.reason eq "identity" ? "msgAccountDeletionIdentity" : "msgAccountDeletionDenied")));
+    getAlert(deletionMessage, deletionAlertType);
+    location url=application.mainURL & (deletionWasOwnContext ? "/account-settings/company" : "/account-settings/tenants") addtoken=false;
 }
 
 logWrite("user", "warning", "Access attempt to handler/cancel.cfm without method [CustomerID: #session.customer_id#, UserID: #session.user_id#]");

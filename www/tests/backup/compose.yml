@@ -1,0 +1,50 @@
+services:
+    lucee:
+        image: ${LUCEE_IMAGE}:${LUCEE_IMAGE_VERSION}
+        working_dir: /var/www
+        environment:
+            LUCEE_ADMIN_PASSWORD: ${LUCEE_ADMIN_PASSWORD}
+            LUCEE_EXTENSIONS: "212BA548-F15A-4EBD-8B1EEDF8DD8A844D;version=1.1.0.17"
+            UMASK: "0000"
+        volumes:
+            - ${BORG_TEST_ROOT}/www:/var/www
+            - ${BORG_TEST_ROOT}/config/nginx/conf.d:/etc/nginx/conf.d
+            - ${BORG_TEST_ROOT}/logs/lucee:/opt/lucee/server/lucee-server/context/logs
+            - ${BORG_TEST_ROOT}/logs/nginx:/var/log/nginx
+            - ${BORG_TEST_ROOT}/logs/tomcat:/usr/local/tomcat/logs
+            - userdata:/var/www/userdata
+        depends_on:
+            mysql:
+                condition: service_healthy
+            inbucket:
+                condition: service_healthy
+    mysql:
+        image: mysql:8.1@sha256:f61944ff3f2961363a4d22913b2ac581523273679d7e14dd26e8db8c9f571a7e
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - database:/var/lib/mysql
+            - ${BORG_TEST_ROOT}/config/mysql/tuning.cnf:/etc/mysql/conf.d/tuning.cnf:ro
+        healthcheck:
+            test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysqladmin ping --host=127.0.0.1 --user=root --silent"]
+            interval: 3s
+            timeout: 3s
+            retries: 60
+    inbucket:
+        image: inbucket/inbucket@sha256:48063d73be66889d95c43a6ee18ed5db08e3ad01196d8f7aa1e7f1e6e4625d93
+        volumes:
+            - mail:/storage
+    flyway:
+        image: flyway/flyway@sha256:af5b530c1d0fa1606264346b0039a80e7e0e0ddffa750bd19a52b19424403c86
+        environment:
+            FLYWAY_USER: root
+            FLYWAY_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - ${BORG_TEST_ROOT}/config/db:/flyway/sql:ro
+volumes:
+    database:
+    userdata:
+    mail:

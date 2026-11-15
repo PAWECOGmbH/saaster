@@ -11,6 +11,11 @@
     showMemberships = membershipOrganization.enabled
         ? application.objMembershipAccess.canManage(session.user_id, session.customer_id)
         : application.objMembershipAccess.canSetup(session.user_id, membershipOrganization.id);
+    showTenantManagement = false;
+    if (getCustomerData.custParentID eq 0 and session.superadmin) {
+        showTenantManagement = application.objCustomer.tenantCreationEnabled()
+            or application.objCustomer.hasChildTenants(session.customer_id);
+    }
 
 </cfscript>
 
@@ -92,7 +97,7 @@
                                         <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
                                     </a>
                                 </cfif>
-                                <cfif getCustomerData.custParentID eq 0 and session.superadmin>
+                                <cfif showTenantManagement>
                                     <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex justify-content-between">
                                             <h4 class="mb-1"><b>#getTrans('titMandanten')#</b></h4>

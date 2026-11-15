@@ -1,0 +1,60 @@
+# Disposable test stack. Run through bin/run_ci.sh from a fresh checkout.
+services:
+    lucee:
+        image: lucee/lucee:7.1.1.17-nginx@sha256:e8e1c98f59fe178a1e497dcdf637908a9def3d7dbf3e58ab50cb88583392518f
+        container_name: ${LUCEE_CONTAINER_NAME}
+        working_dir: /var/www
+        environment:
+            LUCEE_ADMIN_PASSWORD: ${LUCEE_ADMIN_PASSWORD}
+            LUCEE_EXTENSIONS: "212BA548-F15A-4EBD-8B1EEDF8DD8A844D;version=1.1.0.17"
+            UMASK: "0000"
+        ports:
+            - "127.0.0.1:${LUCEE_PORT}:80"
+        volumes:
+            - ../:/var/www
+            - ../../config/nginx/conf.d:/etc/nginx/conf.d:ro
+            - ../../config/db:/var/saaster/db:ro
+            - userdata:/var/www/userdata
+        depends_on:
+            mysql:
+                condition: service_healthy
+            inbucket:
+                condition: service_healthy
+
+    mysql:
+        image: mysql:8.1@sha256:f61944ff3f2961363a4d22913b2ac581523273679d7e14dd26e8db8c9f571a7e
+        container_name: ${MYSQL_CONTAINER_NAME}
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - database:/var/lib/mysql
+        healthcheck:
+            test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_ROOT_PASSWORD mysqladmin ping -h 127.0.0.1 --silent"]
+            interval: 5s
+            timeout: 5s
+            retries: 30
+
+    inbucket:
+        # Inbucket 3.2.0
+        image: inbucket/inbucket@sha256:48063d73be66889d95c43a6ee18ed5db08e3ad01196d8f7aa1e7f1e6e4625d93
+        container_name: ${INBUCKET_CONTAINER_NAME}
+        volumes:
+            - mail:/storage
+
+    flyway:
+        # Flyway 13.12.2; called separately for core and project migrations.
+        image: flyway/flyway@sha256:af5b530c1d0fa1606264346b0039a80e7e0e0ddffa750bd19a52b19424403c86
+        environment:
+            FLYWAY_USER: root
+            FLYWAY_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            FLYWAY_VALIDATE_MIGRATION_NAMING: "true"
+        volumes:
+            - ../../config/db/${FLYWAY_DB_FOLDER:-core}:/flyway/${FLYWAY_DB_FOLDER:-core}:ro
+
+volumes:
+    database:
+    userdata:
+    mail:

@@ -105,6 +105,42 @@ component extends="tests.support.integration_spec" {
                 expect(arrayLen(refused)).toBe(2);
             });
 
+            it("deletes an own tenant with all shipped demo modules registered for owners and Sysadmins", () => {
+                recordLogs();
+                local.lifecycle = new backend.core.com.account_lifecycle();
+                local.password = "Seed-deletion-test-123!";
+                loop array=[false, true] item="local.sysadmin" {
+                    local.parent = variables.fixtures.createCustomer();
+                    local.tenant = variables.fixtures.createCustomer(parentID=local.parent);
+                    local.actor = variables.fixtures.createUser(customerID=local.parent, superAdmin=true, sysAdmin=local.sysadmin,
+                        passwordHash=application.objGlobal.hashPassword(local.password));
+                    variables.fixtures.grantTenant(local.actor.userID, local.tenant);
+                    variables.fixtures.createBooking(customerID=local.tenant, moduleID=3, status="active");
+                    loginAs(local.actor);
+                    local.operation = local.lifecycle.beginOperation(local.parent, "request");
+                    request.accountOperation = local.operation;
+                    try {
+                        local.result = local.lifecycle.submitDeletion(local.actor.userID, local.tenant, local.password);
+                        expect(local.result.success).toBeTrue(serializeJSON(variables.logRecorder.getCalls()));
+                        expect(local.lifecycle.deletionState(local.tenant).status).toBe("completed");
+                        local.remaining = queryExecute(options={datasource:application.datasource},
+                            params={tenant:{type:"integer",value:local.tenant},parent:{type:"integer",value:local.parent}},
+                            sql="SELECT (SELECT COUNT(*) FROM customers WHERE intCustomerID = :tenant) AS tenants,
+                                (SELECT COUNT(*) FROM bookings WHERE intCustomerID = :tenant) AS bookings,
+                                (SELECT blnActive FROM customers WHERE intCustomerID = :parent) AS parentActive");
+                        expect(local.remaining.tenants).toBe(0);
+                        expect(local.remaining.bookings).toBe(0);
+                        expect(local.remaining.parentActive).toBe(1);
+                        expect(local.lifecycle.hasOperations(local.parent)).toBeTrue();
+                        expect(count("modules WHERE intModuleID BETWEEN 1 AND 3")).toBe(3);
+                    } finally {
+                        local.lifecycle.finishOperation(local.operation);
+                        structDelete(request, "accountOperation");
+                        logout();
+                    }
+                }
+            });
+
             it("give every active demo customer a super admin", () => {
                 expect(count("customers c WHERE c.intCustomerID BETWEEN 1001 AND 1099 AND c.blnActive = 1 AND c.intCustParentID = 0 AND NOT EXISTS (SELECT 1 FROM users u WHERE u.intCustomerID = c.intCustomerID AND u.blnSuperAdmin = 1)")).toBe(0);
             });
@@ -134,6 +170,8 @@ component extends="tests.support.integration_spec" {
     // Removes the demo data again and restores the active currencies
     private void function removeSeeds() {
         var statements = [
+            "DELETE d FROM invoice_documents d INNER JOIN invoices i ON i.intInvoiceID = d.intInvoiceID WHERE i.intCustomerID BETWEEN 1001 AND 1099 OR d.intOriginalCustomerID BETWEEN 1001 AND 1099",
+            "DELETE FROM invoices WHERE intCustomerID BETWEEN 1001 AND 1099",
             "DELETE FROM customers WHERE intCustomerID BETWEEN 1001 AND 1099 AND intCustParentID > 0",
             "DELETE FROM customers WHERE intCustomerID BETWEEN 1001 AND 1099",
             "DELETE FROM widgets WHERE intWidgetID BETWEEN 1 AND 5",

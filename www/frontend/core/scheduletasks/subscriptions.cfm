@@ -12,6 +12,7 @@
 //  - Set status for expired plans
 //  - Check for filled schedule tables of modules
 //  - Check open invoices (overdue)
+//  - Remind customers about expiring saved cards
 //  - Delete logfiles older than 30 days
 
 setting requesttimeout = 1000;
@@ -27,6 +28,11 @@ if (url.pass eq variables.schedulePassword) {
     objModules = new backend.core.com.modules();
     objPlans = new backend.core.com.plans();
     objLogs = application.objLog;
+    try {
+        new backend.core.com.card_expiry_reminders().run();
+    } catch (any reminderError) {
+        objLogs.logWrite("scheduletask", "warning", "Card expiry reminder task failed: #reminderError.message#");
+    }
 
 
     // Look for "waiting" plans or modules
@@ -47,6 +53,11 @@ if (url.pass eq variables.schedulePassword) {
     )
 
     loop query=qWaiting {
+        accountLifecycle = new backend.core.com.account_lifecycle();
+        accountOperation = accountLifecycle.beginOperation(qWaiting.intCustomerID, "renewal");
+        if (!len(accountOperation)) continue;
+        try {
+
 
         // Plans to delete
         qPlans = queryExecute(
@@ -154,6 +165,10 @@ if (url.pass eq variables.schedulePassword) {
             objLogs.logWrite("scheduletask", "info", "Waiting module activated [ModuleID: #qWaiting.intModuleID#, CustomerID: #qWaiting.intCustomerID#]");
         }
 
+
+        } finally {
+            accountLifecycle.finishOperation(accountOperation);
+        }
     }
 
 
@@ -177,6 +192,11 @@ if (url.pass eq variables.schedulePassword) {
     )
 
     loop query=qRenewBookings {
+        accountLifecycle = new backend.core.com.account_lifecycle();
+        accountOperation = accountLifecycle.beginOperation(qRenewBookings.intCustomerID, "renewal");
+        if (!len(accountOperation)) continue;
+        try {
+
 
         // Renew plans or modules
         if ((qRenewBookings.strRecurring eq "monthly" or qRenewBookings.strRecurring eq "yearly") and
@@ -552,6 +572,14 @@ if (url.pass eq variables.schedulePassword) {
                 }
             }
 
+            // Let project modules clean up when a canceled booking ends.
+            if (qRenewBookings.intModuleID gt 0 and structKeyExists(application, "objSubscriptionHooks")) {
+                application.objSubscriptionHooks.afterBookingAccessEnded(
+                    customerID = qRenewBookings.intCustomerID,
+                    moduleID = qRenewBookings.intModuleID,
+                    reason = "canceled booking expired"
+                );
+            }
 
         // Set expired test phases to "expired" if its not already done
         } else if (dateFormat(qRenewBookings.dteEndDate, "yyyy-mm-dd") lt dateFormat(now(), "yyyy-mm-dd") and (qRenewBookings.strStatus eq "test" or qRenewBookings.strRecurring eq "onetime")) {
@@ -592,6 +620,14 @@ if (url.pass eq variables.schedulePassword) {
 
                     objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='delete');
 
+                    if (structKeyExists(application, "objSubscriptionHooks")) {
+                        application.objSubscriptionHooks.afterBookingAccessEnded(
+                            customerID = qRenewBookings.intCustomerID,
+                            moduleID = qModule.intModuleID,
+                            reason = "paid access expired"
+                        );
+                    }
+
                 }
 
 
@@ -609,6 +645,14 @@ if (url.pass eq variables.schedulePassword) {
                     objModules.distributeScheduler(moduleID=qRenewBookings.intModuleID, customerID=qRenewBookings.intCustomerID, status='expired');
                 }
 
+                if (qRenewBookings.intModuleID gt 0 and qRenewBookings.strStatus eq "test" and structKeyExists(application, "objSubscriptionHooks")) {
+                    application.objSubscriptionHooks.afterBookingAccessEnded(
+                        customerID = qRenewBookings.intCustomerID,
+                        moduleID = qRenewBookings.intModuleID,
+                        reason = "trial expired without purchase"
+                    );
+                }
+
                 // Send expired email to customer
                 local.moduleID = len(qRenewBookings.intModuleID) ? qRenewBookings.intModuleID : 0;
                 local.planID = len(qRenewBookings.intPlanID) ? qRenewBookings.intPlanID : 0;
@@ -620,6 +664,10 @@ if (url.pass eq variables.schedulePassword) {
 
         }
 
+
+        } finally {
+            accountLifecycle.finishOperation(accountOperation);
+        }
     }
 
 

@@ -22,7 +22,7 @@
 -- create-plans.sql and create-modules.sql (it books their plans 1-4 and modules 1-3).
 -- Dates are relative to the day of the import, so the bookings are always current.
 -- Running it again replaces customers 1001-1099 and everything that belongs to them
--- (demo users explicitly; bookings, invoices, payments and notifications via foreign keys).
+-- (demo users and archived invoices explicitly; bookings, payments and notifications via foreign keys).
 --
 -- Import (see readme.md): cat ./config/db/dev/create-customers.sql | docker exec -i <mysql container> mysql -u <user> -p<password> <database>
 
@@ -35,6 +35,11 @@ SET @password = '$argon2id$v=19$m=19456,t=2,p=1$4cmXB3REA9udGAnL0X4Dsw$7nb6tEL7b
 
 -- Identities survive customer deletion; explicitly replace only the reserved demo identities.
 DELETE FROM users WHERE intUserID BETWEEN 1001 AND 1099 AND strEmail LIKE '%.example';
+
+-- Demo data only: explicitly remove retained invoices before replacing the reserved accounts.
+DELETE d FROM invoice_documents d INNER JOIN invoices i ON i.intInvoiceID = d.intInvoiceID
+WHERE i.intCustomerID BETWEEN 1001 AND 1099 OR d.intOriginalCustomerID BETWEEN 1001 AND 1099;
+DELETE FROM invoices WHERE intCustomerID BETWEEN 1001 AND 1099;
 
 -- Sub-tenants first, then their parents and the rest
 DELETE FROM customers WHERE intCustomerID BETWEEN 1001 AND 1099 AND intCustParentID > 0;
@@ -184,3 +189,6 @@ INSERT INTO notifications (intCustomerID, intUserID, dtmCreated, strTitleVar, st
 (1003, 1006, DATE_SUB(@now, INTERVAL 1 DAY), 'formInvoiceInfo', 'errSystemStoppedFixProblem', '/account-settings/invoices', 'btnActivate', NULL),
 (1005, 1008, @now, 'titStatus', 'errSystemStoppedFixProblem', '/account-settings/plans', 'btnActivate', NULL),
 (1009, 1013, DATE_SUB(@now, INTERVAL 3 DAY), 'txtNetwork', 'errSystemStoppedFixProblem', '/account-settings/tenants', 'btnActivate', NULL);
+
+-- Demo non-drafts represent invoices issued before snapshots were captured.
+UPDATE invoices SET blnDocumentIssued = 1 WHERE intCustomerID BETWEEN 1001 AND 1099 AND intPaymentStatusID <> 1;

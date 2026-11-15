@@ -107,23 +107,8 @@ component displayname="cancel" output="false" {
     // Withdraw module (only possible via SysAdmin)
     public boolean function delete(required numeric bookingID, required numeric moduleID, required numeric customerID) {
 
-        // First, set intBookingID in invoices to 0
-        queryExecute(
-            options = {datasource = application.datasource},
-            params = {
-                bookingID: {type: "numeric", value: arguments.bookingID},
-                customerID: {type: "numeric", value: arguments.customerID}
-            },
-            sql = "
-                UPDATE invoices
-                SET intBookingID = 0
-                WHERE intBookingID = :bookingID
-                AND intCustomerID = :customerID
-            "
-        )
-
-        // Then delete the booking
-        queryExecute(
+        // Only an existing booking can trigger module-specific data deletion.
+        local.qBooking = queryExecute(
             options = {datasource = application.datasource},
             params = {
                 bookingID: {type: "numeric", value: arguments.bookingID},
@@ -131,15 +116,63 @@ component displayname="cancel" output="false" {
                 customerID: {type: "numeric", value: arguments.customerID}
             },
             sql = "
-                DELETE FROM bookings
-                WHERE intCustomerID = :customerID
+                SELECT intBookingID
+                FROM bookings
+                WHERE intBookingID = :bookingID
                 AND intModuleID = :moduleID
+                AND intCustomerID = :customerID
             "
-        )
+        );
+        if (!local.qBooking.recordCount) {
+            return false;
+        }
 
-        // Update scheduletasks
-        local.objModule = new backend.core.com.modules();
-        local.objModule.distributeScheduler(moduleID=arguments.moduleID, customerID=arguments.customerID, status='canceled');
+        transaction {
+
+            // First, set intBookingID in invoices to 0
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    bookingID: {type: "numeric", value: arguments.bookingID},
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    UPDATE invoices
+                    SET intBookingID = 0
+                    WHERE intBookingID = :bookingID
+                    AND intCustomerID = :customerID
+                "
+            )
+
+            // Then delete the booking
+            queryExecute(
+                options = {datasource = application.datasource},
+                params = {
+                    bookingID: {type: "numeric", value: arguments.bookingID},
+                    moduleID: {type: "numeric", value: arguments.moduleID},
+                    customerID: {type: "numeric", value: arguments.customerID}
+                },
+                sql = "
+                    DELETE FROM bookings
+                    WHERE intCustomerID = :customerID
+                    AND intModuleID = :moduleID
+                "
+            )
+
+            // Let project modules delete customer data before the withdrawal commits.
+            if (structKeyExists(application, "objSubscriptionHooks")) {
+                application.objSubscriptionHooks.afterBookingAccessEnded(
+                    customerID = arguments.customerID,
+                    moduleID = arguments.moduleID,
+                    reason = "module withdrawn by sysadmin"
+                );
+            }
+
+            // Keep scheduler jobs in sync with the withdrawn booking.
+            local.objModule = new backend.core.com.modules();
+            local.objModule.distributeScheduler(moduleID=arguments.moduleID, customerID=arguments.customerID, status='canceled');
+
+        }
 
         return true;
 

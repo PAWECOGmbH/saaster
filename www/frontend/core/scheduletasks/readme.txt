@@ -4,6 +4,11 @@ Set up the following scheduled tasks:
 For subscription renewals; the following file EVERY 2 HOURS:
 https://yourdomain.com/frontend/core/scheduletasks/subscriptions.cfm?pass=xxxx
 
+The subscription task also checks up to 100 default Payrexx cards per run. It refreshes
+card expiry data through Payrexx at most once per day per card and sends reminders about one month
+and one week before expiry to customers with recurring bookings. Existing reminder
+records prevent repeats for the same card, expiry month and reminder stage.
+
 For the dynamic tasks (e.g. modules) EVERY 2 MINUTES, one per worker:
 https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=01&pass=xxxx
 https://yourdomain.com/frontend/core/scheduletasks/tasks.cfm?task=02&pass=xxxx
@@ -64,17 +69,12 @@ How a worker run (tasks.cfm?task=NN) protects itself:
   Those tasks hold a worker for too long and must be fixed in the module.
 
 
-Update from the shard tables (scheduler_01 .. scheduler_20)
+Upgrading from the shard tables
 
-Up to version V22 the jobs were spread over 20 tables, one per Lucee task. Migration V23
-creates "scheduler_jobs" and copies all entries over (duplicates are merged). After the
-update:
-
-1. Run the database migrations (Flyway) before the new code receives requests.
-2. Reinitialize the application once (?reinit=1 as sysadmin).
-3. The Lucee tasks stay as they are - the URLs did not change.
-4. The next run of subscriptions.cfm reconciles all customers. Run it once by hand if you
-   do not want to wait: subscriptions.cfm?pass=xxxx
-
-The old tables scheduler_01 .. scheduler_20 are no longer used. They stay in the database
-for this release in case you need to look something up, and are removed by a later migration.
+Migration V23 copies jobs from scheduler_01 .. scheduler_20 to scheduler_jobs; V33 removes
+those old tables. When upgrading directly from a version before V23, stop requests to
+the old application and its Lucee workers before applying the migrations. Deploy the code
+that uses scheduler_jobs before resuming requests and workers.
+Reinitialize the application once (?reinit=1 as sysadmin). The Lucee task URLs stay the
+same. The next run of subscriptions.cfm reconciles all customers; to run it immediately,
+call subscriptions.cfm?pass=xxxx.

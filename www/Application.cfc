@@ -76,6 +76,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objSysadmin = new backend.core.com.sysadmin();
         application.objMeta = new backend.core.com.meta();
         application.objModules = new backend.core.com.modules();
+        application.objModuleBlocks = new backend.core.com.module_blocks();
         application.objCoreUtil = new frontend.core.com.coreutility();
 
         // Save all choosable languages into a list
@@ -267,19 +268,40 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
 
         enforceAccess(application.objRequestAccess.checkPage(thiscontent, cgi.request_method, url));
-        enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
-
-        // More global variables (with customer session).
-        if (structKeyExists(session, "customer_id")) {
-            getTime = new backend.core.com.time(session.customer_id);
-            getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
+        // Payrexx authenticates webhook POSTs with its URL secret, not a browser CSRF token.
+        local.authenticatedPayrexxWebhook = thiscontent.thisPath eq "frontend/core/handler/payrexx_webhook.cfm"
+            and cgi.request_method eq "POST"
+            and len(trim(variables.payrexxWebhookPassword)) gt 0
+            and structKeyExists(url, "pass")
+            and url.pass eq variables.payrexxWebhookPassword;
+        if (not local.authenticatedPayrexxWebhook) {
+            enforceAccess(application.objRequestAccess.checkCsrf(thiscontent, cgi.request_method, url, local.headers));
         }
 
-        // Custom code
-        ownRequest();
+        local.operation = "";
+        if (left(thiscontent.thisPath, 8) eq "backend/" and structKeyExists(session, "customer_id")) {
+            local.operation = new backend.core.com.account_lifecycle().beginOperation(session.customer_id, "request");
+            if (!len(local.operation)) {
+                enforceAccess({access:false, reason:"accountDeletion", statusCode:403, statusText:"Forbidden", messageKey:"msgAccountDeletionPending"});
+            }
+            request.accountOperation = local.operation;
+        }
+        try {
+            // More global variables (with customer session).
+            if (structKeyExists(session, "customer_id")) {
+                getTime = new backend.core.com.time(session.customer_id);
+                getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
+            }
 
-        include template="\#ARGUMENTS.TargetPage#";
-        return true;
+            // Custom code
+            ownRequest();
+
+            include template="\#ARGUMENTS.TargetPage#";
+            return true;
+        } finally {
+            if (len(local.operation)) new backend.core.com.account_lifecycle().finishOperation(local.operation);
+            structDelete(request, "accountOperation");
+        }
 
     }
 

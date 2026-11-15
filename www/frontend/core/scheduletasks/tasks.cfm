@@ -52,6 +52,8 @@ if (url.pass eq variables.schedulePassword) {
         runToken = workerClaim.runToken;
         workerStartTickCount = getTickCount();
 
+        try {
+
         if (workerClaim.takenOver) {
 
             // The previous run held the slot longer than the lease. It was either killed or is still
@@ -72,6 +74,19 @@ if (url.pass eq variables.schedulePassword) {
                 break;
             }
 
+            // A block may have been added after the worker claimed this job.
+            if (application.objModuleBlocks.isBlocked(job.customerID, job.moduleID)) {
+                objScheduler.finishJob(job, false, 0);
+                continue;
+            }
+
+            lifecycle = new backend.core.com.account_lifecycle();
+            operationToken = lifecycle.beginOperation(job.customerID, "job");
+            if (!len(operationToken)) {
+                objScheduler.finishJob(job, false, 0);
+                continue;
+            }
+            try {
             // Variables may be needed in the included file
             customerID = job.customerID;
             moduleID = job.moduleID;
@@ -105,9 +120,13 @@ if (url.pass eq variables.schedulePassword) {
                     // Make log
                     objLogs.logWrite("scheduletask", "error", "Something went wrong in schedule task [File: #job.path#, CustomerID: #job.customerID#, Error: #e.message#]", false);
 
-                    // Send email to the developer with the error dump
-                    cfmail(subject="Error in included scheduletask file", to="#application.errorMail#", from="#application.fromEmail#" type="html" ) {
-                        dump(e);
+                    // Mail failure must not leave the job and worker locked.
+                    try {
+                        cfmail(subject="Error in included scheduletask file", to="#application.errorMail#", from="#application.fromEmail#" type="html" ) {
+                            dump(e);
+                        }
+                    } catch (any mailError) {
+                        objLogs.logWrite("scheduletask", "warning", "Could not send scheduletask error email: #mailError.message#", false);
                     }
 
                 }
@@ -137,17 +156,20 @@ if (url.pass eq variables.schedulePassword) {
 
             }
 
+            } finally {
+                lifecycle.finishOperation(operationToken);
+            }
+
         }
 
-        // Release the worker slot, only if this run still owns the lease
-        released = application.objSysadmin.releaseScheduleControl(url.task, runToken);
+        } finally {
+            // Release the worker slot, only if this run still owns the lease.
+            released = application.objSysadmin.releaseScheduleControl(url.task, runToken);
 
-        if (!released) {
-
-            // Make log
-            workerElapsedSeconds = round((getTickCount() - workerStartTickCount) / 1000);
-            objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# finished after #workerElapsedSeconds# s but had lost its lease to a newer run. The slot has not been released by this run.", false);
-
+            if (!released) {
+                workerElapsedSeconds = round((getTickCount() - workerStartTickCount) / 1000);
+                objLogs.logWrite("scheduletask", "warning", "The scheduler #url.task# finished after #workerElapsedSeconds# s but had lost its lease to a newer run. The slot has not been released by this run.", false);
+            }
         }
 
     } else {

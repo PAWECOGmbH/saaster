@@ -169,11 +169,10 @@
                                                     #getTrans('titMandanten')#
                                                 </span>
                                             </a>
-                                            <div class="dropdown-menu">
+                                            <div class="dropdown-menu tenant-switcher-menu">
                                                 <cfloop query="qTenants">
                                                     <cfif qTenants.blnActive eq 1>
-                                                        <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#" class="dropdown-item">
-                        <cfif session.membership_access ?: false><span class="text-muted small me-2">#encodeForHTML(qTenants.organizationName)# ·</span></cfif>
+                                                        <a href="#application.mainURL#/global?switch=#qTenants.intCustomerID#&#csrfParam()#" class="dropdown-item"<cfif qTenants.intCustomerID eq session.customer_id> aria-current="true"</cfif>>
                                                             <cfif len(trim(qTenants.strCompanyName))>
                                                                 <cfif len(trim(qTenants.strLogo))>
                                                                     <img src="#application.mainURL#/userdata/images/logos/#encodeForHTML(qTenants.strLogo)#" class="avatar avatar-sm me-3 align-self-center" alt="#encodeForHTML(qTenants.strCompanyName)#">
@@ -200,6 +199,9 @@
                                                                     <div class="avatar avatar-sm me-3 align-self-center">#encodeForHTML(left(qTenants.strContactPerson,2))#</div>
                                                                     <span class="nav-link-title">#encodeForHTML(qTenants.strContactPerson)#</span>
                                                                 </cfif>
+                                                            </cfif>
+                                                            <cfif qTenants.intCustomerID eq session.customer_id>
+                                                                <i class="ti ti-check text-primary ms-auto ps-3" aria-hidden="true"></i>
                                                             </cfif>
                                                         </a>
                                                     </cfif>

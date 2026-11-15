@@ -1,4 +1,26 @@
 <cfscript>
+    if (structKeyExists(form, "delete_account")) {
+        if (cgi.request_method neq "POST") { header statuscode=405 statustext="Method Not Allowed"; abort; }
+        if (!(session.sysadmin ?: false) or (session.supportLogin ?: false)) {
+            header statuscode=403 statustext="Forbidden"; abort;
+        }
+        if (!isValid("integer", form.delete_account) or val(form.delete_account) lte 0 or (form.confirm_delete ?: "") neq "1") {
+            header statuscode=400 statustext="Bad Request"; abort;
+        }
+        deletionTarget = val(form.delete_account);
+        deletionResult = new backend.core.com.account_lifecycle().submitDeletion(session.user_id, deletionTarget, form.password ?: "");
+        deletionProgressMessage = deletionResult.reason eq "cleanup"
+            ? "Account cleanup failed. Access and subscriptions remain stopped. Check the system log, resolve the cause, then retry the existing deletion."
+            : "Deletion is pending. Access and subscriptions are stopped; cleanup is not complete. Review the status below and retry.";
+        deletionMessage = deletionResult.success ? "Account deleted. Issued invoices and payments have been retained."
+            : (deletionResult.accepted ? deletionProgressMessage
+            : (deletionResult.reason eq "tenants" ? "Delete all tenants individually before deleting this account. Inactive tenants and pending deletions also count."
+            : (deletionResult.reason eq "identity" ? "Your password could not be verified. Please try again later if there have been repeated failed attempts."
+            : "This account cannot be deleted by the current user. Platform operator accounts are protected.")));
+        getAlert(deletionMessage, deletionResult.success ? "success" : (deletionResult.reason eq "cleanup" ? "danger" : "warning"));
+        location url=application.mainURL & (deletionResult.success ? "/sysadmin/customers" : "/sysadmin/customers/details/" & deletionTarget) addtoken=false;
+    }
+
 
     // Company edit
     if (structKeyExists(form, "edit_company_btn")) {
