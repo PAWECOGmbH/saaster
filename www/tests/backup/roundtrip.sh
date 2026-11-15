@@ -59,6 +59,7 @@ cleanup() {
     exit "$result"
 }
 trap cleanup EXIT
+bash www/tests/bin/check_borg_metadata.sh
 cp config/example.base.conf config/nginx/conf.d/base.conf
 printf '\n# Borg recovery fixture configuration\n' >> config/nginx/conf.d/base.conf
 printf '[mysqld]\nmax_connections=83\n' > config/mysql/tuning.cnf
@@ -167,6 +168,24 @@ grep -Fxq unrelated-project-keep <<< "$archives"
 echo 'PASS: retention removes complete sets and preserves unrelated archives.'
 latest="$(grep "^$prefix-complete-" <<< "$archives" | sort | tail -n1)"
 timestamp="${latest#"$prefix-complete-"}"
+# Recreate this fixture's manifests with the exact Docker 29 warning that older
+# backup scripts saved. The final restore must recover that historical format.
+for component in config complete; do
+    legacy_dir="/test-state/legacy-$component"
+    mkdir "$legacy_dir"
+    (cd "$legacy_dir"; borg extract "$BORG_REPO::$prefix-$component-$timestamp")
+    python3 - "$legacy_dir/manifest.json" <<'PY'
+import json,pathlib,re,sys
+path=pathlib.Path(sys.argv[1])
+manifest=json.loads(path.read_text())
+assert re.fullmatch(r"sha256:[a-f0-9]{64}", manifest["imageId"])
+manifest["imageId"]="Flag --pause has been deprecated, and enabled by default. Use --no-pause to disable pausing during commit.\n"+manifest["imageId"]
+path.write_text(json.dumps(manifest,indent=2)+"\n")
+PY
+    borg delete "$BORG_REPO::$prefix-$component-$timestamp"
+    (cd "$legacy_dir"; borg create "$BORG_REPO::$prefix-$component-$timestamp" .)
+done
+echo 'PASS: new manifests contain canonical image IDs; historical Docker 29 metadata prepared.'
 borg create "$BORG_REPO::$prefix-db-20991231T235959Z" /test-state/empty
 borg create "$BORG_REPO::$prefix-complete-20991231T235959Z" /test-state/empty
 expect_failure 'No complete backup set' bash config/backup/restore_borg.sh --all --timestamp 20991231T235959Z --force
@@ -180,6 +199,18 @@ echo 'PASS: an incomplete newer set is rejected.'
 compose down --volumes
 bash config/backup/restore_borg.sh --config --timestamp "$timestamp"
 bash config/backup/restore_borg.sh --lucee-image --timestamp "$timestamp" --force
+mkdir -p /test-state/wrong-image-bin
+cat > /test-state/wrong-image-bin/docker <<'SH'
+#!/usr/bin/env bash
+if [[ "$1" == image && "$2" == inspect && "$3" == --format && "$4" == '{{.Id}}' ]]; then
+    printf 'sha256:%064d\n' 0
+    exit 0
+fi
+exec "$REAL_DOCKER" "$@"
+SH
+chmod 700 /test-state/wrong-image-bin/docker
+expect_failure 'Loaded image identity differs from the manifest' env REAL_DOCKER="$(command -v docker)" PATH="/test-state/wrong-image-bin:$PATH" bash config/backup/restore_borg.sh --lucee-image --timestamp "$timestamp" --force
+echo 'PASS: historical metadata still rejects a different loaded image.'
 [[ -n "$(docker image inspect --format '{{.Id}}' "saaster-borg-snapshot/$project:$timestamp")" ]]
 echo 'PASS: configuration and runtime image can be recovered without existing containers.'
 printf 'damaged application configuration\n' > www/config.cfm

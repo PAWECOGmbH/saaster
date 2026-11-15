@@ -89,8 +89,7 @@ MANIFEST="$WORK_DIR/complete/manifest.json"
 [[ "$(manifest_value "$MANIFEST" timestamp)" == "$TIMESTAMP" ]] || die "Backup timestamp mismatch"
 SNAPSHOT_IMAGE="$(manifest_value "$MANIFEST" image)"
 [[ "$SNAPSHOT_IMAGE" == "saaster-borg-snapshot/$COMPOSE_PROJECT_NAME:$TIMESTAMP" ]] || die "Invalid snapshot image reference"
-SNAPSHOT_ID="$(manifest_value "$MANIFEST" imageId)"
-[[ "$SNAPSHOT_ID" =~ ^sha256:[a-f0-9]{64}$ ]] || die "Invalid snapshot image identity"
+SNAPSHOT_ID="$(snapshot_image_id "$(manifest_value "$MANIFEST" imageId)")"
 load_snapshot_image() {
     require_command docker
     borg_command extract --stdout "$BORG_REPO::$ARCHIVE_PREFIX-lucee-$TIMESTAMP" lucee-image.tar | docker image load

@@ -66,6 +66,8 @@ The second command must succeed without a password or confirmation prompt. With 
 
 Commands below run from the project root and read its `.env`. `ENV_FILE=/absolute/path` selects another trusted environment file. The standard server layout uses `compose.yml`; `BORG_COMPOSE_FILE` can select a project-relative alternative. Initialize a new repository only once:
 
+`backup.sh` forwards to `backup_borg.sh`. If you are already in `config/backup/`, the equivalent initialization command is `sudo bash backup_borg.sh --init`.
+
 ```bash
 cd /srv/saaster
 sudo chmod 600 .env
@@ -174,6 +176,12 @@ Ensure the server's logrotate timer or daily cron task is enabled. Each backup r
 
 ### Automated isolated test
 
+Check snapshot metadata compatibility without Docker or credentials:
+
+```bash
+bash www/tests/bin/check_borg_metadata.sh
+```
+
 The manual integration test creates its own random credentials, test database, encrypted local Borg repository, containers and volumes. It restores after deleting the fixture's data volumes and checks application login, database objects, userdata, code/configuration and runtime settings:
 
 ```bash
@@ -181,3 +189,9 @@ bash www/tests/bin/check_borg_backup.sh
 ```
 
 It requires a local Linux Docker engine (Docker Desktop works), Git, Bash and tar. It does not load the checkout's local credentials, use staging/production, or run automatically on development commits. See the [test workspace guide](../../www/tests/README.md).
+
+## Docker 29 snapshot metadata
+
+Older backup scripts stored a Docker 29 deprecation warning together with the image ID, causing restore to stop with `Invalid snapshot image identity`. Updated backup scripts inspect the snapshot image directly. Updated restore scripts recognize that specific historical warning and still require the loaded image ID to match the recorded SHA-256 identity. Affected backups can be restored without editing the repository archives.
+
+A full restore also reinstates the backed-up scripts. If that backup predates this fix, reapply the updated backup/restore scripts afterward.
