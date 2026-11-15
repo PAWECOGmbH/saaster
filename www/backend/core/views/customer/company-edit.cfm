@@ -264,7 +264,7 @@
                     <div class="card-footer">
                         <div class="button-group">
                             <button type="submit" id="submit_button" class="btn btn-primary">#getTrans('btnSave')#</button>
-                            <cfif session.superadmin and not session.sysadmin and not (session.membership_access ?: false)>
+                            <cfif new backend.core.com.account_lifecycle().canDelete(session.user_id, session.customer_id) and not session.sysadmin>
                                 <a href="##" data-bs-toggle="modal" data-bs-target="##delete_account" class="btn btn-outline-danger float-end">#getTrans('titDeleteAccount')#</a>
                             </cfif>
                         </div>
@@ -281,44 +281,9 @@
 
 
 
-<!--- Modal for cancelation --->
-<cfif session.superadmin and not (session.membership_access ?: false)>
-<cfoutput>
-<form action="#application.mainURL#/cancel" method="post">#csrfField()#
-<input type="hidden" name="delete" value="#session.customer_id#">
-<div id="delete_account" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
-    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="ps-3 pe-3">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="modal-status bg-danger"></div>
-                <div class="modal-body text-center">
-                    <i class="ti ti-alert-triangle display-1 text-danger"></i>
-                    <h3 class="mt-3">#getTrans('titDeleteAccount')#</h3>
-                    <p>#getTrans('txtDeleteAccount')#</p>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">#getTrans('formEmailAddress')#</label>
-                        <input type="email" name="email" class="form-control" autocomplete="off" required>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">#getTrans('formPassword')#</label>
-                        <div class="input-group input-group-flat">
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer ps-3 pe-3">
-                    <a href="##" class="btn bg-green" data-bs-dismiss="modal">#getTrans('btnNoCancel')#</a>
-                    <button type="submit" class="btn bg-danger ms-auto">
-                        #getTrans('btnDeleteDefinitely')#
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</form>
-</cfoutput>
+<cfif new backend.core.com.account_lifecycle().canDelete(session.user_id, session.customer_id) and not session.sysadmin>
+    <cfset deletionCustomerID = session.customer_id>
+    <cfset deletionCustomerName = len(trim(custCompany)) ? custCompany : custContactPerson>
+    <cfset deletionModalID = "delete_account">
+    <cfinclude template="account_delete_modal.cfm">
 </cfif>

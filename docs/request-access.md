@@ -74,8 +74,9 @@ Non-free bookings with missing dates do not grant access. This agrees with the
 scheduler's eligibility rule. A free catalog plan alone grants nothing without a
 booking. Changes to bookings or included modules take effect on the next request.
 
-The existing platform-admin exception is preserved; support sessions do not gain
-it. Role permissions and permitted HTTP methods are still checked independently.
+The existing platform-admin product exception is preserved; support sessions do not
+gain it. An explicit [customer module block](module-blocks.md) takes precedence over
+that exception. Role permissions and permitted HTTP methods are still checked independently.
 `getModuleStatus()` retains its direct-booking UI/billing contract; callers needing
 route-level entitlement should use `objRequestAccess.moduleAccess()` instead.
 

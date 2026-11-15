@@ -151,10 +151,7 @@ if (isStruct(jsonData) and structKeyExists(jsonData, "transaction")) {
 
                 try {
 
-                    queryExecute(
-
-                        options = {datasource = application.datasource},
-                        params = {
+                    webhookPayment = {
                             customerID: {type: "numeric", value: customerID},
                             transID: {type: "numeric", value: internTransID},
                             gatewayID: {type: "numeric", value: gatewayID},
@@ -168,59 +165,16 @@ if (isStruct(jsonData) and structKeyExists(jsonData, "transaction")) {
                             paymentBrand: {type: "nvarchar", value: paymentBrand},
                             cardNumber: {type: "varchar", value: cardNumber},
                             default: {type: "boolean", value: default}
-                        },
-                        sql = "
-                            INSERT INTO payrexx
-                            (
-                                intCustomerID,
-                                dtmTimeUTC,
-                                intGatewayID,
-                                intTransactionID,
-                                strStatus,
-                                strLanguage,
-                                strPSP,
-                                intPSPID,
-                                decAmount,
-                                decPayrexxFee,
-                                strPaymentBrand,
-                                strCardNumber,
-                                blnDefault
-                            )
-                            VALUES (
-                                :customerID,
-                                :dateTime,
-                                :gatewayID,
-                                :transID,
-                                :status,
-                                :language,
-                                :serviceProvider,
-                                :serviceProviderID,
-                                :paymentAmount,
-                                :payrexxFee,
-                                :paymentBrand,
-                                :cardNumber,
-                                :default
-                            )
-                            ON DUPLICATE KEY UPDATE
-                                dtmTimeUTC = VALUES(dtmTimeUTC),
-                                intGatewayID = VALUES(intGatewayID),
-                                strStatus = VALUES(strStatus),
-                                strLanguage = VALUES(strLanguage),
-                                strPSP = VALUES(strPSP),
-                                intPSPID = VALUES(intPSPID),
-                                decAmount = VALUES(decAmount),
-                                decPayrexxFee = VALUES(decPayrexxFee),
-                                strPaymentBrand = VALUES(strPaymentBrand),
-                                strCardNumber = VALUES(strCardNumber)
-
-                        "
-                    )
+                        };
+                    webhookAccepted = new backend.core.com.payrexx_checkouts().receive(webhookData, webhookPayment);
+                    if (!webhookAccepted) { header statuscode=503 statustext="Service Unavailable"; }
 
                     logWrite("payrexx", "info", "Webhook data successfully saved [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#]");
 
 
                 } catch (any e) {
 
+                    header statuscode=503 statustext="Service Unavailable";
                     request.payrexxWebhookError = "The Payrexx webhook could not be stored: " & e.message;
                     logWrite("payrexx", "error", "Could not insert the webhook data into the payrexx table. [CustomerID: #customerID#, TransactionID: #internTransID#, Payment: #paymentAmount#, Error: #e.message#]", true);
 

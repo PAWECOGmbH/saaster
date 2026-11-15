@@ -28,6 +28,20 @@ component extends="tests.support.integration_spec" {
                 if (fileExists(variables.path)) { fileDelete(variables.path); }
                 queryExecute(options={datasource:application.datasource}, sql="DELETE FROM custom_mappings WHERE strMapping = 'saaster-extension-test'");
             });
+            it("tracks admitted web work and releases it after rendering, redirect and failure", () => {
+                fileWrite(variables.path, '<cfquery name="operations" datasource="##application.datasource##">SELECT COUNT(*) AS cnt FROM account_operations WHERE strKind = ''request'' AND intCustomerID = <cfqueryparam value="##session.customer_id##" cfsqltype="cf_sql_integer"></cfquery><cfoutput>active requests: ##operations.cnt##</cfoutput>', "utf-8");
+                cfhttp(url="http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=saaster-extension-test&direct=1&userID=#variables.reader.userID#", result="local.response", redirect=false);
+                expect(local.response.fileContent).toInclude("active requests: 1");
+                expect(requestOperations()).toBe(0);
+                fileWrite(variables.path, '<cflocation url="/tests/healthcheck.cfm" addtoken="false">', "utf-8");
+                cfhttp(url="http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=saaster-extension-test&direct=1&userID=#variables.reader.userID#", result="local.response", redirect=false);
+                expect(local.response.statusCode).toInclude("302");
+                expect(requestOperations()).toBe(0);
+                fileWrite(variables.path, '<cfthrow message="Expected lifecycle test error">', "utf-8");
+                cfhttp(url="http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=saaster-extension-test&direct=1&userID=#variables.reader.userID#", result="local.response", redirect=false);
+                expect(local.response.statusCode).toInclude("500");
+                expect(requestOperations()).toBe(0);
+            });
             it("checks permissions, methods and tokens for a plan-included module even without path-info", () => {
                 bookIncludedModule();
                 local.url = "http://127.0.0.1/tests/support/organization_flow_probe.cfm?route=dashboard&direct=1";
@@ -95,6 +109,22 @@ component extends="tests.support.integration_spec" {
                     expect(local.response.statusCode).toInclude("200");
                     expect(local.response.fileContent).toInclude("extension request reached");
                 }
+            });
+
+            it("blocks canonical and direct module access without changing role grants", () => {
+                bookIncludedModule();
+                local.mapping = queryExecute(options={datasource:application.datasource},sql="SELECT intModuleID FROM custom_mappings WHERE strMapping = 'saaster-extension-test'");
+                local.admin = variables.fixtures.createUser(customerID=variables.organization,sysAdmin=true);
+                loginAs(local.admin);
+                application.objModuleBlocks.setBlocked(local.admin.userID,variables.organization,local.mapping.intModuleID,true);
+                loop array=[false,true] item="local.direct" {
+                    local.response = fetchExtension(local.direct);
+                    expect(local.response.statusCode).toInclude("403");
+                    expect(local.response.fileContent).notToInclude("extension request reached");
+                }
+                application.objModuleBlocks.setBlocked(local.admin.userID,variables.organization,local.mapping.intModuleID,false);
+                expect(fetchExtension(true).statusCode).toInclude("200");
+                expect(fetchExtension(false).statusCode).toInclude("200");
             });
 
             it("does not let an explicit extension grant bypass platform-only mapping flags", () => {
@@ -176,5 +206,9 @@ component extends="tests.support.integration_spec" {
             sql="UPDATE custom_mappings SET intModuleID = :id WHERE strMapping = 'saaster-extension-test'");
         return variables.fixtures.createBooking(customerID=variables.organization, planID=local.plan, status="active",
             startDate=dateFormat(now(), "yyyy-mm-dd"), endDate=dateFormat(dateAdd("d", 1, now()), "yyyy-mm-dd"));
+    }
+    private numeric function requestOperations() {
+        return queryExecute(options={datasource:application.datasource}, params={id:{type:"integer",value:variables.organization}},
+            sql="SELECT COUNT(*) AS cnt FROM account_operations WHERE intCustomerID = :id AND strKind = 'request'").cnt;
     }
 }

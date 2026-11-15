@@ -32,7 +32,8 @@ Saaster is a modular CFML SaaS framework running on Lucee 7, NGINX, and MySQL 8.
 
 ## User-facing language
 
-- Use formal German address consistently in user-facing UI text, notifications, emails, and translations: `Sie`, `Ihnen`, and `Ihr/Ihre`. This applies to both frontend themes and backend screens.
+- Keep the Sysadmin interface entirely in English, including buttons, modals, status labels, and notifications, regardless of the selected user language. Customer-facing screens remain translated.
+- Use formal German address consistently in user-facing UI text, notifications, emails, and translations: `Sie`, `Ihnen`, and `Ihr/Ihre`. This applies to German text in both frontend themes and customer-facing backend screens.
 - Use neutral infinitives for buttons and labels (for example, `Rolle speichern`). In instructions, use the formal imperative (for example, `Prüfen Sie die Vorschau`). Do not introduce `du`, `dir`, `dich`, `dein`, or informal imperatives.
 - Follow the same convention when adding or changing translation seeds in SQL migrations. Preserve customized translations when correcting existing default wording.
 

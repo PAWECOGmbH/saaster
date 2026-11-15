@@ -2,17 +2,31 @@
 
 	cfmailparam( name="charset", value="utf-8" );
 	cfmailparam( name="MIME-Version", value=1.0 );
-	cfmailparam( name="Content-Type", value="text/html; charset=utf-8" );
 
 	param name="variables.mailTitle" default="Title";
 	param name="variables.mailContent" default="Content";
 	param name="variables.mailType" default="html";
+    variables.mailSignoffLanguage = structKeyExists(variables, "mailLanguage") ? variables.mailLanguage : "";
 
   	// Get customer data
   	customerData = new backend.core.com.sysadmin().getSysAdminData();
+    variables.mailPlainContent = trim(variables.mailTitle) & chr(10) & chr(10)
+        & new backend.core.com.mail_text().fromHtml(variables.mailContent)
+        & chr(10) & chr(10)
+        & application.objLanguage.getTrans("txtRegards", variables.mailSignoffLanguage) & chr(10)
+        & application.objLanguage.getTrans("txtYourTeam", variables.mailSignoffLanguage) & chr(10)
+        & application.appOwner & chr(10) & chr(10)
+        & application.objLanguage.getTrans("txtContact", variables.mailSignoffLanguage) & chr(10)
+        & customerData.companyName & chr(10)
+        & customerData.address & chr(10)
+        & customerData.zip & " " & customerData.city & chr(10)
+        & customerData.email;
+    if (len(trim(customerData.phone))) variables.mailPlainContent &= chr(10) & customerData.phone;
 
 </cfscript>
 
+<cfmailpart type="text/plain" charset="utf-8"><cfoutput>#variables.mailPlainContent#</cfoutput></cfmailpart>
+<cfmailpart type="text/html" charset="utf-8">
 <!DOCTYPE html>
 <html>
 
@@ -130,7 +144,7 @@
 							</tr>
 							<tr>
 								<td width="9"></td>
-								<td valign="top" bgcolor="#variables.mailContentbgColor#">
+								<td valign="top" bgcolor="###variables.mailContentbgColor#">
 									<table border="0" cellpadding="0" cellspacing="0" width="100%">
 										<tr>
 											<td style="padding: 10px 20px 10px 20px; background-color: ###variables.headerBGColor#; width: 100%; font-family: #variables.fontFamily#; color: ###variables.headerFontColor#; font-size: #variables.fontSizeTitle#px;">#variables.mailTitle#</td>
@@ -149,6 +163,11 @@
 											<tr>
 												<td style="padding: 0 0 20px 0; font-size: #variables.fontSizeText#px; font-family: #variables.fontFamily#; color: ###variables.fontColorText#; text-decoration: none;">
 													#variables.mailContent#
+                                    <p style="margin: 24px 0 0;">
+                                        #encodeForHTML(application.objLanguage.getTrans('txtRegards', variables.mailSignoffLanguage))#<br>
+                                        #encodeForHTML(application.objLanguage.getTrans('txtYourTeam', variables.mailSignoffLanguage))#<br>
+                                        #encodeForHTML(application.appOwner)#
+                                    </p>
 												</td>
 											</tr>
 										</table>
@@ -182,10 +201,11 @@
 		<table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
 				<td bgcolor="###variables.mailbodyBGColor#">
-					<div align="center" style="padding: 0 15px 0 15px;" bgcolor="#variables.headerBGColor#">
-						<table border="0" cellpadding="0" cellspacing="0" width="640" class="wrapper">
+					<div align="center" style="padding: 0 15px 0 15px;">
+						<table border="0" cellpadding="0" cellspacing="0" width="#variables.mailMaxWidthContent#" class="wrapper">
 							<tr>
-								<td align="center" bgcolor="#variables.headerBGColor#">
+                                <td width="9"></td>
+								<td align="center" bgcolor="###variables.headerBGColor#" style="background-color: ###variables.headerBGColor#;">
 									<table width="100%" cellspacing="0" cellpadding="0" border="0">
 										<tr>
 											<td valign="top" style="padding: 20px;" class="mobile-wrapper">
@@ -208,6 +228,7 @@
 										</tr>
 									</table>
 								</td>
+                                <td width="9"></td>
 							</tr>
 						</table>
 					</div>
@@ -216,3 +237,4 @@
 		</table>
 	</cfoutput>
 </body>
+</cfmailpart>

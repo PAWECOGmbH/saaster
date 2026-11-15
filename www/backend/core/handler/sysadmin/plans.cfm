@@ -1107,8 +1107,8 @@ if (structKeyExists(url, "booking")) {
 
                 DELETE FROM invoices
                 WHERE intBookingID = :bookingID
-                AND intPaymentStatusID != 3
-                AND intPaymentStatusID != 4;
+                AND intPaymentStatusID = 1
+                AND NOT EXISTS (SELECT 1 FROM invoice_documents d WHERE d.intInvoiceID = invoices.intInvoiceID);
 
             "
         )

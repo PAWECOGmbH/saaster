@@ -1,5 +1,30 @@
 <cfscript>
 
+if (structKeyExists(form, "module_access_action")) {
+    if (cgi.request_method neq "POST" or not application.objGlobal.csrfVerify()
+        or not (session.sysadmin ?: false) or (session.supportLogin ?: false)) {
+        header statuscode=403 statustext="Forbidden";
+        abort;
+    }
+    if (not listFind("block,unblock", form.module_access_action)
+        or not isValid("integer", form.customer_id ?: "") or val(form.customer_id) lte 0
+        or not isValid("integer", form.module_id ?: "") or val(form.module_id) lte 0) {
+        header statuscode=400 statustext="Bad Request";
+        abort;
+    }
+    try {
+        application.objModuleBlocks.setBlocked(session.user_id, form.customer_id, form.module_id, form.module_access_action eq "block");
+        getAlert("Module access has been updated.", "success");
+    } catch (Saaster.ModuleBlock.Denied e) {
+        header statuscode=403 statustext="Forbidden";
+        abort;
+    } catch (Saaster.ModuleBlock.Invalid e) {
+        getAlert("Module access could not be changed. Check the customer and module booking.", "danger");
+    }
+    location url=application.mainURL & "/sysadmin/customers/details/" & int(form.customer_id) & "?del_redirect##modules" addtoken=false;
+}
+
+
 
 if (structKeyExists(form, "new_module")) {
 
@@ -82,6 +107,13 @@ if (structKeyExists(form, "new_module")) {
 if (structKeyExists(form, "edit_module")) {
 
     if (isNumeric(form.edit_module)) {
+
+        // The folder must also be a valid component path for the deletion hook.
+        form.prefix = trim(form.prefix ?: "");
+        if (!reFind("^[a-zA-Z0-9_]{1,20}$", form.prefix)) {
+            getAlert('Use 1 to 20 letters, digits or underscores for the module prefix.', 'danger');
+            location url="#application.mainURL#/sysadmin/modules/edit/#form.edit_module#" addtoken="false";
+        }
 
         picSuccess = true;
 
@@ -260,7 +292,33 @@ writeOutput("<!--- This file will be included while users login --->");
             }
         }
 
-        if (picSuccess and createFolderSuccess and createLoginFileSuccess) {
+        // Generate only missing hooks; never overwrite module-specific cleanup.
+        createDeletionFileSuccess = true;
+        if (!fileExists(expandPath('/backend/modules/#form.prefix#/deletion.cfc'))) {
+            deletionContent = arrayToList([
+                'component output="false" {',
+                '    // Implement cleanup for this customer, including former subscribers.',
+                '    // Retried calls must be safe after partial success.',
+                '    // See docs/module-account-deletion.md in the Saaster repository.',
+                '    public struct function deleteCustomer(required numeric customerID) {',
+                '        throw(',
+                '            type="AccountDeletion.NotImplemented",',
+                '            message="Implement customer cleanup in this module deletion.cfc before deleting accounts."',
+                '        );',
+                '        // Return {success:true} only after all module-owned customer data is removed.',
+                '    }',
+                '}',
+                ''
+            ], chr(10));
+            try {
+                fileWrite(expandPath('/backend/modules/#form.prefix#/deletion.cfc'), deletionContent, 'utf-8');
+            } catch (any e) {
+                createDeletionFileSuccess = false;
+                getAlert('Could not create the module deletion hook: ' & e.message, 'danger');
+            }
+        }
+
+        if (picSuccess and createFolderSuccess and createFileSuccess and createLoginFileSuccess and createDeletionFileSuccess) {
             getAlert('Module saved.');
         }
 
@@ -932,9 +990,17 @@ if (structKeyExists(url, "booking")) {
     // Withdraw the module booking
     if (structKeyExists(url, "delete")) {
 
-        deleteModule = new backend.core.com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);
-
-        getAlert('The module was withdrawn from the customer.');
+        try {
+            deleteModule = new backend.core.com.cancel(customerID=url.c, thisID=url.m, what='module').delete(url.b, url.m, url.c);
+            if (deleteModule) {
+                getAlert('The module was withdrawn from the customer.');
+            } else {
+                getAlert('The module booking was not found. Nothing was withdrawn.', 'danger');
+            }
+        } catch (any e) {
+            application.objLog.logWrite("module-withdraw", "error", "Module withdrawal failed [CustomerID: #url.c#, ModuleID: #url.m#, BookingID: #url.b#]: #e.message#");
+            getAlert('The module could not be withdrawn. Please check the application log.', 'danger');
+        }
 
         location url="#application.mainURL#/sysadmin/customers/details/#url.c###modules" addtoken="false";
 

@@ -55,6 +55,21 @@ component extends="tests.support.integration_spec" {
                 expect(fileExists(photo.path)).toBeFalse();
             });
 
+            it("requires tenants to be deleted individually even when they have their own administrator", () => {
+                local.tenant = variables.fixtures.createCustomer(parentID=variables.customerID, active=false);
+                variables.fixtures.createUser(customerID=local.tenant, superAdmin=true);
+                local.logo = createFile("logos", "png");
+                setLogo(local.logo.name);
+                local.customer = new backend.core.com.customer();
+                local.result = local.customer.deleteAccount(variables.customerID);
+                expect(local.result.success).toBeFalse();
+                expect(local.result.message).toBe(application.objLanguage.getTrans("msgAccountHasTenants"));
+                expect(fileExists(local.logo.path)).toBeTrue();
+                expect(local.customer.getCustomerData(local.tenant).custParentID).toBe(variables.customerID);
+                expect(local.customer.deleteAccount(local.tenant).success).toBeTrue();
+                expect(local.customer.deleteAccount(variables.customerID).success).toBeTrue();
+            });
+
             it("deletes an account without logo or photos", () => {
                 var result = new backend.core.com.customer().deleteAccount(variables.customerID);
 

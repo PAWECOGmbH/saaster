@@ -51,6 +51,7 @@ switch (url.tab) {
         objBookModule = new backend.core.com.book("module");
         objSysadmin = new backend.core.com.sysadmin();
         arrModules = objModules.getAllModules();
+        blockedModuleIDs = valueList(application.objModuleBlocks.forCustomer(thisCustomerID).intModuleID);
         qCurrentModules = objSysadmin.getCurrentModules(thisCustomerID);
         currentModuleList = valueList(qCurrentModules.intModuleID);
         break;
@@ -104,7 +105,9 @@ switch (url.tab) {
                                             <cfif invoice.invoiceStatusID eq 1 or invoice.invoiceStatusID eq 2>
                                                 <a class="dropdown-item cursor-pointer" href="#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#invoice.invoiceID#&status=5&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#">Cancel invoice</a>
                                             </cfif>
+                                            <cfif !invoice.documentIssued>
                                             <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/invoices?#csrfParam()#&i=#invoice.invoiceID#&status=delete&redirect=#urlEncodedFormat('sysadmin/customers/details/#thisCustomerID#?del_redirect##invoices')#', 'Delete invoice', 'Do you want to delete this invoice permanently?', 'No, cancel!', 'Yes, delete!')">Delete invoice</a>
+                                            </cfif>
                                         </div>
                                     </div>
                                 </td>
@@ -300,14 +303,25 @@ switch (url.tab) {
     <cfloop array="#arrModules#" item="module">
         <cfif structKeyExists(module, "moduleID")>
             <cfset moduleStatus = objModules.getModuleStatus(thisCustomerID, module.moduleID)>
+            <cfset moduleAccessBlocked = listFind(blockedModuleIDs, module.moduleID) gt 0>
+            <cfset moduleAccessManaged = moduleAccessBlocked or objModules.getModuleAccessBookings(thisCustomerID, module.moduleID).recordCount gt 0>
             <cfif arrayLen(module.includedInPlans)>
                 <div class="col-lg-4 mb-3 mt-3">
                     <div class="card">
                         <div class="card-header">
                             <ul class="nav nav-pills card-header-pills">
-                                <a class="btn btn-outline-info disabled">Included in a plan</a>
+                                <li class="nav-item"><a class="btn btn-outline-info disabled">Included in a plan</a></li>
+                                <cfif moduleAccessManaged>
+                                    <li class="nav-item ms-auto">
+                                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Action</a>
+                                        <div class="dropdown-menu">
+                                            <cfinclude template="module_access_action.cfm">
+                                        </div>
+                                    </li>
+                                </cfif>
                             </ul>
                         </div>
+                        <cfif moduleAccessBlocked><div class="card-header"><span class="badge bg-red-lt">Access blocked</span></div></cfif>
                         <div class="card-body">
                             <div class="d-flex align-items-center p-3">
                                 <div class="d-flex align-items-center">
@@ -409,10 +423,15 @@ switch (url.tab) {
                                             </a>
                                         </cfif>
                                         <cfif listFind(currentModuleList, module.moduleID)>
-                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!', 'Cancel', 'OK, withdraw!')">
+                                            <cfset withdrawDeletesData = false>
+                                            <cfif structKeyExists(application, "objSubscriptionHooks") and structKeyExists(application.objSubscriptionHooks, "deletesCustomerDataOnWithdraw")>
+                                                <cfset withdrawDeletesData = application.objSubscriptionHooks.deletesCustomerDataOnWithdraw(module.moduleID)>
+                                            </cfif>
+                                            <a class="dropdown-item cursor-pointer" onclick="sweetAlert('warning', '#application.mainURL#/sysadm/modules?#csrfParam()#&booking&b=#moduleStatus.bookingID#&c=#thisCustomerID#&m=#module.moduleID#&delete', 'Warning!', 'Please note that the customer can no longer use the module after withdrawal. The system will NOT issue a credit note!<cfif withdrawDeletesData> All customer data stored by this module will be permanently deleted.</cfif>', 'Cancel', 'OK, withdraw!')">
                                                 Withdraw module
                                             </a>
                                         </cfif>
+                                        <cfinclude template="module_access_action.cfm">
                                     </div>
                                 </li>
                             </ul>
@@ -430,6 +449,7 @@ switch (url.tab) {
                                 </cfif>
                             </div>
                         </cfif>
+                        <cfif moduleAccessBlocked><div class="card-header"><span class="badge bg-red-lt">Access blocked</span></div></cfif>
                         <div class="card-body">
                             <div class="d-flex align-items-center p-3">
                                 <div class="d-flex align-items-center">
@@ -444,6 +464,7 @@ switch (url.tab) {
                     </div>
                 </div>
             </cfif>
+            <cfinclude template="module_access_modal.cfm">
         </cfif>
     </cfloop>
 

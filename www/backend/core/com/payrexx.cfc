@@ -225,6 +225,16 @@ component displayname="payrexx" output="false" {
 
     }
 
+    public string function normalizeCardExpiry(any expiry = "") {
+        if (!isSimpleValue(arguments.expiry)) return "";
+        local.expiry = trim(arguments.expiry ?: "");
+        if (reFind("^20[0-9]{2}-(0[1-9]|1[0-2])$",local.expiry)) {
+            return mid(local.expiry,3,2) & right(local.expiry,3);
+        }
+        if (reFind("^[0-9]{2}-(0[1-9]|1[0-2])$",local.expiry)) return local.expiry;
+        return "";
+    }
+
     public string function getApiSignature(required string encodedData) {
 
         local.hmacHex = hmac(arguments.encodedData, variables.payrexxAPIkey, 'HmacSHA256');

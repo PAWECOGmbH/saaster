@@ -111,9 +111,13 @@ component extends="tests.support.integration_spec" {
                 expect(allowed("handler/user.cfm", "POST", {user_new_btn:1})).toBeFalse();
                 expect(variables.access.managementData(variables.member.userID, variables.tenant).tenants.recordCount).toBe(1);
             });
-            it("blocks the old account deletion path even for organization owners", () => {
+            it("restricts lifecycle deletion requests to an owner POST for its own organization or tenant", () => {
                 activate();
-                expect(variables.access.allowRequest(variables.owner.userID, variables.organization, "backend/core/handler/cancel.cfm", "POST", {delete:1})).toBeFalse();
+                expect(variables.access.allowRequest(variables.owner.userID, variables.organization, "backend/core/handler/cancel.cfm", "POST", {delete:variables.organization})).toBeTrue();
+                expect(variables.access.allowRequest(variables.owner.userID, variables.organization, "backend/core/handler/cancel.cfm", "POST", {delete:variables.tenant})).toBeTrue();
+                expect(variables.access.allowRequest(variables.owner.userID, variables.organization, "backend/core/handler/cancel.cfm", "GET", {delete:variables.organization})).toBeFalse();
+                expect(variables.access.allowRequest(variables.owner.userID, variables.organization, "backend/core/handler/cancel.cfm", "POST", {delete:variables.other})).toBeFalse();
+                expect(variables.access.allowRequest(variables.member.userID, variables.tenant, "backend/core/handler/cancel.cfm", "POST", {delete:variables.tenant})).toBeFalse();
             });
             it("keeps platform support sessions separate from the represented account", () => {
                 activate(); loginAs(variables.owner);
