@@ -10,14 +10,13 @@ root="$PWD"
 export ENV_FILE="$root/.env"
 random_password() { od -An -N24 -tx1 /dev/urandom | tr -d ' \n'; }
 mkdir -p /borg-test /test-state /backup config/nginx/conf.d config/mysql
-random_password > /borg-test/passphrase
 cat > .env <<EOF
 COMPOSE_PROJECT_NAME=$project
 BACKUP_ENV=test
 BORG_COMPOSE_FILE=www/tests/backup/compose.yml
 BORG_TEST_ROOT=$root
 BORG_REPO=/borg-test/repository
-BORG_PASSPHRASE_FILE=/borg-test/passphrase
+BORG_PASSPHRASE='$(random_password) spaces \$literal # !'
 BORG_WORK_DIR=/backup
 BORG_KEEP_DAILY=1
 BORG_KEEP_WEEKLY=0
@@ -31,8 +30,6 @@ MYSQL_USER=saaster_borg_test_user
 MYSQL_PASSWORD=$(random_password)
 EOF
 set -a; source .env; set +a
-BORG_PASSPHRASE="$(<"$BORG_PASSPHRASE_FILE")"
-export BORG_PASSPHRASE
 compose() { docker compose --env-file "$ENV_FILE" -p "$project" -f www/tests/backup/compose.yml "$@"; }
 mysql_id() { compose ps -q mysql; }
 lucee_id() { compose ps -q lucee; }
@@ -62,6 +59,7 @@ cleanup() {
     exit "$result"
 }
 trap cleanup EXIT
+bash www/tests/bin/check_borg_metadata.sh
 cp config/example.base.conf config/nginx/conf.d/base.conf
 printf '\n# Borg recovery fixture configuration\n' >> config/nginx/conf.d/base.conf
 printf '[mysqld]\nmax_connections=83\n' > config/mysql/tuning.cnf
@@ -113,7 +111,17 @@ history="$(printf 'SELECT CONCAT(version,":",COALESCE(checksum,""),":",success) 
 config_hash="$(sha256sum www/config.cfm | cut -d' ' -f1)"
 nginx_hash="$(sha256sum config/nginx/conf.d/base.conf | cut -d' ' -f1)"
 filebrowser_hash="$(sha256sum filebrowser.db | cut -d' ' -f1)"
-bash config/backup/backup_borg.sh --init
+env -u BORG_PASSPHRASE bash config/backup/backup_borg.sh --init
+cp .env /test-state/missing-passphrase.env
+sed -i '/^BORG_PASSPHRASE=/d' /test-state/missing-passphrase.env
+expect_failure 'Required setting is missing: BORG_PASSPHRASE' env -u BORG_PASSPHRASE ENV_FILE=/test-state/missing-passphrase.env bash config/backup/backup_borg.sh --list
+cp .env /test-state/empty-passphrase.env
+printf '\nBORG_PASSPHRASE=\n' >> /test-state/empty-passphrase.env
+expect_failure 'Required setting is missing: BORG_PASSPHRASE' env ENV_FILE=/test-state/empty-passphrase.env bash config/backup/restore_borg.sh --list
+cp .env /test-state/wrong-passphrase.env
+printf '\nBORG_PASSPHRASE=wrong-test-passphrase\n' >> /test-state/wrong-passphrase.env
+expect_failure 'passphrase' env ENV_FILE=/test-state/wrong-passphrase.env bash config/backup/backup_borg.sh --list
+echo 'PASS: BORG_PASSPHRASE from .env is required and unlocks the encrypted repository.'
 bash config/backup/backup_borg.sh --export-key /borg-test/exported-key
 bash config/backup/backup_borg.sh --backup
 prefix="$project-saaster-v1"
@@ -160,6 +168,24 @@ grep -Fxq unrelated-project-keep <<< "$archives"
 echo 'PASS: retention removes complete sets and preserves unrelated archives.'
 latest="$(grep "^$prefix-complete-" <<< "$archives" | sort | tail -n1)"
 timestamp="${latest#"$prefix-complete-"}"
+# Recreate this fixture's manifests with the exact Docker 29 warning that older
+# backup scripts saved. The final restore must recover that historical format.
+for component in config complete; do
+    legacy_dir="/test-state/legacy-$component"
+    mkdir "$legacy_dir"
+    (cd "$legacy_dir"; borg extract "$BORG_REPO::$prefix-$component-$timestamp")
+    python3 - "$legacy_dir/manifest.json" <<'PY'
+import json,pathlib,re,sys
+path=pathlib.Path(sys.argv[1])
+manifest=json.loads(path.read_text())
+assert re.fullmatch(r"sha256:[a-f0-9]{64}", manifest["imageId"])
+manifest["imageId"]="Flag --pause has been deprecated, and enabled by default. Use --no-pause to disable pausing during commit.\n"+manifest["imageId"]
+path.write_text(json.dumps(manifest,indent=2)+"\n")
+PY
+    borg delete "$BORG_REPO::$prefix-$component-$timestamp"
+    (cd "$legacy_dir"; borg create "$BORG_REPO::$prefix-$component-$timestamp" .)
+done
+echo 'PASS: new manifests contain canonical image IDs; historical Docker 29 metadata prepared.'
 borg create "$BORG_REPO::$prefix-db-20991231T235959Z" /test-state/empty
 borg create "$BORG_REPO::$prefix-complete-20991231T235959Z" /test-state/empty
 expect_failure 'No complete backup set' bash config/backup/restore_borg.sh --all --timestamp 20991231T235959Z --force
@@ -173,6 +199,18 @@ echo 'PASS: an incomplete newer set is rejected.'
 compose down --volumes
 bash config/backup/restore_borg.sh --config --timestamp "$timestamp"
 bash config/backup/restore_borg.sh --lucee-image --timestamp "$timestamp" --force
+mkdir -p /test-state/wrong-image-bin
+cat > /test-state/wrong-image-bin/docker <<'SH'
+#!/usr/bin/env bash
+if [[ "$1" == image && "$2" == inspect && "$3" == --format && "$4" == '{{.Id}}' ]]; then
+    printf 'sha256:%064d\n' 0
+    exit 0
+fi
+exec "$REAL_DOCKER" "$@"
+SH
+chmod 700 /test-state/wrong-image-bin/docker
+expect_failure 'Loaded image identity differs from the manifest' env REAL_DOCKER="$(command -v docker)" PATH="/test-state/wrong-image-bin:$PATH" bash config/backup/restore_borg.sh --lucee-image --timestamp "$timestamp" --force
+echo 'PASS: historical metadata still rejects a different loaded image.'
 [[ -n "$(docker image inspect --format '{{.Id}}' "saaster-borg-snapshot/$project:$timestamp")" ]]
 echo 'PASS: configuration and runtime image can be recovered without existing containers.'
 printf 'damaged application configuration\n' > www/config.cfm
@@ -185,7 +223,7 @@ printf '[mysqld]\nmax_connections=17\n' > config/mysql/tuning.cnf
 cp config/example.base.conf config/nginx/conf.d/base.conf
 compose up -d --wait --wait-timeout 180 mysql inbucket lucee
 docker exec "$(lucee_id)" sh -c 'printf "stale replacement data\n" > /var/www/userdata/stale.txt'
-bash config/backup/restore_borg.sh --all --force
+env -u BORG_PASSPHRASE bash config/backup/restore_borg.sh --all --force
 set -a; source .env; set +a
 assert_same "$config_hash" "$(sha256sum www/config.cfm | cut -d' ' -f1)" 'application configuration'
 assert_same "$nginx_hash" "$(sha256sum config/nginx/conf.d/base.conf | cut -d' ' -f1)" 'NGINX configuration'

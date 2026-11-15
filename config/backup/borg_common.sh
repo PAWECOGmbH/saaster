@@ -98,6 +98,16 @@ credentials_hash() {
 manifest_value() {
     python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$1" "$2"
 }
+snapshot_image_id() {
+    local image_id="$1"
+    local legacy_warning='Flag --pause has been deprecated, and enabled by default. Use --no-pause to disable pausing during commit.'
+    # Older backups captured this Docker 29 stdout warning before the image ID.
+    if [[ "$image_id" == "$legacy_warning"$'\n'* ]]; then
+        image_id="${image_id#"$legacy_warning"$'\n'}"
+    fi
+    [[ "$image_id" =~ ^sha256:[a-f0-9]{64}$ ]] || die "Invalid snapshot image identity"
+    printf '%s\n' "$image_id"
+}
 new_work_dir() {
     local base="${BORG_WORK_DIR:-/backup}"
     mkdir -p "$base"

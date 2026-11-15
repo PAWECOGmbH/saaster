@@ -112,8 +112,10 @@ cp -p "$PROJECT_ROOT/$BORG_COMPOSE_FILE" "$WORK_DIR/config/project/$BORG_COMPOSE
 [[ -f "$WORK_DIR/config/project/www/config.cfm" && ! -L "$WORK_DIR/config/project/www/config.cfm" ]] || die "www/config.cfm is missing"
 [[ -z "$(find "$WORK_DIR/config/project" -type l -print -quit)" ]] || die "Project/configuration symlinks are not supported by this recovery format"
 log "Capturing the stopped Lucee container, including current administrator settings"
-SNAPSHOT_ID="$(docker commit --pause=false "$LUCEE_CONTAINER" "$SNAPSHOT_IMAGE")"
+docker commit "$LUCEE_CONTAINER" "$SNAPSHOT_IMAGE" >/dev/null
 SNAPSHOT_CREATED=true
+# Inspect the tagged image instead of capturing human-readable commit output.
+SNAPSHOT_ID="$(snapshot_image_id "$(docker image inspect --format '{{.Id}}' "$SNAPSHOT_IMAGE")")"
 python3 - "$ENV_FILE" "$WORK_DIR/config/.env" "$SNAPSHOT_IMAGE" <<'PY'
 import pathlib,re,sys
 source,target,image=sys.argv[1:]
