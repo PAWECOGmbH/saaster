@@ -11,7 +11,7 @@ Use the backup section in [`config/example.env`](../example.env) to configure th
 - Set `BACKUP_ENV=production` or `staging`. An empty value disables operations. `test` is reserved for the isolated test harness.
 - Set `BORG_REPO` to an absolute local directory outside the project or an SSH repository URI. If empty, the scripts derive `ssh://SERVER_USER@SERVER_HOST:SERVER_PORT/./REMOTE_BACKUP_PATH/borg`. For an explicit URI, create its parent directory yourself.
 - For SSH, set `SSH_KEY_PATH` and the remote Borg executable in `BORG_REMOTE_PATH` (default `borg-1.2`). Verify the server's SSH host key before first use.
-- Set `BORG_PASSPHRASE_FILE` to a root-readable file outside the checkout, with permissions `0600`. `BORG_PASSCOMMAND` or an exported `BORG_PASSPHRASE` also work. Keep recovery copies of the passphrase, SSH key and exported Borg key separately from the server and repository.
+- Set `BORG_PASSPHRASE` in the server's private `.env`, using single quotes around the value. Keep `.env` readable only by the server administrator (`0600`) and out of Git. Keep recovery copies of the passphrase, SSH key and exported Borg key separately from the server and repository. `BORG_PASSPHRASE_FILE` and `BORG_PASSCOMMAND` remain optional alternatives; leave them unset when using `BORG_PASSPHRASE`.
 - Retention defaults to 7 daily, 4 weekly and 12 monthly sets. At least one rule must retain backups. `BORG_WORK_DIR` defaults to `/backup` and must be outside the project.
 
 Commands below run from the project root and read its `.env`. `ENV_FILE=/absolute/path` selects another trusted environment file. The standard server layout uses `compose.yml`; `BORG_COMPOSE_FILE` can select a project-relative alternative.
