@@ -135,7 +135,7 @@ component extends="tests.support.integration_spec" {
                     variables.fixtures.createUser(customerID=local.issuerID, sysAdmin=true);
                 }
                 try {
-                    queryExecute(options={datasource: application.datasource}, sql="UPDATE system_settings SET strDefaultValue = CASE strSettingVariable WHEN 'settingSwissQrBill' THEN '1' WHEN 'settingIBANnumber' THEN 'CH44 3199 9123 0008 8901 2' ELSE 'RF18539007547034' END WHERE strSettingVariable IN ('settingSwissQrBill', 'settingIBANnumber', 'settingQRreference')");
+                    queryExecute(options={datasource: application.datasource}, sql="UPDATE system_settings SET strDefaultValue = CASE strSettingVariable WHEN 'settingSwissQrBill' THEN '1' WHEN 'settingIBANnumber' THEN 'CH58 0079 1123 0008 8901 2' ELSE 'RF18539007547034' END WHERE strSettingVariable IN ('settingSwissQrBill', 'settingIBANnumber', 'settingQRreference')");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.issuerID}}, sql="UPDATE customers SET strAddress = 'Teststrasse 1', strZIP = '8000', strCity = 'Zürich' WHERE intCustomerID = :id");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: variables.customerID}}, sql="UPDATE customers SET strAddress = '', strZIP = '3000', strCity = 'Bern' WHERE intCustomerID = :id");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: variables.invoiceID}}, sql="UPDATE invoices SET strCurrency = 'CHF' WHERE intInvoiceID = :id");
@@ -153,7 +153,7 @@ component extends="tests.support.integration_spec" {
                     local.pdf = variables.documents.download(variables.invoiceID);
                     cfpdf(action="getInfo", source=local.pdf, name="local.info");
                     expect(local.info.totalPages).toBe(2);
-                    expect(variables.documents.getSnapshot(variables.invoiceID).qr.billerIBAN).toBe("CH44 3199 9123 0008 8901 2");
+                    expect(variables.documents.getSnapshot(variables.invoiceID).qr.billerIBAN).toBe("CH58 0079 1123 0008 8901 2");
                     expect(variables.documents.getSnapshot(variables.invoiceID).qr.invoiceAmount).toBe(5000);
                     expect(variables.documents.getSnapshot(variables.invoiceID).qr.debtorStreet).toBe("");
                     queryExecute(options={datasource: application.datasource}, sql="UPDATE system_settings SET strDefaultValue = '' WHERE strSettingVariable = 'settingIBANnumber'");

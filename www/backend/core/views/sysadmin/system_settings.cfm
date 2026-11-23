@@ -28,6 +28,13 @@
     qSwissQrBill = objSysadmin.getSystemSetting('settingSwissQrBill');
     qSwissQrIBAN = objSysadmin.getSystemSetting('settingIBANnumber');
     qSwissQrRef = objSysadmin.getSystemSetting('settingQRreference');
+    qrSettingsError = session.qrSettingsError ?: {};
+    structDelete(session, "qrSettingsError");
+    hasQrSettingsError = !structIsEmpty(qrSettingsError);
+    qrBillEnabled = hasQrSettingsError ? qrSettingsError.enabled : qSwissQrBill.strDefaultValue;
+    qrIban = hasQrSettingsError ? qrSettingsError.iban : qSwissQrIBAN.strDefaultValue;
+    qrReference = hasQrSettingsError ? qrSettingsError.reference : qSwissQrRef.strDefaultValue;
+    roundFactor = hasQrSettingsError and listFind("1,5", qrSettingsError.roundFactor) ? qrSettingsError.roundFactor : qRoundFactor.strDefaultValue;
     infoMailNewRegistrations = objSysadmin.getSystemSetting('settingMailNewRegistrations');
     dashboardEditable = objSysadmin.getSystemSetting('settingDashboardEditable');
     customerData = application.objSysAdmin.getSysAdminData();
@@ -143,8 +150,8 @@
                                     <div class="col-lg-6">
                                         <p>#encodeForHTML(qRoundFactor.strDescription)#</p>
                                         <select name="#encodeForHTML(qRoundFactor.strSettingVariable)#" class="form-select w-50" id="roundFactorSelect">
-                                            <option value="5" <cfif qRoundFactor.strDefaultValue eq 5>selected</cfif>>0.05 Switzerland</option>
-                                            <option value="1" <cfif qRoundFactor.strDefaultValue eq 1>selected</cfif>>0.01 rest of the world</option>
+                                                            <option value="5" <cfif roundFactor eq 5>selected</cfif>>0.05 Switzerland</option>
+                                                            <option value="1" <cfif roundFactor eq 1>selected</cfif>>0.01 rest of the world</option>
                                         </select>
                                     </div>
                                 </div>
@@ -159,19 +166,19 @@
                                                 <p>#encodeForHTML(qSwissQrBill.strDescription)#</p>
                                                 <div class="col-lg-4">
                                                     <select name="#encodeForHTML(qSwissQrBill.strSettingVariable)#" class="form-select w-50" id="QrBillCheckbox">
-                                                        <option value="0" <cfif qSwissQrBill.strDefaultValue eq 0>selected</cfif>>No</option>
-                                                        <option value="1" <cfif qSwissQrBill.strDefaultValue eq 1>selected</cfif>>Yes</option>
+                                                        <option value="0" <cfif qrBillEnabled eq 0>selected</cfif>>No</option>
+                                                        <option value="1" <cfif qrBillEnabled eq 1>selected</cfif>>Yes</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <a href="##" id="extraLink" class="btn" style="display: none;" data-bs-toggle="modal" data-bs-target="##qr_data">Manage QR data</a>
                                                 </div>
                                             </div>
-                                            <div id="qr_data" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='staticBackdropLabel' aria-hidden='true'>
+                                            <div id="qr_data" class='modal modal-blur fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-labelledby='qr-data-title' aria-hidden='true'#hasQrSettingsError ? ' data-qr-validation-error="true"' : ''#>
                                                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Swiss QR invoice data</h5>
+                                                            <h5 id="qr-data-title" class="modal-title">Swiss QR invoice data</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
@@ -190,13 +197,16 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-body mb-3">
+                                                            <cfif hasQrSettingsError>
+                                                                <div class="alert alert-danger" role="alert">#encodeForHTML(qrSettingsError.message)#</div>
+                                                            </cfif>
                                                             <div class="mb-3">
-                                                                <label class="form-label">IBAN number:</label>
-                                                                <input type="text" name="settingIBANnumber" class="form-control" autocomplete="off" value="#encodeForHTML(qSwissQrIBAN.strDefaultValue)#" maxlength="30">
+                                                                <label class="form-label" for="qr-iban">IBAN</label>
+                                                                <input type="text" id="qr-iban" name="settingIBANnumber" class="form-control" autocomplete="off" value="#encodeForHTMLAttribute(qrIban)#" maxlength="30">
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label class="form-label">QR reference number:</label>
-                                                                <input type="text" name="settingQRreference" class="form-control" autocomplete="off" value="#encodeForHTML(qSwissQrRef.strDefaultValue)#" maxlength="30">
+                                                                <label class="form-label" for="qr-reference">Payment reference</label>
+                                                                <input type="text" id="qr-reference" name="settingQRreference" class="form-control" autocomplete="off" value="#encodeForHTMLAttribute(qrReference)#" maxlength="40">
                                                             </div>
                                                         </div>
                                                         <div class="modal-body modal-footer pt-3">
