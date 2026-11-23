@@ -2,17 +2,10 @@
 component displayname="swissqrbill" output="false" {
 
     public any function init() {
-
-        variables.returnStruct = {};
-        variables.returnStruct['success'] = true;
-        variables.returnStruct['message'] = "OK";
-
-
         return this;
-
     }
 
-    public string function generateSwissBill(required struct qrData, required string output) {
+    public any function generateSwissBill(required struct qrData, required string output) {
 
         // Get the validated qr data
         variables.qrData = validateData(arguments.qrData);
@@ -20,7 +13,11 @@ component displayname="swissqrbill" output="false" {
             return variables.qrData.message;
         }
 
-        // Gererate the qr code as binary string base64
+        if (listFindNoCase("pdf,variable", arguments.output)) {
+            return createPDF(arguments.output);
+        }
+
+        // Generate the QR code as a base64-encoded PNG.
         local.generatedQrCode = generateQRCode(variables.qrData.qrSize);
 
         if (!local.generatedQrCode.success) {
@@ -43,17 +40,6 @@ component displayname="swissqrbill" output="false" {
             return local.generatedQrCode.base64String;
 
 
-        // Generate pdf
-        } else if (arguments.output eq "pdf") {
-
-            return createPDF("pdf");
-
-
-        // Generate pdf using a variable
-        } else if (arguments.output eq "variable") {
-
-            return createPDF("variable");
-
         }
 
         return "";
@@ -61,22 +47,21 @@ component displayname="swissqrbill" output="false" {
 
     }
 
+    private any function generateQRMatrix(required numeric size, required numeric margin) {
+        local.hints = createObject("java", "java.util.Hashtable").init();
+        local.hintType = createObject("java", "com.google.zxing.EncodeHintType");
+        local.hints.put(local.hintType.ERROR_CORRECTION, createObject("java", "com.google.zxing.qrcode.decoder.ErrorCorrectionLevel").M);
+        local.hints.put(local.hintType.CHARACTER_SET, "UTF-8");
+        local.hints.put(local.hintType.MARGIN, javaCast("int", arguments.margin));
+        local.writer = createObject("java", "com.google.zxing.qrcode.QRCodeWriter").init();
+        return local.writer.encode(generateQrDataString(), createObject("java", "com.google.zxing.BarcodeFormat").QR_CODE, javaCast("int", arguments.size), javaCast("int", arguments.size), local.hints);
+    }
+
     private struct function generateQRCode(required numeric qrSize, numeric logoSize=0.1) {
 
         try {
 
-            // Load QRCodeWriter and other necessary classes
-            local.qrCodeWriter = createObject("java", "com.google.zxing.qrcode.QRCodeWriter").init();
-            local.hintMap = createObject("java", "java.util.Hashtable").init();
-            local.errorCorrectionLevel = createObject("java", "com.google.zxing.qrcode.decoder.ErrorCorrectionLevel").H; // High fault tolerance
-            local.hintMap.put(createObject("java", "com.google.zxing.EncodeHintType").ERROR_CORRECTION, local.errorCorrectionLevel);
-            local.hintMap.put(createObject("java", "com.google.zxing.EncodeHintType").MARGIN, javaCast("int", 0));
-
-            // Data for the QR code
-            local.myData = generateQrDataString(variables.qrData);
-
-            // Generate the QR code
-            local.bitMatrix = local.qrCodeWriter.encode(local.myData, createObject("java", "com.google.zxing.BarcodeFormat").QR_CODE, arguments.qrSize, arguments.qrSize, local.hintMap);
+            local.bitMatrix = generateQRMatrix(arguments.qrSize, 4);
 
             // Convert QR code to a BufferedImage
             local.bufferedImage = createObject("java", "com.google.zxing.client.j2se.MatrixToImageWriter").toBufferedImage(local.bitMatrix);
@@ -114,19 +99,33 @@ component displayname="swissqrbill" output="false" {
             // Cleanup resources
             local.byteArrayOutputStream.close();
 
-            // Store or return the base64 encoded string as needed
-            variables.returnStruct['base64String'] = local.base64String;
-
-
+            return {success: true, base64String: local.base64String};
         } catch (any e) {
-
-            variables.returnStruct['success'] = false;
-            variables.returnStruct['message'] = e.message;
-
+            return {success: false, message: e.message};
         }
 
-        return variables.returnStruct;
+    }
 
+    private string function buildPrintQRCode() {
+        // Use vector rectangles without padding so the printed symbol is exactly 46 mm wide.
+        local.matrix = generateQRMatrix(0, 0);
+        local.modules = local.matrix.getWidth();
+        local.moduleSize = 46 / local.modules;
+        local.markup = createObject("java", "java.lang.StringBuilder").init();
+        loop from=0 to=local.modules - 1 index="local.y" {
+            local.start = -1;
+            loop from=0 to=local.modules index="local.x" {
+                if (local.x lt local.modules and local.matrix.get(javaCast("int", local.x), javaCast("int", local.y))) {
+                    if (local.start lt 0) local.start = local.x;
+                } else if (local.start gte 0) {
+                    local.markup.append("<div class='qr_modules' style='left:#local.start * local.moduleSize#mm;top:#local.y * local.moduleSize#mm;width:#(local.x - local.start) * local.moduleSize#mm;height:#local.moduleSize#mm'></div>");
+                    local.start = -1;
+                }
+            }
+        }
+        local.logo = toBase64(fileReadBinary(expandPath("/assets/img/ch-cross.png")));
+        local.markup.append("<img class='qr_cross' alt='' src='data:image/png;base64,#local.logo#' />");
+        return local.markup.toString();
     }
 
     private string function buildHTML() {
@@ -200,10 +199,24 @@ component displayname="swissqrbill" output="false" {
                     ##payment .top {
                         height: 70mm;
                     }
-                    ##payment .qr_code img {
+                    ##payment .qr_code {
                         width: 46mm;
                         height: 46mm;
-                        display: block;
+                        position: relative;
+                    }
+                    .qr_modules {
+                        position: absolute;
+                        background-color: black;
+                    }
+                    .qr_cross {
+                        position: absolute;
+                        left: 19.5mm;
+                        top: 19.5mm;
+                        width: 7mm;
+                        height: 7mm;
+                    }
+                    .qr_extended_text {
+                        font-family: 'DejaVu Sans';
                     }
                     .currency {
                         width: 40%;
@@ -245,16 +258,16 @@ component displayname="swissqrbill" output="false" {
                                     <p class='subtitle'>Konto / Zahlbar an</p>
                                     <p class='text'>
                                         " & variables.qrData.billerIBANformatted & "<br />
-                                        " & variables.qrData.billerName & "<br />
-                                        " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
-                                        " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
+                                        " & printText(variables.qrData.billerName) & "<br />
+                                        " & printText(trim(variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber)) & "<br />
+                                        " & printText(variables.qrData.billerZIP & " " & variables.qrData.billerCity) & "
                                     </p>
                                     #local.referenceNumberCode#
                                     <p class='subtitle'>Zahlbar durch</p>
                                     <p class='text'>
-                                        " & variables.qrData.debtorName & "<br />
-                                        " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
-                                        " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
+                                        " & printText(variables.qrData.debtorName) & "<br />
+                                        " & printText(trim(variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber)) & "<br />
+                                        " & printText(variables.qrData.debtorZIP & " " & variables.qrData.debtorCity) & "
                                     </p>
                                 </div>
                                 <table class='money' width='100%'>
@@ -280,7 +293,7 @@ component displayname="swissqrbill" output="false" {
                                             <div class='top'>
                                                 <p class='title'>Zahlteil</p>
                                                 <div class='qr_code'>
-                                                    <img src='data:image/png;base64," & generateQRCode(500, 0.12).base64String & "'>
+                                                    " & buildPrintQRCode() & "
                                                 </div>
                                             </div>
                                             <table width='100%'>
@@ -300,18 +313,18 @@ component displayname="swissqrbill" output="false" {
                                             <p class='subtitle'>Konto / Zahlbar an</p>
                                             <p class='text'>
                                                 " & variables.qrData.billerIBANFormatted & "<br />
-                                                " & variables.qrData.billerName & "<br />
-                                                " & variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber & "<br />
-                                                " & variables.qrData.billerZIP & " " & variables.qrData.billerCity & "
+                                                " & printText(variables.qrData.billerName) & "<br />
+                                                " & printText(trim(variables.qrData.billerStreet & " " & variables.qrData.billerStreetNumber)) & "<br />
+                                                " & printText(variables.qrData.billerZIP & " " & variables.qrData.billerCity) & "
                                             </p>
                                             #local.referenceNumberCode#
                                             <p class='subtitle'>Zusätzliche Informationen</p>
-                                            <p class='text'>" & variables.qrData.invoiceAddText & "</p>
+                                            <p class='text'>" & printText(variables.qrData.invoiceAddText) & "</p>
                                             <p class='subtitle'>Zahlbar durch</p>
                                             <p class='text'>
-                                                " & variables.qrData.debtorName & "<br />
-                                                " & variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber & "<br />
-                                                " & variables.qrData.debtorZIP & " " & variables.qrData.debtorCity & "
+                                                " & printText(variables.qrData.debtorName) & "<br />
+                                                " & printText(trim(variables.qrData.debtorStreet & " " & variables.qrData.debtorStreetNumber)) & "<br />
+                                                " & printText(variables.qrData.debtorZIP & " " & variables.qrData.debtorCity) & "
                                             </p>
                                         </td>
                                     </tr>
@@ -327,11 +340,18 @@ component displayname="swissqrbill" output="false" {
 
     }
 
+    private string function printText(required string value) {
+        local.encoded = encodeForHTML(arguments.value);
+        if (arguments.value.matches("[\x20-\x7E\xA0-\xFF]*")) return local.encoded;
+        return "<span class='qr_extended_text'>" & local.encoded & "</span>";
+    }
+
     public any function createPDF(string pdfType) {
+        local.fontDirectory = expandPath("/assets/fonts/qr-bill");
 
         // Create and open the PDF directly in the browser
         if (arguments.pdfType eq "pdf") {
-            cfdocument(format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0") {
+            cfdocument(format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0", fontDirectory=local.fontDirectory, fontEmbed="true") {
                 writeOutput(buildHTML());
             }
             return;
@@ -339,7 +359,7 @@ component displayname="swissqrbill" output="false" {
 
         // Create the PDF and save it into the memory
         if (arguments.pdfType eq "variable") {
-            cfdocument(name="local.qrslip" format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0") {
+            cfdocument(name="local.qrslip" format="pdf", unit="pt", pageType="A4", marginLeft="0", marginRight="0", marginTop="540", marginBottom="0", fontDirectory=local.fontDirectory, fontEmbed="true") {
                 writeOutput(buildHTML());
             }
             return local.qrslip;
@@ -356,19 +376,14 @@ component displayname="swissqrbill" output="false" {
         local.qrData = {};
         local.errorMessage = "";
 
-        // Validate IBAN
-        if (structKeyExists(arguments.qrData, "billerIBAN") and len(trim(arguments.qrData.billerIBAN))) {
-            local.iban = formatIBAN(arguments.qrData.billerIBAN);
-        } else {
-            local.errorMessage =  "IBAN is not defined or empty!";
-        }
-
-        // Validate reference number
-        if (structKeyExists(arguments.qrData, "billerQrReference")) {
-            local.reference = formatReference(arguments.qrData.billerQrReference);
-        } else {
-            local.errorMessage = "QR reference is not defined!";
-        }
+        local.qrData["invoiceCurrency"] = uCase(trim(arguments.qrData.invoiceCurrency ?: ""));
+        local.payment = validatePaymentDetails(arguments.qrData.billerIBAN ?: "", arguments.qrData.billerQrReference ?: "", local.qrData.invoiceCurrency);
+        if (!local.payment.success) return local.payment;
+        local.qrData["billerIBANClean"] = local.payment.billerIBANClean;
+        local.qrData["billerIBANFormatted"] = local.payment.billerIBANFormatted;
+        local.qrData["transactionType"] = local.payment.reference.type;
+        local.qrData["billerReferenceClean"] = local.payment.reference.clean;
+        local.qrData["billerReferenceFormatted"] = local.payment.reference.formatted;
 
         // Validate biller
         if (structKeyExists(arguments.qrData, "billerName") and len(trim(arguments.qrData.billerName))) {
@@ -408,11 +423,8 @@ component displayname="swissqrbill" output="false" {
         } else {
             local.errorMessage = "Please provide the debtor name!";
         }
-        if (structKeyExists(arguments.qrData, "debtorStreet") and len(trim(arguments.qrData.debtorStreet))) {
-            local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreet), 70);
-        } else {
-            local.errorMessage = "Debtor street is not defined or empty!";
-        }
+        // The Swiss QR-bill specification allows an empty debtor street field.
+        local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreet ?: ""), 70);
         if (structKeyExists(arguments.qrData, "debtorStreetNumber") and len(trim(arguments.qrData.debtorStreetNumber))) {
             local.qrData["debtorStreetNumber"] = left(trim(arguments.qrData.debtorStreetNumber), 5);
         } else {
@@ -434,31 +446,29 @@ component displayname="swissqrbill" output="false" {
             local.errorMessage = "Debtor country iso is not defined or empty!";
         }
 
-        // Validate amount and currency
-        if (structKeyExists(arguments.qrData, "invoiceAmount") and isNumeric(arguments.qrData.invoiceAmount)) {
+        // Validate amount
+        if (structKeyExists(arguments.qrData, "invoiceAmount") and isNumeric(arguments.qrData.invoiceAmount)
+            and arguments.qrData.invoiceAmount gte 0.01 and arguments.qrData.invoiceAmount lte 999999999.99) {
             local.qrData["invoiceAmountQRCode"] = formatAmount(arguments.qrData.invoiceAmount, "qrcode");
             local.qrData["invoiceAmountPDF"] = formatAmount(arguments.qrData.invoiceAmount, "pdf");
         } else {
-            local.errorMessage = "Amount is not defined or not of type numeric!";
-        }
-        if (structKeyExists(arguments.qrData, "invoiceCurrency") and len(trim(arguments.qrData.invoiceCurrency))) {
-            local.qrData["invoiceCurrency"] = left(arguments.qrData.invoiceCurrency, 3).toUpperCase();
-        } else {
-            local.errorMessage = "Currency is not defined or empty!";
+            local.errorMessage = "The QR-bill amount must be between 0.01 and 999999999.99.";
         }
 
         // Return error message if needed
         if (len(local.errorMessage)) {
-            variables.returnStruct['success'] = false;
-            variables.returnStruct['message'] = local.errorMessage;
-            return variables.returnStruct;
+            return {success: false, message: local.errorMessage};
         }
-
-        // Set transaction type
-        local.qrData["transactionType"] = determineTransactionType(local.reference.billerReferenceClean);
 
         // Additional text
         local.qrData["invoiceAddText"] = structKeyExists(arguments.qrData, "invoiceAddText") ? left(trim(arguments.qrData.invoiceAddText), 140) : "";
+
+        // Validate each text field separately so embedded line breaks cannot shift the QR fields.
+        loop list="billerName,billerStreet,billerStreetNumber,billerZIP,billerCity,billerCountry,debtorName,debtorStreet,debtorStreetNumber,debtorZIP,debtorCity,debtorCountry,invoiceAddText" item="local.field" {
+            if (!local.qrData[local.field].matches("[\x20-\x7E\xA0-\xFF\u0100-\u017F\u0218-\u021B\u20AC]*")) {
+                return {success: false, message: "Unsupported QR-bill characters in field: " & local.field & "."};
+            }
+        }
 
         // Parse the size for the qr code
         local.qrData["qrSize"] = structKeyExists(arguments.qrData, "qrSize") and isNumeric(arguments.qrData.qrSize) ? arguments.qrData.qrSize : 200;
@@ -466,100 +476,80 @@ component displayname="swissqrbill" output="false" {
         // Path to the swiss cross logo
         local.qrData["qrLogo"] = structKeyExists(arguments.qrData, "qrLogo") and len(trim(arguments.qrData.qrLogo)) ? arguments.qrData.qrLogo : "";
 
-        // Add message
-        structAppend(local.qrData, variables.returnStruct);
+        local.qrData["success"] = true;
 
         return local.qrData;
 
     }
 
-    public struct function formatIBAN(required string iban) {
-
-        local.cleanIBAN = replace(arguments.iban, " ", "", "all");
-        local.formattedIBAN = "";
-
-        // Length must be 21 characters
-        if (len(local.cleanIBAN) neq 21) {
-            variables.returnStruct['success'] = false;
-            variables.returnStruct['message'] = "The character length of a Swiss IBAN must be 21!";
-            return variables.returnStruct;
+    public struct function validatePaymentDetails(required string iban, required string reference, string currency = "CHF") {
+        local.payment = formatIBAN(arguments.iban);
+        if (!local.payment.success) return local.payment;
+        if (!listFind("CHF,EUR", arguments.currency)) {
+            return {success: false, message: "The QR-bill currency must be CHF or EUR."};
         }
-
-        // Loop through every fourth index and insert spaces
-        for (local.i = 1; local.i <= len(local.cleanIBAN); local.i += 4) {
-            local.formattedIBAN &= mid(local.cleanIBAN, local.i, 4) & " ";
-        }
-
-        variables.returnStruct['billerIBANClean'] = local.cleanIBAN;
-        variables.returnStruct['billerIBANFormatted'] = local.formattedIBAN;
-        return variables.returnStruct;
-
+        local.iid = val(mid(local.payment.billerIBANClean, 5, 5));
+        local.reference = formatReference(arguments.reference, local.iid gte 30000 and local.iid lte 31999, arguments.currency);
+        if (!local.reference.success) return local.reference;
+        local.payment.reference = local.reference;
+        return local.payment;
     }
 
-    private struct function formatReference(required string reference) {
-
-        local.cleanReference = replace(arguments.reference, " ", "", "all");
-
-        // Check for Creditor Reference (SCOR)
-        if (left(local.cleanReference, 2) eq "RF") {
-
-            local.formattedReference = "";
-
-            // Format the SCOR reference
-            for (local.pos = 1; local.pos <= len(local.cleanReference); local.pos += 4) {
-                local.formattedReference &= mid(local.cleanReference, local.pos, 4) & " ";
-            }
-
-            variables.returnStruct['billerReferenceClean'] = local.cleanReference;
-            variables.returnStruct['billerReferenceFormatted'] = local.formattedReference;
-
-        // Check for QRR reference
-        } else if (isNumeric(local.cleanReference)) {
-
-            local.refLength = len(local.cleanReference);
-
-            // Fill QR reference to 26 numbers with 0
-            if (local.refLength lte 26) {
-
-                // Calculate how many zeros need to be added
-                local.zerosNeeded = 26 - local.refLength;
-
-                // Add the required zeros if len is less than 26
-                if (local.zerosNeeded gt 0) {
-                    local.addZero = "";
-                    for (local.i = 1; local.i <= local.zerosNeeded; local.i++) {
-                        local.addZero &= "0";
-                    }
-                    local.cleanReference = local.addZero & local.cleanReference;
-                }
-
-                // Calculate checksum
-                local.checksum = calculateChecksum(local.cleanReference);
-
-                // Add checksum to the reference number
-                local.fullReference = local.cleanReference & local.checksum;
-
-                variables.returnStruct['billerReferenceClean'] = local.fullReference;
-                variables.returnStruct['billerReferenceFormatted'] = formatReferenceNumber(local.fullReference);
-
-            } else {
-
-                // Reference number with checksum already set
-                variables.returnStruct['billerReferenceClean'] = local.cleanReference;
-                variables.returnStruct['billerReferenceFormatted'] = formatReferenceNumber(local.cleanReference);
-
-            }
-
-        } else {
-
-            // Return of the unchanged reference if it does not correspond to any format
-            variables.returnStruct['billerReferenceClean'] = local.cleanReference;
-            variables.returnStruct['billerReferenceFormatted'] = local.cleanReference;
-
+    public struct function formatIBAN(required string iban) {
+        local.iban = uCase(reReplace(arguments.iban, "\s+", "", "all"));
+        if (!reFind("^(CH|LI)[0-9]{7}[A-Z0-9]{12}$", local.iban) or !hasValidMod97(local.iban)) {
+            return {success: false, message: "Enter a valid Swiss or Liechtenstein IBAN for the QR-bill."};
         }
+        return {
+            success: true,
+            message: "OK",
+            billerIBANClean: local.iban,
+            billerIBANFormatted: trim(reReplace(local.iban, "(.{4})", "\1 ", "all"))
+        };
+    }
 
-        return variables.returnStruct;
+    private struct function formatReference(required string reference, required boolean qrIBAN, required string currency) {
+        local.reference = uCase(reReplace(arguments.reference, "\s+", "", "all"));
+        if (arguments.qrIBAN) {
+            if (arguments.currency neq "CHF" or !reFind("^[0-9]{1,27}$", local.reference) or !reFind("[1-9]", local.reference)) {
+                return {success: false, message: "A QR-IBAN requires a numeric QR reference and can only be used for CHF invoices. Check the IBAN and QR reference from your bank."};
+            }
+            local.base = right(repeatString("0", 26) & left(local.reference, 26), 26);
+            local.complete = local.base & calculateChecksum(local.base);
+            if (len(local.reference) eq 27 and compare(local.reference, local.complete) neq 0) {
+                return {success: false, message: "The QR reference check digit is invalid."};
+            }
+            return {success: true, type: "QRR", clean: local.complete, formatted: formatReferenceNumber(local.complete)};
+        }
+        if (!len(local.reference)) {
+            return {success: true, type: "NON", clean: "", formatted: ""};
+        }
+        if (!reFind("^RF[0-9]{2}[A-Z0-9]{1,21}$", local.reference) or !hasValidMod97(local.reference)) {
+            return {success: false, message: "A standard IBAN requires a valid RF creditor reference or an empty reference."};
+        }
+        return {
+            success: true,
+            type: "SCOR",
+            clean: local.reference,
+            formatted: trim(reReplace(local.reference, "(.{4})", "\1 ", "all"))
+        };
+    }
 
+    private boolean function hasValidMod97(required string value) {
+        local.checkDigits = val(mid(arguments.value, 3, 2));
+        if (local.checkDigits lt 2 or local.checkDigits gt 98) return false;
+
+        local.rotated = mid(arguments.value, 5, len(arguments.value) - 4) & left(arguments.value, 4);
+        local.remainder = 0;
+        loop from=1 to=len(local.rotated) index="local.index" {
+            local.code = asc(mid(local.rotated, local.index, 1));
+            if (local.code gte 65) {
+                local.remainder = (local.remainder * 100 + local.code - 55) % 97;
+            } else {
+                local.remainder = (local.remainder * 10 + local.code - 48) % 97;
+            }
+        }
+        return local.remainder eq 1;
     }
 
     private string function formatReferenceNumber(required string reference) {
@@ -584,66 +574,17 @@ component displayname="swissqrbill" output="false" {
 
     }
 
-    private string function calculateChecksum(required string number) {
-
-        local.refNumber = arguments.number;
-
-        // Determine the length of the reference number
-        local.refLength = len(local.refNumber);
-
-        // Check if the length of the reference number is less than 16
-        if (local.refLength lt 16) {
-
-            // If the reference number is less than 16 characters long,
-            // add leading zeros to make it exactly 15 characters long
-            local.refNumber = right("000000000000000" & local.refNumber, 15);
-
-        } else {
-
-            // If the reference number is 16 or more characters long,
-            // add leading zeros to make it exactly 26 characters long
-            local.refNumber = right("00000000000000000000000000" & local.refNumber, 26);
-
+    private numeric function calculateChecksum(required string number) {
+        local.table = [0, 9, 4, 6, 8, 2, 7, 1, 3, 5];
+        local.carry = 0;
+        loop from=1 to=len(arguments.number) index="local.index" {
+            local.digit = val(mid(arguments.number, local.index, 1));
+            local.carry = local.table[((local.carry + local.digit) % 10) + 1];
         }
-
-        // Initialize the mapping for the checksum calculation algorithm
-        local.alg = [0,9,4,6,8,2,7,1,3,5];
-
-        // Update the length of the reference number after normalization
-        local.refLength = len(local.refNumber);
-
-        // Convert the reference number into an array,
-        // where each element of the array corresponds to a digit of the reference number
-        local.ro = listToArray(local.refNumber, "");
-
-        // Initialize the variable ref, which is used in the checksum calculation
-        local.ref = 0;
-
-        // Iterate through each digit of the reference number to calculate the checksum
-        loop from=1 to=local.refLength index="local.i" {
-
-            // Add the current value of ref and the current digit of the reference number
-            local.rpr = local.ref + local.ro[local.i];
-
-            // Update ref based on the algorithm
-            // The index in the alg array is calculated based on the remainder of the division
-            // of rpr by 10 and increased by 1, as ColdFusion arrays start at 1
-            local.ref = local.alg[(local.rpr % 10) + 1];
-
-        }
-
-        // Calculate the final check digit
-        // This is the remainder of the division of the final ref by 10, subtracted from 10
-        local.checksum = (10 - local.ref % 10);
-
-        // Return the calculated check digit
-        return local.checksum;
-
-
-
+        return (10 - local.carry) % 10;
     }
 
-    private number function formatAmount(required numeric amount, string output="qrcode") {
+    private string function formatAmount(required numeric amount, string output="qrcode") {
 
         // Prepare for qr code
         if (arguments.output eq "qrcode") {
@@ -656,19 +597,6 @@ component displayname="swissqrbill" output="false" {
         }
 
         return local.formattedAmount;
-
-    }
-
-    private string function determineTransactionType(required string reference) {
-
-        // Determine the transaction type
-        if (len(arguments.reference) eq 27) {
-            return 'QRR';
-        } else if (left(arguments.reference, 2) eq "RF") {
-            return 'SCOR';
-        }
-
-        return 'NON';
 
     }
 

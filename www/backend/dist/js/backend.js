@@ -767,6 +767,13 @@ $(document).ready(function() {
     // Initial call to set the correct visibility when the page loads
     handleQrBillVisibility();
 
+    const qrSettingsModal = document.querySelector('#qr_data[data-qr-validation-error]');
+    if (qrSettingsModal) {
+        const ui = window.bootstrap || window.tabler;
+        $('#QrBillContainer').show();
+        ui.Modal.getOrCreateInstance(qrSettingsModal).show();
+    }
+
 
     /**
      * Event listener for the "generate key" icon in the modal.
