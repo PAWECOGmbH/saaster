@@ -123,7 +123,7 @@ component extends="tests.support.integration_spec" {
                 expect(structKeyExists(variables.invoices.getInvoiceData(variables.invoiceID), "number")).toBeFalse();
             });
 
-            it("preserves the Swiss QR slip and issuer when payment settings change", () => {
+            it("includes the Swiss QR slip when the debtor street is empty and preserves it after issuance", () => {
                 local.originalSettings = {};
                 loop list="settingSwissQrBill,settingIBANnumber,settingQRreference" item="local.setting" {
                     local.originalSettings[local.setting] = application.objSysadmin.getSystemSetting(local.setting).strDefaultValue;
@@ -137,13 +137,25 @@ component extends="tests.support.integration_spec" {
                 try {
                     queryExecute(options={datasource: application.datasource}, sql="UPDATE system_settings SET strDefaultValue = CASE strSettingVariable WHEN 'settingSwissQrBill' THEN '1' WHEN 'settingIBANnumber' THEN 'CH44 3199 9123 0008 8901 2' ELSE 'RF18539007547034' END WHERE strSettingVariable IN ('settingSwissQrBill', 'settingIBANnumber', 'settingQRreference')");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.issuerID}}, sql="UPDATE customers SET strAddress = 'Teststrasse 1', strZIP = '8000', strCity = 'Zürich' WHERE intCustomerID = :id");
-                    queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: variables.customerID}}, sql="UPDATE customers SET strAddress = 'Kundenstrasse 2', strZIP = '3000', strCity = 'Bern' WHERE intCustomerID = :id");
+                    queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: variables.customerID}}, sql="UPDATE customers SET strAddress = '', strZIP = '3000', strCity = 'Bern' WHERE intCustomerID = :id");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: variables.invoiceID}}, sql="UPDATE invoices SET strCurrency = 'CHF' WHERE intInvoiceID = :id");
+                    local.position = variables.invoices.getInvoiceData(variables.invoiceID).positions[1];
+                    local.updated = variables.invoices.updatePosition({invoicePosID: local.position.invoicePosID, title: "Service", price: 5000});
+                    expect(local.updated.success).toBeTrue(local.updated.message);
+                    cfhttp(url="http://127.0.0.1/tests/support/invoice_render_probe.cfm?view=print&invoiceID=#variables.invoiceID#&userID=#variables.user.userID#", result="local.preview", redirect=false, getAsBinary="yes");
+                    expect(local.preview.statusCode).toInclude("200");
+                    expect(local.preview.mimeType).toBe("application/pdf");
+                    cfpdf(action="getInfo", source=local.preview.fileContent, name="local.previewInfo");
+                    expect(local.previewInfo.totalPages).toBe(2);
+                    expect(variables.documents.isArchived(variables.invoiceID)).toBeFalse();
+
                     variables.invoices.setInvoiceStatus(variables.invoiceID, 2);
                     local.pdf = variables.documents.download(variables.invoiceID);
                     cfpdf(action="getInfo", source=local.pdf, name="local.info");
                     expect(local.info.totalPages).toBe(2);
                     expect(variables.documents.getSnapshot(variables.invoiceID).qr.billerIBAN).toBe("CH44 3199 9123 0008 8901 2");
+                    expect(variables.documents.getSnapshot(variables.invoiceID).qr.invoiceAmount).toBe(5000);
+                    expect(variables.documents.getSnapshot(variables.invoiceID).qr.debtorStreet).toBe("");
                     queryExecute(options={datasource: application.datasource}, sql="UPDATE system_settings SET strDefaultValue = '' WHERE strSettingVariable = 'settingIBANnumber'");
                     queryExecute(options={datasource: application.datasource}, params={id: {type: "integer", value: local.issuerID}}, sql="UPDATE customers SET strAddress = 'New issuer address' WHERE intCustomerID = :id");
                     expect(variables.documents.getSnapshot(variables.invoiceID).issuer.address).toBe("Teststrasse 1");

@@ -15,12 +15,12 @@ component extends="testbox.system.BaseSpec" {
 
         describe("Swiss QR-bill", () => {
 
-            it("fits on one page", () => {
+            it("fits on one page with a grouped amount", () => {
                 var qrData = {
                     billerIBAN: "CH44 3199 9123 0008 8901 2", billerQrReference: "RF18539007547034", billerName: "Test AG",
                     billerStreet: "Teststrasse", billerStreetNumber: "1", billerZip: "8000", billerCity: "Zürich", billerCountryIso: "CH",
                     debtorName: "Kunde GmbH", debtorStreet: "Bahnhofstrasse", debtorStreetNumber: "2", debtorZip: "3000", debtorCity: "Bern", debtorCountryIso: "CH",
-                    invoiceAmount: 123.45, invoiceCurrency: "CHF", invoiceAddText: "Invoice 1001", qrLogo: "", qrSize: 166
+                    invoiceAmount: 5000.00, invoiceCurrency: "CHF", invoiceAddText: "Invoice 1001", qrLogo: "", qrSize: 166
                 };
                 var slip = new backend.core.com.swissqrbill().generateSwissBill(qrData, "variable");
 

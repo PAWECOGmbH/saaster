@@ -408,11 +408,8 @@ component displayname="swissqrbill" output="false" {
         } else {
             local.errorMessage = "Please provide the debtor name!";
         }
-        if (structKeyExists(arguments.qrData, "debtorStreet") and len(trim(arguments.qrData.debtorStreet))) {
-            local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreet), 70);
-        } else {
-            local.errorMessage = "Debtor street is not defined or empty!";
-        }
+        // The Swiss QR-bill specification allows an empty debtor street field.
+        local.qrData["debtorStreet"] = left(trim(arguments.qrData.debtorStreet ?: ""), 70);
         if (structKeyExists(arguments.qrData, "debtorStreetNumber") and len(trim(arguments.qrData.debtorStreetNumber))) {
             local.qrData["debtorStreetNumber"] = left(trim(arguments.qrData.debtorStreetNumber), 5);
         } else {
@@ -643,7 +640,7 @@ component displayname="swissqrbill" output="false" {
 
     }
 
-    private number function formatAmount(required numeric amount, string output="qrcode") {
+    private string function formatAmount(required numeric amount, string output="qrcode") {
 
         // Prepare for qr code
         if (arguments.output eq "qrcode") {
