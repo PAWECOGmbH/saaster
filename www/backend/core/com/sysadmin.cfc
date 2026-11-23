@@ -1030,6 +1030,52 @@ component displayname="sysadmin" output="false" {
         return local.qSystemSettings;
     }
 
+    public struct function saveSystemSettings(required struct settings) {
+        transaction {
+            if (structKeyExists(arguments.settings, "settingSwissQrBill") or structKeyExists(arguments.settings, "settingIBANnumber")
+                or structKeyExists(arguments.settings, "settingQRreference")) {
+                local.saved = {};
+                local.rows = queryExecute(
+                    options = {datasource: application.datasource},
+                    sql = "SELECT strSettingVariable, strDefaultValue FROM system_settings
+                        WHERE strSettingVariable IN ('settingSwissQrBill', 'settingIBANnumber', 'settingQRreference') FOR UPDATE"
+                );
+                loop query="local.rows" {
+                    local.saved[local.rows.strSettingVariable] = local.rows.strDefaultValue ?: "";
+                }
+                local.iban = structKeyExists(arguments.settings, "settingIBANnumber") ? arguments.settings.settingIBANnumber : (local.saved.settingIBANnumber ?: "");
+                local.reference = structKeyExists(arguments.settings, "settingQRreference") ? arguments.settings.settingQRreference : (local.saved.settingQRreference ?: "");
+                local.enabled = structKeyExists(arguments.settings, "settingSwissQrBill") ? arguments.settings.settingSwissQrBill : (local.saved.settingSwissQrBill ?: "0");
+                local.detailsChanged = compare(local.iban, local.saved.settingIBANnumber ?: "") neq 0
+                    or compare(local.reference, local.saved.settingQRreference ?: "") neq 0;
+
+                // Disabled QR billing may retain its saved details or clear both fields.
+                if (local.enabled eq "1" or (local.detailsChanged and len(trim(local.iban & local.reference)))) {
+                    local.payment = new backend.core.com.swissqrbill().validatePaymentDetails(local.iban, local.reference);
+                    if (!local.payment.success) {
+                        return {
+                            success: false, message: local.payment.message, iban: local.iban, reference: local.reference,
+                            enabled: local.enabled, roundFactor: arguments.settings.settingRoundFactor ?: ""
+                        };
+                    }
+                }
+            }
+
+            loop list=arguments.settings.fieldnames item="local.setting" {
+                if (listFindNoCase("edit_sysadmin_settings,csrf_token,context_token", local.setting)) continue;
+                queryExecute(
+                    options = {datasource: application.datasource},
+                    params = {
+                        variable: {type: "varchar", value: local.setting},
+                        value: {type: "varchar", value: arguments.settings[local.setting]}
+                    },
+                    sql = "UPDATE system_settings SET strDefaultValue = :value WHERE strSettingVariable = :variable"
+                );
+            }
+        }
+        return {success: true};
+    }
+
     public query function getLanguages(){
 
         local.qLanguages = queryExecute (

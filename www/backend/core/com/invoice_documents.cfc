@@ -143,7 +143,8 @@ component {
             local.logoWidth = min(180, local.logoImage.width);
             local.logoSize = "width: #local.logoWidth#px; height: #round(local.logoImage.height * local.logoWidth / local.logoImage.width)#px;";
             local.snapshot.logoURL = "data:image/png;base64," & toBase64(imageGetBlob(local.logoImage));
-            if (application.objSysadmin.getSystemSetting("settingSwissQrBill").strDefaultValue eq 1) {
+            if (local.snapshot.invoice.amountOpen gt 0 and listFindNoCase("CHF,EUR", local.snapshot.invoice.currency)
+                and application.objSysadmin.getSystemSetting("settingSwissQrBill").strDefaultValue eq 1) {
                 local.snapshot.qr = local.objInvoices.setSwissQrInvoiceStruct(local.snapshot.invoice.customerID, local.snapshot.invoice.amountOpen, local.snapshot.invoice.currency, local.snapshot.invoice.number);
             }
             include "invoice_document.cfm";
