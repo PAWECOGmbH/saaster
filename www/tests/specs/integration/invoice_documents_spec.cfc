@@ -123,6 +123,52 @@ component extends="tests.support.integration_spec" {
                 expect(structKeyExists(variables.invoices.getInvoiceData(variables.invoiceID), "number")).toBeFalse();
             });
 
+            it("renders and archives an EUR invoice without a payment slip when using a QR-IBAN", () => {
+                local.settings = {
+                    settingSwissQrBill: "1",
+                    settingIBANnumber: "CH4431999123000889012",
+                    settingQRreference: "210000000003139471430009017"
+                };
+                local.originalSettings = {};
+                loop collection=local.settings item="local.setting" {
+                    local.originalSettings[local.setting] = application.objSysadmin.getSystemSetting(local.setting).strDefaultValue;
+                }
+                try {
+                    loop collection=local.settings item="local.setting" {
+                        queryExecute(
+                            options={datasource: application.datasource},
+                            params={setting: {type: "varchar", value: local.setting}, value: {type: "varchar", value: local.settings[local.setting]}},
+                            sql="UPDATE system_settings SET strDefaultValue = :value WHERE strSettingVariable = :setting"
+                        );
+                    }
+                    queryExecute(
+                        options={datasource: application.datasource},
+                        params={id: {type: "integer", value: variables.invoiceID}},
+                        sql="UPDATE invoices SET strCurrency = 'EUR' WHERE intInvoiceID = :id"
+                    );
+                    cfhttp(url="http://127.0.0.1/tests/support/invoice_render_probe.cfm?view=print&invoiceID=#variables.invoiceID#&userID=#variables.user.userID#", result="local.preview", redirect=false, getAsBinary="yes");
+                    expect(local.preview.statusCode).toInclude("200");
+                    expect(local.preview.mimeType).toBe("application/pdf");
+                    cfpdf(action="getInfo", source=local.preview.fileContent, name="local.previewInfo");
+                    expect(local.previewInfo.totalPages).toBe(1);
+                    expect(variables.documents.isArchived(variables.invoiceID)).toBeFalse();
+
+                    variables.invoices.setInvoiceStatus(variables.invoiceID, 2);
+                    expect(variables.documents.isArchived(variables.invoiceID)).toBeTrue();
+                    expect(variables.documents.getSnapshot(variables.invoiceID)).notToHaveKey("qr");
+                    cfpdf(action="getInfo", source=variables.documents.download(variables.invoiceID), name="local.archivedInfo");
+                    expect(local.archivedInfo.totalPages).toBe(1);
+                } finally {
+                    loop collection=local.originalSettings item="local.setting" {
+                        queryExecute(
+                            options={datasource: application.datasource},
+                            params={setting: {type: "varchar", value: local.setting}, value: {type: "varchar", value: local.originalSettings[local.setting]}},
+                            sql="UPDATE system_settings SET strDefaultValue = :value WHERE strSettingVariable = :setting"
+                        );
+                    }
+                }
+            });
+
             it("includes the Swiss QR slip when the debtor street is empty and preserves it after issuance", () => {
                 local.originalSettings = {};
                 loop list="settingSwissQrBill,settingIBANnumber,settingQRreference" item="local.setting" {
