@@ -1,6 +1,6 @@
 
 <cfoutput>
-<ul class="navbar-nav" style="margin-right: 10px;">
+<ul class="navbar-nav me-md-2">
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
             <span class="nav-link-icon d-md-none d-lg-inline-block">

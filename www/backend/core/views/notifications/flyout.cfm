@@ -8,6 +8,8 @@
 
 </cfscript>
 
+<cfinclude template="../sysadmin_badge.cfm">
+
 <cfoutput>
 <div class="nav-item dropdown d-none d-md-flex me-3">
     <a href="##" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" aria-expanded="false">

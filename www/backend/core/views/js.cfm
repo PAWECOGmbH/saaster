@@ -5,7 +5,7 @@
 <script src="#assetUrl('/backend/dist/js/jquery-3.6.0.min.js')#"></script>
 
 <!--- Tabler JavaScripts (incl. Bootstrap 5.3; loaded after jQuery so the jQuery plugin bridge is registered) --->
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/js/tabler.min.js"></script>
 
 <!--- Drag'n'drop jQuery --->
 <script src="#assetUrl('/backend/dist/js/jquery-ui.min.js')#"></script>

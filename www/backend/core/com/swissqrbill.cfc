@@ -5,12 +5,12 @@ component displayname="swissqrbill" output="false" {
         return this;
     }
 
-    public any function generateSwissBill(required struct qrData, required string output) {
+    public any function generateSwissBill(required struct qrData, required string output, boolean omitInvalid = false) {
 
         // Get the validated qr data
         variables.qrData = validateData(arguments.qrData);
         if (!variables.qrData.success) {
-            return variables.qrData.message;
+            return arguments.omitInvalid ? "" : variables.qrData.message;
         }
 
         if (listFindNoCase("pdf,variable", arguments.output)) {
