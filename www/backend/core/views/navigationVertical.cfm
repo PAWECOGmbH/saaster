@@ -1,5 +1,15 @@
     <cfset qTenants = application.objCustomer.getAllTenants(session.user_id)>
 
+    <div class="d-none d-lg-flex align-items-center gap-1 border-bottom px-3 py-2">
+        <cfinclude template="sysadmin_badge.cfm">
+        <cfoutput>
+            <a href="#application.mainURL#/notifications" class="btn btn-icon btn-ghost-secondary" title="#encodeForHTMLAttribute(getTrans('titNotifications'))#">
+                <i class="ti ti-bell fs-3" aria-hidden="true"></i>
+                <span class="visually-hidden">#getTrans('titNotifications')#</span>
+            </a>
+        </cfoutput>
+    </div>
+
     <cfoutput>
     <div class="collapse navbar-collapse" id="navbar-menu">
     </cfoutput>
@@ -175,36 +185,31 @@
                 </cfif>
             </li>
         </ul>
+    </div>
 
-        <!--- User menu --->
-        <div class="nav-item dropdown d-none d-sm-none d-md-none d-lg-inline-block">
-
+    <div class="navbar-footer d-none d-lg-block py-2">
         <cfoutput>
-            <a class="nav-link dropdown-toggle" href="##navbar-third" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-                <span class="avatar avatar-sm newclass" style="background-image: url(#usersImgStruct.userImage#)" ></span>
-                <div class="d-none d-lg-block d-xl-block ps-2 newclass">
-                    <div>#encodeForHTML(session.user_name)#</div>
-                </div>
-            </a>
-
-            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-
-                <a class="dropdown-item" href="#application.mainURL#/account-settings">
-                    #getTrans('txtAccountSettings')#
-                </a>
-                <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
-                    #getTrans('txtMyProfile')#
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#application.mainURL#/global?logout">
-                    #getTrans('txtLogout')#
-                </a>
-
-            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item dropup">
+                    <a class="nav-link dropdown-toggle" href="##" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                        <span class="avatar avatar-sm" style="background-image: url(#usersImgStruct.userImage#)" aria-hidden="true"></span>
+                        <span class="nav-link-title">#encodeForHTML(session.user_name)#</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="#application.mainURL#/account-settings">
+                            #getTrans('txtAccountSettings')#
+                        </a>
+                        <a class="dropdown-item" href="#application.mainURL#/account-settings/my-profile">
+                            #getTrans('txtMyProfile')#
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#application.mainURL#/global?logout">
+                            #getTrans('txtLogout')#
+                        </a>
+                    </div>
+                </li>
+            </ul>
         </cfoutput>
-
-        </div>
-
     </div>
 
 

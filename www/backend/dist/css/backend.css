@@ -199,6 +199,75 @@ div.dashboard div.card-header label.form-check {
     }
 }
 
+.navbar .navbar-brand-image {
+    height: 2.5rem;
+    max-width: min(12rem, 48vw);
+    object-fit: contain;
+}
+
+.navbar-expand-md > .container-xl:has(> .backend-navbar-actions + .navbar-collapse) {
+    flex-wrap: wrap;
+}
+
+.navbar-expand-md > .container-xl > .backend-navbar-actions:has(+ .navbar-collapse) {
+    margin-inline-start: auto;
+}
+
+[data-bs-theme="dark"] .navbar-brand .backend-custom-logo {
+    background-color: var(--tblr-white);
+    border-radius: var(--tblr-border-radius);
+    padding: .125rem .25rem;
+    filter: none;
+}
+
+.navbar-overlap ~ .page-wrapper .page-header.text-white .breadcrumb a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.navbar-vertical .navbar-footer .dropdown-toggle::after {
+    margin-inline-start: auto;
+}
+
+@media (min-width: 992px) {
+    html:not([data-bs-navbar-position="combined"]) .page > .navbar-vertical:not(.navbar-end) ~ .page-wrapper {
+        --backend-content-margin-start: 0;
+    }
+
+    .page > .navbar-vertical.navbar-end ~ .page-wrapper {
+        --backend-content-margin-end: 0;
+    }
+
+    :is(.page-wrapper, .page-body, .footer) > .container-xl {
+        margin-inline: var(--backend-content-margin-start, auto) var(--backend-content-margin-end, auto);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .navbar .navbar-brand-image {
+        height: 2.25rem;
+    }
+
+    .navbar .navbar-nav.backend-navbar-actions {
+        align-items: center;
+        margin-inline-start: auto;
+        padding-inline: 0;
+    }
+
+    .navbar .backend-navbar-actions .navbar-nav {
+        padding-inline: 0;
+    }
+
+    .navbar .navbar-nav.backend-navbar-actions .nav-link {
+        padding-inline: .375rem;
+    }
+
+    .navbar .backend-navbar-actions .dropdown-menu {
+        inset-inline: auto 0;
+        transform: none;
+    }
+}
+
 /* Stack role descriptions on narrow screens so role names remain readable. */
 @media (max-width: 575.98px) {
     .membership-role-help-table,

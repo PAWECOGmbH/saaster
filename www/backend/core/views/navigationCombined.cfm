@@ -1,9 +1,8 @@
 <cfset qTenants = application.objCustomer.getAllTenants(session.user_id)>
 
-<cfscript>
-    usersImgStruct = application.objUser.getUserImage(session.user_id);
-    getSysadminData = application.objSysadmin.getSysAdminData();
-</cfscript>
+<cfsavecontent variable="notificationsFlyout">
+    <cfinclude template="notifications/flyout.cfm">
+</cfsavecontent>
 
     <cfoutput>
 
@@ -13,25 +12,15 @@
 
             <div class="#getLayout.layoutContainer#">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" >
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="#getLayout.layoutTitel#">
-                    <cfif len(trim(getSysadminData.logo))>
-                        <a href="#application.mainURL#/dashboard">
-                            <img src="/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
-                        </a>
-                    <cfelse>
-                        <a href="#application.mainURL#/dashboard">
-                            <img src="#getLayout.layoutLogo#" alt="logo" class="navbar-brand-image">
-                        </a>
-                    </cfif>
-
-                </div>
+                <cfinclude template="navbar_brand.cfm">
 
 
-                <div class="#getLayout.layoutDiv#">
+                <div class="#getLayout.layoutDiv# backend-navbar-actions">
+                    #notificationsFlyout#
 
                     <!--- Language changer --->
                     <div #getLayout.layoutClass#>
@@ -57,6 +46,9 @@
 
                         <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 
+                            <a class="dropdown-item d-md-none" href="#application.mainURL#/notifications">
+                                #getTrans('titNotifications')#
+                            </a>
                             <a class="dropdown-item" href="#application.mainURL#/account-settings">
                                 #getTrans('txtAccountSettings')#
                             </a>
@@ -267,16 +259,17 @@
 
 
 
-    <header class="navbar navbar-expand-md d-print-none d-none d-sm-none d-md-none d-lg-inline-block">
+    <header class="navbar navbar-expand-md d-print-none d-none d-lg-flex">
 
         <div class="container-xl">
 
             <cfoutput>
 
-            <div class="navbar-brand navbar-brand-autodark pe-0 pe-md-3">
+            <div class="navbar-brand pe-0 pe-md-3">
             </div>
 
             <div class="navbar-nav flex-row order-md-last">
+                #notificationsFlyout#
 
                 <!--- Language changer --->
                 <cfif structKeyExists(application, "allLanguages") and listLen(application.allLanguages) gt 1>

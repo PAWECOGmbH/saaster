@@ -14,24 +14,14 @@
 
         <div class="#getLayout.layoutContainer#">
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" >
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="##navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="#getLayout.layoutTitel#">
-                <cfif len(trim(getSysadminData.logo))>
-                    <a href="#application.mainURL#/dashboard" class="navbar-brand navbar-brand-autodark">
-                        <img src="/userdata/images/logos/#getSysadminData.logo#" class="navbar-brand-image" alt="Logo">
-                    </a>
-                <cfelse>
-                    <a href="#application.mainURL#/dashboard">
-                        <img src="#getLayout.layoutLogo#" alt="logo" class="navbar-brand-image">
-                    </a>
-                </cfif>
-            </div>
+            <cfinclude template="navbar_brand.cfm">
 
 
-            <div class="#getLayout.layoutDiv#">
+            <div class="#getLayout.layoutDiv# backend-navbar-actions">
 
                 <!--- Notifications --->
                 <cfinclude template="notifications/flyout.cfm">
@@ -60,6 +50,9 @@
 
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 
+                        <a class="dropdown-item d-md-none" href="#application.mainURL#/notifications">
+                            #getTrans('titNotifications')#
+                        </a>
                         <a class="dropdown-item" href="#application.mainURL#/account-settings">
                             #getTrans('txtAccountSettings')#
                         </a>
