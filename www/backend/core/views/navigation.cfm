@@ -1,6 +1,6 @@
-<div class="navbar-expand-md">
+<cfoutput>
+<div class="navbar-expand-md d-print-none"<cfif getLayout.layoutString eq "navbarDark"> data-bs-theme="dark"</cfif>>
     <div class="collapse navbar-collapse" id="navbar-menu">
-        <cfoutput>
         <div class="#getLayout.layoutNav#">
             <div class="#getLayout.layoutPage#">
             </cfoutput>

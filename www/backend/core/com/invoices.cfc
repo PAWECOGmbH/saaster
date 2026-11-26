@@ -1909,7 +1909,7 @@ component displayname="invoices" output="false" {
             local.qrDataSet['billerQrReference'] = application.objSysAdmin.getSystemSetting('settingQRreference').strDefaultValue;
 
             // Biler
-            local.qrDataSet['billerName'] = len(trim(local.billerData.companyName)) ? local.billerData.companyName : local.billerData.strContactPerson; // Company or Pre- and Lastname
+            local.qrDataSet['billerName'] = len(trim(local.billerData.companyName)) ? local.billerData.companyName : (local.billerData.contactPerson ?: "");
 
             // Separate house number from street
             local.street = reReplace(local.billerData.address, "\d+.*", "", "all");
