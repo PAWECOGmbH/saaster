@@ -27,7 +27,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -42,10 +42,10 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
-                local.struct['layoutLogo'] = '/assets/img/logo.svg';
+                local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
                 local.struct['layoutPage'] = 'container-xl';
                 local.struct['layoutPageHeader'] = 'page-header d-print-none';
                 local.struct['layoutPageFooter'] = 'container-xl';
@@ -56,7 +56,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<aside class="navbar navbar-vertical navbar-expand-lg navbar-transparent">';
                 local.struct['layoutHeaderEnd'] = '</aside>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark';
+                local.struct['layoutTitel'] = 'navbar-brand';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row d-lg-none';
                 local.struct['layoutClass'] = 'class="d-md-none"';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -70,7 +70,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">';
                 local.struct['layoutHeaderEnd'] = '</aside>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark';
+                local.struct['layoutTitel'] = 'navbar-brand';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row d-lg-none';
                 local.struct['layoutClass'] = 'class="d-md-none"';
                 local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
@@ -84,7 +84,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<aside class="navbar navbar-vertical navbar-end navbar-expand-lg">';
                 local.struct['layoutHeaderEnd'] = '</aside>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark';
+                local.struct['layoutTitel'] = 'navbar-brand';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row d-lg-none';
                 local.struct['layoutClass'] = 'class="d-md-none"';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -98,7 +98,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -112,7 +112,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">';
                 local.struct['layoutHeaderEnd'] = '</aside>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark';
+                local.struct['layoutTitel'] = 'navbar-brand';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row d-lg-none';
                 local.struct['layoutClass'] = 'class="d-md-none"';
                 local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
@@ -126,7 +126,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none" data-bs-theme="dark">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
@@ -140,7 +140,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md sticky-top d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -156,7 +156,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md navbar-overlap d-print-none" data-bs-theme="dark">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
@@ -170,7 +170,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';
@@ -184,7 +184,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">';
                 local.struct['layoutHeaderEnd'] = '</aside>';
                 local.struct['layoutContainer'] = 'container-fluid';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark';
+                local.struct['layoutTitel'] = 'navbar-brand';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row d-lg-none';
                 local.struct['layoutClass'] = 'class="d-md-none"';
                 local.struct['layoutLogo'] = '/assets/img/logo-withe.svg';
@@ -198,7 +198,7 @@ component displayname="layout" output="false" {
                 local.struct['layoutHeader'] = '<header class="navbar navbar-expand-md d-print-none">';
                 local.struct['layoutHeaderEnd'] ='</header>';
                 local.struct['layoutContainer'] = 'container-xl';
-                local.struct['layoutTitel'] = 'navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3';
+                local.struct['layoutTitel'] = 'navbar-brand d-none-navbar-horizontal pe-0 pe-md-3';
                 local.struct['layoutDiv'] = 'navbar-nav flex-row order-md-last';
                 local.struct['layoutNav'] = 'navbar';
                 local.struct['layoutLogo'] = '/assets/img/logo.svg';

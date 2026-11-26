@@ -2,7 +2,7 @@
 <cfset assetUrl = (path) => structKeyExists(application, "objGlobal") ? application.objGlobal.assetUrl(path) : path>
 <cfoutput>
 <!--- Main Tabler CSS --->
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/css/tabler.min.css" />
 
 <!--- Dropify --->
 <link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/dropify.min.css')#" />

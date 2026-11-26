@@ -144,11 +144,16 @@
     <cfoutput>#local.invoiceData#<cfdocumentitem type="footer">#local.invoiceDataFooter#</cfdocumentitem></cfoutput>
 </cfdocument>
 <cfif structKeyExists(local.snapshot, "qr")>
-    <cfset local.slip = new backend.core.com.swissqrbill().generateSwissBill(local.snapshot.qr, "variable")>
-    <cfif !isBinary(local.slip)><cfthrow type="InvoiceDocument.QR" message="Could not generate the invoice payment slip." detail="#local.slip#"></cfif>
-    <cfpdf action="merge" name="local.mergedPDF">
-        <cfpdfparam source="local.pdf">
-        <cfpdfparam source="local.slip">
-    </cfpdf>
-    <cfset local.pdf = local.mergedPDF>
+    <cfset local.slip = new backend.core.com.swissqrbill().generateSwissBill(qrData=local.snapshot.qr, output="variable", omitInvalid=true)>
+    <cfif isBinary(local.slip)>
+        <cfpdf action="merge" name="local.mergedPDF">
+            <cfpdfparam source="local.pdf">
+            <cfpdfparam source="local.slip">
+        </cfpdf>
+        <cfset local.pdf = local.mergedPDF>
+    <cfelseif len(local.slip)>
+        <cfthrow type="InvoiceDocument.QR" message="Could not generate the invoice payment slip." detail="#local.slip#">
+    <cfelse>
+        <cfset structDelete(local.snapshot, "qr")>
+    </cfif>
 </cfif>

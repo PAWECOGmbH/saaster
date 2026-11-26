@@ -39,6 +39,6 @@
         getCustomerData = application.objCustomer.getCustomerData(session.customer_id);
         qTenants = application.objCustomer.getAllTenants(session.user_id);
         include template="/#probePath#";
-        writeOutput('<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script></body></html>');
+        writeOutput('<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/js/tabler.min.js"></script></body></html>');
     }
 </cfscript>
