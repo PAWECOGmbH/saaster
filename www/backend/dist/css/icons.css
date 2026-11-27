@@ -2,3 +2,8 @@
 .ti::before {
     font-size: 1.2em;
 }
+
+/* Icons in avatars (icon tiles) follow Tabler's avatar icon size, like its SVG icons (.avatar .icon). */
+.avatar > .ti {
+    font-size: calc(var(--tblr-avatar-icon-size, 1.5rem) / 1.5);
+}

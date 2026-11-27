@@ -50,24 +50,27 @@
                     <div class="card-body">
                         <div class="list-group">
                             <cfif session.admin>
-                                <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
+                                <a href="#application.mainURL#/account-settings/company" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                    <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-building"></i></span>
+                                    <div>
                                         <h4 class="mb-1"><b>#getTrans('titMyCompany')#</b></h4>
+                                        <p class="mb-1">#getTrans('txtMyCompanyDescription')#</p>
                                     </div>
-                                    <p class="mb-1 ">#getTrans('txtMyCompanyDescription')#</p>
                                 </a>
                             </cfif>
-                            <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex justify-content-between">
+                            <a href="#application.mainURL#/account-settings/my-profile" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-user"></i></span>
+                                <div>
                                     <h4 class="mb-1"><b>#getTrans('txtEditProfile')#</b></h4>
+                                    <p class="mb-1">#getTrans('txtEditYourProfile')#</p>
                                 </div>
-                                <p class="mb-1 ">#getTrans('txtEditYourProfile')#</p>
                             </a>
-                            <a href="#application.mainURL#/account-settings/reset-password" class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex justify-content-between">
+                            <a href="#application.mainURL#/account-settings/reset-password" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-lock"></i></span>
+                                <div>
                                     <h4 class="mb-1"><b>#getTrans('titResetPassword')#</b></h4>
+                                    <p class="mb-1">#getTrans('txtResetOwnPassword')#</p>
                                 </div>
-                                <p class="mb-1 ">#getTrans('txtResetOwnPassword')#</p>
                             </a>
                         </div>
                     </div>
@@ -82,41 +85,46 @@
                         <div class="card-body">
                             <div class="list-group">
                                 <cfif showMemberships>
-                                    <a href="#application.mainURL#/account-settings/memberships" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
+                                    <a href="#application.mainURL#/account-settings/memberships" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                        <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-users-group"></i></span>
+                                        <div>
                                             <h4 class="mb-1"><b>#getTrans('titMemberships')#</b></h4>
+                                            <p class="mb-1">#getTrans('txtMembershipsDescription')#</p>
                                         </div>
-                                        <p class="mb-1">#getTrans('txtMembershipsDescription')#</p>
                                     </a>
                                 </cfif>
                                 <cfif not membershipOrganization.enabled>
-                                    <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
+                                    <a href="#application.mainURL#/account-settings/users" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                        <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-users"></i></span>
+                                        <div>
                                             <h4 class="mb-1"><b>#getTrans('titUser')#</b></h4>
+                                            <p class="mb-1">#getTrans('txtAddOrEditUser')#</p>
                                         </div>
-                                        <p class="mb-1 ">#getTrans('txtAddOrEditUser')#</p>
                                     </a>
                                 </cfif>
                                 <cfif showTenantManagement>
-                                    <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
+                                    <a href="#application.mainURL#/account-settings/tenants" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                        <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-building-community"></i></span>
+                                        <div>
                                             <h4 class="mb-1"><b>#getTrans('titMandanten')#</b></h4>
+                                            <p class="mb-1">#getTrans('txtAddOrEditTenants')#</p>
                                         </div>
-                                        <p class="mb-1 ">#getTrans('txtAddOrEditTenants')#</p>
                                     </a>
                                 </cfif>
-                                <a href="#application.mainURL#/account-settings/invoices" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex justify-content-between">
+                                <a href="#application.mainURL#/account-settings/invoices" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                    <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-file-invoice"></i></span>
+                                    <div>
                                         <h4 class="mb-1"><b>#getTrans('titInvoices')#</b></h4>
+                                        <p class="mb-1">#getTrans('txtViewInvoices')#</p>
                                     </div>
-                                    <p class="mb-1 ">#getTrans('txtViewInvoices')#</p>
                                 </a>
                                 <cfif session.superadmin>
-                                    <a href="#application.mainURL#/account-settings/payment" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
+                                    <a href="#application.mainURL#/account-settings/payment" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                        <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-credit-card"></i></span>
+                                        <div>
                                             <h4 class="mb-1"><b>#getTrans('titPaymentSettings')#</b></h4>
+                                            <p class="mb-1">#getTrans('txtPaymentSettings')#</p>
                                         </div>
-                                        <p class="mb-1 ">#getTrans('txtPaymentSettings')#</p>
                                     </a>
                                 </cfif>
                             </div>
@@ -147,11 +155,12 @@
 
                                             <cfif session.currentPlan.status neq "payment">
 
-                                                <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action flex-column align-items-start">
-                                                    <div class="d-flex justify-content-between">
+                                                <a href="#application.mainURL#/account-settings/plans" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                                    <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-package"></i></span>
+                                                    <div>
                                                         <h4 class="mb-1"><b>#getTrans('titPlans')#</b></h4>
+                                                        <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
                                                     </div>
-                                                    <p class="mb-1">#getTrans('txtUpdatePlan')#</p>
                                                 </a>
 
                                             </cfif>
@@ -177,11 +186,12 @@
 
                                 <cfif arrayLen(moduleArray)>
 
-                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action flex-column align-items-start">
-                                        <div class="d-flex justify-content-between">
+                                    <a href="#application.mainURL#/account-settings/modules" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                                        <span class="avatar avatar-sm bg-accent-lt flex-shrink-0" aria-hidden="true"><i class="ti ti-puzzle"></i></span>
+                                        <div>
                                             <h4 class="mb-1"><b>#getTrans('titModules')#</b></h4>
+                                            <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
                                         </div>
-                                        <p class="mb-1">#getTrans('txtAddOrEditModules')#</p>
                                     </a>
 
                                 </cfif>

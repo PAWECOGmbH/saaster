@@ -23,9 +23,17 @@
     invoiceBcc = application.objSettings.getSetting('settingInvoiceBcc');
     yearlyPricePerMonth = application.objSettings.getSetting('settingYearlyPricePerMonth');
     qLayout = objSysadmin.getSystemSetting('settingLayout');
-    // Saved theme values, normalized like on every backend page (theme.cfc)
-    objTheme = application.objTheme;
+    // Saved theme values, normalized like on every backend page (theme.cfc; a fresh instance also works before a reinit)
+    objTheme = new backend.core.com.theme();
     theme = objTheme.themeSetting(application.objSettings.initSystemSettings());
+    themeColors = [
+        {setting: "settingThemePrimary", colorSetting: "settingColorPrimary", id: "theme-primary", label: "Primary color",
+            hint: "For everything clickable: buttons, links, active navigation, checkboxes and focus."},
+        {setting: "settingThemeAccent", colorSetting: "settingColorAccent", id: "theme-accent", label: "Accent color",
+            hint: "Highlights that are not clickable: page title marker, dashboard widgets, initials and icon tiles."},
+        {setting: "settingThemeAccent2", colorSetting: "settingColorAccent2", id: "theme-accent2", label: "Second accent color",
+            hint: "Optional, used together with the accent color in its gradients. Without it, the accent color is used alone."}
+    ];
     themeSelects = [
         {setting: "settingThemeNavbar", label: "Navigation color", hint: "Colors the top navigation or the sidebar with the primary color. Light primary colors (Yellow, Lime, Green or a light custom color) keep the layout colors so that the navigation stays readable."},
         {setting: "settingThemeBase", label: "Gray tone", hint: "Tints backgrounds, borders and muted text."},
@@ -51,6 +59,12 @@
 
 
 <cfoutput>
+<!--- Tabler's color picker: Coloris in the version of Tabler's package.json, styled by tabler-vendors.css.
+      Loaded here only, as tabler-vendors.css also restyles Tom Select, Litepicker and the editor.
+      Keep the Tabler version equal to css.cfm (checked by tests/specs/unit/theme_spec.cfc). --->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.1/dist/coloris.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/css/tabler-vendors.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@melloware/coloris@0.25.1/dist/umd/coloris.min.js"></script>
 <div class="page-wrapper">
 
     <div class="#getLayout.layoutPage#">
@@ -256,31 +270,43 @@
 
                             <h3>Theme settings</h3>
                             <div class="border align-baseline p-3">
-                                <div class="mb-4">
-                                    <div class="form-label" id="theme-primary-label">Primary color</div>
-                                    <div class="row g-2 align-items-center" role="radiogroup" aria-labelledby="theme-primary-label">
-                                        <cfloop array="#objTheme.choices('settingThemePrimary')#" item="themeChoice">
-                                            <cfif themeChoice.value neq "custom">
-                                                <div class="col-auto">
-                                                    <label class="form-colorinput" title="#encodeForHTMLAttribute(themeChoice.label)#">
-                                                        <input name="settingThemePrimary" type="radio" value="#encodeForHTMLAttribute(themeChoice.value)#" class="form-colorinput-input" aria-label="#encodeForHTMLAttribute(themeChoice.label)#" <cfif theme.settingThemePrimary eq themeChoice.value>checked</cfif>>
-                                                        <span class="form-colorinput-color bg-#encodeForHTMLAttribute(themeChoice.value)#"></span>
-                                                    </label>
+                                <cfloop array="#themeColors#" item="themeColor">
+                                    <div class="mb-4">
+                                        <div class="form-label" id="#themeColor.id#-label">#themeColor.label#</div>
+                                        <div class="row g-2 align-items-center" role="radiogroup" aria-labelledby="#themeColor.id#-label">
+                                            <cfloop array="#objTheme.choices(themeColor.setting)#" item="themeChoice">
+                                                <cfif themeChoice.value eq "none">
+                                                    <div class="col-auto">
+                                                        <label class="form-colorinput form-colorinput-light" title="None">
+                                                            <input name="#themeColor.setting#" type="radio" value="none" class="form-colorinput-input" aria-label="None" <cfif theme[themeColor.setting] eq "none">checked</cfif>>
+                                                            <span class="form-colorinput-color theme-swatch-none"></span>
+                                                        </label>
+                                                    </div>
+                                                <cfelseif themeChoice.value neq "custom">
+                                                    <div class="col-auto">
+                                                        <label class="form-colorinput" title="#encodeForHTMLAttribute(themeChoice.label)#">
+                                                            <input name="#themeColor.setting#" type="radio" value="#encodeForHTMLAttribute(themeChoice.value)#" class="form-colorinput-input" aria-label="#encodeForHTMLAttribute(themeChoice.label)#" <cfif theme[themeColor.setting] eq themeChoice.value>checked</cfif>>
+                                                            <span class="form-colorinput-color bg-#encodeForHTMLAttribute(themeChoice.value)#"></span>
+                                                        </label>
+                                                    </div>
+                                                </cfif>
+                                            </cfloop>
+                                            <div class="col-auto d-flex align-items-center gap-2 ms-sm-2 ps-sm-3 border-start">
+                                                <label class="form-colorinput" title="Custom color">
+                                                    <input id="#themeColor.id#-custom" name="#themeColor.setting#" type="radio" value="custom" class="form-colorinput-input" aria-label="Custom color" <cfif theme[themeColor.setting] eq "custom">checked</cfif>>
+                                                    <!--- themeSetting() only returns validated #rrggbb values --->
+                                                    <span class="form-colorinput-color" style="background-color: #theme[themeColor.colorSetting]#"></span>
+                                                </label>
+                                                <label class="small mb-0" for="#themeColor.id#-custom-color">Custom color</label>
+                                                <div class="theme-color-field" data-theme-custom-color="#themeColor.id#-custom">
+                                                    <input type="text" id="#themeColor.id#-custom-color" class="form-control" name="#themeColor.colorSetting#" value="#encodeForHTMLAttribute(theme[themeColor.colorSetting])#" data-coloris pattern="##[0-9a-fA-F]{6}" maxlength="7" autocomplete="off" spellcheck="false" title="Hex color, e.g. ##1d3557">
                                                 </div>
-                                            </cfif>
-                                        </cfloop>
-                                        <div class="col-auto d-flex align-items-center gap-2 ms-sm-2 ps-sm-3 border-start">
-                                            <label class="form-colorinput" title="Custom color">
-                                                <input id="theme-primary-custom" name="settingThemePrimary" type="radio" value="custom" class="form-colorinput-input" aria-label="Custom color" <cfif theme.settingThemePrimary eq "custom">checked</cfif>>
-                                                <!--- themeSetting() only returns a validated #rrggbb value --->
-                                                <span class="form-colorinput-color" style="background-color: #theme.settingColorPrimary#"></span>
-                                            </label>
-                                            <label class="small mb-0" for="theme-primary-custom-color">Custom color</label>
-                                            <input type="color" id="theme-primary-custom-color" class="form-control form-control-color" name="settingColorPrimary" value="#encodeForHTMLAttribute(theme.settingColorPrimary)#" data-theme-custom-color="theme-primary-custom">
+                                            </div>
                                         </div>
+                                        <p class="form-hint mt-2">#themeColor.hint#</p>
                                     </div>
-                                    <p class="form-hint mt-2">Tabler colors are tuned for light and dark mode. A custom color is used as chosen; text on it turns dark when its contrast with white is too low.</p>
-                                </div>
+                                </cfloop>
+                                <p class="form-hint mb-4">Tabler colors are tuned for light and dark mode. A custom color is used as chosen; text on it turns dark when its contrast with white is too low.</p>
                                 <div class="row g-3">
                                     <cfloop array="#themeSelects#" item="themeSelect">
                                         <div class="col-md-6 col-xl-3">

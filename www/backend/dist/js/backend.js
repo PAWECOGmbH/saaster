@@ -850,13 +850,28 @@ $(document).ready(function() {
 
 
 });
-// Theme settings: opening or changing the custom color picker selects the custom option and updates its swatch.
+// Theme settings: Tabler's color picker (Coloris, loaded by the settings page) for the custom colors.
+$(function () {
+    if (!window.Coloris || !document.querySelector('[data-coloris]')) return;
+    window.Coloris({
+        el: '[data-coloris]',
+        themeMode: document.querySelector('[data-bs-theme="dark"] [data-coloris]') ? 'dark' : 'light',
+        format: 'hex',
+        alpha: false
+    });
+});
+// Enter confirms a color: Coloris then returns the focus to the field, which must not submit the whole form.
+$(document).on('keydown keypress', '[data-coloris]', function (event) {
+    if (event.key === 'Enter') event.preventDefault();
+});
+// Opening or changing a custom color selects the custom option and updates its swatch.
 $(document).on('click input', '[data-theme-custom-color]', function () {
     var option = document.getElementById(this.dataset.themeCustomColor);
-    if (!option) return;
+    var input = this.querySelector('input');
+    if (!option || !input) return;
     option.checked = true;
     var swatch = option.parentElement.querySelector('.form-colorinput-color');
-    if (swatch) swatch.style.backgroundColor = this.value;
+    if (swatch && /^#[0-9a-f]{6}$/i.test(input.value)) swatch.style.backgroundColor = input.value;
 });
 // Fetch customer details only when a tab is opened; retain the loaded panel until reload.
 $(function () {

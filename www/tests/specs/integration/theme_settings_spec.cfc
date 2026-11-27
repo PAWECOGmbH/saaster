@@ -5,7 +5,7 @@ component extends="tests.support.integration_spec" {
         Tabler theme attributes on <html>, and the settings page shows the saved theme.
     */
 
-    variables.themeSettings = "settingThemePrimary,settingColorPrimary,settingThemeNavbar,settingThemeBase,settingThemeRadius,settingThemeFont";
+    variables.themeSettings = "settingThemePrimary,settingColorPrimary,settingThemeAccent,settingColorAccent,settingThemeAccent2,settingColorAccent2,settingThemeNavbar,settingThemeBase,settingThemeRadius,settingThemeFont";
 
     function run() {
 
@@ -31,6 +31,10 @@ component extends="tests.support.integration_spec" {
                     fieldnames: variables.themeSettings,
                     settingThemePrimary: "Green",
                     settingColorPrimary: "##123456;} body {display: none",
+                    settingThemeAccent: "custom",
+                    settingColorAccent: "##AE3EC9",
+                    settingThemeAccent2: "magenta",
+                    settingColorAccent2: "</style>",
                     settingThemeNavbar: "primary",
                     settingThemeBase: "unknown",
                     settingThemeRadius: "1.5",
@@ -40,6 +44,10 @@ component extends="tests.support.integration_spec" {
 
                 expect(local.saved.settingThemePrimary).toBe("green");
                 expect(local.saved.settingColorPrimary).toBe("##206bc4");
+                expect(local.saved.settingThemeAccent).toBe("custom");
+                expect(local.saved.settingColorAccent).toBe("##ae3ec9");
+                expect(local.saved.settingThemeAccent2).toBe("none");
+                expect(local.saved.settingColorAccent2).toBe("##0ca678");
                 expect(local.saved.settingThemeNavbar).toBe("primary");
                 expect(local.saved.settingThemeBase).toBe("neutral");
                 expect(local.saved.settingThemeRadius).toBe("1.5");
@@ -89,10 +97,26 @@ component extends="tests.support.integration_spec" {
                 expect(local.page.fileContent).toInclude("--tblr-primary-fg: var(--tblr-dark);");
             });
 
+            it("put the accent colors on backend pages and the account settings tiles", () => {
+                application.themeStruct = application.objTheme.themeSetting({
+                    settingThemeAccent: "pink", settingThemeAccent2: "custom", settingColorAccent2: "##0CA678"
+                });
+                local.page = renderPage("account-settings", createOwner().userID);
+                local.html = reMatch("<html[^>]*>", local.page.fileContent);
+
+                expect(local.page.statusCode).toInclude("200", left(local.page.fileContent, 500));
+                expect(local.html[1]).toInclude("data-saaster-accent");
+                expect(local.page.fileContent).toInclude("--saaster-accent: var(--tblr-pink);");
+                expect(local.page.fileContent).toInclude("--saaster-accent-2: ##0ca678;");
+                expect(local.page.fileContent).toInclude('class="avatar avatar-sm bg-accent-lt flex-shrink-0"');
+            });
+
             it("are shown with their saved values to the sysadmin", () => {
                 writeSetting("settingThemePrimary", "custom");
                 writeSetting("settingColorPrimary", "##1f8a70");
                 writeSetting("settingThemeRadius", "2");
+                writeSetting("settingThemeAccent", "orange");
+                writeSetting("settingThemeAccent2", "none");
                 local.sysadmin = variables.fixtures.createUser(
                     customerID=variables.fixtures.createCustomer(), sysAdmin=true, superAdmin=true
                 );
@@ -103,6 +127,9 @@ component extends="tests.support.integration_spec" {
                 expect(local.page.fileContent).toInclude('name="settingColorPrimary" value="##1f8a70"');
                 expect(local.page.fileContent).toInclude('<option value="2" selected>');
                 expect(local.page.fileContent).toInclude('class="form-colorinput-color bg-teal"');
+                expect(reFind('name="settingThemeAccent" type="radio" value="orange"[^>]*checked', local.page.fileContent)).toBeGT(0, "Accent color selected");
+                expect(reFind('name="settingThemeAccent2" type="radio" value="none"[^>]*checked', local.page.fileContent)).toBeGT(0, "No second accent color");
+                expect(local.page.fileContent).toInclude('name="settingColorAccent2" value="##0ca678"');
                 expect(local.page.fileContent).notToInclude("settingColorSecondary");
             });
 
