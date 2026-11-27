@@ -23,8 +23,15 @@
     invoiceBcc = application.objSettings.getSetting('settingInvoiceBcc');
     yearlyPricePerMonth = application.objSettings.getSetting('settingYearlyPricePerMonth');
     qLayout = objSysadmin.getSystemSetting('settingLayout');
-    qColorPrimary = objSysadmin.getSystemSetting('settingColorPrimary');
-    qColorSecondary = objSysadmin.getSystemSetting('settingColorSecondary');
+    // Saved theme values, normalized like on every backend page (theme.cfc)
+    objTheme = application.objTheme;
+    theme = objTheme.themeSetting(application.objSettings.initSystemSettings());
+    themeSelects = [
+        {setting: "settingThemeNavbar", label: "Navigation color", hint: "Colors the top navigation or the sidebar with the primary color. Light primary colors (Yellow, Lime, Green or a light custom color) keep the layout colors so that the navigation stays readable."},
+        {setting: "settingThemeBase", label: "Gray tone", hint: "Tints backgrounds, borders and muted text."},
+        {setting: "settingThemeRadius", label: "Corner radius", hint: "Applies to buttons, cards, inputs and badges."},
+        {setting: "settingThemeFont", label: "Font", hint: "Font family of the backend."}
+    ];
     qSwissQrBill = objSysadmin.getSystemSetting('settingSwissQrBill');
     qSwissQrIBAN = objSysadmin.getSystemSetting('settingIBANnumber');
     qSwissQrRef = objSysadmin.getSystemSetting('settingQRreference');
@@ -247,19 +254,45 @@
                         </div>
                         <div class="card-body">
 
-                            <h3>Button settings</h3>
+                            <h3>Theme settings</h3>
                             <div class="border align-baseline p-3">
-                                <div class="row">
-                                    <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
-                                        <p class="no-margin">#encodeForHTML(qColorPrimary.strDescription)#</p>
-                                        <input type="color" class="form-control form-control-color color-width" name="#encodeForHTML(qColorPrimary.strSettingVariable)#" value="#encodeForHTML(qColorPrimary.strDefaultValue)#">
+                                <div class="mb-4">
+                                    <div class="form-label" id="theme-primary-label">Primary color</div>
+                                    <div class="row g-2 align-items-center" role="radiogroup" aria-labelledby="theme-primary-label">
+                                        <cfloop array="#objTheme.choices('settingThemePrimary')#" item="themeChoice">
+                                            <cfif themeChoice.value neq "custom">
+                                                <div class="col-auto">
+                                                    <label class="form-colorinput" title="#encodeForHTMLAttribute(themeChoice.label)#">
+                                                        <input name="settingThemePrimary" type="radio" value="#encodeForHTMLAttribute(themeChoice.value)#" class="form-colorinput-input" aria-label="#encodeForHTMLAttribute(themeChoice.label)#" <cfif theme.settingThemePrimary eq themeChoice.value>checked</cfif>>
+                                                        <span class="form-colorinput-color bg-#encodeForHTMLAttribute(themeChoice.value)#"></span>
+                                                    </label>
+                                                </div>
+                                            </cfif>
+                                        </cfloop>
+                                        <div class="col-auto d-flex align-items-center gap-2 ms-sm-2 ps-sm-3 border-start">
+                                            <label class="form-colorinput" title="Custom color">
+                                                <input id="theme-primary-custom" name="settingThemePrimary" type="radio" value="custom" class="form-colorinput-input" aria-label="Custom color" <cfif theme.settingThemePrimary eq "custom">checked</cfif>>
+                                                <!--- themeSetting() only returns a validated #rrggbb value --->
+                                                <span class="form-colorinput-color" style="background-color: #theme.settingColorPrimary#"></span>
+                                            </label>
+                                            <label class="small mb-0" for="theme-primary-custom-color">Custom color</label>
+                                            <input type="color" id="theme-primary-custom-color" class="form-control form-control-color" name="settingColorPrimary" value="#encodeForHTMLAttribute(theme.settingColorPrimary)#" data-theme-custom-color="theme-primary-custom">
+                                        </div>
                                     </div>
-                                    <div class="col-lg-1"></div>
-                                    <div class="col-lg-3 mb-1 d-flex justify-content-between align-items-center">
-                                        <p class="no-margin">#encodeForHTML(qColorSecondary.strDescription)#</p>
-                                        <input type="color" class="form-control form-control-color color-width" name="#encodeForHTML(qColorSecondary.strSettingVariable)#" value="#encodeForHTML(qColorSecondary.strDefaultValue)#">
-                                    </div>
-                                    <div class="col-lg-5"></div>
+                                    <p class="form-hint mt-2">Tabler colors are tuned for light and dark mode. A custom color is used as chosen; text on it turns dark when its contrast with white is too low.</p>
+                                </div>
+                                <div class="row g-3">
+                                    <cfloop array="#themeSelects#" item="themeSelect">
+                                        <div class="col-md-6 col-xl-3">
+                                            <label class="form-label" for="#themeSelect.setting#">#themeSelect.label#</label>
+                                            <select id="#themeSelect.setting#" name="#themeSelect.setting#" class="form-select">
+                                                <cfloop array="#objTheme.choices(themeSelect.setting)#" item="themeChoice">
+                                                    <option value="#encodeForHTMLAttribute(themeChoice.value)#" <cfif theme[themeSelect.setting] eq themeChoice.value>selected</cfif>>#encodeForHTML(themeChoice.label)#</option>
+                                                </cfloop>
+                                            </select>
+                                            <p class="form-hint">#themeSelect.hint#</p>
+                                        </div>
+                                    </cfloop>
                                 </div>
                             </div>
                         </div>

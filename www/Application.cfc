@@ -72,6 +72,7 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
         application.objRequestAccess = new backend.core.com.request_access();
         application.objCustomer = new backend.core.com.customer();
         application.objLayout = new backend.core.com.layout();
+        application.objTheme = new backend.core.com.theme();
         application.objNotifications = new backend.core.com.notifications();
         application.objSysadmin = new backend.core.com.sysadmin();
         application.objMeta = new backend.core.com.meta();
@@ -99,6 +100,9 @@ component displayname="Application" output="false" extends="backend.myapp.ownApp
 
         // Load layout setting struct and save it into the application scope
         application.layoutStruct = application.objLayout.layoutSetting(application.systemSettingStruct.settingLayout);
+
+        // Load theme settings (Tabler theme attributes and custom primary color) and save them into the application scope
+        application.themeStruct = application.objTheme.themeSetting(application.systemSettingStruct);
 
         // Load JS and CSS path
         application.assetFiles = application.objCoreUtil.getAssets(variables.activeTheme);

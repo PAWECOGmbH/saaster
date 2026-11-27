@@ -17,6 +17,8 @@ component displayname="layout" output="false" {
         local.struct['layoutPageHeader'] = '';
         local.struct['layoutPageFooter'] = '';
         local.struct['layoutDivStart'] = '';
+        // Wrapper start when the theme colors the navigation with the primary color (theme.cfc)
+        local.struct['layoutDivStartPrimaryNavbar'] = '';
         local.struct['layoutDivEnd'] = '';
         local.struct['horizontal'] = '';
 
@@ -148,6 +150,8 @@ component displayname="layout" output="false" {
                 local.struct['layoutPageHeader'] = 'page-header d-print-none';
                 local.struct['layoutPageFooter'] = 'container-xl';
                 local.struct['layoutDivStart'] = '<div class="sticky-top">';
+                // Tabler colors a primary navbar only as direct child of .page, so the wrapper provides its dark scope
+                local.struct['layoutDivStartPrimaryNavbar'] = '<div class="sticky-top" data-bs-theme="dark">';
                 local.struct['layoutDivEnd'] = '</div>';
                 local.struct[arguments.layoutValue] = 'checked';
                 break;

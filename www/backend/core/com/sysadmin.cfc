@@ -1061,13 +1061,16 @@ component displayname="sysadmin" output="false" {
                 }
             }
 
+            // Theme settings end up as attributes and CSS in every backend page, so only allowed values are stored
+            local.objTheme = new backend.core.com.theme();
+
             loop list=arguments.settings.fieldnames item="local.setting" {
                 if (listFindNoCase("edit_sysadmin_settings,csrf_token,context_token", local.setting)) continue;
                 queryExecute(
                     options = {datasource: application.datasource},
                     params = {
                         variable: {type: "varchar", value: local.setting},
-                        value: {type: "varchar", value: arguments.settings[local.setting]}
+                        value: {type: "varchar", value: local.objTheme.normalizeValue(local.setting, arguments.settings[local.setting])}
                     },
                     sql = "UPDATE system_settings SET strDefaultValue = :value WHERE strSettingVariable = :variable"
                 );

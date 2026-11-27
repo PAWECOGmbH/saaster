@@ -850,6 +850,14 @@ $(document).ready(function() {
 
 
 });
+// Theme settings: opening or changing the custom color picker selects the custom option and updates its swatch.
+$(document).on('click input', '[data-theme-custom-color]', function () {
+    var option = document.getElementById(this.dataset.themeCustomColor);
+    if (!option) return;
+    option.checked = true;
+    var swatch = option.parentElement.querySelector('.form-colorinput-color');
+    if (swatch) swatch.style.backgroundColor = this.value;
+});
 // Fetch customer details only when a tab is opened; retain the loaded panel until reload.
 $(function () {
     var ui = window.bootstrap || window.tabler;

@@ -20,7 +20,7 @@ Use a project-specific name for new files and module prefixes. The existing file
 
 Keep lifecycle work appropriate to its frequency: application startup runs again after reinitialization, session startup runs for new sessions, and request hooks run on requests. Do not run schema migrations in these hooks. After changes, log in as a Sysadmin and reload configuration and permission manifests with `/index.cfm?reinit=1`.
 
-Use explicit `<cfoutput>` blocks around dynamic HTML in included templates. Put custom styling in project stylesheets and use the locally hosted Tabler icons. See [AGENTS.md](../AGENTS.md) for coding conventions, [request access](request-access.md) for routed actions, and [account deletion](module-account-deletion.md) for application/module cleanup hooks.
+Use explicit `<cfoutput>` blocks around dynamic HTML in included templates. Put custom styling in project stylesheets and use the locally hosted Tabler icons. Backend colors come from the Sysadmin theme settings (primary color, navigation color, gray tone, corner radius, font). They use Tabler's own theme attributes and `--tblr-primary` tokens, so Tabler stays unmodified on the CDN; use `var(--tblr-primary)` in project styles instead of fixed brand colors. When updating Tabler, load `tabler.min.css` and `tabler-themes.min.css` in the same version (`www/backend/core/views/css.cfm`) and check the attribute values in `www/backend/core/com/theme.cfc`. See [AGENTS.md](../AGENTS.md) for coding conventions, [request access](request-access.md) for routed actions, and [account deletion](module-account-deletion.md) for application/module cleanup hooks.
 
 ## Project migrations
 

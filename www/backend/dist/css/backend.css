@@ -115,10 +115,6 @@ div.dashboard div.card-header label.form-check {
     margin: 0;
 }
 
-.color-width{
-    width: 5rem;
-}
-
 .no-max-width{
     max-width: revert;
 }
@@ -199,6 +195,18 @@ div.dashboard div.card-header label.form-check {
     }
 }
 
+/* Primary navbar (data-bs-navbar-theme): Tabler only colors navbars that are direct children of .page.
+   The sticky layout wraps them in a dark scoped .sticky-top (layout.cfc), and the transparent sidebar
+   would otherwise keep its transparent background (Tabler: !important) under light navigation text. */
+html[data-bs-navbar-theme="primary"] .page > .sticky-top .navbar {
+    --tblr-navbar-bg: var(--tblr-primary);
+    --tblr-navbar-border-color: transparent;
+}
+
+html[data-bs-navbar-theme="primary"] .page > .navbar.navbar-transparent {
+    background: var(--tblr-navbar-bg) !important;
+}
+
 .navbar .navbar-brand-image {
     height: 2.5rem;
     max-width: min(12rem, 48vw);
@@ -213,7 +221,8 @@ div.dashboard div.card-header label.form-check {
     margin-inline-start: auto;
 }
 
-[data-bs-theme="dark"] .navbar-brand .backend-custom-logo {
+[data-bs-theme="dark"] .navbar-brand .backend-custom-logo,
+html[data-bs-navbar-theme="primary"] .navbar-brand .backend-custom-logo {
     background-color: var(--tblr-white);
     border-radius: var(--tblr-border-radius);
     padding: .125rem .25rem;

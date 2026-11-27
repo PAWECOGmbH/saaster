@@ -1,7 +1,7 @@
 <cfoutput>
 
 <!doctype html>
-<html lang="#session.lng#"<cfif getLayout.layoutString eq "combined"> data-bs-navbar-position="combined"</cfif>>
+<html lang="#session.lng#"<cfif getLayout.layoutString eq "combined"> data-bs-navbar-position="combined"</cfif>#application.themeStruct.htmlAttributes ?: ""#>
 
 <cfinclude template="/backend/core/views/head.cfm">
 
