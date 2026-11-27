@@ -8,7 +8,11 @@
 <cfif getLayout.layoutString eq "combined">
     <cfinclude template="navigationCombined.cfm">
 <cfelse>
-    #getLayout.layoutDivStart#
+    <cfif len(getLayout.layoutDivStartPrimaryNavbar ?: "") and (application.themeStruct.primaryNavbar ?: false)>
+        #getLayout.layoutDivStartPrimaryNavbar#
+    <cfelse>
+        #getLayout.layoutDivStart#
+    </cfif>
 
     #getLayout.layoutHeader#
 

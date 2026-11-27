@@ -115,10 +115,6 @@ div.dashboard div.card-header label.form-check {
     margin: 0;
 }
 
-.color-width{
-    width: 5rem;
-}
-
 .no-max-width{
     max-width: revert;
 }
@@ -199,6 +195,105 @@ div.dashboard div.card-header label.form-check {
     }
 }
 
+/* Primary navbar (data-bs-navbar-theme): Tabler only colors navbars that are direct children of .page.
+   The sticky layout wraps them in a dark scoped .sticky-top (layout.cfc), and the transparent sidebar
+   would otherwise keep its transparent background (Tabler: !important) under light navigation text. */
+html[data-bs-navbar-theme="primary"] .page > .sticky-top .navbar {
+    --tblr-navbar-bg: var(--tblr-primary);
+    --tblr-navbar-border-color: transparent;
+}
+
+html[data-bs-navbar-theme="primary"] .page > .navbar.navbar-transparent {
+    background: var(--tblr-navbar-bg) !important;
+}
+
+/* Accent colors of the sysadmin theme settings (corporate design, theme.cfc sets them inline).
+   Without them the primary color is used. Accents highlight; clickable elements keep the primary color. */
+:root {
+    --saaster-accent: var(--tblr-primary);
+    --saaster-accent-fg: var(--tblr-primary-fg);
+    --saaster-accent-text: var(--tblr-link-color);
+    --saaster-accent-lt: color-mix(in oklab, var(--saaster-accent) 10%, transparent);
+    --saaster-accent-2: var(--saaster-accent);
+    --saaster-accent-2-fg: var(--saaster-accent-fg);
+    --saaster-accent-2-text: var(--saaster-accent-text);
+    --saaster-accent-2-lt: color-mix(in oklab, var(--saaster-accent-2) 10%, transparent);
+    --saaster-accent-gradient: linear-gradient(90deg, var(--saaster-accent), var(--saaster-accent-2));
+}
+
+.bg-accent {
+    color: var(--saaster-accent-fg) !important;
+    background-color: var(--saaster-accent) !important;
+}
+
+.bg-accent-lt {
+    color: var(--saaster-accent-text) !important;
+    background-color: var(--saaster-accent-lt) !important;
+}
+
+.text-accent {
+    color: var(--saaster-accent-text) !important;
+}
+
+.border-accent {
+    border-color: var(--saaster-accent) !important;
+}
+
+.bg-accent-2 {
+    color: var(--saaster-accent-2-fg) !important;
+    background-color: var(--saaster-accent-2) !important;
+}
+
+.bg-accent-2-lt {
+    color: var(--saaster-accent-2-text) !important;
+    background-color: var(--saaster-accent-2-lt) !important;
+}
+
+.text-accent-2 {
+    color: var(--saaster-accent-2-text) !important;
+}
+
+.border-accent-2 {
+    border-color: var(--saaster-accent-2) !important;
+}
+
+/* Accent decoration, only when an accent color is set (data-saaster-accent on <html>) */
+html[data-saaster-accent] .page-header .page-title::before {
+    content: "";
+    flex: none;
+    width: .25rem;
+    height: 1.1em;
+    margin-inline-end: .625rem;
+    border-radius: var(--tblr-border-radius-pill);
+    background: linear-gradient(180deg, var(--saaster-accent), var(--saaster-accent-2));
+}
+
+/* Dashboard widgets: a status line like Tabler's .card-status-top, in the accent gradient */
+html[data-saaster-accent] .dashboard > * > .card::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--tblr-card-border-width));
+    border-radius: var(--tblr-card-border-radius);
+    background: var(--saaster-accent-gradient);
+    mask-image: linear-gradient(to bottom, #000 3px, transparent 3px);
+    pointer-events: none;
+}
+
+html[data-saaster-accent] .avatar:not([style*="background-image"]):not([class*="bg-"]) {
+    --tblr-avatar-bg: var(--saaster-accent-lt);
+    color: var(--saaster-accent-text);
+}
+
+/* Theme settings: hex input with Tabler's color picker (Coloris) */
+.theme-color-field {
+    width: 8.5rem;
+}
+
+/* Theme settings: swatch for "no accent color" */
+.form-colorinput-color.theme-swatch-none {
+    background: linear-gradient(to top right, transparent calc(50% - 1px), var(--tblr-danger) 50%, transparent calc(50% + 1px)), var(--tblr-bg-surface);
+}
+
 .navbar .navbar-brand-image {
     height: 2.5rem;
     max-width: min(12rem, 48vw);
@@ -213,7 +308,8 @@ div.dashboard div.card-header label.form-check {
     margin-inline-start: auto;
 }
 
-[data-bs-theme="dark"] .navbar-brand .backend-custom-logo {
+[data-bs-theme="dark"] .navbar-brand .backend-custom-logo,
+html[data-bs-navbar-theme="primary"] .navbar-brand .backend-custom-logo {
     background-color: var(--tblr-white);
     border-radius: var(--tblr-border-radius);
     padding: .125rem .25rem;

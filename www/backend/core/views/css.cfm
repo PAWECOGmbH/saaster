@@ -4,6 +4,9 @@
 <!--- Main Tabler CSS --->
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/css/tabler.min.css" />
 
+<!--- Tabler theme attributes on <html> (primary color, gray tone, radius, font); keep the same version as tabler.min.css --->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.7.5/dist/css/tabler-themes.min.css" />
+
 <!--- Dropify --->
 <link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/dropify.min.css')#" />
 
@@ -23,6 +26,8 @@
 <!--- Customized CSS --->
 <link rel="stylesheet" type="text/css" href="#assetUrl('/backend/dist/css/backend.css')#" />
 
-<!--- Dynamic CSS for Primary and Secondary Button color --->
-<link rel="stylesheet" type="text/css" href="/backend/core/views/color.cfm" />
+<!--- Custom primary color of the sysadmin theme settings (theme.cfc); presets use the attributes on <html> --->
+<cfif len(application.themeStruct.customCss ?: "")>
+<style>#application.themeStruct.customCss#</style>
+</cfif>
 </cfoutput>
